@@ -1,4 +1,4 @@
-package com.OLearning.repository.dashBoard;
+package com.OLearning.repository.adminDashBoard;
 
 import com.OLearning.entity.Course;
 import org.springframework.data.jpa.repository.JpaRepository;
