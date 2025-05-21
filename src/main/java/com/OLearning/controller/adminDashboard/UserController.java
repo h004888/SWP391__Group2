@@ -16,13 +16,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Controller
-public class AdminDashboardController {
+public class UserController {
     @Autowired
     private UserService userService;
 
     @GetMapping("/admin")
     public String getAdminDashboardPAge(Model model) {
-        model.addAttribute("textDemo", "Test Thymleaf");
         return "adminDashboard/index";
     }
 
