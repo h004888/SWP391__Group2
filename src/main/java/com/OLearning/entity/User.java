@@ -35,6 +35,6 @@ public class User {
     @OneToMany(mappedBy = "instructor")
     private List<Course> courses;
 
-    // Getters and setters
+
 }
 
