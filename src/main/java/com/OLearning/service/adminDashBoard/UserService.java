@@ -62,4 +62,9 @@ public class UserService {
     public void deleteAcc(Long id) {
         userRepo.deleteById(id);
     }
+
+
+    public User getUserByUsername(String username) {
+        return userRepo.findFirstByUsername(username);
+    }
 }
