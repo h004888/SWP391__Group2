@@ -8,6 +8,7 @@ import com.OLearning.mapper.adminDashBoard.UserDetailMapper;
 import com.OLearning.mapper.adminDashBoard.UserMapper;
 import com.OLearning.repository.adminDashBoard.RoleRepo;
 import com.OLearning.repository.adminDashBoard.UserRepo;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +40,9 @@ public class UserService {
 
 
     public User userDTOtoUser(UserDTO userDTO) {
+        if (userRepo.existsByEmail(userDTO.getEmail())) {
+            throw new RuntimeException("dupliacte user");
+        }
         User user = new User();
         user.setUsername(userDTO.getUserName());
         user.setEmail(userDTO.getEmail());
@@ -59,7 +63,11 @@ public class UserService {
         return roleRepo.findAll();
     }
 
-    public void deleteAcc(Long id) {
-        userRepo.deleteById(id);
+    public boolean deleteAcc(Long id) {
+        if(userRepo.existsById(id)){
+            userRepo.deleteById(id);
+            return true;
+        }
+        return false;
     }
 }

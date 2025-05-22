@@ -21,5 +21,5 @@ public class UserDetailDTO {
     private String address;
     private String profilePicture;
 
-//    private List<String> enrolledCourseTitles;
+    private List<String> enrolledCourseTitles;
 }
