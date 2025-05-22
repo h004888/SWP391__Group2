@@ -16,10 +16,10 @@ public class Lesson {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int lessonID;
+    private long lessonId;
 
     @ManyToOne
-    @JoinColumn(name = "courseID")
+    @JoinColumn(name = "courseId")
     private Course course;
     private String title;
     private String description;
