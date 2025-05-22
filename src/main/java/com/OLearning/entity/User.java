@@ -6,13 +6,13 @@ import lombok.*;
 import java.time.LocalDate;
 import java.util.List;
 
-@Entity
-@Table(name = "Users")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @ToString
+@Entity
+@Table(name = "Users")
 public class User {
 
     @Id

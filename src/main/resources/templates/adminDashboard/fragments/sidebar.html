@@ -1,5 +1,4 @@
-<div th:fragment="sidebar">
-    <ul  class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+    <ul th:fragment="sidebar" class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
         <!-- Sidebar - Brand -->
         <a class="sidebar-brand d-flex align-items-center justify-content-center" th:href="@{/admin}">
@@ -37,7 +36,7 @@
             <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">Custom Customer:</h6>
-                    <a class="collapse-item" th:href="@{admin/account}">Accounts</a>
+                    <a class="collapse-item" th:href="@{/admin/account}">Accounts</a>
                 </div>
             </div>
         </li>
@@ -54,7 +53,7 @@
                  data-parent="#accordionSidebar">
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">Custom Course:</h6>
-                    <a class="collapse-item" href="utilities-color.html">Course</a>
+                    <a class="collapse-item" th:href="@{/admin/course}">Course</a>
                     <a class="collapse-item" href="utilities-border.html">Orders & Payments</a>
                     <a class="collapse-item" href="utilities-animation.html">Analytics & Reports</a>
                     <a class="collapse-item" href="utilities-other.html">Review & FeedBack</a>
@@ -75,4 +74,3 @@
 
     </ul>
 
-</div>

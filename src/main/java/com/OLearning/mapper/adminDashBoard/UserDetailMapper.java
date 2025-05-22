@@ -20,11 +20,11 @@ public class UserDetailMapper {
         dto.setAddress(user.getAddress());
         dto.setProfilePicture(user.getProfilePicture());
         dto.setRoleName(user.getRole().getName());
-//        dto.setEnrolledCourseTitles(
-//                user.getCourses().stream()
-//                        .map(Course::getTitle)
-//                        .collect(Collectors.toList())
-//        );
+        dto.setEnrolledCourseTitles(
+                user.getCourses().stream()
+                        .map(Course::getTitle)
+                        .collect(Collectors.toList())
+        );
         return dto;
     }
 

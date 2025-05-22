@@ -22,22 +22,23 @@ public class UserController {
 
     @GetMapping("/admin")
     public String getAdminDashboardPAge(Model model) {
+        model.addAttribute("fragmentContent", "adminDashboard/fragments/content :: contentMain");
         return "adminDashboard/index";
     }
 
     @GetMapping("/admin/account")
     public String getAccountPage(Model model) {
         List<UserDTO> listU = userService.getAllUsers();
+        model.addAttribute("fragmentContent", "adminDashboard/fragments/accountContent :: accountContent");
         model.addAttribute("listU", listU);
         model.addAttribute("accNamePage", "Management Account");
         model.addAttribute("addAccount", new UserDTO());
         model.addAttribute("listRole", userService.getListRole());
-        return "adminDashboard/account";
+        return "adminDashboard/index";
     }
 
     @PostMapping("/admin/account/add")
     public String addUser(@ModelAttribute("addAccount") UserDTO userDTO, RedirectAttributes redirectAttributes) {
-
         try {
             userService.createUser(userService.userDTOtoUser(userDTO));
             redirectAttributes.addFlashAttribute("successMessage", "User added successfully");
@@ -49,20 +50,22 @@ public class UserController {
 
     @GetMapping("admin/account/viewInfo/{userId}")
     public String getDetailAccount(Model model, @PathVariable("userId") long id) {
+        model.addAttribute("fragmentContent", "adminDashboard/fragments/accountDetailContent :: accountDetail");
         Optional<UserDetailDTO> userDetailDTO = userService.getInfoUser(id);
         if (userDetailDTO.isPresent()) {
+            model.addAttribute("accNamePage","Detail Account");
             model.addAttribute("userDetail", userDetailDTO.get());
-            return "adminDashboard/accountDetail";
-
+            return "adminDashboard/index";
         } else {
-            return "redirect:/admin/account";
+            return "redirect:/admin/index";
         }
     }
 
     @GetMapping("admin/account/delete/{userId}")
-    public String deleteAccount(@PathVariable("userId") long id) {
-         userService.deleteAcc(id);
-        return "redirect:/admin/account";
+    public String deleteAccount(Model model,@PathVariable("userId") long id) {
+        model.addAttribute("fragmentContent", "adminDashboard/fragments/accountContent :: accountContent");
+        userService.deleteAcc(id);
+        return "redirect:/admin/index";
     }
 
 
