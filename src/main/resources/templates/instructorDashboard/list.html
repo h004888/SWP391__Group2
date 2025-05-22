@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:insert="instructorDashboard/fragments/header :: header"></div>
+<body id="page-top">
+<div id="wrapper">
+    <div th:insert="instructorDashboard/fragments/sidebar :: sidebar"></div>
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+            <div th:insert="instructorDashboard/fragments/topbar :: topbar"></div>
+
+            <div class="container-fluid">
+                <h1 class="h3 mb-4 text-gray-800">Lesson Management</h1>
+                <a class="btn btn-success mb-3" th:href="@{/instructor/lessons/add}">Add Lesson</a>
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Course</th>
+                        <th>Type</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="lesson : ${lessons}">
+                        <td th:text="${lesson.lessonID}">1</td>
+                        <td th:text="${lesson.title}">Title</td>
+                        <td th:text="${lesson.courseTitle}">Course</td>
+                        <td th:text="${lesson.contentType}">video</td>
+                        <td>
+                            <a th:href="@{/instructor/lessons/edit/{id}(id=${lesson.lessonID})}" class="btn btn-warning btn-sm">Edit</a>
+                            <a th:href="@{/instructor/lessons/delete/{id}(id=${lesson.lessonID})}" class="btn btn-danger btn-sm">Delete</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+        <div th:insert="instructorDashboard/fragments/footer :: footer"></div>
+    </div>
+</div>
+</body>
+</html>

@@ -37,5 +37,9 @@ public class Course {
 //    @ManyToOne
 //    @JoinColumn(name = "categoryId")
 //    private Category category;
+    @ManyToOne
+    @JoinColumn(name = "lessonId")
+    private Lesson lesson;
 }
+
 

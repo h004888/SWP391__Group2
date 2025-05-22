@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:insert="instructorDashboard/fragments/header :: header"></div>
+<body id="page-top">
+
+<div id="wrapper">
+  <div th:insert="instructorDashboard/fragments/sidebar :: sidebar"></div>
+
+  <div id="content-wrapper" class="d-flex flex-column">
+    <div id="content">
+      <div th:insert="instructorDashboard/fragments/topbar :: topbar"></div>
+
+      <div class="container-fluid">
+        <h1 class="h3 mb-4 text-gray-800"
+            th:text="${lesson.lessonID == null ? 'Add Lesson' : 'Edit Lesson'}"></h1>
+
+        <form th:action="@{/instructor/lessons/save}" th:object="${lesson}" method="post">
+          <!-- Hidden ID field -->
+          <input type="hidden" th:field="*{lessonID}" />
+
+          <!-- Title -->
+          <div class="form-group">
+            <label for="title">Title</label>
+            <input th:field="*{title}" id="title" class="form-control" required />
+          </div>
+
+          <!-- Description -->
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea th:field="*{description}" id="description" class="form-control" rows="3"></textarea>
+          </div>
+
+          <!-- Content Type -->
+          <div class="form-group">
+            <label for="contentType">Content Type</label>
+            <select th:field="*{contentType}" id="contentType" class="form-control">
+              <option value="video">Video</option>
+              <option value="document">Document</option>
+              <option value="quiz">Quiz</option>
+              <option value="assignment">Assignment</option>
+            </select>
+          </div>
+
+          <!-- Content -->
+          <div class="form-group">
+            <label for="content">Content (URL or Text)</label>
+            <input th:field="*{content}" id="content" class="form-control" />
+          </div>
+
+          <!-- Duration -->
+          <div class="form-group">
+            <label for="duration">Duration (minutes)</label>
+            <input type="number" th:field="*{duration}" id="duration" class="form-control" />
+          </div>
+
+          <!-- Is Free -->
+          <div class="form-group form-check">
+            <input type="checkbox" class="form-check-input" th:field="*{free}" id="free" />
+            <label class="form-check-label" for="free">Free Lesson</label>
+          </div>
+
+          <!-- Course -->
+          <div class="form-group">
+            <label for="courseID">Course</label>
+            <select th:field="*{courseID}" id="courseID" class="form-control">
+              <option th:each="course : ${courses}"
+                      th:value="${course.courseID}"
+                      th:text="${course.title}"></option>
+            </select>
+          </div>
+
+          <!-- Submit buttons -->
+          <button type="submit" class="btn btn-primary">Save</button>
+          <a th:href="@{/instructor/lessons}" class="btn btn-secondary">Cancel</a>
+        </form>
+      </div>
+    </div>
+
+    <div th:insert="instructorDashboard/fragments/footer :: footer"></div>
+  </div>
+</div>
+
+</body>
+</html>
