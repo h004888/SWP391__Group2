@@ -1,11 +1,14 @@
-package com.OLearning.controller.adminDashboard;
+package com.OLearning.controller.adminDashBoard;
 
+import com.OLearning.dto.adminDashBoard.CourseDetailDTO;
 import com.OLearning.service.adminDashBoard.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+
+import java.util.Optional;
 
 @Controller
 public class CourseController {
@@ -39,8 +42,15 @@ public class CourseController {
     }
 
     @GetMapping("/admin/course/detail/{id}")
-    public String viewCourseDetail(@PathVariable("id") Long id) {
-        //
-        return "redirect:/admin/course";
+    public String viewCourseDetail(Model model, @PathVariable("id") Long id) {
+        model.addAttribute("fragmentContent", "adminDashboard/fragments/courseDetailContent :: courseDetail");
+        Optional<CourseDetailDTO> optionalDetail = courseService.getDetailCourse(id);
+        if (optionalDetail.isPresent()) {
+            model.addAttribute("detailCourse", optionalDetail.get());
+            return "adminDashboard/index";
+        } else {
+            return "redirect:/admin/course";
+        }
+
     }
 }
