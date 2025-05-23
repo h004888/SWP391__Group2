@@ -3,21 +3,20 @@
 
 <div th:insert="adminDashboard/fragments/header :: header"></div>
 
+
 <body id="page-top">
 
-<!-- Page Wrapper -->
-<div id="wrapper">
 
+<<<<<<< HEAD
     <!-- Sidebar -->
     <div th:replace="adminDashboard/fragments/sidebar :: sidebar"></div>
     <!-- End of Sidebar -->
+=======
+>>>>>>> 69228912ecafac89513f319d86ed6eb7cb5482ab
 
-    <!-- Content Wrapper -->
-    <div id="content-wrapper" class="d-flex flex-column">
 
-        <!-- Main Content -->
-        <div id="content">
 
+<<<<<<< HEAD
             <!-- Topbar -->
             <div th:replace="adminDashboard/fragments/topbar :: topbar"></div>
             <!-- End of Topbar -->
@@ -26,6 +25,41 @@
             <div th:replace="~{__${fragmentContent}__}"></div>
 
             <!-- /.container-fluid -->
+=======
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+
+        <!-- Sidebar -->
+        <ul th:replace="adminDashboard/fragments/sidebar :: sidebar"></ul>
+        <!-- End of Sidebar -->
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+
+            <!-- Main Content -->
+            <div id="content">
+
+                <!-- Topbar -->
+                <div th:replace="adminDashboard/fragments/topbar :: topbar"></div>
+                <!-- End of Topbar -->
+
+                <!-- Begin Page Content -->
+                <div th:replace="~{__${content}__}" class="container-fluid" id="main-content">
+
+
+                    </div>
+                </div>
+
+
+
+            </div>
+            <!-- End of Main Content -->
+
+            <!-- Footer -->
+            <div th:replace="adminDashboard/fragments/footer :: footer"></div>
+            <!-- End of Footer -->
+
+>>>>>>> 69228912ecafac89513f319d86ed6eb7cb5482ab
 
         </div>
         <!-- End of Main Content -->
@@ -65,22 +99,24 @@
     </div>
 </div>
 
-<!-- Bootstrap core JavaScript-->
-<script th:src="@{/vendor/jquery/jquery.min.js}"></script>
-<script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <!-- Bootstrap core JavaScript-->
+    <script th:src="@{/vendor/jquery/jquery.min.js}"></script>
+    <script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
 
-<!-- Core plugin JavaScript-->
-<script th:src="@{/vendor/jquery-easing/jquery.easing.min.js}"></script>
+    <!-- Core plugin JavaScript-->
+    <script th:src="@{/vendor/jquery-easing/jquery.easing.min.js}"></script>
 
-<!-- Custom scripts for all pages-->
-<script th:src="@{/js/sb-admin-2.min.js}"></script>
+    <!-- Custom scripts for all pages-->
+    <script th:src="@{/js/sb-admin-2.min.js}"></script>
 
-<!-- Page level plugins -->
-<script th:src="@{/vendor/chart.js/Chart.min.js}"></script>
+    <!-- Page level plugins -->
+    <script th:src="@{/vendor/chart.js/Chart.min.js}"></script>
 
-<!-- Page level custom scripts -->
-<script th:src="@{/js/demo/chart-area-demo.js}"></script>
-<script th:src="@{/js/demo/chart-pie-demo.js}"></script>
+    <!-- Page level custom scripts -->
+    <script th:src="@{/js/demo/chart-area-demo.js}"></script>
+    <script th:src="@{/js/demo/chart-pie-demo.js}"></script>
+    <script th:src="@{/js/category/category.js}"></script>
+
 
 </body>
 
