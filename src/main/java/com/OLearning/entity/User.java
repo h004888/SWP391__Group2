@@ -27,6 +27,7 @@ public class User {
     private LocalDate birthday;
     private String address;
     private String profilePicture;
+    private String personalSkill;
 
     @ManyToOne
     @JoinColumn(name = "roleId")

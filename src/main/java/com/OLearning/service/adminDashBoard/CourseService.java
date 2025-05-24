@@ -40,7 +40,7 @@ public class CourseService {
                         courseRepo.save(course);
                         return true;
                     }
-                    return false; // Đã được duyệt rồi
+                    return false;
                 })
                 .orElse(false);
     }

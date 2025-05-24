@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.Optional;
 
@@ -23,13 +24,13 @@ public class CourseController {
         return "adminDashboard/index";
     }
 
-    @GetMapping("/admin/course/approve/{id}")
+    @PostMapping("/admin/course/approve/{id}")
     public String approveCourse(@PathVariable("id") Long id) {
         courseService.approveCourse(id);
         return "redirect:/admin/course";
     }
 
-    @GetMapping("/admin/course/reject/{id}")
+    @PostMapping("/admin/course/reject/{id}")
     public String rejectCourse(@PathVariable("id") Long id) {
         courseService.rejectCourse(id);
         return "redirect:/admin/course";
