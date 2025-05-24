@@ -23,9 +23,10 @@ public class CourseService {
 
     public List<CourseDTO> getAllCourses() {
         List<Course> courseList = courseRepo.findAll();
-        return courseList.stream()
+        List<CourseDTO> collect = courseList.stream()
                 .map(courseMapper::toDTO)
                 .collect(Collectors.toList());
+        return collect;
     }
 
     public Optional<CourseDetailDTO> getDetailCourse(Long id) {

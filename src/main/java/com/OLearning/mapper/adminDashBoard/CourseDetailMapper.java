@@ -25,7 +25,7 @@ public class CourseDetailMapper {
         dto.setUpdatedAt(course.getUpdatedAt());
         dto.setIsChecked(course.getIsChecked());
         dto.setInstructor(course.getInstructor());
-
+        dto.setCategory(course.getCategory());
         return dto;
     }
 

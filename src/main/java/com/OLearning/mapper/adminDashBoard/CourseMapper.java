@@ -13,20 +13,13 @@ public class CourseMapper {
                 course.getCourseId(),
                 course.getTitle(),
                 course.getDuration(),
-                course.getTotalStudentEnrolled(),
+                course.getPrice(),
+                course.getTotalLessons(),
                 course.getCreatedAt(),
                 course.getUpdatedAt(),
-                course.getIsChecked()
+                course.getIsChecked(),
+                course.getCategory()
         );
     }
 
-    public void updateEntityFromDTO(CourseDTO dto, Course course) {
-        if (dto == null || course == null) return;
-
-        course.setTitle(dto.getTitle());
-        course.setDuration(dto.getDuration());
-        course.setTotalStudentEnrolled(dto.getTotalStudentEnrolled());
-        course.setIsChecked(dto.getIsChecked());
-        course.setUpdatedAt(java.time.LocalDateTime.now());
-    }
 }
