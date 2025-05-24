@@ -1,6 +1,7 @@
 package com.OLearning.controller.adminDashBoard;
 
 import com.OLearning.dto.adminDashBoard.CourseDetailDTO;
+import com.OLearning.service.adminDashBoard.CategoriesService;
 import com.OLearning.service.adminDashBoard.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -15,12 +16,15 @@ import java.util.Optional;
 public class CourseController {
     @Autowired
     private CourseService courseService;
+    @Autowired
+    private CategoriesService categoriesService;
 
     @GetMapping("admin/course")
     public String getCoursePage(Model model) {
         model.addAttribute("accNamePage", "Management Course");
         model.addAttribute("fragmentContent", "adminDashboard/fragments/courseContent :: courseContent");
         model.addAttribute("listCourse", courseService.getAllCourses());
+        model.addAttribute("listCategories",categoriesService.getListCategories());
         return "adminDashboard/index";
     }
 
@@ -36,7 +40,7 @@ public class CourseController {
         return "redirect:/admin/course";
     }
 
-    @GetMapping("/admin/course/delete/{id}")
+    @GetMapping ("/admin/course/delete/{id}")
     public String deleteCourse(@PathVariable("id") Long id) {
         courseService.deleteCourse(id);
         return "redirect:/admin/course";

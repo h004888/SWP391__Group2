@@ -3,15 +3,34 @@
         <div class="table-wrapper">
             <div class="table-title">
                 <div class="row">
-                    <div class="col-sm-8">
+                    <div class="col-md-4">
                         <h2>Management <b>Course</b></h2>
                     </div>
-                    <div class="col-sm-4">
+
+                    <div class="col-md-4">
                         <div class="search-box">
                             <i class="material-icons">&#xE8B6;</i>
                             <input type="text" class="form-control" placeholder="Search&hellip;">
                         </div>
                     </div>
+                </div>
+                <div class="col-md-4 d-flex gap-2">
+                    <select class="form-control" name="category" id="filterCategory">
+                        <option value="">All Categories</option>
+                        <option th:each="cat : ${listCategories}"
+                                th:value="${cat.id}"
+                                th:text="${cat.name}"
+                                th:selected="${cat.id == selectedCategory}"></option>
+                    </select>
+
+                    <select class="form-control" name="price" id="filterPrice">
+                        <option value="">All Prices</option>
+                        <option value="free" >Free</option>
+                        <!--                            <option value="paid" th:selected="${selectedPrice == 'paid'}">Paid</option>-->
+                        <!--                            <option value="low" th:selected="${selectedPrice == 'low'}">Below $50</option>-->
+                        <!--                            <option value="mid" th:selected="${selectedPrice == 'mid'}">50 - 100$</option>-->
+                        <!--                            <option value="high" th:selected="${selectedPrice == 'high'}">Above $100</option>-->
+                    </select>
                 </div>
             </div>
 
@@ -21,7 +40,8 @@
                     <th>ID</th>
                     <th>Name</th>
                     <th>Duration</th>
-                    <th>TotalStudentEnrolled</th>
+                    <th>Price</th>
+                    <th>Toatal Lessons</th>
                     <th>CreatedAt</th>
                     <th>UpdatedAt</th>
                     <th>Status</th>
@@ -33,7 +53,8 @@
                     <td th:text="${course.courseId}"></td>
                     <td th:text="${course.title}"></td>
                     <td th:text="${course.duration + ' phút'}"></td>
-                    <td th:text="${course.totalStudentEnrolled}"></td>
+                    <td th:text="'$' + ${course.price}"></td>
+                    <td th:text="${course.totalLessons}"></td>
                     <td th:text="${#temporals.format(course.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
                     <td th:text="${#temporals.format(course.updatedAt, 'dd/MM/yyyy HH:mm')}"></td>
                     <td>
@@ -56,7 +77,7 @@
                         <!--              <i class="fas fa-edit"></i>-->
                         <!--            </a>-->
                         <a th:href="@{/admin/course/delete/{courseId}(courseId=${course.courseId})}" class="btn btn-danger"
-                           onclick="return confirm('Bạn có chắc chắn muốn xóa tài khoản này không?')" title="Delete">
+                           onclick="return confirm('Bạn có chắc chắn muốn xóa khóa học này không?')" title="Delete">
                             <i class="fas fa-trash"></i>
                         </a>
                     </td>

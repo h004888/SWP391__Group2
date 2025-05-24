@@ -1,5 +1,6 @@
 package com.OLearning.dto.adminDashBoard;
 
+import com.OLearning.entity.Categories;
 import com.OLearning.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,4 +30,5 @@ public class CourseDetailDTO {
     private LocalDateTime updatedAt;
     private Boolean isChecked;
     private User instructor;
+    private Categories category;
 }
