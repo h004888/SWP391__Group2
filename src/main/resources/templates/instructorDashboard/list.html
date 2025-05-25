@@ -10,7 +10,7 @@
 
             <div class="container-fluid">
                 <h1 class="h3 mb-4 text-gray-800">Lesson Management</h1>
-                <a class="btn btn-success mb-3" th:href="@{/instructor/lessons/add}">Add Lesson</a>
+                <a class="btn btn-success mb-3" th:href="@{/instructor/add}">Add Lesson</a>
                 <table class="table table-bordered">
                     <thead>
                     <tr>
@@ -23,13 +23,13 @@
                     </thead>
                     <tbody>
                     <tr th:each="lesson : ${lessons}">
-                        <td th:text="${lesson.lessonID}">1</td>
+                        <td th:text="${lesson.lessonId}">1</td>
                         <td th:text="${lesson.title}">Title</td>
                         <td th:text="${lesson.courseTitle}">Course</td>
                         <td th:text="${lesson.contentType}">video</td>
                         <td>
-                            <a th:href="@{/instructor/lessons/edit/{id}(id=${lesson.lessonID})}" class="btn btn-warning btn-sm">Edit</a>
-                            <a th:href="@{/instructor/lessons/delete/{id}(id=${lesson.lessonID})}" class="btn btn-danger btn-sm">Delete</a>
+                            <a th:href="@{/instructor/edit/{id}(id=${lesson.lessonId})}" class="btn btn-warning btn-sm">Edit</a>
+                            <a th:href="@{/instructor/delete/{id}(id=${lesson.lessonId})}" class="btn btn-danger btn-sm">Delete</a>
                         </td>
                     </tr>
                     </tbody>
