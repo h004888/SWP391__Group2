@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "Courses")
@@ -15,8 +18,7 @@ import java.time.LocalDateTime;
 public class Course {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long courseId;
-
+    private int courseId;
     private String title;
     private String description;
     private Double price;
@@ -37,5 +39,9 @@ public class Course {
 //    @ManyToOne
 //    @JoinColumn(name = "categoryId")
 //    private Category category;
+@ManyToMany(mappedBy = "courses")
+private Set<Payment> payments = new HashSet<>();
+
+
 }
 

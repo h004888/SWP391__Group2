@@ -22,6 +22,7 @@ public class UserController {
 
     @GetMapping("/admin")
     public String getAdminDashboardPAge(Model model) {
+        model.addAttribute("fragmentContent", "adminDashboard/fragments/content :: contentMain");
         return "adminDashboard/index";
     }
 
