@@ -1,50 +1,89 @@
 package com.OLearning.service.adminDashBoard;
 
+import com.OLearning.dto.adminDashBoard.PaymentDTO;
 import com.OLearning.entity.Payment;
-import com.OLearning.entity.User;
-import com.OLearning.repository.adminDashBoard.PaymentRepository;
+
+import com.OLearning.repository.adminDashBoard.PaymentRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
 
 @Service
 public class PaymentService {
     @Autowired
-    private PaymentRepository paymentRepository;
-    public List<Payment> getAllPayments() {
-        return paymentRepository.findAll();
-    }
-    @Autowired
-    private UserService userService; // Giả sử bạn có UserService để lấy thông tin user
+    private PaymentRepo paymentRepository;
 
-    public List<Payment> findByUserName(String username) {
-        User user = username != null ? userService.getUserByUsername(username) : null;
-        return user != null ? paymentRepository.findByUser(user) : paymentRepository.findAll();
+    public List<PaymentDTO> getAllPayments() {
+        return paymentRepository.findAll().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
-    // Tìm kiếm theo Status
-    public List<Payment> findByStatus(String status) {
-        return status != null ? paymentRepository.findByStatus(status) : paymentRepository.findAll();
+    public List<PaymentDTO> findByUsername(String username) {
+        if (username == null || username.trim().isEmpty()) {
+            return getAllPayments();
+        }
+        return paymentRepository.findByUserUsernameContaining(username).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
-    // Sắp xếp theo ngày (tăng dần)
-    public List<Payment> findAllByDateAsc() {
-        return paymentRepository.findAllByOrderByPaymentDateAsc();
+    public List<PaymentDTO> findByCourseName(String courseName) {
+        if (courseName == null || courseName.trim().isEmpty()) {
+            return getAllPayments();
+        }
+        String pattern = courseName + "__";
+        return paymentRepository.findByCourseNamePattern(pattern).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
-    // Sắp xếp theo ngày (giảm dần)
-    public List<Payment> findAllByDateDesc() {
-        return paymentRepository.findAllByOrderByPaymentDateDesc();
+    public List<PaymentDTO> sortByAmount(String direction) {
+        List<Payment> payments;
+        if ("asc".equalsIgnoreCase(direction)) {
+            payments = paymentRepository.findAllByOrderByAmountAsc();
+        } else if ("desc".equalsIgnoreCase(direction)) {
+            payments = paymentRepository.findAllByOrderByAmountDesc();
+        } else {
+            payments = paymentRepository.findAll(); // All
+        }
+        return payments.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
-    // Sắp xếp theo giá (tăng dần)
-    public List<Payment> findAllByAmountAsc() {
-        return paymentRepository.findAllByOrderByAmountAsc();
+    public List<PaymentDTO> sortByDate(String direction) {
+        List<Payment> payments;
+        if ("asc".equalsIgnoreCase(direction)) {
+            payments = paymentRepository.findAllByOrderByPaymentDateAsc();
+        } else if ("desc".equalsIgnoreCase(direction)) {
+            payments = paymentRepository.findAllByOrderByPaymentDateDesc();
+        } else {
+            payments = paymentRepository.findAll(); // All
+        }
+        return payments.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
-    // Sắp xếp theo giá (giảm dần)
-    public List<Payment> findAllByAmountDesc() {
-        return paymentRepository.findAllByOrderByAmountDesc();
+    private PaymentDTO convertToDTO(Payment payment) {
+        PaymentDTO dto = new PaymentDTO();
+        dto.setPaymentId(payment.getPaymentId());
+        dto.setAmount(payment.getAmount());
+        dto.setPaymentType(payment.getPaymenttype());
+        dto.setStatus(payment.getStatus());
+        dto.setPaymentDate(payment.getPaymentDate());
+        dto.setNote(payment.getNote());
+        dto.setUsername(payment.getUser().getUsername());
+
+        List<String> courseNames = payment.getCourses().stream()
+                .map(course -> course.getTitle())
+                .collect(Collectors.toList());
+        dto.setCourseNames(courseNames);
+
+        return dto;
     }
 }

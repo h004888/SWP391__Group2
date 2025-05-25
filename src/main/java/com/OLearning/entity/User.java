@@ -14,7 +14,6 @@ import java.util.List;
 @Setter
 @ToString
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
@@ -35,6 +34,8 @@ public class User {
     @OneToMany(mappedBy = "instructor")
     private List<Course> courses;
 
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
+    private List<Payment> payment;
 
 }
 
