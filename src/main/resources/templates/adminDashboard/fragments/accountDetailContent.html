@@ -120,10 +120,11 @@
                     <div class="mb-3">
                         <label class="form-label">Courses Enrolled</label>
                         <ul class="list-group">
-                            <li class="list-group-item" th:each="course : ${userDetail.enrolledCourseTitles}"
-                                th:text="${course}">
-                                Course Title
+                            <li class="list-group-item"
+                                th:each="course : ${userDetail.enrolledCourseTitles}"
+                                th:text="${course != null ? '-> ' + course : 'No course enrolled'}">
                             </li>
+
                         </ul>
                     </div>
                 </div>
