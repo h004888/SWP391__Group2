@@ -2,72 +2,28 @@ package com.OLearning.service.adminDashBoard;
 
 import com.OLearning.dto.adminDashBoard.UserDTO;
 import com.OLearning.dto.adminDashBoard.UserDetailDTO;
+import com.OLearning.entity.Course;
 import com.OLearning.entity.Role;
 import com.OLearning.entity.User;
-import com.OLearning.mapper.adminDashBoard.UserDetailMapper;
-import com.OLearning.mapper.adminDashBoard.UserMapper;
-import com.OLearning.repository.adminDashBoard.RoleRepo;
-import com.OLearning.repository.adminDashBoard.UserRepo;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
-public class UserService {
-    @Autowired
-    private UserRepo userRepo;
-    @Autowired
-    private RoleRepo roleRepo;
-    @Autowired
-    private UserMapper userMapper;
-    @Autowired
-    private UserDetailMapper userDetailMapper;
+public interface UserService {
 
-    public List<UserDTO> getAllUsers() {
-        return userRepo.findAll().stream()
-                .map(userMapper::toDTO)
-                .collect(Collectors.toList());
-    }
+    List<UserDTO> getAllUsers();
 
-    public Optional<UserDetailDTO> getInfoUser(Long id) {
-        return userRepo.findById(id)
-                .map(userDetailMapper::toDetailDTO);
-    }
+    Optional<UserDetailDTO> getInfoUser(Long id);
 
+    User userDTOtoUser(UserDTO userDTO);
 
-    public User userDTOtoUser(UserDTO userDTO) {
-        if (userRepo.existsByEmail(userDTO.getEmail())) {
-            throw new RuntimeException("dupliacte user");
-        }
-        User user = new User();
-        user.setUsername(userDTO.getUserName());
-        user.setEmail(userDTO.getEmail());
-        //default data
-        user.setFullName(userDTO.getUserName());
-        user.setPassword("123");
+    User createUser(User user);
 
-        user.setRole(roleRepo.findRoleByName(userDTO.getRoleName()));
+    List<Role> getListRole();
 
-        return user;
-    }
+    boolean deleteAcc(Long id);
 
-    public User createUser(User user) {
-        return userRepo.save(user);
-    }
+    List<UserDTO> searchByName(String keyword,Integer roleId);
 
-    public List<Role> getListRole() {
-        return roleRepo.findAll();
-    }
-
-    public boolean deleteAcc(Long id) {
-        if(userRepo.existsById(id)){
-            userRepo.deleteById(id);
-            return true;
-        }
-        return false;
-    }
 }

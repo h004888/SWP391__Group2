@@ -1,52 +1,69 @@
 package com.OLearning.controller.adminDashBoard;
 
+import com.OLearning.dto.adminDashBoard.CourseDTO;
 import com.OLearning.dto.adminDashBoard.CourseDetailDTO;
+import com.OLearning.entity.Categories;
 import com.OLearning.service.adminDashBoard.CategoriesService;
 import com.OLearning.service.adminDashBoard.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @Controller
+@RequestMapping("/admin/course")
 public class CourseController {
     @Autowired
     private CourseService courseService;
     @Autowired
     private CategoriesService categoriesService;
 
-    @GetMapping("admin/course")
+    @GetMapping
     public String getCoursePage(Model model) {
+        List<CourseDTO> listCourse = courseService.getAllCourses();
+        List<Categories> listCategories = categoriesService.getListCategories();
+
         model.addAttribute("accNamePage", "Management Course");
         model.addAttribute("fragmentContent", "adminDashboard/fragments/courseContent :: courseContent");
-        model.addAttribute("listCourse", courseService.getAllCourses());
-        model.addAttribute("listCategories",categoriesService.getListCategories());
+        model.addAttribute("listCourse", listCourse);
+        model.addAttribute("listCategories", listCategories);
         return "adminDashboard/index";
     }
 
-    @PostMapping("/admin/course/approve/{id}")
+    //Filter with ajax
+    @GetMapping("/filter")
+    public String filterCourses(@RequestParam(required = false) String keyword,
+                                @RequestParam(required = false) Integer category,
+                                @RequestParam(required = false) String price,
+                                @RequestParam(required = false) String status,
+                                Model model) {
+        List<CourseDTO> listCourse = courseService.filterCourses(keyword, category, price,status);
+        model.addAttribute("listCourse", listCourse);
+        return "adminDashboard/fragments/courseContent :: courseTableBody";
+    }
+
+    @PostMapping("/approve/{id}")
     public String approveCourse(@PathVariable("id") Long id) {
         courseService.approveCourse(id);
         return "redirect:/admin/course";
     }
 
-    @PostMapping("/admin/course/reject/{id}")
+    @PostMapping("/reject/{id}")
     public String rejectCourse(@PathVariable("id") Long id) {
         courseService.rejectCourse(id);
         return "redirect:/admin/course";
     }
 
-    @GetMapping ("/admin/course/delete/{id}")
+    @GetMapping("/delete/{id}")
     public String deleteCourse(@PathVariable("id") Long id) {
         courseService.deleteCourse(id);
         return "redirect:/admin/course";
     }
 
-    @GetMapping("/admin/course/detail/{id}")
+    @GetMapping("/detail/{id}")
     public String viewCourseDetail(Model model, @PathVariable("id") Long id) {
         model.addAttribute("fragmentContent", "adminDashboard/fragments/courseDetailContent :: courseDetail");
         Optional<CourseDetailDTO> optionalDetail = courseService.getDetailCourse(id);
