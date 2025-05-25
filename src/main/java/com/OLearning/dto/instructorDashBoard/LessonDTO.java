@@ -10,13 +10,13 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LessonDTO {
-    private Long lessonID;
+    private Long lessonId;
     private String title;
     private String description;
     private String contentType;
     private String content;
     private int duration;
     private boolean isFree;
-    private Long courseID;
+    private Long courseId;
     private String courseTitle; // Optional for display
 }

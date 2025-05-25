@@ -3,12 +3,14 @@ package com.OLearning.mapper.instructorDashBoard;
 import com.OLearning.dto.instructorDashBoard.LessonDTO;
 import com.OLearning.entity.Course;
 import com.OLearning.entity.Lesson;
+import org.springframework.stereotype.Component;
 
+@Component
 public class LessonMapper {
 
     public static LessonDTO toDTO(Lesson lesson) {
         LessonDTO dto = new LessonDTO();
-        dto.setLessonID((long) lesson.getLessonId());
+        dto.setLessonId((long) lesson.getLessonId());
         dto.setTitle(lesson.getTitle());
         dto.setDescription(lesson.getDescription());
         dto.setContentType(lesson.getContentType());
@@ -16,7 +18,7 @@ public class LessonMapper {
         dto.setDuration(lesson.getDuration());
         dto.setFree(lesson.isFree());
         if (lesson.getCourse() != null) {
-            dto.setCourseID(lesson.getCourse().getCourseId());
+            dto.setCourseId(lesson.getCourse().getCourseId());
             dto.setCourseTitle(lesson.getCourse().getTitle());
         }
         return dto;
@@ -24,7 +26,7 @@ public class LessonMapper {
 
     public static Lesson toEntity(LessonDTO dto, Course course) {
         Lesson lesson = new Lesson();
-        lesson.setLessonId(dto.getLessonID());
+        lesson.setLessonId(dto.getLessonId());
         lesson.setTitle(dto.getTitle());
         lesson.setDescription(dto.getDescription());
         lesson.setContentType(dto.getContentType());
