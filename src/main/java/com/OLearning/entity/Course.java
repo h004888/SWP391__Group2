@@ -6,6 +6,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+
 @Entity
 @Table(name = "Courses")
 @NoArgsConstructor
@@ -35,12 +36,12 @@ public class Course {
     @JoinColumn(name = "userId")
     private User instructor;
 
+    @ManyToOne
+    @JoinColumn(name = "CategoryID")
+    private Categories category;
+
     @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
     private List<Lessons> listOfLessons;
-
-    @ManyToOne
-    @JoinColumn(name = "categoryId")
-    private Categories category;
 
 }
 

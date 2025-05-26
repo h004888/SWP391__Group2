@@ -6,17 +6,21 @@ import lombok.*;
 import java.util.List;
 
 @Entity
-@Table(name = "Categories")
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
+@Builder
 @Getter
 @Setter
-@ToString
+@Table(name = "Categories")
 public class Categories {
-    @Id
+    @Column(name = "CategoryID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Id
+    private int id;
+    @Column(name = "Name", nullable = false, length = 100, columnDefinition = "NVARCHAR(100)")
     private String name;
-    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
-    private List<Course> listOfCourse;
+
+    @OneToMany(mappedBy = "category")
+    private List<Course> courses ;
 }
