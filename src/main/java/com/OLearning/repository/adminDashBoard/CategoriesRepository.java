@@ -25,6 +25,8 @@ public interface CategoriesRepository extends JpaRepository<Categories, Integer>
 
     void delete(Categories categories);
 
+    List<Categories> findByNameContaining(String name);
+
     @Modifying
     @Query("UPDATE Categories c SET c.name = :name WHERE c.id = :id")
     void updateCategory(@Param("id") int id, @Param("name") String name);
