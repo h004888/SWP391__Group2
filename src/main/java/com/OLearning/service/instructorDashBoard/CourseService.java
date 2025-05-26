@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface CourseService {
     List<CourseDTO> findCourseByUserId(Long userId);
-
+    boolean canCreateCourse(Long userId);
 }
