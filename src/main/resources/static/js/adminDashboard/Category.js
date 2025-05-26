@@ -1,56 +1,36 @@
-// Hàm gắn sự kiện xóa danh mục
-function bindDeleteCategoryEvent() {
-    $('#loadCategory').off('click', '.delete').on('click', '.delete', function () {
-        const id = $(this).data("id");
+$(document).ready(function () {
+    function fetchData() {
+        const name = $('#searchInput').val();
+        const select = $('#sortSelect').val();
 
         $.ajax({
-            url: '/admin/categories/delete',
-            type: 'GET',
-            data: { id: id },
-            success: function (fragmentHtml) {
-                $('#loadCategory').html(fragmentHtml);
-                // Sau khi load lại fragment → gắn lại event
-                bindDeleteCategoryEvent();
-                bindSearchCategoryEvent();
+            url: '/admin/categories/search',
+            method: 'GET',
+            data: {
+                name: name,
+                select: select
+            },
+            success: function (data) {
+                $('#categoryTable').html(data);
             },
             error: function () {
-                alert('Lỗi khi xóa danh mục.');
+                console.error("Lỗi khi tìm kiếm dữ liệu");
             }
         });
+    }
+
+    // ⏱ Gõ đến đâu search đến đó (debounce 300ms)
+    let typingTimer;
+    $('#searchInput').on('input', function () {
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(fetchData, 300); // đợi 300ms sau khi ngừng gõ
     });
-}
 
-// Hàm gắn sự kiện tìm kiếm tự động khi nhập
-function bindSearchCategoryEvent() {
-    let timer;
-    const delay = 300;
+    // 🔄 Khi chọn sort thì cũng gọi lại
+    $('#sortSelect').on('change', fetchData);
 
-    $('#loadCategory').off('input', '#searchInput').on('input', '#searchInput', function () {
-        clearTimeout(timer);
-        const keyword = $(this).val().trim();
-
-        timer = setTimeout(function () {
-            $.ajax({
-                url: '/admin/categories/search',
-                method: 'GET',
-                data: { name: keyword },
-                success: function (data) {
-                    $('#loadCategory').html(data);
-                    $('#searchInput').val(keyword); // giữ lại value sau reload
-                    // Sau khi load lại fragment → gắn lại event
-                    bindDeleteCategoryEvent();
-                    bindSearchCategoryEvent();
-                },
-                error: function () {
-                    alert('Lỗi khi tìm kiếm danh mục.');
-                }
-            });
-        }, delay);
+    // ❌ Ngăn reload nếu form bị submit
+    $('#filterForm').on('submit', function (e) {
+        e.preventDefault();
     });
-}
-
-// Hàm khởi tạo sự kiện khi load trang
-$(document).ready(function () {
-    bindDeleteCategoryEvent();
-    bindSearchCategoryEvent();
 });
