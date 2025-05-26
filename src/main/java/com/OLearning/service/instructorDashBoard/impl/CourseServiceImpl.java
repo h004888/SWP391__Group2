@@ -3,6 +3,7 @@ package com.OLearning.service.instructorDashBoard.impl;
 import com.OLearning.dto.instructorDashboard.CourseDTO;
 import com.OLearning.entity.Course;
 import com.OLearning.repository.instructorDashBoard.InstructorCourseRepo;
+import com.OLearning.repository.instructorDashBoard.InstructorPackageRepository;
 import com.OLearning.service.instructorDashBoard.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,13 @@ public class CourseServiceImpl implements CourseService {
 
     @Autowired
     private InstructorCourseRepo instructorCourseRepo;
+        @Autowired
+        private InstructorPackageRepository buyPackageRepository;
+
+        public boolean canCreateCourse(Long userId) {
+            List<Object[]> result = buyPackageRepository.findValidPackagesByUserId(userId);
+            return !result.isEmpty();
+    }
 
     @Override
     public List<CourseDTO> findCourseByUserId(Long userId) {
@@ -31,7 +39,13 @@ public class CourseServiceImpl implements CourseService {
             courseDTO.setDuration(course.getDuration());
             courseDTO.setDiscount(course.getDiscount());
             courseDTO.setTotalLessons(course.getTotalLessons());
-            courseDTO.setCategoryName(course.getCategory().getName());
+
+            if (course.getCategory() != null) {
+                courseDTO.setCategoryName(course.getCategory().getName());
+            } else {
+                courseDTO.setCategoryName("Không rõ"); // hoặc để trống
+            }
+
             courseDTOList.add(courseDTO);
         }
         return courseDTOList;
