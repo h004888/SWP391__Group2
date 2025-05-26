@@ -7,6 +7,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -69,5 +70,25 @@ public class CategoriesServiceImpl implements CategoriesService {
         return categoriesRepository.findByNameContaining(name);
     }
 
- 
+    @Override
+    public List<Categories> filterCategories(String name, String select) {
+        List<Categories> categories;
+
+        if (name == null || name.isEmpty()) {
+            categories = categoriesRepository.findAll();
+        } else {
+            categories = categoriesRepository.findByNameContaining(name);
+        }
+
+        if (select != null) {
+            if (select.equals("1")) {
+                categories.sort(Comparator.comparing(Categories::getName, String.CASE_INSENSITIVE_ORDER));
+            } else if (select.equals("2")) {
+                categories.sort(Comparator.comparing(Categories::getName, String.CASE_INSENSITIVE_ORDER).reversed());
+            }
+        }
+
+        return categories;
+    }
+
 }

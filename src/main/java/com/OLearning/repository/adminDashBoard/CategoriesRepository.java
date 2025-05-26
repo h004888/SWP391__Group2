@@ -5,9 +5,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public interface CategoriesRepository extends JpaRepository<Categories, Integer> {
     Categories findByName(String name);
 
@@ -26,6 +28,7 @@ public interface CategoriesRepository extends JpaRepository<Categories, Integer>
     void delete(Categories categories);
 
     List<Categories> findByNameContaining(String name);
+    
 
     @Modifying
     @Query("UPDATE Categories c SET c.name = :name WHERE c.id = :id")
