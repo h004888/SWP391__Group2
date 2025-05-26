@@ -63,4 +63,11 @@ public class CategoriesServiceImpl implements CategoriesService {
     public void updateCategory(int id, String name) {
         categoriesRepository.updateCategory(id, name);
     }
+
+    @Override
+    public List<Categories> findByNameContaining(String name) {
+        return categoriesRepository.findByNameContaining(name);
+    }
+
+ 
 }
