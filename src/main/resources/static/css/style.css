@@ -1,0 +1,354 @@
+/* Main Styles */
+:root {
+    --teal: #3dcbb1;
+    --teal-hover: #35b69e;
+    --dark-blue: #1b283f;
+    --purple: #a04ae3;
+    --yellow: #ffd130;
+}
+
+body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+}
+
+/* Utility Classes */
+.text-teal {
+    color: var(--teal) !important;
+}
+
+.bg-teal {
+    background-color: var(--teal) !important;
+}
+
+.btn-teal {
+    background-color: var(--teal);
+    color: white;
+}
+
+.btn-teal:hover {
+    background-color: var(--teal-hover);
+    color: white;
+}
+
+.gradient-bg {
+    background: linear-gradient(to right, #4f46e5, #8b5cf6);
+}
+
+.gradient-btn {
+    background: linear-gradient(to right, #4f46e5, #8b5cf6);
+    border: none;
+}
+
+.gradient-btn:hover {
+    background: linear-gradient(to right, #4338ca, #7c3aed);
+}
+
+.bg-white-transparent {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.text-white-80 {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.z-index-1 {
+    z-index: 1;
+}
+
+.object-fit-cover {
+    object-fit: cover;
+}
+
+/* Header Styles */
+.navbar-brand .logo {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(to bottom right, #4f46e5, #8b5cf6);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Hero Section */
+.hero-section {
+    height: 600px;
+    background-image: url("../images/hero-bg.jpg");
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.hero-section .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.5), transparent);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+    padding-top: 150px;
+}
+
+/* Search Bar */
+.search-container {
+    position: relative;
+    margin-top: -100px;
+    z-index: 10;
+}
+
+.search-bar {
+    padding: 30px;
+}
+
+/* Course Cards */
+.course-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+}
+
+.course-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.course-card .badge {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+}
+
+.course-card .discount-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}
+
+.course-card .course-image {
+    height: 200px;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.course-card:hover .course-image {
+    transform: scale(1.05);
+}
+
+/* Featured Course Card */
+.featured-course-card {
+    position: relative;
+    height: 100%;
+    color: white;
+}
+
+.featured-course-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.5), transparent);
+    z-index: 1;
+    border-radius: 0.5rem;
+}
+
+.featured-course-card .content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 30px;
+    z-index: 2;
+}
+
+/* Webinar Card */
+.webinar-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+}
+
+.webinar-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.webinar-card .live-badge {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    z-index: 2;
+}
+
+.webinar-card .date-time {
+    position: absolute;
+    bottom: 15px;
+    left: 0;
+    width: 100%;
+    padding: 0 15px;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* Instructor Card */
+.instructor-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1rem;
+    aspect-ratio: 1;
+}
+
+.instructor-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.3), transparent);
+    z-index: 1;
+}
+
+.instructor-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.instructor-card:hover img {
+    transform: scale(1.05);
+}
+
+.instructor-card .content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px;
+    z-index: 2;
+    color: white;
+}
+
+/* Promo Section */
+.promo-section .decorative-circles {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.promo-section .circle {
+    position: absolute;
+    border-radius: 50%;
+}
+
+.promo-section .circle-1 {
+    width: 100px;
+    height: 100px;
+    background-color: rgba(255, 105, 180, 0.2);
+    top: 20px;
+    right: 50px;
+}
+
+.promo-section .circle-2 {
+    width: 80px;
+    height: 80px;
+    background-color: rgba(255, 215, 0, 0.2);
+    top: 80px;
+    right: 120px;
+}
+
+.promo-section .circle-3 {
+    width: 60px;
+    height: 60px;
+    background-color: rgba(50, 205, 50, 0.2);
+    top: 40px;
+    right: 90px;
+}
+
+.promo-section .circle-4 {
+    width: 70px;
+    height: 70px;
+    background-color: rgba(30, 144, 255, 0.2);
+    top: 100px;
+    right: 30px;
+}
+
+/* Auth Modals */
+.auth-image {
+    background-image: url("../images/auth-background.jpg");
+    background-size: cover;
+    background-position: center;
+    min-height: 400px;
+}
+
+.logo-square {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(to bottom right, #4f46e5, #8b5cf6);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Course Detail Page */
+.course-curriculum .lesson-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.course-curriculum .lesson-item:hover {
+    background-color: #f8f9fa;
+}
+
+.course-curriculum .lesson-item.active {
+    background-color: var(--teal);
+    color: white;
+}
+
+/* My Course Page */
+.course-progress {
+    height: 8px;
+    border-radius: 4px;
+    background-color: #e9ecef;
+    overflow: hidden;
+}
+
+.course-progress .progress-bar {
+    background-color: var(--teal);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .hero-section {
+        height: 500px;
+    }
+
+    .search-container {
+        margin-top: -50px;
+    }
+
+    .search-bar {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-section {
+        height: 400px;
+    }
+
+    .hero-content {
+        padding-top: 100px;
+    }
+}

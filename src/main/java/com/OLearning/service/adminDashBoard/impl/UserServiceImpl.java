@@ -6,13 +6,14 @@ import com.OLearning.entity.Role;
 import com.OLearning.entity.User;
 import com.OLearning.mapper.adminDashBoard.UserDetailMapper;
 import com.OLearning.mapper.adminDashBoard.UserMapper;
-import com.OLearning.repository.adminDashBoard.RoleRepo;
-import com.OLearning.repository.adminDashBoard.UserRepo;
+import com.OLearning.repository.adminDashBoard.RoleRepository;
+import com.OLearning.repository.adminDashBoard.UserRepository;
 import com.OLearning.service.adminDashBoard.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -21,9 +22,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     @Autowired
-    private UserRepo userRepo;
+    private UserRepository userRepository;
     @Autowired
-    private RoleRepo roleRepo;
+    private RoleRepository roleRepository;
     @Autowired
     private UserMapper userMapper;
     @Autowired
@@ -31,20 +32,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDTO> getAllUsers() {
-        return userRepo.findAll().stream()
+        return userRepository.findAll().stream()
                 .map(userMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
     public Optional<UserDetailDTO> getInfoUser(Long id) {
-        return userRepo.findById(id)
+        return userRepository.findById(id)
                 .map(userDetailMapper::toDetailDTO);
     }
 
     @Override
     public User userDTOtoUser(UserDTO userDTO) {
-        if (userRepo.existsByEmail(userDTO.getEmail())) {
+        if (userRepository.existsByEmail(userDTO.getEmail())) {
             throw new RuntimeException("dupliacte user");
         }
         User user = new User();
@@ -54,25 +55,25 @@ public class UserServiceImpl implements UserService {
         user.setFullName(userDTO.getUserName());
         user.setPassword("123");
 
-        user.setRole(roleRepo.findRoleByName(userDTO.getRoleName()));
+        user.setRole(roleRepository.findRoleByName(userDTO.getRoleName()));
 
         return user;
     }
 
     @Override
     public User createUser(User user) {
-        return userRepo.save(user);
+        return userRepository.save(user);
     }
 
     @Override
     public List<Role> getListRole() {
-        return roleRepo.findAll();
+        return roleRepository.findAll();
     }
 
     @Override
     public boolean deleteAcc(Long id) {
-        if (userRepo.existsById(id)) {
-            userRepo.deleteById(id);
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
             return true;
         }
         return false;
@@ -87,9 +88,11 @@ public class UserServiceImpl implements UserService {
         if (keyword != null && !keyword.trim().isEmpty()) {
             processedKeyword = keyword.trim().toLowerCase();
         }
-        return userRepo.searchByKeyword(processedKeyword, roleId).stream()
+        return userRepository.searchByKeyword(processedKeyword, roleId).stream()
                 .map(userMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
+
 
 }
