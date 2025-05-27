@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Controller
 @RequestMapping("/admin")
@@ -41,12 +43,10 @@ public class CategoryController {
     public String deleteCategory(@RequestParam("id") int id, Model model) {
         if (categoriesService.existsById(id)) {
             categoriesService.deleteById(id);
-            List<Categories> categories = categoriesService.findAll();
-
-            model.addAttribute("categories", categories);
-            return "adminDashboard/fragments/category :: categoryList";
         }
-        return "redirect:/admin/categories";
+        List<Categories> categories = categoriesService.findAll();
+        model.addAttribute("categories", categories);
+        return "adminDashboard/fragments/category :: categoryTable";
     }
 
     @GetMapping("/categories/search")
@@ -58,6 +58,21 @@ public class CategoryController {
         model.addAttribute("categories", categories);
         return "adminDashboard/fragments/category :: categoryTable";
 
+    }
+
+    @PostMapping("/categories/add")
+    public String addCategory(@RequestParam("name") String name, Model model) {
+        if (categoriesService.existsByName(name)) {
+            model.addAttribute("errorMessage", "Category already exists");
+        } else {
+            Categories newCategory = new Categories();
+            newCategory.setName(name);
+            categoriesService.save(newCategory);
+            model.addAttribute("successMessage", "Category added successfully");
+        }
+        List<Categories> categories = categoriesService.findAll();
+        model.addAttribute("categories", categories);
+        return "adminDashboard/fragments/category :: categoryTable";
     }
 
 }
