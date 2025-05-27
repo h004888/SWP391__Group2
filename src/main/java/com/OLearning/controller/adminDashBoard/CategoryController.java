@@ -71,8 +71,9 @@ public class CategoryController {
             model.addAttribute("successMessage", "Category added successfully");
         }
         List<Categories> categories = categoriesService.findAll();
+        model.addAttribute("fragmentContent", "adminDashboard/fragments/category :: categoryList");
         model.addAttribute("categories", categories);
-        return "adminDashboard/fragments/category :: categoryTable";
+        return "adminDashboard/index";
     }
 
 }
