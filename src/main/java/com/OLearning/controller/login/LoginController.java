@@ -25,11 +25,15 @@ public class LoginController {
         if (expired != null) {
             model.addAttribute("warningMessage", "Phiên đăng nhập đã hết hạn!");
         }
-        return "login/login";
+        return "loginPage/login";
     }
 
     @GetMapping("/register")
     public String signUpPage() {
-        return "login/signup";
+        return "loginPage/signup";
+    }
+    @GetMapping("/403")
+    public String errorPage() {
+        return "loginPage/403";
     }
 }
