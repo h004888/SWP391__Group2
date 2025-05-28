@@ -66,8 +66,7 @@
                                 <tbody>
                                 <tr th:each="course : ${courses}">
                                     <td th:utext="${course.courseId}"></td>
-                                    <td><img src="/placeholder.svg?height=40&width=60" alt="Course"
-                                             class="course-image"></td>
+                                    <td><img th:src="@{'/img/' + ${course.courseImg}}" width="120" height="100" /></td>
                                     <td th:utext="${course.title}"></td>
                                     <td th:utext="${course.categoryName}"><span class="badge badge-primary"></span></td>
                                     <td th:utext="${course.price}"></td>

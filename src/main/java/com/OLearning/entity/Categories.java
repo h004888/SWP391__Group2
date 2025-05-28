@@ -17,7 +17,7 @@ public class Categories {
     @Column(name = "CategoryID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private int id;
+    private Long id;
     @Column(name = "Name", nullable = false, length = 100, columnDefinition = "NVARCHAR(100)")
     private String name;
 

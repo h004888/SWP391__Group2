@@ -1,27 +1,48 @@
 package com.OLearning.service.instructorDashBoard.impl;
 
+import com.OLearning.dto.instructorDashboard.CourseAddDTO;
 import com.OLearning.dto.instructorDashboard.CourseDTO;
+import com.OLearning.entity.Categories;
 import com.OLearning.entity.Course;
+import com.OLearning.entity.User;
+import com.OLearning.mapper.instructorDashBoard.CourseMapper;
+import com.OLearning.repository.instructorDashBoard.InstructorCategoryRepo;
 import com.OLearning.repository.instructorDashBoard.InstructorCourseRepo;
 import com.OLearning.repository.instructorDashBoard.InstructorPackageRepository;
+import com.OLearning.repository.instructorDashBoard.InstructorUserRepo;
 import com.OLearning.service.instructorDashBoard.CourseService;
+import com.OLearning.service.instructorDashBoard.FileHelper.FileHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CourseServiceImpl implements CourseService {
 
     @Autowired
     private InstructorCourseRepo instructorCourseRepo;
-        @Autowired
-        private InstructorPackageRepository buyPackageRepository;
+    @Autowired
+    private InstructorPackageRepository buyPackageRepository;
+    @Autowired
+    private CourseMapper courseMapper;
+    @Autowired
+    private InstructorCategoryRepo instructorCategoryRepo;
+    @Autowired
+    private InstructorUserRepo instructorUserRepo;
 
-        public boolean canCreateCourse(Long userId) {
-            List<Object[]> result = buyPackageRepository.findValidPackagesByUserId(userId);
-            return !result.isEmpty();
+    public boolean canCreateCourse(Long userId) {
+        List<Object[]> result = buyPackageRepository.findValidPackagesByUserId(userId);
+        return !result.isEmpty();
     }
 
     @Override
@@ -43,11 +64,47 @@ public class CourseServiceImpl implements CourseService {
             if (course.getCategory() != null) {
                 courseDTO.setCategoryName(course.getCategory().getName());
             } else {
-                courseDTO.setCategoryName("Không rõ"); // hoặc để trống
+                courseDTO.setCategoryName("Không rõ");
             }
 
             courseDTOList.add(courseDTO);
         }
         return courseDTOList;
+    }
+
+
+    //create new course service
+    @Override
+    public void createCourse(CourseAddDTO courseAddDTO) {
+        courseAddDTO.setUserId(2L);
+        Course course = courseMapper.MapCourseAdd(courseAddDTO);
+        Categories category = instructorCategoryRepo.findByName(courseAddDTO.getCategoryName());
+        if (category == null) {
+            throw new RuntimeException("not found: " + courseAddDTO.getCategoryName());
+        }
+        User instructor = instructorUserRepo.findById(courseAddDTO.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("not found user: " + courseAddDTO.getUserId()));
+
+
+        MultipartFile imageFile = courseAddDTO.getCourseImg();
+        if(imageFile != null && !imageFile.isEmpty()) {
+            try{
+                File imageFoldder = new File(new ClassPathResource(".").getFile().getPath() + "/static/img");
+                if(!imageFoldder.exists()){
+                    imageFoldder.mkdirs();
+                }
+                String fileName = FileHelper.generateFileName(imageFile.getOriginalFilename());
+                Path path = Paths.get(imageFoldder.getAbsolutePath() + File.separator + fileName);
+
+                Files.copy(imageFile.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+                course.setCourseImg(fileName);
+//              modelMap.put("photo", fileName);
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+        course.setInstructor(instructor);
+        course.setCategory(category);
+        instructorCourseRepo.save(course);
     }
 }

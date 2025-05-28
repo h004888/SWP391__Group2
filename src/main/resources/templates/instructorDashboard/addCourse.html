@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html xmlns:th="http://www.thymeleaf.org">
 <div th:replace="instructorDashboard/fragments/header :: header"></div>
 
 <body id="page-top">
@@ -34,70 +33,63 @@
         <div class="row">
           <div class="col-lg-12">
             <div class="course-form-container">
-              <form id="addCourseForm" th:action="@{/instructordashboard/viewcourse/addcourse}" method="POST" enctype="multipart/form-data">
+              <form  th:action="@{/instructordashboard/viewcourse/addcourse}" method="POST" th:object="${courseAddDTO}" enctype="multipart/form-data">
+
+
+
+
+
                 <div class="form-group">
                   <label for="title" class="required">Course Title</label>
-                  <input type="text" id="title" name="title" maxlength="255" class="form-control"
+                  <input type="text" id="title" th:field="*{title}" maxlength="255" class="form-control"
                          required>
                 </div>
 
 
                 <div class="form-group">
                   <label for="categoryId">Category</label>
-                  <select id="categoryId" name="categoryId" class="form-control">
+                  <select id="categoryId" th:field="*{categoryName}" class="form-control">
                     <option value="">Select Category</option>
-                    <option value="1">Web Development</option>
-                    <option value="2">Mobile Development</option>
-                    <option value="3">Data Science</option>
-                    <option value="4">Design</option>
-                    <!-- More options would be populated from database -->
+                    <option th:each="cat : ${categories}"
+                            th:value="${cat.categoryName}"
+                            th:text="${cat.categoryName}">
+                    </option>
                   </select>
                 </div>
 
                 <div class="form-group">
                   <label for="description">Course Description</label>
-                  <textarea id="description" name="description" maxlength="2000"
+                  <textarea id="description" th:field="*{description}" maxlength="2000"
                             class="form-control"></textarea>
                 </div>
 
                 <div class="form-row">
                   <div class="form-group">
                     <label for="price" class="required">Price ($)</label>
-                    <input type="number" id="price" name="price" min="0" step="0.01"
+                    <input type="number" id="price" th:field="*{price}" min="0" step="0.01"
                            class="form-control" required>
                   </div>
 
                   <div class="form-group">
                     <label for="discount">Discount (%)</label>
-                    <input type="number" id="discount" name="discount" min="0" max="100"
+                    <input type="number" id="discount" th:field="*{discount}" min="0" max="100"
                            step="0.01" value="0" class="form-control">
                   </div>
                 </div>
 
                 <div class="form-group">
-                  <label for="courseImg">Course Image</label>
-                  <input type="file" id="courseImg" name="courseImg" accept="image/*"
-                         class="form-control-file">
-                  <div class="form-hint">Recommended size: 1280x720 pixels (16:9 ratio)</div>
-                </div>
-
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="duration">Duration (hours)</label>
-                    <input type="number" id="duration" name="duration" min="0" value="0"
-                           class="form-control">
-                  </div>
-
-                  <div class="form-group">
-                    <label for="totalLessons">Total Lessons</label>
-                    <input type="number" id="totalLessons" name="totalLessons" min="0" value="0"
-                           class="form-control">
-                  </div>
+                  <label for="avatarFile">Course Image</label>
+                  <input type="file" id="avatarFile" th:field="*{courseImg}" accept=".png, .jpg, .jpeg"
+                         class="form-control">
+                  <div class="form-group"><img style="max-height: 250px; display: none;" alt="avatar-preview" id="avatarPreview"></div>
                 </div>
 
                 <div class="text-center mt-4">
                   <button type="submit" class="btn btn-primary">Create Course</button>
                 </div>
+
+
+
               </form>
             </div>
           </div>
@@ -147,6 +139,18 @@
 <!-- Bootstrap core JavaScript-->
 <script src="/vendor/jquery/jquery.min.js"></script>
 <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<script>
+  $(document).ready(() => {
+    const avatarFile = $("#avatarFile");
+    avatarFile.change(function (e) {
+      const imgURL = URL.createObjectURL(e.target.files[0]);
+      $("#avatarPreview").attr("src", imgURL);
+      $("#avatarPreview").css({ "display": "block" });
+    });
+  });
+</script>
 
 <!-- Core plugin JavaScript-->
 <script src="/vendor/jquery-easing/jquery.easing.min.js"></script>
