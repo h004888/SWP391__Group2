@@ -54,7 +54,7 @@
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">Custom Course:</h6>
                 <a class="collapse-item" th:href="@{/admin/course}">Course</a>
-                <a class="collapse-item" th:href="@{/admin/payments}">Orders & Payments</a>
+                <a class="collapse-item" th:href="@{/admin/orders}">Orders & Payments</a>
                 <a class="collapse-item" href="utilities-animation.html">Analytics & Reports</a>
                 <a class="collapse-item" href="utilities-other.html">Review & FeedBack</a>
                 <a class="collapse-item" href="utilities-other.html">Quiz</a>
@@ -62,6 +62,21 @@
         </div>
     </li>
 
+
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#packages"
+           aria-expanded="true" aria-controls="packages">
+            <i class="fas fa-fw fa-check"></i>
+            <span>Packages</span>
+        </a>
+        <div id="packages" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Packages Customer:</h6>
+                <a class="collapse-item" th:href="@{/admin/packages}">Packages</a>
+                <a class="collapse-item" th:href="@{/admin/buypackages}">BuyPackages</a>
+            </div>
+        </div>
+    </li>
     <!-- Divider -->
     <hr class="sidebar-divider">
 

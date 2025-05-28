@@ -12,12 +12,12 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PaymentDTO {
-    private int paymentId;
+public class OrdersDTO {
+    private int orderId;
     private double amount;
-    private String paymentType;
+    private String orderType;
     private String status;
-    private LocalDateTime paymentDate;
+    private LocalDateTime orderDate;
     private String note;
     private String username;
     private List<String> courseNames;
