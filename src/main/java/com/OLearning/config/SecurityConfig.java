@@ -50,7 +50,6 @@ public class SecurityConfig {
                         // User có thể truy cập /user/** và /home
 //                        .requestMatchers("/home").hasAnyRole("USER","INSTRUCTOR")
 
-                        // Các request khác cần xác thực
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

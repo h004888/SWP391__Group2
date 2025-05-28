@@ -57,7 +57,7 @@ CREATE TABLE Courses
     Duration            INT                     DEFAULT 0,
     TotalLessons        INT                     DEFAULT 0,
     TotalRatings        INT                     DEFAULT 0,
-    TotalStudentErolled INT                     DEFAULT 0,
+    TotalStudentEnrolled INT                     DEFAULT 0,
     CreatedAt           DATETIME                DEFAULT GETDATE(),
     UpdatedAt           DATETIME                DEFAULT GETDATE(),
     isChecked           BIT,

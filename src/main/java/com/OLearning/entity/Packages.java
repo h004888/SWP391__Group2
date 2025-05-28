@@ -21,8 +21,10 @@ public class Packages {
     private Long price;
     private Integer coursesCreated;
     private Integer duration;
+    private Boolean isActive;
 
     @OneToMany(mappedBy = "packages", fetch = FetchType.LAZY)
     private List<BuyPackages> listOfBuyPackage;
 
 }
+
