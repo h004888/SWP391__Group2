@@ -11,6 +11,7 @@ import com.OLearning.repository.adminDashBoard.UserRepository;
 import com.OLearning.service.adminDashBoard.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -53,7 +54,8 @@ public class UserServiceImpl implements UserService {
         user.setEmail(userDTO.getEmail());
         //default data
         user.setFullName(userDTO.getUserName());
-        user.setPassword("123");
+        //encrypt password
+        user.setPassword(new BCryptPasswordEncoder().encode("123"));
 
         user.setRole(roleRepository.findRoleByName(userDTO.getRoleName()));
 

@@ -22,18 +22,7 @@
           <div class="row g-0">
             <!-- Left side - Decorative Image -->
             <div class="col-md-6 d-none d-md-block">
-              <div class="auth-image position-relative h-100">
-                <div class="position-absolute bottom-0 start-0 p-4 text-white">
-                  <div class="d-flex align-items-center gap-3 mb-2">
-                    <img src="assets/images/joe-avatar.jpg" alt="Joe Kitanoe" class="rounded-circle" width="48" height="48">
-                    <div>
-                      <h3 class="fw-semibold mb-0">Joe Kitanoe</h3>
-                      <p class="small text-white-80 mb-0">Software Developer</p>
-                    </div>
-                  </div>
-                  <p class="text-white-80 small mb-0">"Learning on Eduverse transformed my career in tech!"</p>
-                </div>
-              </div>
+              <img src="https://frontends.udemycdn.com/components/auth/desktop-illustration-x1.webp" alt="Banner Login" class="img-fluid ">
             </div>
             <!-- Right side - Sign Up Form -->
             <div class="col-md-6">
@@ -101,7 +90,7 @@
                 <div class="text-center">
                   <p class="text-muted">
                     Already have an account?
-                    <a href="login.html" class="text-primary fw-medium text-decoration-none">Sign In</a>
+                    <a th:href="@{/login}" class="text-primary fw-medium text-decoration-none">Sign In</a>
                   </p>
                 </div>
               </div>
