@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-OLearningApplication<OLearning>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.OLearning.OLearningApplication",
+            "projectName": "OLearning",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

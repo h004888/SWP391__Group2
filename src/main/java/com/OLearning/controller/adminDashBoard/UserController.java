@@ -2,7 +2,6 @@ package com.OLearning.controller.adminDashBoard;
 
 import com.OLearning.dto.adminDashBoard.UserDTO;
 import com.OLearning.dto.adminDashBoard.UserDetailDTO;
-import com.OLearning.entity.User;
 import com.OLearning.service.adminDashBoard.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -19,7 +18,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("")
+    @GetMapping()
     public String getAdminDashboardPAge(Model model) {
         model.addAttribute("fragmentContent", "adminDashboard/fragments/content :: contentMain");
         return "adminDashboard/index";

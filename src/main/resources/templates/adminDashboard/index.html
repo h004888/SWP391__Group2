@@ -20,10 +20,11 @@
         <div id="content">
 
             <!-- Topbar -->
-            <th:block th:insert="adminDashboard/fragments/topbar :: topbar"></th:block>
+            <th:block th:replace="adminDashboard/fragments/topbar :: topbar"></th:block>
             <!-- End of Topbar -->
 
             <!-- Begin Page Content -->
+
             <div th:replace="~{__${fragmentContent}__}"></div>
 
             <!-- /.container-fluid -->
