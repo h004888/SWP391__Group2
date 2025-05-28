@@ -42,13 +42,13 @@ public class SecurityConfig {
                         .requestMatchers("/error", "/403").permitAll()
 
                         // Root path redirect
-                        .requestMatchers("/").permitAll()
+                        .requestMatchers("/home").permitAll()
 
                         // Chỉ admin mới được truy cập /admin/**
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
                         // User có thể truy cập /user/** và /home
-                        .requestMatchers("/home", "/user/**").hasAnyRole("USER", "ADMIN")
+//                        .requestMatchers("/home").hasAnyRole("USER","INSTRUCTOR")
 
                         // Các request khác cần xác thực
                         .anyRequest().authenticated()
@@ -56,7 +56,7 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/perform_login")
-                        .usernameParameter("username")
+                        .usernameParameter("email")
                         .passwordParameter("password")
                         .successHandler(authenticationSuccessHandler()) // dùng bean thay vì new
                         .failureUrl("/login?error=true")

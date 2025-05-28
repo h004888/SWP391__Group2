@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eduverse - Online Learning Platform</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{css/styleHome.css}">
+</head>
+<body>
+<!-- Header/Navigation -->
+<header class="bg-black border-bottom border-dark">
+    <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand d-flex align-items-center" href="index.html">
+                    <div class="logo-bg me-2">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <span>Eduverse</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                Browse
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                                <li><a class="dropdown-item" href="search-results.html?category=design">Design</a></li>
+                                <li><a class="dropdown-item" href="search-results.html?category=programming">Programming</a></li>
+                                <li><a class="dropdown-item" href="search-results.html?category=business">Business & Marketing</a></li>
+                                <li><a class="dropdown-item" href="search-results.html?category=photo">Photo & Video</a></li>
+                                <li><a class="dropdown-item" href="search-results.html?category=writing">Writing</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <div class="d-flex align-items-center">
+                        <a href="become-instructor.html" class="text-white text-decoration-none me-4">Become Instructor</a>
+                        <a href="cart.html" class="text-white me-4 position-relative">
+                            <i class="fa-solid fa-cart-shopping"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    3
+                                </span>
+                        </a>
+                        <div class="dropdown">
+                            <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="https://placehold.co/32x32" alt="User" width="32" height="32" class="rounded-circle me-2">
+                                <span>John Doe</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
+                                <li><a class="dropdown-item" href="profile.html">Profile</a></li>
+                                <li><a class="dropdown-item" href="my-courses.html">My Courses</a></li>
+                                <li><a class="dropdown-item" href="wishList.html">Wishlist</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#">Sign out</a></li>
+                            </ul>
+                        </div>
+
+                        <!-- Uncomment this for non-logged in users
+                        <button class="btn btn-outline-light rounded-pill px-4 me-2" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
+                        <button class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#signupModal">Sign Up</button>
+                        -->
+                        <a href="login.html">Login</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<!-- Hero Section -->
+<section class="hero-section text-white">
+    <div class="container hero-content">
+        <div class="row align-items-center">
+            <div class="col-lg-7 text-center text-lg-start">
+                <h1 class="display-4 fw-bold mb-4">Expand Your Knowledge & Achieve Your Goals</h1>
+                <p class="lead mb-5">Discover thousands of high-quality courses taught by industry experts. Learn at your own pace and take your skills to the next level.</p>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                    <button class="btn btn-primary btn-lg px-4 me-md-2" onclick="window.location.href='search-results.html'">Browse Courses</button>
+                    <button class="btn btn-outline-light btn-lg px-4" onclick="window.location.href='become-instructor.html'">Become an Instructor</button>
+                </div>
+            </div>
+            <div class="col-lg-5 d-none d-lg-block">
+                <img src="https://placehold.co/600x400" class="img-fluid rounded" alt="Hero Image">
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- Search Bar Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="search-bar">
+            <form action="search-results.html" method="get">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="What do you want to learn today?" name="query">
+                    <button class="btn btn-primary" type="submit">
+                        <i class="fa-solid fa-search me-2"></i> Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Browse Categories Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Browse Top Categories</h2>
+            <p class="text-muted">Explore our most popular course categories</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Category 1 -->
+            <div class="col-6 col-md-4 col-lg-2">
+                <a href="search-results.html?category=design" class="text-decoration-none">
+                    <div class="card h-100 text-center border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="rounded-circle bg-primary bg-opacity-10 p-3 d-inline-flex mb-3">
+                                <i class="fa-solid fa-palette fa-2x text-primary"></i>
+                            </div>
+                            <h5 class="card-title">Design</h5>
+                            <p class="text-muted small">1,245 Courses</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Category 2 -->
+            <div class="col-6 col-md-4 col-lg-2">
+                <a href="search-results.html?category=development" class="text-decoration-none">
+                    <div class="card h-100 text-center border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="rounded-circle bg-success bg-opacity-10 p-3 d-inline-flex mb-3">
+                                <i class="fa-solid fa-code fa-2x text-success"></i>
+                            </div>
+                            <h5 class="card-title">Development</h5>
+                            <p class="text-muted small">2,150 Courses</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Category 3 -->
+            <div class="col-6 col-md-4 col-lg-2">
+                <a href="search-results.html?category=business" class="text-decoration-none">
+                    <div class="card h-100 text-center border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="rounded-circle bg-info bg-opacity-10 p-3 d-inline-flex mb-3">
+                                <i class="fa-solid fa-chart-line fa-2x text-info"></i>
+                            </div>
+                            <h5 class="card-title">Business</h5>
+                            <p class="text-muted small">1,870 Courses</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Category 4 -->
+            <div class="col-6 col-md-4 col-lg-2">
+                <a href="search-results.html?category=marketing" class="text-decoration-none">
+                    <div class="card h-100 text-center border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="rounded-circle bg-warning bg-opacity-10 p-3 d-inline-flex mb-3">
+                                <i class="fa-solid fa-bullhorn fa-2x text-warning"></i>
+                            </div>
+                            <h5 class="card-title">Marketing</h5>
+                            <p class="text-muted small">1,430 Courses</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Category 5 -->
+            <div class="col-6 col-md-4 col-lg-2">
+                <a href="search-results.html?category=photography" class="text-decoration-none">
+                    <div class="card h-100 text-center border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="rounded-circle bg-danger bg-opacity-10 p-3 d-inline-flex mb-3">
+                                <i class="fa-solid fa-camera fa-2x text-danger"></i>
+                            </div>
+                            <h5 class="card-title">Photography</h5>
+                            <p class="text-muted small">950 Courses</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Category 6 -->
+            <div class="col-6 col-md-4 col-lg-2">
+                <a href="search-results.html?category=music" class="text-decoration-none">
+                    <div class="card h-100 text-center border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="rounded-circle bg-secondary bg-opacity-10 p-3 d-inline-flex mb-3">
+                                <i class="fa-solid fa-music fa-2x text-secondary"></i>
+                            </div>
+                            <h5 class="card-title">Music</h5>
+                            <p class="text-muted small">820 Courses</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Trending Courses Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold mb-0">Trending Courses</h2>
+            <a href="search-results.html?sort=trending" class="btn btn-outline-primary">View All</a>
+        </div>
+
+        <!-- Category Pills -->
+        <div class="category-pills mb-4">
+            <button class="btn btn-primary">All Categories</button>
+            <button class="btn btn-outline-secondary">Design</button>
+            <button class="btn btn-outline-secondary">Development</button>
+            <button class="btn btn-outline-secondary">Business</button>
+            <button class="btn btn-outline-secondary">Marketing</button>
+            <button class="btn btn-outline-secondary">Photography</button>
+            <button class="btn btn-outline-secondary">Music</button>
+        </div>
+
+        <div class="row g-4">
+            <!-- Course Card 1 -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card course-card h-100">
+                    <div class="position-relative">
+                        <img src="https://placehold.co/400x200" class="card-img-top" alt="Course Image">
+                        <div class="position-absolute top-0 start-0 m-3 d-flex gap-1">
+                            <span class="badge rounded-pill text-bg-primary">Best Seller</span>
+                        </div>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold">UI DESIGN FOR BEGINNERS</h5>
+                        <p class="card-text text-muted small">by <a href="instructor-profile.html" class="text-primary text-decoration-none">Kitani Studio</a></p>
+                        <p class="card-text">Learn the fundamentals of UI design and create beautiful interfaces</p>
+
+                        <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top">
+                            <div class="ratings">
+                                <i class="fa-solid fa-star text-warning"></i>
+                                <i class="fa-solid fa-star text-warning"></i>
+                                <i class="fa-solid fa-star text-warning"></i>
+                                <i class="fa-solid fa-star text-warning"></i>
+                                <i class="fa-solid fa-star-half-alt text-warning"></i>
+                                <span class="text-muted small">(1200)</span>
+                            </div>
+                            <div>
+                                <span class="fw-bold">$24.92</span>
+                                <span class="text-muted text-decoration-line-through small">$32.90</span>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="course_detail.html" class="stretched-link"></a>
+                </div>
+            </div>
+
+            <!-- Course Card 2 -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card course-card h-100">
+                    <div class="position-relative">
+                        <img src="https://placehold.co/400x200" class="card-img-top" alt="Course Image">
+                        <div class="position-absolute top-0 start-0 m-3 d-flex gap-1">
+                            <span class="badge rounded-pill text-bg-primary">Best Seller</span>
+                        </div>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold">JAVASCRIPT FUNDAMENTALS</h5>
+                        <p class="card-text text-muted small">by <a href="instructor-profile.html" class="text-primary text-decoration-none">Kitani Studio</a></p>
+                        <p class="card-text">Master JavaScript from the ground up</p>
+
+                        <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top">
+                            <div class="ratings">
+                                <i class="fa-solid fa-star text-warning"></i>
+                                <i class="fa-solid fa-star text-warning"></i>
+                                <i class="fa-solid fa-star text-warning"></i>
+                                <i class="fa-solid fa-star text-warning"></i>
+                                <i class="fa-solid fa-star-half-alt text-warning"></i>
+                                <span class="text-muted small">(1500)</span>
+                            </div>
+                            <div>
+                                <span class="fw-bold">$19.99</span>
+                                <span class="text-muted text-decoration-line-through small">$29.99</span>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="course_detail.html" class="stretched-link"></a>
+                </div>
+            </div>
+
+            <!-- Course Card 3 -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card course-card h-100">
+                    <div class="position-relative">
+                        <img src="https://placehold.co/400x200" class="card-img-top" alt="Course Image">
+                        <div class="position-absolute top-0 start-0 m-3 d-flex gap-1">
+                            <span class="badge rounded-pill text-bg-primary">Best Seller</span>
+                        </div>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold">REACT JS MASTERCLASS</h5>
+                        <p class="card-text text-muted small">by <a href="instructor-profile.html" class="text-primary text-decoration-none">Kitani Studio</a></p>
+                        <p class="card-text">Build modern web applications with React</p>
+
+                        <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top">
+                            <div class="ratings">
+                                <i class="fa-solid fa-star text-warning"></i>
+                                <i class="fa-solid fa-star text-warning"></i>
+                                <i class="fa-solid fa-star text-warning"></i>
+                                <i class="fa-solid fa-star text-warning"></i>
+                                <i class="fa-solid fa-star text-warning"></i>
+                                <span class="text-muted small">(3200)</span>
+                            </div>
+                            <div>
+                                <span class="fw-bold">$39.99</span>
+                                <span class="text-muted text-decoration-line-through small">$59.99</span>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="course_detail.html" class="stretched-link"></a>
+                </div>
+            </div>
+
+            <!-- Course Card 4 -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card course-card h-100">
+                    <div class="position-relative">
+                        <img src="https://placehold.co/400x200" class="card-img-top" alt="Course Image">
+                        <div class="position-absolute top-0 start-0 m-3 d-flex gap-1">
+                            <span class="badge rounded-pill text-bg-primary">Best Seller</span>
+                        </div>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold">ADVANCED CSS AND SASS</h5>
+                        <p class="card-text text-muted small">by <a href="instructor-profile.html" class="text-primary text-decoration-none">Web Design Masters</a></p>
+                        <p class="card-text">Take your CSS skills to the next level with advanced techniques and Sass</p>
+
+                        <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top">
+                            <div class="ratings">
+                                <i class="fa-solid fa-star text-warning"></i>
+                                <i class="fa-solid fa-star text-warning"></i>
+                                <i class="fa-solid fa-star text-warning"></i>
+                                <i class="fa-solid fa-star text-warning"></i>
+                                <i class="fa-solid fa-star text-warning"></i>
+                                <span class="text-muted small">(2800)</span>
+                            </div>
+                            <div>
+                                <span class="fw-bold">$34.99</span>
+                                <span class="text-muted text-decoration-line-through small">$49.99</span>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="course_detail.html" class="stretched-link"></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Upcoming Webinars Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold mb-0">Upcoming Webinars</h2>
+            <a href="webinars.html" class="btn btn-outline-primary">View All</a>
+        </div>
+
+        <div class="row g-4">
+            <!-- Webinar Card 1 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card webinar-card h-100">
+                    <div class="position-relative">
+                        <img src="https://placehold.co/400x200" class="card-img-top" alt="Webinar Image">
+                        <div class="position-absolute top-0 start-0 m-3">
+                            <span class="badge rounded-pill text-bg-danger">Live</span>
+                        </div>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fa-solid fa-calendar-alt text-primary me-2"></i>
+                            <span>May 20, 2024 • 2:00 PM EST</span>
+                        </div>
+                        <h5 class="card-title fw-bold">The Future of UI/UX Design in 2024</h5>
+                        <p class="card-text text-muted small">by <a href="instructor-profile.html" class="text-primary text-decoration-none">Kitani Studio</a></p>
+                        <p class="card-text">Discover the latest trends and techniques in UI/UX design that will dominate the industry in 2024.</p>
+
+                        <div class="mt-auto pt-3 border-top">
+                            <button class="btn btn-outline-primary w-100">Register Now</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Webinar Card 2 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card webinar-card h-100">
+                    <div class="position-relative">
+                        <img src="https://placehold.co/400x200" class="card-img-top" alt="Webinar Image">
+                        <div class="position-absolute top-0 start-0 m-3">
+                            <span class="badge rounded-pill text-bg-danger">Live</span>
+                        </div>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fa-solid fa-calendar-alt text-primary me-2"></i>
+                            <span>May 22, 2024 • 1:00 PM EST</span>
+                        </div>
+                        <h5 class="card-title fw-bold">Mastering React Hooks and Context API</h5>
+                        <p class="card-text text-muted small">by <a href="instructor-profile.html" class="text-primary text-decoration-none">Kitani Studio</a></p>
+                        <p class="card-text">Learn how to leverage React Hooks and Context API to build more efficient and maintainable React applications.</p>
+
+                        <div class="mt-auto pt-3 border-top">
+                            <button class="btn btn-outline-primary w-100">Register Now</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Webinar Card 3 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card webinar-card h-100">
+                    <div class="position-relative">
+                        <img src="https://placehold.co/400x200" class="card-img-top" alt="Webinar Image">
+                        <div class="position-absolute top-0 start-0 m-3">
+                            <span class="badge rounded-pill text-bg-danger">Live</span>
+                        </div>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fa-solid fa-calendar-alt text-primary me-2"></i>
+                            <span>May 25, 2024 • 3:00 PM EST</span>
+                        </div>
+                        <h5 class="card-title fw-bold">Digital Marketing Strategies for 2024</h5>
+                        <p class="card-text text-muted small">by <a href="instructor-profile.html" class="text-primary text-decoration-none">Marketing Experts</a></p>
+                        <p class="card-text">Explore effective digital marketing strategies to grow your business in 2024 and beyond.</p>
+
+                        <div class="mt-auto pt-3 border-top">
+                            <button class="btn btn-outline-primary w-100">Register Now</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Popular Instructors Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Popular Instructors</h2>
+            <p class="text-muted">Learn from industry experts with real-world experience</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Instructor 1 -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card instructor-card h-100 text-center">
+                    <div class="card-body">
+                        <img src="https://placehold.co/150x150" class="instructor-img" alt="Instructor">
+                        <h5 class="card-title">Kitani Studio</h5>
+                        <p class="text-muted">UI/UX Design</p>
+                        <div class="d-flex justify-content-center mb-3">
+                            <i class="fa-solid fa-star text-warning"></i>
+                            <span class="ms-1">4.8</span>
+                            <span class="text-muted small ms-1">(1,200+ reviews)</span>
+                        </div>
+                        <p class="card-text small">Leading UI/UX design studio with over 10 years of experience in creating beautiful interfaces.</p>
+                        <a href="instructor-profile.html" class="btn btn-outline-primary btn-sm">View Profile</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instructor 2 -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card instructor-card h-100 text-center">
+                    <div class="card-body">
+                        <img src="https://placehold.co/150x150" class="instructor-img" alt="Instructor">
+                        <h5 class="card-title">Web Design Masters</h5>
+                        <p class="text-muted">Web Development</p>
+                        <div class="d-flex justify-content-center mb-3">
+                            <i class="fa-solid fa-star text-warning"></i>
+                            <span class="ms-1">4.9</span>
+                            <span class="text-muted small ms-1">(2,800+ reviews)</span>
+                        </div>
+                        <p class="card-text small">Expert web development team specializing in modern frontend and backend technologies.</p>
+                        <a href="instructor-profile.html" class="btn btn-outline-primary btn-sm">View Profile</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instructor 3 -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card instructor-card h-100 text-center">
+                    <div class="card-body">
+                        <img src="https://placehold.co/150x150" class="instructor-img" alt="Instructor">
+                        <h5 class="card-title">Marketing Experts</h5>
+                        <p class="text-muted">Digital Marketing</p>
+                        <div class="d-flex justify-content-center mb-3">
+                            <i class="fa-solid fa-star text-warning"></i>
+                            <span class="ms-1">4.7</span>
+                            <span class="text-muted small ms-1">(950+ reviews)</span>
+                        </div>
+                        <p class="card-text small">Digital marketing agency with proven strategies for business growth and online presence.</p>
+                        <a href="instructor-profile.html" class="btn btn-outline-primary btn-sm">View Profile</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instructor 4 -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card instructor-card h-100 text-center">
+                    <div class="card-body">
+                        <img src="https://placehold.co/150x150" class="instructor-img" alt="Instructor">
+                        <h5 class="card-title">John Smith</h5>
+                        <p class="text-muted">Photography</p>
+                        <div class="d-flex justify-content-center mb-3">
+                            <i class="fa-solid fa-star text-warning"></i>
+                            <span class="ms-1">4.8</span>
+                            <span class="text-muted small ms-1">(750+ reviews)</span>
+                        </div>
+                        <p class="card-text small">Award-winning photographer with 15+ years of experience in portrait and landscape photography.</p>
+                        <a href="instructor-profile.html" class="btn btn-outline-primary btn-sm">View Profile</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Promo Section -->
+<section class="promo-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h2 class="text-white display-5 fw-bold mb-4">Become an instructor</h2>
+                <p class="text-white-50 fs-5 mb-4">
+                    Share your knowledge and expertise with students around the world. Create engaging courses and earn money while making a difference.
+                </p>
+                <button class="btn btn-light btn-lg px-4 py-3" onclick="window.location.href='become-instructor.html'">Start Teaching Today</button>
+            </div>
+            <div class="col-lg-6 d-none d-lg-block">
+                <img src="https://placehold.co/600x400" class="img-fluid rounded" alt="Become an Instructor">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">What Our Students Say</h2>
+            <p class="text-muted">Thousands of students are learning and achieving their goals with Eduverse</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Testimonial 1 -->
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <i class="fa-solid fa-star text-warning"></i>
+                            <i class="fa-solid fa-star text-warning"></i>
+                            <i class="fa-solid fa-star text-warning"></i>
+                            <i class="fa-solid fa-star text-warning"></i>
+                            <i class="fa-solid fa-star text-warning"></i>
+                        </div>
+                        <p class="card-text mb-4">"The UI Design for Beginners course completely transformed my career. I went from knowing nothing about design to landing a job as a UI designer in just 3 months. The instructor's teaching style made complex concepts easy to understand."</p>
+                        <div class="d-flex align-items-center">
+                            <img src="https://placehold.co/50x50" class="rounded-circle me-3" alt="Student">
+                            <div>
+                                <h6 class="mb-0">Sarah Johnson</h6>
+                                <p class="text-muted small mb-0">UI Designer at TechCorp</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Testimonial 2 -->
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <i class="fa-solid fa-star text-warning"></i>
+                            <i class="fa-solid fa-star text-warning"></i>
+                            <i class="fa-solid fa-star text-warning"></i>
+                            <i class="fa-solid fa-star text-warning"></i>
+                            <i class="fa-solid fa-star text-warning"></i>
+                        </div>
+                        <p class="card-text mb-4">"I've taken several JavaScript courses, but the JavaScript Fundamentals course on Eduverse was by far the best. The practical exercises and real-world projects helped me truly understand the concepts. I'm now confident in my coding skills."</p>
+                        <div class="d-flex align-items-center">
+                            <img src="https://placehold.co/50x50" class="rounded-circle me-3" alt="Student">
+                            <div>
+                                <h6 class="mb-0">Michael Chen</h6>
+                                <p class="text-muted small mb-0">Frontend Developer</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Testimonial 3 -->
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <i class="fa-solid fa-star text-warning"></i>
+                            <i class="fa-solid fa-star text-warning"></i>
+                            <i class="fa-solid fa-star text-warning"></i>
+                            <i class="fa-solid fa-star text-warning"></i>
+                            <i class="fa-solid fa-star-half-alt text-warning"></i>
+                        </div>
+                        <p class="card-text mb-4">"The Digital Marketing Strategies course helped me grow my small business's online presence significantly. The instructor provided actionable tips and strategies that I could implement immediately. My website traffic has increased by 200%!"</p>
+                        <div class="d-flex align-items-center">
+                            <img src="https://placehold.co/50x50" class="rounded-circle me-3" alt="Student">
+                            <div>
+                                <h6 class="mb-0">Emily Rodriguez</h6>
+                                <p class="text-muted small mb-0">Small Business Owner</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Promo Section Alt -->
+<section class="promo-section-alt">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h2 class="text-white display-6 fw-bold mb-3">Join Eduverse now to get 35% off</h2>
+                <p class="text-white-50 fs-5">
+                    Limited time offer! Get access to thousands of courses at a discounted price.
+                    Start learning today and take your skills to the next level.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+                <button class="btn btn-light btn-lg px-4 py-3" onclick="window.location.href='signup.html'">Join Eduverse</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-dark text-white py-5">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Logo Column -->
+            <div class="col-lg-3 col-md-6">
+                <a class="d-flex align-items-center text-white text-decoration-none mb-4" href="index.html">
+                    <div class="logo-bg me-2">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <span class="fs-5 fw-semibold">Eduverse</span>
+                </a>
+                <p class="text-secondary">Eduverse is an online learning platform that offers thousands of courses taught by industry experts.</p>
+            </div>
+
+            <!-- Programming Column -->
+            <div class="col-lg-3 col-md-6">
+                <h5 class="fw-semibold mb-4">Programming</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><a href="search-results.html?category=web" class="text-secondary text-decoration-none hover-white">Web Programming</a></li>
+                    <li class="mb-2"><a href="search-results.html?category=mobile" class="text-secondary text-decoration-none hover-white">Mobile Programming</a></li>
+                    <li class="mb-2"><a href="search-results.html?category=java" class="text-secondary text-decoration-none hover-white">Java Beginner</a></li>
+                    <li class="mb-2"><a href="search-results.html?category=php" class="text-secondary text-decoration-none hover-white">PHP Beginner</a></li>
+                </ul>
+            </div>
+
+            <!-- Design Column -->
+            <div class="col-lg-3 col-md-6">
+                <h5 class="fw-semibold mb-4">Design</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><a href="search-results.html?category=illustrator" class="text-secondary text-decoration-none hover-white">Adobe Illustrator</a></li>
+                    <li class="mb-2"><a href="search-results.html?category=photoshop" class="text-secondary text-decoration-none hover-white">Adobe Photoshop</a></li>
+                    <li class="mb-2"><a href="search-results.html?category=logo" class="text-secondary text-decoration-none hover-white">Design Logo</a></li>
+                    <li class="mb-2"><a href="search-results.html?category=ui" class="text-secondary text-decoration-none hover-white">UI/UX Design</a></li>
+                </ul>
+            </div>
+
+            <!-- Content Column -->
+            <div class="col-lg-3 col-md-6">
+                <h5 class="fw-semibold mb-4">Content</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><a href="search-results.html?category=writing" class="text-secondary text-decoration-none hover-white">Writing Course</a></li>
+                    <li class="mb-2"><a href="search-results.html?category=photography" class="text-secondary text-decoration-none hover-white">Photography</a></li>
+                    <li class="mb-2"><a href="search-results.html?category=video" class="text-secondary text-decoration-none hover-white">Video Making</a></li>
+                    <li class="mb-2"><a href="search-results.html?category=music" class="text-secondary text-decoration-none hover-white">Music Production</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Bottom Section -->
+        <div class="mt-5 pt-4 border-top border-secondary d-flex flex-column flex-md-row justify-content-between align-items-center">
+            <p class="text-secondary small">Copyright © Eduverse 2024. All Rights Reserved</p>
+            <div class="d-flex gap-4 mt-3 mt-md-0">
+                <a href="#" class="text-secondary hover-white"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="text-secondary hover-white"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="text-secondary hover-white"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="text-secondary hover-white"><i class="fab fa-linkedin-in"></i></a>
+                <a href="#" class="text-secondary hover-white"><i class="fab fa-youtube"></i></a>
+            </div>
+        </div>
+    </div>
+</footer>
+<div class="modal fade" id="loginModal" tabindex="-2" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-body p-0">
+                <div class="row g-0">
+                    <!-- Left side - Decorative Image -->
+                    <div class="col-md-6 d-none d-md-block">
+                        <img src="https://placehold.co/600x800" alt="" class="img-fluid h-100 object-fit-cover">
+                    </div>
+
+                    <!-- Right side - Login Form -->
+                    <div class="col-md-6 p-4 p-md-5">
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="logo-bg me-2">
+                                <i class="fa-solid fa-graduation-cap"></i>
+                            </div>
+                            <span class="fs-5 fw-semibold">Eduverse</span>
+                        </div>
+
+                        <p class="text-muted mb-4">Join us and get more benefits. We promise to keep your data safely.</p>
+
+                        <form class="mb-4">
+                            <div class="mb-3">
+                                <input type="email" class="form-control form-control-lg" placeholder="Email Address">
+                            </div>
+                            <div class="mb-3">
+                                <input type="password" class="form-control form-control-lg" placeholder="Password">
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-lg w-100">Login</button>
+                        </form>
+
+                        <div class="position-relative mb-4">
+                            <hr>
+                            <span class="position-absolute top-50 start-50 translate-middle px-3 bg-white text-muted small">or you can</span>
+                        </div>
+
+                        <div class="d-grid gap-2 mb-4">
+                            <button class="btn btn-outline-secondary btn-lg">
+                                <i class="fab fa-facebook text-primary me-2"></i> Continue with Facebook
+                            </button>
+                            <button class="btn btn-outline-secondary btn-lg">
+                                <i class="fab fa-apple me-2"></i> Continue with Apple
+                            </button>
+                            <button class="btn btn-outline-secondary btn-lg">
+                                <i class="fab fa-google me-2"></i> Continue with Google
+                            </button>
+                        </div>
+
+                        <div class="text-center">
+                            <p class="text-muted">
+                                Need an Account?
+                                <a href="#" class="text-primary fw-medium" data-bs-toggle="modal" data-bs-target="#signupModal" data-bs-dismiss="modal">
+                                    Sign Up
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sign Up Modal -->
+<div class="modal fade" id="signupModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-body p-0">
+                <div class="row g-0">
+                    <!-- Left side - Decorative Image -->
+                    <div class="col-md-6 d-none d-md-block">
+                        <img src="https://placehold.co/600x800" alt="" class="img-fluid h-100 object-fit-cover">
+                    </div>
+
+                    <!-- Right side - Sign Up Form -->
+                    <div class="col-md-6 p-4 p-md-5">
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="logo-bg me-2">
+                                <i class="fa-solid fa-graduation-cap"></i>
+                            </div>
+                            <span class="fs-5 fw-semibold">Eduverse</span>
+                        </div>
+
+                        <h2 class="fs-3 fw-bold mb-3">Sign Up</h2>
+                        <p class="text-muted mb-4">Join us and get more benefits. We promise to keep your data safely.</p>
+
+                        <form class="mb-4">
+                            <div class="mb-3">
+                                <input type="text" class="form-control form-control-lg" placeholder="First Name" required>
+                            </div>
+                            <div class="mb-3">
+                                <input type="text" class="form-control form-control-lg" placeholder="Last Name" required>
+                            </div>
+                            <div class="mb-3">
+                                <input type="email" class="form-control form-control-lg" placeholder="Email Address" required>
+                            </div>
+                            <div class="mb-3">
+                                <input type="password" class="form-control form-control-lg" placeholder="Password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-lg w-100">Create Account</button>
+                        </form>
+
+                        <div class="d-grid gap-2 mb-4">
+                            <button class="btn btn-outline-secondary btn-lg">
+                                <i class="fab fa-facebook text-primary me-2"></i> Sign Up with Facebook
+                            </button>
+                            <button class="btn btn-outline-secondary btn-lg">
+                                <i class="fab fa-apple me-2"></i> Sign Up with Apple
+                            </button>
+                            <button class="btn btn-outline-secondary btn-lg">
+                                <i class="fab fa-google me-2"></i> Sign Up with Google
+                            </button>
+                        </div>
+
+                        <div class="position-relative mb-4">
+                            <hr>
+                            <span class="position-absolute top-50 start-50 translate-middle px-3 bg-white text-muted small">or you can</span>
+                        </div>
+
+                        <div class="text-center">
+                            <p class="text-muted">
+                                Already have an Account?
+                                <a href="#" class="text-primary fw-medium" data-bs-toggle="modal" data-bs-target="#loginModal" data-bs-dismiss="modal">
+                                    Sign In
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Bootstrap JS Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Custom JS -->
+<script src="js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:replace="adminDashboard/fragments/header :: header"></head>
+<head>
+    <meta charset="UTF-8">
+    <title>Access denied</title>
+</head>
+<body>
+<div class="text-center">
+    <div class="error mx-auto" data-text="403">403</div>
+    <p class="lead text-gray-800 mb-5">Access denied</p>
+    <p class="text-500 mb-0">You do not have permission to access this page...</p>
+    <a th:href="@{/login}">&larr; Back to Login</a>
+</div>
+</body>
+</html>
