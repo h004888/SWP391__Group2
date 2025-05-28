@@ -8,7 +8,7 @@ import com.OLearning.entity.User;
 import com.OLearning.mapper.instructorDashBoard.CourseMapper;
 import com.OLearning.repository.instructorDashBoard.InstructorCategoryRepo;
 import com.OLearning.repository.instructorDashBoard.InstructorCourseRepo;
-import com.OLearning.repository.instructorDashBoard.InstructorPackageRepository;
+import com.OLearning.repository.instructorDashBoard.InstructorBuyPackagesRepository;
 import com.OLearning.repository.instructorDashBoard.InstructorUserRepo;
 import com.OLearning.service.instructorDashBoard.CourseService;
 import com.OLearning.service.instructorDashBoard.FileHelper.FileHelper;
@@ -24,7 +24,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CourseServiceImpl implements CourseService {
@@ -32,18 +31,21 @@ public class CourseServiceImpl implements CourseService {
     @Autowired
     private InstructorCourseRepo instructorCourseRepo;
     @Autowired
-    private InstructorPackageRepository buyPackageRepository;
+    private InstructorBuyPackagesRepository buyPackageRepository;
     @Autowired
     private CourseMapper courseMapper;
     @Autowired
     private InstructorCategoryRepo instructorCategoryRepo;
     @Autowired
     private InstructorUserRepo instructorUserRepo;
-
+    @Override
     public boolean canCreateCourse(Long userId) {
         List<Object[]> result = buyPackageRepository.findValidPackagesByUserId(userId);
         return !result.isEmpty();
+        //if emty => false
+        //else true
     }
+
 
     @Override
     public List<CourseDTO> findCourseByUserId(Long userId) {
@@ -98,7 +100,6 @@ public class CourseServiceImpl implements CourseService {
 
                 Files.copy(imageFile.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
                 course.setCourseImg(fileName);
-//              modelMap.put("photo", fileName);
             }catch(Exception e){
                 e.printStackTrace();
             }

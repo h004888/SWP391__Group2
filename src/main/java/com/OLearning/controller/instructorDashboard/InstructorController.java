@@ -40,6 +40,7 @@ public class InstructorController {
         return "instructorDashboard/index";
     }
 
+
     //Validate add course with package and view addcourse gui
     @GetMapping("/instructordashboard/viewcourse/addcourse")
     public String addNewCourse(@RequestParam(name = "id", defaultValue = "2") Long id, RedirectAttributes redirectAttributes, Model model) {
@@ -59,6 +60,7 @@ public class InstructorController {
     @PostMapping("/instructordashboard/viewcourse/addcourse")
     public String saveCourse(@ModelAttribute("courseAddDTO") CourseAddDTO courseAddDTO) {
         courseService.createCourse(courseAddDTO);
+
         return "redirect:/instructordashboard/viewcourse";
     }
 }
