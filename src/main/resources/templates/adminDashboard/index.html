@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" >
 
-<div th:insert="adminDashboard/fragments/header :: header"></div>
+<head th:replace="adminDashboard/fragments/header :: header"></head>
 
 <body id="page-top">
 
@@ -9,7 +10,7 @@
 <div id="wrapper">
 
     <!-- Sidebar -->
-    <div th:replace="adminDashboard/fragments/sidebar :: sidebar"></div>
+    <ul th:replace="adminDashboard/fragments/sidebar :: sidebar"></ul>
     <!-- End of Sidebar -->
 
     <!-- Content Wrapper -->
@@ -19,7 +20,7 @@
         <div id="content">
 
             <!-- Topbar -->
-            <div th:replace="adminDashboard/fragments/topbar :: topbar"></div>
+            <th:block th:insert="adminDashboard/fragments/topbar :: topbar"></th:block>
             <!-- End of Topbar -->
 
             <!-- Begin Page Content -->
@@ -31,7 +32,7 @@
         <!-- End of Main Content -->
 
         <!-- Footer -->
-        <div th:insert="adminDashboard/fragments/footer :: footer"></div>
+        <div th:replace="adminDashboard/fragments/footer :: footer"></div>
         <!-- End of Footer -->
 
     </div>
@@ -45,7 +46,7 @@
     <i class="fas fa-angle-up" ></i>
 </a>
 
-<!-- Logout Modal-->
+<!-- Logout Modal -->
 <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
      aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -59,7 +60,10 @@
             <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                <a class="btn btn-primary" href="login.html">Logout</a>
+
+                <form th:action="@{/logout}" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-primary">Logout</button>
+                </form>
             </div>
         </div>
     </div>
