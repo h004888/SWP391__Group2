@@ -35,7 +35,10 @@ public class User {
     private List<Course> courses;
 
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
-    private List<Payment> payment;
+    private List<Orders> orders;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<BuyPackages> buyBackages;
 
 }
 
