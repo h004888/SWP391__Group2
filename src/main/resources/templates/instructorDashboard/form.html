@@ -8,7 +8,7 @@
 
   <div id="content-wrapper" class="d-flex flex-column">
     <div id="content">
-      <div th:insert="instructorDashboard/fragments/topbar :: topbar"></div>
+      <div th:replace="instructorDashboard/fragments/topbar :: topbar"></div>
 
       <div class="container-fluid">
         <h1 class="h3 mb-4 text-gray-800"
@@ -72,18 +72,18 @@
           </div>
 
           <!-- Course -->
-          <div class="form-group">
-            <label for="courseID">Course</label>
-            <select th:field="*{courseId}" id="courseID" class="form-control">
-              <option th:each="course : ${courses}"
-                      th:value="${course.courseId}"
-                      th:text="${course.title}"></option>
-            </select>
-          </div>
+<!--          <div class="form-group">-->
+<!--            <label for="courseID">Course</label>-->
+<!--            <select th:field="*{courseId}" id="courseID" class="form-control">-->
+<!--              <option th:each="course : ${courses}"-->
+<!--                      th:value="${course.courseId}"-->
+<!--                      th:text="${course.title}"></option>-->
+<!--            </select>-->
+<!--          </div>-->
 
           <!-- Submit buttons -->
           <button type="submit" class="btn btn-primary">Save</button>
-          <a th:href="@{/instructor/}" class="btn btn-secondary">Cancel</a>
+          <a th:href="@{/instructor}" class="btn btn-secondary">Cancel</a>
         </form>
       </div>
     </div>
