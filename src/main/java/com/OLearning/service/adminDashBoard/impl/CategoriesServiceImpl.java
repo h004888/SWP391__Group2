@@ -5,12 +5,17 @@ import com.OLearning.repository.adminDashBoard.CategoriesRepository;
 import com.OLearning.service.adminDashBoard.CategoriesService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
 
 @Service
+@Transactional
 public class CategoriesServiceImpl implements CategoriesService {
     @Autowired
     private CategoriesRepository categoriesRepository;
@@ -89,6 +94,26 @@ public class CategoriesServiceImpl implements CategoriesService {
         }
 
         return categories;
+    }
+
+    @Override
+    public Page<Categories> findAllCategory(int page, int size, String sortBy, String sortDirection) {
+        Sort sort = Sort.by(sortBy != null ? sortBy : "id");
+        sort = "desc".equalsIgnoreCase(sortDirection) ? sort.descending() : sort.ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        return categoriesRepository.findAll(pageable);
+    }
+
+    @Override
+    public Page<Categories> findByNameContaining(String keyword, int page, int size, String sortBy,
+            String sortDirection) {
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return categoriesRepository.findAll(pageable);
+
+        }
+        return categoriesRepository.findByNameContaining(keyword, pageable);
     }
 
 }
