@@ -23,18 +23,19 @@
             <!-- End of Topbar -->
 
             <!-- Begin Page Content -->
-
-                <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search"
-                      th:action="@{/admin/orders/searchByUsername}" method="get">
-                    <div class="input-group">
-                        <input type="text" class="form-control bg-light border-0 small" name="username" th:value="${username}" placeholder="Enter username"/>
-                        <div class="input-group-append">
-                            <button class="btn btn-dark" type="submit">
-                                <i class="fas fa-search fa-sm"></i>
-                            </button>
+            <div class="container-fluid">
+                <div class="table-wrapper">
+                    <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search"
+                        th:action="@{/admin/orders/searchByUsername}" method="get">
+                        <div class="input-group">
+                            <input type="text" class="form-control bg-light border-0 small" name="username" th:value="${username}" placeholder="Enter username"/>
+                            <div class="input-group-append">
+                                <button class="btn btn-dark" type="submit">
+                                    <i class="fas fa-search fa-sm"></i>
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                </form>
+                    </form>
 
             <!-- Form tìm kiếm theo Status -->
                 <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search"
@@ -114,8 +115,9 @@
                     </li>
                 </ul>
             </div>
+            </div>
             <!-- /.container-fluid -->
-
+        </div>
         </div>
         <!-- End of Main Content -->
 

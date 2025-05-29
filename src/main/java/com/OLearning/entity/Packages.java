@@ -27,7 +27,12 @@ public class Packages {
     @Column(name = "Duration")
     private int duration;
 
+    @Column(name = "IsActive", nullable = false)
+    private boolean isActive = true;
+
     @OneToMany(mappedBy = "packages", cascade = CascadeType.ALL)
     private List<BuyPackages> buyPackages;
+
+
 
 }
