@@ -1,0 +1,40 @@
+<div id="content" th:fragment="contentPackages">
+<div class="container-fluid">
+    <div class="table-wrapper">
+        <!-- Hiển thị danh sách payments -->
+        <table class="table table-striped table-hover table-bordered">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Courses Created</th>
+                <th>Duration</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="package : ${packages}">
+                <td th:text="${package.packagesId}"></td>
+                <td th:text="${package.packagesName}"></td>
+                <td th:text="${package.price}"></td>
+                <td th:text="${package.coursesCreated}"></td>
+                <td th:text="${package.duration}"></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="clearfix">
+            <div class="hint-text">Showing <b>5</b> out of <b>25</b> entries</div>
+            <ul class="pagination">
+                <li class="page-item disabled"><a href="#"><i class="fa fa-angle-double-left"></i></a></li>
+                <li class="page-item"><a href="#" class="page-link">1</a></li>
+                <li class="page-item"><a href="#" class="page-link">2</a></li>
+                <li class="page-item active"><a href="#" class="page-link">3</a></li>
+                <li class="page-item"><a href="#" class="page-link">4</a></li>
+                <li class="page-item"><a href="#" class="page-link">5</a></li>
+                <li class="page-item"><a href="#" class="page-link"><i class="fa fa-angle-double-right"></i></a>
+                </li>
+            </ul>
+        </div>
+        <!-- /.container-fluid -->
+    </div>

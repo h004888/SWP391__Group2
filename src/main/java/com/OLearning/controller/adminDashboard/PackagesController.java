@@ -20,7 +20,8 @@ public class PackagesController {
     @GetMapping
     public String getAllPackages(Model model) {
         List<Packages> packages = packagesService.getAllPackages();
+        model.addAttribute("fragmentContent", "adminDashboard/fragments/packagesContent :: contentPackages");
         model.addAttribute("packages", packages);
-        return "adminDashboard/packages";
+        return "adminDashboard/index";
     }
 }
