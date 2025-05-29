@@ -20,19 +20,19 @@ public class UserController {
 
     @GetMapping()
     public String getAdminDashboardPAge(Model model) {
-        model.addAttribute("fragmentContent", "adminDashboard/fragments/content :: contentMain");
-        return "adminDashboard/index";
+        model.addAttribute("fragmentContent", "adminDashBoard/fragments/content :: contentMain");
+        return "adminDashBoard/index";
     }
 
 
     @GetMapping("/account")
     public String getAccountPage(Model model) {
-        model.addAttribute("fragmentContent", "adminDashboard/fragments/accountContent :: accountContent");
+        model.addAttribute("fragmentContent", "adminDashBoard/fragments/accountContent :: accountContent");
         model.addAttribute("listU", userService.getAllUsers());
         model.addAttribute("accNamePage", "Management Account");
         model.addAttribute("addAccount", new UserDTO());
         model.addAttribute("listRole", userService.getListRole());
-        return "adminDashboard/index";
+        return "adminDashBoard/index";
     }
 
     //Filter with ajax
@@ -43,7 +43,7 @@ public class UserController {
             Model model) {
         List<UserDTO> listU = userService.searchByName(keyword, roleId);
         model.addAttribute("listU", listU);
-        return "adminDashboard/fragments/accountContent :: userTableBody";
+        return "adminDashBoard/fragments/accountContent :: userTableBody";
     }
 
     @PostMapping("/account/add")
@@ -59,12 +59,12 @@ public class UserController {
 
     @GetMapping("account/viewInfo/{userId}")
     public String getDetailAccount(Model model, @PathVariable("userId") long id) {
-        model.addAttribute("fragmentContent", "adminDashboard/fragments/accountDetailContent :: accountDetail");
+        model.addAttribute("fragmentContent", "adminDashBoard/fragments/accountDetailContent :: accountDetail");
         Optional<UserDetailDTO> userDetailDTO = userService.getInfoUser(id);
         if (userDetailDTO.isPresent()) {
             model.addAttribute("accNamePage","Detail Account");
             model.addAttribute("userDetail", userDetailDTO.get());
-            return "adminDashboard/index";
+            return "adminDashBoard/index";
         } else {
             return "redirect:/admin/index";
         }
@@ -72,7 +72,7 @@ public class UserController {
 
     @GetMapping("admin/account/delete/{userId}")
     public String deleteAccount(Model model,@PathVariable("userId") long id) {
-        model.addAttribute("fragmentContent", "adminDashboard/fragments/accountContent :: accountContent");
+        model.addAttribute("fragmentContent", "adminDashBoard/fragments/accountContent :: accountContent");
         userService.deleteAcc(id);
         return "redirect:/admin/index";
     }
