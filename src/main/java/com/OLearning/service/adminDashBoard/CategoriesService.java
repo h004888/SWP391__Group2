@@ -1,6 +1,9 @@
 package com.OLearning.service.adminDashBoard;
 
 import com.OLearning.entity.Categories;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,6 +27,8 @@ public interface CategoriesService {
 
     void delete(Categories categories);
 
+    Page<Categories> findAllCategory(int page, int size, String sortBy, String sortDirection);
+
     void updateCategory(int id, String name);
 
     List<Categories> findByNameContaining(String name);
@@ -31,5 +36,7 @@ public interface CategoriesService {
     List<Categories> getListCategories();
 
     List<Categories> filterCategories(String name, String select);
+
+    Page<Categories> findByNameContaining(String keyword, int page, int size, String sortBy, String sortDirection);
 
 }

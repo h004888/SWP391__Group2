@@ -6,21 +6,26 @@ $(document).ready(function () {
             deleteCategoryById(id);
         }
     });
-    // ⏱ Gõ đến đâu search đến đó (debounce 300ms)
+
+
+    //  Gõ đến đâu search đến đó (debounce 300ms)
     let typingTimer;
     $('#searchInput').on('input', function () {
         clearTimeout(typingTimer);
         typingTimer = setTimeout(fetchData, 300); // đợi 300ms sau khi ngừng gõ
     });
-    // 🔄 Khi chọn sort thì cũng gọi lại
+    // Khi chọn sort thì cũng gọi lại
     $('#sortSelect').on('change', fetchData);
 
-    // ❌ Ngăn reload nếu form bị submit
+    //  Ngăn reload nếu form bị submit
     $('#filterForm').on('submit', function (e) {
         e.preventDefault();
     });
 
+
+
 });
+
 
 
 function deleteCategoryById(id) {
@@ -37,6 +42,26 @@ function deleteCategoryById(id) {
     });
 }
 
+$(document).ready(function () {
+    const successAlert = $('#success-alert');
+    const errorAlert = $('#error-alert');
+
+    if (successAlert.length) {
+        setTimeout(function () {
+            successAlert.fadeOut(500, function () {
+                $(this).remove();
+            });
+        }, 3000);
+    }
+
+    if (errorAlert.length) {
+        setTimeout(function () {
+            errorAlert.fadeOut(500, function () {
+                $(this).remove();
+            });
+        }, 3000);
+    }
+});
 
 
 function fetchData() {
