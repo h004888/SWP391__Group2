@@ -16,7 +16,7 @@ import java.util.List;
 public class Packages {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer packageId;
+    private Long packageId;
     private String packageName;
     private Long price;
     private Integer coursesCreated;
@@ -25,6 +25,7 @@ public class Packages {
 
     @OneToMany(mappedBy = "packages", fetch = FetchType.LAZY)
     private List<BuyPackages> listOfBuyPackage;
-
+//    @OneToMany(mappedBy = "packages", cascade = CascadeType.ALL)
+//    private List<BuyPackages> buyPackages;
 }
 

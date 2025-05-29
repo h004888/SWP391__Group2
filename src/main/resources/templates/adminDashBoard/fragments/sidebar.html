@@ -27,43 +27,49 @@
         </div>
 
         <!-- Nav Item - Pages Collapse Menu -->
+        <!-- Nav Item - Accounts -->
         <li class="nav-item">
-            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
-               aria-expanded="true" aria-controls="collapseTwo">
+            <a class="nav-link" th:href="@{/admin/account}">
                 <i class="fas fa-fw fa-user"></i>
-                <span>Customers</span>
+                <span>Accounts</span>
             </a>
-            <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                <div class="bg-white py-2 collapse-inner rounded">
-                    <h6 class="collapse-header">Custom Customer:</h6>
-                    <a class="collapse-item" th:href="@{/admin/account}">Accounts</a>
-                </div>
-            </div>
         </li>
 
-
-        <!-- Nav Item - Utilities Collapse Menu -->
+        <!-- Nav Item - Courses -->
         <li class="nav-item">
-            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities"
-               aria-expanded="true" aria-controls="collapseUtilities">
+            <a class="nav-link" th:href="@{/admin/course}">
                 <i class="fas fa-fw fa-trophy"></i>
-                <span>Course</span>
+                <span>Courses</span>
             </a>
-            <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities"
-                 data-parent="#accordionSidebar">
-                <div class="bg-white py-2 collapse-inner rounded">
-                    <h6 class="collapse-header">Custom Course:</h6>
-                    <a class="collapse-item" th:href="@{/admin/course}">Course</a>
-                    <a class="collapse-item" href="utilities-border.html">Orders & Payments</a>
-                    <a class="collapse-item" href="utilities-animation.html">Analytics & Reports</a>
-                    <a class="collapse-item" href="utilities-other.html">Review & FeedBack</a>
-                    <a class="collapse-item" href="utilities-other.html">Quiz</a>
-                </div>
-            </div>
         </li>
 
-        <!-- Divider -->
-        <hr class="sidebar-divider">
+        <!-- Nav Item - Orders & Payments -->
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/admin/orders}">
+                <i class="fas fa-fw fa-credit-card"></i>
+                <span>Orders & Payments</span>
+            </a>
+        </li>
+
+        <!-- Nav Item - Packages -->
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/admin/packages}">
+                <i class="fas fa-fw fa-receipt"></i>
+                <span>Packages</span>
+            </a>
+        </li>
+
+        <!-- Nav Item - BuyPackages -->
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/admin/buyPackages}">
+                <i class="fas fa-fw fa-clock"></i>
+                <span>BuyPackages</span>
+            </a>
+        </li>
+
+    </li>
+    <!-- Divider -->
+    <hr class="sidebar-divider">
 
         <!-- Sidebar Toggler (Sidebar) -->
         <div class="text-center d-none d-md-inline">
@@ -71,5 +77,5 @@
         </div>
 
 
-    </ul>
+</ul>
 
