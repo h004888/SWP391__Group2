@@ -1,15 +1,5 @@
-IF
-NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'Olearning')
-BEGIN
-    CREATE
-DATABASE Olearning;
-END;
-GO
-
-USE Olearning;
-GO
---update26/05
--- Bảng Roles
+CREATE
+DATABASE Olearning
 CREATE TABLE Roles
 (
     RoleID SMALLINT IDENTITY(1,1) PRIMARY KEY,
@@ -24,13 +14,12 @@ CREATE TABLE Users
     Username       NVARCHAR(50) NOT NULL UNIQUE,
     RoleID         SMALLINT,
     Email          NVARCHAR(100) NOT NULL UNIQUE,
-    Password       NVARCHAR(255) NOT NULL,
+    Password       NVARCHAR(255) NOT NULL, -- Mật khẩu đã hash
     FullName       NVARCHAR(100) NOT NULL,
     Phone          NVARCHAR(15),
     Birthday       DATETIME,
     Address        NVARCHAR(255),
     ProfilePicture NVARCHAR(255),
-    PersonalSkills NVARCHAR(MAX),---new
     FOREIGN KEY (RoleID) REFERENCES Roles (RoleID)
 );
 GO
@@ -46,21 +35,21 @@ GO
 -- Bảng Courses
 CREATE TABLE Courses
 (
-    CourseID            INT IDENTITY(1,1) PRIMARY KEY,
-    UserID              INT            NOT NULL,
-    CategoryID          INT,
-    Title               NVARCHAR(255) NOT NULL,
-    Description         NVARCHAR(2000),
-    Price               DECIMAL(10, 2) NOT NULL DEFAULT 0,
-    Discount            DECIMAL(5, 2)           DEFAULT 0,
-    CourseImg           NVARCHAR(255),
-    Duration            INT                     DEFAULT 0,
-    TotalLessons        INT                     DEFAULT 0,
-    TotalRatings        INT                     DEFAULT 0,
+    CourseID             INT IDENTITY(1,1) PRIMARY KEY,
+    UserID               INT            NOT NULL,
+    CategoryID           INT,
+    Title                NVARCHAR(255) NOT NULL,
+    Description          NVARCHAR(2000),
+    Price                DECIMAL(10, 2) NOT NULL DEFAULT 0,
+    Discount             DECIMAL(5, 2)           DEFAULT 0,
+    CourseImg            NVARCHAR(255),
+    Duration             INT                     DEFAULT 0,
+    TotalLessons         INT                     DEFAULT 0,
+    TotalRatings         INT                     DEFAULT 0,
     TotalStudentEnrolled INT                     DEFAULT 0,
-    CreatedAt           DATETIME                DEFAULT GETDATE(),
-    UpdatedAt           DATETIME                DEFAULT GETDATE(),
-    isChecked           BIT,
+    CreatedAt            DATETIME                DEFAULT GETDATE(),
+    UpdatedAt            DATETIME                DEFAULT GETDATE(),
+    isChecked            BIT, -- Sửa từ BOOLEAN thành BIT cho SQL Server
     FOREIGN KEY (UserID) REFERENCES Users (UserID),
     FOREIGN KEY (CategoryID) REFERENCES Categories (CategoryID)
 );
@@ -85,9 +74,9 @@ GO
 -- Bảng Quizz
 CREATE TABLE Quizz
 (
-    QuizzID       INT IDENTITY(1,1) PRIMARY KEY,
+    QuizzID       INT IDENTITY(1,1) PRIMARY KEY, -- Sửa AUTO_INCREMENT thành IDENTITY
     LessonID      INT NOT NULL,
-    Question      NVARCHAR(MAX) NOT NULL,
+    Question      NVARCHAR(MAX) NOT NULL,        -- Sửa TEXT thành NVARCHAR(MAX)
     CorrectAnswer NVARCHAR(255) NOT NULL,
     FOREIGN KEY (LessonID) REFERENCES Lessons (LessonID) ON DELETE CASCADE
 );
@@ -96,15 +85,16 @@ GO
 -- Bảng Video
 CREATE TABLE Video
 (
-    VideoID    INT IDENTITY(1,1) PRIMARY KEY,
+    VideoID    INT IDENTITY(1,1) PRIMARY KEY, -- Sửa AUTO_INCREMENT thành IDENTITY
     LessonID   INT  NOT NULL,
     VideoURL   NVARCHAR(255) NOT NULL,
     Duration   TIME NOT NULL,
-    UploadDate DATETIME DEFAULT GETDATE(),
+    UploadDate DATETIME DEFAULT GETDATE(),    -- Sửa CURRENT_TIMESTAMP thành GETDATE()
     FOREIGN KEY (LessonID) REFERENCES Lessons (LessonID) ON DELETE CASCADE
 );
 GO
 
+-- Bảng Payments
 CREATE TABLE Orders
 (
     OrderID   INT IDENTITY(1,1) PRIMARY KEY,
@@ -120,13 +110,40 @@ GO
 
 CREATE TABLE Order_Detail
 (
+
     OrderID   INT NOT NULL,
     CourseID  INT NOT NULL,
     UnitPrice INT NOT NULL,
+    PRIMARY KEY (OrderID, CourseID),
     FOREIGN KEY (OrderID) REFERENCES Orders (OrderID),
     FOREIGN KEY (CourseID) REFERENCES Courses (CourseID)
 );
 GO
+
+-- bảng gói đăng ký
+CREATE TABLE Packages
+(
+    PackagesId     INT PRIMARY KEY IDENTITY(1,1),
+    PackagesName   NVARCHAR(100) NOT NULL,
+    Price          DECIMAL(10, 2) NOT NULL,
+    CoursesCreated INT            NOT NULL DEFAULT 0,
+    Duration       INT            NOT NULL, -- thời gian tính theo tháng
+    isActive       BIT            NOT NULL DEFAULT 1
+);
+--mua gói
+CREATE TABLE BuyPackages
+(
+    Id         INT PRIMARY KEY IDENTITY(1,1),
+    UserId     INT            NOT NULL,
+    PackagesId INT            NOT NULL,
+    Quantity   INT            NOT NULL CHECK (quantity > 0),
+    Price      DECIMAL(10, 2) NOT NULL,
+    Status     NVARCHAR(20) DEFAULT 'Active' CHECK (status IN ('Active', 'Expired', 'Pending')),
+    ValidFrom  DATE           NOT NULL,
+    ValidTo    DATE           NOT NULL,
+    CONSTRAINT FK_BuyPackages_Packages FOREIGN KEY (PackagesId) REFERENCES Packages (PackagesId),
+    CONSTRAINT FK_BuyPackages_User FOREIGN KEY (UserId) REFERENCES Users (UserId)
+);
 
 -- Bảng Enrollments
 CREATE TABLE Enrollments
@@ -137,10 +154,10 @@ CREATE TABLE Enrollments
     EnrollmentDate DATETIME      DEFAULT GETDATE(),
     Progress       DECIMAL(5, 2) DEFAULT 0,
     Status         NVARCHAR(20) DEFAULT 'onGoing' CHECK (Status IN ('onGoing', 'completed')),
-    PaymentID      INT,
+    OrderID        INT,
     FOREIGN KEY (UserID) REFERENCES Users (UserID),
     FOREIGN KEY (CourseID) REFERENCES Courses (CourseID),
-    FOREIGN KEY (PaymentID) REFERENCES Payments (PaymentID),
+    FOREIGN KEY (OrderID) REFERENCES Orders (OrderID),
     CONSTRAINT UQ_User_Course UNIQUE (UserID, CourseID)
 );
 GO
@@ -159,28 +176,3 @@ CREATE TABLE CourseReviews
     FOREIGN KEY (CourseID) REFERENCES Courses (CourseID)
 );
 GO
-
--- Bảng InstructorPackages
-CREATE TABLE Packages
-(
-    PackageId      INT PRIMARY KEY IDENTITY(1,1),
-    PackageName    NVARCHAR(100) NOT NULL,
-    Price          DECIMAL(10, 2) NOT NULL,
-    CoursesCreated INT            NOT NULL DEFAULT 0,
-    Duration       INT            NOT NULL -- thời gian tính theo tháng
-);
-
---mua gói
-CREATE TABLE BuyPackages
-(
-    Id        INT PRIMARY KEY IDENTITY(1,1),
-    UserId    INT            NOT NULL,
-    PackageId INT            NOT NULL,
-    Quantity  INT            NOT NULL CHECK (quantity > 0),
-    Price     DECIMAL(10, 2) NOT NULL,
-    Status    NVARCHAR(20) DEFAULT 'Active' CHECK (status IN ('Active', 'Expired', 'Pending')),
-    ValidFrom DATE           NOT NULL,
-    ValidTo   DATE           NOT NULL,
-    CONSTRAINT FK_BuyPackages_Package FOREIGN KEY (PackageId) REFERENCES Packages (PackageId),
-    CONSTRAINT FK_BuyPackages_User FOREIGN KEY (UserId) REFERENCES Users (UserId)
-);
