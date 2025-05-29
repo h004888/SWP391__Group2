@@ -27,10 +27,10 @@ public class CourseController {
         List<Categories> listCategories = categoriesService.getListCategories();
 
         model.addAttribute("accNamePage", "Management Course");
-        model.addAttribute("fragmentContent", "adminDashboard/fragments/courseContent :: courseContent");
+        model.addAttribute("fragmentContent", "adminDashBoard/fragments/courseContent :: courseContent");
         model.addAttribute("listCourse", listCourse);
         model.addAttribute("listCategories", listCategories);
-        return "adminDashboard/index";
+        return "adminDashBoard/index";
     }
 
     //Filter with ajax
@@ -42,7 +42,7 @@ public class CourseController {
                                 Model model) {
         List<CourseDTO> listCourse = courseService.filterCourses(keyword, category, price,status);
         model.addAttribute("listCourse", listCourse);
-        return "adminDashboard/fragments/courseContent :: courseTableBody";
+        return "adminDashBoard/fragments/courseContent :: courseTableBody";
     }
 
     @PostMapping("/approve/{id}")
@@ -65,11 +65,11 @@ public class CourseController {
 
     @GetMapping("/detail/{id}")
     public String viewCourseDetail(Model model, @PathVariable("id") Long id) {
-        model.addAttribute("fragmentContent", "adminDashboard/fragments/courseDetailContent :: courseDetail");
+        model.addAttribute("fragmentContent", "adminDashBoard/fragments/courseDetailContent :: courseDetail");
         Optional<CourseDetailDTO> optionalDetail = courseService.getDetailCourse(id);
         if (optionalDetail.isPresent()) {
             model.addAttribute("detailCourse", optionalDetail.get());
-            return "adminDashboard/index";
+            return "adminDashBoard/index";
         } else {
             return "redirect:/admin/course";
         }

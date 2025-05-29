@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security" >
 
-<head th:replace="adminDashboard/fragments/header :: header"></head>
+<head th:replace="adminDashBoard/fragments/header :: header"></head>
 
 <body id="page-top">
 
@@ -10,7 +10,7 @@
 <div id="wrapper">
 
     <!-- Sidebar -->
-    <ul th:replace="adminDashboard/fragments/sidebar :: sidebar"></ul>
+    <ul th:replace="adminDashBoard/fragments/sidebar :: sidebar"></ul>
     <!-- End of Sidebar -->
 
     <!-- Content Wrapper -->
@@ -20,7 +20,7 @@
         <div id="content">
 
             <!-- Topbar -->
-            <th:block th:replace="adminDashboard/fragments/topbar :: topbar"></th:block>
+            <th:block th:replace="adminDashBoard/fragments/topbar :: topbar"></th:block>
             <!-- End of Topbar -->
 
             <!-- Begin Page Content -->
@@ -33,7 +33,7 @@
         <!-- End of Main Content -->
 
         <!-- Footer -->
-        <div th:replace="adminDashboard/fragments/footer :: footer"></div>
+        <div th:replace="adminDashBoard/fragments/footer :: footer"></div>
         <!-- End of Footer -->
 
     </div>
