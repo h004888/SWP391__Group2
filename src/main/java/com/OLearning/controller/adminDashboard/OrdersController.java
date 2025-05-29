@@ -22,23 +22,26 @@ public class OrdersController {
     public String getAllOrders(Model model) {
         List<OrdersDTO> orders = orderService.getAllOrders();
         model.addAttribute("orders", orders);
-        return "adminDashboard/orders";
+        model.addAttribute("fragmentContent", "adminDashboard/fragments/ordersContent :: contentOrders");
+        return "adminDashboard/index";
     }
 
     @GetMapping("/searchByUsername")
     public String searchByUsername(@RequestParam(value = "username", required = false) String username, Model model) {
         List<OrdersDTO> orders = orderService.findByUsername(username);
+        model.addAttribute("fragmentContent", "adminDashboard/fragments/ordersContent :: contentOrders");
         model.addAttribute("orders", orders);
         model.addAttribute("username", username);
-        return "adminDashboard/orders";
+        return "adminDashboard/index";
     }
 
     @GetMapping("/searchByCourseName")
     public String searchByCourseName(@RequestParam(value = "courseName", required = false) String courseName, Model model) {
         List<OrdersDTO> orders = orderService.findByCourseName(courseName);
+        model.addAttribute("fragmentContent", "adminDashboard/fragments/ordersContent :: contentOrders");
         model.addAttribute("orders", orders);
         model.addAttribute("courseName", courseName);
-        return "adminDashboard/orders";
+        return "adminDashboard/index";
     }
 
     @GetMapping("/sortByAmount")
@@ -46,7 +49,8 @@ public class OrdersController {
         List<OrdersDTO> orders = orderService.sortByAmount(direction);
         model.addAttribute("orders", orders);
         model.addAttribute("amountDirection", direction);
-        return "adminDashboard/orders";
+        model.addAttribute("fragmentContent", "adminDashboard/fragments/ordersContent :: contentOrders");
+        return "adminDashboard/index";
     }
 
     @GetMapping("/sortByDate")
@@ -54,6 +58,7 @@ public class OrdersController {
         List<OrdersDTO> orders = orderService.sortByDate(direction);
         model.addAttribute("orders", orders);
         model.addAttribute("dateDirection", direction);
-        return "adminDashboard/orders";
+        model.addAttribute("fragmentContent", "adminDashboard/fragments/ordersContent :: contentOrders");
+        return "adminDashboard/index";
     }
 }

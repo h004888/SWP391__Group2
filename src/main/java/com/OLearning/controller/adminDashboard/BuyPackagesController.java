@@ -20,8 +20,9 @@ public class BuyPackagesController {
     @GetMapping
     public String getAllBuyPackages(Model model) {
         List<BuyPackages> buyPackages = buyPackagesService.getAllBuyPackages();
+        model.addAttribute("fragmentContent", "adminDashboard/fragments/buyPackagesContent :: contentbuyPackages");
         model.addAttribute("buyPackages", buyPackages);
-        return "adminDashboard/buyPackages";
+        return "adminDashboard/index";
     }
 
 }
