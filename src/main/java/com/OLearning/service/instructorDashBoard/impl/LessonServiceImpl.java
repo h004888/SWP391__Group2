@@ -1,4 +1,4 @@
-package com.OLearning.service.instructorDashboard.impl;
+package com.OLearning.service.instructorDashBoard.impl;
 
 import com.OLearning.dto.instructorDashBoard.LessonDTO;
 import com.OLearning.entity.Course;
@@ -21,6 +21,8 @@ public class LessonServiceImpl implements LessonService {
 
     @Autowired
     private CourseRepo courseRepo;
+    @Autowired
+    private LessonMapper lessonMapper;
 
 
     @Override
@@ -40,25 +42,30 @@ public class LessonServiceImpl implements LessonService {
     @Override
     public LessonDTO getLessonById(Long id) {
         Lesson lesson = lessonRepo.findById(id).orElse(null);
-        return lesson != null ? LessonMapper.toDTO(lesson) : null;
+        return lesson != null ? lessonMapper.toDTO(lesson) : null;
     }
 
     @Override
     public void saveLesson(LessonDTO dto) {
         Course course = courseRepo.findById(dto.getCourseId()).orElse(null);
-        Lesson lesson = LessonMapper.toEntity(dto, course);
+        if (course == null) {
+            throw new IllegalArgumentException("Invalid courseId: " + dto.getCourseId());
+        }
+        Lesson lesson = lessonMapper.toEntity(dto, course);
         lessonRepo.save(lesson);
     }
+
+
 
     @Override
     public void deleteLesson(Long id) {
         lessonRepo.deleteById(id);
     }
 
-    // Uncomment and implement if needed
+
 //    @Override
 //    public List<LessonDTO> getLessonsByCourseId(Long courseId) {
-//        return lessonRepo.findByCourse_CourseID(courseId).stream()
+//        return lessonRepo.findByCourseCourseId(courseId).stream()
 //                .map(LessonMapper::toDTO)
 //                .collect(Collectors.toList());
 //    }

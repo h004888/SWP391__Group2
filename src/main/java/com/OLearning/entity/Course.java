@@ -1,6 +1,7 @@
 package com.OLearning.entity;
 
 import jakarta.persistence.*;
+import jdk.jfr.Category;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -34,9 +35,9 @@ public class Course {
     @JoinColumn(name = "userId")
     private User instructor;
 
-//    @ManyToOne
-//    @JoinColumn(name = "categoryId")
-//    private Category category;
+    @ManyToOne
+    @JoinColumn(name = "categoryId")
+    private Categories category;
     @ManyToOne
     @JoinColumn(name = "lessonId")
     private Lesson lesson;

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class LessonMapper {
 
-    public static LessonDTO toDTO(Lesson lesson) {
+    public LessonDTO toDTO(Lesson lesson) {
         LessonDTO dto = new LessonDTO();
         dto.setLessonId((long) lesson.getLessonId());
         dto.setTitle(lesson.getTitle());
@@ -24,7 +24,7 @@ public class LessonMapper {
         return dto;
     }
 
-    public static Lesson toEntity(LessonDTO dto, Course course) {
+    public Lesson toEntity(LessonDTO dto, Course course) {
         Lesson lesson = new Lesson();
         lesson.setLessonId(dto.getLessonId());
         lesson.setTitle(dto.getTitle());

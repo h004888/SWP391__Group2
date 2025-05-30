@@ -1,57 +1,65 @@
 package com.OLearning.controller.instructorDashboard;
 
 import com.OLearning.dto.instructorDashBoard.LessonDTO;
-import com.OLearning.repository.adminDashBoard.CourseRepo;
+import com.OLearning.entity.Course;
+import com.OLearning.repository.instructorDashBoard.InstructorCourseRepo;
 import com.OLearning.service.instructorDashBoard.LessonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Controller
-@RequestMapping("/instructor")
+@RequestMapping("/instructordashboard/viewcourse")
 public class LessonController {
 
     @Autowired
     private LessonService lessonService;
 
-    @GetMapping("/")
-    public String showDashboard() {
-        return "instructorDashboard/index";
-    }
+    @Autowired
+    private InstructorCourseRepo instructorCourseRepo;
 
+    // Hiển thị danh sách bài học theo courseId
+    @GetMapping("/{courseId}/lessons")
+    public String listLessons(@PathVariable Long courseId, Model model) {
+        Course course = instructorCourseRepo.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("Course not found with id: " + courseId));
 
-    @GetMapping("/list")
-    public String listLessons(Model model) {
-        model.addAttribute("lessons", lessonService.getAllLessons());
+        List<LessonDTO> lessons = lessonService.getLessonsByCourseId(courseId);
+
+        model.addAttribute("course", course);
+        model.addAttribute("lessons", lessons);
+        model.addAttribute("courseId", courseId);
+
         return "instructorDashboard/list";
     }
 
-    @GetMapping("/add")
-    public String showAddForm(Model model) {
-        model.addAttribute("lesson", new LessonDTO());
-        model.addAttribute("courses",lessonService.getAllLessons());
+    @GetMapping("/{courseId}/lessons/add")
+    public String showAddForm(@PathVariable Long courseId, Model model) {
+        LessonDTO lesson = new LessonDTO();
+        lesson.setCourseId(courseId);
+        model.addAttribute("lesson", lesson);
         return "instructorDashboard/form";
     }
 
-    @PostMapping("/save")
-    public String saveLesson(@ModelAttribute("lesson") LessonDTO dto) {
+    @PostMapping("/{courseId}/lessons/save")
+    public String saveLesson(@PathVariable Long courseId, @ModelAttribute("lesson") LessonDTO dto) {
+        dto.setCourseId(courseId);
         lessonService.saveLesson(dto);
-        return "redirect:/instructor/";
+        return "redirect:/instructordashboard/viewcourse/" + courseId + "/lessons";
     }
 
-    @GetMapping("/edit/{id}")
-    public String editLesson(@PathVariable Long id, Model model) {
-        model.addAttribute("lesson", lessonService.getLessonById(id));
-        model.addAttribute("courses", lessonService.getAllLessons());
+    @GetMapping("/{courseId}/lessons/edit/{lessonId}")
+    public String editLesson(@PathVariable Long courseId, @PathVariable Long lessonId, Model model) {
+        model.addAttribute("lesson", lessonService.getLessonById(lessonId));
         return "instructorDashboard/form";
     }
 
-    @GetMapping("/delete/{id}")
-    public String deleteLesson(@PathVariable Long id) {
-        lessonService.deleteLesson(id);
-        return "redirect:/instructor/";
-
+    @GetMapping("/{courseId}/lessons/delete/{lessonId}")
+    public String deleteLesson(@PathVariable Long courseId, @PathVariable Long lessonId) {
+        lessonService.deleteLesson(lessonId);
+        return "redirect:/instructordashboard/viewcourse/" + courseId + "/lessons";
     }
-    
 }
