@@ -10,6 +10,7 @@ import com.OLearning.service.adminDashBoard.CourseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -39,8 +40,9 @@ public class CourseServiceImpl implements CourseService {
     public boolean approveCourse(Long id) {
         return courseRepository.findById(id)
                 .map(course -> {
-                    if (!Boolean.TRUE.equals(course.getIsChecked())) {
-                        course.setIsChecked(true);
+                    if (!"approved".equalsIgnoreCase(course.getStatus())) {
+                        course.setStatus("approved");
+                        course.setUpdatedAt(LocalDateTime.now());
                         courseRepository.save(course);
                         return true;
                     }
@@ -53,8 +55,24 @@ public class CourseServiceImpl implements CourseService {
     public boolean rejectCourse(Long id) {
         return courseRepository.findById(id)
                 .map(course -> {
-                    if (!Boolean.TRUE.equals(course.getIsChecked())) {
-                        course.setIsChecked(false);
+                    if (!"rejected".equalsIgnoreCase(course.getStatus())) {
+                        course.setStatus("rejected");
+                        course.setUpdatedAt(LocalDateTime.now());
+                        courseRepository.save(course);
+                        return true;
+                    }
+                    return false;
+                })
+                .orElse(false);
+    }
+
+    @Override
+    public boolean violateCourse(Long id) {
+        return courseRepository.findById(id)
+                .map(course -> {
+                    if (!"violated".equalsIgnoreCase(course.getStatus())) {
+                        course.setStatus("violated");
+                        course.setUpdatedAt(LocalDateTime.now());
                         courseRepository.save(course);
                         return true;
                     }
@@ -73,7 +91,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public List<CourseDTO> filterCourses(String keyword, Integer categoryId, String price,String status) {
+    public List<CourseDTO> filterCourses(String keyword, Integer categoryId, String price, String status) {
         if (keyword != null && !keyword.trim().isEmpty()) {
             keyword = "%" + keyword.trim().toLowerCase() + "%";
         } else {

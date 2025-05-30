@@ -15,7 +15,7 @@ public class InstructorCourseMapper {
         course.setDescription(dto.getDescription());
         course.setPrice(dto.getPrice());
         course.setTotalStudentEnrolled(0);
-        course.setIsChecked(null);
+        course.setStatus(null);
         course.setDiscount(dto.getDiscount());
         course.setTotalLessons(0);
         course.setTotalRatings(0);
