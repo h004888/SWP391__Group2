@@ -27,7 +27,6 @@ public interface CategoriesService {
 
     void delete(Categories categories);
 
-    Page<Categories> findAllCategory(int page, int size, String sortBy, String sortDirection);
 
     void updateCategory(int id, String name);
 
@@ -37,6 +36,6 @@ public interface CategoriesService {
 
     List<Categories> filterCategories(String name, String select);
 
-    Page<Categories> findByNameContaining(String keyword, int page, int size, String sortBy, String sortDirection);
+    Page<Categories> findByNameContaining(String name, Pageable pageable);
 
 }

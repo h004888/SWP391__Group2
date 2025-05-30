@@ -3,14 +3,14 @@ package com.OLearning.controller.adminDashBoard;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import com.OLearning.entity.Categories;
 import com.OLearning.service.adminDashBoard.CategoriesService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/admin")
@@ -19,43 +19,53 @@ public class CategoryController {
     private static final String fragmentContent = "fragmentContent";
     private static final String categoryList = "adminDashboard/fragments/category :: categoryList";
     private static final String categoryTable = "adminDashboard/fragments/category :: categoryTable";
+    private static final String categoryPagination = "adminDashboard/fragments/category :: pagination";
     @Autowired
     private CategoriesService categoriesService;
 
-    @GetMapping("/categories/fragment")
-    public String getAllCategories(Model model) {
-        List<Categories> categories = categoriesService.findAll();
+    private void loadPagedCategories(Model model, String name, String sort, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size,
+                sort.equals("asc") ? Sort.by("name").ascending()
+                        : sort.equals("desc") ? Sort.by("name").descending()
+                                : Sort.unsorted());
 
-        model.addAttribute("categories", categories);
-        return "adminDashboard/fragments/category :: categoryList";
-    }
-
-    // @GetMapping("/categories")
-    // public String getAll(Model model) {
-    // List<Categories> categories = categoriesService.findAll();
-    // model.addAttribute(fragmentContent, "adminDashboard/fragments/category ::
-    // categoryList");
-    // model.addAttribute("categories", categories);
-    // return adminDashboardPath;
-    // }
-
-    @GetMapping("/categories")
-    public String getAllCategories(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size,
-            @RequestParam(required = false) String sortBy,
-            @RequestParam(required = false) String sortDirection,
-            Model model) {
-
-        Page<Categories> categoriesPage = categoriesService.findAllCategory(page, size, sortBy, sortDirection);
+        Page<Categories> categoriesPage = categoriesService.findByNameContaining(name, pageable);
 
         model.addAttribute("categories", categoriesPage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", categoriesPage.getTotalPages());
         model.addAttribute("totalItems", categoriesPage.getTotalElements());
-        model.addAttribute(fragmentContent, categoryList);
 
-        return "adminDashboard/index";
+    }
+
+    @GetMapping("/categories")
+    public String getAllCategories(
+            @RequestParam(defaultValue = "") String name,
+            @RequestParam(defaultValue = "") String sort,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
+            Model model) {
+
+        Pageable pageable = PageRequest.of(page, size, sort.equals("asc") ? Sort.by("name").ascending()
+                : sort.equals("desc") ? Sort.by("name").descending() : Sort.unsorted());
+
+        Page<Categories> categoriesPage = categoriesService.findByNameContaining(name, pageable);
+
+        model.addAttribute("categories", categoriesPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", categoriesPage.getTotalPages());
+        model.addAttribute("totalItems", categoriesPage.getTotalElements());
+
+        if ("XMLHttpRequest".equals(requestedWith)) {
+            // AJAX request → trả về fragment
+
+            return categoryList;
+        } else {
+            // Request thường → load layout chính
+            model.addAttribute(fragmentContent, categoryList);
+            return adminDashboardPath;
+        }
     }
 
     @GetMapping("/categories/delete")
@@ -68,30 +78,41 @@ public class CategoryController {
         return categoryTable;
     }
 
-    @GetMapping("/categories/search")
-    public String searchCategory(@RequestParam(value = "name", required = false) String name,
-            @RequestParam(value = "select", required = false) String select,
-            Model model) {
-        List<Categories> categories = categoriesService.filterCategories(name, select);
-        System.out.println("list categories: " + categories);
-        model.addAttribute("categories", categories);
-        return categoryTable;
-
-    }
+    // @PostMapping("/categories/add")
+    // public String addCategory(@RequestParam("name") String name, Model model) {
+    // if (categoriesService.existsByName(name)) {
+    // model.addAttribute("errorMessage", "Category already exists");
+    // } else {
+    // Categories newCategory = new Categories();
+    // newCategory.setName(name);
+    // categoriesService.save(newCategory);
+    // model.addAttribute("successMessage", "Category added successfully");
+    // }
+    // List<Categories> categories = categoriesService.findAll();
+    // model.addAttribute(fragmentContent, categoryList);
+    // model.addAttribute("categories", categories);
+    // return adminDashboardPath;
+    // }
 
     @PostMapping("/categories/add")
-    public String addCategory(@RequestParam("name") String name, Model model) {
+    public String addCategory(@RequestParam("name") String name,
+            @RequestParam(defaultValue = "") String sort,
+            @RequestParam(defaultValue = "") String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            Model model) {
+
         if (categoriesService.existsByName(name)) {
             model.addAttribute("errorMessage", "Category already exists");
         } else {
             Categories newCategory = new Categories();
-            newCategory.setName(name);
+            newCategory.setName(name.trim());
             categoriesService.save(newCategory);
             model.addAttribute("successMessage", "Category added successfully");
         }
-        List<Categories> categories = categoriesService.findAll();
+
+        loadPagedCategories(model, search, sort, page, size);
         model.addAttribute(fragmentContent, categoryList);
-        model.addAttribute("categories", categories);
         return adminDashboardPath;
     }
 
@@ -108,10 +129,41 @@ public class CategoryController {
         return adminDashboardPath;
     }
 
+    // @PostMapping("/categories/edit")
+    // public String editCategory(
+    // @RequestParam("id") int id,
+    // @RequestParam("name") String name,
+    // Model model) {
+
+    // Categories category = categoriesService.findById(id);
+
+    // if (category == null) {
+    // model.addAttribute("errorMessage", "Category not found");
+    // } else if (categoriesService.existsByName(name) &&
+    // !category.getName().equals(name)) {
+    // model.addAttribute("errorMessage", "Another category with this name already
+    // exists");
+    // } else if (category.getName().equalsIgnoreCase(name.trim())) {
+    // model.addAttribute("errorMessage", "Không có thay đổi nào được thực hiện");
+    // } else {
+    // categoriesService.updateCategory(id, name.trim());
+    // model.addAttribute("successMessage", "Category updated successfully");
+    // }
+
+    // List<Categories> categories = categoriesService.findAll();
+    // model.addAttribute("categories", categories);
+    // model.addAttribute(fragmentContent, categoryList);
+
+    // return adminDashboardPath;
+    // }
+
     @PostMapping("/categories/edit")
-    public String editCategory(
-            @RequestParam("id") int id,
+    public String editCategory(@RequestParam("id") int id,
             @RequestParam("name") String name,
+            @RequestParam(defaultValue = "") String sort,
+            @RequestParam(defaultValue = "") String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
             Model model) {
 
         Categories category = categoriesService.findById(id);
@@ -127,9 +179,7 @@ public class CategoryController {
             model.addAttribute("successMessage", "Category updated successfully");
         }
 
-        List<Categories> categories = categoriesService.findAll();
-        model.addAttribute("categories", categories);
-        model.addAttribute(fragmentContent, categoryList);
+        loadPagedCategories(model, search, sort, page, size);
 
         return adminDashboardPath;
     }
