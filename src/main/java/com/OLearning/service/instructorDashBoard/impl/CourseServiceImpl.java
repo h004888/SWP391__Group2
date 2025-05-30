@@ -77,7 +77,7 @@ public class CourseServiceImpl implements CourseService {
 
     //create new course service
     @Override
-    public void createCourse(CourseAddDTO courseAddDTO) {
+    public void createCourse(CourseAddDTO courseAddDTO, MultipartFile courseImg) {
         courseAddDTO.setUserId(2L);
         Course course = courseMapper.MapCourseAdd(courseAddDTO);
         Categories category = instructorCategoryRepo.findByName(courseAddDTO.getCategoryName());

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -58,8 +59,12 @@ public class InstructorController {
 
     //    save add course to Db
     @PostMapping("/instructordashboard/viewcourse/addcourse")
-    public String saveCourse(@ModelAttribute("courseAddDTO") CourseAddDTO courseAddDTO) {
-        courseService.createCourse(courseAddDTO);
+    public String saveCourse(
+            @ModelAttribute("courseAddDTO") CourseAddDTO courseAddDTO,
+            @RequestParam("courseImg") MultipartFile courseImg // add this parameter
+    ) {
+        // Pass the file to the service or set it in the DTO as needed
+        courseService.createCourse(courseAddDTO, courseImg);
 
         return "redirect:/instructordashboard/viewcourse";
     }

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<div th:insert="instructorDashboard/fragments/header :: header"></div>
+<div th:replace="instructorDashboard/fragments/header :: header"></div>
 <body id="page-top">
 
 <div id="wrapper">
-  <div th:insert="instructorDashboard/fragments/sidebar :: sidebar"></div>
+  <div th:replace="instructorDashboard/fragments/sidebar :: sidebar"></div>
 
   <div id="content-wrapper" class="d-flex flex-column">
     <div id="content">
@@ -14,9 +14,12 @@
         <h1 class="h3 mb-4 text-gray-800"
             th:text="${lesson.lessonId == null ? 'Add Lesson' : 'Edit Lesson'}"></h1>
 
-        <form th:action="@{/instructor/save}" th:object="${lesson}" method="post" enctype="multipart/form-data">
+        <form th:action="@{'/instructordashboard/viewcourse/' + ${lesson.courseId} + '/lessons/save'}"
+              th:object="${lesson}" method="post" enctype="multipart/form-data">
+
           <!-- Hidden ID field -->
           <input type="hidden" th:field="*{lessonId}" />
+          <input type="hidden" th:field="*{courseId}" />
 
           <!-- Title -->
           <div class="form-group">
@@ -47,17 +50,17 @@
             <input th:field="*{content}" id="lesson-content" class="form-control" />
           </div>
 
-          <!-- File Upload -->
-          <div class="form-group">
-            <label for="fileUpload">Upload File</label>
-            <input type="file" class="form-control-file" name="file" id="fileUpload" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt" />
-          </div>
+<!--          &lt;!&ndash; File Upload &ndash;&gt;-->
+<!--          <div class="form-group">-->
+<!--            <label for="fileUpload">Upload File</label>-->
+<!--            <input type="file" class="form-control-file" name="file" id="fileUpload" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt" />-->
+<!--          </div>-->
 
-          <!-- Video Upload -->
-          <div class="form-group">
-            <label for="videoUpload">Upload Video</label>
-            <input type="file" class="form-control-file" name="video" id="videoUpload" accept="video/*" />
-          </div>
+<!--          &lt;!&ndash; Video Upload &ndash;&gt;-->
+<!--          <div class="form-group">-->
+<!--            <label for="videoUpload">Upload Video</label>-->
+<!--            <input type="file" class="form-control-file" name="video" id="videoUpload" accept="video/*" />-->
+<!--          </div>-->
 
           <!-- Duration -->
           <div class="form-group">
@@ -71,19 +74,9 @@
             <label class="form-check-label" for="free">Free Lesson</label>
           </div>
 
-          <!-- Course -->
-<!--          <div class="form-group">-->
-<!--            <label for="courseID">Course</label>-->
-<!--            <select th:field="*{courseId}" id="courseID" class="form-control">-->
-<!--              <option th:each="course : ${courses}"-->
-<!--                      th:value="${course.courseId}"-->
-<!--                      th:text="${course.title}"></option>-->
-<!--            </select>-->
-<!--          </div>-->
-
           <!-- Submit buttons -->
           <button type="submit" class="btn btn-primary">Save</button>
-          <a th:href="@{/instructor}" class="btn btn-secondary">Cancel</a>
+          <a th:href="@{'/instructordashboard/viewcourse/' + ${lesson.courseId} + '/lessons'}" class="btn btn-secondary">Cancel</a>
         </form>
       </div>
     </div>

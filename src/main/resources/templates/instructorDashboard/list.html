@@ -1,16 +1,36 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<div th:insert="instructorDashboard/fragments/header :: header"></div>
+<div th:replace="instructorDashboard/fragments/header :: header"></div>
 <body id="page-top">
 <div id="wrapper">
-    <div th:insert="instructorDashboard/fragments/sidebar :: sidebar"></div>
+    <div th:replace="instructorDashboard/fragments/sidebar :: sidebar"></div>
     <div id="content-wrapper" class="d-flex flex-column">
         <div id="content">
-            <div th:insert="instructorDashboard/fragments/topbar :: topbar"></div>
+            <div th:replace="instructorDashboard/fragments/topbar :: topbar"></div>
 
             <div class="container-fluid">
-                <h1 class="h3 mb-4 text-gray-800">Lesson Management</h1>
-                <a class="btn btn-success mb-3" th:href="@{/instructor/add}">Add Lesson</a>
+                <!-- Course Details -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h2 class="h4 mb-2 text-primary" th:text="${course.title}">Course Title</h2>
+                        <p th:text="${course.description}">Course description goes here...</p>
+
+                        <!-- Optional YouTube video preview (only if present) -->
+<!--                        <div th:if="${course.videoUrl != null}">-->
+<!--                            <iframe width="560" height="315"-->
+<!--                                    th:src="'https://www.youtube.com/embed/' + ${course.videoUrl}"-->
+<!--                                    title="YouTube video player" frameborder="0"-->
+<!--                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"-->
+<!--                                    allowfullscreen>-->
+<!--                            </iframe>-->
+<!--                        </div>-->
+                    </div>
+                </div>
+
+                <!-- Lesson Management -->
+                <h3 class="h5 mb-3 text-gray-800">Lesson Management</h3>
+                <a th:href="@{'/instructordashboard/viewcourse/' + ${courseId} + '/lessons/add'}" class="btn btn-primary mb-3">Add Lesson</a>
+
                 <table class="table table-bordered">
                     <thead>
                     <tr>
@@ -18,6 +38,8 @@
                         <th>Title</th>
                         <th>Course</th>
                         <th>Type</th>
+                        <th>Duration</th>
+                        <th>Free</th>
                         <th>Actions</th>
                     </tr>
                     </thead>
@@ -27,9 +49,19 @@
                         <td th:text="${lesson.title}">Title</td>
                         <td th:text="${lesson.courseTitle}">Course</td>
                         <td th:text="${lesson.contentType}">video</td>
+                        <td th:text="${lesson.duration} + ' min'">10 min</td>
                         <td>
-                            <a th:href="@{/instructor/edit/{id}(id=${lesson.lessonId})}" class="btn btn-warning btn-sm">Edit</a>
-                            <a th:href="@{/instructor/delete/{id}(id=${lesson.lessonId})}" class="btn btn-danger btn-sm">Delete</a>
+                            <span class="badge badge-success" th:if="${lesson.free}">Free</span>
+                            <span class="badge badge-secondary" th:unless="${lesson.free}">Paid</span>
+                        </td>
+                        <td>
+                            <a th:href="@{'/instructordashboard/viewcourse/' + ${courseId} + '/lessons/edit/' + ${lesson.lessonId}}" class="btn btn-warning btn-action" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a th:href="@{'/instructordashboard/viewcourse/' + ${courseId} + '/lessons/delete/' + ${lesson.lessonId}}" class="btn btn-danger btn-action" title="Delete"
+                               onclick="return confirm('Are you sure you want to delete this course?');">
+                                <i class="fas fa-trash"></i>
+                            </a>
                         </td>
                     </tr>
                     </tbody>
