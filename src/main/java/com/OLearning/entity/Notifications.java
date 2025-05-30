@@ -19,6 +19,7 @@ public class Notifications {
 
     private String message;
     private LocalDateTime sentAt;
+    private String type;
     private boolean status;
 
     @ManyToOne

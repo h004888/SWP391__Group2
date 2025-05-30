@@ -23,6 +23,7 @@ public class CourseDetailMapper {
         dto.setTotalStudentEnrolled(course.getTotalStudentEnrolled());
         dto.setCreatedAt(course.getCreatedAt());
         dto.setUpdatedAt(course.getUpdatedAt());
+        dto.setCanResubmit(course.getCanResubmit());
         dto.setStatus(course.getStatus());
         dto.setInstructor(course.getInstructor());
         dto.setCategory(course.getCategory());

@@ -19,8 +19,6 @@ public interface CourseService {
 
     boolean rejectCourse(Long id);
 
-    boolean violateCourse(Long id);
-
     boolean deleteCourse(Long id);
 
     List<CourseDTO> filterCourses(String keyword, Integer categoryId, String price, String status);

@@ -14,6 +14,7 @@ public class NotificationMapper {
         dto.setNotificationId(notification.getNotificationId());
         dto.setMessage(notification.getMessage());
         dto.setSentAt(notification.getSentAt());
+        dto.setType(notification.getType());
         dto.setStatus(notification.isStatus());
         dto.setUserId(notification.getUser() != null ? notification.getUser().getUserId() : null);
         dto.setCourseId(notification.getCourse() != null ? notification.getCourse().getCourseId() : null);
@@ -26,8 +27,9 @@ public class NotificationMapper {
         Notifications notification = new Notifications();
         notification.setMessage(dto.getMessage());
         notification.setSentAt(dto.getSentAt());
+        notification.setType(dto.getType());
         notification.setStatus(dto.isStatus());
-        notification.setUser(user);     // đảm bảo đã tìm user bằng service/repo trước khi truyền vào
+        notification.setUser(user);
         notification.setCourse(course); // có thể null nếu không liên quan
 
         return notification;

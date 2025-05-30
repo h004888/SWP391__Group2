@@ -128,6 +128,9 @@
                         <h1 class="mb-0" th:text="${detailCourse.title}">Course Title</h1>
                         <span th:switch="${detailCourse.status}">
                     <span th:case="null" class="badge badge-secondary">
+                        <i class="fas fa-save "></i> Save Draft
+                    </span>
+                    <span th:case="'pending'" class="badge badge-secondary">
                         <i class="fas fa-clock"></i> Pending
                     </span>
                     <span th:case="'approved'" class="badge badge-success">
@@ -136,8 +139,8 @@
                     <span th:case="'rejected'" class="badge badge-danger">
                         <i class="fas fa-times"></i> Rejected
                     </span>
-                    <span th:case="'violated'" class="badge bg-warning text-dark">
-                        <i class="fas fa-exclamation-triangle"></i> Violated
+                    <span th:case="'resubmit'" class="badge badge-warning text-dark">
+                             <i class="fas fa-exclamation-triangle"></i> ReSubmit
                     </span>
                 </span>
                     </div>
@@ -181,7 +184,7 @@
                                 data-bs-toggle="modal"
                                 data-bs-target="#approveModal"
                                 th:data-course-id="${detailCourse.courseId}"
-                                th:if="${detailCourse.status == null or detailCourse.status == 'pending' or detailCourse.status == 'rejected' or detailCourse.status == 'violated'}">
+                                th:if="${detailCourse.status == 'pending' or detailCourse.status == 'resubmit'}">
                             <i class="bi bi-check-circle me-1"></i> Approve Course
                         </button>
 
@@ -190,19 +193,9 @@
                                 data-bs-toggle="modal"
                                 data-bs-target="#rejectModal"
                                 th:data-course-id="${detailCourse.courseId}"
-                                th:if="${detailCourse.status == null or detailCourse.status == 'pending' or detailCourse.status == 'violated'}">
+                                th:if="${detailCourse.status == 'pending' or detailCourse.status == 'approved' or detailCourse.status == 'resubmit'}">
                             <i class="bi bi-x-circle me-1"></i> Reject Course
                         </button>
-
-                        <!-- Mark as Violated -->
-                        <button class="btn btn-warning me-2"
-                                data-bs-toggle="modal"
-                                data-bs-target="#violateModal"
-                                th:data-course-id="${detailCourse.courseId}"
-                                th:if="${detailCourse.status == null or detailCourse.status == 'pending' or detailCourse.status == 'approved'}">
-                            <i class="bi bi-exclamation-triangle me-1"></i> Mark as Violated
-                        </button>
-
                     </div>
                 </div>
             </div>
@@ -276,7 +269,10 @@
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     <span><i class="bi bi-shield me-2"></i> Status</span>
                                     <span th:switch="${detailCourse.status}">
-                                     <span th:case="null" class="badge bg-secondary">
+                                    <span th:case="null" class="badge badge-secondary">
+                                        <i class="fas fa-save"></i> Save Draft
+                                    </span>
+                                     <span th:case="'pending'" class="badge bg-secondary">
                                             <i class="fas fa-clock"></i> Pending
                                      </span>
                                      <span th:case="'approved'" class="badge bg-success">
@@ -285,8 +281,8 @@
                                      <span th:case="'rejected'" class="badge bg-danger">
                                          <i class="fas fa-times"></i> Rejected
                                      </span>
-                                      <span th:case="'violated'" class="badge bg-warning text-dark">
-                                            <i class="fas fa-exclamation-triangle"></i> Violated
+                                      <span th:case="'resubmit'" class="badge bg-warning text-dark">
+                                            <i class="fas fa-exclamation-triangle"></i> ReSubmit
                                      </span>
                                     </span>
                                 </li>
@@ -505,7 +501,10 @@
                                     class="list-group-item d-flex justify-content-between align-items-center">
                                     <span th:text="${course.title}">JavaScript Fundamentals</span>
                                     <span th:switch="${course.status}">
-                                    <span th:case="null" class="badge bg-secondary">
+                                        <span th:case="null" class="badge badge-secondary">
+                                        <i class="fas fa-save"></i> Save Draft
+                                    </span>
+                                    <span th:case="'pending'" class="badge bg-secondary">
                                         <i class="fas fa-clock"></i> Pending
                                     </span>
                                     <span th:case="'approved'" class="badge bg-success">
@@ -514,24 +513,16 @@
                                     <span th:case="'rejected'" class="badge bg-danger">
                                         <i class="fas fa-times"></i> Rejected
                                     </span>
-                                    <span th:case="'violated'" class="badge bg-warning text-dark">
-                                        <i class="fas fa-exclamation-triangle"></i> Violated
+                                    <span th:case="'resubmit'" class="badge bg-warning text-dark">
+                                        <i class="fas fa-exclamation-triangle"></i> ReSubmit
                                     </span>
                                     <span th:case="*"
                                           class="badge bg-dark">
-                                        <i class="fas fa-question-circle"></i> Unknown
+                                        <i class="fas fa-question-circle"></i> Unknow
                                     </span>
                                 </span>
 
                                 </li>
-                                <!--                                <li class="list-group-item d-flex justify-content-between align-items-center">-->
-                                <!--                                    <span>HTML & CSS Masterclass</span>-->
-                                <!--                                    <span class="badge bg-success">Approved</span>-->
-                                <!--                                </li>-->
-                                <!--                                <li class="list-group-item d-flex justify-content-between align-items-center">-->
-                                <!--                                    <span>Vue.js for Beginners</span>-->
-                                <!--                                    <span class="badge bg-success">Approved</span>-->
-                                <!--                                </li>-->
                             </ul>
                         </div>
                     </div>
@@ -578,8 +569,8 @@
                         <p>You are about to reject this course.</p>
 
                         <!-- Hidden inputs -->
-                        <input type="hidden" th:field="*{courseId}" th:value="${detailCourse.courseId}" />
-                        <input type="hidden" th:field="*{userId}" th:value="${detailCourse.instructor.userId}" />
+                        <input type="hidden" name="courseId" th:value="${detailCourse.courseId}"/>
+                        <input type="hidden" name="userId" th:value="${detailCourse.instructor.userId}"/>
 
                         <div class="mb-3">
                             <label class="form-label">Reject Reason</label>
@@ -589,7 +580,7 @@
 
                         <div class="form-check mb-3">
                             <input class="form-check-input" type="checkbox" id="allowResubmission"
-                                   name="allowResubmission" checked />
+                                   name="allowResubmission" checked/>
                             <label class="form-check-label" for="allowResubmission">
                                 Allow instructor to revise and resubmit
                             </label>
@@ -605,44 +596,6 @@
     </div>
 
 
-    <!-- Violate Modal -->
-    <div class="modal fade" id="violateModal" tabindex="-1" aria-labelledby="violateModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <form id="violateForm" method="post">
-                <input type="hidden" name="courseId" id="violateCourseId">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="violateModalLabel">Confirm Violation</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        Are you sure you want to mark this course as <strong>violated</strong>?
-                        <br>
-                        <div class="mb-3">
-                            <label for="violateDetails" class="form-label">Reason (visible to
-                                instructor)</label>
-                            <textarea class="form-control" id="violateDetails" rows="4"
-                                      placeholder="Provide specific details about why the course was violate and what changes are needed..." required></textarea>
-                        </div>
-
-                        <div class="form-check mb-3">
-                            <input class="form-check-input" type="checkbox" id="allowResubmission1" checked>
-                            <label class="form-check-label" for="allowResubmission">
-                                Allow instructor to revise and resubmit
-                            </label>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-warning">Yes, Mark as Violated</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-
-
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -651,8 +604,7 @@
             const approveForm = document.getElementById('approveForm');
             const rejectModal = document.getElementById('rejectModal');
             const rejectForm = document.getElementById('rejectForm');
-            const violateModal = document.getElementById('violateModal');
-            const violateForm = document.getElementById('violateForm');
+
 
             if (approveModal && approveForm) {
                 approveModal.addEventListener('show.bs.modal', function (event) {
@@ -674,15 +626,6 @@
                 });
             }
 
-            if (violateModal && violateForm) {
-                violateModal.addEventListener('show.bs.modal', function (event) {
-                    const button = event.relatedTarget;
-                    const courseId = button?.getAttribute('data-course-id');
-                    if (courseId) {
-                        violateForm.action = '/admin/course/violate/' + courseId;
-                    }
-                });
-            }
         });
     </script>
 
