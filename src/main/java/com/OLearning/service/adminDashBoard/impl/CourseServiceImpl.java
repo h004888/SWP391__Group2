@@ -5,11 +5,12 @@ import com.OLearning.dto.adminDashBoard.CourseDetailDTO;
 import com.OLearning.entity.Course;
 import com.OLearning.mapper.adminDashBoard.CourseDetailMapper;
 import com.OLearning.mapper.adminDashBoard.CourseMapper;
-import com.OLearning.repository.adminDashBoard.CourseRepo;
+import com.OLearning.repository.adminDashBoard.CourseRepository;
 import com.OLearning.service.adminDashBoard.CourseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,12 +20,12 @@ import java.util.stream.Collectors;
 public class CourseServiceImpl implements CourseService {
 
     private final CourseMapper courseMapper;
-    private final CourseRepo courseRepo;
+    private final CourseRepository courseRepository;
     private final CourseDetailMapper courseDetailMapper;
 
     @Override
     public List<CourseDTO> getAllCourses() {
-        List<Course> courseList = courseRepo.findAll();
+        List<Course> courseList = courseRepository.findAll();
         return courseList.stream()
                 .map(courseMapper::toDTO)
                 .collect(Collectors.toList());
@@ -32,16 +33,17 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public Optional<CourseDetailDTO> getDetailCourse(Long id) {
-        return courseRepo.findById(id).map(courseDetailMapper::toDTO);
+        return courseRepository.findById(id).map(courseDetailMapper::toDTO);
     }
 
     @Override
     public boolean approveCourse(Long id) {
-        return courseRepo.findById(id)
+        return courseRepository.findById(id)
                 .map(course -> {
-                    if (!Boolean.TRUE.equals(course.getIsChecked())) {
-                        course.setIsChecked(true);
-                        courseRepo.save(course);
+                    if (!"approved".equalsIgnoreCase(course.getStatus())) {
+                        course.setStatus("approved");
+                        course.setUpdatedAt(LocalDateTime.now());
+                        courseRepository.save(course);
                         return true;
                     }
                     return false;
@@ -51,11 +53,27 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public boolean rejectCourse(Long id) {
-        return courseRepo.findById(id)
+        return courseRepository.findById(id)
                 .map(course -> {
-                    if (!Boolean.TRUE.equals(course.getIsChecked())) {
-                        course.setIsChecked(false);
-                        courseRepo.save(course);
+                    if (!"rejected".equalsIgnoreCase(course.getStatus())) {
+                        course.setStatus("rejected");
+                        course.setUpdatedAt(LocalDateTime.now());
+                        courseRepository.save(course);
+                        return true;
+                    }
+                    return false;
+                })
+                .orElse(false);
+    }
+
+    @Override
+    public boolean violateCourse(Long id) {
+        return courseRepository.findById(id)
+                .map(course -> {
+                    if (!"violated".equalsIgnoreCase(course.getStatus())) {
+                        course.setStatus("violated");
+                        course.setUpdatedAt(LocalDateTime.now());
+                        courseRepository.save(course);
                         return true;
                     }
                     return false;
@@ -65,15 +83,15 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public boolean deleteCourse(Long id) {
-        if (courseRepo.existsById(id)) {
-            courseRepo.deleteById(id);
+        if (courseRepository.existsById(id)) {
+            courseRepository.deleteById(id);
             return true;
         }
         return false;
     }
 
     @Override
-    public List<CourseDTO> filterCourses(String keyword, Integer categoryId, String price,String status) {
+    public List<CourseDTO> filterCourses(String keyword, Integer categoryId, String price, String status) {
         if (keyword != null && !keyword.trim().isEmpty()) {
             keyword = "%" + keyword.trim().toLowerCase() + "%";
         } else {
@@ -83,7 +101,7 @@ public class CourseServiceImpl implements CourseService {
         if (price != null && price.trim().isEmpty()) price = null;
         if (status != null && status.trim().isEmpty()) status = null;
 
-        return courseRepo.filterCourses(keyword, categoryId, price, status).stream()
+        return courseRepository.filterCourses(keyword, categoryId, price, status).stream()
                 .map(courseMapper::toDTO)
                 .collect(Collectors.toList());
     }

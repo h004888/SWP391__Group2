@@ -34,9 +34,10 @@
                         </select>
                         <select class="form-control ml-2" name="status" id="filterStatus">
                             <option value="">All Status</option>
-                            <option value="pending" th:selected="${selectedPrice == 'paid'}">Pending</option>
-                            <option value="approve" th:selected="${selectedPrice == 'low'}">Approved</option>
-                            <option value="reject" th:selected="${selectedPrice == 'mid'}">Reject</option>
+                            <option value="pending" th:selected="${selectedStatus == 'pending'}">Pending</option>
+                            <option value="approved" th:selected="${selectedStatus == 'approved'}">Approved</option>
+                            <option value="rejected" th:selected="${selectedStatus == 'rejected'}">Rejected</option>
+                            <option value="violated" th:selected="${selectedStatus == 'violated'}">Violated</option>
                         </select>
 
                     </div>
@@ -69,15 +70,25 @@
                     <td th:text="${#temporals.format(course.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
                     <td th:text="${#temporals.format(course.updatedAt, 'dd/MM/yyyy HH:mm')}"></td>
                     <td>
-                        <span th:if="${course.isChecked == null}" class="badge badge-secondary">
-                            <i class="fas fa-clock"></i> Pending
-                        </span>
-                        <span th:if="${course.isChecked == true}" class="badge badge-success">
-                            <i class="fas fa-check"></i> Approved
-                        </span>
-                        <span th:if="${course.isChecked == false}" class="badge badge-danger">
-                            <i class="fas fa-times"></i> Rejected
-                        </span>
+                     <span th:switch="${course.status}">
+                         <span th:case="null" class="badge badge-secondary">
+                             <i class="fas fa-clock"></i> Pending
+                         </span>
+                         <span th:case="'pending'" class="badge badge-secondary">
+                             <i class="fas fa-clock"></i> Pending
+                         </span>
+                         <span th:case="'approved'" class="badge badge-success">
+                             <i class="fas fa-check"></i> Approved
+                         </span>
+                         <span th:case="'rejected'" class="badge badge-danger">
+                             <i class="fas fa-times"></i> Rejected
+                         </span>
+                         <span th:case="'violated'" class="badge badge-warning text-dark">
+                             <i class="fas fa-exclamation-triangle"></i> Violated
+                         </span>
+                     </span>
+
+
                     </td>
                     <td>
                         <a th:href="@{/admin/course/detail/{courseId}(courseId=${course.courseId})}"

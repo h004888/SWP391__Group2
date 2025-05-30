@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "Courses")
@@ -28,7 +31,7 @@ public class Course {
     private Integer totalStudentEnrolled;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Boolean isChecked;
+    private String status;
 
     @ManyToOne
     @JoinColumn(name = "userId")
@@ -37,5 +40,10 @@ public class Course {
     @ManyToOne
     @JoinColumn(name = "CategoryID")
     private Categories category;
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Notifications> notifications;
+
+
 }
 
