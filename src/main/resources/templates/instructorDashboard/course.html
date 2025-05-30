@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 
 <div th:replace="instructorDashboard/fragments/header :: header"></div>
 
@@ -41,7 +41,6 @@
                 </div>
 
 
-
                 <div class="course-table">
                     <div class="card-header py-3">
                         <h6 class="m-0 font-weight-bold text-primary">Course List</h6>
@@ -66,7 +65,7 @@
                                 <tbody>
                                 <tr th:each="course : ${courses}">
                                     <td th:utext="${course.courseId}"></td>
-                                    <td><img th:src="@{'/img/' + ${course.courseImg}}" width="120" height="100" /></td>
+                                    <td><img th:src="@{'/img/' + ${course.courseImg}}" width="120" height="100"/></td>
                                     <td th:utext="${course.title}"></td>
                                     <td th:utext="${course.categoryName}"><span class="badge badge-primary"></span></td>
                                     <td th:utext="${course.price}"></td>
@@ -78,12 +77,20 @@
                                         <button class="btn btn-info btn-action" title="View">
                                             <i class="fas fa-eye"></i>
                                         </button>
+                                        <form th:action="@{/instructordashboard/viewcourse/updatecourse/{id}(id=${course.courseId})}"
+                                              method="GET">
                                         <button class="btn btn-warning btn-action" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </button>
-                                        <button class="btn btn-danger btn-action" title="Delete">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                        </form>
+
+                                        <form th:action="@{/instructordashboard/viewcourse/deletecourse/{id}(id=${course.courseId})}"
+                                              method="POST" style="display:inline"
+                                              onsubmit="return confirm('Do you want to delete course?')">
+                                            <button type="submit" class="btn btn-danger btn-action" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
                                     </td>
                                 </tr>
                                 </tbody>
@@ -596,11 +603,25 @@
         transform: translateY(20px);
     }
 
-    .table tbody tr:nth-child(1) { animation-delay: 0.1s; }
-    .table tbody tr:nth-child(2) { animation-delay: 0.2s; }
-    .table tbody tr:nth-child(3) { animation-delay: 0.3s; }
-    .table tbody tr:nth-child(4) { animation-delay: 0.4s; }
-    .table tbody tr:nth-child(5) { animation-delay: 0.5s; }
+    .table tbody tr:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .table tbody tr:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .table tbody tr:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+
+    .table tbody tr:nth-child(4) {
+        animation-delay: 0.4s;
+    }
+
+    .table tbody tr:nth-child(5) {
+        animation-delay: 0.5s;
+    }
 
     @keyframes fadeInUp {
         to {

@@ -9,12 +9,12 @@ import java.util.List;
 
 public interface InstructorBuyPackagesRepository extends JpaRepository<BuyPackages, Long> {
     //query find package_id with user_id
-    @Query(value = "SELECT bp.PackageId FROM BuyPackages bp " +
+    @Query(value = "SELECT p.PackageId FROM BuyPackages bp " +
             "JOIN Packages p ON bp.PackageId = p.PackageId " +
             "WHERE bp.UserId = :userId " +
             "  AND bp.Status = 'Active' " +
             "  AND GETDATE() BETWEEN bp.ValidFrom AND bp.ValidTo ", nativeQuery = true)
-    List<Object[]> findValidPackagesByUserId(@Param("userId") Long userId);
+    List<Long> findValidPackagesByUserId(@Param("userId") Long userId);
 }
 
 

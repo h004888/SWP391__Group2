@@ -24,6 +24,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CourseServiceImpl implements CourseService {
@@ -40,7 +41,7 @@ public class CourseServiceImpl implements CourseService {
     private InstructorUserRepo instructorUserRepo;
     @Override
     public boolean canCreateCourse(Long userId) {
-        List<Object[]> result = buyPackageRepository.findValidPackagesByUserId(userId);
+        List<Long> result = buyPackageRepository.findValidPackagesByUserId(userId);
         return !result.isEmpty();
         //if emty => false
         //else true
@@ -66,7 +67,7 @@ public class CourseServiceImpl implements CourseService {
             if (course.getCategory() != null) {
                 courseDTO.setCategoryName(course.getCategory().getName());
             } else {
-                courseDTO.setCategoryName("Không rõ");
+                courseDTO.setCategoryName("not found");
             }
 
             courseDTOList.add(courseDTO);
@@ -91,13 +92,12 @@ public class CourseServiceImpl implements CourseService {
         MultipartFile imageFile = courseAddDTO.getCourseImg();
         if(imageFile != null && !imageFile.isEmpty()) {
             try{
-                File imageFoldder = new File(new ClassPathResource(".").getFile().getPath() + "/static/img");
+              File imageFoldder = new File(new ClassPathResource(".").getFile().getPath() + "/static/img");
                 if(!imageFoldder.exists()){
                     imageFoldder.mkdirs();
                 }
                 String fileName = FileHelper.generateFileName(imageFile.getOriginalFilename());
                 Path path = Paths.get(imageFoldder.getAbsolutePath() + File.separator + fileName);
-
                 Files.copy(imageFile.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
                 course.setCourseImg(fileName);
             }catch(Exception e){
@@ -107,5 +107,19 @@ public class CourseServiceImpl implements CourseService {
         course.setInstructor(instructor);
         course.setCategory(category);
         instructorCourseRepo.save(course);
+    }
+
+    @Override
+    public void deleteCourse(Long courseId) {
+        instructorCourseRepo.deleteById(courseId);
+    }
+
+    @Override
+    public Course findCourseById(Long courseId) {
+        Optional<Course> course = instructorCourseRepo.findById(courseId);
+        if(course.isPresent()) {
+            return course.get();
+        }
+        return null;
     }
 }

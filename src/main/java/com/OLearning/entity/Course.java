@@ -40,7 +40,7 @@ public class Course {
     @JoinColumn(name = "CategoryID")
     private Categories category;
 
-    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Lessons> listOfLessons;
 
     public List<Lessons> getListOfLessons() {
