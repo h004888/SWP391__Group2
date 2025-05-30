@@ -18,7 +18,6 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
-
     private String username;
     private String email;
     private String password;
@@ -35,6 +34,8 @@ public class User {
     @OneToMany(mappedBy = "instructor")
     private List<Course> courses;
 
+    @OneToMany(mappedBy = "instructor", fetch = FetchType.LAZY)
+    private List<BuyPackages> listOfBuyPackage;
 
 }
 
