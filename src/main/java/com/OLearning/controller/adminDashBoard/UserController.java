@@ -46,17 +46,6 @@ public class UserController {
         return "adminDashBoard/fragments/accountContent :: userTableBody";
     }
 
-    @PostMapping("/account/add")
-    public String addUser(@ModelAttribute("addAccount") UserDTO userDTO, RedirectAttributes redirectAttributes) {
-        try {
-            userService.createUser(userService.userDTOtoUser(userDTO));
-            redirectAttributes.addFlashAttribute("successMessage", "User added successfully");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error adding user: " + e.getMessage());
-        }
-        return "redirect:/admin/account";
-    }
-
     @GetMapping("account/viewInfo/{userId}")
     public String getDetailAccount(Model model, @PathVariable("userId") long id) {
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/accountDetailContent :: accountDetail");
