@@ -19,8 +19,8 @@
                         <div class="col-sm-2">
                             <select class="form-control" name="select" id="sortSelect">
                                 <option value="">Sort</option>
-                                <option value="1">A to Z</option>
-                                <option value="2">Z to A</option>
+                                <option value="asc">A to Z</option>
+                                <option value="desc">Z to A</option>
                             </select>
                         </div>
                     </form>
@@ -78,23 +78,31 @@
             </table>
 
             <!-- Pagination static (có thể chuyển sang dynamic sau) -->
-            <div class="clearfix">
-                <div class="hint-text">Showing <b>5</b> out of <b>25</b> entries</div>
+            <div class="clearfix" th:if="${totalPages > 0}">
+                <div class="hint-text">
+                    Showing <b th:text="${categories.size()}"></b> out of <b th:text="${totalItems}"></b> entries
+                </div>
                 <ul class="pagination">
-                    <li class="page-item" th:classappend="${currentPage == 0}? 'disabled'"><a
-                            th:href="@{/admin/categories(page=${currentPage - 1})}"><i
-                                class="fa fa-angle-double-left"></i></a></li>
-                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                        th:classappend="${currentPage == i}? 'active'">
-                        <a class="page-link" th:href="@{/admin/categories(page=${i})}" th:text="${i + 1}">1</a>
+                    <!-- Nút Previous -->
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" th:data-page="${currentPage - 1}" href="#"><i
+                                class="fa fa-angle-double-left"></i></a>
                     </li>
 
-                    <li class="page-item" th:classappend="${currentPage + 1 >= totalPages}? 'disabled'"><a
-                            th:href="@{/admin/categories(page=${currentPage + 1})}" class="page-link"><i
+                    <!-- Các nút số trang -->
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                        th:classappend="${currentPage == i} ? 'active'">
+                        <a class="page-link" th:data-page="${i}" th:text="${i + 1}" href="#"></a>
+                    </li>
+
+                    <!-- Nút Next -->
+                    <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                        <a class="page-link" th:data-page="${currentPage + 1}" href="#"><i
                                 class="fa fa-angle-double-right"></i></a>
                     </li>
                 </ul>
             </div>
+
 
         </div>
     </div>

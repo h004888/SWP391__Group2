@@ -97,23 +97,8 @@ public class CategoriesServiceImpl implements CategoriesService {
     }
 
     @Override
-    public Page<Categories> findAllCategory(int page, int size, String sortBy, String sortDirection) {
-        Sort sort = Sort.by(sortBy != null ? sortBy : "id");
-        sort = "desc".equalsIgnoreCase(sortDirection) ? sort.descending() : sort.ascending();
-        Pageable pageable = PageRequest.of(page, size, sort);
-        return categoriesRepository.findAll(pageable);
-    }
-
-    @Override
-    public Page<Categories> findByNameContaining(String keyword, int page, int size, String sortBy,
-            String sortDirection) {
-        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
-        Pageable pageable = PageRequest.of(page, size, sort);
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return categoriesRepository.findAll(pageable);
-
-        }
-        return categoriesRepository.findByNameContaining(keyword, pageable);
+    public Page<Categories> findByNameContaining(String name,Pageable pageable) {
+        return categoriesRepository.findByNameContaining(name, pageable);
     }
 
 }

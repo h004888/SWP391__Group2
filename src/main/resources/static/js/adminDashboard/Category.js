@@ -1,85 +1,47 @@
 $(document).ready(function () {
-
-    $('#categoryTable').on('click', '.delete-category', function () {
-        const id = $(this).data('id');
-        if (confirm("Bạn có chắc chắn muốn xóa danh mục này?")) {
-            deleteCategoryById(id);
-        }
-    });
-
-
-    //  Gõ đến đâu search đến đó (debounce 300ms)
     let typingTimer;
-    $('#searchInput').on('input', function () {
+    const debounceDelay = 300;
+    let currentName = '';
+    let currentSort = '';
+
+    $(document).on('input', '#searchInput', function () {
         clearTimeout(typingTimer);
-        typingTimer = setTimeout(fetchData, 300); // đợi 300ms sau khi ngừng gõ
+        typingTimer = setTimeout(() => {
+            currentName = $(this).val().trim();
+            fetchCategories(0);
+        }, debounceDelay);
     });
-    // Khi chọn sort thì cũng gọi lại
-    $('#sortSelect').on('change', fetchData);
 
-    //  Ngăn reload nếu form bị submit
-    $('#filterForm').on('submit', function (e) {
+    $(document).on('change', '#sortSelect', function () {
+        currentSort = $(this).val();
+        fetchCategories(0);
+    });
+
+    $(document).on('click', '.pagination a', function (e) {
         e.preventDefault();
-    });
-
-
-
-});
-
-
-
-function deleteCategoryById(id) {
-    $.ajax({
-        url: '/admin/categories/delete?id=' + id,
-        method: 'GET',
-        success: function (data) {
-            console.log("Xóa thành công danh mục có ID: " + id);
-            fetchData(); // Cập nhật lại bảng danh mục sau khi xóa
-        },
-        error: function () {
-            alert("Lỗi khi xóa danh mục!");
+        const page = $(this).data('page');
+        if (page !== undefined) {
+            fetchCategories(page);
         }
     });
-}
 
-$(document).ready(function () {
-    const successAlert = $('#success-alert');
-    const errorAlert = $('#error-alert');
-
-    if (successAlert.length) {
-        setTimeout(function () {
-            successAlert.fadeOut(500, function () {
-                $(this).remove();
-            });
-        }, 3000);
+    function fetchCategories(page) {
+        $.ajax({
+            url: '/admin/categories',
+            type: 'GET',
+            data: { name: currentName, sort: currentSort, page, size: 5 },
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function (response) {
+                $('#loadCategory').html(response);
+            },
+            error: function (xhr, status, error) {
+                console.error("Lỗi AJAX:", status, error);
+                alert("Lỗi khi tải danh mục.");
+            }
+        });
     }
 
-    if (errorAlert.length) {
-        setTimeout(function () {
-            errorAlert.fadeOut(500, function () {
-                $(this).remove();
-            });
-        }, 3000);
-    }
+  
 });
-
-
-function fetchData() {
-    const name = $('#searchInput').val();
-    const select = $('#sortSelect').val();
-
-    $.ajax({
-        url: '/admin/categories/search',
-        method: 'GET',
-        data: {
-            name: name,
-            select: select
-        },
-        success: function (data) {
-            $('#categoryTable').html(data);
-        },
-        error: function () {
-            console.error("Lỗi khi tìm kiếm dữ liệu");
-        }
-    });
-}
