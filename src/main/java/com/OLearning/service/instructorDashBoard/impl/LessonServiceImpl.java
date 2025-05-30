@@ -1,4 +1,4 @@
-package com.OLearning.service.instructorDashBoard;
+package com.OLearning.service.instructorDashboard.impl;
 
 import com.OLearning.dto.instructorDashBoard.LessonDTO;
 import com.OLearning.entity.Course;
@@ -6,6 +6,7 @@ import com.OLearning.entity.Lesson;
 import com.OLearning.mapper.instructorDashBoard.LessonMapper;
 import com.OLearning.repository.adminDashBoard.CourseRepo;
 import com.OLearning.repository.instructorDashBoard.LessonRepo;
+import com.OLearning.service.instructorDashBoard.LessonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,11 +22,19 @@ public class LessonServiceImpl implements LessonService {
     @Autowired
     private CourseRepo courseRepo;
 
+
+    @Override
+    public List<LessonDTO> getLessonsByCourseId(Long courseId) {
+        List<Lesson> lessons = lessonRepo.findByCourseCourseId(courseId);
+        return lessons.stream()
+                .map(lessonMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+
     @Override
     public List<LessonDTO> getAllLessons() {
-        return lessonRepo.findAll().stream()
-                .map(LessonMapper::toDTO)
-                .collect(Collectors.toList());
+        return List.of();
     }
 
     @Override
