@@ -1,7 +1,9 @@
 package com.OLearning.service.instructorDashBoard;
 
-import java.util.List;
+import com.OLearning.entity.Packages;
+
+import java.util.Optional;
 
 public interface PackagesService {
-    Integer getPackageIdFormBuyPackages(Long userId);
+   public void updateCourseCreated(Long id);
 }
