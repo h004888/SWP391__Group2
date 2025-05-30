@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
 
@@ -49,14 +48,18 @@ public class NotificationServiceImpl implements NotificationService {
         } else {
             fullMessage += " You are not allowed to resubmit.";
         }
+
         dto.setMessage(fullMessage);
         dto.setSentAt(LocalDateTime.now());
+        dto.setType("COURSE_REJECTION");
         dto.setStatus(true);
 
         Notifications notification = notificationMapper.toEntity(dto, user, course);
         notificationRepository.save(notification);
 
-        course.setStatus("REJECTED");
+        //set Course when reject
+        course.setCanResubmit(allowResubmission);
+        course.setStatus("rejected");
         courseRepository.save(course);
 
     }

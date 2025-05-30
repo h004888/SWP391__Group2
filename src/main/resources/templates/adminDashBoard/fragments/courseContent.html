@@ -37,7 +37,8 @@
                             <option value="pending" th:selected="${selectedStatus == 'pending'}">Pending</option>
                             <option value="approved" th:selected="${selectedStatus == 'approved'}">Approved</option>
                             <option value="rejected" th:selected="${selectedStatus == 'rejected'}">Rejected</option>
-                            <option value="violated" th:selected="${selectedStatus == 'violated'}">Violated</option>
+                            <option value="resubmit" th:selected="${selectedStatus == 'resubmit'}">ReSubmit</option>
+                            <option value="null" th:selected="${selectedStatus == 'null'}">Save Draft</option>
                         </select>
 
                     </div>
@@ -72,7 +73,7 @@
                     <td>
                      <span th:switch="${course.status}">
                          <span th:case="null" class="badge badge-secondary">
-                             <i class="fas fa-clock"></i> Pending
+                             <i class="fas fa-save"></i> Save Draft
                          </span>
                          <span th:case="'pending'" class="badge badge-secondary">
                              <i class="fas fa-clock"></i> Pending
@@ -83,8 +84,8 @@
                          <span th:case="'rejected'" class="badge badge-danger">
                              <i class="fas fa-times"></i> Rejected
                          </span>
-                         <span th:case="'violated'" class="badge badge-warning text-dark">
-                             <i class="fas fa-exclamation-triangle"></i> Violated
+                         <span th:case="'resubmit'" class="badge badge-warning text-dark">
+                             <i class="fas fa-exclamation-triangle"></i> ReSubmit
                          </span>
                      </span>
 

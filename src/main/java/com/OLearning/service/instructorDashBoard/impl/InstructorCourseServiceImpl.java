@@ -8,7 +8,6 @@ import com.OLearning.entity.User;
 import com.OLearning.mapper.instructorDashBoard.InstructorCourseMapper;
 import com.OLearning.repository.instructorDashBoard.InstructorCategoryRepo;
 import com.OLearning.repository.instructorDashBoard.InstructorCourseRepo;
-import com.OLearning.repository.instructorDashBoard.InstructorBuyPackagesRepository;
 import com.OLearning.repository.instructorDashBoard.InstructorUserRepo;
 import com.OLearning.service.instructorDashBoard.CourseService;
 import com.OLearning.service.instructorDashBoard.FileHelper.FileHelper;
@@ -30,21 +29,14 @@ public class InstructorCourseServiceImpl implements CourseService {
 
     @Autowired
     private InstructorCourseRepo instructorCourseRepo;
-    @Autowired
-    private InstructorBuyPackagesRepository buyPackageRepository;
+
     @Autowired
     private InstructorCourseMapper instructorCourseMapper;
     @Autowired
     private InstructorCategoryRepo instructorCategoryRepo;
     @Autowired
     private InstructorUserRepo instructorUserRepo;
-    @Override
-    public boolean canCreateCourse(Long userId) {
-        List<Object[]> result = buyPackageRepository.findValidPackagesByUserId(userId);
-        return !result.isEmpty();
-        //if emty => false
-        //else true
-    }
+
 
 
     @Override
@@ -72,6 +64,11 @@ public class InstructorCourseServiceImpl implements CourseService {
             courseDTOList.add(courseDTO);
         }
         return courseDTOList;
+    }
+
+    @Override
+    public boolean canCreateCourse(Long userId) {
+        return false;
     }
 
 

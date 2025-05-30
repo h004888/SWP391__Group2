@@ -23,9 +23,5 @@ public class Packages {
     private Integer duration;
     private Boolean isActive;
 
-    @OneToMany(mappedBy = "packages", fetch = FetchType.LAZY)
-    private List<BuyPackages> listOfBuyPackage;
-//    @OneToMany(mappedBy = "packages", cascade = CascadeType.ALL)
-//    private List<BuyPackages> buyPackages;
 }
 

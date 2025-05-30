@@ -31,13 +31,8 @@ public class CourseController {
     @Autowired
     private CategoriesService categoriesService;
     @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private CourseRepository courseRepository;
-    @Autowired
     private NotificationService notificationService;
-    @Autowired
-    private NotificationRepository notificationRepository;
+
 
     @GetMapping
     public String getCoursePage(Model model) {
@@ -64,15 +59,22 @@ public class CourseController {
         return "adminDashBoard/fragments/courseContent :: courseTableBody";
     }
 
+    @GetMapping("/detail/{id}")
+    public String viewCourseDetail(Model model, @PathVariable("id") Long id) {
+        model.addAttribute("notification", new NotificationDTO());
+        model.addAttribute("fragmentContent", "adminDashBoard/fragments/courseDetailContent :: courseDetail");
+        Optional<CourseDetailDTO> optionalDetail = courseService.getDetailCourse(id);
+        if (optionalDetail.isPresent()) {
+            model.addAttribute("detailCourse", optionalDetail.get());
+            return "adminDashBoard/index";
+        } else {
+            return "redirect:/admin/course";
+        }
+    }
+
     @PostMapping("/approve/{id}")
     public String approveCourse(@PathVariable("id") Long id) {
         courseService.approveCourse(id);
-        return "redirect:/admin/course";
-    }
-
-    @PostMapping("/violate/{id}")
-    public String rejectCourse(@PathVariable("id") Long id) {
-        courseService.violateCourse(id);
         return "redirect:/admin/course";
     }
 
@@ -82,7 +84,7 @@ public class CourseController {
                                RedirectAttributes redirectAttributes) {
         try {
             notificationService.rejectCourseMess(notificationDTO, allowResubmission);
-            redirectAttributes.addFlashAttribute("successMessage", "Course rejected and notification sent.");
+            redirectAttributes.addFlashAttribute("successMessage", "Course rejected and notification sent successfully.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error rejecting course: " + e.getMessage());
         }
@@ -95,17 +97,4 @@ public class CourseController {
         return "redirect:/admin/course";
     }
 
-    @GetMapping("/detail/{id}")
-    public String viewCourseDetail(Model model, @PathVariable("id") Long id) {
-        model.addAttribute("notification", new NotificationDTO());
-        model.addAttribute("fragmentContent", "adminDashBoard/fragments/courseDetailContent :: courseDetail");
-        Optional<CourseDetailDTO> optionalDetail = courseService.getDetailCourse(id);
-        if (optionalDetail.isPresent()) {
-            model.addAttribute("detailCourse", optionalDetail.get());
-            return "adminDashBoard/index";
-        } else {
-            return "redirect:/admin/course";
-        }
-
-    }
 }

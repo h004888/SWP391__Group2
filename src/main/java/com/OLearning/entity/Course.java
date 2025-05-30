@@ -32,6 +32,7 @@ public class Course {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String status;
+    private Boolean canResubmit;
 
     @ManyToOne
     @JoinColumn(name = "userId")
@@ -42,7 +43,7 @@ public class Course {
     private Categories category;
 
     @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
-    private List<Lesson> listOfLessons;
+    private List<Lessons> listOfLessons;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<OrderDetail> orderDetails;

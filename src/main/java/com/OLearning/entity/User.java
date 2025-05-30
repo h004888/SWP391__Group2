@@ -39,9 +39,6 @@ public class User {
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
     private List<Orders> orders;
 
-    @OneToMany(mappedBy = "instructor", fetch = FetchType.LAZY)
-    private List<BuyPackages> listOfBuyPackage;
-
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Notifications> notifications;
 

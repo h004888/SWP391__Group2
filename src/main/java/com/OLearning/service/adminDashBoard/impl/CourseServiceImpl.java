@@ -66,20 +66,6 @@ public class CourseServiceImpl implements CourseService {
                 .orElse(false);
     }
 
-    @Override
-    public boolean violateCourse(Long id) {
-        return courseRepository.findById(id)
-                .map(course -> {
-                    if (!"violated".equalsIgnoreCase(course.getStatus())) {
-                        course.setStatus("violated");
-                        course.setUpdatedAt(LocalDateTime.now());
-                        courseRepository.save(course);
-                        return true;
-                    }
-                    return false;
-                })
-                .orElse(false);
-    }
 
     @Override
     public boolean deleteCourse(Long id) {
@@ -99,11 +85,20 @@ public class CourseServiceImpl implements CourseService {
         }
         if (categoryId != null && categoryId == 0) categoryId = null;
         if (price != null && price.trim().isEmpty()) price = null;
-        if (status != null && status.trim().isEmpty()) status = null;
 
-        return courseRepository.filterCourses(keyword, categoryId, price, status).stream()
+        Boolean isNullStatus = false;
+        if ("null".equalsIgnoreCase(status)) {
+            isNullStatus = true;
+            status = null;
+        } else if (status != null && status.trim().isEmpty()) {
+            status = null;
+        }
+
+        return courseRepository.filterCourses(keyword, categoryId, price, status, isNullStatus)
+                .stream()
                 .map(courseMapper::toDTO)
                 .collect(Collectors.toList());
+
     }
 
 

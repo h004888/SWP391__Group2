@@ -29,6 +29,7 @@ public class CourseDetailDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String status;
+    private Boolean canResubmit;
     private User instructor;
     private Categories category;
 }
