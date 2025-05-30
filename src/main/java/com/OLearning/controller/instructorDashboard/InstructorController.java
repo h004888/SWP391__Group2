@@ -53,7 +53,8 @@ public class InstructorController {
 //        }
         model.addAttribute("courseAddDTO", new CourseAddDTO());
         model.addAttribute("categories", categoryService.findAll());
-        return "instructorDashboard/addCourse";
+//        return "instructorDashboard/addCourse";
+        return "instructorDashboard/CreateCourseStep1";
     }
 
     @Autowired
