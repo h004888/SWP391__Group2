@@ -54,16 +54,13 @@ public class InstructorController {
             model.addAttribute("categories", categoryService.findAll());
             return "instructorDashboard/CreateCourseStep1";
         }
-        //bay gio khi next minh deo save nua
-        //minh se gan dan cai gia tri course vao la duoc
-        return "instructorDashboard/index";
-//
-//        Course course = courseService.findCourseById(courseId);
-//        AddCourseStep1DTO coursestep1 = courseService.draftCourseStep1(course);
-//        //in duoc het thong tin course ra kieu step 1
-//        model.addAttribute("coursestep1", coursestep1);
-//        return "instructorDashboard/CreateCourseStep1";
-
+        //khi nay la nhap thong tin tiep
+        Course course = courseService.findCourseById(courseId);
+        AddCourseStep1DTO coursestep1 = courseService.draftCourseStep1(course);
+        //in duoc het thong tin course ra kieu step 1
+        model.addAttribute("coursestep1", coursestep1);
+        model.addAttribute("categories", categoryService.findAll());
+        return "instructorDashboard/CreateCourseStep1";
     }
     //NEXT step 2 and save step 1 or draf
     @PostMapping("/instructordashboard/viewcourse/addcoursestep2")
@@ -74,12 +71,15 @@ public class InstructorController {
 
 
         if(action.equals("draft")) {
-            courseService.createCourseStep1(null, courseStep1);
+           Course course = courseService.createCourseStep1(courseStep1.getId(), courseStep1);
+            courseStep1.setId(course.getCourseId());
             List<CourseDTO> courseList = courseService.findCourseByUserId(id);
             modelMap.put("courses", courseList);
             return "redirect:/instructordashboard/viewcourse";
         }
-        Course course = courseService.createCourseStep1(null, courseStep1);
+        //dung co save nua
+        Course course = courseService.createCourseStep1(courseStep1.getId(), courseStep1);
+        courseStep1.setId(course.getCourseId());
         Long courseId = course.getCourseId();
         model.addAttribute("courseId", courseId);
         model.addAttribute("coursestep2", new AddCourseStep2DTO());

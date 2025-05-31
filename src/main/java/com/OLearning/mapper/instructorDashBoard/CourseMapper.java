@@ -36,6 +36,7 @@ public class CourseMapper {
     }
     public AddCourseStep1DTO DraftStep1(Course course) {
         AddCourseStep1DTO dto = new AddCourseStep1DTO();
+        dto.setId(course.getCourseId());
         dto.setTitle(course.getTitle());
         dto.setDescription(course.getDescription());
         dto.setCategoryName(course.getCategory().getName());
