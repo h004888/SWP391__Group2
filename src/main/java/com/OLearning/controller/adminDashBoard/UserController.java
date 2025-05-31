@@ -46,7 +46,7 @@ public class UserController {
         return "adminDashBoard/fragments/accountContent :: userTableBody";
     }
 
-    @GetMapping("account/viewInfo/{userId}")
+    @GetMapping("/account/viewInfo/{userId}")
     public String getDetailAccount(Model model, @PathVariable("userId") long id) {
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/accountDetailContent :: accountDetail");
         Optional<UserDetailDTO> userDetailDTO = userService.getInfoUser(id);
@@ -55,15 +55,22 @@ public class UserController {
             model.addAttribute("userDetail", userDetailDTO.get());
             return "adminDashBoard/index";
         } else {
-            return "redirect:/admin/index";
+            return "redirect:/admin/account";
         }
     }
 
-    @GetMapping("admin/account/delete/{userId}")
+    @GetMapping("/account/delete/{userId}")
     public String deleteAccount(Model model,@PathVariable("userId") long id) {
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/accountContent :: accountContent");
         userService.deleteAcc(id);
-        return "redirect:/admin/index";
+        return "redirect:/admin/account";
+    }
+
+    @GetMapping("account/resetPass/{userId}")
+    public String resetPassword(Model model,@PathVariable("userId") long id){
+        model.addAttribute("fragmentContent", "adminDashBoard/fragments/accountContent :: accountContent");
+        userService.resetPassword(id);
+        return "redirect:/admin/account";
     }
 
 

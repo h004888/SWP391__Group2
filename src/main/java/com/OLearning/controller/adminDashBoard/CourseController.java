@@ -4,12 +4,6 @@ import com.OLearning.dto.adminDashBoard.CourseDTO;
 import com.OLearning.dto.adminDashBoard.CourseDetailDTO;
 import com.OLearning.dto.adminDashBoard.NotificationDTO;
 import com.OLearning.entity.Categories;
-import com.OLearning.entity.Course;
-import com.OLearning.entity.Notifications;
-import com.OLearning.entity.User;
-import com.OLearning.repository.adminDashBoard.CourseRepository;
-import com.OLearning.repository.adminDashBoard.NotificationRepository;
-import com.OLearning.repository.adminDashBoard.UserRepository;
 import com.OLearning.service.adminDashBoard.CategoriesService;
 import com.OLearning.service.adminDashBoard.CourseService;
 import com.OLearning.service.adminDashBoard.NotificationService;
@@ -19,7 +13,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 

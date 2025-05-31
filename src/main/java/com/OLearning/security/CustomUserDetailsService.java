@@ -1,4 +1,4 @@
-package com.OLearning.config;
+package com.OLearning.security;
 
 import com.OLearning.entity.User;
 import com.OLearning.repository.adminDashBoard.UserRepository;
@@ -31,15 +31,8 @@ public class CustomUserDetailsService implements UserDetailsService {
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().getName().toUpperCase()));
 
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getUsername())
-                .password(user.getPassword())
-                .authorities(authorities)
-                .accountExpired(false)
-                .accountLocked(false)
-                .credentialsExpired(false)
-                .disabled(false)
-                .build();
+        //custom user detail
+        return new CustomUserDetails(user,authorities);
     }
 
 }
