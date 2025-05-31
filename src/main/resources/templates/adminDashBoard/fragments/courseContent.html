@@ -17,6 +17,14 @@
                         </div>
                     </div>
                     <div class="col-md-6 d-flex gap-2 mt-4">
+                        <select class="form-control ml-2" name="status" id="filterStatus">
+                            <option value="pending" th:selected="${selectedStatus == 'pending'}">Pending</option>
+                            <option value="approved" th:selected="${selectedStatus == 'approved'}">Approved</option>
+                            <option value="rejected" th:selected="${selectedStatus == 'rejected'}">Rejected</option>
+                            <option value="resubmit" th:selected="${selectedStatus == 'resubmit'}">ReSubmit</option>
+                            <option value="null" th:selected="${selectedStatus == 'null'}">Save Draft</option>
+                            <option value="">All Status</option>
+                        </select>
                         <select class="form-control ml-2" name="category" id="filterCategory">
                             <option value="">All Categories</option>
                             <option th:each="cate : ${listCategories}"
@@ -32,15 +40,6 @@
                             <option value="mid" th:selected="${selectedPrice == 'mid'}">50 - 100$</option>
                             <option value="high" th:selected="${selectedPrice == 'high'}">Above $100</option>
                         </select>
-                        <select class="form-control ml-2" name="status" id="filterStatus">
-                            <option value="">All Status</option>
-                            <option value="pending" th:selected="${selectedStatus == 'pending'}">Pending</option>
-                            <option value="approved" th:selected="${selectedStatus == 'approved'}">Approved</option>
-                            <option value="rejected" th:selected="${selectedStatus == 'rejected'}">Rejected</option>
-                            <option value="resubmit" th:selected="${selectedStatus == 'resubmit'}">ReSubmit</option>
-                            <option value="null" th:selected="${selectedStatus == 'null'}">Save Draft</option>
-                        </select>
-
                     </div>
 
                 </form>

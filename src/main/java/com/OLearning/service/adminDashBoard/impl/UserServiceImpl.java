@@ -2,10 +2,12 @@ package com.OLearning.service.adminDashBoard.impl;
 
 import com.OLearning.dto.adminDashBoard.UserDTO;
 import com.OLearning.dto.adminDashBoard.UserDetailDTO;
+import com.OLearning.dto.login.RegisterDTO;
 import com.OLearning.entity.Role;
 import com.OLearning.entity.User;
 import com.OLearning.mapper.adminDashBoard.UserDetailMapper;
 import com.OLearning.mapper.adminDashBoard.UserMapper;
+import com.OLearning.mapper.login.RegisterMapper;
 import com.OLearning.repository.adminDashBoard.RoleRepository;
 import com.OLearning.repository.adminDashBoard.UserRepository;
 import com.OLearning.service.adminDashBoard.UserService;
@@ -30,6 +32,8 @@ public class UserServiceImpl implements UserService {
     private UserMapper userMapper;
     @Autowired
     private UserDetailMapper userDetailMapper;
+    @Autowired
+    private RegisterMapper registerMapper;
 
     @Override
     public List<UserDTO> getAllUsers() {
@@ -42,29 +46,6 @@ public class UserServiceImpl implements UserService {
     public Optional<UserDetailDTO> getInfoUser(Long id) {
         return userRepository.findById(id)
                 .map(userDetailMapper::toDetailDTO);
-    }
-
-    @Override
-    public User userDTOtoUser(UserDTO userDTO) {
-        if (userRepository.existsByEmail(userDTO.getEmail())) {
-            throw new RuntimeException("dupliacte user");
-        }
-        User user = new User();
-        user.setUsername(userDTO.getUserName());
-        user.setEmail(userDTO.getEmail());
-        //default data
-        user.setFullName(userDTO.getUserName());
-        //encrypt password
-        user.setPassword(new BCryptPasswordEncoder().encode("123"));
-
-        user.setRole(roleRepository.findRoleByName(userDTO.getRoleName()));
-
-        return user;
-    }
-
-    @Override
-    public User createUser(User user) {
-        return userRepository.save(user);
     }
 
     @Override
@@ -81,6 +62,44 @@ public class UserServiceImpl implements UserService {
         return false;
     }
 
+    @Override
+    public User registerAccount(RegisterDTO registerDTO) {
+        System.out.println("Starting registration for: " + registerDTO.getEmail());
+
+        validateRegistrationData(registerDTO);
+        System.out.println("Validation passed");
+
+        User user = registerMapper.toUser(registerDTO);
+        System.out.println("User mapped: " + user.getEmail());
+
+        try {
+            User savedUser = userRepository.save(user);
+            System.out.println("User saved successfully with ID: " + savedUser.getUserId());
+            return savedUser;
+        } catch (Exception e) {
+            System.err.println("Error saving user: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public void validateRegistrationData(RegisterDTO registrationDto) {
+        // Check if passwords match
+        if (!registrationDto.isPasswordsMatch()) {
+            throw new RuntimeException("Passwords do not match");
+        }
+
+        // Check if email already exists
+        if (userRepository.existsByEmail(registrationDto.getEmail())) {
+            throw new RuntimeException("Email address is already registered");
+        }
+
+        // Check terms agreement
+        if (!registrationDto.isAgreeToTerms()) {
+            throw new RuntimeException("You must agree to the Terms of Service and Privacy Policy");
+        }
+    }
     @Override
     public List<UserDTO> searchByName(String keyword, Integer roleId) {
         if (roleId != null && roleId == 0) {

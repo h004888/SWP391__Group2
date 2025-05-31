@@ -44,7 +44,9 @@
                                 <div th:if="${successMessage}" class="alert alert-success" role="alert">
                                     <span th:text="${successMessage}"></span>
                                 </div>
-
+                                <div th:if="${success}" class="alert alert-success" role="alert">
+                                    <span th:text="${success}"></span>
+                                </div>
                                 <!-- Login Form  -->
                                 <form action="/perform_login" method="post" class="mb-4">
                                     <div class="mb-3">
