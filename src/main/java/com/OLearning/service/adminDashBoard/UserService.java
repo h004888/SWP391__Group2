@@ -25,4 +25,5 @@ public interface UserService {
 
     List<UserDTO> searchByName(String keyword,Integer roleId);
 
+    boolean resetPassword(Long id);
 }

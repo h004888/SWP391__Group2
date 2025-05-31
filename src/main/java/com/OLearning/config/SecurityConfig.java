@@ -1,13 +1,15 @@
 package com.OLearning.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.OLearning.security.CustomAuthenticationSuccessHandler;
+import com.OLearning.security.CustomUserDetailsService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -15,10 +17,10 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Autowired
-    private UserDetailsService userDetailsService;
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -32,25 +34,31 @@ public class SecurityConfig {
         return new CustomAuthenticationSuccessHandler();
     }
 
+    //Config to use customUserDetailsService
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authz -> authz
-                        // Cho phép truy cập public resources
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/static/**").permitAll()
-                        .requestMatchers("/login", "/register").permitAll()
-                        .requestMatchers("/error", "/403").permitAll()
+                                // Cho phép truy cập public resources
+                                .requestMatchers("/css/**", "/js/**", "/images/**", "/static/**").permitAll()
+                                .requestMatchers("/login", "/register").permitAll()
+                                .requestMatchers("/error", "/403").permitAll()
 
-                        // Root path redirect
-                        .requestMatchers("/home").permitAll()
+                                // Root path redirect
+                                .requestMatchers("/home").permitAll()
 
-                        // Chỉ admin mới được truy cập /admin/**
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                                // Chỉ admin mới được truy cập /admin/**
+                                .requestMatchers("/admin/**").hasRole("ADMIN")
 
-                        // User có thể truy cập /user/** và /home
+                                // User có thể truy cập /user/** và /home
 //                        .requestMatchers("/home").hasAnyRole("USER","INSTRUCTOR")
 
-                        .anyRequest().authenticated()
+                                .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")

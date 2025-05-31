@@ -95,6 +95,21 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public boolean resetPassword(Long id) {
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isEmpty()) {
+            return false;
+        }
+        User user = optionalUser.get();
+
+        //Defaut reset password is 12345
+        String encodedPassword = new BCryptPasswordEncoder().encode("123");
+        user.setPassword(encodedPassword);
+        userRepository.save(user);
+        //sau khi doi pass gửi email cho user bt
+        return false;
+    }
 
 
 }
