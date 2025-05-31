@@ -10,4 +10,5 @@ import java.util.List;
 public interface InstructorCourseRepo extends JpaRepository<Course, Long> {
     //tao the nay la xong roi no lay ve mot dong ham roi
     List<Course> findByInstructorUserId(Long userId);
+    List<Course> findByStatus(String status);
 }

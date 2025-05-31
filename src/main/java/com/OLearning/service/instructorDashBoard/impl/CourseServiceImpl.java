@@ -1,5 +1,6 @@
 package com.OLearning.service.instructorDashBoard.impl;
 
+import com.OLearning.dto.instructorDashboard.AddCourseStep1DTO;
 import com.OLearning.dto.instructorDashboard.CourseAddDTO;
 import com.OLearning.dto.instructorDashboard.CourseDTO;
 import com.OLearning.entity.Categories;
@@ -39,19 +40,18 @@ public class CourseServiceImpl implements CourseService {
     private InstructorCategoryRepo instructorCategoryRepo;
     @Autowired
     private InstructorUserRepo instructorUserRepo;
-    @Override
-    public boolean canCreateCourse(Long userId) {
-        List<Long> result = buyPackageRepository.findValidPackagesByUserId(userId);
-        return !result.isEmpty();
-        //if emty => false
-        //else true
-    }
+//    @Override
+//    public boolean canCreateCourse(Long userId) {
+//        List<Long> result = buyPackageRepository.findValidPackagesByUserId(userId);
+//        return !result.isEmpty();
+//        //if emty => false
+//        //else true
+//    }
 
 
     @Override
     public List<CourseDTO> findCourseByUserId(Long userId) {
         List<Course> listCourseRepo = instructorCourseRepo.findByInstructorUserId(userId);
-        //da tim duoc ra danh sach theo user roi, gio can do ra dto de inra man hinh thoi
         List<CourseDTO> courseDTOList = new ArrayList<>();
         for (Course course : listCourseRepo) {
             CourseDTO courseDTO = new CourseDTO();
@@ -63,50 +63,15 @@ public class CourseServiceImpl implements CourseService {
             courseDTO.setDuration(course.getDuration());
             courseDTO.setDiscount(course.getDiscount());
             courseDTO.setTotalLessons(course.getTotalLessons());
-
+            courseDTO.setStatus(course.getStatus());
             if (course.getCategory() != null) {
                 courseDTO.setCategoryName(course.getCategory().getName());
             } else {
                 courseDTO.setCategoryName("not found");
             }
-
             courseDTOList.add(courseDTO);
         }
         return courseDTOList;
-    }
-
-
-    //create new course service
-    @Override
-    public void createCourse(CourseAddDTO courseAddDTO) {
-        courseAddDTO.setUserId(2L);
-        Course course = courseMapper.MapCourseAdd(courseAddDTO);
-        Categories category = instructorCategoryRepo.findByName(courseAddDTO.getCategoryName());
-        if (category == null) {
-            throw new RuntimeException("not found: " + courseAddDTO.getCategoryName());
-        }
-        User instructor = instructorUserRepo.findById(courseAddDTO.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("not found user: " + courseAddDTO.getUserId()));
-
-
-        MultipartFile imageFile = courseAddDTO.getCourseImg();
-        if(imageFile != null && !imageFile.isEmpty()) {
-            try{
-              File imageFoldder = new File(new ClassPathResource(".").getFile().getPath() + "/static/img");
-                if(!imageFoldder.exists()){
-                    imageFoldder.mkdirs();
-                }
-                String fileName = FileHelper.generateFileName(imageFile.getOriginalFilename());
-                Path path = Paths.get(imageFoldder.getAbsolutePath() + File.separator + fileName);
-                Files.copy(imageFile.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-                course.setCourseImg(fileName);
-            }catch(Exception e){
-                e.printStackTrace();
-            }
-        }
-        course.setInstructor(instructor);
-        course.setCategory(category);
-        instructorCourseRepo.save(course);
     }
 
     @Override
@@ -117,9 +82,50 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Course findCourseById(Long courseId) {
         Optional<Course> course = instructorCourseRepo.findById(courseId);
-        if(course.isPresent()) {
+        if (course.isPresent()) {
             return course.get();
         }
         return null;
+    }
+
+    @Override
+    public Course createCourseStep1(Long courseId, AddCourseStep1DTO addCourseStep1DTO) {
+        Course course = (courseId == null) ? new Course() : findCourseById(courseId);
+        courseMapper.Step1(addCourseStep1DTO, course);
+        //no set xong may cai co ban roi
+
+        Categories category = instructorCategoryRepo.findByName(addCourseStep1DTO.getCategoryName());
+        if (category == null) {
+            throw new RuntimeException("not found: " + addCourseStep1DTO.getCategoryName());
+        }
+        addCourseStep1DTO.setUserId(2L);
+        User instructor = instructorUserRepo.findById(addCourseStep1DTO.getUserId()).orElseThrow();
+
+
+        MultipartFile imageFile = addCourseStep1DTO.getCourseImg();
+        if (imageFile != null && !imageFile.isEmpty()) {
+            try {
+                File imageFoldder = new File(new ClassPathResource(".").getFile().getPath() + "/static/img");
+                if (!imageFoldder.exists()) {
+                    imageFoldder.mkdirs();
+                }
+                String fileName = FileHelper.generateFileName(imageFile.getOriginalFilename());
+                Path path = Paths.get(imageFoldder.getAbsolutePath() + File.separator + fileName);
+
+                Files.copy(imageFile.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+                course.setCourseImg(fileName);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        course.setInstructor(instructor);
+        course.setCategory(category);
+        return instructorCourseRepo.save(course);
+    }
+
+    @Override
+    public AddCourseStep1DTO draftCourseStep1(Course course) {
+        AddCourseStep1DTO courseDTO = courseMapper.DraftStep1(course);
+        return courseDTO;
     }
 }
