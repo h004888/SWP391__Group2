@@ -1,8 +1,8 @@
 package com.OLearning.service.instructorDashBoard;
 
-import com.OLearning.dto.instructorDashboard.CategoryDTO;
-import com.OLearning.dto.instructorDashboard.CourseAddDTO;
-import com.OLearning.dto.instructorDashboard.CourseDTO;
+import com.OLearning.dto.instructorDashBoard.CategoryDTO;
+import com.OLearning.dto.instructorDashBoard.CourseAddDTO;
+import com.OLearning.dto.instructorDashBoard.CourseDTO;
 import com.OLearning.entity.Course;
 
 import java.util.List;

@@ -1,10 +1,12 @@
 package com.OLearning.controller.instructorDashboard;
 
 
-import com.OLearning.dto.instructorDashboard.CourseAddDTO;
-import com.OLearning.dto.instructorDashboard.CourseDTO;
+import com.OLearning.dto.instructorDashBoard.NotificationsDTO;
+import com.OLearning.dto.instructorDashBoard.CourseAddDTO;
+import com.OLearning.dto.instructorDashBoard.CourseDTO;
 import com.OLearning.service.instructorDashBoard.CategoryService;
 import com.OLearning.service.instructorDashBoard.CourseService;
+import com.OLearning.service.instructorDashBoard.NotificationsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,6 +22,8 @@ import java.util.List;
 
 @Controller
 public class InstructorController {
+    @Autowired
+    private NotificationsService notificationsService;
     @Autowired
     private CourseService courseService;
     @Autowired
@@ -67,5 +71,23 @@ public class InstructorController {
         courseService.createCourse(courseAddDTO, courseImg);
 
         return "redirect:/instructordashboard/viewcourse";
+    }
+    @GetMapping("/instructordashboard/notifications")
+    public String viewNotifications(@RequestParam(name = "userId", defaultValue = "2") Long userId,
+                                    Model model) {
+        List<NotificationsDTO> notifications = notificationsService.getNotificationsByUserId(userId);
+        model.addAttribute("notifications", notifications);
+        return "instructorDashboard/notifications"; // view name
+    }
+
+    // Search notifications
+    @GetMapping("/instructordashboard/notifications/search")
+    public String searchNotifications(@RequestParam("userId") Long userId,
+                                      @RequestParam("keyword") String keyword,
+                                      Model model) {
+        List<NotificationsDTO> notifications = notificationsService.searchNotifications(userId, keyword);
+        model.addAttribute("notifications", notifications);
+        model.addAttribute("keyword", keyword);
+        return "instructorDashboard/notifications"; // same view
     }
 }

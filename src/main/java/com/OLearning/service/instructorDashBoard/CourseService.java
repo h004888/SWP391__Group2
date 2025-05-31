@@ -1,7 +1,7 @@
 package com.OLearning.service.instructorDashBoard;
 
-import com.OLearning.dto.instructorDashboard.CourseAddDTO;
-import com.OLearning.dto.instructorDashboard.CourseDTO;
+import com.OLearning.dto.instructorDashBoard.CourseAddDTO;
+import com.OLearning.dto.instructorDashBoard.CourseDTO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
