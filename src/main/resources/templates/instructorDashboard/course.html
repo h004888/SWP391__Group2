@@ -103,8 +103,9 @@
                                         </form>
 
                                         <form th:if="${course.status == 'draft'}"
-                                              th:action="@{/instructordashboard/viewcourse/addcoursestep1(id=${course.courseId})}"
+                                              th:action="@{/instructordashboard/viewcourse/addcoursestep1}"
                                               method="GET" style="display:inline;">
+                                            <input type="hidden" name="id" th:value="${course.courseId}"/>
                                             <button type="submit" class="btn btn-primary btn-action" title="Coutinue Edit">
                                                 <i class="fas fa-arrow-right"></i>
                                             </button>
