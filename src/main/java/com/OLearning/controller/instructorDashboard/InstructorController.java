@@ -1,6 +1,8 @@
 package com.OLearning.controller.instructorDashboard;
 
 
+import com.OLearning.dto.instructorDashboard.AddCourseStep1DTO;
+import com.OLearning.dto.instructorDashboard.AddCourseStep2DTO;
 import com.OLearning.dto.instructorDashboard.CourseAddDTO;
 import com.OLearning.dto.instructorDashboard.CourseDTO;
 import com.OLearning.entity.Course;
@@ -23,12 +25,14 @@ public class InstructorController {
     private CourseService courseService;
     @Autowired
     private CategoryService categoryService;
+    @Autowired
+    private InstructorBuyPackagesService buyPackagesService;
+    @Autowired
+    private PackagesService packagesService;
 
     //load all course by id of user login
     @GetMapping("/instructordashboard/viewcourse")
     public String viewCourse(@RequestParam(name = "id", defaultValue = "2") Long id, Model model, ModelMap modelMap) {
-//        List<CourseDTO> list = courseService.findCourseByUserId(id);
-//        model.addAttribute("courses", list);
         List<CourseDTO> courseList = courseService.findCourseByUserId(id);
         modelMap.put("courses", courseList);
         return "instructorDashboard/course";
@@ -41,34 +45,65 @@ public class InstructorController {
     }
 
 
-    //Validate add course with package and view addcourse gui
-    @GetMapping("/instructordashboard/viewcourse/addcourse")
-    public String addNewCourse(@RequestParam(name = "id", defaultValue = "2") Long id, RedirectAttributes redirectAttributes, Model model) {
-        //validate packages
-//        boolean checkBuyPackages = courseService.canCreateCourse(id);
-//        if (!checkBuyPackages) {
-//            redirectAttributes.addFlashAttribute("canCreate", "Can not add new course because package is expired");
-//            return "redirect:/instructordashboard/viewcourse";
+    //Create, countinue update with step, step
+    @GetMapping("/instructordashboard/viewcourse/addcoursestep1")
+    public String addNewCourse(@RequestParam(value="id", required = false) Long courseId,Model model) {
+
+        if(courseId == null) {
+            model.addAttribute("coursestep1", new AddCourseStep1DTO());
+            model.addAttribute("categories", categoryService.findAll());
+            return "instructorDashboard/CreateCourseStep1";
+        }
+        //bay gio khi next minh deo save nua
+        //minh se gan dan cai gia tri course vao la duoc
+        return "instructorDashboard/index";
 //
-//        }
-        model.addAttribute("courseAddDTO", new CourseAddDTO());
-        model.addAttribute("categories", categoryService.findAll());
-//        return "instructorDashboard/addCourse";
-        return "instructorDashboard/CreateCourseStep1";
+//        Course course = courseService.findCourseById(courseId);
+//        AddCourseStep1DTO coursestep1 = courseService.draftCourseStep1(course);
+//        //in duoc het thong tin course ra kieu step 1
+//        model.addAttribute("coursestep1", coursestep1);
+//        return "instructorDashboard/CreateCourseStep1";
+
+    }
+    //NEXT step 2 and save step 1 or draf
+    @PostMapping("/instructordashboard/viewcourse/addcoursestep2")
+    public String SaveStep1NextToStep2(
+            @ModelAttribute("coursestep1") AddCourseStep1DTO courseStep1, @RequestParam(name = "id", defaultValue = "2") Long id, @RequestParam(name="action") String action,  Model model,
+            ModelMap modelMap) {
+
+
+
+        if(action.equals("draft")) {
+            courseService.createCourseStep1(null, courseStep1);
+            List<CourseDTO> courseList = courseService.findCourseByUserId(id);
+            modelMap.put("courses", courseList);
+            return "redirect:/instructordashboard/viewcourse";
+        }
+        Course course = courseService.createCourseStep1(null, courseStep1);
+        Long courseId = course.getCourseId();
+        model.addAttribute("courseId", courseId);
+        model.addAttribute("coursestep2", new AddCourseStep2DTO());
+        return "instructorDashboard/CreateCourseStep2";
     }
 
-    @Autowired
-    private InstructorBuyPackagesService buyPackagesService;
-    @Autowired
-    private PackagesService packagesService;
+    @GetMapping("/instructordashboard/viewcourse/addcourse/step3")
+    public String step3() {
+        return "instructorDashboard/CreateCourseStep3";
+    }
+    @GetMapping("/instructordashboard/viewcourse/addcourse/step4")
+    public String step4() {
+        return "instructorDashboard/CreateCourseStep4";
+    }
+
 
     //save add course to Db
     @PostMapping("/instructordashboard/viewcourse/addcourse")
     public String saveCourse(@ModelAttribute("courseAddDTO") CourseAddDTO courseAddDTO, @RequestParam(name = "id", defaultValue = "2") Long id) {
-        courseService.createCourse(courseAddDTO);
-        packagesService.updateCourseCreated(buyPackagesService.findIdPackages(id));
+//        courseService.createCourse(courseAddDTO);
+//        packagesService.updateCourseCreated(buyPackagesService.findIdPackages(id));
         return "redirect:/instructordashboard/viewcourse";
     }
+
     //deleteCourse
     @PostMapping("/instructordashboard/viewcourse/deletecourse/{id}")
     public String deleteCourse(@PathVariable Long id) {
