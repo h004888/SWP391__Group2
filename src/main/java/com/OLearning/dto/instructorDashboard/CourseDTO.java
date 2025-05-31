@@ -1,4 +1,4 @@
-package com.OLearning.dto.instructorDashboard;
+package com.OLearning.dto.instructorDashBoard;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

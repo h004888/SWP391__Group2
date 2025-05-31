@@ -1,6 +1,7 @@
 package com.OLearning.mapper.instructorDashBoard;
 
-import com.OLearning.dto.instructorDashboard.CourseAddDTO;
+import com.OLearning.dto.instructorDashBoard.CourseAddDTO;
+import com.OLearning.dto.instructorDashBoard.CourseAddDTO;
 import com.OLearning.entity.Categories;
 import com.OLearning.entity.Course;
 import com.OLearning.repository.instructorDashBoard.InstructorCategoryRepo;
@@ -26,4 +27,6 @@ public class CourseMapper {
         course.setDuration(0);
         return course;
     }
+
+
 }

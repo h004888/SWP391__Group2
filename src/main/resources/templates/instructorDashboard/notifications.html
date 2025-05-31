@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Instructor Notifications</title>
+    <th:block th:replace="~{instructorDashboard/fragments/head :: head}"></th:block>
+</head>
+<body id="page-top">
+<div id="wrapper">
+
+    <!-- Sidebar -->
+    <th:block th:replace="~{instructorDashboard/fragments/sidebar :: sidebar}"></th:block>
+
+    <!-- Content Wrapper -->
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+
+            <!-- Topbar -->
+            <th:block th:replace="~{instructorDashboard/fragments/topbar :: topbar}"></th:block>
+
+            <!-- Main Content -->
+            <div class="container-fluid">
+                <h1 class="h3 mb-4 text-gray-800">Notifications</h1>
+
+<!--                &lt;!&ndash; Search form &ndash;&gt;-->
+<!--                <form th:action="@{/instructordashboard/notifications/search}" method="get" class="form-inline mb-3">-->
+<!--                    <input type="hidden" name="userId" th:value="2" />-->
+<!--                    <input type="text" name="keyword" class="form-control mr-2" placeholder="Search by course title..." th:value="${keyword}" />-->
+<!--                    <button type="submit" class="btn btn-primary">Search</button>-->
+<!--                </form>-->
+
+                <!-- Notification List -->
+                <div class="card shadow mb-4">
+                    <div class="card-body">
+                        <ul class="list-group">
+                            <li class="list-group-item" th:each="n : ${notifications}">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <strong th:text="${n.courseTitle}">Course Title</strong><br/>
+                                        <span th:text="${n.message}">Message</span>
+                                    </div>
+                                    <small th:text="${#temporals.format(n.sentAt, 'dd/MM/yyyy HH:mm')}"></small>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <th:block th:replace="~{instructorDashboard/fragments/footer :: footer}"></th:block>
+    </div>
+</div>
+
+<!-- Scripts -->
+<th:block th:replace="~{instructorDashboard/fragments/scripts :: scripts}"></th:block>
+</body>
+</html>

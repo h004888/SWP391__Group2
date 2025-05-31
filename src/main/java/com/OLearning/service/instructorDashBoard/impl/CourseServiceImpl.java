@@ -1,7 +1,7 @@
 package com.OLearning.service.instructorDashBoard.impl;
 
-import com.OLearning.dto.instructorDashboard.CourseAddDTO;
-import com.OLearning.dto.instructorDashboard.CourseDTO;
+import com.OLearning.dto.instructorDashBoard.CourseAddDTO;
+import com.OLearning.dto.instructorDashBoard.CourseDTO;
 import com.OLearning.entity.Categories;
 import com.OLearning.entity.Course;
 import com.OLearning.entity.User;

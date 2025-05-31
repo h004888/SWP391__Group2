@@ -34,10 +34,10 @@ public class LessonServiceImpl implements LessonService {
     }
 
 
-    @Override
-    public List<LessonDTO> getAllLessons() {
-        return List.of();
-    }
+//    @Override
+//    public List<LessonDTO> getAllLessons() {
+//        return List.of();
+//    }
 
     @Override
     public LessonDTO getLessonById(Long id) {

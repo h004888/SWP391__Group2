@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface LessonService {
 
-   List<LessonDTO> getAllLessons();
+//   List<LessonDTO> getAllLessons();
 
     LessonDTO getLessonById(Long id);
 
