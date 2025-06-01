@@ -2,35 +2,40 @@
     <div class="table-responsive">
         <div class="table-wrapper">
             <div class="table-title">
-                <div class="row">
-                    <div class="col-sm-4">
-                        <h2>Management <b>Category</b></h2>
+                <div class="row align-items-center mb-3">
+
+                    <div class="col-md-4">
+                        <h2 class="mb-0">Management <strong>Category</strong></h2>
                     </div>
 
-                    <!-- AJAX search form -->
-                    <form id="filterForm" class="form-inline col-sm-6">
-                        <div class="col-sm-4">
-                            <div class="search-box">
-                                <i class="material-icons">&#xE8B6;</i>
+                    <div class="col-md-4">
+                        <form id="filterForm" class="d-flex">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="material-icons">&#xE8B6;</i>
+                                </span>
                                 <input type="text" name="name" id="searchInput" class="form-control"
-                                    placeholder="Search&hellip;">
+                                    placeholder="Search…">
                             </div>
-                        </div>
-                        <div class="col-sm-2">
-                            <select class="form-control" name="select" id="sortSelect">
-                                <option value="">Sort</option>
-                                <option value="asc">A to Z</option>
-                                <option value="desc">Z to A</option>
-                            </select>
-                        </div>
-                    </form>
+                        </form>
+                    </div>
 
-                    <div class="col-sm-2 text-right">
+                    <div class="col-md-2">
+                        <select class="form-select" id="sortSelect">
+                            <option value="">Sort</option>
+                            <option value="asc">A to Z</option>
+                            <option value="desc">Z to A</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2 text-right">
                         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#categoryModal">
                             Add Category
                         </button>
                     </div>
+
                 </div>
+
             </div>
 
             <!-- Alert thành công -->
@@ -51,57 +56,60 @@
             </div>
 
 
+            <div th:fragment="categoryPage" id="categoryPage">
+                <!-- Table categories -->
+                <table class="table table-striped table-hover table-bordered" id="categoryTable"
+                    th:fragment="categoryTable">
+                    <thead>
+                        <tr>
+                            <th>ID <i class="fa fa-sort"></i></th>
+                            <th>Name</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="category,stat : ${categories}">
+                            <td th:text="${stat.index + 1}"></td>
+                            <td th:text="${category.name}"></td>
+                            <td>
+                                <a th:href="@{/admin/categories/edit(id=${category.id}, page=${currentPage}, sort=${sort}, name=${name})}"
+                                    class="edit" title="Edit" data-toggle="tooltip"><i
+                                        class="material-icons">&#xE254;</i></a>
+                                <a href="#" class="delete delete-category" th:data-id="${category.id}" title="Delete"
+                                    data-toggle="tooltip"><i class="material-icons">&#xE872;</i></a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
 
+                <!-- Pagination static (có thể chuyển sang dynamic sau) -->
+                <div class="clearfix" th:if="${totalPages > 0}">
+                    <div class="hint-text">
+                        Showing <b th:text="${categories.size()}"></b> out of <b th:text="${totalItems}"></b> entries
+                    </div>
+                    <ul class="pagination">
+                        <!-- Nút Previous -->
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                            <a class="page-link" th:data-page="${currentPage - 1}" href="#"><i
+                                    class="fa fa-angle-double-left"></i></a>
+                        </li>
 
-            <!-- Table categories -->
-            <table class="table table-striped table-hover table-bordered" id="categoryTable"
-                th:fragment="categoryTable">
-                <thead>
-                    <tr>
-                        <th>ID <i class="fa fa-sort"></i></th>
-                        <th>Name</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="category,stat : ${categories}">
-                        <td th:text="${stat.index + 1}"></td>
-                        <td th:text="${category.name}"></td>
-                        <td>
-                            <a th:href="@{/admin/categories/edit(id=${category.id})}" class="edit" title="Edit"
-                                data-toggle="tooltip"><i class="material-icons">&#xE254;</i></a>
-                            <a href="#" class="delete delete-category" th:data-id="${category.id}" title="Delete"
-                                data-toggle="tooltip"><i class="material-icons">&#xE872;</i></a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                        <!-- Các nút số trang -->
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                            th:classappend="${currentPage == i} ? 'active'">
+                            <a class="page-link" th:data-page="${i}" th:text="${i + 1}" href="#"></a>
+                        </li>
 
-            <!-- Pagination static (có thể chuyển sang dynamic sau) -->
-            <div class="clearfix" th:if="${totalPages > 0}">
-                <div class="hint-text">
-                    Showing <b th:text="${categories.size()}"></b> out of <b th:text="${totalItems}"></b> entries
+                        <!-- Nút Next -->
+                        <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                            <a class="page-link" th:data-page="${currentPage + 1}" href="#"><i
+                                    class="fa fa-angle-double-right"></i></a>
+                        </li>
+                    </ul>
                 </div>
-                <ul class="pagination">
-                    <!-- Nút Previous -->
-                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                        <a class="page-link" th:data-page="${currentPage - 1}" href="#"><i
-                                class="fa fa-angle-double-left"></i></a>
-                    </li>
-
-                    <!-- Các nút số trang -->
-                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                        th:classappend="${currentPage == i} ? 'active'">
-                        <a class="page-link" th:data-page="${i}" th:text="${i + 1}" href="#"></a>
-                    </li>
-
-                    <!-- Nút Next -->
-                    <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
-                        <a class="page-link" th:data-page="${currentPage + 1}" href="#"><i
-                                class="fa fa-angle-double-right"></i></a>
-                    </li>
-                </ul>
             </div>
+
+
 
 
         </div>
@@ -109,15 +117,14 @@
 
 
 
-    <!-- Modal Add -->
     <div class="modal fade" id="categoryModal" tabindex="-1" role="dialog" aria-labelledby="categoryModalLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
-
             <form id="categoryForm" th:action="@{/admin/categories/add}" method="post">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="categoryModalLabel">Add Category</h5>
+
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -151,6 +158,10 @@
 
                     <form th:action="@{/admin/categories/edit}" method="post">
                         <input type="hidden" name="id" th:value="${category.id}" />
+                        <input type="hidden" name="page" th:value="${currentPage}" />
+                        <input type="hidden" name="sort" th:value="${sort}" />
+                        <input type="hidden" name="search" th:value="${name}" />
+
 
                         <div class="form-group">
                             <label for="categoryName">Name:</label> <!-- Add for attribute for accessibility -->
