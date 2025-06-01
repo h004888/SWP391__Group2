@@ -42,8 +42,8 @@ public class Course {
     @JoinColumn(name = "CategoryID")
     private Categories category;
 
-    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
-    private List<Lessons> listOfLessons;
+//    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
+//    private List<Lessons> listOfLessons;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<OrderDetail> orderDetails;
