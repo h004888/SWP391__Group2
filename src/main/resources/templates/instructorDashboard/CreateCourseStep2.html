@@ -103,7 +103,8 @@
             <!-- Navigation Buttons -->
             <div class="content-card">
               <div class="d-flex justify-content-between">
-                <form th:action="@{/instructordashboard/viewcourse/addcourse/step1}" method="GET">
+                <form th:action="@{/instructordashboard/viewcourse/addcoursestep1}" method="GET">
+                  <input type="hidden" name="id" th:value="${courseId}"/>
                 <button class="btn btn-outline-secondary">
                   <i class="bi bi-arrow-left me-1"></i> Previous
                 </button>
