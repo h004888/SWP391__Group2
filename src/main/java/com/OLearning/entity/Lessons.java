@@ -20,6 +20,7 @@ public class Lessons {
     private String description;
     private String contentType = "video";
     private Integer orderNumber;
+    private String duration;
     private Boolean isFree;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -27,6 +28,7 @@ public class Lessons {
     @JoinColumn(name = "chapterId")
     private Chapters chapter;
 
-    @OneToMany(mappedBy="lesson")
-    private List<Video> videos;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "videoId")
+    private Video video;
 }

@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface ChapterService {
     Chapters saveChapter(ChapterDTO chapterDTO);
+    List<Chapters> chapterListByCourse(Long courserId);
+    Chapters getChapterById(Long id);
 }

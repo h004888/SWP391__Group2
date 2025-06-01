@@ -56,10 +56,11 @@
                     <div class="col-lg-6">
                         <div class="container form-container">
                             <h3 class="form-title">Add Chapter</h3>
-                            <form th:action="@{/chapters/add}" th:object="${chapter}" method="post">
+                            <form th:action="@{/instructordashboard/viewcourse/chaptersadd}" th:object="${chapter}" method="post">
                                 <div class="mb-3">
                                     <label class="form-label">Title*</label>
                                     <input type="text" th:field="*{title}" class="form-control" name="title" required>
+                                    <input type="hidden" name="courseId" th:value="${chapter.courseId}">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Description*</label>
@@ -78,40 +79,45 @@
                     <div class="col-lg-6">
                         <div class="container form-container">
                             <h3 class="form-title">Add Lesson</h3>
-                            <form th:action="@{/lessons/add}" method="post">
+                            <form th:action="@{/instructordashboard/viewcourse/lessonadd}" th:object="${lessonDTO}" method="post">
                                 <div class="mb-3">
                                     <label class="form-label">Choose Chapter*</label>
-                                    <select name="chapterId" class="form-select" required>
+                                    <select name="chapterId" th:field="*{chapterId}" class="form-select" required>
+                                        <option value="">Select Chapters</option>
                                         <option th:each="chapter : ${chapters}" th:value="${chapter.id}"
-                                                th:text="${chapter.title}">Select Chapter
+                                                th:text="${chapter.title}">
                                         </option>
                                     </select>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Title*</label>
-                                    <input type="text" class="form-control" name="title" required>
+                                    <input type="text" th:field="*{title}" class="form-control" name="title" required>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Description*</label>
-                                    <textarea class="form-control" name="description" rows="3"></textarea>
+                                    <textarea class="form-control" th:field="*{description}" name="description" rows="3"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Video*</label>
+                                    <input type="text" th:field="*{videoUrl}" class="form-control" name="videoUrl">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Duration*</label>
-                                    <input type="text" class="form-control" name="duration">
+                                    <input type="text" th:field="*{duration}" class="form-control" name="duration">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Order Number*</label>
-                                    <input type="number" class="form-control" name="orderNumber">
+                                    <input type="number" th:field="*{orderNumber}" class="form-control" name="orderNumber">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label d-block">Is Free?</label>
                                     <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="isFree" id="freeYes"
+                                        <input class="form-check-input" th:field="*{isFree}" type="radio" name="isFree" id="freeYes"
                                                value="true">
                                         <label class="form-check-label" for="freeYes">YES</label>
                                     </div>
                                     <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="isFree" id="freeNo"
+                                        <input class="form-check-input" th:field="*{isFree}" type="radio" name="isFree" id="freeNo"
                                                value="false">
                                         <label class="form-check-label" for="freeNo">NO</label>
                                     </div>
@@ -120,6 +126,22 @@
                             </form>
                         </div>
                     </div>
+
+
+                    <h3>Chapters and Lessons</h3>
+                    <div th:each="ch : ${chapters}">
+                        <h4 th:text="${ch.title}">Chapter Title</h4>
+                        <ul>
+                            <li th:each="lesson : ${ch.lessons}">
+                                <span th:text="${lesson.title}">Lesson Title</span> -
+                                <a th:href="${lesson.videoUrl}" target="_blank">Watch Video</a>
+                            </li>
+                            <li th:if="${#lists.isEmpty(ch.lessons)}">No lessons yet.</li>
+                        </ul>
+                    </div>
+
+
+
                     <div id="chaptersContainer">
                         <div class="content-card">
                             <div class="d-flex justify-content-between">

@@ -1,0 +1,20 @@
+package com.OLearning.dto.instructorDashboard;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+public class LessonDTO {
+    private String title;
+    private String description;
+    private Integer orderNumber;
+    private String duration;
+    private Boolean isFree;
+    private Long chapterId;
+    private String videoUrl;
+}

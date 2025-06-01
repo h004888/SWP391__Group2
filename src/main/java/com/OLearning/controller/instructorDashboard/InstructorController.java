@@ -2,6 +2,7 @@ package com.OLearning.controller.instructorDashboard;
 
 
 import com.OLearning.dto.instructorDashboard.*;
+import com.OLearning.entity.Chapters;
 import com.OLearning.entity.Course;
 import com.OLearning.service.instructorDashBoard.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,8 @@ public class InstructorController {
     private InstructorBuyPackagesService buyPackagesService;
     @Autowired
     private PackagesService packagesService;
-
+    @Autowired
+    private LessonService lessonService;
     //load all course by id of user login
     @GetMapping("/instructordashboard/viewcourse")
     public String viewCourse(@RequestParam(name = "id", defaultValue = "2") Long id, Model model, ModelMap modelMap) {
@@ -75,19 +77,53 @@ public class InstructorController {
         ChapterDTO chapterDTO = new ChapterDTO();
         chapterDTO.setCourseId(courseId);
         model.addAttribute("chapter", chapterDTO);
-        //-----------------------------------------
+        //new code
+        List<Chapters> chapters = chapterService.chapterListByCourse(courseId);
+        if(chapters != null && chapters.size() > 0) {
+            model.addAttribute("chapters", chapters);
+        }
+        //new code add lesson
+        model.addAttribute("lessonDTO", new LessonDTO());
         return "instructorDashboard/CreateCourseStep2";
     }
 
-
+//create chapter
     @Autowired
     private ChapterService chapterService;
-    @PostMapping("/chapters/add")
-    public String addNewChapter(@ModelAttribute("chapter") ChapterDTO chapterDTO) {
+    @PostMapping("/instructordashboard/viewcourse/chaptersadd")
+    public String addNewChapter(@ModelAttribute("chapter") ChapterDTO chapterDTO,
+                @RequestParam(name="courseId") Long courseId,
+                Model model,
+                RedirectAttributes redirectAttributes
+    ) {
+        chapterDTO.setCourseId(courseId);
         chapterService.saveChapter(chapterDTO);
-        return "instructorDashboard/CreateCourseStep1";
-    }
+        return "redirect:/instructordashboard/viewcourse/addcoursestep2?courseId=" + courseId;
 
+    }
+    //create lesson
+    @PostMapping("/instructordashboard/viewcourse/lessonadd")
+    public String addNewLesson(@ModelAttribute("lessonDTO") LessonDTO lessonDTO, RedirectAttributes redirectAttributes) {
+        lessonService.createLesson(lessonDTO);
+        Long chapterId = lessonDTO.getChapterId();
+        Long courseId = chapterService.getChapterById(chapterId).getCourse().getCourseId();
+        return "redirect:/instructordashboard/viewcourse/addcoursestep2?courseId=" + courseId;
+    }
+//up screen after add chapter, lesson step 2
+    @GetMapping("/instructordashboard/viewcourse/addcoursestep2")
+    public String showStep2Page(@RequestParam(name="courseId") Long courseId, Model model) {
+        ChapterDTO chapterDTO = new ChapterDTO();
+        chapterDTO.setCourseId(courseId);
+        model.addAttribute("chapter", chapterDTO);
+
+        List<Chapters> chapters = chapterService.chapterListByCourse(courseId);
+        if (chapters != null && !chapters.isEmpty()) {
+            model.addAttribute("chapters", chapters);
+        }
+
+        model.addAttribute("lessonDTO", new LessonDTO());
+        return "instructorDashboard/CreateCourseStep2";
+    }
 
     @PostMapping("/instructordashboard/viewcourse/addcourse/step3")
     public String step3() {
@@ -97,9 +133,6 @@ public class InstructorController {
     public String step4() {
         return "instructorDashboard/CreateCourseStep4";
     }
-
-
-
     //deleteCourse
     @PostMapping("/instructordashboard/viewcourse/deletecourse/{id}")
     public String deleteCourse(@PathVariable Long id) {
