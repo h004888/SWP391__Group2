@@ -1,4 +1,4 @@
-package com.OLearning.controller.adminDashBoard;
+package com.OLearning.controller.adminDashboard;
 
 import com.OLearning.dto.adminDashBoard.OrdersDTO;
 import com.OLearning.service.adminDashBoard.OrdersService;
@@ -20,45 +20,50 @@ public class OrdersController {
 
     @GetMapping
     public String getAllOrders(Model model) {
+        model.addAttribute("accNamePage", "Management Orders");
         List<OrdersDTO> orders = orderService.getAllOrders();
         model.addAttribute("orders", orders);
-        model.addAttribute("fragmentContent", "adminDashBoard/fragments/ordersContent :: contentOrders");
-        return "adminDashBoard/index";
+        model.addAttribute("fragmentContent", "adminDashboard/fragments/ordersContent :: contentOrders");
+        return "adminDashboard/index";
     }
 
     @GetMapping("/searchByUsername")
     public String searchByUsername(@RequestParam(value = "username", required = false) String username, Model model) {
+        model.addAttribute("accNamePage", "Management Orders");
         List<OrdersDTO> orders = orderService.findByUsername(username);
-        model.addAttribute("fragmentContent", "adminDashBoard/fragments/ordersContent :: contentOrders");
+        model.addAttribute("fragmentContent", "adminDashboard/fragments/ordersContent :: contentOrders");
         model.addAttribute("orders", orders);
         model.addAttribute("username", username);
-        return "adminDashBoard/index";
+        return "adminDashboard/index";
     }
 
     @GetMapping("/searchByCourseName")
     public String searchByCourseName(@RequestParam(value = "courseName", required = false) String courseName, Model model) {
+        model.addAttribute("accNamePage", "Management Orders");
         List<OrdersDTO> orders = orderService.findByCourseName(courseName);
-        model.addAttribute("fragmentContent", "adminDashBoard/fragments/ordersContent :: contentOrders");
+        model.addAttribute("fragmentContent", "adminDashboard/fragments/ordersContent :: contentOrders");
         model.addAttribute("orders", orders);
         model.addAttribute("courseName", courseName);
-        return "adminDashBoard/index";
+        return "adminDashboard/index";
     }
 
     @GetMapping("/sortByAmount")
     public String sortByAmount(@RequestParam(value = "direction", required = false) String direction, Model model) {
-        model.addAttribute("amountDirection", direction);
+        model.addAttribute("accNamePage", "Management Orders");
         List<OrdersDTO> orders = orderService.sortByAmount(direction);
         model.addAttribute("orders", orders);
-        model.addAttribute("fragmentContent", "adminDashBoard/fragments/ordersContent :: contentOrders");
-        return "adminDashBoard/index";
+        model.addAttribute("amountDirection", direction);
+        model.addAttribute("fragmentContent", "adminDashboard/fragments/ordersContent :: contentOrders");
+        return "adminDashboard/index";
     }
 
     @GetMapping("/sortByDate")
     public String sortByDate(@RequestParam(value = "direction", required = false) String direction, Model model) {
+        model.addAttribute("accNamePage", "Management Orders");
         List<OrdersDTO> orders = orderService.sortByDate(direction);
         model.addAttribute("orders", orders);
         model.addAttribute("dateDirection", direction);
-        model.addAttribute("fragmentContent", "adminDashBoard/fragments/ordersContent :: contentOrders");
-        return "adminDashBoard/index";
+        model.addAttribute("fragmentContent", "adminDashboard/fragments/ordersContent :: contentOrders");
+        return "adminDashboard/index";
     }
 }

@@ -42,19 +42,19 @@ public class InstructorController {
 
 
     //Validate add course with package and view addcourse gui
-    @GetMapping("/instructordashboard/viewcourse/addcourse")
-    public String addNewCourse(@RequestParam(name = "id", defaultValue = "3") Long id, RedirectAttributes redirectAttributes, Model model) {
-        //validate packages
-        boolean checkBuyPackages = courseService.canCreateCourse(id);
-        if (!checkBuyPackages) {
-            redirectAttributes.addFlashAttribute("canCreate", "Can not add new course because package is expired");
-            return "redirect:/instructordashboard/viewcourse";
-
-        }
-        model.addAttribute("courseAddDTO", new CourseAddDTO());
-        model.addAttribute("categories", categoryService.findAll());
-        return "instructorDashboard/addCourse";
-    }
+//    @GetMapping("/instructordashboard/viewcourse/addcourse")
+//    public String addNewCourse(@RequestParam(name = "id", defaultValue = "3") Long id, RedirectAttributes redirectAttributes, Model model) {
+//        //validate packages
+//        boolean checkBuyPackages = courseService.canCreateCourse(id);
+//        if (!checkBuyPackages) {
+//            redirectAttributes.addFlashAttribute("canCreate", "Can not add new course because package is expired");
+//            return "redirect:/instructordashboard/viewcourse";
+//
+//        }
+//        model.addAttribute("courseAddDTO", new CourseAddDTO());
+//        model.addAttribute("categories", categoryService.findAll());
+//        return "instructorDashboard/addCourse";
+//    }
 
     //    save add course to Db
     @PostMapping("/instructordashboard/viewcourse/addcourse")
