@@ -1,14 +1,21 @@
 package com.OLearning.repository.adminDashBoard;
 
 import com.OLearning.entity.Categories;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public interface CategoriesRepository extends JpaRepository<Categories, Integer> {
+    Page<Categories> findAll(Pageable pageable);
+
     Categories findByName(String name);
 
     Categories findById(int id);
@@ -17,7 +24,7 @@ public interface CategoriesRepository extends JpaRepository<Categories, Integer>
 
     boolean existsById(int id);
 
-    List<Categories> findAll();
+    Page<Categories> findByNameContaining(String name, Pageable pageable);
 
     Categories save(Categories categories);
 
@@ -25,7 +32,9 @@ public interface CategoriesRepository extends JpaRepository<Categories, Integer>
 
     void delete(Categories categories);
 
-    @Modifying
+    List<Categories> findByNameContaining(String name);
+
+    @Modifying(clearAutomatically = true)
     @Query("UPDATE Categories c SET c.name = :name WHERE c.id = :id")
     void updateCategory(@Param("id") int id, @Param("name") String name);
 }
