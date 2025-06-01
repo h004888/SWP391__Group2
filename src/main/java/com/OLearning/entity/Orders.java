@@ -19,17 +19,11 @@ import java.util.Set;
 public class Orders {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "OrderId")
-    private Integer orderId;
-    @Column(name = "Amount")
+    private Long orderId;
     private double amount;
-    @Column(name = "OrderType")
     private String orderType;
-    @Column(name = "Status")
     private String status;
-    @Column(name = "OrderDate")
     private LocalDateTime orderDate;
-    @Column(name = "Note")
     private String note;
 
     @ManyToOne

@@ -47,6 +47,8 @@ public class Course {
 @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 private Set<OrderDetail> orderDetails;
 
+    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
+    private List<CourseMaintenance> courseMaintenances;
 
 }
 
