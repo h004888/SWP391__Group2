@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "Courses")
@@ -37,5 +38,8 @@ public class Course {
     @ManyToOne
     @JoinColumn(name = "CategoryID")
     private Categories category;
+
+    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
+    private List<Lesson> listOfLessons;
 }
 

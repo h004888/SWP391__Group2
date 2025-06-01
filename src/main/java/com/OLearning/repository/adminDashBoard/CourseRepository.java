@@ -1,6 +1,5 @@
 package com.OLearning.repository.adminDashBoard;
 
-import com.OLearning.dto.adminDashBoard.CourseDTO;
 import com.OLearning.entity.Course;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -8,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface CourseRepo extends JpaRepository<Course, Long> {
+public interface CourseRepository extends JpaRepository<Course, Long> {
 
     @Query("SELECT c FROM Course c WHERE " +
             "(:keyword IS NULL OR LOWER(c.title) LIKE %:keyword%) AND " +
