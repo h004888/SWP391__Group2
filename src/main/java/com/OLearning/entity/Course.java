@@ -43,5 +43,8 @@ public class Course {
     @ManyToOne
     @JoinColumn(name = "CategoryID")
     private Categories category;
+
+    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
+    private List<Lesson> listOfLessons;
 }
 
