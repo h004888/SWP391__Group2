@@ -24,5 +24,4 @@ public class CourseDTO {
     private Integer totalLessons;
     private LocalDateTime createdAt;
     private String status;
-    private Boolean isEdit; //false là tạo mới, true là chỉnh sửa
 }

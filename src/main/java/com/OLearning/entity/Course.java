@@ -13,7 +13,6 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
 public class Course {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,12 +34,13 @@ public class Course {
     @ManyToOne
     @JoinColumn(name = "userId")
     private User instructor;
-
     @ManyToOne
     @JoinColumn(name = "CategoryID")
     private Categories category;
 
+
+
     @OneToMany(mappedBy = "course", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<Lessons> listOfLessons;
+    private List<Chapters> listOfChapters;
 }
 
