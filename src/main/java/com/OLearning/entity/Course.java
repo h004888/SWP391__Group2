@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
 
 @Entity
 @Table(name = "Courses")
@@ -11,7 +13,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
 public class Course {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,11 +29,16 @@ public class Course {
     private Integer totalStudentEnrolled;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Boolean isChecked;
-
+    private String status = "draft";
+    private Boolean canResubmit;
     @ManyToOne
     @JoinColumn(name = "userId")
     private User instructor;
+    @ManyToOne
+    @JoinColumn(name = "CategoryID")
+    private Categories category;
+
+
 
     @ManyToOne
     @JoinColumn(name = "CategoryID")
