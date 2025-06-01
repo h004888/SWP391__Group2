@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -100,6 +99,20 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("You must agree to the Terms of Service and Privacy Policy");
         }
     }
+
+    @Override
+    public void assignRoleToUser(Long userId, String roleName) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Role role = roleRepository.findRoleByName(roleName)
+                .orElseThrow(() -> new RuntimeException("Role not found"));
+
+        user.setRole(role);
+        userRepository.save(user);
+    }
+
+
     @Override
     public List<UserDTO> searchByName(String keyword, Integer roleId) {
         if (roleId != null && roleId == 0) {
@@ -122,7 +135,7 @@ public class UserServiceImpl implements UserService {
         }
         User user = optionalUser.get();
 
-        //Defaut reset password is 12345
+        //Defaut reset password is 123
         String encodedPassword = new BCryptPasswordEncoder().encode("123");
         user.setPassword(encodedPassword);
         userRepository.save(user);

@@ -61,9 +61,8 @@ public class LoginController {
 
         try {
             User savedUser = userServiceImpl.registerAccount(registerDTO);
-            redirectAttributes.addFlashAttribute("success",
-                    "Registration successful! Welcome to OLearning, " + savedUser.getFullName() + "!");
-            return "redirect:/login";
+
+            return "redirect:/select-role?userId=" + savedUser.getUserId();
 
         } catch (RuntimeException e) {
             String errorMessage = e.getMessage();
@@ -83,6 +82,29 @@ public class LoginController {
         } catch (Exception e) {
             model.addAttribute("error", "An unexpected error occurred. Please try again.");
             return "loginPage/signup";
+        }
+    }
+
+
+    @GetMapping("/select-role")
+    public String selectRolePage(@RequestParam("userId") Long userId, Model model) {
+        model.addAttribute("userId", userId);
+        model.addAttribute("roles", userServiceImpl.getListRole());
+        return "loginPage/selectRole";
+    }
+
+    @PostMapping("/assign-role")
+    public String assignRole(@RequestParam("role") String role,
+                             @RequestParam("userId") Long userId,
+                             RedirectAttributes redirectAttributes) {
+        try {
+            userServiceImpl.assignRoleToUser(userId, role);
+            redirectAttributes.addFlashAttribute("success",
+                    "Registration successful! Welcome to OLearning, " + userServiceImpl.getInfoUser(userId).get().getFullName() + "!");
+            return "redirect:/login";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Can not selected role.");
+            return "redirect:/select-role?userId=" + userId;
         }
     }
 

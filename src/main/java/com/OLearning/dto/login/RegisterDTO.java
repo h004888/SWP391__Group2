@@ -26,7 +26,7 @@ public class RegisterDTO {
     //    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).*$",
 //            message = "Password must contain at least one lowercase letter, one uppercase letter, and one digit")
     @NotBlank(message = "Password is required")
-    @Size(min = 3, message = "Password must be at least 8 characters long")
+    @Size(min = 3, message = "Password must be at least 3 characters long")
     private String password;
 
     @NotBlank(message = "Password confirmation is required")

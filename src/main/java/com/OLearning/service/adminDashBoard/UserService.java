@@ -28,4 +28,6 @@ public interface UserService {
     User registerAccount(RegisterDTO registerDTO);
 
     void validateRegistrationData(RegisterDTO registrationDto);
+
+    void assignRoleToUser(Long userId, String roleName) ;
 }
