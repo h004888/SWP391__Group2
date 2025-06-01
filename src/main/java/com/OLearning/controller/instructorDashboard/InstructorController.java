@@ -3,7 +3,7 @@ package com.OLearning.controller.instructorDashboard;
 
 import com.OLearning.dto.instructorDashboard.*;
 import com.OLearning.entity.Course;
-import com.OLearning.service.instructorDashBoard.*;
+import com.OLearning.service.adminDashBoard.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
