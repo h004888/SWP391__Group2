@@ -46,7 +46,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authz -> authz
                                 // Cho phép truy cập public resources
                                 .requestMatchers("/css/**", "/js/**", "/images/**", "/static/**").permitAll()
-                                .requestMatchers("/login", "/register").permitAll()
+                                .requestMatchers("/login", "/register","/select-role","/assign-role").permitAll()
                                 .requestMatchers("/error", "/403").permitAll()
 
                                 // Root path redirect
@@ -54,6 +54,9 @@ public class SecurityConfig {
 
                                 // Chỉ admin mới được truy cập /admin/**
                                 .requestMatchers("/admin/**").hasRole("ADMIN")
+
+                                // Chỉ INSTRUCTOR mới được truy cập /instructordashboard/**
+                                .requestMatchers("/instructordashboard/**").hasRole("INSTRUCTOR")
 
                                 // User có thể truy cập /user/** và /home
 //                        .requestMatchers("/home").hasAnyRole("USER","INSTRUCTOR")

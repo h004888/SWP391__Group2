@@ -21,10 +21,4 @@ public class RegisterMapper {
         return user;
     }
 
-    //set role
-    public User assignRole(User user, Role role) {
-        user.setRole(role);
-        return user;
-    }
-
 }
