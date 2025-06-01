@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "Lessons")
@@ -11,20 +12,21 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
 public class Lessons {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long lessonId;
     private String title;
     private String description;
-    private String contentType;
-    private String content;
-    private String duration;
-    private Boolean IsFree;
-    private LocalDateTime CreatedAt;
-    private LocalDateTime UpdatedAt;
+    private String contentType = "video";
+    private Integer orderNumber;
+    private Boolean isFree;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     @ManyToOne
-    @JoinColumn(name = "courseId")
-    private Course course;
+    @JoinColumn(name = "chapterId")
+    private Chapters chapter;
+
+    @OneToMany(mappedBy="lesson")
+    private List<Video> videos;
 }
