@@ -80,6 +80,10 @@ public class InstructorController {
         //dung co save nua
         Course course = courseService.createCourseStep1(courseStep1.getId(), courseStep1);
         courseStep1.setId(course.getCourseId());
+
+        //chuan luon phai lay ve course id
+        //xong do lai dung service de add het vao o day STEP 2
+        //sau do
         Long courseId = course.getCourseId();
         model.addAttribute("courseId", courseId);
         model.addAttribute("coursestep2", new AddCourseStep2DTO());
