@@ -19,12 +19,12 @@ import java.util.stream.Collectors;
 public class CourseServiceImpl implements CourseService {
 
     private final CourseMapper courseMapper;
-    private final CourseRepository courseRepository;
+    private final CourseRepository courseRepo;
     private final CourseDetailMapper courseDetailMapper;
 
     @Override
     public List<CourseDTO> getAllCourses() {
-        List<Course> courseList = courseRepository.findAll();
+        List<Course> courseList = courseRepo.findAll();
         return courseList.stream()
                 .map(courseMapper::toDTO)
                 .collect(Collectors.toList());
@@ -32,16 +32,16 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public Optional<CourseDetailDTO> getDetailCourse(Long id) {
-        return courseRepository.findById(id).map(courseDetailMapper::toDTO);
+        return courseRepo.findById(id).map(courseDetailMapper::toDTO);
     }
 
     @Override
     public boolean approveCourse(Long id) {
-        return courseRepository.findById(id)
+        return courseRepo.findById(id)
                 .map(course -> {
                     if (!Boolean.TRUE.equals(course.getIsChecked())) {
                         course.setIsChecked(true);
-                        courseRepository.save(course);
+                        courseRepo.save(course);
                         return true;
                     }
                     return false;
@@ -51,11 +51,11 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public boolean rejectCourse(Long id) {
-        return courseRepository.findById(id)
+        return courseRepo.findById(id)
                 .map(course -> {
                     if (!Boolean.TRUE.equals(course.getIsChecked())) {
                         course.setIsChecked(false);
-                        courseRepository.save(course);
+                        courseRepo.save(course);
                         return true;
                     }
                     return false;
@@ -65,8 +65,8 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public boolean deleteCourse(Long id) {
-        if (courseRepository.existsById(id)) {
-            courseRepository.deleteById(id);
+        if (courseRepo.existsById(id)) {
+            courseRepo.deleteById(id);
             return true;
         }
         return false;
@@ -83,7 +83,7 @@ public class CourseServiceImpl implements CourseService {
         if (price != null && price.trim().isEmpty()) price = null;
         if (status != null && status.trim().isEmpty()) status = null;
 
-        return courseRepository.filterCourses(keyword, categoryId, price, status).stream()
+        return courseRepo.filterCourses(keyword, categoryId, price, status).stream()
                 .map(courseMapper::toDTO)
                 .collect(Collectors.toList());
     }

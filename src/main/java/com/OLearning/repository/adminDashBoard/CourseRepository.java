@@ -17,11 +17,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
             "(:price = 'paid' AND c.price > 0) OR " +
             "(:price = 'low' AND c.price < 50) OR " +
             "(:price = 'mid' AND c.price BETWEEN 50 AND 100) OR " +
-            "(:price = 'high' AND c.price > 100)) AND " +
-            "(:status IS NULL OR " +
-            "(:status = 'pending' AND c.isChecked IS NULL) OR " +
-            "(:status = 'approve' AND c.isChecked = TRUE) OR " +
-            "(:status = 'reject' AND c.isChecked = FALSE))")
+            "(:price = 'high' AND c.price > 100)) ")
     List<Course> filterCourses(@Param("keyword") String keyword,
                                   @Param("categoryId") Integer categoryId,
                                   @Param("price") String price,
