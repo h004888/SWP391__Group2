@@ -41,4 +41,5 @@ public class Course {
 
     @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
     private List<Lesson> listOfLessons;
+    
 }
