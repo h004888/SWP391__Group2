@@ -28,7 +28,8 @@ public class CourseDetailDTO {
     private Integer totalStudentEnrolled;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Boolean isChecked;
+    private String status;
+    private Boolean canResubmit;
     private User instructor;
     private Categories category;
 }
