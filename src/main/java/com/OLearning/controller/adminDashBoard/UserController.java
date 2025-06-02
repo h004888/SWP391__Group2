@@ -19,12 +19,11 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("")
+    @GetMapping()
     public String getAdminDashboardPAge(Model model) {
         model.addAttribute("fragmentContent", "adminDashboard/fragments/content :: contentMain");
         return "adminDashboard/index";
     }
-
 
     @GetMapping("/account")
     public String getAccountPage(Model model) {
