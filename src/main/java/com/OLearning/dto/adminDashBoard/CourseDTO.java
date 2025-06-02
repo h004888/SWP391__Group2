@@ -21,6 +21,6 @@ public class CourseDTO {
     private Integer totalLessons;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Boolean isChecked;
+    private String status;
     private Categories category;
 }

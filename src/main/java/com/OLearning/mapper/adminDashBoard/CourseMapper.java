@@ -17,7 +17,7 @@ public class CourseMapper {
                 course.getTotalLessons(),
                 course.getCreatedAt(),
                 course.getUpdatedAt(),
-                course.getIsChecked(),
+                course.getStatus(),
                 course.getCategory()
         );
     }
