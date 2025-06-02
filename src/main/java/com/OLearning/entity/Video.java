@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor
@@ -14,15 +15,19 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class Video {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(nullable = false)
     private String videoUrl;
+
     private String duration;
+
     private LocalDateTime uploadDate;
 
     @ManyToOne
-    @JoinColumn(name="lessonId")
+    @JoinColumn(name = "lessonId")
     private Lessons lesson;
 }

@@ -43,7 +43,8 @@ public class InstructorController {
 
     // dashboard
     @GetMapping("/instructordashboard")
-    public String dashboard() {
+    public String dashboard(Model model) {
+        model.addAttribute("fragmentContent", "instructorDashboard/fragments/content");
         return "instructorDashboard/index";
     }
 

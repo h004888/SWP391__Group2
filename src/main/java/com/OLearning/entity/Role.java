@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
+@ToString(exclude = "users") // ✅ tránh đệ quy vô hạn
 public class Role {
 
     @Id
@@ -22,6 +22,4 @@ public class Role {
 
     @OneToMany(mappedBy = "role")
     private List<User> users;
-
-
 }

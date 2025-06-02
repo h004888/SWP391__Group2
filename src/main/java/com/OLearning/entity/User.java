@@ -28,6 +28,9 @@ public class User {
     private String profilePicture;
     private String personalSkill;
 
+    @OneToMany(mappedBy = "user")
+    private List<Enrollment> enrollments;
+
     @ManyToOne
     @JoinColumn(name = "roleId")
     private Role role;
@@ -39,4 +42,3 @@ public class User {
     private List<BuyPackages> listOfBuyPackage;
 
 }
-
