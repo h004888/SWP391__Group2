@@ -13,7 +13,6 @@ import java.util.List;
 @Setter
 @ToString
 public class Role {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roleId;
@@ -22,6 +21,5 @@ public class Role {
 
     @OneToMany(mappedBy = "role")
     private List<User> users;
-
 
 }
