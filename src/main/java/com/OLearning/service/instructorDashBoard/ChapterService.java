@@ -1,4 +1,4 @@
-package com.OLearning.service.instructorDashBoard;
+package com.OLearning.service.instructorDashboard;
 
 import com.OLearning.dto.instructorDashboard.ChapterDTO;
 import com.OLearning.entity.Chapters;

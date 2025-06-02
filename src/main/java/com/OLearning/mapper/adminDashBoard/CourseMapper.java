@@ -4,7 +4,7 @@ import com.OLearning.dto.adminDashBoard.CourseDTO;
 import com.OLearning.entity.Course;
 import org.springframework.stereotype.Component;
 
-@Component
+@Component("adminCourseMapper")
 public class CourseMapper {
     public CourseDTO toDTO(Course course) {
         if (course == null) return null;
@@ -17,9 +17,9 @@ public class CourseMapper {
                 course.getTotalLessons(),
                 course.getCreatedAt(),
                 course.getUpdatedAt(),
-                course.getIsChecked(),
+                course.getIsChecked(),  
                 course.getCategory()
         );
-    }
+    }   
 
 }

@@ -1,5 +1,5 @@
-package com.OLearning.service.instructorDashBoard;
+package com.OLearning.service.instructorDashboard;
 
-public interface InstructorBuyPackagesService {
+public interface InstructorBuyPackagesService { 
    public Long findIdPackages(Long userId);
 }
