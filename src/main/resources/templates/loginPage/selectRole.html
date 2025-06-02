@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Your Role - Eduverse</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .gradient-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .logo-square {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+<!-- Role Selection Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card shadow-lg border-0">
+                    <div class="row g-0">
+                        <!-- Left side - Decorative Image -->
+                        <div class="col-md-6 d-none d-md-block">
+                            <img src="https://frontends.udemycdn.com/components/auth/desktop-illustration-x1.webp"
+                                 alt="Banner Role Selection" class="img-fluid">
+                        </div>
+                        <!-- Right side - Role Selection -->
+                        <div class="col-md-6">
+                            <div class="p-4 p-md-5">
+                                <div class="d-flex align-items-center gap-2 mb-4">
+                                    <div class="logo-square"></div>
+                                    <span class="fs-4 fw-semibold">Eduverse</span>
+                                </div>
+
+                                <h1 class="fs-2 fw-bold mb-3">Choose Your Role</h1>
+                                <p class="text-muted mb-4">Select how you'd like to use Eduverse to get started</p>
+
+                                <!-- Success Message -->
+                                <div th:if="${success}" class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    <span th:text="${success}"></span>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+
+                                <!-- Error Message -->
+                                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <span th:text="${error}"></span>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+
+                                <!-- Role Selection Form -->
+                                <form th:action="@{/assign-role}" method="post" id="role-form" class="mb-4">
+                                    <!-- Role Selection -->
+                                    <div class="mb-4">
+                                        <label for="role" class="form-label fw-semibold">
+                                            <i class="fas fa-user-tag me-2"></i>Select Your Role
+                                        </label>
+                                        <input type="hidden" name="userId" th:value="${userId}" />
+                                        <select class="form-select form-select-lg" id="role" name="role" required>
+                                            <option value="">Choose your role...</option>
+                                            <!--Don't have role ADMIN for selected-->
+                                            <th:block th:each="r : ${roles}" th:if="${r.roleId != 1}">
+                                                <option th:value="${r.name}" th:text="${r.name}">Role Name</option>
+                                            </th:block>
+
+                                        </select>
+                                        <div class="form-text">
+                                            Don't worry, you can change your role later in account settings.
+                                        </div>
+                                    </div>
+
+                                    <div class="alert alert-danger d-none" id="role-error">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        Please select a role to continue.
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary btn-lg w-100 gradient-btn mb-3" id="continue-button">
+                                        <i class="fas fa-arrow-right me-2"></i>Continue to Dashboard
+                                    </button>
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Bootstrap Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+</body>
+</html>
