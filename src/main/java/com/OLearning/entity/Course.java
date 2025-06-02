@@ -6,11 +6,11 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
 @Entity
 @Table(name = "Courses")
 @NoArgsConstructor
 @AllArgsConstructor
+
 @Getter
 @Setter
 public class Course {
@@ -31,6 +31,7 @@ public class Course {
     private LocalDateTime updatedAt;
     private String status = "draft";
     private Boolean canResubmit;
+    private Boolean isChecked = false;
     @ManyToOne
     @JoinColumn(name = "userId")
     private User instructor;
@@ -38,13 +39,6 @@ public class Course {
     @JoinColumn(name = "CategoryID")
     private Categories category;
 
-
-
-    @ManyToOne
-    @JoinColumn(name = "CategoryID")
-    private Categories category;
-
     @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
     private List<Lesson> listOfLessons;
 }
-

@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Service
+@Service("adminCourseService")
 @RequiredArgsConstructor
 public class CourseServiceImpl implements CourseService {
 
@@ -73,20 +73,22 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public List<CourseDTO> filterCourses(String keyword, Integer categoryId, String price,String status) {
+    public List<CourseDTO> filterCourses(String keyword, Integer categoryId, String price, String status) {
         if (keyword != null && !keyword.trim().isEmpty()) {
             keyword = "%" + keyword.trim().toLowerCase() + "%";
         } else {
             keyword = null;
         }
-        if (categoryId != null && categoryId == 0) categoryId = null;
-        if (price != null && price.trim().isEmpty()) price = null;
-        if (status != null && status.trim().isEmpty()) status = null;
+        if (categoryId != null && categoryId == 0)
+            categoryId = null;
+        if (price != null && price.trim().isEmpty())
+            price = null;
+        if (status != null && status.trim().isEmpty())
+            status = null;
 
         return courseRepository.filterCourses(keyword, categoryId, price, status).stream()
                 .map(courseMapper::toDTO)
                 .collect(Collectors.toList());
     }
-
 
 }

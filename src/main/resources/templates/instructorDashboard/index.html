@@ -15,7 +15,12 @@
     <div id="content-wrapper" class="d-flex flex-column">
 
         <!-- Main Content -->
-
+        <div id="content">
+            <!-- Topbar -->
+            <div th:replace="instructorDashboard/fragments/topbar :: topbar"></div>
+            <!-- End of Topbar -->
+            <div th:replace="~{__${fragmentContent}__}"></div>
+        </div>
         <!-- End of Main Content -->
 
         <!-- Footer -->

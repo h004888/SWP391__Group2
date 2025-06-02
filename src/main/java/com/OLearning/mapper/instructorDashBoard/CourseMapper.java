@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
-@Component
+@Component("instructorCourseMapper")
 public class CourseMapper {
     // Mapper ve de save course
     public Course MapCourseAdd(CourseAddDTO dto) {

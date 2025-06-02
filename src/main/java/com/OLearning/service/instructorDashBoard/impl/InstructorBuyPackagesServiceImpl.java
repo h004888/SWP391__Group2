@@ -1,7 +1,7 @@
-package com.OLearning.service.instructorDashBoard.impl;
+package com.OLearning.service.instructorDashboard.impl;
 
 import com.OLearning.repository.instructorDashBoard.InstructorBuyPackagesRepository;
-import com.OLearning.service.instructorDashBoard.InstructorBuyPackagesService;
+import com.OLearning.service.instructorDashboard.InstructorBuyPackagesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

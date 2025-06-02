@@ -1,4 +1,4 @@
-package com.OLearning.service.instructorDashBoard.impl;
+package com.OLearning.service.instructorDashboard.impl;
 
 import com.OLearning.dto.instructorDashboard.AddCourseStep1DTO;
 import com.OLearning.dto.instructorDashboard.CourseAddDTO;
@@ -11,8 +11,8 @@ import com.OLearning.repository.instructorDashBoard.InstructorCategoryRepo;
 import com.OLearning.repository.instructorDashBoard.InstructorCourseRepo;
 import com.OLearning.repository.instructorDashBoard.InstructorBuyPackagesRepository;
 import com.OLearning.repository.instructorDashBoard.InstructorUserRepo;
-import com.OLearning.service.instructorDashBoard.CourseService;
-import com.OLearning.service.instructorDashBoard.FileHelper.FileHelper;
+import com.OLearning.service.instructorDashboard.CourseService;
+import com.OLearning.service.instructorDashboard.FileHelper.FileHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@Service
+@Service("instructorCourseService")
 public class CourseServiceImpl implements CourseService {
 
     @Autowired

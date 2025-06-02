@@ -1,4 +1,4 @@
-package com.OLearning.service.instructorDashBoard.impl;
+package com.OLearning.service.instructorDashboard.impl;
 
 import com.OLearning.dto.instructorDashboard.CategoryDTO;
 import com.OLearning.dto.instructorDashboard.CourseAddDTO;
@@ -8,7 +8,7 @@ import com.OLearning.entity.Course;
 import com.OLearning.mapper.instructorDashBoard.CourseMapper;
 import com.OLearning.repository.instructorDashBoard.InstructorCategoryRepo;
 import com.OLearning.repository.instructorDashBoard.InstructorCourseRepo;
-import com.OLearning.service.instructorDashBoard.CategoryService;
+import com.OLearning.service.instructorDashboard.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
