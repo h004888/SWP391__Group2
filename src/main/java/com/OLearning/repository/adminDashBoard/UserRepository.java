@@ -12,10 +12,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Boolean existsByEmail(String email);
 
+    List<User> findByRole_RoleId(Long id);
+
     @Query("SELECT u FROM User u WHERE " +
-            "(:keyword IS NULL OR :keyword = '' OR LOWER(u.username) LIKE CONCAT('%', :keyword, '%')) AND " +
-            "(:roleId IS NULL OR u.role.roleId = :roleId)")
-    List<User> searchByKeyword(@Param("keyword") String keyword,
-                               @Param("roleId") Integer roleId);
+            "u.role.roleId = :roleId " +
+            "AND (:keyword IS NULL OR :keyword = '' OR LOWER(u.username) LIKE CONCAT('%', LOWER(:keyword), '%'))")
+    List<User> searchByNameAndRole(@Param("keyword") String keyword, @Param("roleId") Long roleId);
 
 }

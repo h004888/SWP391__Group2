@@ -19,9 +19,12 @@ public interface UserService {
 
     List<Role> getListRole();
 
-    boolean deleteAcc(Long id);
+    List<UserDTO> getUsersByRole(Long roleId);
 
-    List<UserDTO> searchByName(String keyword, Integer roleId);
+//    boolean deleteAcc(Long id);
+    boolean changStatus(Long id);
+
+    List<UserDTO> searchByName(String keyword, Long roleId);
 
     boolean resetPassword(Long id);
 
@@ -29,5 +32,5 @@ public interface UserService {
 
     void validateRegistrationData(RegisterDTO registrationDto);
 
-    void assignRoleToUser(Long userId, String roleName) ;
+    void assignRoleToUser(Long userId, String roleName);
 }

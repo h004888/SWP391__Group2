@@ -53,9 +53,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean deleteAcc(Long id) {
+    public boolean changStatus(Long id) {
         if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
+            Optional<User> user = userRepository.findById(id);
+            user.get().setStatus(!user.get().isStatus());
+            userRepository.save(user.get());
             return true;
         }
         return false;
@@ -63,13 +65,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User registerAccount(RegisterDTO registerDTO) {
-        System.out.println("Starting registration for: " + registerDTO.getEmail());
-
         validateRegistrationData(registerDTO);
-        System.out.println("Validation passed");
-
         User user = registerMapper.toUser(registerDTO);
-        System.out.println("User mapped: " + user.getEmail());
 
         try {
             User savedUser = userRepository.save(user);
@@ -114,15 +111,20 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public List<UserDTO> searchByName(String keyword, Integer roleId) {
-        if (roleId != null && roleId == 0) {
-            roleId = null;
-        }
+    public List<UserDTO> searchByName(String keyword, Long roleId) { // Đổi từ long thành Long
         String processedKeyword = null;
         if (keyword != null && !keyword.trim().isEmpty()) {
             processedKeyword = keyword.trim().toLowerCase();
         }
-        return userRepository.searchByKeyword(processedKeyword, roleId).stream()
+        List<User> users = userRepository.searchByNameAndRole(processedKeyword, roleId);
+        return users.stream()
+                .map(userMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<UserDTO> getUsersByRole(Long roleId) {
+        return userRepository.findByRole_RoleId(roleId).stream()
                 .map(userMapper::toDTO)
                 .collect(Collectors.toList());
     }
