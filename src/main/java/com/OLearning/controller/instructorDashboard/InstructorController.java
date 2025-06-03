@@ -146,17 +146,52 @@ public class InstructorController {
             modelMap.put("courses", courseList);
             return "redirect:/instructordashboard/viewcourse";
         }
-        Long idtemp = courseId;
         Course course = courseService.createCourseStep2(courseId);
         model.addAttribute("course", course);
-
+        model.addAttribute("courseId", courseId);
+        if(course.getPrice() == null) {
+            model.addAttribute("coursestep3", new AddCourseStep3DTO());
+        }
+        else {
+            AddCourseStep3DTO dto = new AddCourseStep3DTO();
+            dto.setPrice(course.getPrice());
+            model.addAttribute("coursestep3", dto);
+        }
         return "instructorDashboard/CreateCourseStep3";
     }
 
 //save all and submit
     @PostMapping("/instructordashboard/viewcourse/addcoursestep4")
-    public String step4() {
+    public String step4(@ModelAttribute("coursestep3") AddCourseStep3DTO courseStep3,
+                        @RequestParam(name="courseId", required = false) Long courseId,
+                        Model model, @RequestParam(name="action") String action,
+                        @RequestParam(name = "id", defaultValue = "2") Long userid, ModelMap modelMap) {
+        if(action.equals("draft")) {
+            Course course = courseService.createCourseStep3(courseId, courseStep3);
+            List<CourseDTO> courseList = courseService.findCourseByUserId(userid);
+            modelMap.put("courses", courseList);
+            return "redirect:/instructordashboard/viewcourse";
+        }
+        Course course = courseService.createCourseStep3(courseId, courseStep3);
+        model.addAttribute("courseId", courseId);
         return "instructorDashboard/CreateCourseStep4";
+    }
+
+    //set status=pending after create = submit with condition
+    @PostMapping("/instructordashboard/viewcourse/submitcourse")
+    public String submitCourse( @RequestParam(name="courseId", required = false) Long courseId,
+                                Model model, @RequestParam(name="action") String action,
+                                @RequestParam(name = "id", defaultValue = "2") Long userid, ModelMap modelMap) {
+        if(action.equals("draft")) {
+            Course course = courseService.submitCourse(courseId, "draft");
+            List<CourseDTO> courseList = courseService.findCourseByUserId(userid);
+            modelMap.put("courses", courseList);
+            return "redirect:/instructordashboard/viewcourse";
+        }
+        Course course = courseService.submitCourse(courseId, "pending");
+        model.addAttribute("course", course);
+        model.addAttribute("courseId", courseId);
+        return "redirect:/instructordashboard/viewcourse"; //in ra cai detail course thi hay hon
     }
 
     //deleteCourse

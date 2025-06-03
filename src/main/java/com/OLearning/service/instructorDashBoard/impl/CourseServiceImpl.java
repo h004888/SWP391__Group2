@@ -1,6 +1,7 @@
 package com.OLearning.service.instructorDashBoard.impl;
 
 import com.OLearning.dto.instructorDashboard.AddCourseStep1DTO;
+import com.OLearning.dto.instructorDashboard.AddCourseStep3DTO;
 import com.OLearning.dto.instructorDashboard.CourseDTO;
 import com.OLearning.entity.*;
 import com.OLearning.mapper.instructorDashBoard.CourseMapper;
@@ -71,8 +72,6 @@ public class CourseServiceImpl implements CourseService {
     public Course createCourseStep1(Long courseId, AddCourseStep1DTO addCourseStep1DTO) {
         Course course = (courseId == null) ? new Course() : findCourseById(courseId);
         courseMapper.Step1(addCourseStep1DTO, course);
-        //no set xong may cai co ban roi
-
         Categories category = instructorCategoryRepo.findByName(addCourseStep1DTO.getCategoryName());
         if (category == null) {
             throw new RuntimeException("not found: " + addCourseStep1DTO.getCategoryName());
@@ -123,6 +122,19 @@ public class CourseServiceImpl implements CourseService {
         course.getListOfChapters().addAll(chapters);
         course.setTotalLessons(totalLessons);
         course.setDuration(totalDuration);
+        return instructorCourseRepo.save(course);
+    }
+    public Course createCourseStep3(Long courseId, AddCourseStep3DTO addCourseStep3DTO) {
+        Course course = (courseId == null) ? new Course() : findCourseById(courseId);
+        courseMapper.Step3(addCourseStep3DTO, course);
+        course.setPrice(addCourseStep3DTO.getPrice());
+        return instructorCourseRepo.save(course);
+    }
+
+    @Override
+    public Course submitCourse(Long courseId, String status) {
+        Course course = (courseId == null) ? new Course() : findCourseById(courseId);
+        course.setStatus(status);
         return instructorCourseRepo.save(course);
     }
 

@@ -63,15 +63,4 @@ public class CourseMapper {
         dto.setCategoryName(course.getCategory().getName());
         return dto;
     }
-    public AddCourseStep2DTO DraftStep2(Course course) {
-        AddCourseStep2DTO dto = new AddCourseStep2DTO();
-        dto.setDuration(course.getDuration());
-        dto.setTotalLessons(course.getTotalLessons());
-        return dto;
-    }
-    public AddCourseStep3DTO DraftStep3(Course course) {
-        AddCourseStep3DTO dto = new AddCourseStep3DTO();
-        dto.setPrice(course.getPrice());
-        return dto;
-    }
 }

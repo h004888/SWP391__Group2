@@ -1,9 +1,6 @@
 package com.OLearning.service.instructorDashBoard;
 
-import com.OLearning.dto.instructorDashboard.AddCourseStep1DTO;
-import com.OLearning.dto.instructorDashboard.AddCourseStep2DTO;
-import com.OLearning.dto.instructorDashboard.CourseAddDTO;
-import com.OLearning.dto.instructorDashboard.CourseDTO;
+import com.OLearning.dto.instructorDashboard.*;
 import com.OLearning.entity.Course;
 
 import java.util.List;
@@ -15,5 +12,7 @@ public interface CourseService {
     Course findCourseById(Long courseId);
     Course createCourseStep1(Long courseId, AddCourseStep1DTO addCourseStep1DTO);
     Course createCourseStep2(Long courseId);
-    public AddCourseStep1DTO draftCourseStep1(Course course);
+    AddCourseStep1DTO draftCourseStep1(Course course);
+    Course createCourseStep3(Long courseId, AddCourseStep3DTO addCourseStep3DTO);
+    Course submitCourse(Long courseId, String status);
 }

@@ -23,14 +23,6 @@
             <h1 class="h3 mb-0">Create New Course</h1>
             <p class="text-muted">Fill in the details below to create your course</p>
           </div>
-          <div>
-            <button class="btn btn-outline-secondary me-2" id="saveDraftBtn">
-              <i class="bi bi-save me-1"></i> Save as Draft
-            </button>
-            <button class="btn btn-primary" id="publishBtn">
-              <i class="bi bi-upload me-1"></i> Publish Course
-            </button>
-          </div>
         </div>
 
         <div class="content-card">
@@ -53,6 +45,7 @@
             </div>
           </div>
         </div>
+        <form th:action="@{/instructordashboard/viewcourse/addcoursestep4}" th:object="${coursestep3}" method="POST">
         <div class="row">
           <div>
             <div class="step-content" id="step-3">
@@ -62,67 +55,23 @@
                 <div class="row mb-4">
                   <div class="col-md-6">
                     <div class="form-floating">
-                      <input type="number" class="form-control" id="coursePrice"
+                      <input th:field="*{price}" type="number" class="form-control" id="coursePrice"
                              placeholder="Course Price" min="0" step="0.01">
+                      <input type="hidden" name="courseId" th:value="${courseId}"/>
                       <label for="coursePrice">Course Price ($)</label>
                     </div>
                   </div>
-                  <div class="col-md-6">
-                    <div class="form-floating">
-                      <input type="number" class="form-control" id="courseDiscount"
-                             placeholder="Discount %" min="0" max="100">
-                      <label for="courseDiscount">Discount (%)</label>
-                    </div>
-                  </div>
                 </div>
 
-                <div class="row mb-4">
-                  <div class="col-12">
-                    <div class="form-check form-switch">
-                      <input class="form-check-input" type="checkbox" id="freeCourse">
-                      <label class="form-check-label" for="freeCourse">
-                        Make this course free
-                      </label>
-                    </div>
-                  </div>
-                </div>
 
-                <div class="row mb-4">
-                  <div class="col-12">
-                    <label class="form-label">Course Language</label>
-                    <select class="form-select" id="courseLanguage">
-                      <option value="english">English</option>
-                      <option value="vietnamese">Vietnamese</option>
-                      <option value="spanish">Spanish</option>
-                      <option value="french">French</option>
-                      <option value="german">German</option>
-                      <option value="chinese">Chinese</option>
-                      <option value="japanese">Japanese</option>
-                    </select>
-                  </div>
-                </div>
 
                 <div class="row mb-4">
                   <div class="col-12">
                     <label class="form-label">Course Settings</label>
                     <div class="form-check">
-                      <input class="form-check-input" type="checkbox" id="enableComments"
-                             checked>
-                      <label class="form-check-label" for="enableComments">
-                        Enable student comments
-                      </label>
-                    </div>
-                    <div class="form-check">
                       <input class="form-check-input" type="checkbox" id="enableQA" checked>
                       <label class="form-check-label" for="enableQA">
                         Enable Q&A section
-                      </label>
-                    </div>
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" id="enableCertificate"
-                             checked>
-                      <label class="form-check-label" for="enableCertificate">
-                        Provide certificate of completion
                       </label>
                     </div>
                   </div>
@@ -132,17 +81,16 @@
 
             <div class="content-card">
               <div class="d-flex justify-content-between">
-                <form th:action="@{/instructordashboard/viewcourse/addcoursestep2}" method="POST">
-<!--                  <input type="hidden" name="id" th:value="${courseId}"/>-->
-                <button class="btn btn-outline-secondary">
+                <button class="btn btn-outline-secondary" name="action" value="previousstep" type="button"
+                        onclick="window.location.href='/instructordashboard/viewcourse/addcoursestep2'">
                   <i class="bi bi-arrow-left me-1"></i> Previous
                 </button>
-                </form>
-                <form th:action="@{/instructordashboard/viewcourse/addcoursestep4}" method="POST">
-                <button class="btn btn-primary ms-auto">
+                  <button class="btn btn-outline-secondary me-2" id="saveDraftBtn" name="action" value="draft">
+                    <i class="bi bi-save me-1"></i> Save as Draft
+                  </button>
+                <button class="btn btn-primary ms-auto" name="action" value="nextstep">
                   Next <i class="bi bi-arrow-right ms-1"></i>
                 </button>
-                </form>
               </div>
             </div>
           </div>
@@ -150,6 +98,7 @@
           <!-- Sidebar -->
 
         </div>
+        </form>
       </div>
     </div>
 
