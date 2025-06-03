@@ -19,8 +19,8 @@ public class Lessons {
     private String title;
     private String description;
     private String contentType = "video";
-    private Integer orderNumber;
-    private String duration;
+    private Integer orderNumber= 0;
+    private Integer duration;
     private Boolean isFree;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

@@ -23,8 +23,8 @@ public class Course {
     private Double price;
     private Double discount;
     private String courseImg;
-    private Integer duration;
-    private Integer totalLessons;
+    private Integer duration; //step 2 //lay tu o trong
+    private Integer totalLessons;//step 2
     private Integer totalRatings;
     private Integer totalStudentEnrolled;
     private LocalDateTime createdAt;
@@ -37,9 +37,6 @@ public class Course {
     @ManyToOne
     @JoinColumn(name = "CategoryID")
     private Categories category;
-
-
-
     @OneToMany(mappedBy = "course", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Chapters> listOfChapters;
 }

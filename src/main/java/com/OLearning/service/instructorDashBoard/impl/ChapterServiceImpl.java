@@ -3,10 +3,12 @@ package com.OLearning.service.instructorDashBoard.impl;
 import com.OLearning.dto.instructorDashboard.ChapterDTO;
 import com.OLearning.entity.Chapters;
 import com.OLearning.entity.Course;
+import com.OLearning.entity.Lessons;
 import com.OLearning.mapper.instructorDashBoard.ChapterMapper;
 import com.OLearning.repository.instructorDashBoard.ChapterRepository;
 import com.OLearning.service.instructorDashBoard.ChapterService;
 import com.OLearning.service.instructorDashBoard.CourseService;
+import com.OLearning.service.instructorDashBoard.LessonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

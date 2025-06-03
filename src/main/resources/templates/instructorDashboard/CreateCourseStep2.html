@@ -30,7 +30,6 @@
 
                 </div>
 
-                <!-- Step Indicator -->
                 <div class="content-card">
                     <div class="step-indicator">
                         <div class="step completed" data-step="1">
@@ -51,111 +50,122 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="row">
-                    <div class="col-lg-6">
+                    <div class="col-lg-12">
                         <div class="container form-container">
-                            <h3 class="form-title">Add Chapter</h3>
-                            <form th:action="@{/instructordashboard/viewcourse/chaptersadd}" th:object="${chapter}" method="post">
+                            <h3 class="form-title">Chapters & Lessons</h3>
+                            <form th:action="@{/instructordashboard/viewcourse/chaptersadd}" th:object="${chapter}" method="post" class="mb-4">
                                 <div class="mb-3">
                                     <label class="form-label">Title*</label>
-                                    <input type="text" th:field="*{title}" class="form-control" name="title" required>
+                                    <input type="text" th:field="*{title}" class="form-control" required>
                                     <input type="hidden" name="courseId" th:value="${chapter.courseId}">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Description*</label>
-                                    <textarea class="form-control" th:field="*{description}" name="description" rows="3"></textarea>
+                                    <textarea class="form-control" th:field="*{description}" rows="3"></textarea>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Order Number Chapter*</label>
-                                    <input type="number" th:field="*{ordernNumber}" class="form-control" name="orderNumber">
+                                    <input type="number" th:field="*{ordernNumber}" class="form-control">
                                 </div>
-                                <button type="submit" class="btn btn-custom">Save</button>
+                                <button type="submit" class="btn btn-custom">Add Chapter</button>
                             </form>
+
+                            <div th:if="${!#lists.isEmpty(chapters)}">
+                                <div th:each="chapter : ${chapters}" class="mb-4">
+                                    <div class="chapter-card p-3">
+                                        <h4 th:text="${chapter.title}">Chapter Title</h4>
+                                        <p th:text="${chapter.description}"></p>
+                                        <ul th:if="${chapter.lessons != null}">
+                                            <li th:each="lesson : ${chapter.lessons}">
+                                                <a href="#" th:text="${lesson.title}" th:attr="data-videoid=${lesson.video.videoUrl}" class="lesson-video-link">Lesson Title</a>
+                                            </li>
+                                        </ul>
+                                        <button class="btn btn-sm btn-primary mt-2" type="button"
+                                                th:attr="data-chapterid=${chapter.id}"
+                                                onclick="showLessonForm(this)">
+                                            Add Lesson
+                                        </button>
+                                        <form th:action="@{/instructordashboard/viewcourse/lessonadd}" th:object="${lessonDTO}" method="post"
+                                              class="lesson-form mt-3" style="display:none;"
+                                              th:attr="data-chapterid=${chapter.id}">
+                                            <input type="hidden" name="chapterId" th:value="${chapter.id}">
+                                            <div class="mb-2">
+                                                <label class="form-label">Title*</label>
+                                                <input type="text" th:field="*{title}" class="form-control" required>
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label">Description*</label>
+                                                <textarea class="form-control" th:field="*{description}" rows="2"></textarea>
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label">Video*</label>
+                                                <input type="text" th:field="*{videoUrl}" class="form-control">
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label">Duration*</label>
+                                                <input type="text" th:field="*{duration}" class="form-control">
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label">Order Number*</label>
+                                                <input type="number" th:field="*{orderNumber}" class="form-control">
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label d-block">Is Free?</label>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" th:field="*{isFree}" type="radio" value="true">
+                                                    <label class="form-check-label">YES</label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" th:field="*{isFree}" type="radio" value="false">
+                                                    <label class="form-check-label">NO</label>
+                                                </div>
+                                            </div>
+                                            <button type="submit" class="btn btn-success btn-sm">Save Lesson</button>
+                                            <button type="button" class="btn btn-secondary btn-sm" onclick="hideLessonForm(this)">Cancel</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Form Add Lesson -->
-                    <div class="col-lg-6">
-                        <div class="container form-container">
-                            <h3 class="form-title">Add Lesson</h3>
-                            <form th:action="@{/instructordashboard/viewcourse/lessonadd}" th:object="${lessonDTO}" method="post">
-                                <div class="mb-3">
-                                    <label class="form-label">Choose Chapter*</label>
-                                    <select name="chapterId" th:field="*{chapterId}" class="form-select" required>
-                                        <option value="">Select Chapters</option>
-                                        <option th:each="chapter : ${chapters}" th:value="${chapter.id}"
-                                                th:text="${chapter.title}">
-                                        </option>
-                                    </select>
+                    <div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="videoModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="videoModalLabel">Lesson Video</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                                            onclick="stopVideo()"></button>
                                 </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Title*</label>
-                                    <input type="text" th:field="*{title}" class="form-control" name="title" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Description*</label>
-                                    <textarea class="form-control" th:field="*{description}" name="description" rows="3"></textarea>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Video*</label>
-                                    <input type="text" th:field="*{videoUrl}" class="form-control" name="videoUrl">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Duration*</label>
-                                    <input type="text" th:field="*{duration}" class="form-control" name="duration">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Order Number*</label>
-                                    <input type="number" th:field="*{orderNumber}" class="form-control" name="orderNumber">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label d-block">Is Free?</label>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" th:field="*{isFree}" type="radio" name="isFree" id="freeYes"
-                                               value="true">
-                                        <label class="form-check-label" for="freeYes">YES</label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" th:field="*{isFree}" type="radio" name="isFree" id="freeNo"
-                                               value="false">
-                                        <label class="form-check-label" for="freeNo">NO</label>
+                                <div class="modal-body d-flex justify-content-center">
+                                    <div style="width: 100%; max-width: 800px; aspect-ratio: 16/9;">
+                                        <iframe id="lessonVideoIframe"
+                                                style="width: 100%; height: 100%; border-radius: 12px;"
+                                                frameborder="0"
+                                                allowfullscreen></iframe>
                                     </div>
                                 </div>
-                                <button type="submit" class="btn btn-custom">Save</button>
-                            </form>
+                            </div>
                         </div>
                     </div>
-
-
-                    <h3>Chapters and Lessons</h3>
-                    <div th:each="ch : ${chapters}">
-                        <h4 th:text="${ch.title}">Chapter Title</h4>
-                        <ul>
-                            <li th:each="lesson : ${ch.lessons}">
-                                <span th:text="${lesson.title}">Lesson Title</span> -
-                                <a th:href="${lesson.videoUrl}" target="_blank">Watch Video</a>
-                            </li>
-                            <li th:if="${#lists.isEmpty(ch.lessons)}">No lessons yet.</li>
-                        </ul>
-                    </div>
-
 
 
                     <div id="chaptersContainer">
                         <div class="content-card">
                             <div class="d-flex justify-content-between">
                                 <form th:action="@{/instructordashboard/viewcourse/addcoursestep1}" method="GET">
-                                    <input type="hidden" name="id" th:value="${courseId}"/>
+                                    <input type="hidden" name="courseId" th:value="${courseId}"/>
                                     <button class="btn btn-outline-secondary">
                                         <i class="bi bi-arrow-left me-1"></i> Previous
                                     </button>
                                 </form>
-                                <button class="btn btn-outline-secondary me-2" id="saveDraftBtn">
+                                <form th:action="@{/instructordashboard/viewcourse/addcoursestep3}" method="POST">
+                                <button class="btn btn-outline-secondary me-2" name="action" value="draft" id="saveDraftBtn">
                                     <i class="bi bi-save me-1"></i> Save as Draft
                                 </button>
-                                <form th:action="@{/instructordashboard/viewcourse/addcoursestep3}" method="POST">
-                                    <button class="btn btn-primary">
+                                    <input type="hidden" name="courseId" th:value="${courseId}"/>
+                                    <button class="btn btn-primary" name="action" value="nextstep">
                                         Next <i class="bi bi-arrow-right ms-1"></i>
                                     </button>
                                 </form>
@@ -163,8 +173,6 @@
                         </div>
                     </div>
                 </div>
-
-
             </div>
         </div>
 
@@ -652,5 +660,37 @@
         background-color: #1d4ed8;
     }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.lesson-video-link').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                var videoId = this.getAttribute('data-videoid');
+                var iframe = document.getElementById('lessonVideoIframe');
+                iframe.src = "https://www.youtube.com/embed/" + videoId;
+                var modal = new bootstrap.Modal(document.getElementById('videoModal'));
+                modal.show();
+            });
+        });
+    });
+
+    function stopVideo() {
+        document.getElementById('lessonVideoIframe').src = "";
+    }
+    function showLessonForm(btn) {
+        var chapterId = btn.getAttribute('data-chapterid');
+        document.querySelectorAll('.lesson-form').forEach(function(form) {
+            if (form.getAttribute('data-chapterid') === chapterId) {
+                form.style.display = 'block';
+            } else {
+                form.style.display = 'none';
+            }
+        });
+    }
+    function hideLessonForm(btn) {
+        btn.closest('.lesson-form').style.display = 'none';
+    }
+</script>
 </body>
 </html>

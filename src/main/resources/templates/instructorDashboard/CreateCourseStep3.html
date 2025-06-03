@@ -132,12 +132,13 @@
 
             <div class="content-card">
               <div class="d-flex justify-content-between">
-                <form th:action="@{/instructordashboard/viewcourse/addcourse/step2}" method="GET">
+                <form th:action="@{/instructordashboard/viewcourse/addcoursestep2}" method="POST">
+<!--                  <input type="hidden" name="id" th:value="${courseId}"/>-->
                 <button class="btn btn-outline-secondary">
                   <i class="bi bi-arrow-left me-1"></i> Previous
                 </button>
                 </form>
-                <form th:action="@{/instructordashboard/viewcourse/addcourse/step4}" method="GET">
+                <form th:action="@{/instructordashboard/viewcourse/addcoursestep4}" method="POST">
                 <button class="btn btn-primary ms-auto">
                   Next <i class="bi bi-arrow-right ms-1"></i>
                 </button>

@@ -1,12 +1,11 @@
 package com.OLearning.mapper.instructorDashBoard;
 
-import com.OLearning.dto.instructorDashboard.AddCourseStep1DTO;
-import com.OLearning.dto.instructorDashboard.AddCourseStep2DTO;
-import com.OLearning.dto.instructorDashboard.CourseAddDTO;
+import com.OLearning.dto.instructorDashboard.*;
 import com.OLearning.entity.Categories;
 import com.OLearning.entity.Course;
 import com.OLearning.repository.instructorDashBoard.InstructorCategoryRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -28,10 +27,32 @@ public class CourseMapper {
         course.setDuration(0);
         return course;
     }
+    public CourseDTO MapCourseDTO(Course course) {
+        CourseDTO courseDTO = new CourseDTO();
+        courseDTO.setCourseId(course.getCourseId());
+        courseDTO.setCourseImg(course.getCourseImg());
+        courseDTO.setTitle(course.getTitle());
+        courseDTO.setCreatedAt(course.getCreatedAt());
+        courseDTO.setPrice(course.getPrice());
+        courseDTO.setDuration(course.getDuration());
+        courseDTO.setDiscount(course.getDiscount());
+        courseDTO.setTotalLessons(course.getTotalLessons());
+        courseDTO.setStatus(course.getStatus());
+        return courseDTO;
+    }
     public Course Step1(AddCourseStep1DTO dto, Course course) {
         course.setTitle(dto.getTitle());
         course.setDescription(dto.getDescription());
         course.setCreatedAt(LocalDateTime.now());
+        return course;
+    }
+    public Course Step2(Course course) {
+        course.setUpdatedAt(LocalDateTime.now());
+        return course;
+    }
+    public Course Step3(AddCourseStep3DTO dto, Course course) {
+        course.setPrice(dto.getPrice());
+        course.setUpdatedAt(LocalDateTime.now());
         return course;
     }
     public AddCourseStep1DTO DraftStep1(Course course) {
@@ -40,6 +61,17 @@ public class CourseMapper {
         dto.setTitle(course.getTitle());
         dto.setDescription(course.getDescription());
         dto.setCategoryName(course.getCategory().getName());
+        return dto;
+    }
+    public AddCourseStep2DTO DraftStep2(Course course) {
+        AddCourseStep2DTO dto = new AddCourseStep2DTO();
+        dto.setDuration(course.getDuration());
+        dto.setTotalLessons(course.getTotalLessons());
+        return dto;
+    }
+    public AddCourseStep3DTO DraftStep3(Course course) {
+        AddCourseStep3DTO dto = new AddCourseStep3DTO();
+        dto.setPrice(course.getPrice());
         return dto;
     }
 }

@@ -13,7 +13,7 @@ public class LessonDTO {
     private String title;
     private String description;
     private Integer orderNumber;
-    private String duration;
+    private Integer duration;
     private Boolean isFree;
     private Long chapterId;
     private String videoUrl;

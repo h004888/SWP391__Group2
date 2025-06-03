@@ -4,6 +4,7 @@ package com.OLearning.controller.instructorDashboard;
 import com.OLearning.dto.instructorDashboard.*;
 import com.OLearning.entity.Chapters;
 import com.OLearning.entity.Course;
+import com.OLearning.entity.Lessons;
 import com.OLearning.service.instructorDashBoard.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -59,7 +60,8 @@ public class InstructorController {
     //NEXT step 2 and save step 1 or draf
     @PostMapping("/instructordashboard/viewcourse/addcoursestep2")
     public String SaveStep1NextToStep2(
-            @ModelAttribute("coursestep1") AddCourseStep1DTO courseStep1, @RequestParam(name = "id", defaultValue = "2") Long id, @RequestParam(name="action") String action,  Model model,
+            @ModelAttribute("coursestep1") AddCourseStep1DTO courseStep1, @RequestParam(name = "id", defaultValue = "2") Long id,
+            @RequestParam(name="action") String action,  Model model,
             ModelMap modelMap) {
 
         if(action.equals("draft")) { //khi nay la draft khi o step 1
@@ -69,20 +71,23 @@ public class InstructorController {
             modelMap.put("courses", courseList);
             return "redirect:/instructordashboard/viewcourse";
         }
-        //dung co save nua, save lan dau
         Course course = courseService.createCourseStep1(courseStep1.getId(), courseStep1);
         courseStep1.setId(course.getCourseId());
         Long courseId = course.getCourseId();
-        //new code step 2
+        model.addAttribute("courseId", courseId);
         ChapterDTO chapterDTO = new ChapterDTO();
         chapterDTO.setCourseId(courseId);
         model.addAttribute("chapter", chapterDTO);
-        //new code
         List<Chapters> chapters = chapterService.chapterListByCourse(courseId);
-        if(chapters != null && chapters.size() > 0) {
+        for(Chapters chapter : chapters) {
+            List<Lessons> lessons = lessonService.findLessonsByChapterId(chapter.getId());
+            if(lessons != null && lessons.size() > 0) {
+                chapter.setLessons(lessons);
+            }
+        }
+        if (chapters != null && !chapters.isEmpty()) {
             model.addAttribute("chapters", chapters);
         }
-        //new code add lesson
         model.addAttribute("lessonDTO", new LessonDTO());
         return "instructorDashboard/CreateCourseStep2";
     }
@@ -117,37 +122,47 @@ public class InstructorController {
         model.addAttribute("chapter", chapterDTO);
 
         List<Chapters> chapters = chapterService.chapterListByCourse(courseId);
+        for(Chapters chapter : chapters) {
+            List<Lessons> lessons = lessonService.findLessonsByChapterId(chapter.getId());
+            if(lessons != null && lessons.size() > 0) {
+                chapter.setLessons(lessons);
+            }
+        }
         if (chapters != null && !chapters.isEmpty()) {
             model.addAttribute("chapters", chapters);
         }
-
+        model.addAttribute("courseId", courseId);
         model.addAttribute("lessonDTO", new LessonDTO());
         return "instructorDashboard/CreateCourseStep2";
     }
+//save step 2 and next step 3
+    @PostMapping("/instructordashboard/viewcourse/addcoursestep3")
+    public String step3(@RequestParam(name="courseId", required = false) Long courseId,
+                        Model model, @RequestParam(name="action") String action,
+    @RequestParam(name = "id", defaultValue = "2") Long userid, ModelMap modelMap) {
+        if(action.equals("draft")) { //khi nay la draft khi o step 2
+            Course course = courseService.createCourseStep2(courseId);
+            List<CourseDTO> courseList = courseService.findCourseByUserId(userid);
+            modelMap.put("courses", courseList);
+            return "redirect:/instructordashboard/viewcourse";
+        }
+        Long idtemp = courseId;
+        Course course = courseService.createCourseStep2(courseId);
+        model.addAttribute("course", course);
 
-    @PostMapping("/instructordashboard/viewcourse/addcourse/step3")
-    public String step3() {
         return "instructorDashboard/CreateCourseStep3";
     }
-    @PostMapping("/instructordashboard/viewcourse/addcourse/step4")
+
+//save all and submit
+    @PostMapping("/instructordashboard/viewcourse/addcoursestep4")
     public String step4() {
         return "instructorDashboard/CreateCourseStep4";
     }
+
     //deleteCourse
     @PostMapping("/instructordashboard/viewcourse/deletecourse/{id}")
     public String deleteCourse(@PathVariable Long id) {
         courseService.deleteCourse(id);
         return "redirect:/instructordashboard/viewcourse";
-    }
-    //update Course
-    @GetMapping("/instructordashboard/viewcourse/updatecourse/{id}")
-    public String updateCourseById(@PathVariable Long id, Model model) {
-        //bay gio minh se fill course by id
-        Course course = courseService.findCourseById(id);
-        model.addAttribute("course", course);
-        model.addAttribute("courseAddDTO", new CourseAddDTO());
-        model.addAttribute("categories", categoryService.findAll());
-        return "instructorDashboard/updateCourse";
-        //xong minh de gan no vao giao dien chinh qua cai Course
     }
 }

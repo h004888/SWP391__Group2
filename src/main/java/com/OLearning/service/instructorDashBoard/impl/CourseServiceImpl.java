@@ -1,16 +1,11 @@
 package com.OLearning.service.instructorDashBoard.impl;
 
 import com.OLearning.dto.instructorDashboard.AddCourseStep1DTO;
-import com.OLearning.dto.instructorDashboard.CourseAddDTO;
 import com.OLearning.dto.instructorDashboard.CourseDTO;
-import com.OLearning.entity.Categories;
-import com.OLearning.entity.Course;
-import com.OLearning.entity.User;
+import com.OLearning.entity.*;
 import com.OLearning.mapper.instructorDashBoard.CourseMapper;
-import com.OLearning.repository.instructorDashBoard.InstructorCategoryRepo;
-import com.OLearning.repository.instructorDashBoard.InstructorCourseRepo;
-import com.OLearning.repository.instructorDashBoard.InstructorBuyPackagesRepository;
-import com.OLearning.repository.instructorDashBoard.InstructorUserRepo;
+import com.OLearning.repository.adminDashBoard.CourseRepo;
+import com.OLearning.repository.instructorDashBoard.*;
 import com.OLearning.service.instructorDashBoard.CourseService;
 import com.OLearning.service.instructorDashBoard.FileHelper.FileHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,30 +35,14 @@ public class CourseServiceImpl implements CourseService {
     private InstructorCategoryRepo instructorCategoryRepo;
     @Autowired
     private InstructorUserRepo instructorUserRepo;
-//    @Override
-//    public boolean canCreateCourse(Long userId) {
-//        List<Long> result = buyPackageRepository.findValidPackagesByUserId(userId);
-//        return !result.isEmpty();
-//        //if emty => false
-//        //else true
-//    }
-
+    private CourseRepo courseRepo;
 
     @Override
     public List<CourseDTO> findCourseByUserId(Long userId) {
         List<Course> listCourseRepo = instructorCourseRepo.findByInstructorUserId(userId);
         List<CourseDTO> courseDTOList = new ArrayList<>();
         for (Course course : listCourseRepo) {
-            CourseDTO courseDTO = new CourseDTO();
-            courseDTO.setCourseId(course.getCourseId());
-            courseDTO.setCourseImg(course.getCourseImg());
-            courseDTO.setTitle(course.getTitle());
-            courseDTO.setCreatedAt(course.getCreatedAt());
-            courseDTO.setPrice(course.getPrice());
-            courseDTO.setDuration(course.getDuration());
-            courseDTO.setDiscount(course.getDiscount());
-            courseDTO.setTotalLessons(course.getTotalLessons());
-            courseDTO.setStatus(course.getStatus());
+            CourseDTO courseDTO = courseMapper.MapCourseDTO(course);
             if (course.getCategory() != null) {
                 courseDTO.setCategoryName(course.getCategory().getName());
             } else {
@@ -120,6 +99,30 @@ public class CourseServiceImpl implements CourseService {
         }
         course.setInstructor(instructor);
         course.setCategory(category);
+        return instructorCourseRepo.save(course);
+    }
+    @Autowired
+    ChapterRepository chapterRepo;
+    @Autowired
+    LessonRepository lessonRepo;
+    @Override
+    public Course createCourseStep2(Long courseId) {
+        Course course = (courseId == null) ? new Course() : findCourseById(courseId);
+        courseMapper.Step2(course);
+        int totalLessons = 0;
+        int totalDuration = 0;
+        List<Chapters> chapters = chapterRepo.findChaptersByCourse(courseId); //tim ra list chapter
+        for (Chapters chapter : chapters) {
+            List<Lessons> lessons = chapter.getLessons();
+            totalLessons += lessons.size();
+            for (Lessons lesson : lessons) {
+                totalDuration += lesson.getDuration() != null ? lesson.getDuration() : 0; //can lam lai
+            }
+        }
+        course.getListOfChapters().clear();
+        course.getListOfChapters().addAll(chapters);
+        course.setTotalLessons(totalLessons);
+        course.setDuration(totalDuration);
         return instructorCourseRepo.save(course);
     }
 

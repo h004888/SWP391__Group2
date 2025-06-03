@@ -22,7 +22,7 @@ public class Chapters {
     @Column(nullable = false)
     private String title;
     private String description;
-    private Integer orderNumber; //stt chuong trong khoa hoc
+    private Integer orderNumber=0; //stt chuong trong khoa hoc
     private LocalDateTime createAt;
     private LocalDateTime updateAt;
 

@@ -9,10 +9,12 @@ import com.OLearning.repository.instructorDashBoard.LessonRepository;
 import com.OLearning.repository.instructorDashBoard.VideoRepository;
 import com.OLearning.service.instructorDashBoard.ChapterService;
 import com.OLearning.service.instructorDashBoard.LessonService;
+import com.OLearning.service.instructorDashBoard.VideoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class LessonServiceImpl implements LessonService {
@@ -23,17 +25,21 @@ public class LessonServiceImpl implements LessonService {
     @Autowired
     private ChapterService chapterService;
     @Autowired
-    private VideoRepository videoRepository;
+    private VideoService videoService;
     @Override
     public Lessons createLesson(LessonDTO lessonDTO) {
         Lessons lesson = lessonMapper.DtoToLesson(lessonDTO);
         Chapters chapter = chapterService.getChapterById(lessonDTO.getChapterId());
         lesson.setChapter(chapter);
-        Video video = new Video();
-        video.setVideoUrl(lessonDTO.getVideoUrl());
-        video.setUploadDate(LocalDateTime.now());
+        lesson.setCreatedAt(LocalDateTime.now());
+        lesson.setUpdatedAt(LocalDateTime.now());
+        Video video = videoService.createVideo(lessonDTO.getVideoUrl());
         lesson.setVideo(video);
-        videoRepository.save(video);
         return lessonRepository.save(lesson);
+    }
+
+    @Override
+    public List<Lessons> findLessonsByChapterId(Long chapterId) {
+        return lessonRepository.findByChapterId(chapterId);
     }
 }
