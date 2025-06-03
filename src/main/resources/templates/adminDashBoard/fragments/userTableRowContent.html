@@ -1,0 +1,44 @@
+<!-- Fragment for table rows only - accountContent.html -->
+<th:block th:fragment="userTableRows">
+    </style>
+    <tr th:each="u : ${listU}">
+        <td th:text="${u.userId}"></td>
+        <td th:text="${u.userName}"></td>
+        <td th:text="${u.email}"></td>
+        <td th:text="${u.roleName}"></td>
+        <td>
+           <span th:class="'badge rounded-pill px-3 py-2 ' + (${u.status} ? 'bg-success' : 'bg-danger')"
+          th:text="${u.status} ? 'Active' : 'Inactive'">
+           </span>
+        </td>
+
+        </td>
+        <td style="white-space: nowrap;">
+            <a th:href="@{/admin/account/viewInfo/{userId}(userId=${u.userId})}"
+               class="btn btn-info btn-sm" title="View">
+                <i class="fas fa-eye"></i>
+            </a>
+            <!-- Nếu đang active thì hiển thị nút block -->
+            <a th:if="${u.status}"
+               th:href="@{/admin/account/block/{userId}(userId=${u.userId})}"
+               class="btn btn-danger btn-sm"
+               title="Blocked">
+                <i class="fas fa-lock"></i>
+            </a>
+            <!-- Nếu đang inactive thì hiển thị nút active -->
+            <a th:unless="${u.status}"
+               th:href="@{/admin/account/block/{userId}(userId=${u.userId})}"
+               class="btn btn-warning btn-sm"
+               title="Activate">
+                <i class="fas fa-unlock"></i>
+            </a>
+        </td>
+        <td style="white-space: nowrap;">
+            <a th:attr="data-userid=${u.userId}"
+               class="btn btn-success btn-sm btn-reset-password"
+               title="Reset Password">
+                <i class="fas fa-key"></i>
+            </a>
+        </td>
+    </tr>
+</th:block>

@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,11 +38,22 @@ public class UserController {
     @GetMapping("/account/filter")
     public String filterAccounts(
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false, name = "role") Integer roleId,
+            @RequestParam(required = false, name = "role") Long roleId,
             Model model) {
-        List<UserDTO> listU = userService.searchByName(keyword, roleId);
+
+        if (roleId == null) {
+            model.addAttribute("listU", List.of());
+            return "adminDashBoard/fragments/userTableRowContent :: userTableRows";
+        }
+        List<UserDTO> listU;
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            listU = userService.searchByName(keyword.trim(), roleId);
+        } else {
+            listU = userService.getUsersByRole(roleId);
+        }
         model.addAttribute("listU", listU);
-        return "adminDashBoard/fragments/accountContent :: userTableBody";
+        return "adminDashBoard/fragments/userTableRowContent :: userTableRows";
     }
 
     @GetMapping("/account/viewInfo/{userId}")
@@ -59,10 +69,10 @@ public class UserController {
         }
     }
 
-    @GetMapping("/account/delete/{userId}")
+    @GetMapping("/account/block/{userId}")
     public String deleteAccount(Model model,@PathVariable("userId") long id) {
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/accountContent :: accountContent");
-        userService.deleteAcc(id);
+        userService.changStatus(id);
         return "redirect:/admin/account";
     }
 

@@ -28,6 +28,7 @@ public class User {
     private String address;
     private String profilePicture;
     private String personalSkill;
+    private boolean status;//new
 
     @ManyToOne
     @JoinColumn(name = "roleId")
@@ -36,7 +37,7 @@ public class User {
     @OneToMany(mappedBy = "instructor")
     private List<Course> courses;
 
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Orders> orders;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
