@@ -31,7 +31,6 @@ public class Course {
     private LocalDateTime updatedAt;
     private String status = "draft";
     private Boolean canResubmit;
-    private Boolean isChecked = false;
     @ManyToOne
     @JoinColumn(name = "userId")
     private User instructor;

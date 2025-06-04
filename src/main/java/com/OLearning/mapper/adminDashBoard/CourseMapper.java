@@ -7,7 +7,8 @@ import org.springframework.stereotype.Component;
 @Component("adminCourseMapper")
 public class CourseMapper {
     public CourseDTO toDTO(Course course) {
-        if (course == null) return null;
+        if (course == null)
+            return null;
 
         return new CourseDTO(
                 course.getCourseId(),
@@ -17,9 +18,7 @@ public class CourseMapper {
                 course.getTotalLessons(),
                 course.getCreatedAt(),
                 course.getUpdatedAt(),
-                course.getIsChecked(),  
-                course.getCategory()
-        );
-    }   
+                course.getCategory());
+    }
 
 }

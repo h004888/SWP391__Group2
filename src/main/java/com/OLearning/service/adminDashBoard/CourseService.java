@@ -15,13 +15,7 @@ public interface CourseService {
 
     Optional<CourseDetailDTO> getDetailCourse(Long id);
 
-    boolean approveCourse(Long id);
-
-
-    boolean rejectCourse(Long id);
-
-
     boolean deleteCourse(Long id);
 
-    List<CourseDTO> filterCourses(String keyword, Integer categoryId, String price,String status);
+    List<CourseDTO> filterCourses(String keyword, Integer categoryId, String price, String status);
 }

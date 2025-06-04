@@ -1,0 +1,25 @@
+<div th:fragment="showMore">
+    <h2 class="mb-0">Category detail : <strong th:text="${category.name}"></strong></h2>
+    </h2>
+
+    <table class="table table-striped table-hover table-bordered" id="categoryTable" th:fragment="showMoreTable">
+        <thead>
+            <tr>
+                <th>STT<i class="fa fa-sort"></i></th>
+                <th>Course Name</th>
+                <th>Number of Student</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="course,stat : ${coursesList}">
+                <td th:text="${stat.index + 1}"></td>
+                <td th:text="${course.title}"></td>
+                <td>
+                    <a th:href="@{/admin/categories/edit(id=${category.id}, page=${currentPage}, sort=${sort}, name=${name})}"
+                        class="edit" title="Edit" data-toggle="tooltip"><i class="material-icons">&#xE254;</i></a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
