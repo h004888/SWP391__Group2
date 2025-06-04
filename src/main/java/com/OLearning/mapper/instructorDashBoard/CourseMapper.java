@@ -33,6 +33,7 @@ public class CourseMapper {
         courseDTO.setCourseImg(course.getCourseImg());
         courseDTO.setTitle(course.getTitle());
         courseDTO.setCreatedAt(course.getCreatedAt());
+        courseDTO.setUpdatedAt(course.getUpdatedAt());
         courseDTO.setPrice(course.getPrice());
         courseDTO.setDuration(course.getDuration());
         courseDTO.setDiscount(course.getDiscount());

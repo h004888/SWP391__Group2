@@ -98,7 +98,8 @@
             <div class="content-card">
               <div class="d-flex justify-content-between">
                 <form th:action="@{/instructordashboard/viewcourse/addcoursestep3}" method="POST">
-                <button class="btn btn-outline-secondary">
+                <button class="btn btn-outline-secondary" name="action" value="previousstep3">
+                  <input type="hidden" name="courseId" th:value="${courseId}"/>
                   <i class="bi bi-arrow-left me-1"></i> Previous
                 </button>
                 </form>

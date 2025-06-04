@@ -23,5 +23,6 @@ public class CourseDTO {
     private String categoryName;
     private Integer totalLessons;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private String status;
 }
