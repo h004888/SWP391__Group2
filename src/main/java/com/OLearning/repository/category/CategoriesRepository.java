@@ -1,6 +1,7 @@
 package com.OLearning.repository.category;
 
 import com.OLearning.entity.Categories;
+import com.OLearning.entity.Enrollment;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,4 +38,9 @@ public interface CategoriesRepository extends JpaRepository<Categories, Integer>
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Categories c SET c.name = :name WHERE c.id = :id")
     void updateCategory(@Param("id") int id, @Param("name") String name);
+
+    int countNumberCoursesByCategoryId(int categoryId);
+
+    int countNumberEnrollmentsByCategoryId(int categoryId);
+
 }

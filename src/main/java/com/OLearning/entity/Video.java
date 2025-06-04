@@ -29,5 +29,9 @@ public class Video {
 
     @ManyToOne
     @JoinColumn(name = "lessonId")
-    private Lessons lesson;
+    private Lesson lesson;
+
+    @ManyToOne
+    @JoinColumn(name = "LessonID")
+    private Lesson videoLesson;
 }

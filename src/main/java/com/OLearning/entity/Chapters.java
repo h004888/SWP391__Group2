@@ -15,21 +15,27 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Chapters {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Column(nullable = false)
-    private String title;
-    private String description;
-    private Integer orderNumber; //stt chuong trong khoa hoc
-    private LocalDateTime createAt;
-    private LocalDateTime updateAt;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long chapterId;
 
-    @OneToMany(mappedBy = "chapter")
-  private List<Lessons> lessons;
+  private String title;
 
-    @ManyToOne
-    @JoinColumn(name = "courseId")
-    private Course course;
+  private String description;
+
+  private Integer orderNumber;
+
+  private LocalDateTime createdAt;
+
+  @ManyToOne
+  @JoinColumn(name = "CourseID")
+  private Course course;
+
+  @OneToMany(mappedBy = "chapter")
+  private List<Lesson> lessons;
+
+  @ManyToOne
+  @JoinColumn(name = "CourseID")
+  private Course courseForChapter;
 
 }
