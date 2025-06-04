@@ -1,4 +1,4 @@
-package com.OLearning.service.adminDashBoard;
+package com.OLearning.service.order;
 
 import com.OLearning.dto.adminDashBoard.OrdersDTO;
 import com.OLearning.entity.Orders;
@@ -8,9 +8,7 @@ import com.OLearning.repository.adminDashBoard.OrdersRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Service

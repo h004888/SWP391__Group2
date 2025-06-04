@@ -2,7 +2,7 @@ package com.OLearning.controller.login;
 
 import com.OLearning.dto.login.RegisterDTO;
 import com.OLearning.entity.User;
-import com.OLearning.service.adminDashBoard.impl.UserServiceImpl;
+import com.OLearning.service.user.impl.UserServiceImpl;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

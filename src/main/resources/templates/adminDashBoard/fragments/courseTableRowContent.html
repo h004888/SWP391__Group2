@@ -1,0 +1,44 @@
+<th:block th:fragment="courseTableRowContent">
+    <tr th:each="course : ${listCourse}">
+        <td th:text="${course.courseId}"></td>
+        <td th:text="${course.title}"></td>
+        <td th:text="${course.duration + ' phút'}"></td>
+        <td th:text="'$' + ${course.price}"></td>
+        <td th:text="${course.totalLessons}"></td>
+        <td th:text="${#temporals.format(course.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
+        <td th:text="${#temporals.format(course.updatedAt, 'dd/MM/yyyy HH:mm')}"></td>
+        <td>
+                         <span th:switch="${course.status}">
+                             <span th:case="null" class="badge badge-secondary">
+                                 <i class="fas fa-save"></i> Save Draft
+                             </span>
+                             <span th:case="'pending'" class="badge badge-secondary">
+                                 <i class="fas fa-clock"></i> Pending
+                             </span>
+                             <span th:case="'approved'" class="badge badge-success">
+                                 <i class="fas fa-check"></i> Approved
+                             </span>
+                             <span th:case="'rejected'" class="badge badge-danger">
+                                 <i class="fas fa-times"></i> Rejected
+                             </span>
+                             <span th:case="'resubmit'" class="badge badge-warning text-dark">
+                                 <i class="fas fa-exclamation-triangle"></i> ReSubmit
+                             </span>
+                         </span>
+        </td>
+        <td>
+            <div class="d-flex justify-content-center gap-2 w-100">
+                <a th:href="@{/admin/course/detail/{courseId}(courseId=${course.courseId})}"
+                   class="btn btn-info btn-sm w-100" title="View Detail">
+                    <i class="fas fa-eye"></i>
+                </a>
+
+                <a th:href="@{/admin/course/delete/{courseId}(courseId=${course.courseId})}"
+                   class="btn btn-danger btn-sm w-100"
+                   onclick="return confirm('Bạn có chắc chắn muốn xóa khóa học này không?')" title="Delete">
+                    <i class="fas fa-trash"></i>
+                </a>
+            </div>
+        </td>
+    </tr>
+</th:block>

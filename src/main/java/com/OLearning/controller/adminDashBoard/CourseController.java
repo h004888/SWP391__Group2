@@ -4,9 +4,9 @@ import com.OLearning.dto.adminDashBoard.CourseDTO;
 import com.OLearning.dto.adminDashBoard.CourseDetailDTO;
 import com.OLearning.dto.adminDashBoard.NotificationDTO;
 import com.OLearning.entity.Categories;
-import com.OLearning.service.adminDashBoard.CategoriesService;
-import com.OLearning.service.adminDashBoard.CourseService;
-import com.OLearning.service.adminDashBoard.NotificationService;
+import com.OLearning.service.category.CategoriesService;
+import com.OLearning.service.course.CourseService;
+import com.OLearning.service.notification.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -49,7 +49,7 @@ public class CourseController {
                                 Model model) {
         List<CourseDTO> listCourse = courseService.filterCourses(keyword, category, price, status);
         model.addAttribute("listCourse", listCourse);
-        return "adminDashBoard/fragments/courseContent :: courseTableBody";
+        return "adminDashBoard/fragments/courseTableRowContent :: courseTableRowContent";
     }
 
     @GetMapping("/detail/{id}")
@@ -58,6 +58,18 @@ public class CourseController {
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/courseDetailContent :: courseDetail");
         Optional<CourseDetailDTO> optionalDetail = courseService.getDetailCourse(id);
         if (optionalDetail.isPresent()) {
+            CourseDetailDTO course = optionalDetail.get();
+            // Debug logging
+            System.out.println("Tên khóa học: " + course.getTitle());
+            System.out.println("Số lượng chapters: " +
+                    (course.getListOfChapters() != null ? course.getListOfChapters().size() : 0));
+
+            if (course.getListOfChapters() != null) {
+                course.getListOfChapters().forEach(chapter -> {
+                    System.out.println("Chapter: " + chapter.getTitle() +
+                            ", Lessons: " + (chapter.getLessons() != null ? chapter.getLessons().size() : 0));
+                });
+            }
             model.addAttribute("detailCourse", optionalDetail.get());
             return "adminDashBoard/index";
         } else {

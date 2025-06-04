@@ -1,4 +1,4 @@
-package com.OLearning.service.adminDashBoard.impl;
+package com.OLearning.service.notification.impl;
 
 import com.OLearning.dto.adminDashBoard.NotificationDTO;
 import com.OLearning.entity.Course;
@@ -8,8 +8,7 @@ import com.OLearning.mapper.adminDashBoard.NotificationMapper;
 import com.OLearning.repository.adminDashBoard.CourseRepository;
 import com.OLearning.repository.adminDashBoard.NotificationRepository;
 import com.OLearning.repository.adminDashBoard.UserRepository;
-import com.OLearning.service.adminDashBoard.NotificationService;
-import jakarta.transaction.Transactional;
+import com.OLearning.service.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

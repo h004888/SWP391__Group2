@@ -1,6 +1,7 @@
 package com.OLearning.dto.adminDashBoard;
 
 import com.OLearning.entity.Categories;
+import com.OLearning.entity.Chapters;
 import com.OLearning.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -32,4 +34,6 @@ public class CourseDetailDTO {
     private Boolean canResubmit;
     private User instructor;
     private Categories category;
+    private List<Chapters> listOfChapters;
+
 }

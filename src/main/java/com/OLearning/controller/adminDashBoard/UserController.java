@@ -2,11 +2,12 @@ package com.OLearning.controller.adminDashBoard;
 
 import com.OLearning.dto.adminDashBoard.UserDTO;
 import com.OLearning.dto.adminDashBoard.UserDetailDTO;
-import com.OLearning.service.adminDashBoard.UserService;
+import com.OLearning.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +33,17 @@ public class UserController {
         model.addAttribute("addAccount", new UserDTO());
         model.addAttribute("listRole", userService.getListRole());
         return "adminDashBoard/index";
+    }
+
+    @PostMapping("/account/add")
+    public String addUser(@ModelAttribute("addAccount") UserDTO userDTO, RedirectAttributes redirectAttributes) {
+        try {
+            userService.createUser(userDTO);
+            redirectAttributes.addFlashAttribute("successMessage", "User added successfully");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error adding user: " + e.getMessage());
+        }
+        return "redirect:/admin/account";
     }
 
     //Filter with ajax

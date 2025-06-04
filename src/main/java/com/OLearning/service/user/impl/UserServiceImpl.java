@@ -1,4 +1,4 @@
-package com.OLearning.service.adminDashBoard.impl;
+package com.OLearning.service.user.impl;
 
 import com.OLearning.dto.adminDashBoard.UserDTO;
 import com.OLearning.dto.adminDashBoard.UserDetailDTO;
@@ -10,7 +10,7 @@ import com.OLearning.mapper.adminDashBoard.UserMapper;
 import com.OLearning.mapper.login.RegisterMapper;
 import com.OLearning.repository.adminDashBoard.RoleRepository;
 import com.OLearning.repository.adminDashBoard.UserRepository;
-import com.OLearning.service.adminDashBoard.UserService;
+import com.OLearning.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -129,6 +129,14 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public User createUser(UserDTO userDTO) {
+        User user = userMapper.toUser(userDTO,roleRepository.findRoleByName(userDTO.getRoleName()).get());
+        //default account password
+        String encodedPassword = new BCryptPasswordEncoder().encode("123");
+        user.setPassword(encodedPassword);
+        return userRepository.save(user);
+    }
     @Override
     public boolean resetPassword(Long id) {
         Optional<User> optionalUser = userRepository.findById(id);
