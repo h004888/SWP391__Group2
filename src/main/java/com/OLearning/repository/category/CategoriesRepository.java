@@ -1,4 +1,4 @@
-package com.OLearning.repository.adminDashBoard;
+package com.OLearning.repository.category;
 
 import com.OLearning.entity.Categories;
 

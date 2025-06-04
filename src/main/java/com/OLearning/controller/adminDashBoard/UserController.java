@@ -2,7 +2,6 @@ package com.OLearning.controller.adminDashBoard;
 
 import com.OLearning.dto.adminDashBoard.UserDTO;
 import com.OLearning.dto.adminDashBoard.UserDetailDTO;
-import com.OLearning.entity.User;
 import com.OLearning.service.adminDashBoard.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

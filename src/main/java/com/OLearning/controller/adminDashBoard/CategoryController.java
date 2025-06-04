@@ -9,7 +9,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import com.OLearning.entity.Categories;
-import com.OLearning.service.adminDashBoard.CategoriesService;
+import com.OLearning.service.category.CategoriesService;
+
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -18,7 +19,7 @@ public class CategoryController {
     private static final String adminDashboardPath = "adminDashboard/index";
     private static final String fragmentContent = "fragmentContent";
     private static final String categoryList = "adminDashboard/fragments/category :: categoryList";
-    private static final String categoryTable = "adminDashboard/fragments/category :: categoryTable";
+
     private static final String categoryPagination = "adminDashboard/fragments/category :: categoryPage";
     @Autowired
     private CategoriesService categoriesService;

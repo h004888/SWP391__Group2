@@ -3,8 +3,9 @@ package com.OLearning.controller.adminDashBoard;
 import com.OLearning.dto.adminDashBoard.CourseDTO;
 import com.OLearning.dto.adminDashBoard.CourseDetailDTO;
 import com.OLearning.entity.Categories;
-import com.OLearning.service.adminDashBoard.CategoriesService;
 import com.OLearning.service.adminDashBoard.CourseService;
+import com.OLearning.service.category.CategoriesService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
