@@ -1,8 +1,8 @@
-package com.OLearning.service.adminDashBoard.impl;
+package com.OLearning.service.category.impl;
 
 import com.OLearning.entity.Categories;
 import com.OLearning.repository.adminDashBoard.CategoriesRepository;
-import com.OLearning.service.adminDashBoard.CategoriesService;
+import com.OLearning.service.category.CategoriesService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

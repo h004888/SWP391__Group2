@@ -1,8 +1,7 @@
-package com.OLearning.service.adminDashBoard;
+package com.OLearning.service.course;
 
 import com.OLearning.dto.adminDashBoard.CourseDTO;
 import com.OLearning.dto.adminDashBoard.CourseDetailDTO;
-import com.OLearning.entity.Course;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,4 +21,6 @@ public interface CourseService {
     boolean deleteCourse(Long id);
 
     List<CourseDTO> filterCourses(String keyword, Integer categoryId, String price, String status);
+
+
 }

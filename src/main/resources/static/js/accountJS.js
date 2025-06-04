@@ -147,9 +147,25 @@ function updateCountBadge(roleId, data) {
 
 // Event listeners
 $(document).ready(function () {
+    function toggleAddButton(tabId) {
+        if (tabId === "#admin") {
+            $("#addAccountBtnContainer").show();
+        } else {
+            $("#addAccountBtnContainer").hide();
+        }
+    }
+
+    const activeTab = $(".nav-link.active").data("bsTarget");
+    toggleAddButton(activeTab);
+
+    $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+        const target = $(e.target).data("bsTarget");
+        toggleAddButton(target);
+    });
+
     // Load initial data for admin tab
     [1, 2, 3].forEach(roleId => {
-        loadUsers(roleId); // Keyword để trống để lấy toàn bộ
+        loadUsers(roleId);
     });
 
     // Tab change

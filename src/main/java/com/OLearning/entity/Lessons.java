@@ -1,33 +1,38 @@
-//package com.OLearning.entity;
-//
-//import jakarta.persistence.*;
-//import lombok.*;
-//
-//import java.time.LocalDateTime;
-//import java.util.List;
-//
-//@Entity
-//@Table(name = "Lessons")
-//@NoArgsConstructor
-//@AllArgsConstructor
-//@Getter
-//@Setter
-//@ToString
-//public class Lessons {
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    private Long lessonId;
-//    private String title;
-//    private String description;
-//    private String contentType = "video";
-//    private Integer orderNumber;
-//    private Boolean isFree;
-//    private LocalDateTime createdAt;
-//    private LocalDateTime updatedAt;
-//    @ManyToOne
-//    @JoinColumn(name = "chapterId")
-//    private Chapters chapter;
-//
-//    @OneToMany(mappedBy="lesson")
-//    private List<Video> videos;
-//}
+package com.OLearning.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "Lessons")
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+public class Lessons {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long lessonId;
+
+    @Column(columnDefinition = "nvarchar(255)")
+    private String title;
+
+    @Column(columnDefinition = "nvarchar(max)")
+    private String description;
+
+    private String contentType;
+    private Integer orderNumber= 0;
+    private Integer duration;
+    private Boolean isFree;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    @ManyToOne
+    @JoinColumn(name = "chapterId")
+    private Chapters chapter;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "videoId")
+    private Video video;
+}

@@ -1,4 +1,4 @@
-package com.OLearning.service.adminDashBoard;
+package com.OLearning.service.user;
 
 import com.OLearning.dto.adminDashBoard.UserDTO;
 import com.OLearning.dto.adminDashBoard.UserDetailDTO;
@@ -21,7 +21,9 @@ public interface UserService {
 
     List<UserDTO> getUsersByRole(Long roleId);
 
-//    boolean deleteAcc(Long id);
+    User createUser(UserDTO userDTO);
+
+    //    boolean deleteAcc(Long id);
     boolean changStatus(Long id);
 
     List<UserDTO> searchByName(String keyword, Long roleId);

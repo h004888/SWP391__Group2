@@ -90,7 +90,14 @@
                                        placeholder="Search…" th:value="${keyword}">
                             </div>
                         </div>
+                        <div class="col-md-10"></div>
+                        <div id="addAccountBtnContainer" class="col-md-2 text-right mt-4" style="display: none;">
+                            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#addModal">
+                                Add New Account
+                            </button>
+                        </div>
                     </div>
+
                 </div>
 
                 <div class="table-wrapper">
@@ -117,6 +124,7 @@
                         </ul>
 
                         <div class="tab-content p-0" id="accountTabsContent">
+
                             <!-- Admin Tab -->
                             <div class="tab-pane fade show active" id="admin" role="tabpanel">
                                 <div class="table-responsive">
@@ -203,7 +211,7 @@
                 </div>
             </div>
 
-            <!-- Delete Modal HTML -->
+            <!-- Block Modal HTML -->
             <div id="deleteModal" class="modal fade">
                 <div class="modal-dialog">
                     <div class="modal-content">
@@ -219,6 +227,41 @@
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                                 <a id="confirmDelete" class="btn btn-danger" href="#">Block</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Modal HTML -->
+            <div id="addModal" class="modal fade">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form th:action="@{/admin/account/add}" th:object="${addAccount}" method="post">
+                            <div class="modal-header">
+                                <h4 class="modal-title">Add User</h4>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label">UserName</label>
+                                    <input th:field="*{userName}" type="text" class="form-control" required/>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input th:field="*{email}" type="email" class="form-control" required/>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Role</label>
+                                    <select th:field="*{roleName}" class="form-select" >Admin
+                                        <option th:value="Admin">Admin</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-success">Add</button>
                             </div>
                         </form>
                     </div>

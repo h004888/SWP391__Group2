@@ -1,4 +1,4 @@
-package com.OLearning.service.adminDashBoard;
+package com.OLearning.service.notification;
 
 import com.OLearning.dto.adminDashBoard.NotificationDTO;
 import com.OLearning.entity.Notifications;

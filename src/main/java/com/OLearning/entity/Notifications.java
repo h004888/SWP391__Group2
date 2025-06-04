@@ -17,6 +17,7 @@ public class Notifications {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long notificationId;
 
+    @Column(columnDefinition = "nvarchar(max)")
     private String message;
     private LocalDateTime sentAt;
     private String type;
