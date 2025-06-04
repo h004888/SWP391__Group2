@@ -6,6 +6,8 @@ import lombok.*;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.aspectj.weaver.ast.Or;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -40,4 +42,7 @@ public class User {
     @OneToMany(mappedBy = "instructor", fetch = FetchType.LAZY)
     private List<BuyPackages> listOfBuyPackage;
 
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<Order> orders;
+    
 }

@@ -28,8 +28,9 @@ public class Enrollment {
     @JoinColumn(name = "UserID", nullable = false)
     private User user;
 
-    @Column(name = "CourseID", nullable = false)
-    private int courseId;
+    @ManyToOne
+    @JoinColumn(name = "CourseID", nullable = false)
+    private Course course;
 
     @Column(name = "EnrollmentDate")
     @Temporal(TemporalType.TIMESTAMP)
@@ -43,4 +44,5 @@ public class Enrollment {
 
     @Column(name = "PaymentID")
     private int payment;
+
 }

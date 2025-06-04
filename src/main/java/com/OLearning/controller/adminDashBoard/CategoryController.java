@@ -49,6 +49,7 @@ public class CategoryController {
         Categories category = categoriesService.findById(id);
         model.addAttribute("category", category);
         model.addAttribute("coursesList", category.getCourses());
+        model.addAttribute("numberOfCourses", categoriesService.countNumberEnrollmentsByCategoryId(id));
         model.addAttribute(fragmentContent, "adminDashboard/fragments/showMore :: showMore");
         return "adminDashboard/index";
 

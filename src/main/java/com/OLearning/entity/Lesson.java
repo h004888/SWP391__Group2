@@ -4,32 +4,35 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-
+@Entity
+@Table(name = "Lessons")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
-@Entity
-@Table(name = "Lessons")
 public class Lesson {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long lessonId;
+    private Long lessonId;
     private String title;
     private String description;
-    private String contentType;
-    @Column(length = 1000)
-    private String content;
-    private int duration;
-    private boolean isFree;
+    private String contentType = "video";
+    private Integer orderNumber;
+    private Boolean isFree;
+    private Integer duration;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
     @ManyToOne
-    @JoinColumn(name = "courseId")
-    private Course course;
+    @JoinColumn(name = "ChapterID")
+    private Chapters chapter;
 
+    @OneToMany(mappedBy = "lesson")
+    private List<Video> videos;
+    @OneToMany(mappedBy = "lesson")
+    private List<Quiz> quizzes;
+
+    @OneToMany(mappedBy = "videoLesson")
+    private List<Video> listOfVideos;
 }

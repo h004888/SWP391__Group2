@@ -32,7 +32,7 @@ public class Course {
     private String status = "draft";
     private Boolean canResubmit;
     @ManyToOne
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "UserID")
     private User instructor;
     @ManyToOne
     @JoinColumn(name = "CategoryID")
@@ -40,5 +40,14 @@ public class Course {
 
     @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
     private List<Lesson> listOfLessons;
+
+    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
+    private List<Enrollment> enrollments;
+
+    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
+    private List<Chapters> chapters;
+
+    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
+    private List<OrderDetail> orderDetails;
     
 }

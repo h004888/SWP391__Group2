@@ -37,4 +37,6 @@ public interface CategoriesService {
 
     Page<Categories> findByNameContaining(String name, Pageable pageable);
 
+    int countNumberCoursesByCategoryId(int categoryId);
+    int countNumberEnrollmentsByCategoryId(int categoryId);
 }
