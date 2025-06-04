@@ -9,9 +9,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import com.OLearning.entity.Categories;
+import com.OLearning.service.adminDashBoard.CourseService;
 import com.OLearning.service.category.CategoriesService;
 
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/admin")
@@ -23,6 +26,8 @@ public class CategoryController {
     private static final String categoryPagination = "adminDashboard/fragments/category :: categoryPage";
     @Autowired
     private CategoriesService categoriesService;
+    @Autowired
+    private CourseService courseService;
 
     private void loadPagedCategories(Model model, String name, String sort, int page, int size) {
         Pageable pageable = PageRequest.of(page, size,
@@ -36,6 +41,16 @@ public class CategoryController {
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", categoriesPage.getTotalPages());
         model.addAttribute("totalItems", categoriesPage.getTotalElements());
+
+    }
+
+    @GetMapping("/categories/showmore")
+    public String showmore(@RequestParam("id") int id, Model model) {
+        Categories category = categoriesService.findById(id);
+        model.addAttribute("category", category);
+        model.addAttribute("coursesList", category.getCourses());
+        model.addAttribute(fragmentContent, "adminDashboard/fragments/showMore :: showMore");
+        return "adminDashboard/index";
 
     }
 

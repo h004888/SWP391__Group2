@@ -46,17 +46,7 @@ public class CourseController {
         return "adminDashboard/fragments/courseContent :: courseTableBody";
     }
 
-    @PostMapping("/approve/{id}")
-    public String approveCourse(@PathVariable("id") Long id) {
-        courseService.approveCourse(id);
-        return "redirect:/admin/course";
-    }
 
-    @PostMapping("/reject/{id}")
-    public String rejectCourse(@PathVariable("id") Long id) {
-        courseService.rejectCourse(id);
-        return "redirect:/admin/course";
-    }
 
     @GetMapping("/delete/{id}")
     public String deleteCourse(@PathVariable("id") Long id) {

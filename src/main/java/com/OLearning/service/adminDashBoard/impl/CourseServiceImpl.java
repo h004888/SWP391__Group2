@@ -35,33 +35,6 @@ public class CourseServiceImpl implements CourseService {
         return courseRepository.findById(id).map(courseDetailMapper::toDTO);
     }
 
-    @Override
-    public boolean approveCourse(Long id) {
-        return courseRepository.findById(id)
-                .map(course -> {
-                    if (!Boolean.TRUE.equals(course.getIsChecked())) {
-                        course.setIsChecked(true);
-                        courseRepository.save(course);
-                        return true;
-                    }
-                    return false;
-                })
-                .orElse(false);
-    }
-
-    @Override
-    public boolean rejectCourse(Long id) {
-        return courseRepository.findById(id)
-                .map(course -> {
-                    if (!Boolean.TRUE.equals(course.getIsChecked())) {
-                        course.setIsChecked(false);
-                        courseRepository.save(course);
-                        return true;
-                    }
-                    return false;
-                })
-                .orElse(false);
-    }
 
     @Override
     public boolean deleteCourse(Long id) {

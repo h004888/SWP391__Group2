@@ -26,7 +26,6 @@ public class User {
     private LocalDate birthday;
     private String address;
     private String profilePicture;
-    private String personalSkill;
 
     @OneToMany(mappedBy = "user")
     private List<Enrollment> enrollments;
