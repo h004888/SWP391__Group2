@@ -33,5 +33,9 @@ public class Orders {
     @OneToMany(mappedBy = "orders", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<OrderDetail> orderDetails;
 
+    @OneToMany(mappedBy = "orders")
+    private Set<CourseMaintenance> courseMaintenances;
 
+    @OneToMany(mappedBy = "orders")
+    private Set<Enrollment> enrollments;
 }

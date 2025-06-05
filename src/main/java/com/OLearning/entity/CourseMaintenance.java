@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 
 @Entity
@@ -17,8 +18,7 @@ public class CourseMaintenance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long maintenanceId;
-    private LocalDate monthYear;
-    private Long enrollmentCount;
+
     @ManyToOne
     @JoinColumn(name = "courseId")
     private Course course;
@@ -26,4 +26,15 @@ public class CourseMaintenance {
     @ManyToOne
     @JoinColumn(name = "feeId")
     private Fees fee;
+
+    @ManyToOne
+    @JoinColumn(name = "orderId")
+    private Orders orders;
+
+    private LocalDate monthYear;
+    private Long enrollmentCount;
+    private String status;
+
+    private LocalDate dueDate;
+    private LocalDateTime sentAt;
 }

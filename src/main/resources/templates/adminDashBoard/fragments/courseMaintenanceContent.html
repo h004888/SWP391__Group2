@@ -5,27 +5,14 @@
         <div class="row">
           <div class="col-md-8">
             <h2 th:text="${accNamePage}">Management <b>Maintenances</b></h2>
+            <p th:text="${lastRunMessage}" class="text-success"></p>
           </div>
           <div class="col-md-4">
             <form th:action="@{/admin/courseMaintenance/search}" method="get" class="mb-3">
               <div class="search-box mt-2">
-                <i class="material-icons">&#xE8B6;</i>
+                <i class="material-icons"></i>
                 <input type="text" name="username" class="form-control" th:value="${selectedUsername}" placeholder="Search by User Name"/>
               </div>
-            </form>
-          </div>
-        </div>
-
-        <div class="row mt-4">
-          <div class="col-md-6 d-flex gap-2">
-            <form th:action="@{/admin/courseMaintenance/filter}" method="get" class="mb-4">
-              <select id="monthYear" name="monthYear" class="form-select" onchange="this.form.submit()">
-                <option value="">All</option>
-                <option th:each="month : ${monthYears}"
-                        th:value="${#temporals.format(month, 'yyyy-MM')}"
-                        th:text="${#temporals.format(month, 'MM/yyyy')}"
-                        th:selected="${selectedMonthYear == #temporals.format(month, 'yyyy-MM')}"></option>
-              </select>
             </form>
           </div>
         </div>
@@ -40,6 +27,8 @@
           <th>Fee</th>
           <th>Course Name</th>
           <th>User Name</th>
+          <th>Status</th>
+          <th>Due Date</th>
         </tr>
         </thead>
         <tbody>
@@ -49,7 +38,9 @@
           <td th:text="${cm.enrollmentCount != null ? cm.enrollmentCount : 'N/A'}"></td>
           <td th:text="${cm.fee != null ? #numbers.formatDecimal(cm.fee.maintenanceFee, 0, 'COMMA', 0, 'POINT') : 'N/A'}"></td>
           <td th:text="${cm.course != null ? cm.course.title : 'N/A'}"></td>
-          <td th:text="${cm.course != null and cm.course.instructor != null ? cm.course.instructor.username : 'N/A'}"></td>
+          <td th:text="${cm.course != null && cm.course.instructor != null ? cm.course.instructor.username : 'N/A'}"></td>
+          <td th:text="${cm.status != null ? cm.status : 'N/A'}"></td>
+          <td th:text="${cm.dueDate != null ? #temporals.format(cm.dueDate, 'dd/MM/yyyy') : 'N/A'}"></td>
         </tr>
         </tbody>
       </table>

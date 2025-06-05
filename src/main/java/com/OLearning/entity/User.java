@@ -39,6 +39,9 @@ public class User {
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
     private List<Orders> orders;
 
-
+    @OneToMany(mappedBy = "user")
+    private List<Enrollment> enrollments;
+    @OneToMany(mappedBy = "user")
+    private List<Notification> notifications;
 }
 

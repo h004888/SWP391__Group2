@@ -1,7 +1,7 @@
 package com.OLearning.config;
 
 import com.OLearning.entity.User;
-import com.OLearning.repository.adminDashBoard.UserRepository;
+import com.OLearning.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

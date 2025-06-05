@@ -16,9 +16,9 @@ public class Fees {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long feeId;
-    private Long MinEnrollments;
-    private Long MaxEnrollments;
-    private Long MaintenanceFee;
+    private Long minEnrollments;
+    private Long maxEnrollments;
+    private Long maintenanceFee;
 
     @OneToMany(mappedBy = "fee", fetch = FetchType.LAZY)
     private List<CourseMaintenance> courseMaintenances;

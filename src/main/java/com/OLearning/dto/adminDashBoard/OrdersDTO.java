@@ -20,5 +20,5 @@ public class OrdersDTO {
     private LocalDateTime orderDate;
     private String note;
     private String username;
-    private List<String> courseNames;
+    private String role;
 }
