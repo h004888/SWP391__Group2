@@ -25,10 +25,6 @@ public class CategoriesServiceImpl implements CategoriesService {
         return categoriesRepository.findAll();
     }
 
-    @Override
-    public int countNumberCoursesByCategoryId(int categoryId) {
-        return categoriesRepository.countNumberCoursesByCategoryId(categoryId);
-    }
 
     @Override
     public void delete(Categories categories) {
@@ -107,9 +103,6 @@ public class CategoriesServiceImpl implements CategoriesService {
         return categoriesRepository.findByNameContaining(name, pageable);
     }
 
-    @Override
-    public int countNumberEnrollmentsByCategoryId(int categoryId) {
-        return categoriesRepository.countNumberEnrollmentsByCategoryId(categoryId);
-    }
+
 
 }

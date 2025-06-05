@@ -42,7 +42,8 @@ public class Enrollment {
     @Column(name = "Status", length = 20)
     private String status;
 
-    @Column(name = "PaymentID")
-    private int payment;
+    @ManyToOne
+    @JoinColumn(name = "OrderID")
+    private Order order;
 
 }

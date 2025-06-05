@@ -15,10 +15,8 @@
             <tr th:each="course,stat : ${coursesList}">
                 <td th:text="${stat.index + 1}"></td>
                 <td th:text="${course.title}"></td>
-                <td>
-                    <a th:href="@{/admin/categories/edit(id=${category.id}, page=${currentPage}, sort=${sort}, name=${name})}"
-                        class="edit" title="Edit" data-toggle="tooltip"><i class="material-icons">&#xE254;</i></a>
-                </td>
+                <td th:text="${course.enrollments.size()}"></td>
+
             </tr>
         </tbody>
     </table>
