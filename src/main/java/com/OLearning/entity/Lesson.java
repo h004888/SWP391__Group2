@@ -32,6 +32,9 @@ public class Lesson {
     private List<Video> videos;
     @OneToMany(mappedBy = "lesson")
     private List<Quiz> quizzes;
+    @ManyToOne
+    @JoinColumn(name = "CourseID")
+    private Course course;
 
     @OneToMany(mappedBy = "videoLesson")
     private List<Video> listOfVideos;

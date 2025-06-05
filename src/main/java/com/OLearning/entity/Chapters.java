@@ -34,8 +34,4 @@ public class Chapters {
   @OneToMany(mappedBy = "chapter")
   private List<Lesson> lessons;
 
-  @ManyToOne
-  @JoinColumn(name = "CourseID")
-  private Course courseForChapter;
-
 }

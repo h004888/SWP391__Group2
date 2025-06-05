@@ -5,13 +5,12 @@ import lombok.*;
 
 import java.util.List;
 
-
 @Entity
-    @Table(name = "Packages")
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public class Packages {
+@Table(name = "Packages")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Packages {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long packageId;
@@ -23,4 +22,3 @@ import java.util.List;
     @OneToMany(mappedBy = "packages", fetch = FetchType.LAZY)
     private List<BuyPackages> listOfBuyPackage;
 }
-

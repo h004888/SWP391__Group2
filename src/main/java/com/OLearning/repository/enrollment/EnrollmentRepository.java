@@ -10,5 +10,5 @@ import jakarta.transaction.Transactional;
 @Transactional
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer> {
 
-    int countByCourseId(int courseId);
+
 }
