@@ -1,8 +1,8 @@
 package com.OLearning.service.category.impl;
 
-import com.OLearning.entity.Categories;
+import com.OLearning.entity.Category;
 import com.OLearning.repository.category.CategoriesRepository;
-import com.OLearning.service.category.CategoriesService;
+import com.OLearning.service.category.CategoryService;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,17 +17,17 @@ import java.util.List;
 
 @Service
 @Transactional
-public class CategoriesServiceImpl implements CategoriesService {
+public class CategoryServiceImpl implements CategoryService {
     @Autowired
     private CategoriesRepository categoriesRepository;
 
-    public List<Categories> getListCategories() {
+    public List<Category> getListCategories() {
         return categoriesRepository.findAll();
     }
 
 
     @Override
-    public void delete(Categories categories) {
+    public void delete(Category categories) {
         categoriesRepository.delete(categories);
     }
 
@@ -47,22 +47,22 @@ public class CategoriesServiceImpl implements CategoriesService {
     }
 
     @Override
-    public List<Categories> findAll() {
+    public List<Category> findAll() {
         return categoriesRepository.findAll();
     }
 
     @Override
-    public Categories findById(int id) {
+    public Category findById(int id) {
         return categoriesRepository.findById(id);
     }
 
     @Override
-    public Categories findByName(String name) {
+    public Category findByName(String name) {
         return categoriesRepository.findByName(name);
     }
 
     @Override
-    public Categories save(Categories categories) {
+    public Category save(Category categories) {
         return categoriesRepository.save(categories);
     }
 
@@ -73,13 +73,13 @@ public class CategoriesServiceImpl implements CategoriesService {
     }
 
     @Override
-    public List<Categories> findByNameContaining(String name) {
+    public List<Category> findByNameContaining(String name) {
         return categoriesRepository.findByNameContaining(name);
     }
 
     @Override
-    public List<Categories> filterCategories(String name, String select) {
-        List<Categories> categories;
+    public List<Category> filterCategories(String name, String select) {
+        List<Category> categories;
 
         if (name == null || name.isEmpty()) {
             categories = categoriesRepository.findAll();
@@ -89,9 +89,9 @@ public class CategoriesServiceImpl implements CategoriesService {
 
         if (select != null) {
             if (select.equals("1")) {
-                categories.sort(Comparator.comparing(Categories::getName, String.CASE_INSENSITIVE_ORDER));
+                categories.sort(Comparator.comparing(Category::getName, String.CASE_INSENSITIVE_ORDER));
             } else if (select.equals("2")) {
-                categories.sort(Comparator.comparing(Categories::getName, String.CASE_INSENSITIVE_ORDER).reversed());
+                categories.sort(Comparator.comparing(Category::getName, String.CASE_INSENSITIVE_ORDER).reversed());
             }
         }
 
@@ -99,7 +99,7 @@ public class CategoriesServiceImpl implements CategoriesService {
     }
 
     @Override
-    public Page<Categories> findByNameContaining(String name, Pageable pageable) {
+    public Page<Category> findByNameContaining(String name, Pageable pageable) {
         return categoriesRepository.findByNameContaining(name, pageable);
     }
 

@@ -18,7 +18,7 @@ import java.util.List;
 @Getter
 @Setter
 @Table(name = "Categories")
-public class Categories {
+public class Category {
     @Column(name = "CategoryID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
