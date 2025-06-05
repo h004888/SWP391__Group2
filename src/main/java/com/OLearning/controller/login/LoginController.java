@@ -103,7 +103,7 @@ public class LoginController {
                     "Registration successful! Welcome to OLearning, " + userServiceImpl.getInfoUser(userId).get().getFullName() + "!");
             return "redirect:/login";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Can not selected role.");
+            redirectAttributes.addFlashAttribute("error", "You need selected role before.");
             return "redirect:/select-role?userId=" + userId;
         }
     }

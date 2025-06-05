@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -49,23 +50,24 @@
                                     3
                                 </span>
                         </a>
-<!--                        <div class="dropdown">-->
-<!--                            <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">-->
-<!--                                <img src="https://placehold.co/32x32" alt="User" width="32" height="32" class="rounded-circle me-2">-->
-<!--                                <span>John Doe</span>-->
-<!--                            </a>-->
-<!--                            <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">-->
-<!--                                <li><a class="dropdown-item" href="profile.html">Profile</a></li>-->
-<!--                                <li><a class="dropdown-item" href="my-courses.html">My Courses</a></li>-->
-<!--                                <li><a class="dropdown-item" href="wishList.html">Wishlist</a></li>-->
-<!--                                <li><hr class="dropdown-divider"></li>-->
-<!--                                <li><a class="dropdown-item" href="#">Sign out</a></li>-->
-<!--                            </ul>-->
-<!--                        </div>-->
-
+                        <div class="dropdown" sec:authorize="isAuthenticated()">
+                            <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="https://placehold.co/32x32" alt="User" width="32" height="32" class="rounded-circle me-2">
+                                <span th:text="${#authentication.getName()}">John Doe</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
+                                <li><a class="dropdown-item" href="profile.html">Profile</a></li>
+                                <li><a class="dropdown-item" href="my-courses.html">My Courses</a></li>
+                                <li><a class="dropdown-item" href="wishList.html">Wishlist</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" th:href="@{/logout}">Sign out</a></li>
+                            </ul>
+                        </div>
+                        <div sec:authorize="isAnonymous()">
                         <!-- Uncomment this for non-logged in users-->
                         <a class="btn btn-outline-light rounded-pill px-4 me-2" th:href="@{/login}">Login</a>
                         <a class="btn btn-primary rounded-pill px-4" th:href="@{/register}">Sign Up</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -114,7 +116,7 @@
     <div class="container">
         <div class="text-center mb-5">
             <h2 class="fw-bold">Browse Top Categories</h2>
-            <p class="text-muted">Explore our most popular course categories</p>
+            <p class="text-muted">Explore our most popular course category</p>
         </div>
 
         <div class="row g-4">

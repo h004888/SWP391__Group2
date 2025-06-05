@@ -1,13 +1,17 @@
 package com.OLearning.service.course.impl;
 
-import com.OLearning.dto.adminDashBoard.CourseDTO;
-import com.OLearning.dto.adminDashBoard.CourseDetailDTO;
+import com.OLearning.dto.course.CourseDTO;
+import com.OLearning.dto.course.CourseDetailDTO;
 import com.OLearning.entity.Course;
-import com.OLearning.mapper.adminDashBoard.CourseDetailMapper;
-import com.OLearning.mapper.adminDashBoard.CourseMapper;
-import com.OLearning.repository.adminDashBoard.CourseRepository;
+import com.OLearning.mapper.course.CourseDetailMapper;
+import com.OLearning.mapper.course.CourseMapper;
+import com.OLearning.repository.CourseRepository;
 import com.OLearning.service.course.CourseService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,11 +28,9 @@ public class CourseServiceImpl implements CourseService {
     private final CourseDetailMapper courseDetailMapper;
 
     @Override
-    public List<CourseDTO> getAllCourses() {
-        List<Course> courseList = courseRepository.findAll();
-        return courseList.stream()
-                .map(courseMapper::toDTO)
-                .collect(Collectors.toList());
+    public Page<CourseDTO> getAllCourses(Pageable pageable) {
+        Page<Course> courseList = courseRepository.findAll(pageable);
+        return courseList.map(courseMapper::toDTO);
     }
 
     @Override
@@ -77,28 +79,14 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public List<CourseDTO> filterCourses(String keyword, Integer categoryId, String price, String status) {
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            keyword = "%" + keyword.trim().toLowerCase() + "%";
-        } else {
-            keyword = null;
-        }
-        if (categoryId != null && categoryId == 0) categoryId = null;
-        if (price != null && price.trim().isEmpty()) price = null;
+    public Page<CourseDTO> filterCoursesWithPagination(String keyword, Integer category, String price, String status, int page, int size) {
+        String searchKeyword = keyword != null && !keyword.trim().isEmpty() ? keyword.trim() : null;
 
-        Boolean isNullStatus = false;
-        if ("null".equalsIgnoreCase(status)) {
-            isNullStatus = true;
-            status = null;
-        } else if (status != null && status.trim().isEmpty()) {
-            status = null;
-        }
-
-        return courseRepository.filterCourses(keyword, categoryId, price, status, isNullStatus)
-                .stream()
-                .map(courseMapper::toDTO)
-                .collect(Collectors.toList());
-
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Course> coursePage = courseRepository.filterCourses(
+                searchKeyword, category, price, status, pageable
+        );
+        return coursePage.map(courseMapper::toDTO);
     }
 
 

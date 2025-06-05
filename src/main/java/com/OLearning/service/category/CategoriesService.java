@@ -1,6 +1,6 @@
 package com.OLearning.service.category;
 
-import com.OLearning.entity.Categories;
+import com.OLearning.entity.Category;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -8,23 +8,23 @@ import java.util.List;
 @Service
 public interface CategoriesService {
 
-    Categories findByName(String name);
+    Category findByName(String name);
 
-    Categories findById(int id);
+    Category findById(int id);
 
     boolean existsByName(String name);
 
     boolean existsById(int id);
 
-    List<Categories> findAll();
+    List<Category> findAll();
 
-    Categories save(Categories categories);
+    Category save(Category category);
 
     void deleteById(int id);
 
-    void delete(Categories categories);
+    void delete(Category category);
 
     void updateCategory(int id, String name);
 
-    List<Categories> getListCategories();
+    List<Category> getListCategories();
 }

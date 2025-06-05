@@ -1,7 +1,7 @@
 package com.OLearning.service.category.impl;
 
-import com.OLearning.entity.Categories;
-import com.OLearning.repository.adminDashBoard.CategoriesRepository;
+import com.OLearning.entity.Category;
+import com.OLearning.repository.CategoriesRepository;
 import com.OLearning.service.category.CategoriesService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,13 +14,13 @@ public class CategoriesServiceImpl implements CategoriesService {
     @Autowired
     private CategoriesRepository categoriesRepository;
 
-    public List<Categories> getListCategories() {
+    public List<Category> getListCategories() {
         return categoriesRepository.findAll();
     }
 
     @Override
-    public void delete(Categories categories) {
-        categoriesRepository.delete(categories);
+    public void delete(Category category) {
+        categoriesRepository.delete(category);
     }
 
     @Override
@@ -39,23 +39,23 @@ public class CategoriesServiceImpl implements CategoriesService {
     }
 
     @Override
-    public List<Categories> findAll() {
+    public List<Category> findAll() {
         return categoriesRepository.findAll();
     }
 
     @Override
-    public Categories findById(int id) {
+    public Category findById(int id) {
         return categoriesRepository.findById(id);
     }
 
     @Override
-    public Categories findByName(String name) {
+    public Category findByName(String name) {
         return categoriesRepository.findByName(name);
     }
 
     @Override
-    public Categories save(Categories categories) {
-        return categoriesRepository.save(categories);
+    public Category save(Category category) {
+        return categoriesRepository.save(category);
     }
 
     @Transactional

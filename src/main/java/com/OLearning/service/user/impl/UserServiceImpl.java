@@ -1,18 +1,20 @@
 package com.OLearning.service.user.impl;
 
-import com.OLearning.dto.adminDashBoard.UserDTO;
-import com.OLearning.dto.adminDashBoard.UserDetailDTO;
+import com.OLearning.dto.user.UserDTO;
+import com.OLearning.dto.user.UserDetailDTO;
 import com.OLearning.dto.login.RegisterDTO;
 import com.OLearning.entity.Role;
 import com.OLearning.entity.User;
-import com.OLearning.mapper.adminDashBoard.UserDetailMapper;
-import com.OLearning.mapper.adminDashBoard.UserMapper;
+import com.OLearning.mapper.user.UserDetailMapper;
+import com.OLearning.mapper.user.UserMapper;
 import com.OLearning.mapper.login.RegisterMapper;
-import com.OLearning.repository.adminDashBoard.RoleRepository;
-import com.OLearning.repository.adminDashBoard.UserRepository;
+import com.OLearning.repository.RoleRepository;
+import com.OLearning.repository.UserRepository;
 import com.OLearning.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -35,10 +37,22 @@ public class UserServiceImpl implements UserService {
     private RegisterMapper registerMapper;
 
     @Override
-    public List<UserDTO> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(userMapper::toDTO)
-                .collect(Collectors.toList());
+    public Page<UserDTO> getAllUsers(Pageable page) {
+        Page<User> users = userRepository.findAll(page);
+        return users.map(userMapper::toDTO);
+    }
+
+    @Override
+    public Page<UserDTO> getUsersByRoleWithPagination(Long roleId, Pageable pageable) {
+        Page<User> userPage = userRepository.findByRole_RoleId(roleId, pageable);
+        return userPage.map(userMapper::toDTO);
+    }
+
+    @Override
+    public Page<UserDTO> searchByNameWithPagination(String keyword, Long roleId, Pageable pageable) {
+        // Sử dụng repository method với pagination
+        Page<User> userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleId(keyword, roleId, pageable);
+        return userPage.map(userMapper::toDTO);
     }
 
     @Override
@@ -110,17 +124,17 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    @Override
-    public List<UserDTO> searchByName(String keyword, Long roleId) { // Đổi từ long thành Long
-        String processedKeyword = null;
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            processedKeyword = keyword.trim().toLowerCase();
-        }
-        List<User> users = userRepository.searchByNameAndRole(processedKeyword, roleId);
-        return users.stream()
-                .map(userMapper::toDTO)
-                .collect(Collectors.toList());
-    }
+//    @Override
+//    public List<UserDTO> searchByName(String keyword, Long roleId) {
+//        String processedKeyword = null;
+//        if (keyword != null && !keyword.trim().isEmpty()) {
+//            processedKeyword = keyword.trim().toLowerCase();
+//        }
+//        List<User> users = userRepository.searchByNameAndRole(processedKeyword, roleId);
+//        return users.stream()
+//                .map(userMapper::toDTO)
+//                .collect(Collectors.toList());
+//    }
 
     @Override
     public List<UserDTO> getUsersByRole(Long roleId) {
@@ -131,12 +145,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createUser(UserDTO userDTO) {
-        User user = userMapper.toUser(userDTO,roleRepository.findRoleByName(userDTO.getRoleName()).get());
-        //default account password
+        if (userRepository.existsByEmail(userDTO.getEmail())) {
+            throw new IllegalArgumentException("Email already exists");
+        }
+        Optional<Role> roleOpt = roleRepository.findRoleByName(userDTO.getRoleName());
+        if (roleOpt.isEmpty()) {
+            throw new IllegalArgumentException("Role not found: " + userDTO.getRoleName());
+        }
+        User user = userMapper.toUser(userDTO, roleOpt.get());
         String encodedPassword = new BCryptPasswordEncoder().encode("123");
         user.setPassword(encodedPassword);
+
         return userRepository.save(user);
     }
+
     @Override
     public boolean resetPassword(Long id) {
         Optional<User> optionalUser = userRepository.findById(id);
