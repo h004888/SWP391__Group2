@@ -2,7 +2,7 @@
 <div class="container-fluid">
   <div class="table-wrapper">
     <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search"
-          th:action="@{/admin/orders/searchByUsername}" method="get">
+          th:action="@{/admin/order/searchByUsername}" method="get">
       <div class="input-group">
         <input type="text" class="form-control bg-light border-0 small" name="username" th:value="${username}" placeholder="Enter username"/>
         <div class="input-group-append">
@@ -15,7 +15,7 @@
 
     <!-- Form tìm kiếm theo Status -->
     <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search"
-          th:action="@{/admin/orders/searchByCourseName}" method="get">
+          th:action="@{/admin/order/searchByCourseName}" method="get">
       <div class="input-group">
         <input type="text" class="form-control bg-light border-0 small" name="courseName" th:value="${courseName}" placeholder="Enter course name"/>
         <div class="input-group-append">
@@ -27,7 +27,7 @@
     </form>
 
     <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search"
-          th:action="@{/admin/orders/sortByAmount}" method="get">
+          th:action="@{/admin/order/sortByAmount}" method="get">
       <div class="input-group">
         <label>Sort by Amount:</label>
         <select  name="direction" onchange="this.form.submit()">
@@ -39,7 +39,7 @@
     </form>
 
     <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search"
-          th:action="@{/admin/orders/sortByDate}" method="get">
+          th:action="@{/admin/order/sortByDate}" method="get">
       <div class="input-group">
         <label>Sort by Date:</label>
         <select  name="direction" onchange="this.form.submit()">
@@ -65,15 +65,15 @@
       </tr>
       </thead>
       <tbody>
-      <tr th:each="orders : ${orders}">
-        <td th:text="${orders.orderId} ?: 'N/A'"></td>
-        <td th:text="${orders.amount} ?: 'N/A'"></td>
-        <td th:text="${orders.orderType} ?: 'N/A'"></td>
-        <td th:text="${orders.status} ?: 'N/A'"></td>
-        <td th:with="formatter=${#temporals.format(orders.orderDate, 'dd/MM/yyyy HH:mm')}" th:text="${formatter}"></td>
-        <td th:text="${orders.note} ?: 'N/A'"></td>
-        <td th:text="${orders.username} ?: 'N/A'"></td>
-        <td th:text="${orders.courseNames != null && !orders.courseNames.isEmpty()} ? ${#strings.listJoin(orders.courseNames, ', ')} : 'No courses'"></td>
+      <tr th:each="order : ${order}">
+        <td th:text="${order.orderId} ?: 'N/A'"></td>
+        <td th:text="${order.amount} ?: 'N/A'"></td>
+        <td th:text="${order.orderType} ?: 'N/A'"></td>
+        <td th:text="${order.status} ?: 'N/A'"></td>
+        <td th:with="formatter=${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}" th:text="${formatter}"></td>
+        <td th:text="${order.note} ?: 'N/A'"></td>
+        <td th:text="${order.username} ?: 'N/A'"></td>
+        <td th:text="${order.courseNames != null && !order.courseNames.isEmpty()} ? ${#strings.listJoin(order.courseNames, ', ')} : 'No courses'"></td>
       </tr>
       </tbody>
     </table>

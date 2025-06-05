@@ -1,13 +1,13 @@
 package com.OLearning.service.notification.impl;
 
-import com.OLearning.dto.adminDashBoard.NotificationDTO;
+import com.OLearning.dto.notification.NotificationDTO;
 import com.OLearning.entity.Course;
-import com.OLearning.entity.Notifications;
+import com.OLearning.entity.Notification;
 import com.OLearning.entity.User;
-import com.OLearning.mapper.adminDashBoard.NotificationMapper;
-import com.OLearning.repository.adminDashBoard.CourseRepository;
-import com.OLearning.repository.adminDashBoard.NotificationRepository;
-import com.OLearning.repository.adminDashBoard.UserRepository;
+import com.OLearning.mapper.notification.NotificationMapper;
+import com.OLearning.repository.CourseRepository;
+import com.OLearning.repository.NotificationRepository;
+import com.OLearning.repository.UserRepository;
 import com.OLearning.service.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +30,8 @@ public class NotificationServiceImpl implements NotificationService {
 
 
     @Override
-    public Notifications sendMess(Notifications notifications) {
-        return notificationRepository.save(notifications);
+    public Notification sendMess(Notification notification) {
+        return notificationRepository.save(notification);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class NotificationServiceImpl implements NotificationService {
         dto.setType("COURSE_REJECTION");
         dto.setStatus(true);
 
-        Notifications notification = notificationMapper.toEntity(dto, user, course);
+        Notification notification = notificationMapper.toEntity(dto, user, course);
         notificationRepository.save(notification);
 
         //set Course when reject

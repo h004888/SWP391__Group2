@@ -38,10 +38,10 @@ public class User {
     private List<Course> courses;
 
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
-    private List<Orders> orders;
+    private List<Order> orders;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Notifications> notifications;
+    private List<Notification> notifications;
 
 }
 

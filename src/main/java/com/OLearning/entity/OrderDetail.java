@@ -17,7 +17,7 @@ public class OrderDetail {
     @ManyToOne
     @MapsId("orderId")
     @JoinColumn(name = "orderId")
-    private Orders orders;
+    private Order order;
 
     @ManyToOne
     @MapsId("courseId")

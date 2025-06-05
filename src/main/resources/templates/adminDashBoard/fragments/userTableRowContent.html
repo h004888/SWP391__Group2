@@ -1,5 +1,6 @@
 <!-- Fragment for table rows only - accountContent.html -->
-<th:block th:fragment="userTableRows">
+<div th:fragment="userTableRows">
+
     <tr th:each="u : ${listU}">
         <td th:text="${u.userId}"></td>
         <td th:text="${u.userName}"></td>
@@ -7,7 +8,7 @@
         <td th:text="${u.roleName}"></td>
         <td>
            <span th:class="'badge rounded-pill px-3 py-2 ' + (${u.status} ? 'bg-success' : 'bg-danger')"
-          th:text="${u.status} ? 'Active' : 'Inactive'">
+                 th:text="${u.status} ? 'Active' : 'Inactive'">
            </span>
         </td>
 
@@ -40,4 +41,37 @@
             </a>
         </td>
     </tr>
-</th:block>
+</div>
+
+<div th:fragment="paginationInfo" xmlns:th="http://www.thymeleaf.org">
+    <div class="clearfix" th:if="${totalPages > 0}">
+        <div class="hint-text">
+            Showing <b th:text="${listU.size()}"></b> out of <b th:text="${totalItems}"></b> entries
+        </div>
+        <ul class="pagination">
+
+            <!-- Previous button -->
+            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                <a class="page-link" th:data-page="${currentPage - 1}" href="#"
+                   th:data-role="${roleId}" th:data-keyword="${keyword}">
+                    <i class="fa fa-angle-double-left"></i>
+                </a>
+            </li>
+
+            <!-- Page numbers -->
+            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                th:classappend="${currentPage == i} ? 'active'">
+                <a class="page-link" th:data-page="${i}" th:text="${i + 1}" href="#"
+                   th:data-role="${roleId}" th:data-keyword="${keyword}"></a>
+            </li>
+
+            <!-- Next button -->
+            <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                <a class="page-link" th:data-page="${currentPage + 1}" href="#"
+                   th:data-role="${roleId}" th:data-keyword="${keyword}">
+                    <i class="fa fa-angle-double-right"></i>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
