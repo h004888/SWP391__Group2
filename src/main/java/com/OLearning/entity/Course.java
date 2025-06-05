@@ -36,7 +36,7 @@ public class Course {
     private User instructor;
     @ManyToOne
     @JoinColumn(name = "CategoryID")
-    private Categories category;
+    private Category category;
 
     @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
     private List<Lesson> listOfLessons;

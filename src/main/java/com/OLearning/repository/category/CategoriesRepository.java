@@ -1,6 +1,6 @@
 package com.OLearning.repository.category;
 
-import com.OLearning.entity.Categories;
+import com.OLearning.entity.Category;
 import com.OLearning.entity.Enrollment;
 
 import org.springframework.data.domain.Page;
@@ -14,26 +14,26 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface CategoriesRepository extends JpaRepository<Categories, Integer> {
-    Page<Categories> findAll(Pageable pageable);
+public interface CategoriesRepository extends JpaRepository<Category, Integer> {
+    Page<Category> findAll(Pageable pageable);
 
-    Categories findByName(String name);
+    Category findByName(String name);
 
-    Categories findById(int id);
+    Category findById(int id);
 
     boolean existsByName(String name);
 
     boolean existsById(int id);
 
-    Page<Categories> findByNameContaining(String name, Pageable pageable);
+    Page<Category> findByNameContaining(String name, Pageable pageable);
 
-    Categories save(Categories categories);
+    Category save(Category categories);
 
     void deleteById(int id);
 
-    void delete(Categories categories);
+    void delete(Category categories);
 
-    List<Categories> findByNameContaining(String name);
+    List<Category> findByNameContaining(String name);
 
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Categories c SET c.name = :name WHERE c.id = :id")
