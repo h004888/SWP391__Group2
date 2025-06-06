@@ -1,7 +1,7 @@
 package com.OLearning.service.category.impl;
 
 import com.OLearning.entity.Category;
-import com.OLearning.repository.category.CategoriesRepository;
+import com.OLearning.repository.CategoriesRepository;
 import com.OLearning.service.category.CategoryService;
 
 import jakarta.transaction.Transactional;

@@ -1,7 +1,6 @@
-package com.OLearning.repository.category;
+package com.OLearning.repository;
 
 import com.OLearning.entity.Category;
-import com.OLearning.entity.Enrollment;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,7 +35,7 @@ public interface CategoriesRepository extends JpaRepository<Category, Integer> {
     List<Category> findByNameContaining(String name);
 
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE Categories c SET c.name = :name WHERE c.id = :id")
+    @Query("UPDATE Category c SET c.name = :name WHERE c.id = :id")
     void updateCategory(@Param("id") int id, @Param("name") String name);
 
 }
