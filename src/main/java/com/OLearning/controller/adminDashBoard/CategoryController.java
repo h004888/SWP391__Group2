@@ -9,8 +9,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import com.OLearning.entity.Category;
-import com.OLearning.service.adminDashBoard.CourseService;
 import com.OLearning.service.category.CategoryService;
+import com.OLearning.service.course.CourseService;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -78,7 +78,7 @@ public class CategoryController {
 
     @GetMapping("/categories/delete")
     public String deleteCategory(@RequestParam("id") int id, Model model) {
-        if (categoriesService.existsById(id)) {
+        if (categoriesService.existsById(id) ) {
             categoriesService.deleteById(id);
         }
         List<Category> categories = categoriesService.findAll();
