@@ -1,0 +1,30 @@
+<div id="content" class="container-fluid" th:fragment="contentOrderDetails">
+  <div class="table-responsive">
+    <div class="table-wrapper">
+      <div class="table-title">
+        <div class="row">
+          <div class="col-md-6">
+            <h2 th:text="${accNamePage}">Order <b>Details</b></h2>
+          </div>
+          <div class="col-md-6">
+            <a th:href="@{/admin/orders}" class="btn btn-secondary mt-2">Back to Orders</a>
+          </div>
+        </div>
+      </div>
+      <table class="table table-striped table-hover table-bordered">
+        <thead>
+        <tr>
+          <th>Course Name</th>
+          <th>Unit Price</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="detail : ${orderDetails}">
+          <td th:text="${detail.course.title} ?: 'N/A'"></td>
+          <td th:text="${detail.unitPrice} ?: 'N/A'"></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

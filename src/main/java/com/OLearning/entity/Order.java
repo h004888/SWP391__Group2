@@ -17,24 +17,18 @@ import java.util.Set;
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "OrderId")
-    private Integer orderId;
-    @Column(name = "Amount")
+    private Long orderId;
     private double amount;
-    @Column(name = "OrderType")
     private String orderType;
-    @Column(name = "Status")
     private String status;
-    @Column(name = "OrderDate")
     private LocalDateTime orderDate;
-    @Column(name = "Note")
     private String note;
 
     @ManyToOne
     @JoinColumn(name = "userId", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "orders", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<OrderDetail> orderDetails;
 
 

@@ -1,39 +1,58 @@
 package com.OLearning.repository;
 
 import com.OLearning.entity.Order;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public interface OrdersRepository extends JpaRepository<Order,Integer> {
-//    @Query("SELECT DISTINCT o FROM Orders o JOIN FETCH o.user u JOIN FETCH o.orderDetails od JOIN FETCH od.course c")
-//    List<Orders> findAllOrders();
+public interface OrdersRepository extends JpaRepository<Order, Long> {
+    // Tìm tất cả đơn hàng có load user, orderDetails và course
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    List<Order> findAll();
 
-    @Query("SELECT DISTINCT o FROM Order o JOIN FETCH o.user u JOIN FETCH o.orderDetails od JOIN FETCH od.course c " +
-            "WHERE u.username LIKE %:username%")
-    List<Order> findByUsername(@Param("username") String username);
+    // Tìm tất cả đơn hàng với phân trang
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    Page<Order> findAll(Pageable pageable);
 
-    @Query("SELECT DISTINCT o FROM Order o JOIN FETCH o.user u JOIN FETCH o.orderDetails od JOIN FETCH od.course c " +
-            "WHERE c.title LIKE %:courseName%")
-    List<Order> findByCourseName(@Param("courseName") String courseName);
+    // Tìm đơn hàng theo username (LIKE)
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    List<Order> findByUserUsernameContaining(String username);
 
-//    @Query("SELECT DISTINCT o FROM Orders o JOIN FETCH o.user u JOIN FETCH o.orderDetails od JOIN FETCH od.course c " +
-//            "ORDER BY o.amount ASC")
-List<Order> findByOrderByAmountAsc();
+    // Tìm đơn hàng theo username với phân trang
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    Page<Order> findByUserUsernameContaining(String username, Pageable pageable);
 
-//    @Query("SELECT DISTINCT o FROM Orders o JOIN FETCH o.user u JOIN FETCH o.orderDetails od JOIN FETCH od.course c " +
-//            "ORDER BY o.amount DESC")
-    List<Order> findByOrderByAmountDesc();
+    // Sắp xếp theo amount tăng dần
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    List<Order> findAllByOrderByAmountAsc();
 
-    @Query("SELECT DISTINCT o FROM Order o JOIN FETCH o.user u JOIN FETCH o.orderDetails od JOIN FETCH od.course c " +
-            "ORDER BY o.orderDate ASC")
-    List<Order> findAllOrderByOrderDateAsc();
+    // Sắp xếp theo amount giảm dần
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    List<Order> findAllByOrderByAmountDesc();
 
-    @Query("SELECT DISTINCT o FROM Order o JOIN FETCH o.user u JOIN FETCH o.orderDetails od JOIN FETCH od.course c " +
-            "ORDER BY o.orderDate DESC")
-    List<Order> findAllOrderByOrderDateDesc();
+    // Sắp xếp theo ngày tăng dần
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    List<Order> findAllByOrderByOrderDateAsc();
+
+    // Sắp xếp theo ngày giảm dần
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    List<Order> findAllByOrderByOrderDateDesc();
+
+    // Combined username filtering and sorting with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    Page<Order> findByUserUsernameContainingOrderByAmountAsc(String username, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    Page<Order> findByUserUsernameContainingOrderByAmountDesc(String username, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    Page<Order> findByUserUsernameContainingOrderByOrderDateAsc(String username, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    Page<Order> findByUserUsernameContainingOrderByOrderDateDesc(String username, Pageable pageable);
 }
