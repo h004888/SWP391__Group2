@@ -81,13 +81,17 @@ public class InstructorController {
     }
 
     // Search notifications
-    @GetMapping("/instructordashboard/notifications/search")
-    public String searchNotifications(@RequestParam("userId") Long userId,
-                                      @RequestParam("keyword") String keyword,
-                                      Model model) {
-        List<NotificationsDTO> notifications = notificationsService.searchNotifications(userId, keyword);
-        model.addAttribute("notifications", notifications);
+    @GetMapping("/notifications/search")
+    public String searchNotifications( @RequestParam("keyword") String keyword,
+                                       Model model) {
+        try {
+            List<NotificationsDTO> notifications = notificationsService.searchNotifications(keyword);
+            model.addAttribute("notifications", notifications);
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Error searching notifications: " + e.getMessage());
+            model.addAttribute("notifications", List.of());
+        }
         model.addAttribute("keyword", keyword);
-        return "instructorDashboard/notifications"; // same view
+        return "instructorDashboard/notifications";
     }
 }

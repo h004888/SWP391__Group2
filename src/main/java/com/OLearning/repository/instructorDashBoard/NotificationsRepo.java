@@ -13,5 +13,6 @@ public interface NotificationsRepo extends JpaRepository<Notifications, Long> {
     List<Notifications> findByUser_UserIdOrderBySentAtDesc(Long userId);
 
     // Tìm kiếm thông báo theo tên khóa học (nếu có liên kết)
-    List<Notifications> findByUser_UserIdAndCourse_TitleContainingIgnoreCase(Long userId, String keyword);
+    List<Notifications> findByCourse_TitleContainingIgnoreCase( String keyword);
+
 }

@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface NotificationsService {
     List<NotificationsDTO> getNotificationsByUserId(Long userId);
-    List<NotificationsDTO> searchNotifications(Long userId, String keyword);
+    List<NotificationsDTO> searchNotifications( String keyword);
+    NotificationsDTO getNotificationDetail(Long notificationId, Long userId);
 }

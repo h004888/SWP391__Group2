@@ -1,5 +1,7 @@
 package com.OLearning.dto.instructorDashBoard;
 
+import com.OLearning.entity.Course;
+import com.OLearning.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,10 +19,6 @@ public class NotificationsDTO {
     private LocalDateTime sentAt;
     private String type;
     private boolean status;
-
-    private Long userId;
-    private String userName;
-
-    private Long courseId;
-    private String courseTitle;
+    private User user;
+    private Course course;
 }
