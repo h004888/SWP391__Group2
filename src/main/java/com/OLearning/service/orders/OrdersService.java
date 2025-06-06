@@ -1,4 +1,4 @@
-package com.OLearning.service.Orders;
+package com.OLearning.service.orders;
 
 import com.OLearning.dto.adminDashBoard.OrdersDTO;
 import com.OLearning.entity.OrderDetail;

@@ -1,12 +1,12 @@
-package com.OLearning.service.Orders.Impl;
+package com.OLearning.service.orders.Impl;
 
 import com.OLearning.dto.adminDashBoard.OrdersDTO;
 import com.OLearning.entity.OrderDetail;
 import com.OLearning.entity.Orders;
-import com.OLearning.mapper.Orders.OrdersMapper;
+import com.OLearning.mapper.orders.OrdersMapper;
 import com.OLearning.repository.OrderDetailRepository;
 import com.OLearning.repository.OrdersRepository;
-import com.OLearning.service.Orders.OrdersService;
+import com.OLearning.service.orders.OrdersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

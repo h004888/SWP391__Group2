@@ -1,12 +1,12 @@
-package com.OLearning.service.Course.Impl;
+package com.OLearning.service.course.Impl;
 
 import com.OLearning.dto.adminDashBoard.CourseDTO;
 import com.OLearning.dto.adminDashBoard.CourseDetailDTO;
 import com.OLearning.entity.Course;
-import com.OLearning.mapper.Course.CourseDetailMapper;
-import com.OLearning.mapper.Course.CourseMapper;
+import com.OLearning.mapper.course.CourseDetailMapper;
+import com.OLearning.mapper.course.CourseMapper;
 import com.OLearning.repository.CourseRepository;
-import com.OLearning.service.Course.CourseService;
+import com.OLearning.service.course.CourseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

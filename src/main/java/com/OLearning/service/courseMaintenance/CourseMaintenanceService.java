@@ -1,9 +1,8 @@
-package com.OLearning.service.CourseMaintenance;
+package com.OLearning.service.courseMaintenance;
 
 import com.OLearning.entity.CourseMaintenance;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Service

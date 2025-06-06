@@ -1,4 +1,4 @@
-package com.OLearning.mapper.Orders;
+package com.OLearning.mapper.orders;
 
 import com.OLearning.dto.adminDashBoard.OrdersDTO;
 

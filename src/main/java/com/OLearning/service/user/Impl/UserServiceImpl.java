@@ -1,4 +1,4 @@
-package com.OLearning.service.User.Impl;
+package com.OLearning.service.user.Impl;
 
 import com.OLearning.dto.adminDashBoard.UserDTO;
 import com.OLearning.dto.adminDashBoard.UserDetailDTO;
@@ -8,7 +8,7 @@ import com.OLearning.mapper.User.UserDetailMapper;
 import com.OLearning.mapper.User.UserMapper;
 import com.OLearning.repository.RoleRepository;
 import com.OLearning.repository.UserRepository;
-import com.OLearning.service.User.UserService;
+import com.OLearning.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

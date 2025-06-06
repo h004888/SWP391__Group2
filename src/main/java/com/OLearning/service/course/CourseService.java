@@ -1,4 +1,4 @@
-package com.OLearning.service.Course;
+package com.OLearning.service.course;
 
 import com.OLearning.dto.adminDashBoard.CourseDTO;
 import com.OLearning.dto.adminDashBoard.CourseDetailDTO;

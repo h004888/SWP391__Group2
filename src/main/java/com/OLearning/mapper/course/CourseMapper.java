@@ -1,4 +1,4 @@
-package com.OLearning.mapper.Course;
+package com.OLearning.mapper.course;
 
 import com.OLearning.dto.adminDashBoard.CourseDTO;
 import com.OLearning.entity.Course;

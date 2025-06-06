@@ -2,7 +2,7 @@ package com.OLearning.controller.adminDashBoard;
 
 import com.OLearning.dto.adminDashBoard.OrdersDTO;
 import com.OLearning.entity.OrderDetail;
-import com.OLearning.service.Orders.OrdersService;
+import com.OLearning.service.orders.OrdersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;

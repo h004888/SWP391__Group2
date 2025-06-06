@@ -1,8 +1,8 @@
-package com.OLearning.service.Category.Impl;
+package com.OLearning.service.category.Impl;
 
 import com.OLearning.entity.Categories;
 import com.OLearning.repository.CategoriesRepository;
-import com.OLearning.service.Category.CategoriesService;
+import com.OLearning.service.category.CategoriesService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
