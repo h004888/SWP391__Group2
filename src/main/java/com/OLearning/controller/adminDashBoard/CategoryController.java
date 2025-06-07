@@ -1,6 +1,8 @@
 package com.OLearning.controller.adminDashBoard;
 
 import java.util.List;
+
+import com.OLearning.entity.Category;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -8,8 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import com.OLearning.entity.Categories;
-import com.OLearning.service.adminDashBoard.CategoriesService;
+import com.OLearning.service.category.CategoriesService;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -29,7 +30,7 @@ public class CategoryController {
                         : sort.equals("desc") ? Sort.by("name").descending()
                                 : Sort.unsorted());
 
-        Page<Categories> categoriesPage = categoriesService.findByNameContaining(name, pageable);
+        Page<Category> categoriesPage = categoriesService.findByNameContaining(name, pageable);
 
         model.addAttribute("categories", categoriesPage.getContent());
         model.addAttribute("currentPage", page);
@@ -65,7 +66,7 @@ public class CategoryController {
         if (categoriesService.existsById(id)) {
             categoriesService.deleteById(id);
         }
-        List<Categories> categories = categoriesService.findAll();
+        List<Category> categories = categoriesService.findAll();
         model.addAttribute("categories", categories);
         return categoryPagination;
     }
@@ -81,7 +82,7 @@ public class CategoryController {
         if (categoriesService.existsByName(name)) {
             model.addAttribute("errorMessage", "Category already exists");
         } else {
-            Categories newCategory = new Categories();
+            Category newCategory = new Category();
             newCategory.setName(name.trim());
             categoriesService.save(newCategory);
             model.addAttribute("successMessage", "Category added successfully");
@@ -98,7 +99,7 @@ public class CategoryController {
             @RequestParam(defaultValue = "") String sort,
             @RequestParam(defaultValue = "") String name,
             Model model) {
-        Categories category = categoriesService.findById(id);
+        Category category = categoriesService.findById(id);
         if (category != null) {
             model.addAttribute("category", category);
             model.addAttribute("currentPage", page);
@@ -118,7 +119,7 @@ public class CategoryController {
             @RequestParam(defaultValue = "") String sort,
             @RequestParam(defaultValue = "") String search,
             Model model) {
-        Categories category = categoriesService.findById(id);
+        Category category = categoriesService.findById(id);
 
         if (category == null) {
             model.addAttribute("errorMessage", "Category not found");

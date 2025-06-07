@@ -1,12 +1,12 @@
 package com.OLearning.controller.adminDashBoard;
 
-import com.OLearning.dto.adminDashBoard.CourseDTO;
-import com.OLearning.dto.adminDashBoard.CourseDetailDTO;
-import com.OLearning.dto.adminDashBoard.NotificationDTO;
-import com.OLearning.entity.Categories;
-import com.OLearning.service.adminDashBoard.CategoriesService;
-import com.OLearning.service.adminDashBoard.CourseService;
-import com.OLearning.service.adminDashBoard.NotificationService;
+import com.OLearning.dto.course.CourseDTO;
+import com.OLearning.dto.course.CourseDetailDTO;
+import com.OLearning.dto.notification.NotificationDTO;
+import com.OLearning.entity.Category;
+import com.OLearning.service.category.CategoriesService;
+import com.OLearning.service.course.CourseService;
+import com.OLearning.service.notification.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -30,7 +30,7 @@ public class CourseController {
     @GetMapping
     public String getCoursePage(Model model) {
         List<CourseDTO> listCourse = courseService.getAllCourses();
-        List<Categories> listCategories = categoriesService.getListCategories();
+        List<Category> listCategories = categoriesService.getListCategories();
 
         model.addAttribute("accNamePage", "Management Course");
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/courseContent :: courseContent");
