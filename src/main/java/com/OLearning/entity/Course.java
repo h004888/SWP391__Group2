@@ -5,7 +5,6 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -40,7 +39,7 @@ public class Course {
 
     @ManyToOne
     @JoinColumn(name = "CategoryID")
-    private Categories category;
+    private Category category;
 
 //    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
 //    private List<Lessons> listOfLessons;
@@ -49,7 +48,7 @@ public class Course {
     private Set<OrderDetail> orderDetails;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Notifications> notifications;
+    private List<Notification> notifications;
 
 
 }

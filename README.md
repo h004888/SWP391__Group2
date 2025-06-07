@@ -35,7 +35,7 @@ src/
 | **Tên class** | PascalCase: `CategoryController`, `UserServiceImpl` |
 | **Tên biến** | camelCase: `categoryList`, `userId` |
 | **Tên method** | camelCase, có động từ: `getAllUsers()`, `saveCategory()` |
-| **Tên package** | Chữ thường, chia rõ theo vai trò: `controller.categories`, `repository.user` |
+| **Tên package** | Chữ thường, chia rõ theo vai trò: `controller.category`, `repository.user` |
 | **HTML file** | Tên tiếng Anh, snake-case hoặc camelCase: `createCategory.html`, `topbar.html` |
 | **Tái sử dụng HTML** | Dùng `th:replace="fragments/header :: header"` để nhúng |
 | **Comment code** | Rõ ràng, dùng `//` hoặc `/** */` nếu thật cần thiết |
