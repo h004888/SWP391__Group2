@@ -16,7 +16,7 @@ public class NotificationsMapper {
         dto.setMessage(notification.getMessage());
         dto.setSentAt(notification.getSentAt());
         dto.setType(notification.getType());
-        dto.setStatus(notification.isStatus());
+        dto.setStatus(notification.getStatus());
         dto.setUser(notification.getUser());
         dto.setCourse(notification.getCourse());
 
@@ -29,7 +29,7 @@ public class NotificationsMapper {
         notification.setMessage(dto.getMessage());
         notification.setSentAt(dto.getSentAt());
         notification.setType(dto.getType());
-        notification.setStatus(dto.isStatus());
+        notification.setStatus(dto.getStatus());
         notification.setUser(user);
         notification.setCourse(course); // có thể null nếu không liên quan
 

@@ -19,7 +19,7 @@ public class Notifications {
     private String message;
     private LocalDateTime sentAt;
     private String type; // e.g., "REJECT_COURSE"
-    private boolean status; // false = chưa đọc, true = đã đọc
+    private String status; // false = chưa đọc, true = đã đọc
 
     @ManyToOne
     @JoinColumn(name = "userId", nullable = false)

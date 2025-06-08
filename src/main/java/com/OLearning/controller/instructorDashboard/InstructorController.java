@@ -72,26 +72,5 @@ public class InstructorController {
 
         return "redirect:/instructordashboard/viewcourse";
     }
-    @GetMapping("/instructordashboard/notifications")
-    public String viewNotifications(@RequestParam(name = "userId", defaultValue = "2") Long userId,
-                                    Model model) {
-        List<NotificationsDTO> notifications = notificationsService.getNotificationsByUserId(userId);
-        model.addAttribute("notifications", notifications);
-        return "instructorDashboard/notifications"; // view name
-    }
 
-    // Search notifications
-    @GetMapping("/notifications/search")
-    public String searchNotifications( @RequestParam("keyword") String keyword,
-                                       Model model) {
-        try {
-            List<NotificationsDTO> notifications = notificationsService.searchNotifications(keyword);
-            model.addAttribute("notifications", notifications);
-        } catch (Exception e) {
-            model.addAttribute("errorMessage", "Error searching notifications: " + e.getMessage());
-            model.addAttribute("notifications", List.of());
-        }
-        model.addAttribute("keyword", keyword);
-        return "instructorDashboard/notifications";
-    }
 }

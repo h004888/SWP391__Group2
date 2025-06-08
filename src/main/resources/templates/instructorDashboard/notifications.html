@@ -127,15 +127,6 @@
             color: white;
         }
 
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
         .notification-time {
             font-size: 0.875rem;
             color: #6c757d;
@@ -146,50 +137,6 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-        }
-
-        /* Modal Styles */
-        .notification-modal .modal-content {
-            border-radius: 15px;
-            border: none;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-
-        .notification-modal .modal-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 15px 15px 0 0;
-            border: none;
-        }
-
-        .notification-modal .modal-header .btn-close {
-            filter: invert(1);
-        }
-
-        .notification-modal .modal-body {
-            padding: 2rem;
-        }
-
-        .notification-detail-card {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .notification-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        .notification-content {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            color: #495057;
         }
 
         .status-indicator {
@@ -212,13 +159,6 @@
             color: #2e7d32;
         }
 
-        .course-info {
-            background: white;
-            border-radius: 10px;
-            padding: 1rem;
-            border-left: 4px solid #2196f3;
-        }
-
         @media (max-width: 768px) {
             .notification-message {
                 max-width: 150px;
@@ -226,10 +166,6 @@
 
             .table-responsive {
                 font-size: 0.875rem;
-            }
-
-            .notification-modal .modal-body {
-                padding: 1rem;
             }
         }
     </style>
@@ -244,9 +180,6 @@
     <div id="content-wrapper" class="d-flex flex-column">
         <div id="content">
 
-            <!-- Topbar -->
-            <!-- <th:block th:replace="instructorDashboard/fragments/topbar :: topbar"></th:block> -->
-
             <!-- Main Content -->
             <div class="container-fluid px-4">
                 <!-- Page Header -->
@@ -254,14 +187,32 @@
                     <h1 class="h3 mb-0 text-gray-800">
                         <i class="fas fa-bell me-2"></i>Notifications
                     </h1>
-                    <form method="post" action="/instructordashboard/notifications/mark-all-read">
-                        <button type="submit" class="btn btn-warning">Mark All as Read</button>
+                    <form th:action="@{/instructordashboard/notifications/mark-all-read}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-outline-primary">
+                            <i class="fas fa-check-double me-1"></i>Mark All as Read
+                        </button>
                     </form>
-
                 </div>
 
+                <!-- Notification Stats -->
+                <div class="notification-stats" th:if="${notificationStats}">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <h4 th:text="${notificationStats.total}">0</h4>
+                            <small>Total Notifications</small>
+                        </div>
+                        <div class="col-md-4">
+                            <h4 th:text="${notificationStats.unread}">0</h4>
+                            <small>Unread</small>
+                        </div>
+                        <div class="col-md-4">
+                            <h4 th:text="${notificationStats.read}">0</h4>
+                            <small>Read</small>
+                        </div>
+                    </div>
+                </div>
 
-
+                <!-- Search Form -->
                 <div class="search-container">
                     <form th:action="@{/instructordashboard/notifications/search}" method="get" class="row g-3">
                         <div class="col-md-8">
@@ -299,7 +250,9 @@
                                 <th width="30%">
                                     <i class="fas fa-envelope me-1"></i>Message
                                 </th>
-
+<!--                                <th width="15%">-->
+<!--                                    <i class="fas fa-clock me-1"></i>Sent At-->
+<!--                                </th>-->
                                 <th width="12%">
                                     <i class="fas fa-tag me-1"></i>Type
                                 </th>
@@ -314,17 +267,10 @@
                                 </th>
                             </tr>
                             </thead>
-                            <tbody id="notificationsTableBody">
+                            <tbody>
 
                             <tr th:each="n : ${notifications}"
-                                class="notification-row"
-                                th:classappend="${n.status} ? 'notification-read' : 'notification-unread'"
-                                th:data-notification-id="${n.notificationId}"
-                                th:data-message="${n.message}"
-                                th:data-type="${n.type}"
-                                th:data-course="${n.course.title}"
-                                th:data-status="${n.status}"
-                                onclick="showNotificationModal(this)">
+                                th:class="'notification-row ' + (${n.status} == 'sent' ? 'notification-read' : 'notification-unread')">
                                 <td>
                                     <div class="notification-badge">
                                         <strong th:text="${n.notificationId}"></strong>
@@ -333,7 +279,12 @@
                                 <td>
                                     <div class="notification-message" th:title="${n.message}" th:text="${n.message}"></div>
                                 </td>
-
+<!--                                <td>-->
+<!--                                    <div class="notification-time">-->
+<!--                                        <i class="fas fa-calendar-alt me-1"></i>-->
+<!--                                        <span th:text="${#temporals.format(n.sentAt, 'dd/MM/yyyy HH:mm')}"></span>-->
+<!--                                    </div>-->
+<!--                                </td>-->
                                 <td>
                                     <span th:class="'badge notification-type-badge ' + ${n.type == 'COURSE_REJECTION' ? 'bg-danger' : (n.type == 'ENROLLMENT' ? 'bg-success' : 'bg-info')}">
                                         <i th:class="'fas me-1 ' + ${n.type == 'COURSE_REJECTION' ? 'fa-times-circle' : (n.type == 'ENROLLMENT' ? 'fa-user-plus' : 'fa-info-circle')}"></i>
@@ -344,34 +295,34 @@
                                     <strong th:text="${n.course.title}"></strong>
                                 </td>
                                 <td>
-                                    <span th:class="${n.status} ? 'status-indicator status-read' : 'status-indicator status-unread'">
-                                        <i th:class="${n.status} ? 'fas fa-check-circle' : 'fas fa-circle'"></i>
-                                        <span th:text="${n.status} ? 'Read' : 'Unread'"></span>
+                                    <span th:class="${n.status} == 'sent' ? 'status-indicator status-read' : 'status-indicator status-unread'">
+                                        <i th:class="${n.status} == 'sent' ? 'fas fa-check-circle' : 'fas fa-circle'"></i>
+                                        <span th:text="${n.status} == 'sent' ? 'Read' : 'Unread'"></span>
                                     </span>
                                 </td>
                                 <td>
                                     <!-- Edit button for COURSE_REJECTION -->
-                                    <button th:if="${n.type == 'COURSE_REJECTION'}"
-                                            class="btn btn-warning btn-sm action-btn me-1"
-                                            onclick="event.stopPropagation(); editCourseRejection(this.closest('tr'))"
-                                            title="Edit Course">
+                                    <a th:if="${n.type == 'COURSE_REJECTION'}"
+                                       th:href="@{/instructordashboard/courses/edit(rejectionNotificationId=${n.notificationId})}"
+                                       class="btn btn-warning btn-sm action-btn me-1"
+                                       title="Edit Course">
                                         <i class="fas fa-edit"></i>
-                                    </button>
+                                    </a>
 
-                                    <!-- View button for all notifications -->
-                                    <button class="btn btn-outline-primary btn-sm action-btn"
-                                            onclick="event.stopPropagation(); showNotificationModal(this.closest('tr'))"
-                                            title="View Details">
+                                    <!-- View notification details -->
+                                    <a th:href="@{/instructordashboard/notifications/view/{id}(id=${n.notificationId})}"
+                                       class="btn btn-outline-primary btn-sm action-btn"
+                                       title="View Details">
                                         <i class="fas fa-eye"></i>
-                                    </button>
+                                    </a>
 
-                                    <!-- Additional action for non-rejection notifications -->
-                                    <button th:if="${n.type != 'COURSE_REJECTION'}"
-                                            class="btn btn-success btn-sm action-btn ms-1"
-                                            onclick="event.stopPropagation(); viewCourse(this.closest('tr'))"
-                                            title="View Course">
+                                    <!-- View course for non-rejection notifications -->
+                                    <a th:if="${n.type != 'COURSE_REJECTION'}"
+                                       th:href="@{/instructordashboard/courses/view(fromNotification=${n.notificationId})}"
+                                       class="btn btn-success btn-sm action-btn ms-1"
+                                       title="View Course">
                                         <i class="fas fa-book-open"></i>
-                                    </button>
+                                    </a>
                                 </td>
                             </tr>
 
@@ -380,7 +331,7 @@
                     </div>
 
                     <!-- Empty state -->
-                    <div id="emptyState" class="text-center py-5" style="display: none;">
+                    <div th:if="${#lists.isEmpty(notifications)}" class="text-center py-5">
                         <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
                         <h5 class="text-muted">No notifications found</h5>
                         <p class="text-muted">You're all caught up! Check back later for new notifications.</p>
@@ -394,302 +345,8 @@
     </div>
 </div>
 
-<!-- Notification Detail Modal -->
-<div class="modal fade notification-modal" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="notificationModalLabel">
-                    <i class="fas fa-bell me-2"></i>Notification Details
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="notification-detail-card">
-                    <div class="notification-meta">
-                        <div>
-                            <h6 class="mb-1">Notification #<span id="modalNotificationId"></span></h6>
-                            <small class="text-muted">
-                                <i class="fas fa-calendar-alt me-1"></i>
-                                Sent: <span id="modalSentAt"></span>
-                            </small>
-                        </div>
-                        <div>
-                            <span id="modalStatus" class="status-indicator"></span>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-8">
-                            <h6 class="mb-2">
-                                <i class="fas fa-envelope me-2"></i>Message
-                            </h6>
-                            <div class="notification-content" id="modalMessage"></div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="course-info">
-                                <h6 class="mb-2">
-                                    <i class="fas fa-book me-2"></i>Course
-                                </h6>
-                                <p class="mb-2" id="modalCourse"></p>
-                                <span id="modalType" class="badge"></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="d-flex justify-content-between align-items-center">
-                    <small class="text-muted">
-                        <i class="fas fa-info-circle me-1"></i>
-                        This notification will be automatically marked as read when you view it.
-                    </small>
-                    <form method="post" action="/instructordashboard/notifications/mark-read">
-                        <input type="hidden" name="notificationId" value="${notification.id}" />
-                        <button type="submit" class="btn btn-primary">Mark as Read</button>
-                    </form>
-
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Scripts -->
+<!-- Simple Bootstrap JS for basic functionality -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    let currentNotificationRow = null;
-    let currentNotificationId = null;
-
-    // Show notification modal
-    function showNotificationModal(row) {
-        currentNotificationRow = row;
-        currentNotificationId = row.dataset.notificationId;
-
-        // Populate modal with notification data
-        document.getElementById('modalNotificationId').textContent = row.dataset.notificationId;
-        document.getElementById('modalMessage').textContent = row.dataset.message;
-        document.getElementById('modalSentAt').textContent = row.dataset.sentAt;
-        document.getElementById('modalCourse').textContent = row.dataset.course;
-        document.getElementById('modalType').textContent = row.dataset.type;
-
-        // Set type badge color
-        const typeBadge = document.getElementById('modalType');
-        const type = row.dataset.type;
-        typeBadge.className = 'badge ';
-        if (type === 'COURSE_REJECTION') {
-            typeBadge.className += 'bg-danger';
-        } else if (type === 'ENROLLMENT') {
-            typeBadge.className += 'bg-success';
-        } else {
-            typeBadge.className += 'bg-info';
-        }
-
-        // Set status
-        const statusElement = document.getElementById('modalStatus');
-        const isRead = row.dataset.status === 'true';
-        statusElement.className = isRead ? 'status-indicator status-read' : 'status-indicator status-unread';
-        statusElement.innerHTML = isRead ?
-            '<i class="fas fa-check-circle"></i> <span>Read</span>' :
-            '<i class="fas fa-circle"></i> <span>Unread</span>';
-
-        // Show modal
-        const modal = new bootstrap.Modal(document.getElementById('notificationModal'));
-        modal.show();
-
-        // Auto-mark as read if unread
-        if (!isRead) {
-            setTimeout(() => {
-                markCurrentNotificationAsRead();
-            }, 2000); // Mark as read after 2 seconds of viewing
-        }
-    }
-
-    // Mark current notification as read
-    function markCurrentNotificationAsRead() {
-        if (!currentNotificationRow || !currentNotificationId) return;
-
-        if (currentNotificationRow.classList.contains('notification-unread')) {
-            // Update UI immediately
-            currentNotificationRow.classList.remove('notification-unread');
-            currentNotificationRow.classList.add('notification-read');
-            currentNotificationRow.dataset.status = 'true';
-
-            // Update status in modal
-            const statusElement = document.getElementById('modalStatus');
-            statusElement.className = 'status-indicator status-read';
-            statusElement.innerHTML = '<i class="fas fa-check-circle"></i> <span>Read</span>';
-
-            // Update status in table
-            const statusCell = currentNotificationRow.querySelector('.status-indicator');
-            statusCell.className = 'status-indicator status-read';
-            statusCell.innerHTML = '<i class="fas fa-check-circle"></i> <span>Read</span>';
-
-            // Send AJAX request to backend
-            fetch(`/instructordashboard/notifications/${currentNotificationId}/mark-read`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-                .then(response => {
-                    if (response.ok) {
-                        console.log('Notification marked as read');
-                        updateNotificationStats();
-                        sortNotifications();
-                    } else {
-                        console.error('Failed to mark notification as read');
-                        // Revert UI changes if request failed
-                        currentNotificationRow.classList.remove('notification-read');
-                        currentNotificationRow.classList.add('notification-unread');
-                        currentNotificationRow.dataset.status = 'false';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    // Revert UI changes if request failed
-                    currentNotificationRow.classList.remove('notification-read');
-                    currentNotificationRow.classList.add('notification-unread');
-                    currentNotificationRow.dataset.status = 'false';
-                });
-        }
-    }
-
-    function markAllAsRead() {
-        const unreadRows = document.querySelectorAll('.notification-unread');
-
-        if (unreadRows.length === 0) {
-            alert('All notifications are already read!');
-            return;
-        }
-
-        if (confirm(`Mark all ${unreadRows.length} unread notifications as read?`)) {
-            unreadRows.forEach(row => {
-                row.classList.remove('notification-unread');
-                row.classList.add('notification-read');
-                row.dataset.status = 'true';
-
-                // Update status in table
-                const statusCell = row.querySelector('.status-indicator');
-                statusCell.className = 'status-indicator status-read';
-                statusCell.innerHTML = '<i class="fas fa-check-circle"></i> <span>Read</span>';
-            });
-
-            // Send AJAX request to backend
-            fetch('/instructordashboard/notifications/mark-all-read', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-                .then(response => {
-                    if (response.ok) {
-                        console.log('All notifications marked as read');
-                        updateNotificationStats();
-                        sortNotifications();
-                    } else {
-                        console.error('Failed to mark all notifications as read');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-        }
-    }
-
-    function sortNotifications() {
-        const tbody = document.getElementById('notificationsTableBody');
-        const rows = Array.from(tbody.querySelectorAll('.notification-row'));
-
-        // Sort: unread first, then by notification ID (newest first)
-        rows.sort((a, b) => {
-            const aUnread = a.classList.contains('notification-unread');
-            const bUnread = b.classList.contains('notification-unread');
-
-            if (aUnread && !bUnread) return -1;
-            if (!aUnread && bUnread) return 1;
-
-            // If both have same read status, sort by ID (newest first)
-            const aId = parseInt(a.dataset.notificationId);
-            const bId = parseInt(b.dataset.notificationId);
-            return bId - aId;
-        });
-
-        // Re-append sorted rows
-        rows.forEach(row => {
-            tbody.appendChild(row);
-            row.classList.add('fade-in');
-        });
-    }
-
-    function updateNotificationStats() {
-        const totalNotifications = document.querySelectorAll('.notification-row').length;
-        const unreadNotifications = document.querySelectorAll('.notification-unread').length;
-        const readNotifications = totalNotifications - unreadNotifications;
-
-        document.getElementById('totalNotifications').textContent = totalNotifications;
-        document.getElementById('unreadNotifications').textContent = unreadNotifications;
-        document.getElementById('readNotifications').textContent = readNotifications;
-
-        // Show empty state if no notifications
-        const emptyState = document.getElementById('emptyState');
-        const tableContainer = document.querySelector('.table-responsive');
-
-        if (totalNotifications === 0) {
-            emptyState.style.display = 'block';
-            tableContainer.style.display = 'none';
-        } else {
-            emptyState.style.display = 'none';
-            tableContainer.style.display = 'block';
-        }
-    }
-
-    // Initialize on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        updateNotificationStats();
-        sortNotifications();
-
-        // Add hover effects
-        document.querySelectorAll('.notification-row').forEach(row => {
-            row.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-2px)';
-            });
-
-            row.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
-            });
-        });
-    });
-
-    // Auto-refresh notifications every 30 seconds
-    setInterval(function() {
-        // You can implement auto-refresh logic here
-        console.log('Auto-refresh check...');
-    }, 30000);
-
-    // Add this function after the existing JavaScript functions
-
-    // Handle course rejection edit
-    function editCourseRejection(row) {
-        const notificationId = row.dataset.notificationId;
-        const courseTitle = row.dataset.course;
-
-        if (confirm(`Edit course "${courseTitle}" based on rejection feedback?`)) {
-            // Redirect to course edit page or open edit modal
-            window.location.href = `/instructordashboard/courses/edit?rejectionNotificationId=${notificationId}`;
-        }
-    }
-
-    // Handle view course action
-    function viewCourse(row) {
-        const courseTitle = row.dataset.course;
-        const notificationId = row.dataset.notificationId;
-
-        // Redirect to course view page
-        window.location.href = `/instructordashboard/courses/view?fromNotification=${notificationId}`;
-    }
-</script>
 
 </body>
 </html>

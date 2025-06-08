@@ -18,7 +18,7 @@ public class NotificationsDTO {
     private String message;
     private LocalDateTime sentAt;
     private String type;
-    private boolean status;
+    private String status;
     private User user;
     private Course course;
 }
