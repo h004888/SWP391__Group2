@@ -5,6 +5,24 @@ let totalPages = 0;
 
 // Event listeners
 $(document).ready(function () {
+    [1, 2, 3].forEach(roleId => {
+        loadUsers(roleId,'', 0);
+    });
+    function toggleAddButton(tabId) {
+        if (tabId === "#admin") {
+            $("#addAccountBtnContainer").show();
+        } else {
+            $("#addAccountBtnContainer").hide();
+        }
+    }
+
+    const initialActiveTabId = $(".tab-pane.active").attr("id");
+    toggleAddButton(`#${initialActiveTabId}`);
+
+    $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+        const target = $(e.target).data("bsTarget");
+        toggleAddButton(target);
+    });
 
     // Xử lý phân trang với AJAX
     $(document).on('click', '.pagination a', function (e) {
@@ -21,26 +39,9 @@ $(document).ready(function () {
         }
     });
 
-    function toggleAddButton(tabId) {
-        if (tabId === "#admin") {
-            $("#addAccountBtnContainer").show();
-        } else {
-            $("#addAccountBtnContainer").hide();
-        }
-    }
-
-    const activeTab = $(".nav-link.active").data("bsTarget");
-    toggleAddButton(activeTab);
-
-    $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
-        const target = $(e.target).data("bsTarget");
-        toggleAddButton(target);
-    });
 
 // Load initial data for admin tab
-    [1, 2, 3].forEach(roleId => {
-        loadUsers(roleId,'', 0);
-    });
+
     // loadUsers(1, ); // Load trang đầu tiên cho admin
 
     // Tab change

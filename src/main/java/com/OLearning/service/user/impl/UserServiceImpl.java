@@ -10,7 +10,9 @@ import com.OLearning.mapper.user.UserMapper;
 import com.OLearning.mapper.login.RegisterMapper;
 import com.OLearning.repository.RoleRepository;
 import com.OLearning.repository.UserRepository;
+import com.OLearning.service.email.EmailService;
 import com.OLearning.service.user.UserService;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -35,6 +37,8 @@ public class UserServiceImpl implements UserService {
     private UserDetailMapper userDetailMapper;
     @Autowired
     private RegisterMapper registerMapper;
+    @Autowired
+    private EmailService emailService;
 
     @Override
     public Page<UserDTO> getAllUsers(Pageable page) {
@@ -70,8 +74,14 @@ public class UserServiceImpl implements UserService {
     public boolean changStatus(Long id) {
         if (userRepository.existsById(id)) {
             Optional<User> user = userRepository.findById(id);
+            try {
+                emailService.sendAccountStatusEmail(user.get(),user.get().isStatus());
+            } catch (MessagingException e) {
+                throw new RuntimeException(e);
+            }
             user.get().setStatus(!user.get().isStatus());
             userRepository.save(user.get());
+
             return true;
         }
         return false;
@@ -153,6 +163,7 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Role not found: " + userDTO.getRoleName());
         }
         User user = userMapper.toUser(userDTO, roleOpt.get());
+        //Default password
         String encodedPassword = new BCryptPasswordEncoder().encode("123");
         user.setPassword(encodedPassword);
 
