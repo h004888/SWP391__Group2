@@ -2,40 +2,55 @@ package com.OLearning.security;
 
 import com.OLearning.entity.User;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Map;
 
 @AllArgsConstructor
-public class CustomUserDetails implements UserDetails {
+@Getter
+public class CustomUserDetails implements UserDetails, OAuth2User {
 
     private final User user;
     private final Collection<? extends GrantedAuthority> authorities;
+    private Map<String, Object> attributes; // chứa info từ Google
 
-    public String getFullName() {
-        return user.getFullName();
+    // Constructor cho form login
+    public CustomUserDetails(User user, Collection<? extends GrantedAuthority> authorities) {
+        this.user = user;
+        this.authorities = authorities;
     }
 
-    public String getphone() {
-        return user.getPhone();
+    public String getFullName() {
+        return user.getFullName() != null ? user.getFullName() : "";
+    }
+
+    public String getPhone() {
+        return user.getPhone() != null ? user.getPhone() : "";
     }
 
     public LocalDate getBirthday() {
         return user.getBirthday();
     }
 
-    public String getAdress() {
-        return user.getAddress();
+    public String getAddress() {
+        return user.getAddress() != null ? user.getAddress() : "";
     }
 
     public String getPersonalSkill() {
-        return user.getPersonalSkill();
+        if (user.getProfilePicture() != null && !user.getProfilePicture().trim().isEmpty()) {
+            return user.getProfilePicture();
+        }
+        // Trả về ảnh mặc định nếu không có
+        return "/assets/images/avatar/01.jpg";
     }
 
     public String getEmail() {
-        return user.getEmail();
+        return user.getEmail() != null ? user.getEmail() : "";
     }
 
     public String getProfilePicture() {
@@ -50,7 +65,18 @@ public class CustomUserDetails implements UserDetails {
         return this.user;
     }
 
- // DeFault function
+    //LOGIN OAUTH2
+    @Override
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+
+    @Override
+    public String getName() {
+        return user.getEmail();
+    }
+
+    // DeFault function
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;

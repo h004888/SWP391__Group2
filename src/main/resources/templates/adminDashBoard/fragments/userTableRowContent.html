@@ -44,34 +44,72 @@
 </div>
 
 <div th:fragment="paginationInfo" xmlns:th="http://www.thymeleaf.org">
-    <div class="clearfix" th:if="${totalPages > 0}">
-        <div class="hint-text">
+    <nav class="mt-4" aria-label="navigation" th:if="${totalPages > 0}">
+        <div class="hint-text mb-2 text-center">
             Showing <b th:text="${listU.size()}"></b> out of <b th:text="${totalItems}"></b> entries
         </div>
-        <ul class="pagination">
-
+        <ul class="pagination pagination-soft rounded justify-content-end">
             <!-- Previous button -->
             <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                <a class="page-link" th:data-page="${currentPage - 1}" href="#"
-                   th:data-role="${roleId}" th:data-keyword="${keyword}">
-                    <i class="fa fa-angle-double-left"></i>
+                <a class="page-link"
+                   th:data-page="${currentPage - 1}"
+                   th:data-role="${roleId}"
+                   th:data-keyword="${keyword}"
+                   href="#" title="Previous">
+                    <i class="fas fa-angle-double-left"></i>
                 </a>
             </li>
 
-            <!-- Page numbers -->
-            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                th:classappend="${currentPage == i} ? 'active'">
-                <a class="page-link" th:data-page="${i}" th:text="${i + 1}" href="#"
-                   th:data-role="${roleId}" th:data-keyword="${keyword}"></a>
-            </li>
+            <!-- Optional: Dải số trang với giới hạn hiển thị -->
+            <th:block th:with="startPage=${currentPage - 2 < 0 ? 0 : currentPage - 2},
+                              endPage=${currentPage + 2 >= totalPages ? totalPages - 1 : currentPage + 2}">
+
+                <!-- Show first page if not in range -->
+                <li class="page-item" th:if="${startPage > 0}">
+                    <a class="page-link" th:data-page="0" th:text="1"
+                       th:data-role="${roleId}" th:data-keyword="${keyword}" href="#"></a>
+                </li>
+                <li class="page-item disabled" th:if="${startPage > 1}">
+                    <span class="page-link">..</span>
+                </li>
+
+                <!-- Page numbers -->
+                <li class="page-item"
+                    th:each="i : ${#numbers.sequence(startPage, endPage)}"
+                    th:classappend="${currentPage == i} ? 'active'">
+                    <a class="page-link"
+                       th:data-page="${i}"
+                       th:text="${i + 1}"
+                       th:data-role="${roleId}"
+                       th:data-keyword="${keyword}"
+                       href="#"></a>
+                </li>
+
+                <!-- Show last page if not in range -->
+                <li class="page-item disabled" th:if="${endPage < totalPages - 2}">
+                    <span class="page-link">..</span>
+                </li>
+                <li class="page-item" th:if="${endPage < totalPages - 1}">
+                    <a class="page-link"
+                       th:data-page="${totalPages - 1}"
+                       th:text="${totalPages}"
+                       th:data-role="${roleId}"
+                       th:data-keyword="${keyword}"
+                       href="#"></a>
+                </li>
+            </th:block>
 
             <!-- Next button -->
             <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
-                <a class="page-link" th:data-page="${currentPage + 1}" href="#"
-                   th:data-role="${roleId}" th:data-keyword="${keyword}">
-                    <i class="fa fa-angle-double-right"></i>
+                <a class="page-link"
+                   th:data-page="${currentPage + 1}"
+                   th:data-role="${roleId}"
+                   th:data-keyword="${keyword}"
+                   href="#" title="Next">
+                    <i class="fas fa-angle-double-right"></i>
                 </a>
             </li>
         </ul>
-    </div>
+    </nav>
 </div>
+

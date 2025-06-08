@@ -9,19 +9,19 @@
         <td th:text="${#temporals.format(course.updatedAt, 'dd/MM/yyyy HH:mm')}"></td>
         <td>
                          <span th:switch="${course.status}">
-                             <span th:case="null" class="badge badge-secondary">
+                             <span th:case="null" class="badge bg-secondary">
                                  <i class="fas fa-save"></i> Save Draft
                              </span>
-                             <span th:case="'pending'" class="badge badge-secondary">
+                             <span th:case="'pending'" class="badge bg-secondary">
                                  <i class="fas fa-clock"></i> Pending
                              </span>
-                             <span th:case="'approved'" class="badge badge-success">
+                             <span th:case="'approved'" class="badge bg-success">
                                  <i class="fas fa-check"></i> Approved
                              </span>
-                             <span th:case="'rejected'" class="badge badge-danger">
+                             <span th:case="'rejected'" class="badge bg-danger">
                                  <i class="fas fa-times"></i> Rejected
                              </span>
-                             <span th:case="'resubmit'" class="badge badge-warning text-dark">
+                             <span th:case="'resubmit'" class="badge bg-warning text-dark">
                                  <i class="fas fa-exclamation-triangle"></i> ReSubmit
                              </span>
                          </span>
@@ -44,22 +44,12 @@
 </div>
 
 <div th:fragment="coursePagination">
-    <div class="clearfix" th:if="${totalPages > 0}">
-        <div class="hint-text">
-            Showing <b th:text="${listCourse.size()}"></b> out of <b th:text="${totalItems}"></b> entries
-        </div>
-        <ul class="pagination">
+    <nav class="mt-4" aria-label="navigation" th:if="${totalPages > 0}">
+        <ul class="pagination pagination-soft rounded justify-content-end">
             <!-- First Page -->
             <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                <a class="page-link" th:data-page="0" href="#" title="First">
-                    <i class="fa fa-angle-double-left"></i>
-                </a>
-            </li>
-
-            <!-- Previous Page -->
-            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                <a class="page-link" th:data-page="${currentPage - 1}" href="#" title="Previous">
-                    <i class="fa fa-angle-left"></i>
+                <a class="page-link" th:data-page="0" href="#" tabindex="-1" title="First">
+                    <i class="fas fa-angle-double-left"></i>
                 </a>
             </li>
 
@@ -72,10 +62,10 @@
                     <a class="page-link" th:data-page="0" th:text="1" href="#"></a>
                 </li>
                 <li class="page-item disabled" th:if="${startPage > 1}">
-                    <span class="page-link">...</span>
+                    <span class="page-link">..</span>
                 </li>
 
-                <!-- Show page range -->
+                <!-- Page range -->
                 <li class="page-item"
                     th:each="i : ${#numbers.sequence(startPage, endPage)}"
                     th:classappend="${currentPage == i} ? 'active'">
@@ -84,29 +74,22 @@
 
                 <!-- Show last page if not in range -->
                 <li class="page-item disabled" th:if="${endPage < totalPages - 2}">
-                    <span class="page-link">...</span>
+                    <span class="page-link">..</span>
                 </li>
                 <li class="page-item" th:if="${endPage < totalPages - 1}">
                     <a class="page-link" th:data-page="${totalPages - 1}" th:text="${totalPages}" href="#"></a>
                 </li>
             </th:block>
 
-            <!-- Next Page -->
-            <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
-                <a class="page-link" th:data-page="${currentPage + 1}" href="#" title="Next">
-                    <i class="fa fa-angle-right"></i>
-                </a>
-            </li>
-
             <!-- Last Page -->
             <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
                 <a class="page-link" th:data-page="${totalPages - 1}" href="#" title="Last">
-                    <i class="fa fa-angle-double-right"></i>
+                    <i class="fas fa-angle-double-right"></i>
                 </a>
             </li>
         </ul>
-    </div>
-
+    </nav>
 </div>
+
 
 
