@@ -16,6 +16,7 @@ public class HomeController {
     public String home(Model model) {
         model.addAttribute("categories", categoryService.findTop5ByOrderByIdAsc());
         model.addAttribute("allCategories", categoryService.findAll());
+        model.addAttribute("message", "Hello World");
         return "homePage/index";
     }
 
