@@ -25,7 +25,6 @@ public class CategoryServiceImpl implements CategoryService {
         return categoriesRepository.findAll();
     }
 
-
     @Override
     public void delete(Category categories) {
         categoriesRepository.delete(categories);
@@ -103,6 +102,9 @@ public class CategoryServiceImpl implements CategoryService {
         return categoriesRepository.findByNameContaining(name, pageable);
     }
 
-
+    @Override
+    public List<Category> findTop5ByOrderByIdAsc() {
+        return categoriesRepository.findTop5ByOrderByIdAsc();
+    }
 
 }

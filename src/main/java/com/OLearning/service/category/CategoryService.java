@@ -19,7 +19,8 @@ public interface CategoryService {
 
     boolean existsById(int id);
 
-    List<Category> findAll();
+    List<Category> findAll();   
+    List<Category> findTop5ByOrderByIdAsc();
 
     Category save(Category categories);
 
