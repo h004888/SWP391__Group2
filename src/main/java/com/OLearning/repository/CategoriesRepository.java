@@ -38,4 +38,6 @@ public interface CategoriesRepository extends JpaRepository<Category, Integer> {
     @Query("UPDATE Category c SET c.name = :name WHERE c.id = :id")
     void updateCategory(@Param("id") int id, @Param("name") String name);
 
+    List<Category> findTop5ByOrderByIdAsc();
+
 }
