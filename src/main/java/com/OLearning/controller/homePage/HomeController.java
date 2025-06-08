@@ -15,7 +15,7 @@ public class HomeController {
     @GetMapping
     public String home(Model model) {
         model.addAttribute("categories", categoryService.findTop5ByOrderByIdAsc());
-        model.addAttribute("allCategories", categoryService.findAll());
+        model.addAttribute("allCategories", categoryService.getAllCategory());
         model.addAttribute("message", "Hello World");
         return "homePage/index";
     }

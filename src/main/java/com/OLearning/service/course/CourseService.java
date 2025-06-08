@@ -1,7 +1,7 @@
 package com.OLearning.service.course;
 
-import com.OLearning.dto.adminDashBoard.CourseDTO;
-import com.OLearning.dto.adminDashBoard.CourseDetailDTO;
+import com.OLearning.dto.CourseDTO;
+import com.OLearning.dto.CourseDetailDTO;
 import com.OLearning.entity.Course;
 import org.springframework.stereotype.Service;
 

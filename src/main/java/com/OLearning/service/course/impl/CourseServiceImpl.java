@@ -1,10 +1,10 @@
 package com.OLearning.service.course.impl;
 
-import com.OLearning.dto.adminDashBoard.CourseDTO;
-import com.OLearning.dto.adminDashBoard.CourseDetailDTO;
+import com.OLearning.dto.CourseDTO;
+import com.OLearning.dto.CourseDetailDTO;
 import com.OLearning.entity.Course;
-import com.OLearning.mapper.adminDashBoard.CourseDetailMapper;
-import com.OLearning.mapper.adminDashBoard.CourseMapper;
+import com.OLearning.mapper.CourseDetailMapper;
+import com.OLearning.mapper.CourseMapper;
 import com.OLearning.repository.CourseRepository;
 import com.OLearning.service.course.CourseService;
 

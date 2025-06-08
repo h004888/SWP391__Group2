@@ -81,7 +81,7 @@ public class CategoryController {
         if (categoriesService.existsById(id) ) {
             categoriesService.deleteById(id);
         }
-        List<Category> categories = categoriesService.findAll();
+        List<Category> categories = categoriesService.getListCategories();
         model.addAttribute("categories", categories);
         return categoryPagination;
     }

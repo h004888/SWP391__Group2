@@ -1,11 +1,11 @@
 package com.OLearning.service.adminDashBoard.impl;
 
-import com.OLearning.dto.adminDashBoard.UserDTO;
-import com.OLearning.dto.adminDashBoard.UserDetailDTO;
+import com.OLearning.dto.UserDTO;
+import com.OLearning.dto.UserDetailDTO;
 import com.OLearning.entity.Role;
 import com.OLearning.entity.User;
-import com.OLearning.mapper.adminDashBoard.UserDetailMapper;
-import com.OLearning.mapper.adminDashBoard.UserMapper;
+import com.OLearning.mapper.UserDetailMapper;
+import com.OLearning.mapper.UserMapper;
 import com.OLearning.repository.RoleRepository;
 import com.OLearning.repository.UserRepository;
 import com.OLearning.service.adminDashBoard.UserService;

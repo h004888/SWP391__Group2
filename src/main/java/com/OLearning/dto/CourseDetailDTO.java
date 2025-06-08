@@ -1,6 +1,7 @@
-package com.OLearning.dto.adminDashBoard;
+package com.OLearning.dto;
 
 import com.OLearning.entity.Category;
+import com.OLearning.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,14 +13,22 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CourseDTO {
+public class CourseDetailDTO {
 
     private Long courseId;
+
     private String title;
-    private Integer duration;
+    private String description;
     private Double price;
+    private Double discount;
+    private String courseImg;
+    private Integer duration;
     private Integer totalLessons;
+    private Integer totalRatings;
+    private Integer totalStudentEnrolled;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Boolean isChecked;
+    private User instructor;
     private Category category;
 }

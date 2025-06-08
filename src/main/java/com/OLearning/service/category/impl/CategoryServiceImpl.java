@@ -1,5 +1,6 @@
 package com.OLearning.service.category.impl;
 
+import com.OLearning.dto.CategoryDTO;
 import com.OLearning.entity.Category;
 import com.OLearning.repository.CategoriesRepository;
 import com.OLearning.service.category.CategoryService;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -41,13 +43,15 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public boolean existsByName(String name) {
-        return categoriesRepository.existsByName(name);
+    public List<CategoryDTO> getAllCategory() {
+        return categoriesRepository.findAll().stream()
+                .map(c -> new CategoryDTO(c.getId(), c.getName()))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<Category> findAll() {
-        return categoriesRepository.findAll();
+    public boolean existsByName(String name) {
+        return categoriesRepository.existsByName(name);
     }
 
     @Override
