@@ -7,26 +7,31 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "Chapter")
+@Table(name = "Chapters")
 public class Chapter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Column(nullable = false)
+    private Long chapterId;
+
+    @Column(nullable = false, columnDefinition = "nvarchar(255)")
     private String title;
+
+    @Column(columnDefinition = "nvarchar(max)")
     private String description;
-    private Integer orderNumber; //stt chuong trong khoa hoc
+
+    private Integer orderNumber = 0; //stt chuong trong khoa hoc
     private LocalDateTime createAt;
     private LocalDateTime updateAt;
 
-//    @OneToMany(mappedBy = "chapter")
-//    private List<Lessons> lessons;
+    @OneToMany(mappedBy = "chapter")
+    private List<Lesson> lessons;
 
     @ManyToOne
     @JoinColumn(name = "courseId")

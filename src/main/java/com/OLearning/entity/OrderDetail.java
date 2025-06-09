@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "Order_Detail")
+@Table(name = "OrderDetail")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -17,7 +17,7 @@ public class OrderDetail {
     @ManyToOne
     @MapsId("orderId")
     @JoinColumn(name = "orderId")
-    private Order order;
+    private Order orders;
 
     @ManyToOne
     @MapsId("courseId")
@@ -26,5 +26,6 @@ public class OrderDetail {
 
     @Column(name = "UnitPrice")
     private Double unitPrice;
+
 
 }

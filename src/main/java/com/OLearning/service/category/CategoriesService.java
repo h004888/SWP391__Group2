@@ -26,7 +26,6 @@ public interface CategoriesService {
 
     void delete(Category category);
 
-
     void updateCategory(int id, String name);
 
     List<Category> findByNameContaining(String name);

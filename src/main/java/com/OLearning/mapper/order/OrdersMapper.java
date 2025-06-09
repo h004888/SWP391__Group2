@@ -6,31 +6,22 @@ import com.OLearning.entity.OrderDetail;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
 public class OrdersMapper {
-    public OrdersDTO toDTO(Order order) {
+    public OrdersDTO toDTO(Order orders) {
         OrdersDTO dto = new OrdersDTO();
-        dto.setOrderId(order.getOrderId());
-        dto.setAmount(order.getAmount());
-        dto.setOrderType(order.getOrderType());
-        dto.setStatus(order.getStatus());
-        dto.setOrderDate(order.getOrderDate());
-        dto.setNote(order.getNote());
-        dto.setUsername(order.getUser() != null ? order.getUser().getUsername() : null);
-
-        // Lấy danh sách courseNames từ orderDetails
-        Set<OrderDetail> orderDetails = order.getOrderDetails();
-        List<String> courseNames = (orderDetails != null)
-                ? orderDetails.stream()
-                .map(orderDetail -> orderDetail.getCourse() != null ? orderDetail.getCourse().getTitle() : null)
-                .filter(courseName -> courseName != null)
-                .collect(Collectors.toList())
-                : List.of();
-        dto.setCourseNames(courseNames);
-
+        dto.setOrderId(orders.getOrderId());
+        dto.setAmount(orders.getAmount());
+        dto.setOrderType(orders.getOrderType());
+        dto.setStatus(orders.getStatus());
+        dto.setOrderDate(orders.getOrderDate());
+        dto.setNote(orders.getNote());
+        dto.setUsername(orders.getUser() != null ? orders.getUser().getUsername() : null);
+        dto.setRole(orders.getUser() != null && orders.getUser().getRole() != null
+                ? orders.getUser().getRole().getName()
+                : null);
         return dto;
     }
 

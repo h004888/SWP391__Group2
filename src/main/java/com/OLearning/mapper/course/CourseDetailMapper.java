@@ -27,6 +27,7 @@ public class CourseDetailMapper {
         dto.setStatus(course.getStatus());
         dto.setInstructor(course.getInstructor());
         dto.setCategory(course.getCategory());
+        dto.setListOfChapters(course.getListOfChapters());
         return dto;
     }
 

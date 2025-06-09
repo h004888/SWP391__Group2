@@ -3,18 +3,23 @@ package com.OLearning.controller.adminDashBoard;
 import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.course.CourseDetailDTO;
 import com.OLearning.dto.notification.NotificationDTO;
+import com.OLearning.dto.user.UserDTO;
 import com.OLearning.entity.Category;
 import com.OLearning.service.category.CategoriesService;
 import com.OLearning.service.course.CourseService;
 import com.OLearning.service.notification.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Controller
 @RequestMapping("/admin/course")
@@ -25,17 +30,38 @@ public class CourseController {
     private CategoriesService categoriesService;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private SpringTemplateEngine templateEngine;
 
 
     @GetMapping
-    public String getCoursePage(Model model) {
-        List<CourseDTO> listCourse = courseService.getAllCourses();
+    public String getCoursePage(Model model,
+                                @RequestParam(defaultValue = "0") int page,
+                                @RequestParam(defaultValue = "5") int size,
+                                @RequestParam(required = false) String keyword,
+                                @RequestParam(required = false) Integer category,
+                                @RequestParam(required = false) String price) {
+
+        Page<CourseDTO> pendingCourses = courseService.filterCoursesWithPagination(
+                keyword, category, price, "pending", page, size);
+
         List<Category> listCategories = categoriesService.getListCategories();
 
         model.addAttribute("accNamePage", "Management Course");
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/courseContent :: courseContent");
-        model.addAttribute("listCourse", listCourse);
         model.addAttribute("listCategories", listCategories);
+
+        // Initial data for pending tab
+        model.addAttribute("listCourse", pendingCourses.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", pendingCourses.getTotalPages());
+        model.addAttribute("totalItems", pendingCourses.getTotalElements());
+        model.addAttribute("pageSize", size);
+
+        // Preserve filter parameters
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("selectedCategory", category);
+        model.addAttribute("selectedPrice", price);
 
         return "adminDashBoard/index";
     }
@@ -46,10 +72,52 @@ public class CourseController {
                                 @RequestParam(required = false) Integer category,
                                 @RequestParam(required = false) String price,
                                 @RequestParam(required = false) String status,
+                                @RequestParam(defaultValue = "0") int page,
+                                @RequestParam(defaultValue = "5") int size,
                                 Model model) {
-        List<CourseDTO> listCourse = courseService.filterCourses(keyword, category, price, status);
-        model.addAttribute("listCourse", listCourse);
-        return "adminDashBoard/fragments/courseContent :: courseTableBody";
+
+        Page<CourseDTO> coursePage = courseService.filterCoursesWithPagination(
+                keyword, category, price, status, page, size);
+
+        model.addAttribute("listCourse", coursePage.getContent());
+
+        return "adminDashBoard/fragments/courseTableRowContent :: courseTableRowContent";
+    }
+
+    // New endpoint for pagination only
+    @GetMapping("/pagination")
+    public String getPagination(@RequestParam(required = false) String keyword,
+                                @RequestParam(required = false) Integer category,
+                                @RequestParam(required = false) String price,
+                                @RequestParam(required = false) String status,
+                                @RequestParam(defaultValue = "0") int page,
+                                @RequestParam(defaultValue = "5") int size,
+                                Model model) {
+
+        Page<CourseDTO> coursePage = courseService.filterCoursesWithPagination(
+                keyword, category, price, status, page, size);
+
+        model.addAttribute("listCourse", coursePage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", coursePage.getTotalPages());
+        model.addAttribute("totalItems", coursePage.getTotalElements());
+        model.addAttribute("pageSize", size);
+
+        return "adminDashBoard/fragments/courseTableRowContent :: coursePagination";
+    }
+
+    // New endpoint to get total count for badge
+    @GetMapping("/count")
+    @ResponseBody
+    public long getCourseCount(@RequestParam(required = false) String keyword,
+                               @RequestParam(required = false) Integer category,
+                               @RequestParam(required = false) String price,
+                               @RequestParam(required = false) String status) {
+
+        Page<CourseDTO> coursePage = courseService.filterCoursesWithPagination(
+                keyword, category, price, status, 0, 1); // Get only 1 item to check total
+
+        return coursePage.getTotalElements();
     }
 
     @GetMapping("/detail/{id}")
@@ -58,6 +126,7 @@ public class CourseController {
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/courseDetailContent :: courseDetail");
         Optional<CourseDetailDTO> optionalDetail = courseService.getDetailCourse(id);
         if (optionalDetail.isPresent()) {
+            CourseDetailDTO course = optionalDetail.get();
             model.addAttribute("detailCourse", optionalDetail.get());
             return "adminDashBoard/index";
         } else {
