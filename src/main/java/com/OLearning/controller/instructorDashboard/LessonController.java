@@ -2,8 +2,8 @@ package com.OLearning.controller.instructorDashboard;
 
 import com.OLearning.dto.instructorDashBoard.LessonDTO;
 import com.OLearning.entity.Course;
-import com.OLearning.repository.instructorDashBoard.InstructorCourseRepo;
-import com.OLearning.service.instructorDashBoard.LessonService;
+import com.OLearning.repository.InstructorCourseRepo;
+import com.OLearning.service.lesson.LessonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

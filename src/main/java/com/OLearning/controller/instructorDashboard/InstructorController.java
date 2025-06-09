@@ -1,12 +1,11 @@
 package com.OLearning.controller.instructorDashboard;
 
 
-import com.OLearning.dto.instructorDashBoard.NotificationsDTO;
-import com.OLearning.dto.instructorDashBoard.CourseAddDTO;
-import com.OLearning.dto.instructorDashBoard.CourseDTO;
-import com.OLearning.service.instructorDashBoard.CategoryService;
-import com.OLearning.service.instructorDashBoard.CourseService;
-import com.OLearning.service.instructorDashBoard.NotificationsService;
+import com.OLearning.dto.course.CourseAddDTO;
+import com.OLearning.dto.course.CourseDTO;
+import com.OLearning.service.category.CategoryService;
+import com.OLearning.service.course.CourseService;
+import com.OLearning.service.notification.NotificationsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -41,7 +40,8 @@ public class InstructorController {
 
     //dashboard
     @GetMapping("/instructordashboard")
-    public String dashboard() {
+    public String dashboard(Model model) {
+        model.addAttribute("fragmentContent", "instructorDashboard/fragments/content :: contentMain");
         return "instructorDashboard/index";
     }
 

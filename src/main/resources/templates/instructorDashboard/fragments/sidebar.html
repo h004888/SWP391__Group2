@@ -1,85 +1,85 @@
-<ul th:fragment="sidebar" class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+<nav th:fragment="sidebar" class="navbar sidebar navbar-expand-xl navbar-dark bg-dark">
 
-    <!-- Sidebar - Brand -->
-    <a class="sidebar-brand d-flex align-items-center justify-content-center" th:href="@{/instructordashboard}">
-        <div class="sidebar-brand-icon rotate-n-15">
-            <i class="fas fa-laugh-wink"></i>
+    <!-- Navbar brand for xl START -->
+    <div class="d-flex align-items-center">
+        <a class="navbar-brand" th:href="@{/instructordashboard}">
+            <img class="navbar-brand-item" th:src="@{/assets/images/logo-light.svg}" alt="">
+        </a>
+    </div>
+    <!-- Navbar brand for xl END -->
+
+    <!-- Divider -->
+
+    <div class="offcanvas offcanvas-start flex-row custom-scrollbar h-100" data-bs-backdrop="true" tabindex="-1"
+         id="offcanvasSidebar">
+        <div class="offcanvas-body sidebar-content d-flex flex-column bg-dark">
+            <!-- Sidebar menu START -->
+            <ul class="navbar-nav flex-column" id="navbar-sidebar">
+                <!-- Nav Item - Dashboard -->
+                <li class="nav-item active">
+                    <a class="nav-link" th:href="@{/instructordashboard}">
+                        <i class="fas fa-fw fa-tachometer-alt"></i>
+                        <span>Dashboard</span></a>
+                </li>
+
+                <!-- Divider -->
+                <hr class="sidebar-divider">
+
+                <!-- Heading -->
+                <div class="sidebar-heading">
+                    Manage
+                </div>
+
+                <!-- Nav Item - Pages Collapse Menu -->
+                <!-- Nav Item - Accounts -->
+                <!--    <li class="nav-item">-->
+                <!--        <a class="nav-link" th:href="@{/instructordashboard/viewcourse}">-->
+                <!--            <i class="fas fa-fw fa-user"></i>-->
+                <!--            <span>Accounts</span>-->
+                <!--        </a>-->
+                <!--    </li>-->
+
+                <!-- Nav Item - Courses -->
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/instructordashboard/viewcourse}">
+                        <i class="fas fa-fw fa-trophy"></i>
+                        <span>Courses</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/instructordashboard/notifications}">
+                        <i class="fas fa-fw fa-trophy"></i>
+                        <span>notifications</span>
+                    </a>
+                </li>
+                <!-- Nav Item - Orders & Payments -->
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/instructordashboard/orders}">
+                        <i class="fas fa-fw fa-credit-card"></i>
+                        <span>Orders & Payments</span>
+                    </a>
+                </li>
+
+                <!-- Nav Item - Packages -->
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/instructordashboard/packages}">
+                        <i class="fas fa-fw fa-receipt"></i>
+                        <span>Packages</span>
+                    </a>
+                </li>
+
+                <!-- Nav Item - BuyPackages -->
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/instructordashboard/buyPackages}">
+                        <i class="fas fa-fw fa-clock"></i>
+                        <span>BuyPackages</span>
+                    </a>
+                </li>
+
+
+            </ul>
+            <!-- Sidebar menu end -->
+
         </div>
-        <div class="sidebar-brand-text mx-3">instructor</div>
-    </a>
-
-    <!-- Divider -->
-    <hr class="sidebar-divider my-0">
-
-    <!-- Nav Item - Dashboard -->
-    <li class="nav-item active">
-        <a class="nav-link" th:href="@{/instructordashboard}">
-            <i class="fas fa-fw fa-tachometer-alt"></i>
-            <span>Dashboard</span></a>
-    </li>
-
-    <!-- Divider -->
-    <hr class="sidebar-divider">
-
-    <!-- Heading -->
-    <div class="sidebar-heading">
-        Manage
     </div>
-
-    <!-- Nav Item - Pages Collapse Menu -->
-    <!-- Nav Item - Accounts -->
-<!--    <li class="nav-item">-->
-<!--        <a class="nav-link" th:href="@{/instructordashboard/viewcourse}">-->
-<!--            <i class="fas fa-fw fa-user"></i>-->
-<!--            <span>Accounts</span>-->
-<!--        </a>-->
-<!--    </li>-->
-
-    <!-- Nav Item - Courses -->
-    <li class="nav-item">
-        <a class="nav-link" th:href="@{/instructordashboard/viewcourse}">
-            <i class="fas fa-fw fa-trophy"></i>
-            <span>Courses</span>
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" th:href="@{/instructordashboard/notifications}">
-            <i class="fas fa-fw fa-trophy"></i>
-            <span>notifications</span>
-        </a>
-    </li>
-    <!-- Nav Item - Orders & Payments -->
-    <li class="nav-item">
-        <a class="nav-link" th:href="@{/instructordashboard/orders}">
-            <i class="fas fa-fw fa-credit-card"></i>
-            <span>Orders & Payments</span>
-        </a>
-    </li>
-
-    <!-- Nav Item - Packages -->
-    <li class="nav-item">
-        <a class="nav-link" th:href="@{/instructordashboard/packages}">
-            <i class="fas fa-fw fa-receipt"></i>
-            <span>Packages</span>
-        </a>
-    </li>
-
-    <!-- Nav Item - BuyPackages -->
-    <li class="nav-item">
-        <a class="nav-link" th:href="@{/instructordashboard/buyPackages}">
-            <i class="fas fa-fw fa-clock"></i>
-            <span>BuyPackages</span>
-        </a>
-    </li>
-
-    </li>
-    <!-- Divider -->
-    <hr class="sidebar-divider">
-
-    <!-- Sidebar Toggler (Sidebar) -->
-    <div class="text-center d-none d-md-inline">
-        <button class="rounded-circle border-0" id="sidebarToggle"></button>
-    </div>
-
-
-</ul>
+</nav>

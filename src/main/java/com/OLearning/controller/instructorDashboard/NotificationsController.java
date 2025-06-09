@@ -1,9 +1,9 @@
 package com.OLearning.controller.instructorDashboard;
 
-import com.OLearning.dto.instructorDashBoard.NotificationsDTO;
+import com.OLearning.dto.notification.NotificationsDTO;
 import com.OLearning.entity.Notifications;
-import com.OLearning.mapper.instructorDashBoard.NotificationsMapper;
-import com.OLearning.service.instructorDashBoard.NotificationsService;
+import com.OLearning.mapper.notification.NotificationsMapper;
+import com.OLearning.service.notification.NotificationsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
-import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
-
 @Controller
 public class NotificationsController {
 
@@ -24,15 +22,16 @@ public class NotificationsController {
     @Autowired
     private NotificationsMapper notificationsMapper;
 
-    @GetMapping("/instructordashboard/notifications")
+        @GetMapping("/instructordashboard/notifications")
     public String viewNotifications(@RequestParam(name = "userId", defaultValue = "2") Long userId,
                                     Model model) {
         List<NotificationsDTO> notifications = notificationsService.getNotificationsByUserId(userId);
         model.addAttribute("notifications", notifications);
-        return "instructorDashboard/notifications";
+            model.addAttribute("fragmentContent", "instructorDashboard/fragments/notificationContent :: notificationContent");
+        return "instructorDashboard/index";
     }
 
-    @GetMapping("/notifications/search")
+    @GetMapping("/instructordashboard/notifications/search")
     public String searchNotifications(@RequestParam("keyword") String keyword,
                                       Model model) {
         try {
@@ -43,7 +42,9 @@ public class NotificationsController {
             model.addAttribute("notifications", List.of());
         }
         model.addAttribute("keyword", keyword);
-        return "instructorDashboard/notifications";
+        model.addAttribute("fragmentContent", "instructorDashboard/fragments/notificationContent :: notificationContent");
+        return "instructorDashboard/index";
+
     }
     @PostMapping("/instructordashboard/notifications/{id}/mark-read")
     @ResponseBody
@@ -70,7 +71,8 @@ public class NotificationsController {
                 notification.setStatus("sent"); // update status for view
             }
             model.addAttribute("notification", notificationsMapper.toDTO(notification));
-            return "instructorDashboard/notificationsDetail";
+            model.addAttribute("fragmentContent", "instructorDashboard/fragments/notificationDetailContent :: notificationDetailContent");
+            return "instructorDashboard/index";
         } else {
             return "redirect:/instructordashboard/notifications";
         }
