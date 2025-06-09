@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
@@ -12,14 +13,21 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class CourseDTO {
 
     private Long courseId;
+
     private String title;
-    private Integer duration;
+    private String description;
     private Double price;
+    private Double discount;
+    private String courseImg;
+    private Integer duration;
     private Integer totalLessons;
+    private Integer totalRatings;
+    private Integer totalStudentEnrolled;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Category category;
+
 }

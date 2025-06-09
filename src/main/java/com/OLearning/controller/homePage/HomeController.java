@@ -16,22 +16,8 @@ public class HomeController {
     public String home(Model model) {
         model.addAttribute("categories", categoryService.findTop5ByOrderByIdAsc());
         model.addAttribute("allCategories", categoryService.getAllCategory());
-        model.addAttribute("message", "Hello World");
+
         return "homePage/index";
     }
 
-    @GetMapping("/about")
-    public String about() {
-        return "homePage/about";
-    }
-
-    @GetMapping("/contact")
-    public String contact() {
-        return "homePage/contact";
-    }
-
-    @GetMapping("/privacy-policy")
-    public String privacyPolicy() {
-        return "homePage/privacyPolicy";
-    }
 }
