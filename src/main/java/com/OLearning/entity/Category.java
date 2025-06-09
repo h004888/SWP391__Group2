@@ -22,9 +22,9 @@ public class Category {
     @Column(name = "CategoryID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private Long id;
+    private int id;
     @Column(name = "Name", nullable = false, length = 100, columnDefinition = "NVARCHAR(100)")
-    
+
     private String name;
 
     @OneToMany(mappedBy = "category")
