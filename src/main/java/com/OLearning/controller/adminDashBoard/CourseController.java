@@ -3,20 +3,16 @@ package com.OLearning.controller.adminDashBoard;
 import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.course.CourseDetailDTO;
 import com.OLearning.dto.notification.NotificationDTO;
-import com.OLearning.dto.user.UserDTO;
 import com.OLearning.entity.Category;
-import com.OLearning.service.category.CategoriesService;
+import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.course.CourseService;
 import com.OLearning.service.notification.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.util.*;
@@ -27,7 +23,7 @@ public class CourseController {
     @Autowired
     private CourseService courseService;
     @Autowired
-    private CategoriesService categoriesService;
+    private CategoryService categoryService;
     @Autowired
     private NotificationService notificationService;
     @Autowired
@@ -45,7 +41,7 @@ public class CourseController {
         Page<CourseDTO> pendingCourses = courseService.filterCoursesWithPagination(
                 keyword, category, price, "pending", page, size);
 
-        List<Category> listCategories = categoriesService.getListCategories();
+        List<Category> listCategories = categoryService.getListCategories();
 
         model.addAttribute("accNamePage", "Management Course");
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/courseContent :: courseContent");
