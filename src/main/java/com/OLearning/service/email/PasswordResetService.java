@@ -161,7 +161,8 @@ public class PasswordResetService {
             // Update password
             user.setPassword(passwordEncoder.encode(newPassword.trim()));
             userRepository.save(user);
-
+            //Send email notification
+            emailService.sendPasswordChangedEmail(user);
             // Delete OTP record after successful password reset
             otpRepository.delete(resetOtp);
 
