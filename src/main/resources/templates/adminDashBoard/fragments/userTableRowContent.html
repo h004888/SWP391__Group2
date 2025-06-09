@@ -2,7 +2,18 @@
 <div th:fragment="userTableRows">
 
     <tr th:each="u : ${listU}">
-        <td th:text="${u.userId}"></td>
+        <td>
+            <div class="d-flex align-items-center position-relative">
+                <!-- Image -->
+                <div class="avatar avatar-md">
+                    <img th:src="${u.profilePicture}" class="rounded-circle" alt="">
+                </div>
+                <div class="mb-0 ms-2">
+                    <!-- Title -->
+                    <h6 class="mb-0" th:text="${u.userName}"></h6>
+                </div>
+            </div>
+        </td>
         <td th:text="${u.userName}"></td>
         <td th:text="${u.email}"></td>
         <td th:text="${u.roleName}"></td>
@@ -21,7 +32,7 @@
             <!-- Nếu đang active thì hiển thị nút block -->
             <a th:if="${u.status}"
                th:href="@{/admin/account/block/{userId}(userId=${u.userId})}"
-               class="btn btn-danger btn-sm"
+               class="btn btn-danger-soft btn-sm"
                title="Blocked">
                 <i class="fas fa-lock"></i>
             </a>
@@ -31,6 +42,13 @@
                class="btn btn-warning btn-sm"
                title="Activate">
                 <i class="fas fa-unlock"></i>
+            </a>
+            <a th:if="${u.roleName=='Admin'}"
+               th:href="@{/admin/account/delete/{userId}(userId=${u.userId})}"
+               class="btn btn-danger-soft btn-sm"
+               onclick="return confirm('Bạn có chắc chắn muốn xóa nhân viên này không?')"
+               title="Delete">
+                <i class="fas fa-trash"></i>
             </a>
         </td>
         <td style="white-space: nowrap;">

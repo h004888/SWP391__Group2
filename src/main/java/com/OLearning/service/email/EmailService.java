@@ -48,5 +48,39 @@ public class EmailService {
         mailSender.send(message);
     }
 
+    public void sendPasswordChangedEmail(User user) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("ndthang1704@gmail.com");
+        message.setTo(user.getEmail());
+        message.setSubject("Thông báo đổi mật khẩu thành công");
+
+        String content = "Xin chào " + user.getFullName() + ",\n\n"
+                + "Bạn vừa thay đổi mật khẩu tài khoản (" + user.getEmail() + ") trên hệ thống OLearning.\n"
+                + "Nếu bạn không thực hiện hành động này, vui lòng liên hệ bộ phận hỗ trợ ngay qua email: support@olearning.com.\n\n"
+                + "Trân trọng,\n"
+                + "Đội ngũ OLearning";
+
+        message.setText(content);
+        mailSender.send(message);
+    }
+
+    public void sendPromotedToStaffEmail(User user) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("ndthang1704@gmail.com");
+        message.setTo(user.getEmail());
+        message.setSubject("Chúc mừng! Bạn đã trở thành nhân viên hệ thống");
+
+        String content = "Xin chào \n\n"
+                + "Chúng tôi xin chúc mừng bạn đã được cấp quyền trở thành nhân viên hệ thống OLearning.\n"
+                + "Từ bây giờ, bạn có thể truy cập các chức năng quản trị phù hợp với vai trò mới của mình.\n\n"
+                + "Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ đội ngũ hỗ trợ qua email: support@olearning.com\n\n"
+                + "Trân trọng,\n"
+                + "Đội ngũ OLearning";
+
+        message.setText(content);
+        mailSender.send(message);
+    }
+
+
 }
 

@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService {
+ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsById(id)) {
             Optional<User> user = userRepository.findById(id);
             try {
-                emailService.sendAccountStatusEmail(user.get(),user.get().isStatus());
+                emailService.sendAccountStatusEmail(user.get(), user.get().isStatus());
             } catch (MessagingException e) {
                 throw new RuntimeException(e);
             }
@@ -154,7 +154,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User createUser(UserDTO userDTO) {
+    public User createNewStaff(UserDTO userDTO) {
         if (userRepository.existsByEmail(userDTO.getEmail())) {
             throw new IllegalArgumentException("Email already exists");
         }
@@ -167,7 +167,20 @@ public class UserServiceImpl implements UserService {
         String encodedPassword = new BCryptPasswordEncoder().encode("123");
         user.setPassword(encodedPassword);
 
+        //Send notification email to new staff
+        emailService.sendPromotedToStaffEmail(user);
+
         return userRepository.save(user);
+    }
+
+    @Override
+    public boolean deleteAcc(Long id) {
+        Optional<User> userOptional = userRepository.findById(id);
+        if(userOptional.isEmpty()) {
+            return false;
+        }
+        userRepository.deleteById(id);
+        return false;
     }
 
     @Override

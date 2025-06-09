@@ -55,7 +55,7 @@ public class UserController {
     @PostMapping("/account/add")
     public String addUser(@ModelAttribute("addAccount") UserDTO userDTO, RedirectAttributes redirectAttributes) {
         try {
-            userService.createUser(userDTO);
+            userService.createNewStaff(userDTO);
             redirectAttributes.addFlashAttribute("successMessage", "User added successfully");
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
@@ -155,18 +155,26 @@ public class UserController {
     }
 
     @GetMapping("/account/block/{userId}")
-    public String deleteAccount(Model model, @PathVariable("userId") long id) {
+    public String blockAccount(Model model, @PathVariable("userId") long id) {
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/accountContent :: accountContent");
         userService.changStatus(id);
         return "redirect:/admin/account";
     }
 
     @GetMapping("account/resetPass/{userId}")
-    public String resetPassword(Model model, @PathVariable("userId") long id) {
+    public String resetPassword(Model model, @PathVariable("userId") long id,RedirectAttributes redirectAttributes) {
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/accountContent :: accountContent");
         userService.resetPassword(id);
+        redirectAttributes.addFlashAttribute("successMessage", "Reset password successfully");
         return "redirect:/admin/account";
     }
 
+    @GetMapping("/account/delete/{userId}")
+    public String deleteAccount(Model model, @PathVariable("userId") long id,RedirectAttributes redirectAttributes) {
+        model.addAttribute("fragmentContent", "adminDashBoard/fragments/accountContent :: accountContent");
+        redirectAttributes.addFlashAttribute("successMessage", "Delete staff successfully");
+        userService.deleteAcc(id);
+        return "redirect:/admin/account";
+    }
 
 }

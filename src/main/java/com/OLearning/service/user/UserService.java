@@ -27,9 +27,9 @@ public interface UserService {
 
     List<UserDTO> getUsersByRole(Long roleId);
 
-    User createUser(UserDTO userDTO);
+    User createNewStaff(UserDTO userDTO);
 
-    //    boolean deleteAcc(Long id);
+    boolean deleteAcc(Long id);
 
     boolean changStatus(Long id);
 
