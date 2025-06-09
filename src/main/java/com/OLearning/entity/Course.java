@@ -19,7 +19,10 @@ public class Course {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long courseId;
 
+    @Column(columnDefinition = "nvarchar(255)")
     private String title;
+
+    @Column(columnDefinition = "nvarchar(max)")
     private String description;
     private Double price;
     private Double discount;
@@ -41,15 +44,14 @@ public class Course {
     @JoinColumn(name = "CategoryID")
     private Category category;
 
-//    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
-//    private List<Lessons> listOfLessons;
-
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<OrderDetail> orderDetails;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Notification> notifications;
 
+    @OneToMany(mappedBy = "course", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Chapter> listOfChapters;
 
 }
 

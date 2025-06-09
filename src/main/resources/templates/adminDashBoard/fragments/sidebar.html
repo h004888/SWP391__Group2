@@ -1,73 +1,78 @@
-    <ul th:fragment="sidebar" class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+<nav th:fragment="sidebar" class="navbar sidebar navbar-expand-xl navbar-dark bg-dark">
 
-        <!-- Sidebar - Brand -->
-        <a class="sidebar-brand d-flex align-items-center justify-content-center" th:href="@{/admin}">
-            <div class="sidebar-brand-icon rotate-n-15">
-                <i class="fas fa-laugh-wink"></i>
-            </div>
-            <div class="sidebar-brand-text mx-3">Admin</div>
+    <!-- Navbar brand for xl START -->
+    <div class="d-flex align-items-center">
+        <a class="navbar-brand" th:href="@{/admin}">
+            <img class="navbar-brand-item" th:src="@{/assets/images/logo-light.svg}" alt="">
         </a>
+    </div>
+    <!-- Navbar brand for xl END -->
 
-        <!-- Divider -->
-        <hr class="sidebar-divider my-0">
+    <div class="offcanvas offcanvas-start flex-row custom-scrollbar h-100" data-bs-backdrop="true" tabindex="-1"
+         id="offcanvasSidebar">
+        <div class="offcanvas-body sidebar-content d-flex flex-column bg-dark">
 
-        <!-- Nav Item - Dashboard -->
-        <li class="nav-item active">
-            <a class="nav-link" th:href="@{/admin}">
-                <i class="fas fa-fw fa-tachometer-alt"></i>
-                <span>Dashboard</span></a>
-        </li>
+            <!-- Sidebar menu START -->
+            <ul class="navbar-nav flex-column" id="navbar-sidebar">
 
-        <!-- Divider -->
-        <hr class="sidebar-divider">
+                <!-- Menu item 1 -->
+                <li class="nav-item"><a th:href="@{/admin}" class="nav-link active"><i
+                        class="bi bi-house fa-fw me-2"></i>Dashboard</a></li>
 
-        <!-- Heading -->
-        <div class="sidebar-heading">
-            Manage
+                <!-- Title -->
+                <li class="nav-item ms-2 my-2">Pages</li>
+
+                <!-- menu item 2 -->
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/account}">
+                        <i class="fas fa-fw fa-user"></i>
+                        <span>Accounts</span>
+                    </a>
+                </li>
+
+                <!-- Menu item 3 -->
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="collapse" href="#collapseinstructors" role="button"
+                       aria-expanded="true" aria-controls="collapseinstructors">
+                        <i class="fas fa-user-tie fa-fw me-2"></i><span>Instructors</span>
+                    </a>
+                    <ul class="nav collapse flex-column show" id="collapseinstructors" data-bs-parent="#navbar-sidebar">
+                        <li class="nav-item"><a class="nav-link active"
+                                                th:href="@{/admin/mnInstructors}">Instructors</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/admin/mnInstructors/request}">Instructor requests
+                                <!-- <span class="badge text-bg-success rounded-circle ms-2">2</span>-->
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Menu item 4 -->
+                <li class="nav-item"><a class="nav-link" th:href="@{/admin/course}">
+                    <i class="fas fa-fw fa-trophy"></i>
+                    <span>Courses</span>
+                </a></li>
+
+                <!-- Menu item 5 -->
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/orders}">
+                        <i class="fas fa-fw fa-credit-card"></i>
+                        <span>Orders & Payments</span>
+                    </a>
+                </li>
+
+                <!-- Menu item 6 -->
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/courseMaintenance}">
+                        <i class="fas fa-fw fa-receipt"></i>
+                        <span>CourseMaintenance</span>
+                    </a>
+                </li>
+
+
+            </ul>
+            <!-- Sidebar menu end -->
+
         </div>
-
-        <!-- Nav Item - Pages Collapse Menu -->
-        <!-- Nav Item - Accounts -->
-        <li class="nav-item">
-            <a class="nav-link" th:href="@{/admin/account}">
-                <i class="fas fa-fw fa-user"></i>
-                <span>Accounts</span>
-            </a>
-        </li>
-
-        <!-- Nav Item - Courses -->
-        <li class="nav-item">
-            <a class="nav-link" th:href="@{/admin/course}">
-                <i class="fas fa-fw fa-trophy"></i>
-                <span>Courses</span>
-            </a>
-        </li>
-
-        <!-- Nav Item - Order & Payments -->
-        <li class="nav-item">
-            <a class="nav-link" th:href="@{/admin/order}">
-                <i class="fas fa-fw fa-credit-card"></i>
-                <span>Orders & Payments</span>
-            </a>
-        </li>
-
-        <!-- Nav Item - category  -->
-        <li class="nav-item">
-            <a class="nav-link" th:href="@{/admin/category}">
-                <i class="fas fa-fw fa-list"></i>
-                <span>Categories</span>
-            </a>
-        </li>
-
-    </li>
-    <!-- Divider -->
-    <hr class="sidebar-divider">
-
-        <!-- Sidebar Toggler (Sidebar) -->
-        <div class="text-center d-none d-md-inline">
-            <button class="rounded-circle border-0" id="sidebarToggle"></button>
-        </div>
-
-
-</ul>
-
+    </div>
+</nav>

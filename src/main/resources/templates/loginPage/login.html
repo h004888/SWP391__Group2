@@ -22,7 +22,8 @@
                     <div class="row g-0">
                         <!-- Left side - Decorative Image -->
                         <div class="col-md-6 d-none d-md-block">
-                            <img src="https://frontends.udemycdn.com/components/auth/desktop-illustration-x1.webp" alt="Banner Login" class="img-fluid ">
+                            <img src="https://frontends.udemycdn.com/components/auth/desktop-illustration-x1.webp"
+                                 alt="Banner Login" class="img-fluid ">
                         </div>
                         <!-- Right side - Login Form -->
                         <div class="col-md-6">
@@ -69,7 +70,7 @@
                                                 Remember me
                                             </label>
                                         </div>
-                                        <a href="forgot-password.html" class="text-primary text-decoration-none">Forgot
+                                        <a th:href="@{/forgot-password}" class="text-primary text-decoration-none">Forgot
                                             Password?</a>
                                     </div>
                                     <button type="submit" class="btn btn-primary btn-lg w-100 gradient-btn mb-3">
@@ -85,9 +86,9 @@
 
                                 <!-- Social Login -->
                                 <div class="d-grid gap-2 mb-4">
-                                    <button class="btn btn-outline-secondary btn-lg">
+                                    <a href="/oauth2/authorization/google" class="btn btn-outline-secondary btn-lg">
                                         <i class="fab fa-google text-danger me-2"></i> Continue with Google
-                                    </button>
+                                    </a>
                                 </div>
 
                                 <!-- Footer -->

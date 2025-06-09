@@ -10,9 +10,13 @@ import com.OLearning.mapper.user.UserMapper;
 import com.OLearning.mapper.login.RegisterMapper;
 import com.OLearning.repository.RoleRepository;
 import com.OLearning.repository.UserRepository;
+import com.OLearning.service.email.EmailService;
 import com.OLearning.service.user.UserService;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +26,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService {
+ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -33,12 +37,26 @@ public class UserServiceImpl implements UserService {
     private UserDetailMapper userDetailMapper;
     @Autowired
     private RegisterMapper registerMapper;
+    @Autowired
+    private EmailService emailService;
 
     @Override
-    public List<UserDTO> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(userMapper::toDTO)
-                .collect(Collectors.toList());
+    public Page<UserDTO> getAllUsers(Pageable page) {
+        Page<User> users = userRepository.findAll(page);
+        return users.map(userMapper::toDTO);
+    }
+
+    @Override
+    public Page<UserDTO> getUsersByRoleWithPagination(Long roleId, Pageable pageable) {
+        Page<User> userPage = userRepository.findByRole_RoleId(roleId, pageable);
+        return userPage.map(userMapper::toDTO);
+    }
+
+    @Override
+    public Page<UserDTO> searchByNameWithPagination(String keyword, Long roleId, Pageable pageable) {
+        // Sử dụng repository method với pagination
+        Page<User> userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleId(keyword, roleId, pageable);
+        return userPage.map(userMapper::toDTO);
     }
 
     @Override
@@ -53,9 +71,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean deleteAcc(Long id) {
+    public boolean changStatus(Long id) {
         if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
+            Optional<User> user = userRepository.findById(id);
+            try {
+                emailService.sendAccountStatusEmail(user.get(), user.get().isStatus());
+            } catch (MessagingException e) {
+                throw new RuntimeException(e);
+            }
+            user.get().setStatus(!user.get().isStatus());
+            userRepository.save(user.get());
+
             return true;
         }
         return false;
@@ -63,13 +89,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User registerAccount(RegisterDTO registerDTO) {
-        System.out.println("Starting registration for: " + registerDTO.getEmail());
-
         validateRegistrationData(registerDTO);
-        System.out.println("Validation passed");
-
         User user = registerMapper.toUser(registerDTO);
-        System.out.println("User mapped: " + user.getEmail());
 
         try {
             User savedUser = userRepository.save(user);
@@ -113,18 +134,53 @@ public class UserServiceImpl implements UserService {
     }
 
 
+//    @Override
+//    public List<UserDTO> searchByName(String keyword, Long roleId) {
+//        String processedKeyword = null;
+//        if (keyword != null && !keyword.trim().isEmpty()) {
+//            processedKeyword = keyword.trim().toLowerCase();
+//        }
+//        List<User> users = userRepository.searchByNameAndRole(processedKeyword, roleId);
+//        return users.stream()
+//                .map(userMapper::toDTO)
+//                .collect(Collectors.toList());
+//    }
+
     @Override
-    public List<UserDTO> searchByName(String keyword, Integer roleId) {
-        if (roleId != null && roleId == 0) {
-            roleId = null;
-        }
-        String processedKeyword = null;
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            processedKeyword = keyword.trim().toLowerCase();
-        }
-        return userRepository.searchByKeyword(processedKeyword, roleId).stream()
+    public List<UserDTO> getUsersByRole(Long roleId) {
+        return userRepository.findByRole_RoleId(roleId).stream()
                 .map(userMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public User createNewStaff(UserDTO userDTO) {
+        if (userRepository.existsByEmail(userDTO.getEmail())) {
+            throw new IllegalArgumentException("Email already exists");
+        }
+        Optional<Role> roleOpt = roleRepository.findRoleByName(userDTO.getRoleName());
+        if (roleOpt.isEmpty()) {
+            throw new IllegalArgumentException("Role not found: " + userDTO.getRoleName());
+        }
+        User user = userMapper.toUser(userDTO, roleOpt.get());
+        //Default password
+        String encodedPassword = new BCryptPasswordEncoder().encode("123");
+        user.setPassword(encodedPassword);
+
+        //Send notification email to new staff
+        emailService.sendPromotedToStaffEmail(user);
+
+        return userRepository.save(user);
+    }
+
+    @Override
+    public boolean deleteAcc(Long id) {
+        Optional<User> userOptional = userRepository.findById(id);
+        if(userOptional.isEmpty()) {
+            return false;
+        }
+        userRepository.deleteById(id);
+        return false;
     }
 
     @Override

@@ -28,6 +28,7 @@ public class User {
     private String address;
     private String profilePicture;
     private String personalSkill;
+    private boolean status;//new
 
     @ManyToOne
     @JoinColumn(name = "roleId")
