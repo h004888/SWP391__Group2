@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class LessonDTO {
+public class LessonVideoDTO {
     private String title;
     private String description;
     private Integer orderNumber;

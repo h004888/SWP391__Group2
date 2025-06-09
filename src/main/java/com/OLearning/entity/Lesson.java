@@ -18,7 +18,7 @@ public class Lesson {
     private Long lessonId;
     private String title;
     private String description;
-    private String contentType = "video";
+    private String contentType;
     private Integer orderNumber= 0;
     private Integer duration;
     private Boolean isFree;

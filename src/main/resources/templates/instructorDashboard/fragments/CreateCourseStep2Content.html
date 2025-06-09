@@ -64,7 +64,7 @@
                                         onclick="showLessonForm(this)">
                                     Add Lesson
                                 </button>
-                                <form th:action="@{/instructordashboard/viewcourse/lessonadd}" th:object="${lessonDTO}" method="post"
+                                <form th:action="@{/instructordashboard/viewcourse/lessonadd}" th:object="${lessonVideoDTO}" method="post"
                                       class="lesson-form mt-3" style="display:none;"
                                       th:attr="data-chapterid=${chapter.id}">
                                     <input type="hidden" name="chapterId" th:value="${chapter.id}">

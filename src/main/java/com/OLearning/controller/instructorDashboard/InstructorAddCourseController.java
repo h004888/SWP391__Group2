@@ -4,7 +4,7 @@ import com.OLearning.dto.chapter.ChapterDTO;
 import com.OLearning.dto.course.AddCourseStep1DTO;
 import com.OLearning.dto.course.AddCourseStep3DTO;
 import com.OLearning.dto.course.CourseDTO;
-import com.OLearning.dto.lesson.LessonDTO;
+import com.OLearning.dto.lesson.LessonVideoDTO;
 import com.OLearning.entity.Chapter;
 import com.OLearning.entity.Course;
 import com.OLearning.entity.Lesson;
@@ -79,7 +79,7 @@ public class InstructorAddCourseController {
             @RequestParam(name = "action") String action, Model model,
             ModelMap modelMap) {
 
-        if (action.equals("draft")) { //khi nay la draft khi o step 1
+        if (action.equals("draft")) {
             Course course = courseService.createCourseStep1(courseStep1.getId(), courseStep1);
             courseStep1.setId(course.getCourseId());
             List<CourseDTO> courseList = courseService.findCourseByUserId(id);
@@ -103,7 +103,7 @@ public class InstructorAddCourseController {
         if (chapters != null && !chapters.isEmpty()) {
             model.addAttribute("chapters", chapters);
         }
-        model.addAttribute("lessonDTO", new LessonDTO());
+        model.addAttribute("lessonDTO", new LessonVideoDTO());
 
 
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/CreateCourseStep2Content :: step2Content");
@@ -131,16 +131,39 @@ public class InstructorAddCourseController {
 
     //create lesson
     @PostMapping("/viewcourse/lessonadd")
-    public String addNewLesson(@ModelAttribute("lessonDTO") LessonDTO lessonDTO, RedirectAttributes redirectAttributes) {
-        List<Lesson> existingLessons = lessonService.findLessonsByChapterId(lessonDTO.getChapterId());
+    public String addNewLesson(@ModelAttribute("lessonDTO") LessonVideoDTO lessonVideoDTO, RedirectAttributes redirectAttributes) {
+        List<Lesson> existingLessons = lessonService.findLessonsByChapterId(lessonVideoDTO.getChapterId());
         //tim dc list lesson by chapterId
         int nextOrderNumber = existingLessons.size() + 1;
-        lessonDTO.setOrderNumber(nextOrderNumber);
-        lessonService.createLesson(lessonDTO);
-        Long chapterId = lessonDTO.getChapterId();
+        lessonVideoDTO.setOrderNumber(nextOrderNumber);
+        lessonService.createLesson(lessonVideoDTO);
+        Long chapterId = lessonVideoDTO.getChapterId();
         Long courseId = chapterService.getChapterById(chapterId).getCourse().getCourseId();
         return "redirect:/instructordashboard/viewcourse/addcoursestep2?courseId=" + courseId;
     }
+//version with quiz
+//    @PostMapping("/viewcourse/lessonadd")
+//    public String addNewLesson(@ModelAttribute("lessonDTO") LessonDTO lessonDTO,
+//                               RedirectAttributes redirectAttributes) {
+//        List<Lesson> existingLessons = lessonService.findLessonsByChapterId(lessonDTO.getChapterId());
+//        int nextOrderNumber = existingLessons.size() + 1;
+//        lessonDTO.setOrderNumber(nextOrderNumber);
+//
+//        if ("Video".equalsIgnoreCase(lessonDTO.getContentType())) {
+//            lessonService.createLesson(lessonDTO); // Save as video lesson
+//        } else if ("Quiz".equalsIgnoreCase(lessonDTO.getContentType())) {
+//            Lesson lesson = lessonService.createLesson(lessonDTO); // Save lesson
+//            if (lessonVideoDTO.getQuizzes() != null) {
+//                for (QuizDTO quizDTO : lessonVideoDTO.getQuizzes()) {
+//                    quizDTO.setLessonId(lesson.getId());
+//                    quizService.addQuiz(quizDTO); // Save each quiz
+//                }
+//            }
+//        }
+//        Long chapterId = lessonVideoDTO.getChapterId();
+//        Long courseId = chapterService.getChapterById(chapterId).getCourse().getCourseId();
+//        return "redirect:/instructordashboard/viewcourse/addcoursestep2?courseId=" + courseId;
+//    }
 
     //up screen after add chapter, lesson step 2
     @GetMapping("/viewcourse/addcoursestep2")
@@ -160,7 +183,7 @@ public class InstructorAddCourseController {
             model.addAttribute("chapters", chapters);
         }
         model.addAttribute("courseId", courseId);
-        model.addAttribute("lessonDTO", new LessonDTO());
+        model.addAttribute("lessonDTO", new LessonVideoDTO());
 
 
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/CreateCourseStep2Content :: step2Content");

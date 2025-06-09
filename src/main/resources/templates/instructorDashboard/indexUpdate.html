@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
-<div th:insert="adminDashboard/fragments/header :: header"></div>
+<div th:insert="instructorDashboard/fragments/headerUpdate :: header"></div>
 
 <body id="page-top">
 
@@ -9,7 +9,7 @@
 <div id="wrapper">
 
     <!-- Sidebar -->
-    <div th:replace="adminDashboard/fragments/sidebar :: sidebar"></div>
+    <div th:replace="instructorDashboard/fragments/sidebarUpdate :: sidebar"></div>
     <!-- End of Sidebar -->
 
     <!-- Content Wrapper -->
@@ -19,7 +19,7 @@
         <div id="content">
 
             <!-- Topbar -->
-            <div th:replace="adminDashboard/fragments/topbar :: topbar"></div>
+            <div th:replace="instructorDashboard/fragments/topbarUpdate :: topbar"></div>
             <!-- End of Topbar -->
 
             <!-- Begin Page Content -->
@@ -31,7 +31,7 @@
         <!-- End of Main Content -->
 
         <!-- Footer -->
-        <div th:insert="adminDashboard/fragments/footer :: footer"></div>
+        <div th:insert="instructorDashboard/fragments/footerUpdate :: footer"></div>
         <!-- End of Footer -->
 
     </div>

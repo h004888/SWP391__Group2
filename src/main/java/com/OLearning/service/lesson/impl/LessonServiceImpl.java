@@ -1,6 +1,6 @@
 package com.OLearning.service.lesson.impl;
 
-import com.OLearning.dto.lesson.LessonDTO;
+import com.OLearning.dto.lesson.LessonVideoDTO;
 import com.OLearning.entity.Chapter;
 import com.OLearning.entity.Lesson;
 import com.OLearning.entity.Video;
@@ -26,13 +26,13 @@ public class LessonServiceImpl implements LessonService {
     @Autowired
     private VideoService videoService;
     @Override
-    public Lesson createLesson(LessonDTO lessonDTO) {
-        Lesson lesson = lessonMapper.DtoToLesson(lessonDTO);
-        Chapter chapter = chapterService.getChapterById(lessonDTO.getChapterId());
+    public Lesson createLesson(LessonVideoDTO lessonVideoDTO) {
+        Lesson lesson = lessonMapper.DtoToLesson(lessonVideoDTO);
+        Chapter chapter = chapterService.getChapterById(lessonVideoDTO.getChapterId());
         lesson.setChapter(chapter);
         lesson.setCreatedAt(LocalDateTime.now());
         lesson.setUpdatedAt(LocalDateTime.now());
-        Video video = videoService.createVideo(lessonDTO.getVideoUrl());
+        Video video = videoService.createVideo(lessonVideoDTO.getVideoUrl());
         lesson.setVideo(video);
         return lessonRepository.save(lesson);
     }
