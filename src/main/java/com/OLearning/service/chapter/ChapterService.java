@@ -1,12 +1,12 @@
-package com.OLearning.service.instructorDashBoard;
+package com.OLearning.service.chapter;
 
-import com.OLearning.dto.instructorDashboard.ChapterDTO;
-import com.OLearning.entity.Chapters;
+import com.OLearning.dto.chapter.ChapterDTO;
+import com.OLearning.entity.Chapter;
 
 import java.util.List;
 
 public interface ChapterService {
-    Chapters saveChapter(ChapterDTO chapterDTO);
-    List<Chapters> chapterListByCourse(Long courserId);
-    Chapters getChapterById(Long id);
+    Chapter saveChapter(ChapterDTO chapterDTO);
+    List<Chapter> chapterListByCourse(Long courserId);
+    Chapter getChapterById(Long id);
 }

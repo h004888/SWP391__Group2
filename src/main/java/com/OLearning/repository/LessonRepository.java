@@ -1,13 +1,13 @@
-package com.OLearning.repository.instructorDashBoard;
+package com.OLearning.repository;
 
-import com.OLearning.entity.Lessons;
+import com.OLearning.entity.Lesson;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public interface LessonRepository extends JpaRepository<Lessons, Long> {
+public interface LessonRepository extends JpaRepository<Lesson, Long> {
 
-    List<Lessons> findByChapterId(Long chapterId);
+    List<Lesson> findByChapterId(Long chapterId);
 }

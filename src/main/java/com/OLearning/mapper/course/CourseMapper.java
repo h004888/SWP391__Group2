@@ -1,11 +1,10 @@
-package com.OLearning.mapper.instructorDashBoard;
+package com.OLearning.mapper.course;
 
-import com.OLearning.dto.instructorDashboard.*;
-import com.OLearning.entity.Categories;
+import com.OLearning.dto.course.AddCourseStep1DTO;
+import com.OLearning.dto.course.AddCourseStep3DTO;
+import com.OLearning.dto.course.CourseAddDTO;
+import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.entity.Course;
-import com.OLearning.repository.instructorDashBoard.InstructorCategoryRepo;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;

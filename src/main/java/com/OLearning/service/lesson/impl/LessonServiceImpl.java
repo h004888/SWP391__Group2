@@ -1,15 +1,14 @@
-package com.OLearning.service.instructorDashBoard.impl;
+package com.OLearning.service.lesson.impl;
 
-import com.OLearning.dto.instructorDashboard.LessonDTO;
-import com.OLearning.entity.Chapters;
-import com.OLearning.entity.Lessons;
+import com.OLearning.dto.lesson.LessonDTO;
+import com.OLearning.entity.Chapter;
+import com.OLearning.entity.Lesson;
 import com.OLearning.entity.Video;
-import com.OLearning.mapper.instructorDashBoard.LessonMapper;
-import com.OLearning.repository.instructorDashBoard.LessonRepository;
-import com.OLearning.repository.instructorDashBoard.VideoRepository;
-import com.OLearning.service.instructorDashBoard.ChapterService;
-import com.OLearning.service.instructorDashBoard.LessonService;
-import com.OLearning.service.instructorDashBoard.VideoService;
+import com.OLearning.mapper.lesson.LessonMapper;
+import com.OLearning.repository.LessonRepository;
+import com.OLearning.service.chapter.ChapterService;
+import com.OLearning.service.lesson.LessonService;
+import com.OLearning.service.video.VideoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,9 +26,9 @@ public class LessonServiceImpl implements LessonService {
     @Autowired
     private VideoService videoService;
     @Override
-    public Lessons createLesson(LessonDTO lessonDTO) {
-        Lessons lesson = lessonMapper.DtoToLesson(lessonDTO);
-        Chapters chapter = chapterService.getChapterById(lessonDTO.getChapterId());
+    public Lesson createLesson(LessonDTO lessonDTO) {
+        Lesson lesson = lessonMapper.DtoToLesson(lessonDTO);
+        Chapter chapter = chapterService.getChapterById(lessonDTO.getChapterId());
         lesson.setChapter(chapter);
         lesson.setCreatedAt(LocalDateTime.now());
         lesson.setUpdatedAt(LocalDateTime.now());
@@ -39,7 +38,7 @@ public class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    public List<Lessons> findLessonsByChapterId(Long chapterId) {
+    public List<Lesson> findLessonsByChapterId(Long chapterId) {
         return lessonRepository.findByChapterId(chapterId);
     }
 }

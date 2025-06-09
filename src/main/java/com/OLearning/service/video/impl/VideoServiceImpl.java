@@ -1,8 +1,8 @@
-package com.OLearning.service.instructorDashBoard.impl;
+package com.OLearning.service.video.impl;
 
 import com.OLearning.entity.Video;
-import com.OLearning.repository.instructorDashBoard.VideoRepository;
-import com.OLearning.service.instructorDashBoard.VideoService;
+import com.OLearning.repository.VideoRepository;
+import com.OLearning.service.video.VideoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

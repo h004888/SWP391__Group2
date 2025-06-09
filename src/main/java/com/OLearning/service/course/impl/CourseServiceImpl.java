@@ -1,13 +1,12 @@
-package com.OLearning.service.instructorDashBoard.impl;
+package com.OLearning.service.course.impl;
 
-import com.OLearning.dto.instructorDashboard.AddCourseStep1DTO;
-import com.OLearning.dto.instructorDashboard.AddCourseStep3DTO;
-import com.OLearning.dto.instructorDashboard.CourseDTO;
+import com.OLearning.dto.course.AddCourseStep1DTO;
+import com.OLearning.dto.course.AddCourseStep3DTO;
+import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.entity.*;
-import com.OLearning.mapper.instructorDashBoard.CourseMapper;
-import com.OLearning.repository.adminDashBoard.CourseRepo;
-import com.OLearning.repository.instructorDashBoard.*;
-import com.OLearning.service.instructorDashBoard.CourseService;
+import com.OLearning.mapper.course.CourseMapper;
+import com.OLearning.repository.*;
+import com.OLearning.service.course.CourseService;
 import com.OLearning.service.instructorDashBoard.FileHelper.FileHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -29,14 +28,11 @@ public class CourseServiceImpl implements CourseService {
     @Autowired
     private InstructorCourseRepo instructorCourseRepo;
     @Autowired
-    private InstructorBuyPackagesRepository buyPackageRepository;
-    @Autowired
     private CourseMapper courseMapper;
     @Autowired
     private InstructorCategoryRepo instructorCategoryRepo;
     @Autowired
     private InstructorUserRepo instructorUserRepo;
-    private CourseRepo courseRepo;
 
     @Override
     public List<CourseDTO> findCourseByUserId(Long userId) {
@@ -72,7 +68,7 @@ public class CourseServiceImpl implements CourseService {
     public Course createCourseStep1(Long courseId, AddCourseStep1DTO addCourseStep1DTO) {
         Course course = (courseId == null) ? new Course() : findCourseById(courseId);
         courseMapper.Step1(addCourseStep1DTO, course);
-        Categories category = instructorCategoryRepo.findByName(addCourseStep1DTO.getCategoryName());
+        Category category = instructorCategoryRepo.findByName(addCourseStep1DTO.getCategoryName());
         if (category == null) {
             throw new RuntimeException("not found: " + addCourseStep1DTO.getCategoryName());
         }
@@ -100,6 +96,10 @@ public class CourseServiceImpl implements CourseService {
         course.setCategory(category);
         return instructorCourseRepo.save(course);
     }
+    @Override
+    public Course createCourseStep1Demo(Long courseId, AddCourseStep1DTO addCourseStep1DTO) {
+                return null;
+    }
     @Autowired
     ChapterRepository chapterRepo;
     @Autowired
@@ -110,11 +110,11 @@ public class CourseServiceImpl implements CourseService {
         courseMapper.Step2(course);
         int totalLessons = 0;
         int totalDuration = 0;
-        List<Chapters> chapters = chapterRepo.findChaptersByCourse(courseId); //tim ra list chapter
-        for (Chapters chapter : chapters) {
-            List<Lessons> lessons = chapter.getLessons();
+        List<Chapter> chapters = chapterRepo.findChaptersByCourse(courseId); //tim ra list chapter
+        for (Chapter chapter : chapters) {
+            List<Lesson> lessons = chapter.getLessons();
             totalLessons += lessons.size();
-            for (Lessons lesson : lessons) {
+            for (Lesson lesson : lessons) {
                 totalDuration += lesson.getDuration() != null ? lesson.getDuration() : 0; //can lam lai
             }
         }

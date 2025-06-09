@@ -1,0 +1,69 @@
+<nav th:fragment="sidebar" class="navbar sidebar navbar-expand-xl navbar-dark bg-dark">
+
+  <!-- Navbar brand for xl START -->
+  <div class="d-flex align-items-center">
+    <a class="navbar-brand" th:href="@{/admin}">
+      <img class="navbar-brand-item" th:src="@{/assets/images/logo-light.svg}" alt="">
+    </a>
+  </div>
+  <!-- Navbar brand for xl END -->
+
+  <div class="offcanvas offcanvas-start flex-row custom-scrollbar h-100" data-bs-backdrop="true" tabindex="-1"
+       id="offcanvasSidebar">
+    <div class="offcanvas-body sidebar-content d-flex flex-column bg-dark">
+
+      <!-- Sidebar menu START -->
+      <ul class="navbar-nav flex-column" id="navbar-sidebar">
+
+        <!-- Menu item 1 -->
+        <li class="nav-item"><a th:href="@{/admin}" class="nav-link active"><i
+                class="bi bi-house fa-fw me-2"></i>Dashboard</a></li>
+
+        <!-- Title -->
+        <li class="nav-item ms-2 my-2">Pages</li>
+
+        <!-- menu item 2 -->
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/admin/account}">
+            <i class="fas fa-fw fa-user"></i>
+            <span>Accounts</span>
+          </a>
+        </li>
+
+        <!-- Menu item 3 -->
+        <li class="nav-item"><a class="nav-link" th:href="@{/admin/course}">
+          <i class="fas fa-fw fa-trophy"></i>
+          <span>Courses</span>
+        </a></li>
+
+        <!--                &lt;!&ndash; Menu item 4 &ndash;&gt;-->
+        <!--                <li class="nav-item">-->
+        <!--                    <a class="nav-link" th:href="@{/admin/categories}">-->
+        <!--                        <i class="fas fa-fw fa-list"></i>-->
+        <!--                        <span>Categories</span>-->
+        <!--                    </a>-->
+        <!--                </li>-->
+
+        <!-- Menu item 5 -->
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/admin/orders}">
+            <i class="fas fa-fw fa-credit-card"></i>
+            <span>Orders & Payments</span>
+          </a>
+        </li>
+
+        <!-- Menu item 6 -->
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/admin/courseMaintenance}">
+            <i class="fas fa-fw fa-receipt"></i>
+            <span>CourseMaintenance</span>
+          </a>
+        </li>
+
+
+      </ul>
+      <!-- Sidebar menu end -->
+
+    </div>
+  </div>
+</nav>

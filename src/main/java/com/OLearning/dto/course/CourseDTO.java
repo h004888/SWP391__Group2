@@ -1,10 +1,9 @@
-package com.OLearning.dto.instructorDashboard;
+package com.OLearning.dto.course;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 

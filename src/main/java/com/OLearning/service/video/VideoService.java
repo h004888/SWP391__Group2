@@ -1,4 +1,4 @@
-package com.OLearning.service.instructorDashBoard;
+package com.OLearning.service.video;
 
 import com.OLearning.entity.Video;
 

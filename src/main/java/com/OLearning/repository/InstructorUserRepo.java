@@ -1,4 +1,4 @@
-package com.OLearning.repository.instructorDashBoard;
+package com.OLearning.repository;
 
 import com.OLearning.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;

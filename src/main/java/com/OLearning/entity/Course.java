@@ -36,8 +36,8 @@ public class Course {
     private User instructor;
     @ManyToOne
     @JoinColumn(name = "CategoryID")
-    private Categories category;
+    private Category category;
     @OneToMany(mappedBy = "course", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<Chapters> listOfChapters;
+    private List<Chapter> listOfChapters;
 }
 

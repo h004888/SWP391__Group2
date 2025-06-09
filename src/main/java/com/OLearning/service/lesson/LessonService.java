@@ -1,11 +1,11 @@
-package com.OLearning.service.instructorDashBoard;
+package com.OLearning.service.lesson;
 
-import com.OLearning.dto.instructorDashboard.LessonDTO;
-import com.OLearning.entity.Lessons;
+import com.OLearning.dto.lesson.LessonDTO;
+import com.OLearning.entity.Lesson;
 
 import java.util.List;
 
 public interface LessonService {
-    Lessons createLesson(LessonDTO lessonDTO);
-    List<Lessons> findLessonsByChapterId(Long chapterId);
+    Lesson createLesson(LessonDTO lessonDTO);
+    List<Lesson> findLessonsByChapterId(Long chapterId);
 }

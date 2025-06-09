@@ -1,10 +1,865 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+<div class="main-content" th:fragment="courseDetailContent">
+  <div class="container-fluid py-4">
+    <!-- Breadcrumb -->
+
+
+    <!-- Course Header -->
+    <div class="course-header">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <h1 class="mb-2" th:utext="${course.title}"></h1>
+          <div class="d-flex align-items-center mb-3">
+            <span class="badge bg-primary me-2" th:utext="${course.category.name}"></span>
+            Created: <span class="text-muted me-3" th:utext="${course.createdAt}"><i class="bi bi-calendar3 me-1"></i></span>
+            Last Updated: <span class="text-muted" th:utext="${course.updatedAt}"><i class="bi bi-clock me-1"></i></span>
+          </div>
+          <div class="d-flex align-items-center">
+            <div>
+              <i class="bi bi-people-fill me-1"></i>
+              <span>256 students enrolled</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <img th:src="@{'/img/' + ${course.courseImg}}" width="120"
+               height="100" alt="Course Image" class="course-image">
+        </div>
+      </div>
+    </div>
+
+    <!-- Course Stats -->
+    <div class="row mb-4">
+      <div class="col-md-4 col-sm-6 mb-4">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="bi bi-currency-dollar"></i>
+          </div>
+          <div class="stat-value" th:utext="${course.price}"></div>
+          <div class="stat-label">Course Price</div>
+        </div>
+      </div>
+      <div class="col-md-4 col-sm-6 mb-4">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="bi bi-clock"></i>
+          </div>
+          <div class="stat-value" th:utext="${course.duration}"></div>
+          <div class="stat-label">Total Duration</div>
+        </div>
+      </div>
+      <div class="col-md-4 col-sm-6 mb-4">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="bi bi-collection-play"></i>
+          </div>
+          <div class="stat-value" th:utext="${course.totalLessons}"></div>
+          <div class="stat-label">Total Lessons</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Course Content Tabs -->
+    <ul class="nav nav-tabs" id="courseTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview"
+                type="button" role="tab">Overview</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="lessons-tab" data-bs-toggle="tab" data-bs-target="#lessons"
+                type="button" role="tab">Lessons</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="enrollments-tab" data-bs-toggle="tab" data-bs-target="#enrollments"
+                type="button" role="tab">Enrollments</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews"
+                type="button" role="tab">Reviews</button>
+      </li>
+    </ul>
+    <div class="tab-content" id="courseTabContent">
+      <!-- Overview Tab -->
+      <div class="tab-pane fade show active" id="overview" role="tabpanel">
+        <div class="row">
+          <div class="col-lg-8">
+            <div class="content-card">
+              <h3>Course Description</h3>
+              <p th:utext="${course.description}"></p>
+
+              <h4 class="mt-4">What You'll Learn</h4>
+              <ul>
+                <li>React fundamentals including JSX, components, and props</li>
+                <li>State management with hooks and context API</li>
+                <li>Routing with React Router</li>
+                <li>Form handling and validation</li>
+                <li>API integration and data fetching</li>
+                <li>Authentication and authorization</li>
+                <li>State management with Redux</li>
+                <li>Testing React applications</li>
+                <li>Deployment and optimization</li>
+              </ul>
+              <h4 class="mt-4">Requirements</h4>
+              <ul>
+                <li>Basic knowledge of HTML, CSS, and JavaScript</li>
+                <li>Understanding of ES6+ features</li>
+                <li>No prior React experience required</li>
+              </ul>
+            </div>
+
+            <div class="content-card">
+              <h3>Instructor</h3>
+              <div class="d-flex align-items-start">
+                <img src="https://via.placeholder.com/100" alt="Instructor" class="rounded me-3">
+                <div>
+                  <h5 th:utext="${instructor.username}"></h5>
+                  <p class="text-muted" >Senior Frontend Developer & Educator</p>
+                  <p>John is a seasoned web developer with over 10 years of experience in frontend
+                    development. He has worked with companies like Google, Facebook, and Amazon,
+                    and has been teaching web development for the past 5 years.</p>
+                  <div class="d-flex mt-2">
+                    <a href="#" class="btn btn-sm btn-outline-primary me-2"><i
+                            class="bi bi-envelope me-1"></i> Contact</a>
+                    <a href="#" class="btn btn-sm btn-outline-secondary"><i
+                            class="bi bi-person me-1"></i> View Profile</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-4">
+            <div class="content-card">
+              <h3>Course Details</h3>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <span><i class="bi bi-tag me-2"></i> Category</span>
+                  <span  th:utext="${course.category.name}"></span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <span><i class="bi bi-clock me-2"></i> Duration</span>
+                  <span  th:utext="${course.duration}"></span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <span><i class="bi bi-collection-play me-2"></i> Lessons</span>
+                  <span  th:utext="${course.totalLessons}"></span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <span><i class="bi bi-star me-2"></i> Rating</span>
+                  <span>4.5/5</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <span><i class="bi bi-people me-2"></i> Students</span>
+                  <span>256</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <span><i class="bi bi-currency-dollar me-2"></i> Price</span>
+                  <span  th:utext="${course.price}"></span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <span><i class="bi bi-percent me-2"></i> Discount</span>
+                  <span>0%</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lessons Tab -->
+      <div class="tab-pane fade" id="lessons" role="tabpanel">
+        <div class="content-card">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="mb-0">Course Lessons</h3>
+          </div>
+
+          <div class="accordion" id="lessonsAccordion">
+            <!-- Section 1 -->
+
+            <div th:if="${!#lists.isEmpty(chapters)}">
+
+
+              <div class="accordion-item" th:each="chapter : ${chapters}">
+
+
+                <h2 class="accordion-header">
+                  <button class="accordion-button" th:text="${chapter.title}" type="button" data-bs-toggle="collapse"
+                          data-bs-target="#section1">
+                  </button>
+                </h2>
+
+                <div id="section1" class="accordion-collapse collapse show"
+                     data-bs-parent="#lessonsAccordion">
+                  <div class="accordion-body" th:if="${chapter.lessons != null}">
+                    <div th:each="lesson : ${chapter.lessons}">
+                      <div class="lesson-item">
+                        <div class="row align-items-center">
+                          <div class="col-md-6">
+                            <h5 class="mb-1">
+                              <a href="#" th:text="${lesson.title}" th:attr="data-videoid=${lesson.video.videoUrl}" class="lesson-video-link custom-link"></a>
+                            </h5>
+                            <p class="mb-0 text-muted small" th:text="${lesson.description}"></p>
+                          </div>
+                          <div class="col-md-2 text-md-center">
+                            <span class="badge bg-info" th:text="${lesson.contentType}"></span>
+                            <span class="text-muted ms-2" th:text="${lesson.duration}"></span>
+                          </div>
+                          <div class="col-md-2 text-md-center">
+                            <span class="badge bg-success" th:classappend="${lesson.isFree} ? 'bg-success' : 'bg-danger'" th:text="${lesson.isFree} ? 'Free' : 'Premium'"></span>
+                          </div>
+                          <div class="col-md-2 text-md-end">
+                            <div class="btn-group">
+                              <button class="btn btn-sm btn-outline-primary"><i
+                                      class="bi bi-pencil"></i></button>
+                              <button class="btn btn-sm btn-outline-danger"><i
+                                      class="bi bi-trash"></i></button>
+                              <button class="btn btn-sm btn-outline-secondary"><i
+                                      class="bi bi-three-dots-vertical"></i></button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="videoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="videoModalLabel">Lesson Video</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                      onclick="stopVideo()"></button>
+            </div>
+            <div class="modal-body d-flex justify-content-center">
+              <div style="width: 100%; max-width: 800px; aspect-ratio: 16/9;">
+                <iframe id="lessonVideoIframe"
+                        style="width: 100%; height: 100%; border-radius: 12px;"
+                        frameborder="0"
+                        allowfullscreen></iframe>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Enrollments Tab -->
+      <div class="tab-pane fade" id="enrollments" role="tabpanel">
+        <div class="content-card">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="mb-0">Student Enrollments</h3>
+            <div class="d-flex">
+              <input type="text" class="form-control me-2" placeholder="Search students...">
+              <button class="btn btn-outline-primary"><i class="bi bi-search"></i></button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+              <tr>
+                <th>Student</th>
+                <th>Enrollment Date</th>
+                <th>Progress</th>
+                <th>Payment</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <img src="" alt="Student"
+                         class="avatar me-2">
+                    <div>
+                      <h6 class="mb-0">Alice Johnson</h6>
+                      <small class="text-muted">alice@example.com</small>
+                    </div>
+                  </div>
+                </td>
+                <td>May 15, 2023</td>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <div class="progress flex-grow-1 me-2" style="height: 5px;">
+                      <div class="progress-bar bg-success" role="progressbar"
+                           style="width: 75%"></div>
+                    </div>
+                    <span>75%</span>
+                  </div>
+                </td>
+                <td><span class="badge bg-success">Paid</span></td>
+                <td><span class="badge bg-primary">Active</span></td>
+                <td>
+                  <div class="btn-group">
+                    <button class="btn btn-sm btn-outline-primary"><i
+                            class="bi bi-envelope"></i></button>
+                    <button class="btn btn-sm btn-outline-info"><i
+                            class="bi bi-eye"></i></button>
+                    <button class="btn btn-sm btn-outline-secondary"><i
+                            class="bi bi-three-dots-vertical"></i></button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <img src="" alt="Student"
+                         class="avatar me-2">
+                    <div>
+                      <h6 class="mb-0">Bob Smith</h6>
+                      <small class="text-muted">bob@example.com</small>
+                    </div>
+                  </div>
+                </td>
+                <td>June 2, 2023</td>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <div class="progress flex-grow-1 me-2" style="height: 5px;">
+                      <div class="progress-bar bg-success" role="progressbar"
+                           style="width: 45%"></div>
+                    </div>
+                    <span>45%</span>
+                  </div>
+                </td>
+                <td><span class="badge bg-success">Paid</span></td>
+                <td><span class="badge bg-primary">Active</span></td>
+                <td>
+                  <div class="btn-group">
+                    <button class="btn btn-sm btn-outline-primary"><i
+                            class="bi bi-envelope"></i></button>
+                    <button class="btn btn-sm btn-outline-info"><i
+                            class="bi bi-eye"></i></button>
+                    <button class="btn btn-sm btn-outline-secondary"><i
+                            class="bi bi-three-dots-vertical"></i></button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <img src="" alt="Student"
+                         class="avatar me-2">
+                    <div>
+                      <h6 class="mb-0">Charlie Davis</h6>
+                      <small class="text-muted">charlie@example.com</small>
+                    </div>
+                  </div>
+                </td>
+                <td>June 10, 2023</td>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <div class="progress flex-grow-1 me-2" style="height: 5px;">
+                      <div class="progress-bar bg-success" role="progressbar"
+                           style="width: 20%"></div>
+                    </div>
+                    <span>20%</span>
+                  </div>
+                </td>
+                <td><span class="badge bg-warning">Pending</span></td>
+                <td><span class="badge bg-primary">Active</span></td>
+                <td>
+                  <div class="btn-group">
+                    <button class="btn btn-sm btn-outline-primary"><i
+                            class="bi bi-envelope"></i></button>
+                    <button class="btn btn-sm btn-outline-info"><i
+                            class="bi bi-eye"></i></button>
+                    <button class="btn btn-sm btn-outline-secondary"><i
+                            class="bi bi-three-dots-vertical"></i></button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <img src="" alt="Student"
+                         class="avatar me-2">
+                    <div>
+                      <h6 class="mb-0">Diana Evans</h6>
+                      <small class="text-muted">diana@example.com</small>
+                    </div>
+                  </div>
+                </td>
+                <td>July 5, 2023</td>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <div class="progress flex-grow-1 me-2" style="height: 5px;">
+                      <div class="progress-bar bg-success" role="progressbar"
+                           style="width: 90%"></div>
+                    </div>
+                    <span>90%</span>
+                  </div>
+                </td>
+                <td><span class="badge bg-success">Paid</span></td>
+                <td><span class="badge bg-primary">Active</span></td>
+                <td>
+                  <div class="btn-group">
+                    <button class="btn btn-sm btn-outline-primary"><i
+                            class="bi bi-envelope"></i></button>
+                    <button class="btn btn-sm btn-outline-info"><i
+                            class="bi bi-eye"></i></button>
+                    <button class="btn btn-sm btn-outline-secondary"><i
+                            class="bi bi-three-dots-vertical"></i></button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <img src="" alt="Student"
+                         class="avatar me-2">
+                    <div>
+                      <h6 class="mb-0">Ethan Foster</h6>
+                      <small class="text-muted">ethan@example.com</small>
+                    </div>
+                  </div>
+                </td>
+                <td>July 12, 2023</td>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <div class="progress flex-grow-1 me-2" style="height: 5px;">
+                      <div class="progress-bar bg-success" role="progressbar"
+                           style="width: 10%"></div>
+                    </div>
+                    <span>10%</span>
+                  </div>
+                </td>
+                <td><span class="badge bg-danger">Refunded</span></td>
+                <td><span class="badge bg-secondary">Inactive</span></td>
+                <td>
+                  <div class="btn-group">
+                    <button class="btn btn-sm btn-outline-primary"><i
+                            class="bi bi-envelope"></i></button>
+                    <button class="btn btn-sm btn-outline-info"><i
+                            class="bi bi-eye"></i></button>
+                    <button class="btn btn-sm btn-outline-secondary"><i
+                            class="bi bi-three-dots-vertical"></i></button>
+                  </div>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+              <li class="page-item disabled">
+                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+              </li>
+              <li class="page-item active"><a class="page-link" href="#">1</a></li>
+              <li class="page-item"><a class="page-link" href="#">2</a></li>
+              <li class="page-item"><a class="page-link" href="#">3</a></li>
+              <li class="page-item">
+                <a class="page-link" href="#">Next</a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+      <!-- Reviews Tab -->
+      <div class="tab-pane fade" id="reviews" role="tabpanel">
+        <div class="content-card">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="mb-0">Course Reviews</h3>
+            <div>
+              <select class="form-select">
+                <option selected>Sort by: Latest</option>
+                <option>Sort by: Highest Rating</option>
+                <option>Sort by: Lowest Rating</option>
+                <option>Sort by: Oldest</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row mb-4">
+            <div class="col-md-4">
+              <div class="text-center mb-4">
+                <h1 class="display-4 fw-bold">4.5</h1>
+                <div class="star-rating mb-2">
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-fill"></i>
+                  <i class="bi bi-star-half"></i>
+                </div>
+                <p class="text-muted">Based on 128 reviews</p>
+              </div>
+
+              <div class="mb-3">
+                <div class="d-flex align-items-center mb-1">
+                  <div class="me-2">5 stars</div>
+                  <div class="progress flex-grow-1" style="height: 8px;">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: 75%">
+                    </div>
+                  </div>
+                  <div class="ms-2">75%</div>
+                </div>
+                <div class="d-flex align-items-center mb-1">
+                  <div class="me-2">4 stars</div>
+                  <div class="progress flex-grow-1" style="height: 8px;">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: 15%">
+                    </div>
+                  </div>
+                  <div class="ms-2">15%</div>
+                </div>
+                <div class="d-flex align-items-center mb-1">
+                  <div class="me-2">3 stars</div>
+                  <div class="progress flex-grow-1" style="height: 8px;">
+                    <div class="progress-bar bg-warning" role="progressbar" style="width: 5%">
+                    </div>
+                  </div>
+                  <div class="ms-2">5%</div>
+                </div>
+                <div class="d-flex align-items-center mb-1">
+                  <div class="me-2">2 stars</div>
+                  <div class="progress flex-grow-1" style="height: 8px;">
+                    <div class="progress-bar bg-danger" role="progressbar" style="width: 3%">
+                    </div>
+                  </div>
+                  <div class="ms-2">3%</div>
+                </div>
+                <div class="d-flex align-items-center mb-1">
+                  <div class="me-2">1 star</div>
+                  <div class="progress flex-grow-1" style="height: 8px;">
+                    <div class="progress-bar bg-danger" role="progressbar" style="width: 2%">
+                    </div>
+                  </div>
+                  <div class="ms-2">2%</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-8">
+              <div class="review-item">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <div class="d-flex align-items-center">
+                    <img src="https://via.placeholder.com/40" alt="Reviewer"
+                         class="avatar me-2">
+                    <div>
+                      <h6 class="mb-0">Alice Johnson</h6>
+                      <small class="text-muted">July 15, 2023</small>
+                    </div>
+                  </div>
+                  <div class="star-rating">
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                  </div>
+                </div>
+                <p>This course exceeded my expectations! The instructor explains complex React
+                  concepts in a way that's easy to understand. The projects are practical and
+                  helped me build a solid portfolio. Highly recommended for anyone looking to
+                  learn React.</p>
+                <div class="d-flex justify-content-end">
+                  <button class="btn btn-sm btn-outline-primary me-2"><i class="bi bi-reply"></i>
+                    Reply</button>
+                  <button class="btn btn-sm btn-outline-danger"><i class="bi bi-flag"></i>
+                    Report</button>
+                </div>
+              </div>
+
+              <div class="review-item">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <div class="d-flex align-items-center">
+                    <img src="https://via.placeholder.com/40" alt="Reviewer"
+                         class="avatar me-2">
+                    <div>
+                      <h6 class="mb-0">Bob Smith</h6>
+                      <small class="text-muted">July 10, 2023</small>
+                    </div>
+                  </div>
+                  <div class="star-rating">
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star"></i>
+                  </div>
+                </div>
+                <p>Great course overall. The content is well-structured and the instructor is
+                  knowledgeable. I would have liked more advanced topics towards the end, but it's
+                  still a solid introduction to React. The section on hooks was particularly
+                  helpful.</p>
+                <div class="d-flex justify-content-end">
+                  <button class="btn btn-sm btn-outline-primary me-2"><i class="bi bi-reply"></i>
+                    Reply</button>
+                  <button class="btn btn-sm btn-outline-danger"><i class="bi bi-flag"></i>
+                    Report</button>
+                </div>
+              </div>
+
+              <div class="review-item">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <div class="d-flex align-items-center">
+                    <img src="https://via.placeholder.com/40" alt="Reviewer"
+                         class="avatar me-2">
+                    <div>
+                      <h6 class="mb-0">Charlie Davis</h6>
+                      <small class="text-muted">June 28, 2023</small>
+                    </div>
+                  </div>
+                  <div class="star-rating">
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star"></i>
+                    <i class="bi bi-star"></i>
+                  </div>
+                </div>
+                <p>The course is good for beginners, but I found some sections to be a bit outdated.
+                  The Redux section could use an update to include the latest best practices.
+                  However, the fundamentals are well-covered and the instructor is responsive to
+                  questions.</p>
+                <div class="d-flex justify-content-end">
+                  <button class="btn btn-sm btn-outline-primary me-2"><i class="bi bi-reply"></i>
+                    Reply</button>
+                  <button class="btn btn-sm btn-outline-danger"><i class="bi bi-flag"></i>
+                    Report</button>
+                </div>
+              </div>
+
+              <div class="mt-3 text-center">
+                <button class="btn btn-outline-primary">Load More Reviews</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <style>
+    .custom-link {
+      text-decoration: none;
+      color: #0d6efd;
+      font-weight: normal;
+      font-style: normal;
+    }
+    .custom-link:hover {
+      text-decoration: underline;
+      color: #0a58ca;
+    }
+    :root {
+      /*--sidebar-width: 250px;*/
+    }
+
+    body {
+      min-height: 100vh;
+      background-color: #f8f9fa;
+    }
+
+    /*.sidebar {*/
+    /*  width: var(--sidebar-width);*/
+    /*  position: fixed;*/
+    /*  top: 0;*/
+    /*  left: 0;*/
+    /*  min-height: 1000vh;*/
+    /*  !*z-index: 1000;*!*/
+    /*  background-color: #212529;*/
+    /*  !*padding-top: 56px;*!*/
+    /*  transition: all 0.3s;*/
+    /*}*/
+
+    .sidebar .nav-link {
+      color: rgba(255, 255, 255, 0.75);
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+    }
+
+    .sidebar .nav-link:hover {
+      color: rgba(255, 255, 255, 1);
+    }
+
+    .sidebar .nav-link.active {
+      color: #fff;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar .nav-link i {
+      margin-right: 10px;
+    }
+
+    .main-content {
+      margin-left: var(--sidebar-width);
+      /*padding-top: 56px;*/
+      transition: all 0.3s;
+    }
+
+    @media (max-width: 768px) {
+
+      .main-content {
+        margin-left: 0;
+      }
+    }
+
+
+
+    @media (max-width: 768px) {
+      .navbar {
+        padding-left: 1rem;
+      }
+    }
+
+    .course-header {
+      background-color: #fff;
+      border-radius: 0.5rem;
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .course-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 0.5rem;
+    }
+
+    .stat-card {
+      background-color: #fff;
+      border-radius: 0.5rem;
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+      padding: 1rem;
+      text-align: center;
+      height: 100%;
+    }
+
+    .stat-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      color: #0d6efd;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+      color: #6c757d;
+      font-size: 0.875rem;
+    }
+
+    .content-card {
+      background-color: #fff;
+      border-radius: 0.5rem;
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .lesson-item {
+      border-left: 3px solid #dee2e6;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.75rem;
+      transition: all 0.2s;
+    }
+
+    .lesson-item:hover {
+      border-left-color: #0d6efd;
+      background-color: rgba(13, 110, 253, 0.05);
+    }
+
+    .enrollment-item {
+      border-bottom: 1px solid #dee2e6;
+      padding: 0.75rem 0;
+    }
+
+    .enrollment-item:last-child {
+      border-bottom: none;
+    }
+
+    .review-item {
+      border-bottom: 1px solid #dee2e6;
+      padding: 1rem 0;
+    }
+
+    .review-item:last-child {
+      border-bottom: none;
+    }
+
+    .star-rating {
+      color: #ffc107;
+    }
+
+    .progress-thin {
+      height: 0.5rem;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .tab-content {
+      padding-top: 1.5rem;
+    }
+  </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Sidebar toggle
+      const sidebarToggle = document.getElementById('sidebar-toggle');
+      const sidebar = document.querySelector('.sidebar');
+      const mainContent = document.querySelector('.main-content');
+      const navbar = document.querySelector('.navbar');
+
+      if (sidebarToggle && sidebar && mainContent && navbar) {
+        sidebarToggle.addEventListener('click', function () {
+          sidebar.classList.toggle('show');
+          if (window.innerWidth > 768) {
+            if (sidebar.classList.contains('show')) {
+              mainContent.style.marginLeft = '0';
+              navbar.style.paddingLeft = '1rem';
+            } else {
+              mainContent.style.marginLeft = 'var(--sidebar-width)';
+              navbar.style.paddingLeft = 'var(--sidebar-width)';
+            }
+          }
+        });
+
+        window.addEventListener('resize', function () {
+          if (window.innerWidth > 768) {
+            sidebar.classList.remove('show');
+            mainContent.style.marginLeft = 'var(--sidebar-width)';
+            navbar.style.paddingLeft = 'var(--sidebar-width)';
+          } else {
+            mainContent.style.marginLeft = '0';
+            navbar.style.paddingLeft = '1rem';
+          }
+        });
+      }
+
+      // Lesson video modal
+      document.querySelectorAll('.lesson-video-link').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          var videoId = this.getAttribute('data-videoid');
+          var iframe = document.getElementById('lessonVideoIframe');
+          if (iframe && videoId) {
+            iframe.src = "https://www.youtube.com/embed/" + videoId;
+            var modal = new bootstrap.Modal(document.getElementById('videoModal'));
+            modal.show();
+          }
+        });
+      });
+    });
+
+    function stopVideo() {
+      var iframe = document.getElementById('lessonVideoIframe');
+      if (iframe) {
+        iframe.src = "";
+      }
+    }
+  </script>
+</div>

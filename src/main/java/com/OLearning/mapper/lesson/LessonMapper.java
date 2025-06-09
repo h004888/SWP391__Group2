@@ -1,15 +1,15 @@
-package com.OLearning.mapper.instructorDashBoard;
+package com.OLearning.mapper.lesson;
 
-import com.OLearning.dto.instructorDashboard.LessonDTO;
-import com.OLearning.entity.Lessons;
+import com.OLearning.dto.lesson.LessonDTO;
+import com.OLearning.entity.Lesson;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
 @Component
 public class LessonMapper {
-    public Lessons DtoToLesson(LessonDTO lessonDTO) {
-        Lessons lesson = new Lessons();
+    public Lesson DtoToLesson(LessonDTO lessonDTO) {
+        Lesson lesson = new Lesson();
         lesson.setTitle(lessonDTO.getTitle());
         lesson.setDescription(lessonDTO.getDescription());
         lesson.setDuration(lessonDTO.getDuration());

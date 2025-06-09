@@ -1,12 +1,13 @@
 package com.OLearning.controller.instructorDashboard;
 
-import com.OLearning.dto.instructorDashboard.ChapterDTO;
-import com.OLearning.dto.instructorDashboard.LessonDTO;
-import com.OLearning.entity.Chapters;
+import com.OLearning.entity.Chapter;
 import com.OLearning.entity.Course;
-import com.OLearning.entity.Lessons;
+import com.OLearning.entity.Lesson;
 import com.OLearning.entity.User;
-import com.OLearning.service.instructorDashBoard.*;
+import com.OLearning.service.category.CategoryService;
+import com.OLearning.service.chapter.ChapterService;
+import com.OLearning.service.course.CourseService;
+import com.OLearning.service.lesson.LessonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,10 +25,6 @@ public class InstructorCourseDetailController {
     @Autowired
     private CategoryService categoryService;
     @Autowired
-    private InstructorBuyPackagesService buyPackagesService;
-    @Autowired
-    private PackagesService packagesService;
-    @Autowired
     private LessonService lessonService;
     @Autowired
     private ChapterService chapterService;
@@ -37,9 +34,9 @@ public class InstructorCourseDetailController {
         User instructor = course.getInstructor();
         model.addAttribute("course", course);
         model.addAttribute("instructor", instructor);
-        List<Chapters> chapters = chapterService.chapterListByCourse(courseId);//tim list chapter theo courseID
-        for (Chapters chapter : chapters) {
-            List<Lessons> lessons = lessonService.findLessonsByChapterId(chapter.getId());
+        List<Chapter> chapters = chapterService.chapterListByCourse(courseId);//tim list chapter theo courseID
+        for (Chapter chapter : chapters) {
+            List<Lesson> lessons = lessonService.findLessonsByChapterId(chapter.getId());
             if (lessons != null && lessons.size() > 0) {
                 chapter.setLessons(lessons);
             }
@@ -48,6 +45,7 @@ public class InstructorCourseDetailController {
             model.addAttribute("chapters", chapters);
         }
         model.addAttribute("courseId", courseId);
-        return "instructorDashboard/courseDetail";
+        model.addAttribute("fragmentContent", "instructorDashboard/fragments/courseDetailContent :: courseDetailContent");
+        return "instructorDashboard/index";
     }
 }
