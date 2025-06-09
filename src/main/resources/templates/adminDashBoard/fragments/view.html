@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Shopping Cart</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container-fluid">
+    <div class="table-responsive">
+        <div class="table-wrapper">
+            <div class="table-title">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h2>Your Shopping Cart</h2>
+                    </div>
+                </div>
+            </div>
+            <table class="table table-striped table-hover table-bordered">
+                <thead>
+                <tr>
+                    <th>Course ID</th>
+                    <th>Course Name</th>
+                    <th>Price</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="cartDetail : ${cart.cartDetails}">
+                    <td th:text="${cartDetail.courseId}"></td>
+                    <td th:text="${cartDetail.course.title}"></td>
+                    <td th:text="'$' + ${cartDetail.price}"></td>
+                    <td>
+                        <a th:href="@{/cart/remove/{cartDetailId}(cartDetailId=${cartDetail.id})}"
+                           class="btn btn-danger btn-sm"
+                           onclick="return confirm('Bạn có chắc chắn muốn xóa khóa học này khỏi giỏ hàng không?')"
+                           title="Remove from Cart">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="clearfix">
+                <div class="hint-text">Total Courses: <b th:text="${cart.total}"></b></div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

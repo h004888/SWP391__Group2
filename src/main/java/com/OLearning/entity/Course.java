@@ -31,7 +31,7 @@ public class Course {
     private Integer totalStudentEnrolled;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Boolean isChecked;
+    private String isChecked;
 
     @ManyToOne
     @JoinColumn(name = "userId")

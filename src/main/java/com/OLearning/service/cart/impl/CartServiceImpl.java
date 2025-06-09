@@ -36,15 +36,12 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public CartDTO addToCart(Long userId, Long courseId) {
-        // Validate user
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
 
-        // Validate course
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new IllegalArgumentException("Course not found with ID: " + courseId));
 
-        // Find or create cart
         Cart cart = cartRepository.findByUserUserId(userId);
         if (cart == null) {
             cart = Cart.builder()
@@ -54,13 +51,11 @@ public class CartServiceImpl implements CartService {
             cart = cartRepository.save(cart);
         }
 
-        // Check for duplicate course in cart
         CartDetail existingDetail = cartDetailRepository.findByCartCartIdAndCourseCourseId(cart.getCartId(), courseId);
         if (existingDetail != null) {
             throw new IllegalArgumentException("Course already exists in cart");
         }
 
-        // Add course to cart
         CartDetail cartDetail = CartDetail.builder()
                 .cart(cart)
                 .course(course)
@@ -68,26 +63,34 @@ public class CartServiceImpl implements CartService {
                 .build();
         cartDetailRepository.save(cartDetail);
 
-        // Update cart total
         cart.setTotal(cart.getTotal() + 1);
         cartRepository.save(cart);
 
-        // Convert to DTO and return
         return cartMapper.toDTO(cart);
     }
 
     @Override
     public CartDTO getCartByUserId(Long userId) {
-        // Validate user
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
 
-        // Find cart
         Cart cart = cartRepository.findByUserUserId(userId);
         if (cart == null) {
             throw new IllegalArgumentException("Cart not found for user ID: " + userId);
         }
 
         return cartMapper.toDTO(cart);
+    }
+
+    @Override
+    @Transactional
+    public void removeFromCart(Long cartDetailId) {
+        CartDetail cartDetail = cartDetailRepository.findById(cartDetailId)
+                .orElseThrow(() -> new IllegalArgumentException("Cart detail not found with ID: " + cartDetailId));
+
+        Cart cart = cartDetail.getCart();
+        cart.setTotal(cart.getTotal() - 1);
+        cartDetailRepository.delete(cartDetail);
+        cartRepository.save(cart);
     }
 }

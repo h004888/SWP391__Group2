@@ -91,6 +91,10 @@
                                onclick="return confirm('Bạn có chắc chắn muốn xóa khóa học này không?')" title="Delete">
                                 <i class="fas fa-trash"></i>
                             </a>
+                            <a th:if="${course.status == resubmit}" th:href="@{/cart/add(userId=${#authentication.principal.userId},courseId=${course.courseId})}"
+                               class="btn btn-primary btn-sm w-100" title="Add to Cart" onclick="return confirm('Bạn có muốn thêm khóa học này vào giỏ hàng không?')">
+                                <i class="fas fa-cart-plus"></i>
+                            </a>
                         </div>
                     </td>
                 </tr>
