@@ -1,6 +1,6 @@
 package com.OLearning.mapper.orders;
 
-import com.OLearning.dto.adminDashBoard.OrdersDTO;
+import com.OLearning.dto.orders.OrdersDTO;
 
 import com.OLearning.entity.Orders;
 import org.springframework.stereotype.Component;

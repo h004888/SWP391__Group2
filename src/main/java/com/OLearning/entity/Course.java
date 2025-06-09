@@ -44,11 +44,16 @@ public class Course {
     @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
     private List<Lesson> listOfLessons;
 
-@OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-private Set<OrderDetail> orderDetails;
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<OrderDetail> orderDetails;
 
     @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
     private List<CourseMaintenance> courseMaintenances;
+
+    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
+    private List<CartDetail> cartDetails;
+
+
 
 }
 

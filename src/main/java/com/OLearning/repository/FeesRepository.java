@@ -1,8 +1,8 @@
 package com.OLearning.repository;
 
-import com.OLearning.entity.Fees;
+import com.OLearning.entity.Fee;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface FeesRepository extends JpaRepository<Fees, Long> {
-    Fees findByMinEnrollmentsLessThanEqualAndMaxEnrollmentsGreaterThanEqual(Long enrollmentCount, Long enrollmentCount2);
+public interface FeesRepository extends JpaRepository<Fee, Long> {
+    Fee findByMinEnrollmentsLessThanEqualAndMaxEnrollmentsGreaterThanEqual(Long enrollmentCount, Long enrollmentCount2);
 }

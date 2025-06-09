@@ -1,6 +1,6 @@
 package com.OLearning.service.orders;
 
-import com.OLearning.dto.adminDashBoard.OrdersDTO;
+import com.OLearning.dto.orders.OrdersDTO;
 import com.OLearning.entity.OrderDetail;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;

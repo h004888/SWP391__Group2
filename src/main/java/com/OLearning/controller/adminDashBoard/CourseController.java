@@ -1,7 +1,7 @@
 package com.OLearning.controller.adminDashBoard;
 
-import com.OLearning.dto.adminDashBoard.CourseDTO;
-import com.OLearning.dto.adminDashBoard.CourseDetailDTO;
+import com.OLearning.dto.course.CourseDTO;
+import com.OLearning.dto.course.CourseDetailDTO;
 import com.OLearning.entity.Categories;
 import com.OLearning.service.category.CategoriesService;
 import com.OLearning.service.course.CourseService;

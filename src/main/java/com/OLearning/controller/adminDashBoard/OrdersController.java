@@ -1,6 +1,6 @@
 package com.OLearning.controller.adminDashBoard;
 
-import com.OLearning.dto.adminDashBoard.OrdersDTO;
+import com.OLearning.dto.orders.OrdersDTO;
 import com.OLearning.entity.OrderDetail;
 import com.OLearning.service.orders.OrdersService;
 import org.springframework.beans.factory.annotation.Autowired;

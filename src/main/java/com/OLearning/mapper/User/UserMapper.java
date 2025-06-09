@@ -1,6 +1,6 @@
 package com.OLearning.mapper.User;
 
-import com.OLearning.dto.adminDashBoard.UserDTO;
+import com.OLearning.dto.user.UserDTO;
 import com.OLearning.entity.User;
 import org.springframework.stereotype.Component;
 

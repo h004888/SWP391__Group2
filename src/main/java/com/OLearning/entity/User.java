@@ -43,5 +43,8 @@ public class User {
     private List<Enrollment> enrollments;
     @OneToMany(mappedBy = "user")
     private List<Notification> notifications;
+
+    @OneToOne(mappedBy = "user")
+    private Cart cart;
 }
 

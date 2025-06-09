@@ -1,6 +1,6 @@
 package com.OLearning.mapper.course;
 
-import com.OLearning.dto.adminDashBoard.CourseDTO;
+import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.entity.Course;
 import org.springframework.stereotype.Component;
 
