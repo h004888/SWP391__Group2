@@ -1,31 +1,44 @@
+
 package com.OLearning.repository;
 
-import com.OLearning.entity.Categories;
+import com.OLearning.entity.Category;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-public interface CategoriesRepository extends JpaRepository<Categories, Integer> {
-    Categories findByName(String name);
+@Repository
+public interface CategoriesRepository extends JpaRepository<Category, Integer> {
+    Page<Category> findAll(Pageable pageable);
 
-    Categories findById(int id);
+    Category findByName(String name);
+
+    Category findById(int id);
 
     boolean existsByName(String name);
 
     boolean existsById(int id);
 
-    List<Categories> findAll();
+    Page<Category> findByNameContaining(String name, Pageable pageable);
 
-    Categories save(Categories categories);
+    Category save(Category categories);
 
     void deleteById(int id);
 
-    void delete(Categories categories);
+    void delete(Category categories);
 
-    @Modifying
-    @Query("UPDATE Categories c SET c.name = :name WHERE c.id = :id")
+    List<Category> findByNameContaining(String name);
+
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Category c SET c.name = :name WHERE c.id = :id")
     void updateCategory(@Param("id") int id, @Param("name") String name);
+
+    List<Category> findTop5ByOrderByIdAsc();
+
 }

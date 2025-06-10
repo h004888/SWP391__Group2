@@ -1,131 +1,190 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign Up - Eduverse</title>
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Custom CSS -->
-  <link rel="stylesheet" th:href="@{/css/style.css}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up </title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body class="bg-light">
 
 <!-- Sign Up Section -->
 <section class="py-5">
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-lg-10">
-        <div class="card shadow-lg border-0">
-          <div class="row g-0">
-            <!-- Left side - Decorative Image -->
-            <div class="col-md-6 d-none d-md-block">
-              <img src="https://frontends.udemycdn.com/components/auth/desktop-illustration-x1.webp" alt="Banner Login" class="img-fluid ">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card shadow-lg border-0">
+                    <div class="row g-0">
+                        <!-- Left side - Decorative Image -->
+                        <div class="col-md-6 d-none d-md-block">
+                            <img src="https://frontends.udemycdn.com/components/auth/desktop-illustration-x1.webp"
+                                 alt="Banner Login" class="img-fluid ">
+                        </div>
+                        <!-- Right side - Sign Up Form -->
+                        <div class="col-md-6">
+                            <div class="p-4 p-md-5">
+                                <div class="d-flex align-items-center gap-2 mb-4">
+                                    <div class="logo-square"></div>
+                                    <span class="fs-4 fw-semibold">Eduverse</span>
+                                </div>
+
+                                <h1 class="fs-2 fw-bold mb-3" id="signup-title">Create Your Account</h1>
+                                <p class="text-muted mb-4">Join thousands of learners and start your journey today</p>
+
+                                <!-- Global Error Message -->
+                                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show mb-3"
+                                     role="alert">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <span th:text="${error}"></span>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+
+                                <!-- Global Success Message -->
+                                <div th:if="${success}" class="alert alert-success alert-dismissible fade show mb-3"
+                                     role="alert">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    <span th:text="${success}"></span>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+
+                                <!-- Sign Up Form -->
+                                <form th:action="@{/register}" th:object="${user}" method="post" id="signup-form"
+                                      class="mb-4">
+                                    <input type="hidden" id="is-instructor" value="false">
+                                    <div class="row">
+                                        <!-- First Name -->
+                                        <div class="col-md-6 mb-3">
+                                            <label for="firstName" class="form-label">First Name</label>
+                                            <input th:field="*{firstName}"
+                                                   th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid' : ''"
+                                                   type="text"
+                                                   class="form-control form-control-lg"
+                                                   id="firstName"
+                                                   placeholder="First Name">
+                                            <div th:if="${#fields.hasErrors('firstName')}" class="invalid-feedback">
+                                                <span th:errors="*{firstName}"></span>
+                                            </div>
+                                        </div>
+                                        <!-- Last Name -->
+                                        <div class="col-md-6 mb-3">
+                                            <label for="lastName" class="form-label">Last Name</label>
+                                            <input th:field="*{lastName}"
+                                                   th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid' : ''"
+                                                   type="text"
+                                                   class="form-control form-control-lg"
+                                                   id="lastName"
+                                                   placeholder="Last Name">
+                                            <div th:if="${#fields.hasErrors('lastName')}" class="invalid-feedback">
+                                                <span th:errors="*{lastName}"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Email -->
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label">Email Address</label>
+                                        <input th:field="*{email}"
+                                               th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
+                                               type="email"
+                                               class="form-control form-control-lg"
+                                               id="email"
+                                               placeholder="Enter your email">
+                                        <div th:if="${#fields.hasErrors('email')}" class="invalid-feedback">
+                                            <span th:errors="*{email}"></span>
+                                        </div>
+                                    </div>
+                                    <!-- Password -->
+                                    <div class="mb-3">
+                                        <label for="password" class="form-label">Password</label>
+                                        <input th:field="*{password}"
+                                               th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''"
+                                               type="password"
+                                               class="form-control form-control-lg"
+                                               id="password"
+                                               placeholder="Create a password">
+                                        <div th:if="${#fields.hasErrors('password')}" class="invalid-feedback">
+                                            <span th:errors="*{password}"></span>
+                                        </div>
+                                    </div>
+                                    <!-- Confirm Password -->
+                                    <div class="mb-3">
+                                        <label for="confirmPassword" class="form-label">Confirm Password</label>
+                                        <input th:field="*{confirmPassword}"
+                                               th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid' : ''"
+                                               type="password"
+                                               class="form-control form-control-lg"
+                                               id="confirmPassword"
+                                               placeholder="Confirm your password">
+                                        <div th:if="${#fields.hasErrors('confirmPassword')}" class="invalid-feedback">
+                                            <span th:errors="*{confirmPassword}"></span>
+                                        </div>
+                                    </div>
+                                    <!-- Password Match Validation Error -->
+                                    <div th:if="${#fields.hasErrors('passwordsMatch')}" class="alert alert-danger mb-3">
+                                        <span th:errors="*{passwordsMatch}"></span>
+                                    </div>
+                                    <!-- Terms Agreement -->
+                                    <div class="mb-4">
+                                        <div class="form-check">
+                                            <input th:field="*{agreeToTerms}"
+                                                   th:classappend="${#fields.hasErrors('agreeToTerms')} ? 'is-invalid' : ''"
+                                                   class="form-check-input"
+                                                   type="checkbox"
+                                                   id="agreeToTerms">
+                                            <label class="form-check-label" for="agreeToTerms">
+                                                I agree to the <a href="#" class="text-primary">Terms of Service</a> and
+                                                <a href="#" class="text-primary">Privacy Policy</a>
+                                            </label>
+                                            <div th:if="${#fields.hasErrors('agreeToTerms')}"
+                                                 class="invalid-feedback d-block">
+                                                <span th:errors="*{agreeToTerms}"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="alert alert-danger d-none" id="signup-error"></div>
+                                    <button type="submit" class="btn btn-primary btn-lg w-100 gradient-btn mb-3"
+                                            id="signup-button">Create Account
+                                    </button>
+                                </form>
+
+                                <!-- Divider -->
+                                <div class="position-relative my-4">
+                                    <hr>
+                                    <span class="position-absolute top-50 start-50 translate-middle px-3 bg-white text-muted small">or sign up with</span>
+                                </div>
+
+                                <!-- Social Sign Up -->
+                                <div class="d-grid gap-2 mb-4">
+                                    <button class="btn btn-outline-secondary btn-lg">
+                                        <i class="fab fa-google text-danger me-2"></i> Sign Up with Google
+                                    </button>
+                                </div>
+
+                                <!-- Footer -->
+                                <div class="text-center">
+                                    <p class="text-muted">
+                                        Already have an account?
+                                        <a th:href="@{/login}"
+                                           class="text-primary fw-medium text-decoration-none">Sign In</a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <!-- Right side - Sign Up Form -->
-            <div class="col-md-6">
-              <div class="p-4 p-md-5">
-                <div class="d-flex align-items-center gap-2 mb-4">
-                  <div class="logo-square"></div>
-                  <span class="fs-4 fw-semibold">Eduverse</span>
-                </div>
-
-                <h1 class="fs-2 fw-bold mb-3" id="signup-title">Create Your Account</h1>
-                <p class="text-muted mb-4">Join thousands of learners and start your journey today</p>
-
-                <!-- Sign Up Form -->
-                <form id="signup-form" class="mb-4">
-                  <input type="hidden" id="is-instructor" value="false">
-                  <div class="row">
-                    <div class="col-md-6 mb-3">
-                      <label for="signup-firstname" class="form-label">First Name</label>
-                      <input type="text" class="form-control form-control-lg" id="signup-firstname" placeholder="First Name" required>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                      <label for="signup-lastname" class="form-label">Last Name</label>
-                      <input type="text" class="form-control form-control-lg" id="signup-lastname" placeholder="Last Name" required>
-                    </div>
-                  </div>
-                  <div class="mb-3">
-                    <label for="signup-email" class="form-label">Email Address</label>
-                    <input type="email" class="form-control form-control-lg" id="signup-email" placeholder="Enter your email" required>
-                  </div>
-                  <div class="mb-3">
-                    <label for="signup-password" class="form-label">Password</label>
-                    <input type="password" class="form-control form-control-lg" id="signup-password" placeholder="Create a password" required>
-                    <div class="form-text">Password must be at least 8 characters long</div>
-                  </div>
-                  <div class="mb-3">
-                    <label for="confirm-password" class="form-label">Confirm Password</label>
-                    <input type="password" class="form-control form-control-lg" id="confirm-password" placeholder="Confirm your password" required>
-                  </div>
-                  <div class="mb-4">
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" id="terms-agree" required>
-                      <label class="form-check-label" for="terms-agree">
-                        I agree to the <a href="terms.html" class="text-primary">Terms of Service</a> and <a href="privacy.html" class="text-primary">Privacy Policy</a>
-                      </label>
-                    </div>
-                  </div>
-                  <div class="alert alert-danger d-none" id="signup-error"></div>
-                  <button type="submit" class="btn btn-primary btn-lg w-100 gradient-btn mb-3" id="signup-button">Create Account</button>
-                </form>
-
-                <!-- Divider -->
-                <div class="position-relative my-4">
-                  <hr>
-                  <span class="position-absolute top-50 start-50 translate-middle px-3 bg-white text-muted small">or sign up with</span>
-                </div>
-
-                <!-- Social Sign Up -->
-                <div class="d-grid gap-2 mb-4">
-                  <button class="btn btn-outline-secondary btn-lg">
-                    <i class="fab fa-google text-danger me-2"></i> Sign Up with Google
-                  </button>
-                </div>
-
-                <!-- Footer -->
-                <div class="text-center">
-                  <p class="text-muted">
-                    Already have an account?
-                    <a th:href="@{/templates/loginPage}" class="text-primary fw-medium text-decoration-none">Sign In</a>
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
-      </div>
     </div>
-  </div>
 </section>
-
-
-<!-- Personalization Modal -->
-<div class="modal fade" id="personalizationModal" tabindex="-1" aria-labelledby="personalizationModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-body p-4 p-md-5">
-        <h2 class="fs-3 fw-bold text-center mb-4">Pick 3 categories you want to explore</h2>
-
-        <div class="row g-4 mb-4" id="category-grid">
-          <!-- Categories will be loaded here via JavaScript -->
-        </div>
-
-        <button id="personalization-done" class="btn btn-teal btn-lg w-100" disabled>Done</button>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- Bootstrap Bundle with Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<!-- Custom JS -->
-<script src="assets/js/auth.js"></script>
-<script src="assets/js/common.js"></script>
 </body>
 </html>

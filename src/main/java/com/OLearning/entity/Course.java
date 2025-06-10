@@ -5,7 +5,6 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -20,7 +19,10 @@ public class Course {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long courseId;
 
+    @Column(columnDefinition = "nvarchar(255)")
     private String title;
+
+    @Column(columnDefinition = "nvarchar(max)")
     private String description;
     private Double price;
     private Double discount;
@@ -31,7 +33,8 @@ public class Course {
     private Integer totalStudentEnrolled;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private String isChecked;
+    private String status;
+    private Boolean canResubmit;
 
     @ManyToOne
     @JoinColumn(name = "userId")
@@ -39,21 +42,15 @@ public class Course {
 
     @ManyToOne
     @JoinColumn(name = "CategoryID")
-    private Categories category;
-
-    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
-    private List<Lesson> listOfLessons;
+    private Category category;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<OrderDetail> orderDetails;
 
-    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
-    private List<CourseMaintenance> courseMaintenances;
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Notification> notifications;
 
-    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
-    private List<CartDetail> cartDetails;
-
-
+    @OneToMany(mappedBy = "course", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Chapter> listOfChapters;
 
 }
-

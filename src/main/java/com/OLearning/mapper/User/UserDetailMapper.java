@@ -1,4 +1,4 @@
-package com.OLearning.mapper.User;
+package com.OLearning.mapper.user;
 
 import com.OLearning.dto.user.UserDetailDTO;
 import com.OLearning.entity.Course;

@@ -30,16 +30,16 @@
                         <a class="nav-link bg-primary bg-opacity-10 rounded-3 text-primary px-3 py-3 py-xl-0" href="#"
                             id="categoryMenu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i
                                 class="bi bi-ui-radios-grid me-2"></i><span>Category</span></a>
-                        <ul class="dropdown-menu" aria-labelledby="categoryMenu" id="categoryDropdown">
+                        <ul class="dropdown-menu" aria-labelledby="categoryMenu">
                             <li th:each="category : ${categories}">
-                                <a class="dropdown-item" href="#" th:text="${category.name}">Category</a>
+                                <a class="dropdown-item" href="#" th:text="${category.name}">Design</a>
                             </li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
                             <li>
                                 <a class="dropdown-item bg-primary text-primary bg-opacity-10 rounded-2 mb-0"
-                                   href="#" id="viewAllCategoriesBtn">View all categories</a>
+                                    href="#">View all categories</a>
                             </li>
                         </ul>
                     </li>

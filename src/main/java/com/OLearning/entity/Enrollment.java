@@ -1,35 +1,49 @@
 package com.OLearning.entity;
 
-
-
 import jakarta.persistence.*;
-import lombok.*;
-
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
+import java.util.Date;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.ToString;
 
 @Entity
 @Table(name = "Enrollments")
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @ToString
 public class Enrollment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long enrollmentId;
+    @Column(name = "EnrollmentID")
+    private int enrollmentID;
+
     @ManyToOne
-    @JoinColumn(name = "courseId", nullable = false)
+    @JoinColumn(name = "UserID", nullable = false)
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "CourseID", nullable = false)
     private Course course;
 
-    @ManyToOne
-    @JoinColumn(name = "userId", nullable = false)
-    private User user;
-    @ManyToOne
-    @JoinColumn(name = "ordersId", nullable = false)
-    private Orders orders;
+    @Column(name = "EnrollmentDate")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date enrollmentDate;
 
-    private LocalDateTime enrollmentDate;
-    private Double progress;
+    @Column(name = "Progress")
+    private BigDecimal progress;
+
+    @Column(name = "Status", length = 20)
     private String status;
+
+    @ManyToOne
+    @JoinColumn(name = "OrderID")
+    private Orders order;
+
 }

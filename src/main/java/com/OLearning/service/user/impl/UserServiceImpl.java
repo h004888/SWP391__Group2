@@ -2,15 +2,21 @@ package com.OLearning.service.user.impl;
 
 import com.OLearning.dto.user.UserDTO;
 import com.OLearning.dto.user.UserDetailDTO;
+import com.OLearning.dto.login.RegisterDTO;
 import com.OLearning.entity.Role;
 import com.OLearning.entity.User;
-import com.OLearning.mapper.User.UserDetailMapper;
-import com.OLearning.mapper.User.UserMapper;
+import com.OLearning.mapper.user.UserDetailMapper;
+import com.OLearning.mapper.user.UserMapper;
+import com.OLearning.mapper.login.RegisterMapper;
 import com.OLearning.repository.RoleRepository;
 import com.OLearning.repository.UserRepository;
+import com.OLearning.service.email.EmailService;
 import com.OLearning.service.user.UserService;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +26,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService {
+ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -29,12 +35,28 @@ public class UserServiceImpl implements UserService {
     private UserMapper userMapper;
     @Autowired
     private UserDetailMapper userDetailMapper;
+    @Autowired
+    private RegisterMapper registerMapper;
+    @Autowired
+    private EmailService emailService;
 
     @Override
-    public List<UserDTO> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(userMapper::toDTO)
-                .collect(Collectors.toList());
+    public Page<UserDTO> getAllUsers(Pageable page) {
+        Page<User> users = userRepository.findAll(page);
+        return users.map(userMapper::toDTO);
+    }
+
+    @Override
+    public Page<UserDTO> getUsersByRoleWithPagination(Long roleId, Pageable pageable) {
+        Page<User> userPage = userRepository.findByRole_RoleId(roleId, pageable);
+        return userPage.map(userMapper::toDTO);
+    }
+
+    @Override
+    public Page<UserDTO> searchByNameWithPagination(String keyword, Long roleId, Pageable pageable) {
+        // Sử dụng repository method với pagination
+        Page<User> userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleId(keyword, roleId, pageable);
+        return userPage.map(userMapper::toDTO);
     }
 
     @Override
@@ -44,56 +66,138 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User userDTOtoUser(UserDTO userDTO) {
-        if (userRepository.existsByEmail(userDTO.getEmail())) {
-            throw new RuntimeException("dupliacte user");
-        }
-        User user = new User();
-        user.setUsername(userDTO.getUserName());
-        user.setEmail(userDTO.getEmail());
-        //default data
-        user.setFullName(userDTO.getUserName());
-        //encrypt password
-        user.setPassword(new BCryptPasswordEncoder().encode("123"));
-
-        user.setRole(roleRepository.findRoleByName(userDTO.getRoleName()));
-
-        return user;
-    }
-
-    @Override
-    public User createUser(User user) {
-        return userRepository.save(user);
-    }
-
-    @Override
     public List<Role> getListRole() {
         return roleRepository.findAll();
     }
 
     @Override
-    public boolean deleteAcc(Long id) {
+    public boolean changStatus(Long id) {
         if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
+            Optional<User> user = userRepository.findById(id);
+            try {
+                emailService.sendAccountStatusEmail(user.get(), user.get().isStatus());
+            } catch (MessagingException e) {
+                throw new RuntimeException(e);
+            }
+            user.get().setStatus(!user.get().isStatus());
+            userRepository.save(user.get());
+
             return true;
         }
         return false;
     }
 
     @Override
-    public List<UserDTO> searchByName(String keyword, Integer roleId) {
-        if (roleId != null && roleId == 0) {
-            roleId = null;
+    public User registerAccount(RegisterDTO registerDTO) {
+        validateRegistrationData(registerDTO);
+        User user = registerMapper.toUser(registerDTO);
+
+        try {
+            User savedUser = userRepository.save(user);
+            System.out.println("User saved successfully with ID: " + savedUser.getUserId());
+            return savedUser;
+        } catch (Exception e) {
+            System.err.println("Error saving user: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
         }
-        String processedKeyword = null;
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            processedKeyword = keyword.trim().toLowerCase();
+    }
+
+    @Override
+    public void validateRegistrationData(RegisterDTO registrationDto) {
+        // Check if passwords match
+        if (!registrationDto.isPasswordsMatch()) {
+            throw new RuntimeException("Passwords do not match");
         }
-        return userRepository.searchByKeyword(processedKeyword, roleId).stream()
+
+        // Check if email already exists
+        if (userRepository.existsByEmail(registrationDto.getEmail())) {
+            throw new RuntimeException("Email address is already registered");
+        }
+
+        // Check terms agreement
+        if (!registrationDto.isAgreeToTerms()) {
+            throw new RuntimeException("You must agree to the Terms of Service and Privacy Policy");
+        }
+    }
+
+    @Override
+    public void assignRoleToUser(Long userId, String roleName) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Role role = roleRepository.findRoleByName(roleName)
+                .orElseThrow(() -> new RuntimeException("Role not found"));
+
+        user.setRole(role);
+        userRepository.save(user);
+    }
+
+
+//    @Override
+//    public List<UserDTO> searchByName(String keyword, Long roleId) {
+//        String processedKeyword = null;
+//        if (keyword != null && !keyword.trim().isEmpty()) {
+//            processedKeyword = keyword.trim().toLowerCase();
+//        }
+//        List<User> users = userRepository.searchByNameAndRole(processedKeyword, roleId);
+//        return users.stream()
+//                .map(userMapper::toDTO)
+//                .collect(Collectors.toList());
+//    }
+
+    @Override
+    public List<UserDTO> getUsersByRole(Long roleId) {
+        return userRepository.findByRole_RoleId(roleId).stream()
                 .map(userMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public User createNewStaff(UserDTO userDTO) {
+        if (userRepository.existsByEmail(userDTO.getEmail())) {
+            throw new IllegalArgumentException("Email already exists");
+        }
+        Optional<Role> roleOpt = roleRepository.findRoleByName(userDTO.getRoleName());
+        if (roleOpt.isEmpty()) {
+            throw new IllegalArgumentException("Role not found: " + userDTO.getRoleName());
+        }
+        User user = userMapper.toUser(userDTO, roleOpt.get());
+        //Default password
+        String encodedPassword = new BCryptPasswordEncoder().encode("123");
+        user.setPassword(encodedPassword);
+
+        //Send notification email to new staff
+        emailService.sendPromotedToStaffEmail(user);
+
+        return userRepository.save(user);
+    }
+
+    @Override
+    public boolean deleteAcc(Long id) {
+        Optional<User> userOptional = userRepository.findById(id);
+        if(userOptional.isEmpty()) {
+            return false;
+        }
+        userRepository.deleteById(id);
+        return false;
+    }
+
+    @Override
+    public boolean resetPassword(Long id) {
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isEmpty()) {
+            return false;
+        }
+        User user = optionalUser.get();
+
+        //Defaut reset password is 123
+        String encodedPassword = new BCryptPasswordEncoder().encode("123");
+        user.setPassword(encodedPassword);
+        userRepository.save(user);
+        //sau khi doi pass gửi email cho user bt
+        return false;
+    }
 
 
 }

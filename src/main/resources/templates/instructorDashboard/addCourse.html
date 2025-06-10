@@ -50,7 +50,7 @@
                   <label for="categoryId">Category</label>
                   <select id="categoryId" th:field="*{categoryName}" class="form-control">
                     <option value="">Select Category</option>
-                    <option th:each="cat : ${categories}"
+                    <option th:each="cat : ${category}"
                             th:value="${cat.categoryName}"
                             th:text="${cat.categoryName}">
                     </option>

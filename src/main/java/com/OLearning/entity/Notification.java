@@ -16,15 +16,19 @@ public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long notificationId;
+
+    @Column(columnDefinition = "nvarchar(max)")
+    private String message;
+    private LocalDateTime sentAt;
+    private String type;
+    private boolean status;
+
     @ManyToOne
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "userId", nullable = false)
     private User user;
+
     @ManyToOne
     @JoinColumn(name = "courseId")
     private Course course;
-    private  String message;
-    private  String type;
-    private String status;
-    private LocalDateTime createdAt;
-    private boolean isRead;
+
 }

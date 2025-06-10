@@ -1,6 +1,6 @@
 package com.OLearning.dto.course;
 
-import com.OLearning.entity.Categories;
+import com.OLearning.entity.Category;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,6 +21,6 @@ public class CourseDTO {
     private Integer totalLessons;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Boolean isChecked;
-    private Categories category;
+    private String status;
+    private Category category;
 }

@@ -32,59 +32,8 @@ Footer END -->
 	<script src="assets/vendor/glightbox/js/glightbox.js"></script>
 	<script src="assets/vendor/purecounterjs/dist/purecounter_vanilla.js"></script>
 
-	<script th:inline="javascript">
-		/*<![CDATA[*/
-		var allCategories = /*[[${allCategories}]]*/ [];
-		/*]]>*/
-
-		console.log(allCategories);
-	</script>
-
-	<!-- JavaScript xử lý nút View all categories -->
-	<script>
-		document.addEventListener('DOMContentLoaded', function () {
-			var viewAllBtn = document.getElementById('viewAllCategoriesBtn');
-			var dropdown = document.getElementById('categoryDropdown');
-
-			if (viewAllBtn) {
-				viewAllBtn.addEventListener('click', function (e) {
-					e.preventDefault();
-
-					// Xóa toàn bộ danh mục hiện tại
-					dropdown.innerHTML = '';
-
-					// Thêm từng danh mục từ allCategories
-					allCategories.forEach(function (category) {
-						var li = document.createElement('li');
-						var a = document.createElement('a');
-						a.className = 'dropdown-item';
-						a.href = '#';
-						a.textContent = category.name;
-						li.appendChild(a);
-						dropdown.appendChild(li);
-					});
-
-					// (Tùy chọn) thêm lại đường kẻ phân cách và nút "Ẩn bớt"
-					var divider = document.createElement('li');
-					divider.innerHTML = '<hr class="dropdown-divider">';
-					dropdown.appendChild(divider);
-
-					var collapseItem = document.createElement('li');
-					var collapseLink = document.createElement('a');
-					collapseLink.className = 'dropdown-item text-danger';
-					collapseLink.href = '#';
-					collapseLink.textContent = 'Collapse';
-					collapseLink.onclick = function (e) {
-						e.preventDefault();
-						location.reload(); // Tải lại để về danh sách rút gọn ban đầu
-					};
-					collapseItem.appendChild(collapseLink);
-					dropdown.appendChild(collapseItem);
-				});
-			}
-		});
-	</script>
-
+	<!-- Template Functions -->
+	<script src="assets/js/functions.js"></script>
 
 </body>
 

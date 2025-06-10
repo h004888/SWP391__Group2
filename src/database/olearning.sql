@@ -24,7 +24,7 @@ CREATE TABLE Users
 );
 GO
 
--- Bảng Categories
+-- Bảng Category
 CREATE TABLE Categories
 (
     CategoryID INT IDENTITY(1,1) PRIMARY KEY,
