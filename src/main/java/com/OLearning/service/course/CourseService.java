@@ -4,6 +4,8 @@ import com.OLearning.dto.course.AddCourseStep1DTO;
 import com.OLearning.dto.course.AddCourseStep3DTO;
 import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.entity.Course;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -17,4 +19,5 @@ public interface CourseService {
     Course createCourseStep3(Long courseId, AddCourseStep3DTO addCourseStep3DTO);
     Course createCourseStep1Demo(Long courseId, AddCourseStep1DTO addCourseStep1DTO);
     Course submitCourse(Long courseId, String status);
+    Page<CourseDTO> findCourseByUserId(Long userId, int page, int size);
 }

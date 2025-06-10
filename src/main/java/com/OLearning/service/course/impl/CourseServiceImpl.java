@@ -10,6 +10,10 @@ import com.OLearning.service.course.CourseService;
 import com.OLearning.service.instructorDashBoard.FileHelper.FileHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -49,6 +53,24 @@ public class CourseServiceImpl implements CourseService {
         }
         return courseDTOList;
     }
+    //courses phan trang
+    @Override
+    public Page<CourseDTO> findCourseByUserId(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Course> coursePage = instructorCourseRepo.findByInstructorUserId(userId, pageable);//Page<Course> la doi tuong chua ca danh sach khoa hoc
+        List<CourseDTO> courseDTOList = new ArrayList<>();
+        for (Course course : coursePage.getContent()) {
+            CourseDTO courseDTO = courseMapper.MapCourseDTO(course);
+            if (course.getCategory() != null) {
+                courseDTO.setCategoryName(course.getCategory().getName());
+            } else {
+                courseDTO.setCategoryName("not found");
+            }
+            courseDTOList.add(courseDTO);
+        }
+            return new PageImpl<>(courseDTOList, pageable, coursePage.getTotalElements());
+    }
+
 
     @Override
     public void deleteCourse(Long courseId) {
@@ -137,6 +159,8 @@ public class CourseServiceImpl implements CourseService {
         course.setStatus(status);
         return instructorCourseRepo.save(course);
     }
+
+
 
     @Override
     public AddCourseStep1DTO draftCourseStep1(Course course) {

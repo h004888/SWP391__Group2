@@ -39,5 +39,6 @@ public class Course {
     private Category category;
     @OneToMany(mappedBy = "course", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Chapter> listOfChapters;
+
 }
 

@@ -22,7 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 
 @Controller
-@RequestMapping("/instructordashboard")
+//@RequestMapping("/instructordashboard")
 public class InstructorAddCourseController {
     @Autowired
     private CourseService courseService;
@@ -141,29 +141,6 @@ public class InstructorAddCourseController {
         Long courseId = chapterService.getChapterById(chapterId).getCourse().getCourseId();
         return "redirect:/instructordashboard/viewcourse/addcoursestep2?courseId=" + courseId;
     }
-//version with quiz
-//    @PostMapping("/viewcourse/lessonadd")
-//    public String addNewLesson(@ModelAttribute("lessonDTO") LessonDTO lessonDTO,
-//                               RedirectAttributes redirectAttributes) {
-//        List<Lesson> existingLessons = lessonService.findLessonsByChapterId(lessonDTO.getChapterId());
-//        int nextOrderNumber = existingLessons.size() + 1;
-//        lessonDTO.setOrderNumber(nextOrderNumber);
-//
-//        if ("Video".equalsIgnoreCase(lessonDTO.getContentType())) {
-//            lessonService.createLesson(lessonDTO); // Save as video lesson
-//        } else if ("Quiz".equalsIgnoreCase(lessonDTO.getContentType())) {
-//            Lesson lesson = lessonService.createLesson(lessonDTO); // Save lesson
-//            if (lessonVideoDTO.getQuizzes() != null) {
-//                for (QuizDTO quizDTO : lessonVideoDTO.getQuizzes()) {
-//                    quizDTO.setLessonId(lesson.getId());
-//                    quizService.addQuiz(quizDTO); // Save each quiz
-//                }
-//            }
-//        }
-//        Long chapterId = lessonVideoDTO.getChapterId();
-//        Long courseId = chapterService.getChapterById(chapterId).getCourse().getCourseId();
-//        return "redirect:/instructordashboard/viewcourse/addcoursestep2?courseId=" + courseId;
-//    }
 
     //up screen after add chapter, lesson step 2
     @GetMapping("/viewcourse/addcoursestep2")
