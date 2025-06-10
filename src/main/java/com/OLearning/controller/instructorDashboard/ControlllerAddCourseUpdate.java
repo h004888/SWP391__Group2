@@ -38,14 +38,16 @@ public class ControlllerAddCourseUpdate {
     @GetMapping("/courses")
     public String viewCourse(
             @RequestParam(name = "id", defaultValue = "2") Long id,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "7") int size,
             Model model, ModelMap modelMap) {
-        Page<CourseDTO> coursePage = courseService.findCourseByUserId(id, 0, 7);
+        Page<CourseDTO> coursePage = courseService.findCourseByUserId(id, page, size);
         modelMap.put("courses", coursePage.getContent());
         modelMap.put("userId", id);
-        modelMap.put("currentPage", 0);
+        modelMap.put("currentPage", page);
         modelMap.put("totalPages", coursePage.getTotalPages());
         modelMap.put("totalElements", coursePage.getTotalElements());
-        modelMap.put("size", 7);
+        modelMap.put("size", size);
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/CoursesContent :: listsCourseContent");
         return "instructorDashboard/indexUpdate";
     }

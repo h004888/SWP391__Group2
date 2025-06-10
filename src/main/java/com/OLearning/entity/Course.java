@@ -31,6 +31,7 @@ public class Course {
     private LocalDateTime updatedAt;
     private String status = "draft";
     private Boolean canResubmit;
+    private String videoUrlPreview;
     @ManyToOne
     @JoinColumn(name = "userId")
     private User instructor;
