@@ -77,4 +77,5 @@ public class NotificationsController {
             return "redirect:/instructordashboard/notifications";
         }
     }
+
 }
