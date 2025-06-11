@@ -17,6 +17,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.time.format.DateTimeFormatter;
+import java.util.TreeMap;
 
 @Service
 public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
@@ -80,5 +84,23 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
 
             courseMaintenanceRepository.save(maintenance);
         }
+    }
+
+    @Override
+    public Map<String, Object> getMaintenanceRevenueByDateRange(LocalDate startDate, LocalDate endDate) {
+        Map<String, Object> maintenanceData = new TreeMap<>();
+        List<CourseMaintenance> maintenances = courseMaintenanceRepository.findByMonthYearBetween(startDate, endDate);
+        
+        for (CourseMaintenance maintenance : maintenances) {
+            String monthYear = maintenance.getMonthYear().format(DateTimeFormatter.ofPattern("MM/yyyy"));
+            Double fee = maintenance.getFee().getMaintenanceFee().doubleValue();
+            Long enrollmentCount = maintenance.getEnrollmentCount();
+            
+            Map<String, Object> monthData = (Map<String, Object>) maintenanceData.computeIfAbsent(monthYear, k -> new HashMap<>());
+            monthData.put("revenue", fee);
+            monthData.put("enrollmentCount", enrollmentCount);
+        }
+        
+        return maintenanceData;
     }
 }

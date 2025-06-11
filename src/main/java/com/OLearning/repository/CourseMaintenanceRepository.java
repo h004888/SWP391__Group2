@@ -21,4 +21,6 @@ public interface CourseMaintenanceRepository extends JpaRepository<CourseMainten
     Fees findLatestFeeByCourseId(Long courseId);
 
     boolean existsByCourseCourseIdAndDueDate(Long courseId, LocalDate dueDate);
+
+    List<CourseMaintenance> findByMonthYearBetween(LocalDate startDate, LocalDate endDate);
 }

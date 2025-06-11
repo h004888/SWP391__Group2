@@ -14,7 +14,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class OrdersServiceImpl implements OrdersService {
@@ -93,5 +97,36 @@ public class OrdersServiceImpl implements OrdersService {
         }
 
         return ordersPage.map(ordersMapper::toDTO);
+    }
+
+    @Override
+    public Map<String, Double> getRevenuePerMonth() {
+        Map<String, Double> revenuePerMonth = new HashMap<>();
+        // Initialize all months with 0
+        LocalDate now = LocalDate.now();
+        for (int i = 1; i <= 12; i++) {
+            String monthKey = String.format("%d-%02d", now.getYear(), i);
+            revenuePerMonth.put(monthKey, 0.0);
+        }
+        List<Object[]> monthlyRevenue = ordersRepository.getMonthlyRevenue(now.getYear());
+        for (Object[] result : monthlyRevenue) {
+            String month = result[0].toString();
+            Double totalAmount = (Double) result[1];
+            String monthKey = String.format("%d-%02d", now.getYear(), Integer.parseInt(month));
+            revenuePerMonth.put(monthKey, totalAmount);
+        }
+        return revenuePerMonth;
+    }
+
+    @Override
+    public Map<String, Double> getRevenueByDateRange(LocalDate startDate, LocalDate endDate) {
+        Map<String, Double> revenueByDate = new HashMap<>();
+        List<Object[]> revenueData = ordersRepository.getRevenueByDateRange(startDate, endDate);
+        for (Object[] result : revenueData) {
+            String monthYear = (String) result[0];
+            Double totalAmount = (Double) result[1];
+            revenueByDate.put(monthYear, totalAmount);
+        }
+        return revenueByDate;
     }
 }
