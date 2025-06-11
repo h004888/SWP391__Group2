@@ -1,4 +1,4 @@
 package com.OLearning.controller.instructorDashboard;
 
-public class RestJson {
+public class JsonController {
 }
