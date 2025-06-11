@@ -5,7 +5,9 @@ import com.OLearning.entity.OrderDetail;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public interface OrdersService {
@@ -15,4 +17,6 @@ public interface OrdersService {
     List<OrdersDTO> sortByDate(String direction);
     List<OrderDetail> getOrderDetailsByOrderId(Long orderId);
     Page<OrdersDTO> filterAndSortOrders(String username, String amountDirection, String dateDirection, int page, int size);
+    Map<String, Double> getRevenuePerMonth();
+    Map<String, Double> getRevenueByDateRange(LocalDate startDate, LocalDate endDate);
 }

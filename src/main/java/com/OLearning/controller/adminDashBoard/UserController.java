@@ -24,12 +24,6 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @GetMapping()
-    public String getAdminDashboardPAge(Model model) {
-        model.addAttribute("fragmentContent", "adminDashBoard/fragments/content :: contentMain");
-        return "adminDashBoard/index";
-    }
-
     @GetMapping("/account")
     public String getAccountPage(
             Model model,
