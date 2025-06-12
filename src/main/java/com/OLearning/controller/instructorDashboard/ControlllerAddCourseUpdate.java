@@ -1,6 +1,7 @@
 package com.OLearning.controller.instructorDashboard;
 
 import com.OLearning.dto.course.AddCourseStep1DTO;
+import com.OLearning.dto.course.CourseContentDTO;
 import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.course.CourseMediaDTO;
 import com.OLearning.entity.Chapter;
@@ -11,6 +12,7 @@ import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.chapter.ChapterService;
 import com.OLearning.service.course.CourseService;
 import com.OLearning.service.lesson.LessonService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -112,7 +114,8 @@ public class ControlllerAddCourseUpdate {
                                   @RequestParam(name = "id", defaultValue = "2") Long id,
                                   @RequestParam(name = "action") String action,
                                   Model model,
-                                  ModelMap modelMap) {
+                                  ModelMap modelMap,
+                                  HttpSession session) {
         if (result.hasErrors()) {
             result.getFieldErrors().forEach(fieldError -> {
                 if (fieldError.getCode().equals("typeMismatch") && fieldError.getField().equals("price")) {
@@ -129,7 +132,9 @@ public class ControlllerAddCourseUpdate {
             courseStep1.setId(course.getCourseId());
             return "redirect:../courses";
         }
+
         Course course = courseService.createCourseStep1(courseStep1.getId(), courseStep1);//course=null thi se tao moi, con khong thi se update lai
+        session.setAttribute("course", course);
         courseStep1.setId(course.getCourseId());//gan lai id cua course vao DTO
         Long courseId = course.getCourseId();
         model.addAttribute("courseId", courseId);
@@ -143,7 +148,8 @@ public class ControlllerAddCourseUpdate {
                                   BindingResult result,
                                   @RequestParam(name = "id", defaultValue = "2") Long id,
                                   Model model,
-                                  @RequestParam(name = "action") String action) {
+                                  @RequestParam(name = "action") String action,
+                                  HttpSession session) {
         if (result.hasErrors()) {
             model.addAttribute("coursestep2", courseMediaDTO);
             model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step2CourseMedia :: step2Content");
@@ -153,10 +159,21 @@ public class ControlllerAddCourseUpdate {
             Course course = courseService.createCourseMedia(courseMediaDTO.getCourseId(), courseMediaDTO);
             return "redirect:../courses";
         }
+        if(action.equalsIgnoreCase("previousstep")) {
+            //luu lai thong tin media vao session de dung cho buoc tiep theo
+            //gia tri multipart o dto thoi, bay gio ma muon quay lai no van fix cung thi lam the nao??
+            //lay ve cai thang step 1 va quay ve thang step 1
+            Course course = session.getAttribute("course") != null ? (Course) session.getAttribute("course") : new Course();
+            AddCourseStep1DTO courseStep1 = courseService.draftCourseStep1(course);
+            model.addAttribute("coursestep1", courseStep1);
+            model.addAttribute("categories", categoryService.findAll());
+            model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step1BasicInfor :: step1Content");
+            return "instructorDashboard/indexUpdate";
+        }
 
         Course course = courseService.createCourseMedia(courseMediaDTO.getCourseId(), courseMediaDTO);
-        model.addAttribute("courseId", course.getCourseId());
-        model.addAttribute("coursestep3", new AddCourseStep1DTO());
+        session.setAttribute("course", course);// gan lai course vao session de dung cho cac buoc tiep theo
+        model.addAttribute("coursestep3", new CourseContentDTO());
        model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step3CourseContent :: step3Content");
         return "instructorDashboard/indexUpdate";
     }
