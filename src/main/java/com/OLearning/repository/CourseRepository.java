@@ -2,7 +2,7 @@ package com.OLearning.repository;
 
 import com.OLearning.entity.Course;
 
-import org.hibernate.query.Page;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -39,5 +39,11 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
          @Param("categoryId") Integer categoryId,
          @Param("price") String price,
          @Param("status") String status);
+
+   List<Course> findTop5ByOrderByTotalStudentEnrolledDesc();
+
+   Page<Course> findAllByOrderByTotalRatingsDesc(Pageable pageable);
+
+   List<Course> findByStatus(String status);
 
 }

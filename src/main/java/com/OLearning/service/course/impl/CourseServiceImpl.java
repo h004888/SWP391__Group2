@@ -9,6 +9,10 @@ import com.OLearning.repository.CourseRepository;
 import com.OLearning.service.course.CourseService;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,16 +22,18 @@ import java.util.stream.Collectors;
 @Service("adminCourseService")
 @RequiredArgsConstructor
 public class CourseServiceImpl implements CourseService {
-
-    private final CourseMapper courseMapper;
-    private final CourseRepository courseRepository;
-    private final CourseDetailMapper courseDetailMapper;
+    @Autowired
+    private CourseMapper courseMapper;
+    @Autowired
+    private CourseRepository courseRepository;
+    @Autowired
+    private CourseDetailMapper courseDetailMapper;
 
     @Override
     public List<CourseDTO> getAllCourses() {
         List<Course> courseList = courseRepository.findAll();
         return courseList.stream()
-                .map(courseMapper::toDTO)
+                .map(CourseMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
@@ -35,7 +41,6 @@ public class CourseServiceImpl implements CourseService {
     public Optional<CourseDetailDTO> getDetailCourse(Long id) {
         return courseRepository.findById(id).map(courseDetailMapper::toDTO);
     }
-
 
     @Override
     public boolean deleteCourse(Long id) {
@@ -61,8 +66,17 @@ public class CourseServiceImpl implements CourseService {
             status = null;
 
         return courseRepository.filterCourses(keyword, categoryId, price, status).stream()
-                .map(courseMapper::toDTO)
+                .map(CourseMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<Course> getTopCourses() {
+        return courseRepository.findTop5ByOrderByTotalStudentEnrolledDesc();
+    }
+
+    @Override
+    public Page<CourseDTO> getCoursesByTotalRatings(Pageable pageable) {
+        return courseRepository.findAllByOrderByTotalRatingsDesc(pageable).map(CourseMapper::toDTO);
+    }
 }
