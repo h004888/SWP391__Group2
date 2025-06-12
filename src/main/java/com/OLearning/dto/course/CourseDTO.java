@@ -19,6 +19,7 @@ public class CourseDTO {
     private Double discount;
     private String courseImg;
     private Integer duration;
+    private Boolean isFree;
     private String categoryName;
     private Integer totalLessons;
     private LocalDateTime createdAt;

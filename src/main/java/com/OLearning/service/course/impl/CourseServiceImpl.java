@@ -3,32 +3,30 @@ package com.OLearning.service.course.impl;
 import com.OLearning.dto.course.AddCourseStep1DTO;
 import com.OLearning.dto.course.AddCourseStep3DTO;
 import com.OLearning.dto.course.CourseDTO;
-import com.OLearning.entity.*;
+import com.OLearning.dto.course.CourseMediaDTO;
+import com.OLearning.entity.Category;
+import com.OLearning.entity.Course;
+import com.OLearning.entity.User;
 import com.OLearning.mapper.course.CourseMapper;
 import com.OLearning.repository.*;
+import com.OLearning.service.cloudinary.UploadFile;
 import com.OLearning.service.course.CourseService;
-import com.OLearning.service.instructorDashBoard.FileHelper.FileHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class CourseServiceImpl implements CourseService {
-
+    @Autowired
+    private UploadFile uploadFile;
     @Autowired
     private InstructorCourseRepo instructorCourseRepo;
     @Autowired
@@ -89,66 +87,25 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Course createCourseStep1(Long courseId, AddCourseStep1DTO addCourseStep1DTO) {
         Course course = (courseId == null) ? new Course() : findCourseById(courseId);
-        courseMapper.Step1(addCourseStep1DTO, course);
+        courseMapper.CourseBasic(addCourseStep1DTO, course);
         Category category = instructorCategoryRepo.findByName(addCourseStep1DTO.getCategoryName());
         if (category == null) {
             throw new RuntimeException("not found: " + addCourseStep1DTO.getCategoryName());
         }
         addCourseStep1DTO.setUserId(2L);
         User instructor = instructorUserRepo.findById(addCourseStep1DTO.getUserId()).orElseThrow();
-
-
-        MultipartFile imageFile = addCourseStep1DTO.getCourseImg();
-        if (imageFile != null && !imageFile.isEmpty()) {
-            try {
-                File imageFoldder = new File(new ClassPathResource(".").getFile().getPath() + "/static/img");
-                if (!imageFoldder.exists()) {
-                    imageFoldder.mkdirs();
-                }
-                String fileName = FileHelper.generateFileName(imageFile.getOriginalFilename());
-                Path path = Paths.get(imageFoldder.getAbsolutePath() + File.separator + fileName);
-
-                Files.copy(imageFile.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-                course.setCourseImg(fileName);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
         course.setInstructor(instructor);
         course.setCategory(category);
         return instructorCourseRepo.save(course);
-    }
-    @Override
-    public Course createCourseStep1Demo(Long courseId, AddCourseStep1DTO addCourseStep1DTO) {
-                return null;
     }
     @Autowired
     ChapterRepository chapterRepo;
     @Autowired
     LessonRepository lessonRepo;
     @Override
-    public Course createCourseStep2(Long courseId) {
-        Course course = (courseId == null) ? new Course() : findCourseById(courseId);
-        courseMapper.Step2(course);
-        int totalLessons = 0;
-        int totalDuration = 0;
-        List<Chapter> chapters = chapterRepo.findChaptersByCourse(courseId); //tim ra list chapter
-        for (Chapter chapter : chapters) {
-            List<Lesson> lessons = chapter.getLessons();
-            totalLessons += lessons.size();
-            for (Lesson lesson : lessons) {
-                totalDuration += lesson.getDuration() != null ? lesson.getDuration() : 0; //can lam lai
-            }
-        }
-        course.getListOfChapters().clear();
-        course.getListOfChapters().addAll(chapters);
-        course.setTotalLessons(totalLessons);
-        course.setDuration(totalDuration);
-        return instructorCourseRepo.save(course);
-    }
     public Course createCourseStep3(Long courseId, AddCourseStep3DTO addCourseStep3DTO) {
         Course course = (courseId == null) ? new Course() : findCourseById(courseId);
-        courseMapper.Step3(addCourseStep3DTO, course);
+//        courseMapper.Step3(addCourseStep3DTO, course);
         course.setPrice(addCourseStep3DTO.getPrice());
         return instructorCourseRepo.save(course);
     }
@@ -166,5 +123,24 @@ public class CourseServiceImpl implements CourseService {
     public AddCourseStep1DTO draftCourseStep1(Course course) {
         AddCourseStep1DTO courseDTO = courseMapper.DraftStep1(course);
         return courseDTO;
+    }
+    @Override
+    public Course createCourseMedia(Long courseId, CourseMediaDTO CourseMediaDTO) {
+        Course course = (courseId == null) ? new Course() : findCourseById(courseId);
+    try {
+        if (CourseMediaDTO.getImage() != null && !CourseMediaDTO.getImage().isEmpty()) {
+            String imageUrl = uploadFile.uploadImageFile(CourseMediaDTO.getImage());
+            course.setCourseImg(imageUrl);
+        }
+        
+        if (CourseMediaDTO.getVideo() != null && !CourseMediaDTO.getVideo().isEmpty()) {
+            String videoUrl = uploadFile.uploadVideoFile(CourseMediaDTO.getVideo());
+            course.setVideoUrlPreview(videoUrl);
+        }
+        
+        return instructorCourseRepo.save(course);
+    } catch (IOException e) {
+        throw new RuntimeException("Failed to upload course media", e);
+    }
     }
 }

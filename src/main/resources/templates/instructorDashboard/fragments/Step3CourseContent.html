@@ -1,0 +1,431 @@
+<div class="main-content" th:fragment="step3Content">
+    <div class="container-fluid py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 mb-0">Create New Course</h1>
+                <p class="text-muted">Fill in the details below to create your course</p>
+            </div>
+        </div>
+
+        <div class="content-card">
+            <div class="step-indicator">
+                <div class="step completed" data-step="1">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Basic Info</div>
+                </div>
+                <div class="step completed" data-step="2">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Course Content</div>
+                </div>
+                <div class="step active" data-step="3">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Pricing & Settings</div>
+                </div>
+                <div class="step" data-step="4">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">Preview & Publish</div>
+                </div>
+            </div>
+        </div>
+        <form th:action="@{/instructordashboard/viewcourse/addcoursestep4}" th:object="${coursestep3}" method="POST">
+            <div class="row">
+                <div>
+                    <div> <!-- Title -->
+                        <h4>Curriculum</h4>
+
+                        <hr> <!-- Divider -->
+
+                        <div class="row">
+                            <!-- Add lecture Modal button -->
+                            <div class="d-sm-flex justify-content-sm-between align-items-center mb-3">
+                                <h5 class="mb-2 mb-sm-0">Upload Lecture</h5>
+                                <a href="#" class="btn btn-sm btn-primary-soft mb-0" data-bs-toggle="modal"
+                                   data-bs-target="#addLecture"><i class="bi bi-plus-circle me-2"></i>Add Lecture</a>
+                            </div>
+
+                            <!-- Edit lecture START -->
+                            <div class="accordion accordion-icon accordion-bg-light" id="accordionExample2">
+                                <!-- Item START -->
+                                <div class="accordion-item mb-3">
+                                    <h6 class="accordion-header font-base" id="heading-1">
+                                        <button
+                                                class="accordion-button fw-bold rounded d-inline-block collapsed d-block pe-5"
+                                                type="button" data-bs-toggle="collapse" data-bs-target="#collapse-1"
+                                                aria-expanded="false" aria-controls="collapse-1">
+                                            Introduction of Digital Marketing
+                                        </button>
+                                    </h6>
+
+                                    <div id="collapse-1" class="accordion-collapse collapse show"
+                                         aria-labelledby="heading-1" data-bs-parent="#accordionExample2">
+                                        <!-- Topic START -->
+                                        <div class="accordion-body mt-3">
+                                            <!-- Video item START -->
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div class="position-relative">
+                                                    <a href="#"
+                                                       class="btn btn-danger-soft btn-round btn-sm mb-0 stretched-link position-static"><i
+                                                            class="fas fa-play"></i></a>
+                                                    <span class="ms-2 mb-0 h6 fw-light">Introduction</span>
+                                                </div>
+                                                <!-- Edit and cancel button -->
+                                                <div>
+                                                    <a href="#"
+                                                       class="btn btn-sm btn-success-soft btn-round me-1 mb-1 mb-md-0"><i
+                                                            class="far fa-fw fa-edit"></i></a>
+                                                    <button class="btn btn-sm btn-danger-soft btn-round mb-0"><i
+                                                            class="fas fa-fw fa-times"></i></button>
+                                                </div>
+                                            </div>
+                                            <!-- Divider -->
+                                            <hr>
+                                            <!-- Video item END -->
+
+                                            <!-- Video item START -->
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div class="position-relative">
+                                                    <a href="#"
+                                                       class="btn btn-danger-soft btn-round btn-sm mb-0 stretched-link position-static"><i
+                                                            class="fas fa-play"></i></a>
+                                                    <span class="ms-2 mb-0 h6 fw-light">What is Digital Marketing</span>
+                                                </div>
+                                                <!-- Edit and cancel button -->
+                                                <div>
+                                                    <a href="#"
+                                                       class="btn btn-sm btn-success-soft btn-round me-1 mb-1 mb-md-0"><i
+                                                            class="far fa-fw fa-edit"></i></a>
+                                                    <button class="btn btn-sm btn-danger-soft btn-round mb-0"><i
+                                                            class="fas fa-fw fa-times"></i></button>
+                                                </div>
+                                            </div>
+                                            <!-- Divider -->
+                                            <hr>
+                                            <!-- Video item END -->
+
+                                            <!-- Add topic -->
+                                            <a href="#" class="btn btn-sm btn-dark mb-0" data-bs-toggle="modal"
+                                               data-bs-target="#addTopic"><i class="bi bi-plus-circle me-2"></i>Add
+                                                topic</a>
+                                        </div>
+                                        <!-- Topic END -->
+                                    </div>
+                                </div>
+                                <!-- Item END -->
+                            </div>
+                            <!-- Edit lecture END -->
+
+                            <!-- Step 3 button -->
+                        </div>
+                        <div class="modal fade" id="addLecture" tabindex="-1" aria-labelledby="addLectureLabel"
+                             aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-dark">
+                                        <h5 class="modal-title text-white" id="addLectureLabel">Add Lecture</h5>
+                                        <button type="button" class="btn btn-sm btn-light mb-0 ms-auto"
+                                                data-bs-dismiss="modal" aria-label="Close"><i
+                                                class="bi bi-x-lg"></i></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form class="row text-start g-3">
+                                            <!-- Course name -->
+                                            <div class="col-12">
+                                                <label class="form-label">Course name <span
+                                                        class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" placeholder="Enter course name">
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-danger-soft my-0"
+                                                data-bs-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-success my-0">Save Lecture</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Popup modal for add lecture END -->
+
+                        <!-- Popup modal for add topic START -->
+                        <div class="modal fade" id="addTopic" tabindex="-1" aria-labelledby="addTopicLabel"
+                             aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-dark">
+                                        <h5 class="modal-title text-white" id="addTopicLabel">Add topic</h5>
+                                        <button type="button" class="btn btn-sm btn-light mb-0 ms-auto"
+                                                data-bs-dismiss="modal" aria-label="Close"><i
+                                                class="bi bi-x-lg"></i></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form class="row text-start g-3">
+                                            <!-- Topic name -->
+                                            <div class="col-md-6">
+                                                <label class="form-label">Topic name</label>
+                                                <input class="form-control" type="text" placeholder="Enter topic name">
+                                            </div>
+                                            <!-- Video link -->
+                                            <div class="col-md-6">
+                                                <label class="form-label">Video link</label>
+                                                <input type="file" class="form-control" type="text" placeholder="Enter Video link">
+                                            </div>
+                                            <!-- Description -->
+                                            <div class="col-12 mt-3">
+                                                <label class="form-label">Course description</label>
+                                                <textarea class="form-control" rows="4" placeholder=""
+                                                          spellcheck="false"></textarea>
+                                            </div>
+                                            <!-- Buttons -->
+                                            <div class="col-6 mt-3">
+                                                <div class="btn-group" role="group"
+                                                     aria-label="Basic radio toggle button group">
+                                                    <!-- Free button -->
+                                                    <input type="radio" class="btn-check" name="options" id="option1"
+                                                           checked="">
+                                                    <label
+                                                            class="btn btn-sm btn-light btn-primary-soft-check border-0 m-0"
+                                                            for="option1">Free</label>
+                                                    <!-- Premium button -->
+                                                    <input type="radio" class="btn-check" name="options" id="option2">
+                                                    <label
+                                                            class="btn btn-sm btn-light btn-primary-soft-check border-0 m-0"
+                                                            for="option2">Premium</label>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-danger-soft my-0"
+                                                data-bs-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-success my-0">Save topic</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                    <div class="content-card">
+                        <div class="d-flex justify-content-between">
+                            <button class="btn btn-outline-secondary me-3" name="action" value="previousstep">
+                                <i class="bi bi-arrow-left me-1"></i> Previous
+                            </button>
+                            <button class="btn btn-outline-secondary me-2" id="saveDraftBtn" name="action"
+                                    value="draft">
+                                <i class="bi bi-save me-1"></i> Save as Draft
+                            </button>
+                            <button class="btn btn-primary ms-auto" name="action" value="nextstep">
+                                Next <i class="bi bi-arrow-right ms-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+
+            </div>
+        </form>
+    </div>
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- Bootstrap JS -->
+    <script src="assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&amp;family=Roboto:wght@400;500;700&amp;display=swap">
+
+    <!-- Plugins CSS -->
+    <link rel="stylesheet" type="text/css" href="assets/vendor/font-awesome/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/vendor/bootstrap-icons/bootstrap-icons.css">
+    <link rel="stylesheet" type="text/css" href="assets/vendor/choices/css/choices.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/vendor/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="assets/vendor/glightbox/css/glightbox.css">
+    <link rel="stylesheet" type="text/css" href="assets/vendor/quill/css/quill.snow.css">
+    <link rel="stylesheet" type="text/css" href="assets/vendor/stepper/css/bs-stepper.min.css">
+
+    <!-- Theme CSS -->
+    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+
+    <style>
+        body {
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+
+
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding-top: 56px;
+            transition: all 0.3s;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        .navbar {
+            padding-left: var(--sidebar-width);
+            transition: all 0.3s;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding-left: 1rem;
+            }
+        }
+
+        .content-card {
+            background-color: #fff;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            right: -50%;
+            width: 100%;
+            height: 2px;
+            background-color: #dee2e6;
+            z-index: 1;
+        }
+
+        .step.active:not(:last-child)::after {
+            background-color: #0d6efd;
+        }
+
+        .step-circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #dee2e6;
+            color: #6c757d;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .step.active .step-circle {
+            background-color: #0d6efd;
+            color: white;
+        }
+
+        .step.completed .step-circle {
+            background-color: #198754;
+            color: white;
+        }
+
+        .image-upload-area {
+            border: 2px dashed #dee2e6;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .image-upload-area:hover {
+            border-color: #0d6efd;
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+
+        .image-upload-area.dragover {
+            border-color: #0d6efd;
+            background-color: rgba(13, 110, 253, 0.1);
+        }
+
+        .lesson-item {
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background-color: #f8f9fa;
+        }
+
+        .lesson-item.dragging {
+            opacity: 0.5;
+        }
+
+        .drag-handle {
+            cursor: move;
+            color: #6c757d;
+        }
+
+        .video-upload-area {
+            border: 2px dashed #dee2e6;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .video-upload-area:hover {
+            border-color: #0d6efd;
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+
+        .progress-container {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .tab-content {
+            padding-top: 1rem;
+        }
+
+        .form-floating textarea {
+            min-height: 120px;
+        }
+
+        .preview-card {
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .preview-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .sticky-sidebar {
+            position: sticky;
+            top: 20px;
+        }
+    </style>
+</div>

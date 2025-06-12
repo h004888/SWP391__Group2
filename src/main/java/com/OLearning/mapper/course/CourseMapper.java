@@ -38,21 +38,14 @@ public class CourseMapper {
         courseDTO.setDiscount(course.getDiscount());
         courseDTO.setTotalLessons(course.getTotalLessons());
         courseDTO.setStatus(course.getStatus());
+        courseDTO.setIsFree(course.getIsFree());
         return courseDTO;
     }
-    public Course Step1(AddCourseStep1DTO dto, Course course) {
+    public Course CourseBasic(AddCourseStep1DTO dto, Course course) {
         course.setTitle(dto.getTitle());
         course.setDescription(dto.getDescription());
         course.setCreatedAt(LocalDateTime.now());
-        return course;
-    }
-    public Course Step2(Course course) {
-        course.setUpdatedAt(LocalDateTime.now());
-        return course;
-    }
-    public Course Step3(AddCourseStep3DTO dto, Course course) {
         course.setPrice(dto.getPrice());
-        course.setUpdatedAt(LocalDateTime.now());
         return course;
     }
     public AddCourseStep1DTO DraftStep1(Course course) {
@@ -61,6 +54,7 @@ public class CourseMapper {
         dto.setTitle(course.getTitle());
         dto.setDescription(course.getDescription());
         dto.setCategoryName(course.getCategory().getName());
+        dto.setPrice(course.getPrice());
         return dto;
     }
 }

@@ -17,7 +17,7 @@ public class Course {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long courseId;
-
+    private Boolean isFree=false; //step 1
     private String title;
     private String description;
     private Double price;

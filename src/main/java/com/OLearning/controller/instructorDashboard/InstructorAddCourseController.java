@@ -54,21 +54,21 @@ public class InstructorAddCourseController {
     @GetMapping("/viewcourse/addcoursestep1")
     public String addNewCourse(@RequestParam(name = "courseId", required = false) Long courseId, Model model) {
 
-        if (courseId == null) {
-            model.addAttribute("coursestep1", new AddCourseStep1DTO());
-            model.addAttribute("categories", categoryService.findAll());
-            model.addAttribute("fragmentContent", "instructorDashboard/fragments/CreateCourseStep1Content :: step1Content");
-            return "instructorDashboard/index";
-//            return "instructorDashboard/CreateCourseStep1";
-        }
-        Course course = courseService.findCourseById(courseId);
-        AddCourseStep1DTO coursestep1 = courseService.draftCourseStep1(course);
-        model.addAttribute("coursestep1", coursestep1);
-        model.addAttribute("categories", categoryService.findAll());
+//        if (courseId == null) {
+//            model.addAttribute("coursestep1", new AddCourseStep1DTO());
+//            model.addAttribute("categories", categoryService.findAll());
+//            model.addAttribute("fragmentContent", "instructorDashboard/fragments/CreateCourseStep1Content :: step1Content");
+//            return "instructorDashboard/indexUpdate";
+////            return "instructorDashboard/CreateCourseStep1";
+//        }
+//        Course course = courseService.findCourseById(courseId);
+//        AddCourseStep1DTO coursestep1 = courseService.draftCourseStep1(course);
+//        model.addAttribute("coursestep1", coursestep1);
+//        model.addAttribute("categories", categoryService.findAll());
 
-        model.addAttribute("fragmentContent", "instructorDashboard/fragments/CreateCourseStep1Content :: step1Content");
-
-        return "instructorDashboard/index";
+//        model.addAttribute("fragmentContent", "instructorDashboard/fragments/CreateCourseStep1Content :: step1Content");
+        model.addAttribute("fragmentContent", "instructorDashboard/fragments/CreateCourseContent :: CreateCourseContent");
+        return "instructorDashboard/indexUpdate";
 //        return "instructorDashboard/CreateCourseStep1";
     }
 
@@ -175,7 +175,7 @@ public class InstructorAddCourseController {
                         Model model, @RequestParam(name = "action") String action,
                         @RequestParam(name = "id", defaultValue = "2") Long userid, ModelMap modelMap) {
         if (action.equals("draft")) { //khi nay la draft khi o step 2
-            Course course = courseService.createCourseStep2(courseId);
+//            Course course = courseService.createCourseStep2(courseId);
             List<CourseDTO> courseList = courseService.findCourseByUserId(userid);
             modelMap.put("courses", courseList);
             return "redirect:/instructordashboard/viewcourse";
@@ -197,7 +197,8 @@ public class InstructorAddCourseController {
             return "instructorDashboard/index";
 //            return "instructorDashboard/CreateCourseStep3";
         }
-        Course course = courseService.createCourseStep2(courseId);
+//        Course course = courseService.createCourseStep2(courseId);
+        Course course = courseService.findCourseById(courseId); //tam
         model.addAttribute("course", course);
         model.addAttribute("courseId", courseId);
         if (course.getPrice() == null) {

@@ -11,7 +11,7 @@
                 <!-- Card header START -->
                 <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center">
                     <h3 class="mb-0">My Courses List</h3>
-                    <a href="/viewcourse/addcoursestep1" class="btn btn-success">
+                    <a href="/instructordashboard/createcourse/coursebasic" class="btn btn-success">
                         <i class="bi bi-plus-circle me-1"></i> Create Course
                     </a>
                 </div>
@@ -23,7 +23,7 @@
                     <!-- Search and select START -->
                     <div class="row g-3 align-items-center justify-content-between mb-4">
                         <!-- Search -->
-                        <div class="col-md-8">
+                        <div class="col-md-6">
                             <form class="rounded position-relative">
                                 <input class="form-control pe-5 bg-transparent" type="search" placeholder="Search"
                                        aria-label="Search">
@@ -34,6 +34,18 @@
                             </form>
                         </div>
 
+                        <div class="col-md-3">
+                            <div class="form-floating">
+                                <select class="form-select" id="courseCategory" required>
+                                    <option value="">Find All</option>
+                                    <option th:each="cat : ${categories}"
+                                            th:value="${cat.categoryName}"
+                                            th:text="${cat.categoryName}">
+                                    </option>
+                                </select>
+                                <label for="courseCategory">Category</label>
+                            </div>
+                        </div>
                         <!-- Select option -->
                         <div class="col-md-3">
                             <!-- Short by filter -->
@@ -43,7 +55,6 @@
                                     <option value="">Sort by</option>
                                     <option>Free</option>
                                     <option>Newest</option>
-                                    <option>Most popular</option>
                                     <option>Most Viewed</option>
                                 </select>
                             </form>
@@ -58,9 +69,11 @@
                             <thead>
                             <tr>
                                 <th scope="col" class="border-0 rounded-start">Course Title</th>
+                                <th scope="col" class="border-0">Category Name</th>
                                 <th scope="col" class="border-0">Enrolled</th>
                                 <th scope="col" class="border-0">Status</th>
                                 <th scope="col" class="border-0">Price</th>
+                                <th scope="col" class="border-0">IsFree</th>
                                 <th scope="col" class="border-0 rounded-end">Action</th>
                             </tr>
                             </thead>
@@ -73,12 +86,14 @@
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <!-- Image -->
-                                        <div class="w-60px">
-                                            <img th:src="@{'/img/' + ${course.courseImg}}" class="rounded" alt="">
+                                        <div class="w-80px">
+                                            <img th:src="@{${course.courseImg}}" class="rounded" alt="">
                                         </div>
                                         <div class="mb-0 ms-2">
                                             <!-- Title -->
-                                            <h6><a href="#" th:utext="${course.title}"></a></h6>
+                                            <h6>
+                                                <a th:href="@{|/instructordashboard/courses/detail/${course.courseId}|}" th:utext="${course.title}"></a>
+                                            </h6>
                                             <!-- Info -->
                                             <div class="d-sm-flex">
                                                 <p class="h6 fw-light mb-0 small me-3">
@@ -89,8 +104,13 @@
                                         </div>
                                     </div>
                                 </td>
+                                <!-- Category Name item -->
+                                <td>
+                                    <span class="badge bg-primary text-white rounded-pill"
+                                          th:text="${course.categoryName}"></span>
+                                </td>
                                 <!-- Enrolled item -->
-                                <td class="text-center text-sm-start">125</td>
+                                <td class="text-center text-sm-start">0</td>
                                 <!-- Status item -->
                                 <td>
                                     <div th:switch="${course.status}">
@@ -106,12 +126,22 @@
                                 </td>
                                 <!-- Price item -->
                                 <td th:utext="'$' + ${course.price}"></td>
+                                <!--is free-->
+                                <td>
+                                    <span th:if="${course.isFree == true}" class="badge bg-success">Free</span>
+                                    <span th:if="${course.isFree == false}" class="badge bg-danger">Not Free</span>
+                                    <span th:if="${course.isFree == null}" class="badge bg-secondary">Unknown</span>
+                                </td>
                                 <!-- Action item -->
                                 <td>
                                     <a href="#" class="btn btn-sm btn-success-soft btn-round me-1 mb-0"><i
                                             class="far fa-fw fa-edit"></i></a>
                                     <button class="btn btn-sm btn-danger-soft btn-round mb-0"><i
                                             class="fas fa-fw fa-times"></i></button>
+                                    <a href="#" class="btn btn-sm btn-info-soft btn-round mb-0 ms-1" title="Edit"
+                                       th:if="${course.status == 'draft'}">
+                                        <i class="fas fa-arrow-right" style="color: #0dcaf0;"></i>
+                                    </a>
                                 </td>
                             </tr>
                             </tbody>
@@ -133,7 +163,8 @@
                             entries
                         </p>
                         <!-- Pagination -->
-                        <nav class="d-flex justify-content-center mb-0" aria-label="navigation" th:if="${totalPages > 1}">
+                        <nav class="d-flex justify-content-center mb-0" aria-label="navigation"
+                             th:if="${totalPages > 1}">
                             <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
                                 <!-- Previous -->
                                 <li class="page-item mb-0" th:classappend="${currentPage == 0} ? 'disabled'">
@@ -152,7 +183,8 @@
                                        th:text="${i + 1}"></a>
                                 </li>
                                 <!-- Next -->
-                                <li class="page-item mb-0" th:classappend="${currentPage + 1 == totalPages} ? 'disabled'">
+                                <li class="page-item mb-0"
+                                    th:classappend="${currentPage + 1 == totalPages} ? 'disabled'">
                                     <a class="page-link"
                                        th:href="@{|/instructordashboard/courses?id=${userId}&page=${currentPage + 1 < totalPages ? currentPage + 1 : currentPage}|}">
                                         <i class="fas fa-angle-right"></i>

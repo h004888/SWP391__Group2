@@ -1,11 +1,9 @@
 package com.OLearning.service.cloudinary.impl;
-
-import com.OLearning.service.cloudinary.UploadImageFile;
+import com.OLearning.service.cloudinary.UploadFile;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,35 +17,48 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UploadImageFileImpl implements UploadImageFile {
-    private final Cloudinary cloudinary; //tu tao contructor de inject Cloudinary bean
+public class UploadFileImpl implements UploadFile {
+    private final Cloudinary cloudinary;
 
     @Override
     public String uploadImageFile(MultipartFile file) throws IOException {
-        assert file.getOriginalFilename() != null;
-        String publicValue = generetePublicValue(file.getOriginalFilename());
-        log.info("publicValue:{}", publicValue);
-        String extension = getFileName(file.getOriginalFilename())[1];
-        log.info("extension: {}", extension);
-        File fileUpload = convert(file);
-        log.info("fileUpload: {}", fileUpload);
-        cloudinary.uploader().upload(fileUpload, ObjectUtils.asMap("public_id", publicValue));
-        cleanDisk(fileUpload);
-        return cloudinary.url().generate(StringUtils.join(publicValue, ".", extension));
+        return uploadFile(file, "image");
+    }
+    @Override
+    public String uploadVideoFile(MultipartFile file) throws IOException {
+        return uploadFile(file, "video");
     }
 
-    private File convert(MultipartFile file) throws IOException {
+    private String uploadFile(MultipartFile file, String resourceType) throws IOException {
         assert file.getOriginalFilename() != null;
-        File convFile = new File(StringUtils.join(generetePublicValue(file.getOriginalFilename()), getFileName(file.getOriginalFilename())[1]));
+        String publicValue = generatePublicValue(file.getOriginalFilename());
+        String extension = getFileName(file.getOriginalFilename())[1];
+        File fileUpload = convert(file, publicValue, extension);
+        try {
+            cloudinary.uploader().upload(
+                    fileUpload,
+                    ObjectUtils.asMap(
+                            "public_id", publicValue,
+                            "resource_type", resourceType
+                    )
+            );
+            return cloudinary.url().resourceType(resourceType).generate(publicValue + "." + extension);
+        } finally {
+            cleanDisk(fileUpload);
+        }
+    }
+
+    private File convert(MultipartFile file, String publicValue, String extension) throws IOException {
+        File convFile = new File(publicValue + "." + extension);
         try (InputStream inputStream = file.getInputStream()) {
             Files.copy(inputStream, convFile.toPath());
         }
         return convFile;
     }
 
-    public String generetePublicValue(String originalFilename) {
+    public String generatePublicValue(String originalFilename) {
         String fileName = getFileName(originalFilename)[0];
-        return StringUtils.join(UUID.randomUUID().toString(), "_", fileName);
+        return UUID.randomUUID().toString() + "_" + fileName;
     }
 
     public String[] getFileName(String originalFilename) {
@@ -56,7 +67,6 @@ public class UploadImageFileImpl implements UploadImageFile {
 
     private void cleanDisk(File file) {
         try {
-            log.info("file: {}", file.getAbsolutePath());
             Path filePath = file.toPath();
             Files.delete(filePath);
         } catch (IOException e) {

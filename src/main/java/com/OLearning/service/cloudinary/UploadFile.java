@@ -4,6 +4,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
-public interface UploadImageFile {
+public interface UploadFile {
     String uploadImageFile(MultipartFile file) throws IOException;
+    String uploadVideoFile(MultipartFile file) throws IOException;
 }
