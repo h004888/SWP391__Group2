@@ -1,13 +1,19 @@
-package com.OLearning.controller.instructorDashboard;
+package com.OLearning.controller;
 
+import com.OLearning.dto.chapter.ChapterDTO;
 import com.OLearning.dto.course.AddCourseStep1DTO;
 import com.OLearning.dto.course.CourseContentDTO;
 import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.course.CourseMediaDTO;
+import com.OLearning.dto.lesson.LessonTitleDTO;
+import com.OLearning.dto.lesson.LessonVideoDTO;
 import com.OLearning.entity.Chapter;
 import com.OLearning.entity.Course;
 import com.OLearning.entity.Lesson;
 import com.OLearning.entity.User;
+import com.OLearning.mapper.course.CourseMapper;
+import com.OLearning.repository.ChapterRepository;
+import com.OLearning.service.LessonChapterService;
 import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.chapter.ChapterService;
 import com.OLearning.service.course.CourseService;
@@ -15,12 +21,15 @@ import com.OLearning.service.lesson.LessonService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -35,6 +44,12 @@ public class ControlllerAddCourseUpdate {
     private LessonService lessonService;
     @Autowired
     private ChapterService chapterService;
+    @Autowired
+    private LessonChapterService lessonChapterService;
+    @Autowired
+    private CourseMapper courseMapper;
+    @Autowired
+    private ChapterRepository chapterRepository;
 
     //dashhboard
     @GetMapping()
@@ -108,6 +123,7 @@ public class ControlllerAddCourseUpdate {
         return "instructorDashboard/indexUpdate";
     }
     //next to save course basic information
+    //view course media
     @PostMapping("/createcourse/coursemedia")
     public String saveCourseBasic(@Valid @ModelAttribute("coursestep1") AddCourseStep1DTO courseStep1,
                                   BindingResult result,
@@ -143,6 +159,7 @@ public class ControlllerAddCourseUpdate {
         return "instructorDashboard/indexUpdate";
     }
     //save course media and next to course content
+    //view course content
     @PostMapping("/createcourse/coursecontent")
     public String saveCourseMedia(@Valid @ModelAttribute("coursestep2") CourseMediaDTO courseMediaDTO,
                                   BindingResult result,
@@ -160,9 +177,6 @@ public class ControlllerAddCourseUpdate {
             return "redirect:../courses";
         }
         if(action.equalsIgnoreCase("previousstep")) {
-            //luu lai thong tin media vao session de dung cho buoc tiep theo
-            //gia tri multipart o dto thoi, bay gio ma muon quay lai no van fix cung thi lam the nao??
-            //lay ve cai thang step 1 va quay ve thang step 1
             Course course = session.getAttribute("course") != null ? (Course) session.getAttribute("course") : new Course();
             AddCourseStep1DTO courseStep1 = courseService.draftCourseStep1(course);
             model.addAttribute("coursestep1", courseStep1);
@@ -174,7 +188,137 @@ public class ControlllerAddCourseUpdate {
         Course course = courseService.createCourseMedia(courseMediaDTO.getCourseId(), courseMediaDTO);
         session.setAttribute("course", course);// gan lai course vao session de dung cho cac buoc tiep theo
         model.addAttribute("coursestep3", new CourseContentDTO());
-       model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step3CourseContent :: step3Content");
+        //tao demo chapter
+        ChapterDTO chapterDTO = new ChapterDTO();
+        model.addAttribute("chapter", chapterDTO);
+        List<Chapter> chapters = chapterService.chapterListByCourse(course.getCourseId());
+        for (Chapter chapter : chapters) {
+            List<Lesson> lessons = lessonService.findLessonsByChapterId(chapter.getId());
+            if (lessons != null && lessons.size() > 0) {
+                chapter.setLessons(lessons);
+            }
+        }
+        if (chapters != null && !chapters.isEmpty()) {
+            model.addAttribute("chapters", chapters);
+        }
+        model.addAttribute("lessontitle", new LessonTitleDTO());
+        model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step3CourseContent :: step3Content");
+        return "instructorDashboard/indexUpdate";
+    }
+    //save chapter in course Content
+    @PostMapping("/createcourse/chaptersadd")
+    public String addNewChapter(@Valid @ModelAttribute("chapter") ChapterDTO chapterDTO,
+                                BindingResult result,
+                                Model model,
+                                RedirectAttributes redirectAttributes,
+                                HttpSession session
+    ) {
+        Long courseId = ((Course) session.getAttribute("course")).getCourseId();
+        if(result.hasErrors()) {
+            model.addAttribute("showForm", true);
+            List<Chapter> chapters = chapterService.chapterListByCourse(courseId);
+            model.addAttribute("chapter", chapterDTO);
+            model.addAttribute("chapters", chapters);
+            model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step3CourseContent :: step3Content");
+            return "instructorDashboard/indexUpdate";
+        }
+        chapterDTO.setCourseId(courseId);
+        List<Chapter> existingChapters = chapterService.chapterListByCourse(courseId);
+        if (chapterDTO.getOrderNumberChapter() == null || chapterDTO.getOrderNumberChapter() == 0) {
+            int maxOrderNumber = existingChapters.stream()
+                    .mapToInt(Chapter::getOrderNumber)
+                    .max()
+                    .orElse(0);
+            chapterDTO.setOrderNumberChapter(maxOrderNumber + 1);
+        }
+        else {
+            List<Chapter> chapters = chapterService.chapterListByCourse(courseId);
+            for (Chapter chapter : chapters) {
+                if (chapter.getOrderNumber() == chapterDTO.getOrderNumberChapter()) {
+                    model.addAttribute("errorMessage", "Order number already exists. Please choose a different order number.");
+                    model.addAttribute("chapter", chapterDTO);
+                    model.addAttribute("chapters", chapters);
+                    model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step3CourseContent :: step3Content");
+                    return "instructorDashboard/indexUpdate";
+                }
+            }
+        }
+        chapterService.saveChapter(chapterDTO);
+        redirectAttributes.addFlashAttribute("successMessage", "Chapter added successfully.");
+        return "redirect:../createcourse/coursecontent";
+    }
+    //delete chapter
+    @PostMapping("/createcourse/deletechapter")
+    public String deleteChapter(@RequestParam(name = "chapterId") Long chapterId
+                                , RedirectAttributes redirectAttributes,
+                                HttpSession session) {
+        lessonChapterService.deleteChapter(chapterId);
+        redirectAttributes.addFlashAttribute("errorMessage", "Chapter deleted successfully.");
+        return "redirect:../createcourse/coursecontent";
+    }
+    //save lesson title
+    @PostMapping("/createcourse/addlesson")
+    public String addNewLesson(@Valid @ModelAttribute("lessontitle") LessonTitleDTO lessonTitleDTO,
+                               BindingResult result,
+                               Model model,
+                               RedirectAttributes redirectAttributes,
+                               HttpSession session,
+                               @RequestParam(name = "chapterId") Long chapterId) {
+        Long courseId = ((Course) session.getAttribute("course")).getCourseId();
+        if (result.hasErrors()) {
+            List<Chapter> chapters = chapterService.chapterListByCourse(courseId);
+            model.addAttribute("chapters", chapters);
+            //khong biet co phai tim chapterDTO de hien thi lai khong nhi
+            model.addAttribute("chapter", new ChapterDTO());
+            model.addAttribute("lessontitle", lessonTitleDTO);
+            model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step3CourseContent :: step3Content");
+            return "instructorDashboard/indexUpdate";
+        }
+        lessonTitleDTO.setChapterId(chapterId);
+        List<Lesson> existingLessons = lessonService.findLessonsByChapterId(chapterId);
+        if (lessonTitleDTO.getOrderNumber() == null || lessonTitleDTO.getOrderNumber() == 0) {
+            int maxOrderNumber = existingLessons.stream()
+                    .mapToInt(Lesson::getOrderNumber)
+                    .max()
+                    .orElse(0);
+            lessonTitleDTO.setOrderNumber(maxOrderNumber + 1);
+        }
+        else {
+            List<Lesson> lessons = lessonService.findLessonsByChapterId(chapterId);
+            for (Lesson lesson : lessons) {
+                if (lesson.getOrderNumber() == lessonTitleDTO.getOrderNumber()) {
+                    model.addAttribute("errorMessage", "Order number already exists. Please choose a different order number.");
+                    model.addAttribute("chapter", new ChapterDTO());
+                    model.addAttribute("lessontitle", lessonTitleDTO);
+                    List<Chapter> chapters = chapterService.chapterListByCourse(courseId);
+                    model.addAttribute("chapters", chapters);
+                    model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step3CourseContent :: step3Content");
+                    return "instructorDashboard/indexUpdate";
+                }
+            }
+        }
+        lessonChapterService.createLesson(lessonTitleDTO);
+        redirectAttributes.addFlashAttribute("successMessage", "Lesson added successfully.");
+        return "redirect:../createcourse/coursecontent";
+    }
+    //view course sau khi create chapter or lesson
+    @GetMapping("createcourse/coursecontent")
+    public String showCourseContent(Model model, HttpSession session) {
+        ChapterDTO chapterDTO = new ChapterDTO();
+        model.addAttribute("chapter", chapterDTO);
+        Long courseId = ((Course) session.getAttribute("course")).getCourseId();
+        List<Chapter> chapters = chapterService.chapterListByCourse(courseId);
+        for (Chapter chapter : chapters) {
+            List<Lesson> lessons = lessonService.findLessonsByChapterId(chapter.getId());
+            if (lessons != null && lessons.size() > 0) {
+                chapter.setLessons(lessons);
+            }
+        }
+        if (chapters != null && !chapters.isEmpty()) {
+            model.addAttribute("chapters", chapters);
+        }
+        model.addAttribute("lessontitle", new LessonTitleDTO());
+        model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step3CourseContent :: step3Content");
         return "instructorDashboard/indexUpdate";
     }
 }

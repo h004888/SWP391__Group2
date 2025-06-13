@@ -25,4 +25,5 @@ public class CourseDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String status;
+    private String courseLevel; //beginner, intermediate, advanced
 }

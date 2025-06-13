@@ -1,4 +1,4 @@
-package com.OLearning.controller.instructorDashboard;
+package com.OLearning.controller;
 
 import com.OLearning.service.cloudinary.UploadFile;
 import lombok.RequiredArgsConstructor;

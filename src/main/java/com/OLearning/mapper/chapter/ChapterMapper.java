@@ -12,7 +12,7 @@ public class ChapterMapper {
         Chapter chapter = new Chapter();
         chapter.setTitle(dto.getTitle());
         chapter.setDescription(dto.getDescription());
-        chapter.setOrderNumber(dto.getOrdernNumber());
+        chapter.setOrderNumber(dto.getOrderNumberChapter());
         chapter.setCreateAt(LocalDateTime.now());
         chapter.setUpdateAt(LocalDateTime.now());
         return chapter;

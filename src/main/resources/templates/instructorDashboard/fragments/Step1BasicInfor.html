@@ -63,7 +63,7 @@
                               th:text="${cat.categoryName}">
                       </option>
                     </select>
-                    <label for="courseCategory">Category *</label>
+                    <label for="courseCategory">Category</label>
                     <div style="color: red" th:if="${#fields.hasErrors('categoryName')}" th:errors="*{categoryName}"></div>
                   </div>
                 </div>
@@ -77,7 +77,21 @@
                   </div>
                 </div>
               </div>
-
+              <div class="col-12">
+                <label class="form-label">Course level</label>
+                <select class="form-select js-choice"
+                        aria-label=".form-select-sm"
+                        data-search-enabled="false"
+                        data-remove-item-button="true"
+                        th:field="*{courseLevel}">
+                  <option value="">Select course level</option>
+                  <option value="All level">All level</option>
+                  <option value="Beginner">Beginner</option>
+                  <option value="Intermediate">Intermediate</option>
+                  <option value="Advance">Advance</option>
+                </select>
+                <div style="color: red" th:if="${#fields.hasErrors('courseLevel')}" th:errors="*{courseLevel}"></div>
+              </div>
               <div class="row mb-3">
                 <div class="col-12">
                   <label class="form-label">Course Description</label>

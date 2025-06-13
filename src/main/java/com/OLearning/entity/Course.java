@@ -27,10 +27,12 @@ public class Course {
     private Integer totalLessons;//step 2
     private Integer totalRatings;
     private Integer totalStudentEnrolled;
+    private String courseLevel; //beginner, intermediate, advanced
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private String status = "draft";
+    private String status; //=draft
     private Boolean canResubmit;
+    @Column(name = "videoUrlPreview", columnDefinition = "nvarchar(max)")
     private String videoUrlPreview;
     @ManyToOne
     @JoinColumn(name = "userId")

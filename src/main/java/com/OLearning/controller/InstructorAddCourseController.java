@@ -1,4 +1,4 @@
-package com.OLearning.controller.instructorDashboard;
+package com.OLearning.controller;
 
 import com.OLearning.dto.chapter.ChapterDTO;
 import com.OLearning.dto.course.AddCourseStep1DTO;
@@ -123,7 +123,7 @@ public class InstructorAddCourseController {
         List<Chapter> existingChapters = chapterService.chapterListByCourse(courseId);
         //tim dc list chapter by courseId
         int nextOrderNumber = existingChapters.size() + 1;
-        chapterDTO.setOrdernNumber(nextOrderNumber);
+        chapterDTO.setOrderNumberChapter(nextOrderNumber);
         chapterService.saveChapter(chapterDTO);
         return "redirect:/instructordashboard/viewcourse/addcoursestep2?courseId=" + courseId;
 
@@ -136,7 +136,7 @@ public class InstructorAddCourseController {
         //tim dc list lesson by chapterId
         int nextOrderNumber = existingLessons.size() + 1;
         lessonVideoDTO.setOrderNumber(nextOrderNumber);
-        lessonService.createLesson(lessonVideoDTO);
+//        lessonService.createLesson(lessonVideoDTO);
         Long chapterId = lessonVideoDTO.getChapterId();
         Long courseId = chapterService.getChapterById(chapterId).getCourse().getCourseId();
         return "redirect:/instructordashboard/viewcourse/addcoursestep2?courseId=" + courseId;

@@ -5,8 +5,10 @@ import com.OLearning.entity.Chapter;
 import com.OLearning.entity.Course;
 import com.OLearning.mapper.chapter.ChapterMapper;
 import com.OLearning.repository.ChapterRepository;
+import com.OLearning.repository.LessonRepository;
 import com.OLearning.service.chapter.ChapterService;
 import com.OLearning.service.course.CourseService;
+import com.OLearning.service.lesson.LessonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,12 +22,15 @@ public class ChapterServiceImpl implements ChapterService {
     private ChapterMapper chapterMapper;
     @Autowired
     private CourseService courseService;
+    @Autowired
+    private LessonRepository lessonRepository;
+
     @Override
     public Chapter saveChapter(ChapterDTO chapterDTO) {
         Chapter chapter = chapterMapper.dtoToChapter(chapterDTO);
         Course course = courseService.findCourseById(chapterDTO.getCourseId());
         chapter.setCourse(course);
-         return chapterRepository.save(chapter);
+        return chapterRepository.save(chapter);
     }
 
     @Override
@@ -37,4 +42,7 @@ public class ChapterServiceImpl implements ChapterService {
     public Chapter getChapterById(Long id) {
         return chapterRepository.findChapterById(id);
     }
+
+
 }
+

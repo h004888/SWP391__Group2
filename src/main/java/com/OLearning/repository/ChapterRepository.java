@@ -15,4 +15,6 @@ public interface ChapterRepository extends JpaRepository<Chapter, Long> {
 
     @Query(value = "SELECT * FROM Chapter WHERE id = :id", nativeQuery = true)
     Chapter findChapterById(@Param("id") Long id);
+
+    void deleteById(Long id);
 }

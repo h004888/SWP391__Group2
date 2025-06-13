@@ -32,7 +32,7 @@ public class UploadFileImpl implements UploadFile {
     private String uploadFile(MultipartFile file, String resourceType) throws IOException {
         assert file.getOriginalFilename() != null;
         String publicValue = generatePublicValue(file.getOriginalFilename());
-        String extension = getFileName(file.getOriginalFilename())[1];
+        String extension = getFileName(file.getOriginalFilename())[1];//jpg, png
         File fileUpload = convert(file, publicValue, extension);
         try {
             cloudinary.uploader().upload(

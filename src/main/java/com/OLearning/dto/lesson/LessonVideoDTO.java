@@ -16,5 +16,5 @@ public class LessonVideoDTO {
     private Integer duration;
     private Boolean isFree;
     private Long chapterId;
-    private String videoUrl;
+    private String contentType;
 }

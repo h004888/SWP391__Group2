@@ -26,4 +26,6 @@ public class AddCourseStep1DTO {
     @NotNull(message = "Price is required")
     @Positive(message = "Price must be greater than 0")
     private Double price;
+    @NotBlank(message = "Course Level is required")
+    private String courseLevel; //beginner, intermediate, advanced
 }

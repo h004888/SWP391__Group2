@@ -34,6 +34,7 @@ public class CourseMapper {
         courseDTO.setCreatedAt(course.getCreatedAt());
         courseDTO.setUpdatedAt(course.getUpdatedAt());
         courseDTO.setPrice(course.getPrice());
+        courseDTO.setCourseLevel(course.getCourseLevel());
         courseDTO.setDuration(course.getDuration());
         courseDTO.setDiscount(course.getDiscount());
         courseDTO.setTotalLessons(course.getTotalLessons());
@@ -46,6 +47,7 @@ public class CourseMapper {
         course.setDescription(dto.getDescription());
         course.setCreatedAt(LocalDateTime.now());
         course.setPrice(dto.getPrice());
+        course.setCourseLevel(dto.getCourseLevel());
         return course;
     }
     public AddCourseStep1DTO DraftStep1(Course course) {
@@ -55,6 +57,7 @@ public class CourseMapper {
         dto.setDescription(course.getDescription());
         dto.setCategoryName(course.getCategory().getName());
         dto.setPrice(course.getPrice());
+        dto.setCourseLevel(course.getCourseLevel());
         return dto;
     }
 }

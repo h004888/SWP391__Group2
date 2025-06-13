@@ -28,8 +28,7 @@ public class Lesson {
     @JoinColumn(name = "chapterId")
     private Chapter chapter;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "videoId")
+    @OneToOne(mappedBy = "lesson", cascade = CascadeType.ALL)
     private Video video;
 
     @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL, orphanRemoval = true)
