@@ -7,7 +7,7 @@ import com.OLearning.repository.CourseRepository;
 import com.OLearning.repository.EnrollmentRepository;
 import com.OLearning.repository.FeesRepository;
 import com.OLearning.repository.NotificationRepository;
-import com.OLearning.repository.adminDashBoard.CourseMaintenanceRepository;
+import com.OLearning.repository.CourseMaintenanceRepository;
 import com.OLearning.service.courseMaintance.CourseMaintenanceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;

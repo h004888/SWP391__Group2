@@ -44,4 +44,6 @@ public interface UserService {
     void assignRoleToUser(Long userId, String roleName);
 
     List<UserDTO> getTopInstructorsByCourseCount(int limit);
+    
+    UserDTO getUserByEmail(String username);
 }

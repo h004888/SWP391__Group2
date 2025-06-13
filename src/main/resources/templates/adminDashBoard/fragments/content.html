@@ -233,15 +233,14 @@
         function initializeCharts() {
             // Set default date range to current year
             const now = new Date();
-            const firstDay = new Date(now.getFullYear(), 1, 1);
-            const lastDay = new Date(now.getFullYear(), 11, 31);
+            const firstDay = new Date(now.getFullYear(), 0, 2);//01/01/2025
 
             document.getElementById('startDate').value = firstDay.toISOString().split('T')[0];
-            document.getElementById('endDate').value = lastDay.toISOString().split('T')[0];
+            document.getElementById('endDate').value = now.toISOString().split('T')[0];
             document.getElementById('enrollmentStartDate').value = firstDay.toISOString().split('T')[0];
-            document.getElementById('enrollmentEndDate').value = lastDay.toISOString().split('T')[0];
+            document.getElementById('enrollmentEndDate').value = now.toISOString().split('T')[0];
             document.getElementById('maintenanceStartDate').value = firstDay.toISOString().split('T')[0];
-            document.getElementById('maintenanceEndDate').value = lastDay.toISOString().split('T')[0];
+            document.getElementById('maintenanceEndDate').value = now.toISOString().split('T')[0];
 
             // First render charts with initial data
             if (typeof e !== 'undefined') {
@@ -252,9 +251,9 @@
 
             // Then fetch updated data
             Promise.all([
-                fetch(`/admin/revenue?startDate=${firstDay.toISOString().split('T')[0]}&endDate=${lastDay.toISOString().split('T')[0]}`).then(response => response.json()),
-                fetch(`/admin/enrollments?startDate=${firstDay.toISOString().split('T')[0]}&endDate=${lastDay.toISOString().split('T')[0]}`).then(response => response.json()),
-                fetch(`/admin/maintenance-revenue?startDate=${firstDay.toISOString().split('T')[0]}&endDate=${lastDay.toISOString().split('T')[0]}`).then(response => response.json())
+                fetch(`/admin/revenue?startDate=${firstDay.toISOString().split('T')[0]}&endDate=${now.toISOString().split('T')[0]}`).then(response => response.json()),
+                fetch(`/admin/enrollments?startDate=${firstDay.toISOString().split('T')[0]}&endDate=${now.toISOString().split('T')[0]}`).then(response => response.json()),
+                fetch(`/admin/maintenance-revenue?startDate=${firstDay.toISOString().split('T')[0]}&endDate=${now.toISOString().split('T')[0]}`).then(response => response.json())
             ]).then(([revenueData, enrollmentData, maintenanceData]) => {
                 // Only update if we have data
                 if (Object.keys(enrollmentData).length > 0) {

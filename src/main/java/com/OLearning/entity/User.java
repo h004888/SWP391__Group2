@@ -24,6 +24,7 @@ public class User {
     private String password;
     private String fullName;
     private String phone;
+    private Long coin;
     private LocalDate birthday;
     private String address;
     private String profilePicture;
@@ -43,5 +44,12 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Notification> notifications;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<InstructorRequest> instructorRequests;
+
+    @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL)
+    private List<InstructorRequest> approvedRequests;
+//    @OneToMany(mappedBy = "user")
+//    private List<CoinTransaction> coinTransactions;
 }
 
