@@ -11,7 +11,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CartDetailDTO {
     private Long id;
-    private Long cartId;
     private Long courseId;
+    private String courseTitle;
+    private String courseImg;
     private Double price;
 }

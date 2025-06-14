@@ -17,9 +17,9 @@ public class CartDetail {
     private Long id;
     private Double price;
     @ManyToOne
-    @JoinColumn(name = "cartId")
+    @JoinColumn(name = "cartId", nullable = false)
     private Cart cart;
     @ManyToOne
-    @JoinColumn(name = "courseId")
+    @JoinColumn(name = "courseId", nullable = false)
     private Course course;
 }

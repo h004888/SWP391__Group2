@@ -1,5 +1,7 @@
 package com.OLearning.service.category;
 
+
+import com.OLearning.dto.category.CategoryDTO;
 import com.OLearning.entity.Category;
 
 import org.springframework.data.domain.Page;
@@ -19,7 +21,7 @@ public interface CategoryService {
 
     boolean existsById(int id);
 
-    List<Category> findAll();
+    List<CategoryDTO> getAllCategory();
     List<Category> findTop5ByOrderByIdAsc();
 
     Category save(Category categories);

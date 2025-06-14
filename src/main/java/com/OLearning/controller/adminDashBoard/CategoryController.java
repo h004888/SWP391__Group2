@@ -19,13 +19,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 @RequestMapping("/admin")
 public class CategoryController {
-    private static final String adminDashBoardPath = "adminDashBoard/index";
+    private static final String adminDashboardPath = "adminDashboard/index";
     private static final String fragmentContent = "fragmentContent";
-    private static final String categoryList = "adminDashBoard/fragments/category :: categoryList";
+    private static final String categoryList = "adminDashboard/fragments/category :: categoryList";
 
-    private static final String categoryPagination = "adminDashBoard/fragments/category :: categoryPage";
+    private static final String categoryPagination = "adminDashboard/fragments/category :: categoryPage";
     @Autowired
-    private CategoryService categoryService;
+    private CategoryService categoriesService;
     @Autowired
     private CourseService courseService;
 
@@ -35,26 +35,26 @@ public class CategoryController {
                         : sort.equals("desc") ? Sort.by("name").descending()
                         : Sort.unsorted());
 
-        Page<Category> categoriesPage = categoryService.findByNameContaining(name, pageable);
+        Page<Category> categoriesPage = categoriesService.findByNameContaining(name, pageable);
 
-        model.addAttribute("category", categoriesPage.getContent());
+        model.addAttribute("categories", categoriesPage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", categoriesPage.getTotalPages());
         model.addAttribute("totalItems", categoriesPage.getTotalElements());
 
     }
 
-    @GetMapping("/category/showmore")
+    @GetMapping("/categories/showmore")
     public String showmore(@RequestParam("id") int id, Model model) {
-        Category category = categoryService.findById(id);
+        Category category = categoriesService.findById(id);
         model.addAttribute("category", category);
         model.addAttribute("coursesList", category.getCourses());
-        model.addAttribute(fragmentContent, "adminDashBoard/fragments/showMore :: showMore");
-        return "adminDashBoard/index";
+        model.addAttribute(fragmentContent, "adminDashboard/fragments/showMore :: showMore");
+        return "adminDashboard/index";
 
     }
 
-    @GetMapping("/category")
+    @GetMapping("/categories")
     public String getAllCategories(
             @RequestParam(defaultValue = "") String name,
             @RequestParam(defaultValue = "") String sort,
@@ -72,21 +72,21 @@ public class CategoryController {
         } else {
             // Request thường → load layout chính
             model.addAttribute(fragmentContent, categoryList);
-            return adminDashBoardPath;
+            return adminDashboardPath;
         }
     }
 
-    @GetMapping("/category/delete")
+    @GetMapping("/categories/delete")
     public String deleteCategory(@RequestParam("id") int id, Model model) {
-        if (categoryService.existsById(id) ) {
-            categoryService.deleteById(id);
+        if (categoriesService.existsById(id) ) {
+            categoriesService.deleteById(id);
         }
-        List<Category> categories = categoryService.findAll();
+        List<Category> categories = categoriesService.getListCategories();
         model.addAttribute("categories", categories);
         return categoryPagination;
     }
 
-    @PostMapping("/category/add")
+    @PostMapping("/categories/add")
     public String addCategory(@RequestParam("name") String name,
                               @RequestParam(defaultValue = "") String sort,
                               @RequestParam(defaultValue = "") String search,
@@ -94,62 +94,62 @@ public class CategoryController {
                               @RequestParam(defaultValue = "5") int size,
                               Model model) {
 
-        if (categoryService.existsByName(name)) {
+        if (categoriesService.existsByName(name)) {
             model.addAttribute("errorMessage", "Category already exists");
         } else {
             Category newCategory = new Category();
             newCategory.setName(name.trim());
-            categoryService.save(newCategory);
+            categoriesService.save(newCategory);
             model.addAttribute("successMessage", "Category added successfully");
         }
 
         loadPagedCategories(model, search, sort, page, size);
         model.addAttribute(fragmentContent, categoryList);
-        return adminDashBoardPath;
+        return adminDashboardPath;
     }
 
-    @GetMapping("/category/edit")
+    @GetMapping("/categories/edit")
     public String editCategory(@RequestParam("id") int id,
                                @RequestParam(defaultValue = "0") int page,
                                @RequestParam(defaultValue = "") String sort,
                                @RequestParam(defaultValue = "") String name,
                                Model model) {
-        Category category = categoryService.findById(id);
+        Category category = categoriesService.findById(id);
         if (category != null) {
             model.addAttribute("category", category);
             model.addAttribute("currentPage", page);
             model.addAttribute("sort", sort);
             model.addAttribute("name", name);
-            model.addAttribute(fragmentContent, "adminDashBoard/fragments/category :: editCategory");
+            model.addAttribute(fragmentContent, "adminDashboard/fragments/category :: editCategory");
         } else {
             model.addAttribute("errorMessage", "Category not found");
         }
-        return adminDashBoardPath;
+        return adminDashboardPath;
     }
 
-    @PostMapping("/category/edit")
+    @PostMapping("/categories/edit")
     public String editCategory(@RequestParam("id") int id,
                                @RequestParam("name") String name,
                                @RequestParam(defaultValue = "0") int page,
                                @RequestParam(defaultValue = "") String sort,
                                @RequestParam(defaultValue = "") String search,
                                Model model) {
-        Category category = categoryService.findById(id);
+        Category category = categoriesService.findById(id);
 
         if (category == null) {
             model.addAttribute("errorMessage", "Category not found");
-        } else if (categoryService.existsByName(name) && !category.getName().equals(name)) {
+        } else if (categoriesService.existsByName(name) && !category.getName().equals(name)) {
             model.addAttribute("errorMessage", "Another category with this name already exists");
         } else if (category.getName().equalsIgnoreCase(name.trim())) {
             model.addAttribute("errorMessage", "Không có thay đổi nào được thực hiện");
         } else {
-            categoryService.updateCategory(id, name.trim());
+            categoriesService.updateCategory(id, name.trim());
             model.addAttribute("successMessage", "Category updated successfully");
         }
 
         loadPagedCategories(model, search, sort, page, 5);
         model.addAttribute(fragmentContent, categoryList);
-        return adminDashBoardPath;
+        return adminDashboardPath;
     }
 
 }

@@ -1,12 +1,15 @@
-package com.OLearning.service.orders.impl;
+package com.OLearning.service.orders.Impl;
 
+import com.OLearning.dto.cart.CartDTO;
+import com.OLearning.dto.cart.CartDetailDTO;
 import com.OLearning.dto.orders.OrdersDTO;
-import com.OLearning.entity.OrderDetail;
-import com.OLearning.entity.Orders;
+import com.OLearning.entity.*;
 import com.OLearning.mapper.orders.OrdersMapper;
-import com.OLearning.repository.OrderDetailRepository;
-import com.OLearning.repository.OrdersRepository;
+import com.OLearning.repository.*;
+import com.OLearning.service.cart.CartService;
 import com.OLearning.service.orders.OrdersService;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,7 +17,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class OrdersServiceImpl implements OrdersService {
@@ -27,6 +34,18 @@ public class OrdersServiceImpl implements OrdersService {
 
     @Autowired
     private OrdersMapper ordersMapper;
+
+    @Autowired
+    private CartService cartService;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private CourseRepository courseRepository;
+
+    @Autowired
+    private EnrollmentRepository enrollmentRepository;
 
     @Override
     public List<OrdersDTO> getAllOrders() {
@@ -71,7 +90,7 @@ public class OrdersServiceImpl implements OrdersService {
 
     @Override
     public List<OrderDetail> getOrderDetailsByOrderId(Long orderId) {
-        return orderDetailRepository.findByOrdersOrderId(orderId);
+        return orderDetailRepository.findByOrderOrderId(orderId);
     }
 
     @Override
@@ -94,4 +113,5 @@ public class OrdersServiceImpl implements OrdersService {
 
         return ordersPage.map(ordersMapper::toDTO);
     }
+
 }

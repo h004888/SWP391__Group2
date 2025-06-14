@@ -13,6 +13,7 @@ import com.OLearning.repository.UserRepository;
 import com.OLearning.service.email.EmailService;
 import com.OLearning.service.user.UserService;
 import jakarta.mail.MessagingException;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -199,5 +200,10 @@ import java.util.stream.Collectors;
         return false;
     }
 
-
+    @Override
+    public UserDetailDTO getUserDetailsByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
+        return userDetailMapper.toDetailDTO(user);
+    }
 }

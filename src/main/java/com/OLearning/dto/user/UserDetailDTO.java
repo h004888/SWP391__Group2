@@ -17,6 +17,7 @@ public class UserDetailDTO {
     private String fullName;
     private String email;
     private String phone;
+    private Double coin;
     private String roleName;
     private String address;
     private String profilePicture;

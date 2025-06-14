@@ -1,4 +1,4 @@
-package com.OLearning.service.courseMaintenance.impl;
+package com.OLearning.service.courseMaintenance.Impl;
 
 import com.OLearning.entity.Course;
 import com.OLearning.entity.CourseMaintenance;

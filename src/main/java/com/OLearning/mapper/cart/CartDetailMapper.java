@@ -7,10 +7,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class CartDetailMapper {
     public CartDetailDTO toDTO(CartDetail cartDetail) {
+        if (cartDetail == null || cartDetail.getCourse() == null) {
+            return null;
+        }
         CartDetailDTO dto = new CartDetailDTO();
         dto.setId(cartDetail.getId());
-        dto.setCartId(cartDetail.getCart() != null ? cartDetail.getCart().getCartId() : null);
-        dto.setCourseId(cartDetail.getCourse() != null ? cartDetail.getCourse().getCourseId() : null);
+        dto.setCourseId(cartDetail.getCourse().getCourseId());
+        dto.setCourseTitle(cartDetail.getCourse().getTitle());
+        dto.setCourseImg(cartDetail.getCourse().getCourseImg());
         dto.setPrice(cartDetail.getPrice());
         return dto;
     }

@@ -1,5 +1,6 @@
 package com.OLearning.service.course.impl;
 
+
 import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.course.CourseDetailDTO;
 import com.OLearning.entity.Course;
@@ -7,67 +8,40 @@ import com.OLearning.mapper.course.CourseDetailMapper;
 import com.OLearning.mapper.course.CourseMapper;
 import com.OLearning.repository.CourseRepository;
 import com.OLearning.service.course.CourseService;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Service
+@Service("adminCourseService")
 @RequiredArgsConstructor
 public class CourseServiceImpl implements CourseService {
-
-    private final CourseMapper courseMapper;
-    private final CourseRepository courseRepository;
-    private final CourseDetailMapper courseDetailMapper;
+    @Autowired
+    private CourseMapper courseMapper;
+    @Autowired
+    private CourseRepository courseRepository;
+    @Autowired
+    private CourseDetailMapper courseDetailMapper;
 
     @Override
-    public Page<CourseDTO> getAllCourses(Pageable pageable) {
-        Page<Course> courseList = courseRepository.findAll(pageable);
-        return courseList.map(courseMapper::toDTO);
+    public List<CourseDTO> getAllCourses() {
+        List<Course> courseList = courseRepository.findAll();
+        return courseList.stream()
+                .map(CourseMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
     public Optional<CourseDetailDTO> getDetailCourse(Long id) {
         return courseRepository.findById(id).map(courseDetailMapper::toDTO);
     }
-
-    @Override
-    public boolean approveCourse(Long id) {
-        return courseRepository.findById(id)
-                .map(course -> {
-                    if (!"approved".equalsIgnoreCase(course.getStatus())) {
-                        course.setStatus("approved");
-                        course.setUpdatedAt(LocalDateTime.now());
-                        courseRepository.save(course);
-                        return true;
-                    }
-                    return false;
-                })
-                .orElse(false);
-    }
-
-    @Override
-    public boolean rejectCourse(Long id) {
-        return courseRepository.findById(id)
-                .map(course -> {
-                    if (!"rejected".equalsIgnoreCase(course.getStatus())) {
-                        course.setStatus("rejected");
-                        course.setUpdatedAt(LocalDateTime.now());
-                        courseRepository.save(course);
-                        return true;
-                    }
-                    return false;
-                })
-                .orElse(false);
-    }
-
 
     @Override
     public boolean deleteCourse(Long id) {
@@ -79,15 +53,31 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public Page<CourseDTO> filterCoursesWithPagination(String keyword, Integer category, String price, String status, int page, int size) {
-        String searchKeyword = keyword != null && !keyword.trim().isEmpty() ? keyword.trim() : null;
+    public List<CourseDTO> filterCourses(String keyword, Integer categoryId, String price, String status) {
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            keyword = "%" + keyword.trim().toLowerCase() + "%";
+        } else {
+            keyword = null;
+        }
+        if (categoryId != null && categoryId == 0)
+            categoryId = null;
+        if (price != null && price.trim().isEmpty())
+            price = null;
+        if (status != null && status.trim().isEmpty())
+            status = null;
 
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Course> coursePage = courseRepository.filterCourses(
-                searchKeyword, category, price, status, pageable
-        );
-        return coursePage.map(courseMapper::toDTO);
+        return courseRepository.filterCourses(keyword, categoryId, price, status).stream()
+                .map(CourseMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
+    @Override
+    public List<Course> getTopCourses() {
+        return courseRepository.findTop5ByOrderByTotalStudentEnrolledDesc();
+    }
 
+    @Override
+    public Page<CourseDTO> getCoursesByTotalRatings(Pageable pageable) {
+        return courseRepository.findAllByOrderByTotalRatingsDesc(pageable).map(CourseMapper::toDTO);
+    }
 }

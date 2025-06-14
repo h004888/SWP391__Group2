@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 @Getter
 @Setter
@@ -14,7 +15,6 @@ import java.util.List;
 public class CartDTO {
     private Long cartId;
     private Long userId;
-    private List<CartDetailDTO> cartDetails;
-    private Long total;
-
+    private List<CartDetailDTO> cartDetails = new ArrayList<>();
+    private Long total = 0L;
 }

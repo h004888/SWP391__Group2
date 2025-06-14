@@ -1,0 +1,141 @@
+<main th:fragment="cartContent">
+  <!-- Display success/error messages -->
+  <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+    <span th:text="${message}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+
+  <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <span th:text="${error}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+
+  <section class="py-0">
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <div class="bg-light p-4 text-center rounded-3">
+            <h1 class="m-0">My Cart</h1>
+            <nav aria-label="breadcrumb" class="d-flex justify-content-center">
+              <ol class="breadcrumb breadcrumb-dots mb-0">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/courses">Courses</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Cart</li>
+              </ol>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Empty Cart Section -->
+  <section th:if="${cartItems == null || cartItems.isEmpty()}">
+    <div class="container">
+      <div class="row">
+        <div class="col-12 text-center">
+          <img th:src="@{assets/images/element/cart.svg}" class="h-200px h-md-300px mb-3" alt="Empty Cart">
+          <h2>Your cart is currently empty</h2>
+          <p class="mb-0">Please check out all the available courses and buy some courses that fulfill your needs.</p>
+          <a th:href="@{/courses}" class="btn btn-primary mt-4 mb-0">Back to Shop</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Cart Content Section -->
+  <section th:if="${cartItems != null and !cartItems.isEmpty()}">
+    <div class="container">
+      <div class="row g-4 g-sm-5">
+        <!-- Main Content START -->
+        <div class="col-lg-8 mb-4 mb-sm-0">
+          <div class="card card-body p-4 shadow">
+            <div class="table-responsive border-0 rounded-3">
+              <table class="table align-middle p-4 mb-0">
+                <tbody class="border-top-0">
+                <tr th:each="item : ${cartItems}">
+                  <td>
+                    <div class="d-lg-flex align-items-center">
+                      <div class="ms-lg-3 mt-2 mt-lg-0">
+                        <h6 class="mb-0">
+                          <a th:href="@{'/courses/' + ${item.courseId}}"
+                             th:text="${item.courseTitle} ?: 'Course ID: ' + ${item.courseId}"
+                             class="text-decoration-none">Course Title</a>
+                        </h6>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    <h5 class="text-success mb-0"
+                        th:text="'$' + ${#numbers.formatDecimal(item.price, 0, 'COMMA', 2, 'POINT')}">Price</h5>
+                  </td>
+                  <td class="text-end">
+                    <a th:href="@{'/cart/remove/' + ${item.id}}"
+                       class="btn btn-sm btn-danger-soft px-2 mb-0"
+                       onclick="return confirm('Are you sure you want to remove this item from your cart?')">
+                      <i class="fas fa-fw fa-times"></i>
+                    </a>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Clear Cart Button -->
+            <div class="text-end mt-3">
+              <form th:action="@{/cart/clear}" method="post" style="display: inline;">
+                <button type="submit"
+                        class="btn btn-sm btn-outline-danger"
+                        onclick="return confirm('Are you sure you want to clear your entire cart?')">
+                  <i class="fas fa-trash me-1"></i>Clear Cart
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+        <!-- Main Content END -->
+
+        <!-- Right Sidebar START -->
+        <div class="col-lg-4">
+          <div class="card card-body p-4 shadow">
+            <h4 class="mb-3">Cart Total</h4>
+            <ul class="list-group list-group-borderless mb-2">
+              <li class="list-group-item px-0 d-flex justify-content-between">
+                <span class="h6 fw-light mb-0">Original Price</span>
+                <span class="h6 fw-light mb-0 fw-bold" th:text="'$' + ${#numbers.formatDecimal(totalPrice, 0, 'COMMA', 2, 'POINT')}">$0.00</span>
+              </li>
+              <hr class="my-1">
+              <li class="list-group-item px-0 d-flex justify-content-between">
+                <span class="h5 mb-0">Total</span>
+                <span class="h5 mb-0" th:text="'Total: $' + ${#numbers.formatDecimal(totalPrice, 0, 'COMMA', 2, 'POINT')}">$0.00</span>
+              </li>
+            </ul>
+            <div class="d-flex justify-content-center">
+              <form th:action="@{/cart/checkout}" method="post">
+                <button type="submit" class="btn btn-lg btn-success"
+                        onclick="return confirm('Are you sure you want to check out?')">
+                  Checkout
+                </button>
+              </form>
+            </div>
+            <p class="small mb-0 mt-2 text-center">
+              By completing your purchase, you agree to these
+              <a href="#" class="text-decoration-none"><strong>Terms of Service</strong></a>
+            </p>
+          </div>
+
+          <!-- Continue Shopping Card -->
+          <div class="card card-body p-4 shadow mt-4">
+            <h5 class="mb-3">Continue Shopping</h5>
+            <div class="d-grid">
+              <a th:href="@{/courses}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left me-2"></i>Browse More Courses
+              </a>
+            </div>
+          </div>
+        </div>
+        <!-- Right Sidebar END -->
+      </div>
+    </div>
+  </section>
+</main>

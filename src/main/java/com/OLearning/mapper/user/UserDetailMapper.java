@@ -17,6 +17,7 @@ public class UserDetailMapper {
         dto.setFullName(user.getFullName());
         dto.setEmail(user.getEmail());
         dto.setPhone(user.getPhone());
+        dto.setCoin(user.getCoin());
         dto.setAddress(user.getAddress());
         dto.setProfilePicture(user.getProfilePicture());
         dto.setRoleName(user.getRole().getName());

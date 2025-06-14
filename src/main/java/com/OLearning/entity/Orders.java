@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Set;
 
 
@@ -30,12 +29,12 @@ public class Orders {
     @JoinColumn(name = "userId", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "orders", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<OrderDetail> orderDetails;
 
-    @OneToMany(mappedBy = "orders")
+    @OneToMany(mappedBy = "order")
     private Set<CourseMaintenance> courseMaintenances;
 
-    @OneToMany(mappedBy = "orders")
+    @OneToMany(mappedBy = "order")
     private Set<Enrollment> enrollments;
 }

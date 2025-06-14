@@ -42,4 +42,6 @@ public interface UserService {
     void validateRegistrationData(RegisterDTO registrationDto);
 
     void assignRoleToUser(Long userId, String roleName);
+
+    UserDetailDTO getUserDetailsByEmail(String email);
 }

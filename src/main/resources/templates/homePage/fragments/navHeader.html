@@ -1,5 +1,6 @@
 <header th:fragment="navHeader" class="navbar-light navbar-sticky header-static">
     <!-- Nav START -->
+
     <nav class="navbar navbar-expand-xl">
         <div class="container-fluid px-3 px-xl-5">
             <!-- Logo START -->
@@ -505,7 +506,16 @@
                 <!-- Nav Search END -->
             </div>
             <!-- Main navbar END -->
-
+            <div class="me-2 me-md-3 dropdown">
+                <!-- Cart button -->
+                <a class="btn btn-light btn-round mb-0" th:href="@{/cart}">
+                    <i class="bi bi-cart3 fa-fw"></i>
+                </a>
+                <!-- badge -->
+                <span id="cartTotalBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-dark mt-xl-2 ms-n1" th:text="${cartTotal != null ? cartTotal : 0}">
+                <span class="visually-hidden">items in cart</span>
+                </span>
+            </div>
             <!-- Profile START -->
             <div class="dropdown ms-1 ms-lg-0">
                 <a class="avatar avatar-sm p-0" href="#" id="profileDropdown" role="button" data-bs-auto-close="outside"
@@ -580,4 +590,118 @@
         </div>
     </nav>
     <!-- Nav END -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cartTotalBadge = document.getElementById('cartTotalBadge');
+
+            // Function to fetch and update cart total
+            const updateCartTotal = async () => {
+                try {
+                    const response = await fetch('/cart/total', {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    });
+                    if (!response.ok) throw new Error('Failed to fetch cart total');
+                    const data = await response.json();
+                    cartTotalBadge.textContent = data.total || 0;
+                } catch (error) {
+                    console.error('Error updating cart total:', error);
+                    cartTotalBadge.textContent = '0';
+                }
+            };
+
+            // Function to handle add to cart
+            const handleAddToCart = async (courseId) => {
+                try {
+                    const response = await fetch(`/cart/add/${courseId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content
+                        }
+                    });
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.error || 'Failed to add to cart');
+                    alert(data.message || 'Course added to cart successfully!');
+                    updateCartTotal();
+                } catch (error) {
+                    alert('Error: ' + error.message);
+                }
+            };
+
+            // Function to handle remove from cart
+            const handleRemoveFromCart = async (cartDetailId) => {
+                try {
+                    const response = await fetch(`/cart/remove/${cartDetailId}`, {
+                        method: 'GET',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content
+                        }
+                    });
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.error || 'Failed to remove item');
+                    alert(data.message || 'Item removed from cart successfully!');
+                    updateCartTotal();
+                } catch (error) {
+                    alert('Error: ' + error.message);
+                }
+            };
+
+            // Function to handle clear cart
+            const handleClearCart = async () => {
+                try {
+                    const response = await fetch('/cart/clear', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content
+                        }
+                    });
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.error || 'Failed to clear cart');
+                    alert(data.message || 'Cart cleared successfully!');
+                    updateCartTotal();
+                } catch (error) {
+                    alert('Error: ' + error.message);
+                }
+            };
+
+            // Event listeners for add to cart buttons
+            document.querySelectorAll('.add-to-cart').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const courseId = button.dataset.courseId;
+                    handleAddToCart(courseId);
+                });
+            });
+
+            // Event listeners for remove from cart buttons
+            document.querySelectorAll('.remove-from-cart').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const cartDetailId = button.dataset.cartDetailId;
+                    handleRemoveFromCart(cartDetailId);
+                });
+            });
+
+            // Event listener for clear cart button
+            const clearCartButton = document.getElementById('clear-cart');
+            if (clearCartButton) {
+                clearCartButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    handleClearCart();
+                });
+            }
+
+            // Initial cart total update
+            updateCartTotal();
+        });
+    </script>
+
+
 </header>
+
+
+

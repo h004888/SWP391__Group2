@@ -1,0 +1,63 @@
+package com.OLearning.controller.homePage;
+
+import com.OLearning.dto.category.CategoryDTO;
+import com.OLearning.dto.course.CourseDTO;
+import com.OLearning.mapper.course.CourseMapper;
+import com.OLearning.service.category.CategoryService;
+import com.OLearning.service.course.CourseService;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Controller
+@RequestMapping("/fragments")
+public class FragmentController {
+    @Autowired
+    private CategoryService categoryService;
+    @Autowired
+    private CourseService courseService;
+
+    @GetMapping("/category")
+    public List<CategoryDTO> getAllCategories() {
+        return categoryService.getAllCategory();
+    }
+
+//    @GetMapping("/courseByCategory")
+//    public String getAllCoursesByCategory(@RequestParam("categoryId") int categoryId, Model model) {
+//        model.addAttribute("courses", categoryService.findById(categoryId).getCourses().stream().limit(8)
+//                .map(CourseMapper::toDTO)
+//                .collect(Collectors.toList()));
+//
+//        return "homePage/fragments/cardCourse :: cardCourse";
+//    }
+
+    @GetMapping("/topCourse")
+    public String getTopCourses(Model model) {
+        model.addAttribute("topCourses", courseService.getTopCourses().stream().limit(8).collect(Collectors.toList()));
+        return "homePage/fragments/topCourse :: topCourse";
+    }
+
+    @GetMapping("/courses")
+    public String courses(Model model, @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "7") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<CourseDTO> courses = courseService.getCoursesByTotalRatings(pageable);
+
+        model.addAttribute("courses", courses.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", courses.getTotalPages());
+
+        return "homePage/fragments/mainCourseList :: mainCourseList"; // phần tử fragment cho AJAX
+    }
+
+}

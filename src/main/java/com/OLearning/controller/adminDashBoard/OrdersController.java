@@ -64,7 +64,7 @@ public class OrdersController {
 
     @GetMapping("/view/{orderId}")
     public String viewOrderDetails(@PathVariable("orderId") Long orderId, Model model) {
-        model.addAttribute("accNamePage", "Order Details");
+        model.addAttribute("accNamePage", "Orders Details");
         List<OrderDetail> orderDetails = ordersService.getOrderDetailsByOrderId(orderId);
         model.addAttribute("orderDetails", orderDetails);
         model.addAttribute("orderId", orderId);
