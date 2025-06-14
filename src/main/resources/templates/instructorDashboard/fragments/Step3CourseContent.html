@@ -223,67 +223,62 @@
                                             </div>
 
                                         <!-- Quiz Section - Initially Hidden -->
-                                        <div class="quiz-section d-none">
+                                      <div class="quiz-section d-none">
                                             <!-- Quiz List -->
                                             <div class="quiz-list mb-3">
                                                 <!-- Quizzes will be added here -->
                                             </div>
 
                                             <!-- Add Quiz Button -->
-                                            <button type="button" class="btn btn-primary btn-sm mb-3" onclick="addQuiz(this)">
-                                                <i class="bi bi-plus me-1"></i> Add Quiz
-                                            </button>
+                                          <button type="button" class="btn btn-primary btn-sm mb-3" onclick="addQuiz(this)">
+                                              <i class="bi bi-plus me-1"></i> Add Quiz
+                                          </button>
 
-                                            <!-- Quiz Template - This will be cloned when adding new quizzes -->
-                                            <template class="quiz-template">
-                                                <details class="quiz-block mb-3">
-                                                    <summary class="d-flex justify-content-between align-items-center">
-                                                        <div class="d-flex align-items-center">
-                                                            <span class="quiz-number me-2">Quiz</span>
-                                                            <h6 class="mb-0">New Quiz</h6>
-                                                        </div>
-                                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.quiz-block').remove()">
-                                                            <i class="bi bi-trash"></i>
-                                                        </button>
-                                                    </summary>
-                                                    <div class="quiz-container mt-3">
-                                                        <div class="mb-2">
-                                                            <label class="form-label">Quiz Question*</label>
-                                                            <input type="text" class="form-control quiz-question" required>
-                                                        </div>
-                                                        <div class="row">
-                                                            <div class="col-md-6">
-                                                                <label class="form-label">Option A*</label>
-                                                                <input type="text" class="form-control" required>
+                                            <!-- Quiz Form -->
+                                          <form th:action="@{/instructordashboard/createcourse/addquiz}" method="post">
+                                                <input type="hidden" name="lessonId" th:value="${lesson.lessonId}" />
+                                                <div class="quiz-list-container">
+                                                    <template class="quiz-template">
+                                                        <div class="quiz-block mb-3">
+                                                            <div class="mb-2">
+                                                                <label class="form-label">Quiz Question*</label>
+                                                                <input type="text" name="question" class="form-control quiz-question" required>
                                                             </div>
-                                                            <div class="col-md-6">
-                                                                <label class="form-label">Option B*</label>
-                                                                <input type="text" class="form-control" required>
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">Option A*</label>
+                                                                    <input type="text" name="optionA" class="form-control" required>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">Option B*</label>
+                                                                    <input type="text" name="optionB" class="form-control" required>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row mt-2">
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">Option C*</label>
+                                                                    <input type="text" name="optionC" class="form-control" required>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">Option D*</label>
+                                                                    <input type="text" name="optionD" class="form-control" required>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mt-2">
+                                                                <label class="form-label">Correct Answer*</label>
+                                                                <select name="correctAnswer" class="form-select" required>
+                                                                    <option value="">Select correct answer</option>
+                                                                    <option value="A">A</option>
+                                                                    <option value="B">B</option>
+                                                                    <option value="C">C</option>
+                                                                    <option value="D">D</option>
+                                                                </select>
                                                             </div>
                                                         </div>
-                                                        <div class="row mt-2">
-                                                            <div class="col-md-6">
-                                                                <label class="form-label">Option C*</label>
-                                                                <input type="text" class="form-control" required>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <label class="form-label">Option D*</label>
-                                                                <input type="text" class="form-control" required>
-                                                            </div>
-                                                        </div>
-                                                        <div class="mt-2">
-                                                            <label class="form-label">Correct Answer*</label>
-                                                            <select class="form-select" required>
-                                                                <option value="">Select correct answer</option>
-                                                                <option value="A">A</option>
-                                                                <option value="B">B</option>
-                                                                <option value="C">C</option>
-                                                                <option value="D">D</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                </details>
-                                            </template>
+                                                    </template>
+                                                </div>
+                                                <button type="submit" class="btn btn-success btn-sm">Save Quiz</button>
+                                            </form>
                                         </div>
                                     </div>
 
@@ -492,7 +487,7 @@
         // Toggle between video and quiz sections
         function toggleLessonType(selectElement) {
             const lessonItem = selectElement.closest('.lesson-item');
-            const videoForm = lessonItem.querySelector('.video-form');
+            const videoForm = lessonItem.querySelector('.content-form');
             const quizSection = lessonItem.querySelector('.quiz-section');
 
             console.log('Selected value:', selectElement.value);
@@ -517,13 +512,13 @@
             // Clone the template
             const newQuiz = document.importNode(quizTemplate.content, true);
 
-            // Update quiz number
-            const quizCount = quizList.children.length + 1;
-            newQuiz.querySelector('.quiz-number').textContent = `Quiz ${quizCount}`;
-
             // Add to the list
             quizList.appendChild(newQuiz);
+
+            // Ensure the quiz section is visible
+            quizSection.classList.remove('d-none');
         }
+
 
         // Add a new lesson using HTML template
         function addLesson(buttonElement) {

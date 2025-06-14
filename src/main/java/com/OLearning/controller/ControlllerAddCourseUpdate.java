@@ -307,6 +307,7 @@ public class ControlllerAddCourseUpdate {
                     model.addAttribute("chapter", new ChapterDTO());
                     model.addAttribute("lessontitle", lessonTitleDTO);
                     model.addAttribute("videoDTO", new VideoDTO());
+                    model.addAttribute("quizDTO", new QuizDTO());
                     List<Chapter> chapters = chapterService.chapterListByCourse(courseId);
                     model.addAttribute("chapters", chapters);
                     model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step3CourseContent :: step3Content");
@@ -376,19 +377,25 @@ public class ControlllerAddCourseUpdate {
     //create quiz
     @PostMapping("/createcourse/addquiz")
     public String addQuiz(@RequestParam("lessonId") Long lessonId,
-                          @RequestParam("question") List<String> questions,
-                          @RequestParam("optionA") List<String> optionsA,
-                          @RequestParam("optionB") List<String> optionsB,
-                          @RequestParam("optionC") List<String> optionsC,
-                          @RequestParam("optionD") List<String> optionsD,
-                          @RequestParam("correctAnswer") List<String> correctAnswers,
+                          @RequestParam(value = "question", required = false) List<String> questions,
+                          @RequestParam(value = "optionA", required = false) List<String> optionsA,
+                          @RequestParam(value = "optionB", required = false) List<String> optionsB,
+                          @RequestParam(value = "optionC", required = false) List<String> optionsC,
+                          @RequestParam(value = "optionD", required = false) List<String> optionsD,
+                          @RequestParam(value = "correctAnswer", required = false) List<String> correctAnswers,
                           RedirectAttributes redirectAttributes) {
         try {
+            // Check if parameters are valid
+            if (questions == null || questions.isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "No quiz questions provided");
+                return "redirect:../createcourse/coursecontent";
+            }
+            
             // Update lesson content type
             lessonService.updateContentType(lessonId, "quiz");
             Lesson lesson = lessonRepository.findById(lessonId).orElseThrow();
             lesson.setUpdatedAt(LocalDateTime.now());
-
+            
             // Save each quiz question
             for (int i = 0; i < questions.size(); i++) {
                 QuizDTO quizDTO = new QuizDTO();
@@ -399,14 +406,17 @@ public class ControlllerAddCourseUpdate {
                 quizDTO.setOptionD(optionsD.get(i));
                 quizDTO.setCorrectAnswer(correctAnswers.get(i));
                 quizDTO.setOrderNumber(i + 1);
-
+                
                 // Save quiz and associate with lesson
-                Quiz quiz = quizService.saveQuiz(quizDTO, lessonId);
-                lesson.getQuizzes().add(quiz);
+                quizService.saveQuiz(quizDTO, lessonId);
+                // Don't manually add to collection - let JPA handle this
             }
+            
             lessonRepository.save(lesson);
             redirectAttributes.addFlashAttribute("successMessage", "Quiz added successfully.");
         } catch (Exception e) {
+            // Log the full exception for debugging
+            e.printStackTrace();
             redirectAttributes.addFlashAttribute("errorMessage", "Error adding quiz: " + e.getMessage());
         }
         return "redirect:../createcourse/coursecontent";
