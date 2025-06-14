@@ -1,6 +1,5 @@
 package com.OLearning.dto.course;
 
-import com.OLearning.entity.Category;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,14 +12,18 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CourseDTO {
-
     private Long courseId;
     private String title;
-    private Integer duration;
+    private String description;
     private Double price;
+    private Double discount;
+    private String courseImg;
+    private Integer duration;
+    private Boolean isFree;
+    private String categoryName;
     private Integer totalLessons;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String status;
-    private Category category;
+    private String courseLevel; //beginner, intermediate, advanced
 }

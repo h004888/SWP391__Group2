@@ -18,23 +18,24 @@ import java.util.List;
 public class Chapter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long chapterId;
-
-    @Column(nullable = false, columnDefinition = "nvarchar(255)")
+    @Column(name = "chapterId")
+    private Long id;
+    @Column(nullable = false)
     private String title;
-
-    @Column(columnDefinition = "nvarchar(max)")
     private String description;
-
+    @Column(name = "orderNumber")
     private Integer orderNumber = 0; //stt chuong trong khoa hoc
+    @Column(name = "createAt")
     private LocalDateTime createAt;
+    @Column(name = "updateAt")
     private LocalDateTime updateAt;
 
-    @OneToMany(mappedBy = "chapter")
+    @OneToMany(mappedBy = "chapter", fetch = FetchType.LAZY)
     private List<Lesson> lessons;
 
     @ManyToOne
     @JoinColumn(name = "courseId")
     private Course course;
+
 
 }

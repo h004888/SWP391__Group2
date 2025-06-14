@@ -5,6 +5,7 @@ import com.OLearning.entity.Category;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import com.OLearning.dto.category.CategoryDTO;
 
 import java.util.List;
 
@@ -20,6 +21,9 @@ public interface CategoryService {
     boolean existsById(int id);
 
     List<Category> findAll();
+
+    Page<Category> findAll(Pageable pageable);
+
     List<Category> findTop5ByOrderByIdAsc();
 
     Category save(Category categories);
@@ -37,6 +41,4 @@ public interface CategoryService {
     List<Category> filterCategories(String name, String select);
 
     Page<Category> findByNameContaining(String name, Pageable pageable);
-
-    Page<Category> findAll(Pageable pageable);
 }
