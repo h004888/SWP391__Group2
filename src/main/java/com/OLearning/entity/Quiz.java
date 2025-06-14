@@ -6,8 +6,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
-@Table(name = "Quizzes")
+@Table(name = "quiztest")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -16,23 +20,29 @@ public class Quiz {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false, columnDefinition = "nvarchar(max)")
-    private String question;
-    @Column(nullable = false)
-    private String optionA;
 
-    @Column(nullable = false)
-    private String optionB;
+    private String title;
+    private String description;
+    private Integer timeLimit; // in minutes, cai nay se gan truc tiep vao duration cua thang video
 
-    @Column(nullable = false)
-    private String optionC;
-
-    @Column(nullable = false)
-    private String optionD;
-
-    @Column(nullable = false)
-    private String correctAnswer;
-    @ManyToOne
-    @JoinColumn(name = "lessonId")
+    @OneToOne
+    @JoinColumn(name = "lesson_id")
     private Lesson lesson;
+
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<QuizQuestion> questions = new ArrayList<>();
+
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }

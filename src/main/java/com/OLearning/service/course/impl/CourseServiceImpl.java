@@ -102,13 +102,7 @@ public class CourseServiceImpl implements CourseService {
     ChapterRepository chapterRepo;
     @Autowired
     LessonRepository lessonRepo;
-    @Override
-    public Course createCourseStep3(Long courseId, AddCourseStep3DTO addCourseStep3DTO) {
-        Course course = (courseId == null) ? new Course() : findCourseById(courseId);
-//        courseMapper.Step3(addCourseStep3DTO, course);
-        course.setPrice(addCourseStep3DTO.getPrice());
-        return instructorCourseRepo.save(course);
-    }
+
 
     @Override
     public Course submitCourse(Long courseId, String status) {
@@ -142,5 +136,11 @@ public class CourseServiceImpl implements CourseService {
     } catch (IOException e) {
         throw new RuntimeException("Failed to upload course media", e);
     }
+    }
+
+    @Override
+    public void saveCourse(Long courseId) {
+        Course course = (courseId == null) ? new Course() : findCourseById(courseId);
+        instructorCourseRepo.save(course);
     }
 }

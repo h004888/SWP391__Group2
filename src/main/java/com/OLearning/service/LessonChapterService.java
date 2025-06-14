@@ -21,8 +21,6 @@ import java.util.List;
 @Service
 public class LessonChapterService {
     @Autowired
-    private LessonService lessonService;
-    @Autowired
     private ChapterRepository chapterRepository;
     @Autowired
     private ChapterService chapterService;
@@ -31,24 +29,12 @@ public class LessonChapterService {
     @Autowired
     private LessonMapper lessonMapper;
     @Autowired
-    private VideoService videoService;
-    @Autowired
-    private VideoRepository videoRepository;
-    public Lesson createLesson(LessonVideoDTO lessonVideoDTO) {
-        Lesson lesson = lessonMapper.DtoToLesson(lessonVideoDTO);
-        Chapter chapter = chapterService.getChapterById(lessonVideoDTO.getChapterId());
-        lesson.setChapter(chapter);
-        lesson.setCreatedAt(LocalDateTime.now());
-        lesson.setUpdatedAt(LocalDateTime.now());
-//        Video video = videoService.createVideo(lessonVideoDTO.getVideoUrl());
-//        lesson.setVideo(video);
-        return lessonRepository.save(lesson);
-    }
+    private LessonQuizService lessonQuizService;
     @Transactional
     public void deleteChapter(Long chapterId) {
         List<Lesson> lessons = lessonRepository.findByChapterId(chapterId);
         for (Lesson lesson : lessons) {
-            lessonService.deleteAllFkByLessonId(lesson.getLessonId());
+            lessonQuizService.deleteAllFkByLessonId(lesson.getLessonId());
         }
         chapterRepository.deleteById(chapterId);
     }

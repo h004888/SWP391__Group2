@@ -17,25 +17,22 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Setter
 @NoArgsConstructor
 @Getter
 @AllArgsConstructor
 public class QuizDTO{
-    @NotBlank(message = "Question is required")
-    private String question;
-    @NotBlank(message = "Option A is required")
-    private String optionA;
-    @NotBlank(message = "Option B is required")
-    private String optionB;
-    @NotBlank(message = "Option C is required")
-    private String optionC;
-    @NotBlank(message = "Option D is required")
-    private String optionD;
-    @NotBlank(message = "Correct answer is required")
-    private String correctAnswer;
-    @Min(value = 1, message = "Order number must be at least 1")
-    @Digits(integer = 3, fraction = 0, message = "Order number must be numeric")
-    private Integer orderNumber;
+    private Long id;
+    @NotBlank(message = "Title is required")
+    private String title;
+    @NotBlank(message = "Description is required")
+    private String description;
+    @Min(value = 1, message = "Time limit must be at least 1 minute")
+    @Digits(integer = 3, fraction = 0, message = "Time limit must be numeric")
+    private Integer timeLimit;
+    private Long lessonId;
+    private List<QuizQuestionDTO> questions = new ArrayList<>();
 }

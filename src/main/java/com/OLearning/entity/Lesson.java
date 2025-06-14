@@ -31,6 +31,6 @@ public class Lesson {
     @OneToOne(mappedBy = "lesson", cascade = CascadeType.ALL)
     private Video video;
 
-    @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Quiz> quizzes;
+    @OneToOne(mappedBy = "lesson", cascade = CascadeType.ALL)
+    private Quiz quiz;
 }

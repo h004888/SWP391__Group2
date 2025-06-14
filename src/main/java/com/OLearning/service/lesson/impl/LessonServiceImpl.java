@@ -23,26 +23,13 @@ public class LessonServiceImpl implements LessonService {
     private VideoRepository videoRepository;
     @Autowired
     private QuizRepository quizRepository;
-    @Autowired
-    private LessonMapper lessonMapper;
 
     @Override
     public List<Lesson> findLessonsByChapterId(Long chapterId) {
         return lessonRepository.findByChapterId(chapterId);
     }
 
-    @Override
-    public void deleteAllFkByLessonId(Long lessonId) {
-        // Delete all videos associated with the lesson
-        videoRepository.deleteByLesson_LessonId(lessonId);
 
-        // Delete all quizzes associated with the lesson
-        quizRepository.deleteByLesson_LessonId(lessonId);
-
-        // Delete the lesson
-        lessonRepository.deleteById(lessonId);
-        //bay gio thi xoa bay chapter id thi minh phai tim list lesson trong chapter id do va xoa theo lesson id
-    }
 
     @Override
     public void updateContentType(Long lessonId, String contenType) {

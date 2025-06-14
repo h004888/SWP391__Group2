@@ -222,7 +222,7 @@ public class InstructorAddCourseController {
                         Model model, @RequestParam(name = "action") String action,
                         @RequestParam(name = "id", defaultValue = "2") Long userid, ModelMap modelMap) {
         if (action.equals("draft")) {
-            Course course = courseService.createCourseStep3(courseId, courseStep3);
+//            Course course = courseService.createCourseStep3(courseId, courseStep3);
             List<CourseDTO> courseList = courseService.findCourseByUserId(userid);
             modelMap.put("courses", courseList);
             return "redirect:/instructordashboard/viewcourse";
@@ -231,7 +231,7 @@ public class InstructorAddCourseController {
             return "redirect:/instructordashboard/viewcourse/addcoursestep2?courseId=" + courseId;
         }
 
-        Course course = courseService.createCourseStep3(courseId, courseStep3);
+//        Course course = courseService.createCourseStep3(courseId, courseStep3);
         model.addAttribute("courseId", courseId);
 
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/CreateCourseStep4Content :: step4Content");
