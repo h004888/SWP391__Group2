@@ -1,9 +1,9 @@
 /**
-* Eduport- LMS, Education and Course Theme
-*
-* @author StackBros (https://www.stackbros.in/)
-* @version 1.4.2
-**/
+ * Eduport- LMS, Education and Course Theme
+ *
+ * @author StackBros (https://www.stackbros.in/)
+ * @version 1.4.2
+ **/
 
 
 /* ===================
@@ -78,44 +78,45 @@ Table Of Content
 
 // Get CSS var value
 var ThemeColor = function () {
-  return {
-    getCssVariableValue: function (e) {
-      var t = getComputedStyle(document.documentElement).getPropertyValue(e);
-      return t && t.length > 0 && (t = t.trim()), t;
-    }
-  };
+    return {
+        getCssVariableValue: function (e) {
+            var t = getComputedStyle(document.documentElement).getPropertyValue(e);
+            return t && t.length > 0 && (t = t.trim()), t;
+        }
+    };
 }();
 
 var e = {
     init: function () {
         e.preLoader(),
-        e.megaMenu(),
-        e.stickyHeader(),
-        e.tinySlider(),
-        e.stickyBar(),
-        e.toolTipFunc(),
-        e.popOverFunc(),
-        e.backTotop(),
-        e.lightBox(),
-        e.enableIsotope(),
-        e.choicesSelect(),
-        e.aosFunc(),
-        e.dashboardChart(),
-        e.earningChart(),
-        e.earningChart2(),
-        e.trafficChart(),
-        e.activeChart(),
-        e.activeChart2(),
-        e.reviewChart(),
-        e.quill(),
-        e.stepper(),
-        e.videoPlyr(),
-        e.pricing(),
-        e.stickyElement(),
-        e.overlayScrollbars(),
-        e.flatPicker(),
-        e.pCounter()
-        
+            e.megaMenu(),
+            e.stickyHeader(),
+            e.tinySlider(),
+            e.stickyBar(),
+            e.toolTipFunc(),
+            e.popOverFunc(),
+            e.backTotop(),
+            e.lightBox(),
+            e.enableIsotope(),
+            e.choicesSelect(),
+            e.aosFunc(),
+            e.dashboardChart(),
+            e.earningChart(),
+            e.earningChart2(),
+            e.trafficChart(),
+            e.activeChart(),
+            e.activeChart2(),
+            e.reviewChart(),
+            e.quill(),
+            e.stepper(),
+            e.videoPlyr(),
+            e.pricing(),
+            e.stickyElement(),
+            e.overlayScrollbars(),
+            e.flatPicker(),
+            e.pCounter(),
+            e.maintenanceChart()
+
     },
     isVariableDefined: function (el) {
         return typeof !!el && (el) != 'undefined' && el != null;
@@ -222,7 +223,7 @@ var e = {
         }
     },
     toggleAllClass: function (selectors, className) {
-        if (e.isVariableDefined(selectors)  && (selectors instanceof HTMLElement)) {
+        if (e.isVariableDefined(selectors) && (selectors instanceof HTMLElement)) {
             document.querySelectorAll(selectors).forEach((element) => {
                 element.toggleClass(className);
             });
@@ -243,7 +244,6 @@ var e = {
         return document.querySelectorAll(selectors);
     },
 
-    
 
     // START: 01 Preloader
     preLoader: function () {
@@ -251,7 +251,7 @@ var e = {
             var preloader = e.select('.preloader');
             if (e.isVariableDefined(preloader)) {
                 preloader.className += ' animate__animated animate__fadeOut';
-                setTimeout(function(){
+                setTimeout(function () {
                     preloader.style.display = 'none';
                 }, 200);
             }
@@ -268,7 +268,7 @@ var e = {
             if (e.isVariableDefined(element.nextElementSibling) && !element.nextElementSibling.classList.contains("show")) {
                 const parents = e.getParents(element, '.dropdown-menu');
                 e.removeClass(parents.querySelector('.show'), "show");
-                if(e.isVariableDefined(parents.querySelector('.dropdown-opened'))){
+                if (e.isVariableDefined(parents.querySelector('.dropdown-opened'))) {
                     e.removeClass(parents.querySelector('.dropdown-opened'), "dropdown-opened");
                 }
 
@@ -315,96 +315,96 @@ var e = {
     tinySlider: function () {
         var $carousel = e.select('.tiny-slider-inner');
         if (e.isVariableDefined($carousel)) {
-          var tnsCarousel = e.selectAll('.tiny-slider-inner');
-          tnsCarousel.forEach(slider => {
-              var slider1 = slider;
-              var sliderMode = slider1.getAttribute('data-mode') ? slider1.getAttribute('data-mode') : 'carousel';
-              var sliderAxis = slider1.getAttribute('data-axis') ? slider1.getAttribute('data-axis') : 'horizontal';
-              var sliderSpace = slider1.getAttribute('data-gutter') ? slider1.getAttribute('data-gutter') : 30;
-              var sliderEdge = slider1.getAttribute('data-edge') ? slider1.getAttribute('data-edge') : 0;
+            var tnsCarousel = e.selectAll('.tiny-slider-inner');
+            tnsCarousel.forEach(slider => {
+                var slider1 = slider;
+                var sliderMode = slider1.getAttribute('data-mode') ? slider1.getAttribute('data-mode') : 'carousel';
+                var sliderAxis = slider1.getAttribute('data-axis') ? slider1.getAttribute('data-axis') : 'horizontal';
+                var sliderSpace = slider1.getAttribute('data-gutter') ? slider1.getAttribute('data-gutter') : 30;
+                var sliderEdge = slider1.getAttribute('data-edge') ? slider1.getAttribute('data-edge') : 0;
 
-              var sliderItems = slider1.getAttribute('data-items') ? slider1.getAttribute('data-items') : 4; //option: number (items in all device)
-              var sliderItemsXl = slider1.getAttribute('data-items-xl') ? slider1.getAttribute('data-items-xl') : Number(sliderItems); //option: number (items in 1200 to end )
-              var sliderItemsLg = slider1.getAttribute('data-items-lg') ? slider1.getAttribute('data-items-lg') : Number(sliderItemsXl); //option: number (items in 992 to 1199 )
-              var sliderItemsMd = slider1.getAttribute('data-items-md') ? slider1.getAttribute('data-items-md') : Number(sliderItemsLg); //option: number (items in 768 to 991 )
-              var sliderItemsSm = slider1.getAttribute('data-items-sm') ? slider1.getAttribute('data-items-sm') : Number(sliderItemsMd); //option: number (items in 576 to 767 )
-              var sliderItemsXs = slider1.getAttribute('data-items-xs') ? slider1.getAttribute('data-items-xs') : Number(sliderItemsSm); //option: number (items in start to 575 )
+                var sliderItems = slider1.getAttribute('data-items') ? slider1.getAttribute('data-items') : 4; //option: number (items in all device)
+                var sliderItemsXl = slider1.getAttribute('data-items-xl') ? slider1.getAttribute('data-items-xl') : Number(sliderItems); //option: number (items in 1200 to end )
+                var sliderItemsLg = slider1.getAttribute('data-items-lg') ? slider1.getAttribute('data-items-lg') : Number(sliderItemsXl); //option: number (items in 992 to 1199 )
+                var sliderItemsMd = slider1.getAttribute('data-items-md') ? slider1.getAttribute('data-items-md') : Number(sliderItemsLg); //option: number (items in 768 to 991 )
+                var sliderItemsSm = slider1.getAttribute('data-items-sm') ? slider1.getAttribute('data-items-sm') : Number(sliderItemsMd); //option: number (items in 576 to 767 )
+                var sliderItemsXs = slider1.getAttribute('data-items-xs') ? slider1.getAttribute('data-items-xs') : Number(sliderItemsSm); //option: number (items in start to 575 )
 
-              var sliderSpeed = slider1.getAttribute('data-speed') ? slider1.getAttribute('data-speed') : 500;
-              var sliderautoWidth = slider1.getAttribute('data-autowidth') === 'true'; //option: true or false
-              var sliderArrow = slider1.getAttribute('data-arrow') !== 'false'; //option: true or false
-              var sliderDots = slider1.getAttribute('data-dots') !== 'false'; //option: true or false
+                var sliderSpeed = slider1.getAttribute('data-speed') ? slider1.getAttribute('data-speed') : 500;
+                var sliderautoWidth = slider1.getAttribute('data-autowidth') === 'true'; //option: true or false
+                var sliderArrow = slider1.getAttribute('data-arrow') !== 'false'; //option: true or false
+                var sliderDots = slider1.getAttribute('data-dots') !== 'false'; //option: true or false
 
-              var sliderAutoPlay = slider1.getAttribute('data-autoplay') !== 'false'; //option: true or false
-              var sliderAutoPlayTime = slider1.getAttribute('data-autoplaytime') ? slider1.getAttribute('data-autoplaytime') : 4000;
-              var sliderHoverPause = slider1.getAttribute('data-hoverpause') === 'true'; //option: true or false
-              if (e.isVariableDefined(e.select('.custom-thumb'))) {
-                var sliderNavContainer = e.select('.custom-thumb');
-              } 
-              var sliderLoop = slider1.getAttribute('data-loop') !== 'false'; //option: true or false
-              var sliderRewind = slider1.getAttribute('data-rewind') === 'true'; //option: true or false
-              var sliderAutoHeight = slider1.getAttribute('data-autoheight') === 'true'; //option: true or false
-              var sliderfixedWidth = slider1.getAttribute('data-fixedwidth') === 'true'; //option: true or false
-              var sliderTouch = slider1.getAttribute('data-touch') !== 'false'; //option: true or false
-              var sliderDrag = slider1.getAttribute('data-drag') !== 'false'; //option: true or false
-              // Check if document DIR is RTL
-              var ifRtl = document.getElementsByTagName("html")[0].getAttribute("dir");
-              var sliderDirection;
-              if (ifRtl === 'rtl') {
-                  sliderDirection = 'rtl';
-              }
+                var sliderAutoPlay = slider1.getAttribute('data-autoplay') !== 'false'; //option: true or false
+                var sliderAutoPlayTime = slider1.getAttribute('data-autoplaytime') ? slider1.getAttribute('data-autoplaytime') : 4000;
+                var sliderHoverPause = slider1.getAttribute('data-hoverpause') === 'true'; //option: true or false
+                if (e.isVariableDefined(e.select('.custom-thumb'))) {
+                    var sliderNavContainer = e.select('.custom-thumb');
+                }
+                var sliderLoop = slider1.getAttribute('data-loop') !== 'false'; //option: true or false
+                var sliderRewind = slider1.getAttribute('data-rewind') === 'true'; //option: true or false
+                var sliderAutoHeight = slider1.getAttribute('data-autoheight') === 'true'; //option: true or false
+                var sliderfixedWidth = slider1.getAttribute('data-fixedwidth') === 'true'; //option: true or false
+                var sliderTouch = slider1.getAttribute('data-touch') !== 'false'; //option: true or false
+                var sliderDrag = slider1.getAttribute('data-drag') !== 'false'; //option: true or false
+                // Check if document DIR is RTL
+                var ifRtl = document.getElementsByTagName("html")[0].getAttribute("dir");
+                var sliderDirection;
+                if (ifRtl === 'rtl') {
+                    sliderDirection = 'rtl';
+                }
 
-              var tnsSlider = tns({
-                  container: slider,
-                  mode: sliderMode,
-                  axis: sliderAxis,
-                  gutter: sliderSpace,
-                  edgePadding: sliderEdge,
-                  speed: sliderSpeed,
-                  autoWidth: sliderautoWidth,
-                  controls: sliderArrow,
-                  nav: sliderDots,
-                  autoplay: sliderAutoPlay,
-                  autoplayTimeout: sliderAutoPlayTime,
-                  autoplayHoverPause: sliderHoverPause,
-                  autoplayButton: false,
-                  autoplayButtonOutput: false,
-                  controlsPosition: top,
-                  navContainer: sliderNavContainer,
-                  navPosition: top,
-                  autoplayPosition: top,
-                  controlsText: [
-                      '<i class="fas fa-chevron-left"></i>',
-                      '<i class="fas fa-chevron-right"></i>'
-                  ],
-                  loop: sliderLoop,
-                  rewind: sliderRewind,
-                  autoHeight: sliderAutoHeight,
-                  fixedWidth: sliderfixedWidth,
-                  touch: sliderTouch,
-                  mouseDrag: sliderDrag,
-                  arrowKeys: true,
-                  items: sliderItems,
-                  textDirection: sliderDirection,
-                  responsive: {
-                      0: {
-                          items: Number(sliderItemsXs)
-                      },
-                      576: {
-                          items: Number(sliderItemsSm)
-                      },
-                      768: {
-                          items: Number(sliderItemsMd)
-                      },
-                      992: {
-                          items: Number(sliderItemsLg)
-                      },
-                      1200: {
-                          items: Number(sliderItemsXl)
-                      }
-                  }
-              });
-          }); 
+                var tnsSlider = tns({
+                    container: slider,
+                    mode: sliderMode,
+                    axis: sliderAxis,
+                    gutter: sliderSpace,
+                    edgePadding: sliderEdge,
+                    speed: sliderSpeed,
+                    autoWidth: sliderautoWidth,
+                    controls: sliderArrow,
+                    nav: sliderDots,
+                    autoplay: sliderAutoPlay,
+                    autoplayTimeout: sliderAutoPlayTime,
+                    autoplayHoverPause: sliderHoverPause,
+                    autoplayButton: false,
+                    autoplayButtonOutput: false,
+                    controlsPosition: top,
+                    navContainer: sliderNavContainer,
+                    navPosition: top,
+                    autoplayPosition: top,
+                    controlsText: [
+                        '<i class="fas fa-chevron-left"></i>',
+                        '<i class="fas fa-chevron-right"></i>'
+                    ],
+                    loop: sliderLoop,
+                    rewind: sliderRewind,
+                    autoHeight: sliderAutoHeight,
+                    fixedWidth: sliderfixedWidth,
+                    touch: sliderTouch,
+                    mouseDrag: sliderDrag,
+                    arrowKeys: true,
+                    items: sliderItems,
+                    textDirection: sliderDirection,
+                    responsive: {
+                        0: {
+                            items: Number(sliderItemsXs)
+                        },
+                        576: {
+                            items: Number(sliderItemsSm)
+                        },
+                        768: {
+                            items: Number(sliderItemsMd)
+                        },
+                        992: {
+                            items: Number(sliderItemsLg)
+                        },
+                        1200: {
+                            items: Number(sliderItemsXl)
+                        }
+                    }
+                });
+            });
         }
     },
     // END: Tiny Slider
@@ -423,7 +423,7 @@ var e = {
     toolTipFunc: function () {
         var tooltipTriggerList = [].slice.call(e.selectAll('[data-bs-toggle="tooltip"]'))
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-          return new bootstrap.Tooltip(tooltipTriggerEl)
+            return new bootstrap.Tooltip(tooltipTriggerEl)
         })
     },
     // END: Tooltip
@@ -433,7 +433,7 @@ var e = {
     popOverFunc: function () {
         var popoverTriggerList = [].slice.call(e.selectAll('[data-bs-toggle="popover"]'))
         var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
-          return new bootstrap.Popover(popoverTriggerEl)
+            return new bootstrap.Popover(popoverTriggerEl)
         })
     },
     // END: Popover
@@ -538,28 +538,28 @@ var e = {
 
     // START: 11 Choices
     choicesSelect: function () {
-       var choice = e.select('.js-choice');
-       
-       if (e.isVariableDefined(choice)) {
-         var element = document.querySelectorAll('.js-choice');
+        var choice = e.select('.js-choice');
 
-         element.forEach(function (item) {
-           var removeItemBtn = item.getAttribute('data-remove-item-button') == 'true' ? true : false;
-           var placeHolder = item.getAttribute('data-placeholder') == 'false' ? false : true;
-           var placeHolderVal = item.getAttribute('data-placeholder-val') ? item.getAttribute('data-placeholder-val') : 'Type and hit enter';
-           var maxItemCount = item.getAttribute('data-max-item-count') ? item.getAttribute('data-max-item-count') : 3;
-           var searchEnabled = item.getAttribute('data-search-enabled') == 'false' ? false : true;
+        if (e.isVariableDefined(choice)) {
+            var element = document.querySelectorAll('.js-choice');
 
-           var choices = new Choices(item, {
-               removeItemButton: removeItemBtn,
-               placeholder: placeHolder,
-               placeholderValue: placeHolderVal,
-               maxItemCount: maxItemCount,
-               searchEnabled: searchEnabled
-           });
+            element.forEach(function (item) {
+                var removeItemBtn = item.getAttribute('data-remove-item-button') == 'true' ? true : false;
+                var placeHolder = item.getAttribute('data-placeholder') == 'false' ? false : true;
+                var placeHolderVal = item.getAttribute('data-placeholder-val') ? item.getAttribute('data-placeholder-val') : 'Type and hit enter';
+                var maxItemCount = item.getAttribute('data-max-item-count') ? item.getAttribute('data-max-item-count') : 3;
+                var searchEnabled = item.getAttribute('data-search-enabled') == 'false' ? false : true;
 
-         });
-       }
+                var choices = new Choices(item, {
+                    removeItemButton: removeItemBtn,
+                    placeholder: placeHolder,
+                    placeholderValue: placeHolderVal,
+                    maxItemCount: maxItemCount,
+                    searchEnabled: searchEnabled
+                });
+
+            });
+        }
     },
     // END: Choices
 
@@ -575,64 +575,129 @@ var e = {
         }
     },
     // END: AOS Animation
-
+    
     // START: 13 Dashboard Chart
     dashboardChart: function () {
-        var ac = e.select('#ChartPayout');
+        var ac = e.select('#ChartPayoutOfYear');
         if (e.isVariableDefined(ac)) {
-        var options = {
-          series: [{
-            name: 'Payout',
-            data: [2909, 1259, 950, 1563, 1825, 2526, 2010, 3260, 3005, 3860, 4039]
-          }],
-          chart: {
-            height: 300,
-            type: 'area',
-            toolbar: {
-              show: false
-            },
-          },
-          
-          dataLabels: {
-            enabled: true
-          },
-          stroke: {
-            curve: 'smooth'
-          },
-          colors: [ThemeColor.getCssVariableValue('--bs-primary')],
-          xaxis: {
-            type: 'Payout',
-            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct ', 'Nov', 'Dec'],
-            axisBorder: {
-               show: false
-            },
-            axisTicks: {
-                show: false
-            },
-          },
-          yaxis: [{
-              axisTicks: {
-                show: false
-              },
-              axisBorder: {
-                show: false
-              },
-            }],
-          tooltip: {
-            y: {
-              title: {
-                formatter: function (e) {
-                  return "" + "$";
-                }
-              }
-            },
-            marker: {
-              show: !1
+            // Destroy existing chart if any
+            if (window.revenueChart) {
+                window.revenueChart.destroy();
             }
-          }
-        };
-        var chart = new ApexCharts(document.querySelector("#ChartPayout"), options);
-        chart.render();
+
+            // Get revenue data from the controller
+            var revenueData = window.revenuePerMonth || {};
+            console.log('Revenue data:', revenueData);
+
+            // Get date range from input fields
+            var startDate = new Date(document.getElementById('startDate').value);
+            var endDate = new Date(document.getElementById('endDate').value);
+
+            // Generate all months between start and end date
+            var allMonths = [];
+            var currentDate = new Date(startDate);
+            while (currentDate <= endDate) {
+                var monthStr = currentDate.toISOString().slice(0, 7); // Format: YYYY-MM
+                allMonths.push(monthStr);
+                currentDate.setMonth(currentDate.getMonth() + 1);
+            }
+
+            // Prepare data arrays for the chart
+            var revenueValues = allMonths.map(function(month) {
+                return revenueData[month] || 0;
+            });
+
+            // Format dates for display
+            var formattedDates = allMonths.map(function(month) {
+                var [year, monthNum] = month.split('-');
+                return `Tháng ${monthNum}/${year}`;
+            });
+
+            var options = {
+                series: [{
+                    name: 'Doanh Thu',
+                    data: revenueValues
+                }],
+                chart: {
+                    height: 300,
+                    type: 'area',
+                    toolbar: {
+                        show: false
+                    },
+                },
+                dataLabels: {
+                    enabled: true,
+                    formatter: function(val) {
+                        return new Intl.NumberFormat('vi-VN', {
+                            style: 'currency',
+                            currency: 'VND'
+                        }).format(val);
+                    }
+                },
+                stroke: {
+                    curve: 'smooth'
+                },
+                colors: [ThemeColor.getCssVariableValue('--bs-primary')],
+                xaxis: {
+                    categories: formattedDates,
+                    axisBorder: {
+                        show: false
+                    },
+                    axisTicks: {
+                        show: false
+                    },
+                },
+                yaxis: {
+                    labels: {
+                        formatter: function (value) {
+                            return new Intl.NumberFormat('vi-VN', {
+                                style: 'currency',
+                                currency: 'VND'
+                            }).format(value);
+                        }
+                    }
+                },
+                tooltip: {
+                    y: {
+                        formatter: function (value) {
+                            return new Intl.NumberFormat('vi-VN', {
+                                style: 'currency',
+                                currency: 'VND'
+                            }).format(value);
+                        }
+                    }
+                },
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.7,
+                        opacityTo: 0.9,
+                        stops: [0, 90, 100]
+                    }
+                }
+            };
+
+            window.revenueChart = new ApexCharts(ac, options);
+            window.revenueChart.render();
+
+            // Update summary cards if they exist
+            var totalRevenue = revenueValues.reduce((a, b) => a + b, 0);
+            var monthlyRevenueEl = document.getElementById('monthlyRevenue');
+            var yearlyRevenueEl = document.getElementById('yearlyRevenue');
+            
+            if (monthlyRevenueEl) {
+                monthlyRevenueEl.textContent = new Intl.NumberFormat('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND'
+                }).format(totalRevenue);
+            }
+            if (yearlyRevenueEl) {
+                yearlyRevenueEl.textContent = new Intl.NumberFormat('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND'
+                }).format(totalRevenue);
+            }
         }
     },
     // END: Dashboard Chart
@@ -641,47 +706,63 @@ var e = {
     earningChart: function () {
         var cpe = e.select('#ChartPayoutEarning');
         if (e.isVariableDefined(cpe)) {
-        var options = {
-          series: [{
-            name: 'Payout',
-            data: [500, 700, 900, 1500, 1800, 1000, 0, 2000, 3200, 3000, 4800, 4000]
-          }],
-          chart: {
-            height: 300,
-            type: 'area',
-            sparkline: {
-              enabled: !0
+            // Destroy existing chart if any
+            if (window.enrollmentChart) {
+                window.enrollmentChart.destroy();
             }
-          },
-          dataLabels: {
-            enabled: false
-          },
-          stroke: {
-            curve: 'smooth'
-          },
-          colors: [ThemeColor.getCssVariableValue('--bs-primary')],
-          xaxis: {
-            type: 'Payout',
-            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct ', 'Nov', 'Dec']
-          },
-          grid: {
-            
-          },
-          tooltip: {
-            y: {
-              title: {
-                formatter: function (e) {
-                  return "" + "$";
-                }
-              }
-            },
-            marker: {
-              show: !1
+
+            var enrollmentData = window.enrollmentsByCategory || {};
+            var categories = Object.keys(enrollmentData);
+            var enrollmentValues = categories.map(function(category) {
+                return enrollmentData[category] || 0;
+            });
+
+            // Check if there is any data
+            if (categories.length === 0 || enrollmentValues.every(value => value === 0)) {
+                // Display "No Data" message
+                cpe.innerHTML = '<div class="text-center p-4"><h5 class="text-muted">Không có học viên nào đăng ký trong thời gian này</h5></div>';
+                return;
             }
-          }
-        };
-        var chart = new ApexCharts(document.querySelector("#ChartPayoutEarning"), options);
-        chart.render();
+
+            var options = {
+                series: enrollmentValues,
+                chart: {
+                    height: 300,
+                    type: 'pie',
+                    toolbar: {
+                        show: false
+                    }
+                },
+                labels: categories,
+                dataLabels: {
+                    enabled: true,
+                    formatter: function(val) {
+                        return val.toLocaleString() + '%';
+                    }
+                },
+                legend: {
+                    position: 'bottom'
+                },
+                tooltip: {
+                    y: {
+                        formatter: function(val) {
+                            return val.toLocaleString() + ' học viên';
+                        }
+                    }
+                },
+                colors: [
+                    ThemeColor.getCssVariableValue('--bs-primary'),
+                    ThemeColor.getCssVariableValue('--bs-secondary'),
+                    ThemeColor.getCssVariableValue('--bs-success'),
+                    ThemeColor.getCssVariableValue('--bs-danger'),
+                    ThemeColor.getCssVariableValue('--bs-warning'),
+                    ThemeColor.getCssVariableValue('--bs-info'),
+                    '#00E396', '#FEB019', '#FF4560', '#775DD0', '#546E7A', '#26a69a'
+                ]
+            };
+
+            window.enrollmentChart = new ApexCharts(cpe, options);
+            window.enrollmentChart.render();
         }
     },
     // END: Earning Chart
@@ -690,232 +771,228 @@ var e = {
     earningChart2: function () {
         var cpv = e.select('#ChartPageViews');
         if (e.isVariableDefined(cpv)) {
-          // CHART: Page Views
-          var options = {
-            series: [50, 20, 20, 10, 10],
-            labels: ['Course-1', 'Course-2', 'Course-3', 'Course-4', 'Course-5'],
-            chart: {
-              height: 300,
-              width: 300,
-              offsetX: 50,
-              type: 'donut',
-              sparkline: {
-                enabled: !0
-              }
-            },
-            colors: [
-              ThemeColor.getCssVariableValue('--bs-success'),
-              ThemeColor.getCssVariableValue('--bs-warning'),
-              ThemeColor.getCssVariableValue('--bs-danger'),
-              ThemeColor.getCssVariableValue('--bs-primary'),
-              ThemeColor.getCssVariableValue('--bs-secondary')
-            ],
-            tooltip: {
-              theme: "dark"
-            },
-            responsive: [{
-              breakpoint: 480,
-              options: {
+            // CHART: Page Views
+            var options = {
+                series: [50, 20, 20, 10, 10],
+                labels: ['Course-1', 'Course-2', 'Course-3', 'Course-4', 'Course-5'],
                 chart: {
-                  width: 200,
-                  height: 200,
+                    height: 300,
+                    width: 300,
+                    offsetX: 50,
+                    type: 'donut',
+                    sparkline: {
+                        enabled: !0
+                    }
                 },
-                legend: {
-                  position: 'bottom'
-                }
-              }
-            }]
-          };
-          var chart = new ApexCharts(document.querySelector("#ChartPageViews"), options);
-          chart.render();
+                colors: [
+                    ThemeColor.getCssVariableValue('--bs-success'),
+                    ThemeColor.getCssVariableValue('--bs-warning'),
+                    ThemeColor.getCssVariableValue('--bs-danger'),
+                    ThemeColor.getCssVariableValue('--bs-primary'),
+                    ThemeColor.getCssVariableValue('--bs-secondary')
+                ],
+                tooltip: {
+                    theme: "dark"
+                },
+                responsive: [{
+                    breakpoint: 480,
+                    options: {
+                        chart: {
+                            width: 200,
+                            height: 200,
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }]
+            };
+            var chart = new ApexCharts(document.querySelector("#ChartPageViews"), options);
+            chart.render();
         }
     },
     // END: Earning Chart 2
 
     // START: 16 Traffic Chart
     trafficChart: function () {
-      var cpv = e.select('#ChartTrafficViews');
-      if (e.isVariableDefined(cpv)) {
-        // CHART: Page Views
-        var options = {
-          series: [70, 15, 10, 5],
-          labels: ['Course-1', 'Course-2', 'Course-3', 'Course-4'],
-          chart: {
-            height: 200,
-            width: 200,
-            offsetX: 0,
-            type: 'donut',
-            sparkline: {
-              enabled: !0
-            }
-          },
-          colors: [
-            ThemeColor.getCssVariableValue('--bs-primary'),
-            ThemeColor.getCssVariableValue('--bs-success'),
-            ThemeColor.getCssVariableValue('--bs-warning'),
-            ThemeColor.getCssVariableValue('--bs-danger')
-          ],
-          tooltip: {
-            theme: "dark"
-          },
-          responsive: [{
-            breakpoint: 480,
-            options: {
-              chart: {
-                width: 200,
-                height: 200,
-              },
-              legend: {
-                position: 'bottom'
-              }
-            }
-          }]
-        };
-        var chart = new ApexCharts(document.querySelector("#ChartTrafficViews"), options);
-        chart.render();
-      }
+        var cpv = e.select('#ChartTrafficViews');
+        if (e.isVariableDefined(cpv)) {
+            // CHART: Page Views
+            var options = {
+                series: [70, 15, 10, 5],
+                labels: ['Course-1', 'Course-2', 'Course-3', 'Course-4'],
+                chart: {
+                    height: 200,
+                    width: 200,
+                    offsetX: 0,
+                    type: 'donut',
+                    sparkline: {
+                        enabled: !0
+                    }
+                },
+                colors: [
+                    ThemeColor.getCssVariableValue('--bs-primary'),
+                    ThemeColor.getCssVariableValue('--bs-success'),
+                    ThemeColor.getCssVariableValue('--bs-warning'),
+                    ThemeColor.getCssVariableValue('--bs-danger')
+                ],
+                tooltip: {
+                    theme: "dark"
+                },
+                responsive: [{
+                    breakpoint: 480,
+                    options: {
+                        chart: {
+                            width: 200,
+                            height: 200,
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }]
+            };
+            var chart = new ApexCharts(document.querySelector("#ChartTrafficViews"), options);
+            chart.render();
+        }
     },
     // END: Traffic Chart
 
     // START: 17 Active student Chart
     activeChart: function () {
-      var jj = document.querySelector("#activeChartstudent");
-      if(typeof(jj) != 'undefined' && jj != null){
-      var options = {
-        series: [{
-          name: 'Conversion',
-          data: [200, 290, 500, 500, 430, 316, 478, 700]
-        }],
-        chart: {
-          height: 130,
-          type: 'area',
-          sparkline: {
-            enabled: !0
-          }
-        },
-        dataLabels: {
-          enabled: false
-        },
-        stroke: {
-          curve: 'smooth'
-        },
-        colors: [ThemeColor.getCssVariableValue('--bs-success')],
-        xaxis: {
-          type: 'category',
-          categories: ['Dec 01', 'Dec 02', 'Dec 03', 'Dec 04', 'Dec 05', 'Dec 06', 'Dec 07', 'Dec 08', 'Dec 09 ', 'Dec 10', 'Dec 11']
-        },
-        grid: {
-          
-        },
-        tooltip: {
-          y: {
-            title: {
-              formatter: function (e) {
-                return "";
-              }
-            }
-          },
-          marker: {
-            show: !1
-          }
+        var jj = document.querySelector("#activeChartstudent");
+        if (typeof (jj) != 'undefined' && jj != null) {
+            var options = {
+                series: [{
+                    name: 'Conversion',
+                    data: [200, 290, 500, 500, 430, 316, 478, 700]
+                }],
+                chart: {
+                    height: 130,
+                    type: 'area',
+                    sparkline: {
+                        enabled: !0
+                    }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                stroke: {
+                    curve: 'smooth'
+                },
+                colors: [ThemeColor.getCssVariableValue('--bs-success')],
+                xaxis: {
+                    type: 'category',
+                    categories: ['Dec 01', 'Dec 02', 'Dec 03', 'Dec 04', 'Dec 05', 'Dec 06', 'Dec 07', 'Dec 08', 'Dec 09 ', 'Dec 10', 'Dec 11']
+                },
+                grid: {},
+                tooltip: {
+                    y: {
+                        title: {
+                            formatter: function (e) {
+                                return "";
+                            }
+                        }
+                    },
+                    marker: {
+                        show: !1
+                    }
+                }
+            };
+            var chart = new ApexCharts(document.querySelector("#activeChartstudent"), options);
+            chart.render();
         }
-      };
-      var chart = new ApexCharts(document.querySelector("#activeChartstudent"), options);
-      chart.render();
-      }
     },
     // END: Active student Chart
 
     // START: 18 Active student Chart 2
     activeChart2: function () {
-      var jj = document.querySelector("#activeChartstudent2");
-      if(typeof(jj) != 'undefined' && jj != null){
-      var options = {
-        series: [{
-          name: 'Conversion',
-          data: [200, 290, 325, 500, 600, 316, 478, 700]
-        }],
-        chart: {
-          height: 130,
-          type: 'area',
-          sparkline: {
-            enabled: !0
-          }
-        },
-        dataLabels: {
-          enabled: false
-        },
-        stroke: {
-          curve: 'smooth'
-        },
-        colors: [ThemeColor.getCssVariableValue('--bs-purple')],
-        xaxis: {
-          type: 'category',
-          categories: ['Dec 01', 'Dec 02', 'Dec 03', 'Dec 04', 'Dec 05', 'Dec 06', 'Dec 07', 'Dec 08', 'Dec 09 ', 'Dec 10', 'Dec 11']
-        },
-        grid: {
-          
-        },
-        tooltip: {
-          y: {
-            title: {
-              formatter: function (e) {
-                return "";
-              }
-            }
-          },
-          marker: {
-            show: !1
-          }
+        var jj = document.querySelector("#activeChartstudent2");
+        if (typeof (jj) != 'undefined' && jj != null) {
+            var options = {
+                series: [{
+                    name: 'Conversion',
+                    data: [200, 290, 325, 500, 600, 316, 478, 700]
+                }],
+                chart: {
+                    height: 130,
+                    type: 'area',
+                    sparkline: {
+                        enabled: !0
+                    }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                stroke: {
+                    curve: 'smooth'
+                },
+                colors: [ThemeColor.getCssVariableValue('--bs-purple')],
+                xaxis: {
+                    type: 'category',
+                    categories: ['Dec 01', 'Dec 02', 'Dec 03', 'Dec 04', 'Dec 05', 'Dec 06', 'Dec 07', 'Dec 08', 'Dec 09 ', 'Dec 10', 'Dec 11']
+                },
+                grid: {},
+                tooltip: {
+                    y: {
+                        title: {
+                            formatter: function (e) {
+                                return "";
+                            }
+                        }
+                    },
+                    marker: {
+                        show: !1
+                    }
+                }
+            };
+            var chart = new ApexCharts(document.querySelector("#activeChartstudent2"), options);
+            chart.render();
         }
-      };
-      var chart = new ApexCharts(document.querySelector("#activeChartstudent2"), options);
-      chart.render();
-      }
     },
     // END: Active student Chart 2
 
     // START: 19 Review chart
-    reviewChart: function (){
-      var ff = document.querySelector("#apexChartPageViews");
-      if(typeof(ff) != 'undefined' && ff != null){
-      var options = {
-        series: [80, 30],
-        labels: ['Positive', 'Negative'],
-        chart: {
-          height: 300,
-          width: 300,
-          type: 'donut',
-          sparkline: {
-            enabled: !0
-          }
-        },
-        stroke: {
-          colors: 'transparent',
-        },
-        colors: [
-          ThemeColor.getCssVariableValue('--bs-success'),
-          ThemeColor.getCssVariableValue('--bs-danger'),
-        ],
-        tooltip: {
-          theme: "dark"
-        },
-        responsive: [{
-          breakpoint: 480,
-          options: {
-            chart: {
-              height: 100,
-              width: 100
-            },
-            legend: {
-              position: 'bottom'
-            }
-          }
-        }]
-      };
-      var chart = new ApexCharts(document.querySelector("#apexChartPageViews"), options);
-      chart.render();
-      }
+    reviewChart: function () {
+        var ff = document.querySelector("#apexChartPageViews");
+        if (typeof (ff) != 'undefined' && ff != null) {
+            var options = {
+                series: [80, 30],
+                labels: ['Positive', 'Negative'],
+                chart: {
+                    height: 300,
+                    width: 300,
+                    type: 'donut',
+                    sparkline: {
+                        enabled: !0
+                    }
+                },
+                stroke: {
+                    colors: 'transparent',
+                },
+                colors: [
+                    ThemeColor.getCssVariableValue('--bs-success'),
+                    ThemeColor.getCssVariableValue('--bs-danger'),
+                ],
+                tooltip: {
+                    theme: "dark"
+                },
+                responsive: [{
+                    breakpoint: 480,
+                    options: {
+                        chart: {
+                            height: 100,
+                            width: 100
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }]
+            };
+            var chart = new ApexCharts(document.querySelector("#apexChartPageViews"), options);
+            chart.render();
+        }
     },
     // END: Review chart
 
@@ -923,10 +1000,10 @@ var e = {
     quill: function () {
         var ql = e.select('#quilleditor');
         if (e.isVariableDefined(ql)) {
-          var editor = new Quill('#quilleditor', {
-            modules: { toolbar: '#quilltoolbar' },
-            theme: 'snow'
-          });
+            var editor = new Quill('#quilleditor', {
+                modules: {toolbar: '#quilltoolbar'},
+                theme: 'snow'
+            });
         }
     },
     // END: Quill Editor
@@ -935,25 +1012,25 @@ var e = {
     stepper: function () {
         var stp = e.select('#stepper');
         if (e.isVariableDefined(stp)) {
-          var nxtBtn = document.querySelectorAll('.next-btn');
-          var prvBtn = document.querySelectorAll('.prev-btn');
+            var nxtBtn = document.querySelectorAll('.next-btn');
+            var prvBtn = document.querySelectorAll('.prev-btn');
 
-          var stepper = new Stepper(document.querySelector('#stepper'), {
-            linear: false,
-            animation: true
-          });
+            var stepper = new Stepper(document.querySelector('#stepper'), {
+                linear: false,
+                animation: true
+            });
 
-          nxtBtn.forEach(function (button) {
-            button.addEventListener("click", () =>{
-            stepper.next()
-          })
-          });
+            nxtBtn.forEach(function (button) {
+                button.addEventListener("click", () => {
+                    stepper.next()
+                })
+            });
 
-          prvBtn.forEach(function (button) {
-            button.addEventListener("click", () =>{
-            stepper.previous()
-          })
-          });
+            prvBtn.forEach(function (button) {
+                button.addEventListener("click", () => {
+                    stepper.previous()
+                })
+            });
         }
     },
     // END: Stepper
@@ -969,7 +1046,7 @@ var e = {
             // Vimeo
             const playerVimeo = new Plyr('#player-vimeo', {});
             window.player = playerVimeo;
-            
+
             // HTML video
             const playerHtmlvideo = new Plyr('video', {
                 captions: {active: true}
@@ -989,111 +1066,236 @@ var e = {
     pricing: function () {
         var p = e.select('.price-wrap');
         if (e.isVariableDefined(p)) {
-          var pWrap = e.selectAll(".price-wrap");
-          pWrap.forEach(item => {
+            var pWrap = e.selectAll(".price-wrap");
+            pWrap.forEach(item => {
 
-            var priceSwitch = item.querySelector('.price-toggle'),
-            priceElement = item.querySelectorAll('.plan-price');
+                var priceSwitch = item.querySelector('.price-toggle'),
+                    priceElement = item.querySelectorAll('.plan-price');
 
-            priceSwitch.addEventListener('change', function () {
-              if (priceSwitch.checked) {
-                priceElement.forEach(pItem => {
-                  var dd = pItem.getAttribute('data-annual-price');
-                  pItem.innerHTML = dd;
+                priceSwitch.addEventListener('change', function () {
+                    if (priceSwitch.checked) {
+                        priceElement.forEach(pItem => {
+                            var dd = pItem.getAttribute('data-annual-price');
+                            pItem.innerHTML = dd;
+                        });
+                    } else {
+                        priceElement.forEach(pItem => {
+                            var ee = pItem.getAttribute('data-monthly-price');
+                            pItem.innerHTML = ee;
+                        });
+                    }
                 });
-              } else {
-                priceElement.forEach(pItem => {
-                  var ee = pItem.getAttribute('data-monthly-price');
-                  pItem.innerHTML = ee;
-                });
-              }
             });
-          });
         }
     },
     // END: Pricing
 
     // START: 24 Sticky element
     stickyElement: function () {
-    var scrollpos = window.scrollY;
-    var sp = e.select('.sticky-element');
-    if (e.isVariableDefined(sp)) {
-        var add_class_on_scroll = () => sp.addClass("sticky-element-sticked");
-        var remove_class_on_scroll = () => sp.removeClass("sticky-element-sticked");
+        var scrollpos = window.scrollY;
+        var sp = e.select('.sticky-element');
+        if (e.isVariableDefined(sp)) {
+            var add_class_on_scroll = () => sp.addClass("sticky-element-sticked");
+            var remove_class_on_scroll = () => sp.removeClass("sticky-element-sticked");
 
-        window.addEventListener('scroll', function () {
-            scrollpos = window.scrollY;
-            if (scrollpos >= 800) {
-                add_class_on_scroll()
-            } else {
-                remove_class_on_scroll()
-            }
-        });
-    }
+            window.addEventListener('scroll', function () {
+                scrollpos = window.scrollY;
+                if (scrollpos >= 800) {
+                    add_class_on_scroll()
+                } else {
+                    remove_class_on_scroll()
+                }
+            });
+        }
     },
     // END: Sticky element
- 
+
     // START: 25 Overlay scrollbars
     overlayScrollbars: function () {
-      var os = e.select('.custom-scrollbar');
-      if (os) {
-        document.addEventListener("DOMContentLoaded", function() {
-          var cs = document.querySelectorAll('.custom-scrollbar');
-          cs.forEach(c => {
-              OverlayScrollbars(c, {
-                scrollbars: {
-                  autoHide: 'leave',
-                  autoHideDelay: 200
-                },
-                overflowBehavior : {
-                    x : "visible-hidden",
-                    y : "scroll"
-                }
-               });
-          });
-        });
-      }
+        var os = e.select('.custom-scrollbar');
+        if (os) {
+            document.addEventListener("DOMContentLoaded", function () {
+                var cs = document.querySelectorAll('.custom-scrollbar');
+                cs.forEach(c => {
+                    OverlayScrollbars(c, {
+                        scrollbars: {
+                            autoHide: 'leave',
+                            autoHideDelay: 200
+                        },
+                        overflowBehavior: {
+                            x: "visible-hidden",
+                            y: "scroll"
+                        }
+                    });
+                });
+            });
+        }
     },
     // END: Overlay scrollbars
 
     // START: 26 Flatpicker
     flatPicker: function () {
 
-      var picker = e.select('.flatpickr');
-      if (e.isVariableDefined(picker)) {
-        var element = e.selectAll('.flatpickr');
-        element.forEach(function (item) {
-          var mode = item.getAttribute('data-mode') == 'multiple' ? 'multiple' : item.getAttribute('data-mode') == 'range' ? 'range' : 'single';
-          var enableTime = item.getAttribute('data-enableTime') == 'true' ? true : false;
-          var noCalendar = item.getAttribute('data-noCalendar') == 'true' ? true : false;
-          var inline = item.getAttribute('data-inline') == 'true' ? true : false;
-          var dateFormat = item.getAttribute('data-date-format') ? item.getAttribute('data-date-format') : item.getAttribute('data-enableTime') == 'true' ? "h:i K" : "d M";
+        var picker = e.select('.flatpickr');
+        if (e.isVariableDefined(picker)) {
+            var element = e.selectAll('.flatpickr');
+            element.forEach(function (item) {
+                var mode = item.getAttribute('data-mode') == 'multiple' ? 'multiple' : item.getAttribute('data-mode') == 'range' ? 'range' : 'single';
+                var enableTime = item.getAttribute('data-enableTime') == 'true' ? true : false;
+                var noCalendar = item.getAttribute('data-noCalendar') == 'true' ? true : false;
+                var inline = item.getAttribute('data-inline') == 'true' ? true : false;
+                var dateFormat = item.getAttribute('data-date-format') ? item.getAttribute('data-date-format') : item.getAttribute('data-enableTime') == 'true' ? "h:i K" : "d M";
 
-          flatpickr(item, {
-            mode: mode,
-            enableTime: enableTime,
-            noCalendar: noCalendar,
-            inline: inline,
-            animate: "false",
-            position: "top",
-            dateFormat: dateFormat, //Check supported characters here: https://flatpickr.js.org/formatting/
-            disableMobile: "true"
-          });
+                flatpickr(item, {
+                    mode: mode,
+                    enableTime: enableTime,
+                    noCalendar: noCalendar,
+                    inline: inline,
+                    animate: "false",
+                    position: "top",
+                    dateFormat: dateFormat, //Check supported characters here: https://flatpickr.js.org/formatting/
+                    disableMobile: "true"
+                });
 
-        });
-      }
+            });
+        }
     },
     // END: Flatpicker
 
     // START: 27 Purecounter
     /* @required https://github.com/srexi/purecounterjs */
-      pCounter: function () {
+    pCounter: function () {
         var pCounter = e.select('.purecounter');
         if (e.isVariableDefined(pCounter)) {
-          new PureCounter();
+            new PureCounter();
         }
     },
     // END: Purecounter
+
+    // START: Maintenance Revenue Chart
+    maintenanceChart: function() {
+        var maintenanceChart = e.select('#ChartMaintenanceRevenue');
+        if (e.isVariableDefined(maintenanceChart)) {
+            // Destroy existing chart if any
+            if (window.maintenanceChart) {
+                window.maintenanceChart.destroy();
+            }
+
+            var maintenanceData = window.maintenanceRevenue || {};
+            var months = Object.keys(maintenanceData);
+            
+            // Prepare data for the chart
+            var revenueValues = [];
+            var enrollmentValues = [];
+            var categories = [];
+            
+            months.forEach(function(month) {
+                var data = maintenanceData[month];
+                if (data) {
+                    revenueValues.push(data.revenue || 0);
+                    enrollmentValues.push(data.enrollmentCount || 0);
+                    categories.push(month);
+                }
+            });
+
+            var options = {
+                series: [{
+                    name: 'Doanh Thu Bảo Trì',
+                    type: 'column',
+                    data: revenueValues
+                }, {
+                    name: 'Số Học Viên',
+                    type: 'column',
+                    data: enrollmentValues
+                }],
+                chart: {
+                    height: 350,
+                    type: 'bar',
+                    stacked: false,
+                    toolbar: {
+                        show: false
+                    }
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: false,
+                        columnWidth: '55%',
+                        endingShape: 'rounded'
+                    },
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                stroke: {
+                    show: true,
+                    width: 2,
+                    colors: ['transparent']
+                },
+                xaxis: {
+                    categories: categories,
+                    labels: {
+                        style: {
+                            colors: '#8c8c8c'
+                        }
+                    }
+                },
+                yaxis: [{
+                    title: {
+                        text: 'Doanh Thu (VNĐ)',
+                        style: {
+                            color: ThemeColor.getCssVariableValue('--bs-primary')
+                        }
+                    },
+                    labels: {
+                        formatter: function(value) {
+                            return value.toLocaleString('vi-VN') + ' VNĐ';
+                        },
+                        style: {
+                            colors: '#8c8c8c'
+                        }
+                    }
+                }, {
+                    opposite: true,
+                    title: {
+                        text: 'Số Học Viên',
+                        style: {
+                            color: ThemeColor.getCssVariableValue('--bs-success')
+                        }
+                    },
+                    labels: {
+                        formatter: function(value) {
+                            return value.toLocaleString('vi-VN');
+                        },
+                        style: {
+                            colors: '#8c8c8c'
+                        }
+                    }
+                }],
+                tooltip: {
+                    y: [{
+                        formatter: function(value) {
+                            return value.toLocaleString('vi-VN') + ' VNĐ';
+                        }
+                    }, {
+                        formatter: function(value) {
+                            return value.toLocaleString('vi-VN') + ' học viên';
+                        }
+                    }]
+                },
+                colors: [
+                    ThemeColor.getCssVariableValue('--bs-primary'),
+                    ThemeColor.getCssVariableValue('--bs-success')
+                ],
+                legend: {
+                    position: 'top'
+                }
+            };
+
+            window.maintenanceChart = new ApexCharts(document.querySelector("#ChartMaintenanceRevenue"), options);
+            window.maintenanceChart.render();
+        }
+    },
+    // END: Maintenance Revenue Chart
 
 };
 e.init();

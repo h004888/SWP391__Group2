@@ -24,11 +24,13 @@ public class OrdersController {
     @GetMapping
     public String getAllOrders(Model model,
                                @RequestParam(value = "page", defaultValue = "0") int page,
-                               @RequestParam(value = "size", defaultValue = "5") int size,
+                               @RequestParam(value = "size", defaultValue = "10") int size,
                                @RequestParam(value = "username", required = false) String username,
                                @RequestParam(value = "amountDirection", required = false) String amountDirection,
-                               @RequestParam(value = "dateDirection", required = false) String dateDirection) {
-        Page<OrdersDTO> ordersPage = ordersService.filterAndSortOrders(username, amountDirection, dateDirection, page, size);
+                               @RequestParam(value = "orderType", required = false) String orderType,
+                               @RequestParam(value = "startDate", required = false) String startDate,
+                               @RequestParam(value = "endDate", required = false) String endDate) {
+        Page<OrdersDTO> ordersPage = ordersService.filterAndSortOrders(username, amountDirection, orderType, startDate, endDate, page, size);
         model.addAttribute("accNamePage", "Management Orders");
         model.addAttribute("orders", ordersPage.getContent());
         model.addAttribute("currentPage", page);
@@ -37,7 +39,9 @@ public class OrdersController {
         model.addAttribute("pageSize", size);
         model.addAttribute("username", username);
         model.addAttribute("amountDirection", amountDirection);
-        model.addAttribute("dateDirection", dateDirection);
+        model.addAttribute("orderType", orderType);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
         model.addAttribute("fragmentContent", "adminDashboard/fragments/ordersContent :: contentOrders");
         return "adminDashboard/index";
     }
@@ -46,11 +50,13 @@ public class OrdersController {
     public String filterOrders(
             @RequestParam(value = "username", required = false) String username,
             @RequestParam(value = "amountDirection", required = false) String amountDirection,
-            @RequestParam(value = "dateDirection", required = false) String dateDirection,
+            @RequestParam(value = "orderType", required = false) String orderType,
+            @RequestParam(value = "startDate", required = false) String startDate,
+            @RequestParam(value = "endDate", required = false) String endDate,
             @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "5") int size,
+            @RequestParam(value = "size", defaultValue = "10") int size,
             Model model) {
-        Page<OrdersDTO> ordersPage = ordersService.filterAndSortOrders(username, amountDirection, dateDirection, page, size);
+        Page<OrdersDTO> ordersPage = ordersService.filterAndSortOrders(username, amountDirection, orderType, startDate, endDate, page, size);
         model.addAttribute("orders", ordersPage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", ordersPage.getTotalPages());
@@ -58,7 +64,9 @@ public class OrdersController {
         model.addAttribute("pageSize", size);
         model.addAttribute("username", username);
         model.addAttribute("amountDirection", amountDirection);
-        model.addAttribute("dateDirection", dateDirection);
+        model.addAttribute("orderType", orderType);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
         return "adminDashboard/fragments/ordersContent :: ordersTableBody";
     }
 

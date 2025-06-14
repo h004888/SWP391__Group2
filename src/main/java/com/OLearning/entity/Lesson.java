@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "Lessons")
@@ -15,13 +16,8 @@ public class Lesson {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long lessonId;
-
-    @Column(columnDefinition = "nvarchar(255)")
     private String title;
-
-    @Column(columnDefinition = "nvarchar(max)")
     private String description;
-
     private String contentType;
     private Integer orderNumber= 0;
     private Integer duration;
@@ -32,7 +28,9 @@ public class Lesson {
     @JoinColumn(name = "chapterId")
     private Chapter chapter;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "videoId")
+    @OneToOne(mappedBy = "lesson", cascade = CascadeType.ALL)
     private Video video;
+
+    @OneToOne(mappedBy = "lesson", cascade = CascadeType.ALL)
+    private Quiz quiz;
 }

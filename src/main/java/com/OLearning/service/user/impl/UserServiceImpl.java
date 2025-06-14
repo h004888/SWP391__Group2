@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
- public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -172,6 +172,13 @@ import java.util.stream.Collectors;
 
         return userRepository.save(user);
     }
+    
+    @Override
+    public UserDTO getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+        return userMapper.toDTO(user);
+    }
 
     @Override
     public boolean deleteAcc(Long id) {
@@ -199,5 +206,20 @@ import java.util.stream.Collectors;
         return false;
     }
 
+    @Override
+    public List<UserDTO> getTopInstructorsByCourseCount(int limit) {
+        // Get all instructors (roleId = 3)
+        List<User> instructors = userRepository.findByRoleId(3L);
+        
+        // Sort instructors by number of courses in descending order
+        return instructors.stream()
+                .sorted((i1, i2) -> Integer.compare(
+                        i2.getCourses().size(),
+                        i1.getCourses().size()
+                ))
+                .limit(limit)
+                .map(userMapper::toDTO)
+                .collect(Collectors.toList());
+    }
 
 }

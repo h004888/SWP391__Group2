@@ -211,32 +211,35 @@
 
                     <!--Paging-->
 
-                    <div class="clearfix" th:if="${totalPages > 0}">
-                        <div class="hint-text">
+                    <div class="d-sm-flex justify-content-sm-between align-items-sm-center mt-2" th:if="${totalPages > 0}">
+                        <div class="mb-0 text-center text-sm-start">
                             Showing <b th:text="${listU.size()}"></b> out of <b th:text="${totalItems}"></b> entries
                         </div>
-                        <ul class="pagination pagination-soft rounded justify-content-end">
+                        <p class="mb-0 text-center text-sm-start" th:if="${totalItems == 0}">
+                            No entries found
+                        </p>
+                        <nav class="d-flex justify-content-center mb-0" aria-label="navigation" th:if="${totalPages > 1}">
+                            <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
                             <!-- Nút Previous -->
-                            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                                <a class="page-link" th:data-page="${currentPage - 1}" href="#"><i
-                                        class="fa fa-angle-double-left"></i></a>
+                            <li class="page-item mb-0" th:classappend="${currentPage == 0} ? 'disabled'">
+                                <a class="page-link" th:data-page="${currentPage - 1}" href="#"> <i class="fas fa-angle-left"></i></a>
                             </li>
 
                             <!-- Các nút số trang -->
-                            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                            <li class="page-item mb-0" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                                 th:classappend="${currentPage == i} ? 'active'">
                                 <a class="page-link" th:data-page="${i}" th:text="${i + 1}" href="#"></a>
                             </li>
 
                             <!-- Nút Next -->
-                            <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                            <li class="page-item mb-0" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
                                 <a class="page-link" th:data-page="${currentPage + 1}" href="#"><i
                                         class="fa fa-angle-double-right"></i></a>
                             </li>
                         </ul>
+                        </nav>
                     </div>
                     <!--End Paging-->
-
                 </div>
             </div>
 

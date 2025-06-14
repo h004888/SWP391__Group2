@@ -62,72 +62,33 @@
 </div>
 
 <div th:fragment="paginationInfo" xmlns:th="http://www.thymeleaf.org">
-    <nav class="mt-4" aria-label="navigation" th:if="${totalPages > 0}">
-        <div class="hint-text mb-2 text-center">
-            Showing <b th:text="${listU.size()}"></b> out of <b th:text="${totalItems}"></b> entries
-        </div>
-        <ul class="pagination pagination-soft rounded justify-content-end">
-            <!-- Previous button -->
-            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                <a class="page-link"
-                   th:data-page="${currentPage - 1}"
-                   th:data-role="${roleId}"
-                   th:data-keyword="${keyword}"
-                   href="#" title="Previous">
-                    <i class="fas fa-angle-double-left"></i>
-                </a>
-            </li>
-
-            <!-- Optional: Dải số trang với giới hạn hiển thị -->
-            <th:block th:with="startPage=${currentPage - 2 < 0 ? 0 : currentPage - 2},
-                              endPage=${currentPage + 2 >= totalPages ? totalPages - 1 : currentPage + 2}">
-
-                <!-- Show first page if not in range -->
-                <li class="page-item" th:if="${startPage > 0}">
-                    <a class="page-link" th:data-page="0" th:text="1"
-                       th:data-role="${roleId}" th:data-keyword="${keyword}" href="#"></a>
+    <div class="d-sm-flex justify-content-sm-between align-items-sm-center mt-2">
+        <p class="mb-0 text-center text-sm-start" th:if="${totalItems > 0}">
+            Showing <span th:text="${currentPage * 5 + 1}">1</span> to 
+            <span th:text="${(currentPage * 5) + 5 > totalItems ? totalItems : (currentPage * 5) + 5}">5</span> of 
+            <span th:text="${totalItems}">20</span> entries
+        </p>
+        <p class="mb-0 text-center text-sm-start" th:if="${totalItems == 0}">
+            No entries found
+        </p>
+        <nav class="d-flex justify-content-center mb-0" aria-label="navigation" th:if="${totalPages > 1}">
+            <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
+                <li class="page-item mb-0" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link" href="#" th:data-page="${currentPage - 1}" th:data-role="${roleId}" th:data-keyword="${keyword}">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
                 </li>
-                <li class="page-item disabled" th:if="${startPage > 1}">
-                    <span class="page-link">..</span>
-                </li>
-
-                <!-- Page numbers -->
-                <li class="page-item"
-                    th:each="i : ${#numbers.sequence(startPage, endPage)}"
+                <li class="page-item mb-0" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" 
                     th:classappend="${currentPage == i} ? 'active'">
-                    <a class="page-link"
-                       th:data-page="${i}"
-                       th:text="${i + 1}"
-                       th:data-role="${roleId}"
-                       th:data-keyword="${keyword}"
-                       href="#"></a>
+                    <a class="page-link" href="#" th:data-page="${i}" th:data-role="${roleId}" th:data-keyword="${keyword}" th:text="${i + 1}"></a>
                 </li>
-
-                <!-- Show last page if not in range -->
-                <li class="page-item disabled" th:if="${endPage < totalPages - 2}">
-                    <span class="page-link">..</span>
+                <li class="page-item mb-0" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                    <a class="page-link" href="#" th:data-page="${currentPage + 1}" th:data-role="${roleId}" th:data-keyword="${keyword}">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
                 </li>
-                <li class="page-item" th:if="${endPage < totalPages - 1}">
-                    <a class="page-link"
-                       th:data-page="${totalPages - 1}"
-                       th:text="${totalPages}"
-                       th:data-role="${roleId}"
-                       th:data-keyword="${keyword}"
-                       href="#"></a>
-                </li>
-            </th:block>
-
-            <!-- Next button -->
-            <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
-                <a class="page-link"
-                   th:data-page="${currentPage + 1}"
-                   th:data-role="${roleId}"
-                   th:data-keyword="${keyword}"
-                   href="#" title="Next">
-                    <i class="fas fa-angle-double-right"></i>
-                </a>
-            </li>
-        </ul>
-    </nav>
+            </ul>
+        </nav>
+    </div>
 </div>
 

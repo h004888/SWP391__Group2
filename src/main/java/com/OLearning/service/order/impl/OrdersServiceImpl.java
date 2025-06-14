@@ -14,7 +14,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class OrdersServiceImpl implements OrdersService {
@@ -75,23 +79,100 @@ public class OrdersServiceImpl implements OrdersService {
     }
 
     @Override
-    public Page<OrdersDTO> filterAndSortOrders(String username, String amountDirection, String dateDirection, int page, int size) {
+    public Page<OrdersDTO> filterAndSortOrders(String username, String amountDirection, String orderType, String startDate, String endDate, int page, int size) {
         Pageable pageable;
-        if (dateDirection != null && !dateDirection.trim().isEmpty()) {
-            pageable = PageRequest.of(page, size, "asc".equalsIgnoreCase(dateDirection) ? Sort.by("orderDate").ascending() : Sort.by("orderDate").descending());
+        if (startDate != null && !startDate.trim().isEmpty() && endDate != null && !endDate.trim().isEmpty()) {
+            try {
+                LocalDate start = LocalDate.parse(startDate);
+                LocalDate end = LocalDate.parse(endDate);
+                // Set end date to end of day
+                LocalDateTime endDateTime = end.plusDays(1).atStartOfDay().minusSeconds(1);
+                
+                pageable = PageRequest.of(page, size, Sort.by("orderDate").ascending());
+                Page<Order> ordersPage;
+                if (username != null && !username.trim().isEmpty() && orderType != null && !orderType.trim().isEmpty()) {
+                    ordersPage = ordersRepository.findByUserUsernameContainingAndOrderTypeAndOrderDateBetween(
+                        username, 
+                        orderType,
+                        start.atStartOfDay(), 
+                        endDateTime, 
+                        pageable
+                    );
+                } else if (username != null && !username.trim().isEmpty()) {
+                    ordersPage = ordersRepository.findByUserUsernameContainingAndOrderDateBetween(
+                        username, 
+                        start.atStartOfDay(), 
+                        endDateTime, 
+                        pageable
+                    );
+                } else if (orderType != null && !orderType.trim().isEmpty()) {
+                    ordersPage = ordersRepository.findByOrderTypeAndOrderDateBetween(
+                        orderType,
+                        start.atStartOfDay(), 
+                        endDateTime, 
+                        pageable
+                    );
+                } else {
+                    ordersPage = ordersRepository.findByOrderDateBetween(
+                        start.atStartOfDay(), 
+                        endDateTime, 
+                        pageable
+                    );
+                }
+                return ordersPage.map(ordersMapper::toDTO);
+            } catch (Exception e) {
+                // If date parsing fails, fall back to default sorting
+                pageable = PageRequest.of(page, size);
+            }
         } else if (amountDirection != null && !amountDirection.trim().isEmpty()) {
-            pageable = PageRequest.of(page, size, "asc".equalsIgnoreCase(amountDirection) ? Sort.by("amount").ascending() : Sort.by("amount").descending());
+            pageable = PageRequest.of(page, size, "asc".equalsIgnoreCase(amountDirection) ? 
+                Sort.by("amount").ascending() : Sort.by("amount").descending());
         } else {
             pageable = PageRequest.of(page, size);
         }
 
         Page<Order> ordersPage;
-        if (username != null && !username.trim().isEmpty()) {
+        if (username != null && !username.trim().isEmpty() && orderType != null && !orderType.trim().isEmpty()) {
+            ordersPage = ordersRepository.findByUserUsernameContainingAndOrderType(username, orderType, pageable);
+        } else if (username != null && !username.trim().isEmpty()) {
             ordersPage = ordersRepository.findByUserUsernameContaining(username, pageable);
+        } else if (orderType != null && !orderType.trim().isEmpty()) {
+            ordersPage = ordersRepository.findByOrderType(orderType, pageable);
         } else {
             ordersPage = ordersRepository.findAll(pageable);
         }
 
         return ordersPage.map(ordersMapper::toDTO);
+    }
+
+    @Override
+    public Map<String, Double> getRevenuePerMonth() {
+        Map<String, Double> revenuePerMonth = new HashMap<>();
+        // Initialize all months with 0
+        LocalDate now = LocalDate.now();
+        for (int i = 1; i <= 12; i++) {
+            String monthKey = String.format("%d-%02d", now.getYear(), i);
+            revenuePerMonth.put(monthKey, 0.0);
+        }
+        List<Object[]> monthlyRevenue = ordersRepository.getMonthlyRevenue(now.getYear());
+        for (Object[] result : monthlyRevenue) {
+            String month = result[0].toString();
+            Double totalAmount = (Double) result[1];
+            String monthKey = String.format("%d-%02d", now.getYear(), Integer.parseInt(month));
+            revenuePerMonth.put(monthKey, totalAmount);
+        }
+        return revenuePerMonth;
+    }
+
+    @Override
+    public Map<String, Double> getRevenueByDateRange(LocalDate startDate, LocalDate endDate) {
+        Map<String, Double> revenueByDate = new HashMap<>();
+        List<Object[]> revenueData = ordersRepository.getRevenueByDateRange(startDate, endDate);
+        for (Object[] result : revenueData) {
+            String monthYear = (String) result[0];
+            Double totalAmount = (Double) result[1];
+            revenueByDate.put(monthYear, totalAmount);
+        }
+        return revenueByDate;
     }
 }
