@@ -38,5 +38,5 @@ public interface CategoryService {
 
     Page<Category> findByNameContaining(String name, Pageable pageable);
 
-
+    Page<Category> findAll(Pageable pageable);
 }

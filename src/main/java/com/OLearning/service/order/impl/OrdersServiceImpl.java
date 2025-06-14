@@ -79,19 +79,65 @@ public class OrdersServiceImpl implements OrdersService {
     }
 
     @Override
-    public Page<OrdersDTO> filterAndSortOrders(String username, String amountDirection, String dateDirection, int page, int size) {
+    public Page<OrdersDTO> filterAndSortOrders(String username, String amountDirection, String orderType, String startDate, String endDate, int page, int size) {
         Pageable pageable;
-        if (dateDirection != null && !dateDirection.trim().isEmpty()) {
-            pageable = PageRequest.of(page, size, "asc".equalsIgnoreCase(dateDirection) ? Sort.by("orderDate").ascending() : Sort.by("orderDate").descending());
+        if (startDate != null && !startDate.trim().isEmpty() && endDate != null && !endDate.trim().isEmpty()) {
+            try {
+                LocalDate start = LocalDate.parse(startDate);
+                LocalDate end = LocalDate.parse(endDate);
+                // Set end date to end of day
+                LocalDateTime endDateTime = end.plusDays(1).atStartOfDay().minusSeconds(1);
+                
+                pageable = PageRequest.of(page, size, Sort.by("orderDate").ascending());
+                Page<Order> ordersPage;
+                if (username != null && !username.trim().isEmpty() && orderType != null && !orderType.trim().isEmpty()) {
+                    ordersPage = ordersRepository.findByUserUsernameContainingAndOrderTypeAndOrderDateBetween(
+                        username, 
+                        orderType,
+                        start.atStartOfDay(), 
+                        endDateTime, 
+                        pageable
+                    );
+                } else if (username != null && !username.trim().isEmpty()) {
+                    ordersPage = ordersRepository.findByUserUsernameContainingAndOrderDateBetween(
+                        username, 
+                        start.atStartOfDay(), 
+                        endDateTime, 
+                        pageable
+                    );
+                } else if (orderType != null && !orderType.trim().isEmpty()) {
+                    ordersPage = ordersRepository.findByOrderTypeAndOrderDateBetween(
+                        orderType,
+                        start.atStartOfDay(), 
+                        endDateTime, 
+                        pageable
+                    );
+                } else {
+                    ordersPage = ordersRepository.findByOrderDateBetween(
+                        start.atStartOfDay(), 
+                        endDateTime, 
+                        pageable
+                    );
+                }
+                return ordersPage.map(ordersMapper::toDTO);
+            } catch (Exception e) {
+                // If date parsing fails, fall back to default sorting
+                pageable = PageRequest.of(page, size);
+            }
         } else if (amountDirection != null && !amountDirection.trim().isEmpty()) {
-            pageable = PageRequest.of(page, size, "asc".equalsIgnoreCase(amountDirection) ? Sort.by("amount").ascending() : Sort.by("amount").descending());
+            pageable = PageRequest.of(page, size, "asc".equalsIgnoreCase(amountDirection) ? 
+                Sort.by("amount").ascending() : Sort.by("amount").descending());
         } else {
             pageable = PageRequest.of(page, size);
         }
 
         Page<Order> ordersPage;
-        if (username != null && !username.trim().isEmpty()) {
+        if (username != null && !username.trim().isEmpty() && orderType != null && !orderType.trim().isEmpty()) {
+            ordersPage = ordersRepository.findByUserUsernameContainingAndOrderType(username, orderType, pageable);
+        } else if (username != null && !username.trim().isEmpty()) {
             ordersPage = ordersRepository.findByUserUsernameContaining(username, pageable);
+        } else if (orderType != null && !orderType.trim().isEmpty()) {
+            ordersPage = ordersRepository.findByOrderType(orderType, pageable);
         } else {
             ordersPage = ordersRepository.findAll(pageable);
         }

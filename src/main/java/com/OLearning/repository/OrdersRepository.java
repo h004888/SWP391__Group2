@@ -76,6 +76,48 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
     List<Object[]> getRevenueByDateRange(@Param("startDate") LocalDate startDate,
                                         @Param("endDate") LocalDate endDate);
 
+    // Find orders by username and date range with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    Page<Order> findByUserUsernameContainingAndOrderDateBetween(
+        String username, 
+        LocalDateTime startDate, 
+        LocalDateTime endDate, 
+        Pageable pageable
+    );
 
+    // Find orders by date range with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    Page<Order> findByOrderDateBetween(
+        LocalDateTime startDate, 
+        LocalDateTime endDate, 
+        Pageable pageable
+    );
+
+    // Find orders by username and order type with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    Page<Order> findByUserUsernameContainingAndOrderType(String username, String orderType, Pageable pageable);
+
+    // Find orders by order type with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    Page<Order> findByOrderType(String orderType, Pageable pageable);
+
+    // Find orders by username, order type and date range with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    Page<Order> findByUserUsernameContainingAndOrderTypeAndOrderDateBetween(
+        String username, 
+        String orderType,
+        LocalDateTime startDate, 
+        LocalDateTime endDate, 
+        Pageable pageable
+    );
+
+    // Find orders by order type and date range with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    Page<Order> findByOrderTypeAndOrderDateBetween(
+        String orderType,
+        LocalDateTime startDate, 
+        LocalDateTime endDate, 
+        Pageable pageable
+    );
 
 }

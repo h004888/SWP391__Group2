@@ -10,6 +10,8 @@ import com.OLearning.repository.NotificationRepository;
 import com.OLearning.repository.CourseMaintenanceRepository;
 import com.OLearning.service.courseMaintance.CourseMaintenanceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -44,11 +46,21 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
     }
 
     @Override
+    public Page<CourseMaintenance> getAllCourseMaintenances(Pageable pageable) {
+        return courseMaintenanceRepository.findAll(pageable);
+    }
+
+    @Override
     public List<CourseMaintenance> searchByUsername(String username) {
         if (username != null && !username.isEmpty()) {
             return courseMaintenanceRepository.findByCourseInstructorUsernameContaining(username);
         }
         return courseMaintenanceRepository.findAll();
+    }
+
+    @Override
+    public Page<CourseMaintenance> filterMaintenances(String username, String status, LocalDate monthYear, Pageable pageable) {
+        return courseMaintenanceRepository.findByUsernameAndStatusAndMonthYear(username, status, monthYear, pageable);
     }
 
     @Scheduled(cron = "0 59 23 L * ?") // Chạy vào 23:59 ngày cuối tháng

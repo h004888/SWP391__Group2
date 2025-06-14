@@ -107,4 +107,8 @@ public class CategoryServiceImpl implements CategoryService {
         return categoriesRepository.findTop5ByOrderByIdAsc();
     }
 
+    @Override
+    public Page<Category> findAll(Pageable pageable) {
+        return categoriesRepository.findAll(pageable);
+    }
 }
