@@ -28,5 +28,6 @@ public class CourseDTO {
     private Integer totalStudentEnrolled;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String courseLevel;
 
 }

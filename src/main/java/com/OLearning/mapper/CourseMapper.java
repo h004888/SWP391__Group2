@@ -24,7 +24,8 @@ public class CourseMapper {
                 course.getTotalRatings(),
                 course.getTotalStudentEnrolled(),
                 course.getCreatedAt(),
-                course.getUpdatedAt());
+                course.getUpdatedAt(),
+                course.getCourseLevel());
     }
 
     // Nếu cần từ DTO → Entity
@@ -45,6 +46,7 @@ public class CourseMapper {
         course.setTotalStudentEnrolled(dto.getTotalStudentEnrolled());
         course.setCreatedAt(dto.getCreatedAt());
         course.setUpdatedAt(dto.getUpdatedAt());
+        course.setCourseLevel(dto.getCourseLevel());
         return course;
     }
 }

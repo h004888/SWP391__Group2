@@ -25,4 +25,21 @@ public interface CourseService {
     List<Course> getTopCourses();
 
     Page<CourseDTO> getCoursesByTotalRatings(Pageable pageable);
+
+    Page<CourseDTO> searchCourses(
+            List<Long> categoryIds,
+            String priceFilter,
+            String sortBy,
+            int page,
+            int size);
+
+    Page<CourseDTO> searchCoursesGrid(
+            List<Long> categoryIds,
+            List<String> priceFilters, // đổi kiểu ở đây
+            String sortBy,
+            String keyword,
+            int page,
+            int size);
+
+
 }

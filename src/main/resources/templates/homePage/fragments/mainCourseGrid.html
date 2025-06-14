@@ -1,0 +1,67 @@
+<div th:fragment="mainCourseGrid" id="mainCourseGrid">
+    <!-- Course Grid -->
+    <div class="row g-4">
+        <div class="col-sm-6 col-xl-4" th:each="course : ${courses}">
+            <div class="card shadow h-100">
+                <img th:src="@{/assets/images/courses/4by3/01.jpg}" class="card-img-top" alt="course image">
+                <div class="card-body pb-0">
+                    <div class="d-flex justify-content-between mb-2">
+                        <a href="#" class="badge bg-purple bg-opacity-10 text-purple">All level</a>
+                        <a href="#" class="h6 fw-light mb-0"><i class="far fa-heart"></i></a>
+                    </div>
+                    <h5 class="card-title"><a th:text="${course.title}"
+                            th:href="@{'/course/' + ${course.courseId}}"></a></h5>
+                    <p class="mb-2 text-truncate-2" th:text="${course.description}"></p>
+                    <ul class="list-inline mb-0">
+                        <li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
+                        <li class="list-inline-item ms-2 h6 fw-light mb-0"
+                            th:text="${course.totalRatings} + ' Ratings'">4.0/5.0</li>
+                    </ul>
+                </div>
+                <div class="card-footer pt-0 pb-3">
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <span class="h6 fw-light mb-0">
+                            <i class="far fa-clock text-danger me-2"></i>
+                            <span th:text="${course.duration} + 'h'">12h</span>
+                        </span>
+                        <span class="h6 fw-light mb-0">
+                            <i class="fas fa-table text-orange me-2"></i>
+                            <span th:text="${course.totalLessons} + ' lectures'">15 lectures</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination (AJAX-friendly) -->
+    <div class="col-12 mt-4 d-flex justify-content-center">
+        <nav aria-label="navigation">
+            <ul class="pagination pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
+
+                <!-- Nút Previous -->
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link pagination-link" href="#" data-page="${currentPage - 1}">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                </li>
+
+                <!-- Các nút số trang -->
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                    th:classappend="${i == currentPage} ? 'active'">
+                    <a class="page-link pagination-link" href="#" th:text="${i + 1}" th:attr="data-page=${i}">1</a>
+                </li>
+
+                <!-- Nút Next -->
+                <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                    <a class="page-link pagination-link" href="#" data-page="${currentPage + 1}">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </li>
+
+            </ul>
+        </nav>
+    </div>
+
+</div>

@@ -37,11 +37,24 @@ public class HomeController {
             @RequestParam(defaultValue = "7") int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<CourseDTO> courses = courseService.getCoursesByTotalRatings(pageable); // lưu ý trả về Page<CourseDTO>
-
+        model.addAttribute("categories", categoryService.findTop5ByOrderByIdAsc());
         model.addAttribute("courses", courses.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", courses.getTotalPages());
         return "homePage/course-list";
+    }
+
+    @GetMapping("/coursesGrid")
+    public String coursesGrid(Model model, @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "9") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<CourseDTO> courses = courseService.getCoursesByTotalRatings(pageable); // lưu ý trả về Page<CourseDTO>
+        model.addAttribute("categories", categoryService.getListCategories());
+        model.addAttribute("courses", courses.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", courses.getTotalPages());
+        model.addAttribute("totalItems", courses.getTotalElements());
+        return "homePage/course-grid";
     }
 
 }

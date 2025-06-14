@@ -48,10 +48,14 @@ public class FragmentController {
     }
 
     @GetMapping("/courses")
-    public String courses(Model model, @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "7") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<CourseDTO> courses = courseService.getCoursesByTotalRatings(pageable);
+    public String courses(@RequestParam(required = false) List<Long> categoryIds,
+                          @RequestParam(required = false) String priceFilter,
+                          @RequestParam(defaultValue = "Newest") String sortBy,
+                          @RequestParam(defaultValue = "0") int page,
+                          @RequestParam(defaultValue = "9") int size,
+                          Model model) {
+
+        Page<CourseDTO> courses = courseService.searchCourses(categoryIds, priceFilter, sortBy, page, size);
 
         model.addAttribute("courses", courses.getContent());
         model.addAttribute("currentPage", page);
@@ -59,5 +63,30 @@ public class FragmentController {
 
         return "homePage/fragments/mainCourseList :: mainCourseList"; // phần tử fragment cho AJAX
     }
+
+    @GetMapping("/coursesGrid")
+    public String courses(
+            @RequestParam(required = false) List<Long> categoryIds,
+            @RequestParam(required = false, name = "priceFilters") List<String> priceFilters,  // đổi kiểu
+            @RequestParam(defaultValue = "Newest") String sortBy,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "9") int size,
+            Model model) {
+
+        Page<CourseDTO> courses = courseService.searchCoursesGrid(
+                categoryIds, priceFilters, sortBy, keyword, page, size
+        );
+
+        model.addAttribute("courses", courses.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", courses.getTotalPages());
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("priceFilters", priceFilters);    // sửa ở đây
+        model.addAttribute("categoryIds", categoryIds);
+
+        return "homePage/fragments/mainCourseGrid :: mainCourseGrid";
+    }
+
 
 }

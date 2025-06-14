@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<!-- Mirrored from stackbros.in/eduport/landing/course-list.html by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 06 Jun 2025 07:32:06 GMT -->
+<!-- Mirrored from stackbros.in/eduport/landing/course-grid.html by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 06 Jun 2025 07:32:05 GMT -->
 
 <head>
 	<title>Eduport - LMS, Education and Course Theme</title>
@@ -33,43 +33,38 @@
 
 		setTheme(getPreferredTheme())
 
-		window.addEventListener('DOMContentLoaded', () => {
-			var el = document.querySelector('.theme-icon-active');
-			if (el != 'undefined' && el != null) {
-				const showActiveTheme = theme => {
-					const activeThemeIcon = document.querySelector('.theme-icon-active use')
-					const btnToActive = document.querySelector(`[data-bs-theme-value="${theme}"]`)
-					const svgOfActiveBtn = btnToActive.querySelector('.mode-switch use').getAttribute('href')
+		const showActiveTheme = theme => {
+			const activeThemeIcon = document.querySelector('.theme-icon-active use')
+			const btnToActive = document.querySelector(`[data-bs-theme-value="${theme}"]`)
+			const svgOfActiveBtn = btnToActive.querySelector('.mode-switch use').getAttribute('href')
 
-					document.querySelectorAll('[data-bs-theme-value]').forEach(element => {
-						element.classList.remove('active')
-					})
+			document.querySelectorAll('[data-bs-theme-value]').forEach(element => {
+				element.classList.remove('active')
+			})
 
-					btnToActive.classList.add('active')
-					activeThemeIcon.setAttribute('href', svgOfActiveBtn)
-				}
+			btnToActive.classList.add('active')
+			activeThemeIcon.setAttribute('href', svgOfActiveBtn)
+		}
 
-				window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-					if (storedTheme !== 'light' || storedTheme !== 'dark') {
-						setTheme(getPreferredTheme())
-					}
-				})
-
-				showActiveTheme(getPreferredTheme())
-
-				document.querySelectorAll('[data-bs-theme-value]')
-					.forEach(toggle => {
-						toggle.addEventListener('click', () => {
-							const theme = toggle.getAttribute('data-bs-theme-value')
-							localStorage.setItem('theme', theme)
-							setTheme(theme)
-							showActiveTheme(theme)
-						})
-					})
-
+		window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+			if (storedTheme !== 'light' || storedTheme !== 'dark') {
+				setTheme(getPreferredTheme())
 			}
 		})
 
+		window.addEventListener('DOMContentLoaded', () => {
+			showActiveTheme(getPreferredTheme())
+
+			document.querySelectorAll('[data-bs-theme-value]')
+				.forEach(toggle => {
+					toggle.addEventListener('click', () => {
+						const theme = toggle.getAttribute('data-bs-theme-value')
+						localStorage.setItem('theme', theme)
+						setTheme(theme)
+						showActiveTheme(theme)
+					})
+				})
+		})
 	</script>
 
 	<!-- Favicon -->
@@ -78,8 +73,9 @@
 	<!-- Google Font -->
 	<link rel="preconnect" href="https://fonts.googleapis.com/">
 	<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
-	<link rel="stylesheet"
-		href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&amp;family=Roboto:wght@400;500;700&amp;display=swap">
+	<link
+		href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&amp;family=Roboto:wght@400;500;700&amp;display=swap"
+		rel="stylesheet">
 
 	<!-- Plugins CSS -->
 	<link rel="stylesheet" type="text/css" href="assets/vendor/font-awesome/css/all.min.css">
@@ -99,7 +95,7 @@
 		<nav class="navbar navbar-expand-xl">
 			<div class="container">
 				<!-- Logo START -->
-				<a class="navbar-brand" th:href="@{/}">
+				<a class="navbar-brand" href="index.html">
 					<img class="light-mode-item navbar-brand-item" src="assets/images/logo.svg" alt="logo">
 					<img class="dark-mode-item navbar-brand-item" src="assets/images/logo-light.svg" alt="logo">
 				</a>
@@ -531,20 +527,19 @@
 
 		<!-- =======================
 Page Banner START -->
-		<section class="bg-dark align-items-center d-flex"
+		<section class="bg-blue align-items-center d-flex"
 			style="background:url(assets/images/pattern/04.png) no-repeat center center; background-size:cover;">
-			<!-- Main banner background image -->
 			<div class="container">
 				<div class="row">
-					<div class="col-12">
+					<div class="col-12 text-center">
 						<!-- Title -->
-						<h1 class="text-white">Course List Classic</h1>
+						<h1 class="text-white">Course Grid Classic</h1>
 						<!-- Breadcrumb -->
-						<div class="d-flex">
+						<div class="d-flex justify-content-center">
 							<nav aria-label="breadcrumb">
 								<ol class="breadcrumb breadcrumb-dark breadcrumb-dots mb-0">
 									<li class="breadcrumb-item"><a href="#">Home</a></li>
-									<li class="breadcrumb-item active" aria-current="page">Courses</li>
+									<li class="breadcrumb-item active" aria-current="page">Courses classic</li>
 								</ol>
 							</nav>
 						</div>
@@ -557,143 +552,194 @@ Page Banner END -->
 
 		<!-- =======================
 Page content START -->
-		<section class="pb-0 py-sm-5">
+		<section class="py-5">
 			<div class="container">
-				<!-- Title and select START -->
-				<div class="row g-3 align-items-center mb-4">
-					<!-- Content -->
-					<div class="col-md-4">
-						<h4 class="mb-0">Showing 1-7 of 32 result</h4>
-					</div>
-
-					<!-- Select option -->
-					<div class="col-md-8">
-						<div class="row g-3 align-items-center justify-content-md-end me-auto">
-
-							<!-- List and Grid icon -->
-							<div class="col-sm-4 col-xl-6 text-md-end d-none d-md-block">
-								<ul class="list-inline mb-0">
-									<!-- Grid icon -->
-									<li class="list-inline-item"><a href="course-grid.html"
-											class="btn btn-outline-light mb-0 me-2"><i
-												class="fas fa-fw fa-th-large"></i></a></li>
-									<!-- list icon -->
-									<li class="list-inline-item"><a href="course-list.html"
-											class="btn btn-outline-light mb-0 me-2"><i
-												class="fas fa-fw fa-list-ul"></i></a></li>
-								</ul>
-							</div>
-
-							<!-- Short by filter -->
-							<form class="col-md-4 border rounded p-1 input-borderless">
-								<select id="sortSelect" class="form-select js-choice z-index-9"
-									aria-label=".form-select-sm">
-									<option value="">Sort by</option>
-									<option value="Free">Free</option>
-									<option value="Newest">Newest</option>
-									<option value="MostPopular">Most popular</option>
-									<option value="MostViewed">Most Viewed</option>
-								</select>
-							</form>
-
-
-							<!-- Advanced filter responsive toggler START -->
-							<div class="col-4 text-md-end">
-								<button class="btn btn-primary mb-0 d-xl-none" type="button" data-bs-toggle="offcanvas"
-									data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar">
-									<i class="fas fa-sliders-h me-1"></i> Show filter
-								</button>
-							</div>
-							<!-- Advanced filter responsive toggler END -->
-
-						</div>
-					</div>
-				</div>
-				<!-- Title and select END -->
-
 				<div class="row">
 					<!-- Main content START -->
-					<div class="col-xl-9 col-xxl-8" id="courseList">
+					<div class="col-lg-8 col-xl-9">
+						<!-- Search + Sort + Filter -->
+						<div class="row mb-4 align-items-center">
+							<div class="col-xl-6">
+								<form class="border rounded p-2" th:action="@{/coursesGrid}" method="get">
+									<div class="input-group input-borderless">
+										<input class="form-control me-1" type="search" name="keyword"
+											placeholder="Find your course">
+										<button type="submit" class="btn btn-primary mb-0 rounded z-index-1"><i
+												class="fas fa-search"></i></button>
+									</div>
+								</form>
+							</div>
 
-						<div th:replace="homePage/fragments/mainCourseList :: mainCourseList"></div>
+							<div class="col-xl-3 mt-3 mt-xl-0">
+								<form class="border rounded p-2 input-borderless">
+									<select class="form-select form-select-sm js-choice border-0" name="sortBy">
+										<option value="">Sort by</option>
+										<option value="Newest">Newest</option>
+										<option value="MostPopular">Most popular</option>
+										<option value="MostViewed">Most Viewed</option>
+									</select>
+								</form>
+							</div>
 
+							<div class="col-12 col-xl-3 d-flex justify-content-between align-items-center mt-3 mt-xl-0">
+								<p class="mb-0 text-end"
+									th:text="'Showing ' + ${#lists.size(courses)} + ' of ' + ${totalPages * 7} + ' results'">
+									Showing 1-7
+									of 32 results</p>
+							</div>
+						</div>
+
+						<div id="mainCourseGrid"></div>
 					</div>
 					<!-- Main content END -->
 
 					<!-- Right sidebar START -->
-					<div class="col-lg-3 col-xxl-4">
+					<div class="col-lg-4 col-xl-3">
 						<!-- Responsive offcanvas body START -->
-						<div class="offcanvas-xl offcanvas-end" tabindex="-1" id="offcanvasSidebar">
+						<div class="offcanvas-lg offcanvas-end" tabindex="-1" id="offcanvasSidebar">
 							<div class="offcanvas-header bg-light">
 								<h5 class="offcanvas-title" id="offcanvasNavbarLabel">Advance Filter</h5>
 								<button type="button" class="btn-close" data-bs-dismiss="offcanvas"
 									data-bs-target="#offcanvasSidebar" aria-label="Close"></button>
 							</div>
-							<div class="offcanvas-body p-3 p-xl-0">
+							<div class="offcanvas-body p-3 p-lg-0">
 								<form>
 									<!-- Category START -->
 									<div class="card card-body shadow p-4 mb-4">
 										<!-- Title -->
-										<h4 class="mb-4">Category</h4>
-										<div class="row">
-											<!-- Category group -->
-											<div class="col-xxl-6">
-												<!-- Checkbox "All" -->
+										<h4 class="mb-3">Category</h4>
+										<!-- Category group -->
+										<div class="col-12">
+											<!-- Checkbox -->
+											<div class="d-flex justify-content-between align-items-center">
 												<div class="form-check">
 													<input class="form-check-input" type="checkbox" value="all"
 														id="checkAll">
 													<label class="form-check-label" for="checkAll">All</label>
 												</div>
-
-												<!-- Các checkbox danh mục -->
-												<div class="form-check" th:each="category : ${categories}">
-													<input class="form-check-input category-checkbox" type="checkbox"
+												<span class="small" th:text="${totalItems}">(1256)</span>
+											</div>
+											<!-- Checkbox -->
+											<div class="d-flex justify-content-between align-items-center"
+												th:each="category, iterStat : ${categories}"
+												th:if="${iterStat.index < 5}">
+												<div class="form-check">
+													<input class="form-check-input" type="checkbox"
 														th:id="'category_' + ${category.id}" th:value="${category.id}"
 														name="categoryIds">
 													<label class="form-check-label"
 														th:for="'category_' + ${category.id}"
-														th:text="${category.name}">Development</label>
+														th:text="${category.name}">Category name</label>
 												</div>
+												<span class="small"
+													th:text="${#lists.size(category.courses)}">(0)</span>
 											</div>
 
-										</div><!-- Row END -->
+
+											<!-- Collapse body -->
+											<div class="collapse multi-collapse mt-2" id="multiCollapseExample1">
+												<div class="card card-body p-0 border-0">
+													<div th:each="category, iterStat : ${categories}"
+														th:if="${iterStat.index >= 5}"
+														class="d-flex justify-content-between align-items-center">
+														<div class="form-check">
+															<input class="form-check-input" type="checkbox"
+																th:id="'category_' + ${category.id}"
+																th:value="${category.id}" name="categoryIds">
+															<label class="form-check-label"
+																th:for="'category_' + ${category.id}"
+																th:text="${category.name}">Category</label>
+														</div>
+														<span class="small"
+															th:text="${#lists.size(category.courses)}">(0)</span>
+													</div>
+												</div>
+											</div>
+											<!-- Collapse button -->
+											<a class=" p-0 mb-0 mt-2 btn-more d-flex align-items-center"
+												data-bs-toggle="collapse" href="#multiCollapseExample1" role="button"
+												aria-expanded="false" aria-controls="multiCollapseExample1">
+												See <span class="see-more ms-1">more</span><span
+													class="see-less ms-1">less</span><i
+													class="fas fa-angle-down ms-2"></i>
+											</a>
+										</div>
 									</div>
 									<!-- Category END -->
-
-									<!-- Price START -->
+									<!-- Price Level START -->
 									<div class="card card-body shadow p-4 mb-4">
-										<!-- Title -->
 										<h4 class="mb-3">Price Level</h4>
 										<ul class="list-inline mb-0">
-											<!-- Price item -->
-											<li class="list-inline-item">
-												<input type="radio" class="btn-check" name="options" id="option1">
+											<!-- Free -->
+											<li class="list-inline-item mb-2">
+												<input type="checkbox" class="btn-check price-filter" id="price-free"
+													value="Free">
 												<label class="btn btn-light btn-primary-soft-check"
-													for="option1">All</label>
+													for="price-free">Free</label>
 											</li>
-											<!-- Price item -->
-											<li class="list-inline-item">
-												<input type="radio" class="btn-check" name="options" id="option2">
+											<!-- Paid -->
+											<li class="list-inline-item mb-2">
+												<input type="checkbox" class="btn-check price-filter" id="price-paid"
+													value="Paid">
 												<label class="btn btn-light btn-primary-soft-check"
-													for="option2">Free</label>
-											</li>
-											<!-- Price item -->
-											<li class="list-inline-item">
-												<input type="radio" class="btn-check" name="options" id="option3">
-												<label class="btn btn-light btn-primary-soft-check"
-													for="option3">Paid</label>
+													for="price-paid">Paid</label>
 											</li>
 										</ul>
 									</div>
-									<!-- Price END -->
+									<!-- Price Level END -->
+
+
+									<!-- Skill Level START -->
+									<div class="card card-body shadow p-4 mb-4">
+										<!-- Title -->
+										<h4 class="mb-3">Skill Level</h4>
+										<ul class="list-inline mb-0">
+											<!-- All levels -->
+											<li class="list-inline-item mb-2">
+												<input type="checkbox" class="btn-check" id="btn-check-skill-all">
+												<label class="btn btn-light btn-primary-soft-check"
+													for="btn-check-skill-all">
+													All levels
+												</label>
+											</li>
+											<!-- Beginner -->
+											<li class="list-inline-item mb-2">
+												<input type="checkbox" class="btn-check" id="btn-check-skill-beginner">
+												<label class="btn btn-light btn-primary-soft-check"
+													for="btn-check-skill-beginner">
+													Beginner
+												</label>
+											</li>
+											<!-- Intermediate -->
+											<li class="list-inline-item mb-2">
+												<input type="checkbox" class="btn-check"
+													id="btn-check-skill-intermediate">
+												<label class="btn btn-light btn-primary-soft-check"
+													for="btn-check-skill-intermediate">
+													Intermediate
+												</label>
+											</li>
+											<!-- Advanced -->
+											<li class="list-inline-item mb-2">
+												<input type="checkbox" class="btn-check" id="btn-check-skill-advanced">
+												<label class="btn btn-light btn-primary-soft-check"
+													for="btn-check-skill-advanced">
+													Advanced
+												</label>
+											</li>
+										</ul>
+									</div>
+									<!-- Skill Level END -->
+
 
 								</form><!-- Form End -->
 							</div>
+
+
 						</div>
 						<!-- Responsive offcanvas body END -->
 					</div>
 					<!-- Right sidebar END -->
-
 				</div><!-- Row END -->
 			</div>
 		</section>
@@ -702,19 +748,23 @@ Page content END -->
 
 		<!-- =======================
 Newsletter START -->
-		<section class="pt-5 pt-lg-0">
+		<section class="pt-0">
 			<div class="container position-relative overflow-hidden">
 				<!-- SVG decoration -->
 				<figure class="position-absolute top-50 start-50 translate-middle ms-3">
 					<svg>
-						<path class="fill-white opacity-3"
-							d="m496 22.999c0 10.493-8.506 18.999-18.999 18.999s-19-8.506-19-18.999 8.507-18.999 19-18.999 18.999 8.506 18.999 18.999z" />
-						<path class="fill-white opacity-3"
-							d="m775 102.5c0 5.799-4.701 10.5-10.5 10.5-5.798 0-10.499-4.701-10.499-10.5 0-5.798 4.701-10.499 10.499-10.499 5.799 0 10.5 4.701 10.5 10.499z" />
-						<path class="fill-white opacity-3"
-							d="m192 102c0 6.626-5.373 11.999-12 11.999s-11.999-5.373-11.999-11.999c0-6.628 5.372-12 11.999-12s12 5.372 12 12z" />
-						<path class="fill-white opacity-3"
-							d="m20.499 10.25c0 5.66-4.589 10.249-10.25 10.249-5.66 0-10.249-4.589-10.249-10.249-0-5.661 4.589-10.25 10.249-10.25 5.661-0 10.25 4.589 10.25 10.25z" />
+						<path
+							d="m496 22.999c0 10.493-8.506 18.999-18.999 18.999s-19-8.506-19-18.999 8.507-18.999 19-18.999 18.999 8.506 18.999 18.999z"
+							fill="#fff" fill-rule="evenodd" opacity=".502" />
+						<path
+							d="m775 102.5c0 5.799-4.701 10.5-10.5 10.5-5.798 0-10.499-4.701-10.499-10.5 0-5.798 4.701-10.499 10.499-10.499 5.799 0 10.5 4.701 10.5 10.499z"
+							fill="#fff" fill-rule="evenodd" opacity=".102" />
+						<path
+							d="m192 102c0 6.626-5.373 11.999-12 11.999s-11.999-5.373-11.999-11.999c0-6.628 5.372-12 11.999-12s12 5.372 12 12z"
+							fill="#fff" fill-rule="evenodd" opacity=".2" />
+						<path
+							d="m20.499 10.25c0 5.66-4.589 10.249-10.25 10.249-5.66 0-10.249-4.589-10.249-10.249-0-5.661 4.589-10.25 10.249-10.25 5.661-0 10.25 4.589 10.25 10.25z"
+							fill="#fff" fill-rule="evenodd" opacity=".2" />
 					</svg>
 				</figure>
 				<!-- Svg decoration -->
@@ -727,7 +777,7 @@ Newsletter START -->
 					</svg>
 				</figure>
 
-				<div class="bg-grad p-3 p-sm-5 rounded-3">
+				<div class="bg-grad-pink p-3 p-sm-5 rounded-3">
 					<div class="row justify-content-center position-relative">
 						<!-- SVG decoration -->
 						<figure class="fill-white opacity-1 position-absolute top-50 start-0 translate-middle-y">
@@ -908,157 +958,94 @@ Footer END -->
 	<!-- Bootstrap JS -->
 	<script src="assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
 	<!-- Vendors -->
 	<script src="assets/vendor/choices/js/choices.min.js"></script>
 
 	<!-- Template Functions -->
 	<script src="assets/js/functions.js"></script>
-	<!-- <script>
-		// --- ĐỊNH NGHĨA HÀM Ở PHẠM VI TOÀN CỤC ---
-		// Đưa hàm ra ngoài $(document).ready() để onclick trong HTML có thể gọi được
-		function loadPage(page) {
-			console.log(`[loadPage] Được gọi để tải trang: ${page}`);
-
-			// BƯỚC 1: Lấy danh sách ID đang được chọn từ các checkbox
-			let selectedIds = [];
-			$('.category-checkbox:checked').each(function () {
-				selectedIds.push($(this).val());
-			});
-			console.log('[loadPage] Với các Category ID đang được chọn:', selectedIds);
-
-			// BƯỚC 2: Thực hiện gọi AJAX với cả page và categoryIds
-			$.ajax({
-				url: '/fragments/courses',
-				type: 'GET',
-				data: {
-					page: page,
-					categoryIds: selectedIds // Gửi cả hai tham số lên server
-				},
-				traditional: true, // Quan trọng để gửi mảng ID đúng cách
-				success: function (data) {
-					console.log('[AJAX] Tải dữ liệu thành công cho trang ' + page);
-					$('#courseList').html(data); // Cập nhật phần danh sách và phân trang
-				},
-				error: function () {
-					console.error('[AJAX] Lỗi khi tải dữ liệu.');
-					alert("Không thể tải dữ liệu, vui lòng thử lại.");
-				}
-			});
-		}
-
-
-		// --- GẮN SỰ KIỆN KHI TRANG ĐÃ SẴN SÀNG ---
-		$(document).ready(function () {
-
-			// Xử lý sự kiện 'change' cho các checkbox
-			$('.category-checkbox, #checkAll').on('change', function () {
-				console.log('--- Event "change" trên checkbox đã kích hoạt ---');
-				console.log('Đối tượng kích hoạt:', this);
-
-				// Logic check/uncheck cho "All"
-				if ($(this).is('#checkAll')) {
-					const isAllChecked = $(this).is(':checked');
-					$('.category-checkbox').prop('checked', isAllChecked);
-				} else {
-					const totalCheckboxes = $('.category-checkbox').length;
-					const checkedCheckboxes = $('.category-checkbox:checked').length;
-					$('#checkAll').prop('checked', totalCheckboxes === checkedCheckboxes);
-				}
-
-				// QUAN TRỌNG: Khi bộ lọc thay đổi, gọi lại hàm loadPage và reset về trang đầu tiên (page 0)
-				console.log('Bộ lọc thay đổi, kích hoạt tải lại dữ liệu từ trang đầu tiên.');
-				loadPage(0);
-				console.log('--------------------------------------');
-			});
-
-			// KHÔNG CẦN listener cho .page-link nữa, vì HTML đã có onclick.
-
-			// (Tùy chọn) Tải dữ liệu lần đầu khi trang được mở
-			// loadPage(0);
-		}); 
-	</script> -->
-
 	<script>
-		// Hàm gọi AJAX để tải dữ liệu theo filter và trang
-		function loadPage(page) {
-			console.log(`[loadPage] Trang cần tải: ${page}`);
-
-			// 1. Lấy danh sách category đã chọn
-			let selectedIds = [];
-			$('.category-checkbox:checked').each(function () {
-				selectedIds.push($(this).val());
-			});
-			console.log('[loadPage] Category đã chọn:', selectedIds);
-
-			// 2. Lấy giá trị sắp xếp từ select
-			let sortBy = $('#sortSelect').val();
-			console.log('[loadPage] Giá trị sortBy:', sortBy);
-
-			// 3. Gọi AJAX gửi categoryIds và sortBy
-			$.ajax({
-				url: 'fragments/courses',
-				type: 'GET',
-				data: {
-					page: page,
-					categoryIds: selectedIds,
-					sortBy: sortBy
-				},
-				traditional: true, // Quan trọng khi gửi mảng
-				success: function (data) {
-					console.log('[AJAX] Thành công - cập nhật dữ liệu');
-					$('#courseList').html(data);
-				},
-				error: function () {
-					console.error('[AJAX] Lỗi khi tải dữ liệu.');
-					alert("Không thể tải dữ liệu, vui lòng thử lại.");
-				}
-			});
-		}
-
-		// Gắn sự kiện sau khi DOM sẵn sàng
 		$(document).ready(function () {
-			// Khi chọn category checkbox
-			$('.category-checkbox, #checkAll').on('change', function () {
-				if ($(this).is('#checkAll')) {
-					const isChecked = $(this).is(':checked');
-					$('.category-checkbox').prop('checked', isChecked);
-				} else {
-					const total = $('.category-checkbox').length;
-					const checked = $('.category-checkbox:checked').length;
-					$('#checkAll').prop('checked', total === checked);
-				}
-				loadPage(0); // luôn tải lại từ trang đầu khi filter thay đổi
+
+			function fetchCourses(page = 0) {
+				const selectedCategories = $('input[name="categoryIds"]:checked').map(function () {
+					return $(this).val();
+				}).get();
+
+				const selectedPrices = $('.price-filter:checked').map(function () {
+					return $(this).val();
+				}).get();
+
+				const sortBy = $('select[name="sortBy"]').val();
+				const keyword = $('input[name="keyword"]').val();
+
+				$.ajax({
+					url: 'fragments/coursesGrid',
+					type: 'GET',
+					data: {
+						categoryIds: selectedCategories,
+						priceFilter: selectedPrices,
+						sortBy: sortBy,
+						keyword: keyword,
+						page: page
+					},
+					traditional: true,
+					success: function (data) {
+						$('#mainCourseGrid').html(data);
+					},
+					error: function (err) {
+						console.error("Lỗi khi gọi AJAX:", err);
+					}
+				});
+			}
+
+			// Checkbox "All"
+			$('#checkAll').on('change', function () {
+				const isChecked = $(this).is(':checked');
+				$('input[name="categoryIds"]').prop('checked', isChecked);
+				fetchCourses();
 			});
 
-			// Khi chọn sắp xếp
-			$('#sortSelect').on('change', function () {
-				console.log('[Event] SortBy đã thay đổi');
-				loadPage(0);
+			// Checkbox từng category
+			$('input[name="categoryIds"]').on('change', function () {
+				const allChecked = $('input[name="categoryIds"]').length === $('input[name="categoryIds"]:checked').length;
+				$('#checkAll').prop('checked', allChecked);
+				fetchCourses();
 			});
+
+			// Select sortBy
+			$('select[name="sortBy"]').on('change', function () {
+				fetchCourses();
+			});
+
+			// Input keyword với delay
+			let typingTimer;
+			const doneTypingInterval = 300;
+			$('input[name="keyword"]').on('input', function () {
+				clearTimeout(typingTimer);
+				typingTimer = setTimeout(fetchCourses, doneTypingInterval);
+			});
+
+			// Checkbox lọc giá
+			$('.price-filter').on('change', function () {
+				fetchCourses();
+			});
+
+			// Click phân trang
+			$(document).on('click', '.pagination-link', function (e) {
+				e.preventDefault();
+				const page = $(this).data('page');
+				if (!$(this).parent().hasClass('disabled') && !$(this).parent().hasClass('active')) {
+					fetchCourses(page);
+				}
+			});
+
+			// Gọi lần đầu
+			fetchCourses();
 		});
 	</script>
 
-
-	<!-- <script>
-		function loadPage(page) {
-			$.ajax({
-				url: '/fragments/courses',
-				type: 'GET',
-				data: { page: page },
-				success: function (data) {
-					$('#courseList').html(data); // Cập nhật phần danh sách course và phân trang
-				},
-				error: function () {
-					alert("Không thể tải dữ liệu, vui lòng thử lại.");
-				}
-			});
-		}
-	</script> -->
-
-
 </body>
 
-<!-- Mirrored from stackbros.in/eduport/landing/course-list.html by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 06 Jun 2025 07:32:06 GMT -->
+<!-- Mirrored from stackbros.in/eduport/landing/course-grid.html by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 06 Jun 2025 07:32:06 GMT -->
 
 </html>

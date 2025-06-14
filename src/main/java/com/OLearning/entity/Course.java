@@ -58,6 +58,8 @@ public class Course {
 
     @Column(name = "CanResubmit")
     private Boolean canResubmit;
+    @Column(name = "CourseLevel")
+    private String courseLevel; 
 
     @ManyToOne
     @JoinColumn(name = "UserID")
@@ -78,4 +80,5 @@ public class Course {
 
     @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
     private List<OrderDetail> orderDetails;
+
 }
