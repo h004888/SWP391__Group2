@@ -7,17 +7,20 @@ import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.course.CourseMediaDTO;
 import com.OLearning.dto.lesson.LessonTitleDTO;
 import com.OLearning.dto.lesson.LessonVideoDTO;
-import com.OLearning.entity.Chapter;
-import com.OLearning.entity.Course;
-import com.OLearning.entity.Lesson;
-import com.OLearning.entity.User;
+import com.OLearning.dto.quiz.QuizDTO;
+import com.OLearning.dto.video.VideoDTO;
+import com.OLearning.entity.*;
 import com.OLearning.mapper.course.CourseMapper;
 import com.OLearning.repository.ChapterRepository;
+import com.OLearning.repository.LessonRepository;
+import com.OLearning.repository.VideoRepository;
 import com.OLearning.service.LessonChapterService;
 import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.chapter.ChapterService;
 import com.OLearning.service.course.CourseService;
 import com.OLearning.service.lesson.LessonService;
+import com.OLearning.service.quiz.QuizService;
+import com.OLearning.service.video.VideoService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +34,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller
@@ -50,6 +54,14 @@ public class ControlllerAddCourseUpdate {
     private CourseMapper courseMapper;
     @Autowired
     private ChapterRepository chapterRepository;
+    @Autowired
+    private VideoService videoService;
+    @Autowired
+    private VideoRepository videoRepository;
+    @Autowired
+    private QuizService quizService;
+    @Autowired
+    private LessonRepository lessonRepository;
 
     //dashhboard
     @GetMapping()
@@ -103,10 +115,10 @@ public class ControlllerAddCourseUpdate {
         return "instructorDashboard/indexUpdate";
     }
 
-        //create Course Basic ìnformation
-        //view course basic
-        @GetMapping("/createcourse/coursebasic")
-        public String addNewCourse(@RequestParam(name = "courseId", required = false) Long courseId, Model model) {
+    //create Course Basic ìnformation
+    //view course basic
+    @GetMapping("/createcourse/coursebasic")
+    public String addNewCourse(@RequestParam(name = "courseId", required = false) Long courseId, Model model) {
         if (courseId == null) {
             model.addAttribute("coursestep1", new AddCourseStep1DTO());//tao doi tương AddCourseStep1DTO de luu thong tin
             model.addAttribute("categories", categoryService.findAll());//in ra thong tin category
@@ -116,12 +128,13 @@ public class ControlllerAddCourseUpdate {
         //khi nay la khi draft xong roi ma minh muon update lai course
         Course course = courseService.findCourseById(courseId); // tim course theo courseId
         AddCourseStep1DTO coursestep1 = courseService.draftCourseStep1(course);// chuyen doi course sang AddCourseStep1DT0
-            // ---chuyen doi course da draft sang AddCourseStep1DTO
+        // ---chuyen doi course da draft sang AddCourseStep1DTO
         model.addAttribute("coursestep1", coursestep1);
         model.addAttribute("categories", categoryService.findAll());
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step1BasicInfor :: step1Content");
         return "instructorDashboard/indexUpdate";
     }
+
     //next to save course basic information
     //view course media
     @PostMapping("/createcourse/coursemedia")
@@ -158,6 +171,7 @@ public class ControlllerAddCourseUpdate {
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step2CourseMedia :: step2Content");
         return "instructorDashboard/indexUpdate";
     }
+
     //save course media and next to course content
     //view course content
     @PostMapping("/createcourse/coursecontent")
@@ -176,7 +190,7 @@ public class ControlllerAddCourseUpdate {
             Course course = courseService.createCourseMedia(courseMediaDTO.getCourseId(), courseMediaDTO);
             return "redirect:../courses";
         }
-        if(action.equalsIgnoreCase("previousstep")) {
+        if (action.equalsIgnoreCase("previousstep")) {
             Course course = session.getAttribute("course") != null ? (Course) session.getAttribute("course") : new Course();
             AddCourseStep1DTO courseStep1 = courseService.draftCourseStep1(course);
             model.addAttribute("coursestep1", courseStep1);
@@ -187,7 +201,6 @@ public class ControlllerAddCourseUpdate {
 
         Course course = courseService.createCourseMedia(courseMediaDTO.getCourseId(), courseMediaDTO);
         session.setAttribute("course", course);// gan lai course vao session de dung cho cac buoc tiep theo
-        model.addAttribute("coursestep3", new CourseContentDTO());
         //tao demo chapter
         ChapterDTO chapterDTO = new ChapterDTO();
         model.addAttribute("chapter", chapterDTO);
@@ -202,9 +215,11 @@ public class ControlllerAddCourseUpdate {
             model.addAttribute("chapters", chapters);
         }
         model.addAttribute("lessontitle", new LessonTitleDTO());
+        model.addAttribute("videoDTO", new VideoDTO());
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step3CourseContent :: step3Content");
         return "instructorDashboard/indexUpdate";
     }
+
     //save chapter in course Content
     @PostMapping("/createcourse/chaptersadd")
     public String addNewChapter(@Valid @ModelAttribute("chapter") ChapterDTO chapterDTO,
@@ -214,7 +229,7 @@ public class ControlllerAddCourseUpdate {
                                 HttpSession session
     ) {
         Long courseId = ((Course) session.getAttribute("course")).getCourseId();
-        if(result.hasErrors()) {
+        if (result.hasErrors()) {
             model.addAttribute("showForm", true);
             List<Chapter> chapters = chapterService.chapterListByCourse(courseId);
             model.addAttribute("chapter", chapterDTO);
@@ -230,13 +245,13 @@ public class ControlllerAddCourseUpdate {
                     .max()
                     .orElse(0);
             chapterDTO.setOrderNumberChapter(maxOrderNumber + 1);
-        }
-        else {
+        } else {
             List<Chapter> chapters = chapterService.chapterListByCourse(courseId);
             for (Chapter chapter : chapters) {
                 if (chapter.getOrderNumber() == chapterDTO.getOrderNumberChapter()) {
                     model.addAttribute("errorMessage", "Order number already exists. Please choose a different order number.");
                     model.addAttribute("chapter", chapterDTO);
+                    model.addAttribute("lessontitle", new LessonTitleDTO());
                     model.addAttribute("chapters", chapters);
                     model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step3CourseContent :: step3Content");
                     return "instructorDashboard/indexUpdate";
@@ -247,15 +262,17 @@ public class ControlllerAddCourseUpdate {
         redirectAttributes.addFlashAttribute("successMessage", "Chapter added successfully.");
         return "redirect:../createcourse/coursecontent";
     }
+
     //delete chapter
     @PostMapping("/createcourse/deletechapter")
     public String deleteChapter(@RequestParam(name = "chapterId") Long chapterId
-                                , RedirectAttributes redirectAttributes,
+            , RedirectAttributes redirectAttributes,
                                 HttpSession session) {
         lessonChapterService.deleteChapter(chapterId);
         redirectAttributes.addFlashAttribute("errorMessage", "Chapter deleted successfully.");
         return "redirect:../createcourse/coursecontent";
     }
+
     //save lesson title
     @PostMapping("/createcourse/addlesson")
     public String addNewLesson(@Valid @ModelAttribute("lessontitle") LessonTitleDTO lessonTitleDTO,
@@ -282,14 +299,14 @@ public class ControlllerAddCourseUpdate {
                     .max()
                     .orElse(0);
             lessonTitleDTO.setOrderNumber(maxOrderNumber + 1);
-        }
-        else {
+        } else {
             List<Lesson> lessons = lessonService.findLessonsByChapterId(chapterId);
             for (Lesson lesson : lessons) {
                 if (lesson.getOrderNumber() == lessonTitleDTO.getOrderNumber()) {
                     model.addAttribute("errorMessage", "Order number already exists. Please choose a different order number.");
                     model.addAttribute("chapter", new ChapterDTO());
                     model.addAttribute("lessontitle", lessonTitleDTO);
+                    model.addAttribute("videoDTO", new VideoDTO());
                     List<Chapter> chapters = chapterService.chapterListByCourse(courseId);
                     model.addAttribute("chapters", chapters);
                     model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step3CourseContent :: step3Content");
@@ -301,6 +318,38 @@ public class ControlllerAddCourseUpdate {
         redirectAttributes.addFlashAttribute("successMessage", "Lesson added successfully.");
         return "redirect:../createcourse/coursecontent";
     }
+
+    //create video
+    @PostMapping("/createcourse/addvideo")
+    public String addVideo(@ModelAttribute("videoDTO") VideoDTO videoDTO,
+                           @RequestParam(name = "lessonId") Long lessonId,
+                           RedirectAttributes redirectAttributes) {
+        try {
+            // Save video and associate with lesson
+            Video video = videoService.saveVideo(videoDTO, lessonId);
+            lessonService.updateContentType(lessonId, "video");
+            Lesson lesson = lessonRepository.findById(lessonId).orElseThrow();
+            lesson.setDuration(videoDTO.getDuration());
+            lesson.setUpdatedAt(LocalDateTime.now());
+            lesson.setVideo(video);
+            lessonRepository.save(lesson);
+
+            redirectAttributes.addFlashAttribute("successMessage", "Video added successfully.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error adding video: " + e.getMessage());
+        }
+        return "redirect:../createcourse/coursecontent";
+    }
+
+    //delete lesson
+    @PostMapping("/createcourse/deletelesson")
+    public String deleteLesson(@RequestParam(name = "lessonId") Long lessonId
+            , RedirectAttributes redirectAttributes) {
+        lessonService.deleteAllFkByLessonId(lessonId);
+        redirectAttributes.addFlashAttribute("errorMessage", "Lesson deleted successfully.");
+        return "redirect:../createcourse/coursecontent";
+    }
+
     //view course sau khi create chapter or lesson
     @GetMapping("createcourse/coursecontent")
     public String showCourseContent(Model model, HttpSession session) {
@@ -318,7 +367,56 @@ public class ControlllerAddCourseUpdate {
             model.addAttribute("chapters", chapters);
         }
         model.addAttribute("lessontitle", new LessonTitleDTO());
+        model.addAttribute("videoDTO", new VideoDTO());
+        model.addAttribute("quizDTO", new QuizDTO());
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step3CourseContent :: step3Content");
         return "instructorDashboard/indexUpdate";
+    }
+
+    //create quiz
+    @PostMapping("/createcourse/addquiz")
+    public String addQuiz(@RequestParam("lessonId") Long lessonId,
+                          @RequestParam("question") List<String> questions,
+                          @RequestParam("optionA") List<String> optionsA,
+                          @RequestParam("optionB") List<String> optionsB,
+                          @RequestParam("optionC") List<String> optionsC,
+                          @RequestParam("optionD") List<String> optionsD,
+                          @RequestParam("correctAnswer") List<String> correctAnswers,
+                          RedirectAttributes redirectAttributes) {
+        try {
+            // Update lesson content type
+            lessonService.updateContentType(lessonId, "quiz");
+            Lesson lesson = lessonRepository.findById(lessonId).orElseThrow();
+            lesson.setUpdatedAt(LocalDateTime.now());
+
+            // Save each quiz question
+            for (int i = 0; i < questions.size(); i++) {
+                QuizDTO quizDTO = new QuizDTO();
+                quizDTO.setQuestion(questions.get(i));
+                quizDTO.setOptionA(optionsA.get(i));
+                quizDTO.setOptionB(optionsB.get(i));
+                quizDTO.setOptionC(optionsC.get(i));
+                quizDTO.setOptionD(optionsD.get(i));
+                quizDTO.setCorrectAnswer(correctAnswers.get(i));
+                quizDTO.setOrderNumber(i + 1);
+
+                // Save quiz and associate with lesson
+                Quiz quiz = quizService.saveQuiz(quizDTO, lessonId);
+                lesson.getQuizzes().add(quiz);
+            }
+            lessonRepository.save(lesson);
+            redirectAttributes.addFlashAttribute("successMessage", "Quiz added successfully.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error adding quiz: " + e.getMessage());
+        }
+        return "redirect:../createcourse/coursecontent";
+    }
+
+    //get quizzes for a lesson
+    @GetMapping("/createcourse/getquizzes")
+    @ResponseBody
+    public List<Quiz> getQuizzes(@RequestParam("lessonId") Long lessonId) {
+        Lesson lesson = lessonRepository.findById(lessonId).orElseThrow();
+        return lesson.getQuizzes();
     }
 }

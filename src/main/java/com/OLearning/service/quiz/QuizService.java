@@ -4,5 +4,5 @@ import com.OLearning.dto.quiz.QuizDTO;
 import com.OLearning.entity.Quiz;
 
 public interface QuizService {
-    Quiz addQuiz(QuizDTO quizDTO);
+    Quiz saveQuiz(QuizDTO quizDTO, Long lessonId);
 }

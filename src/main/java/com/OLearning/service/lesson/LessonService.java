@@ -9,4 +9,5 @@ import java.util.List;
 public interface LessonService {
     List<Lesson> findLessonsByChapterId(Long chapterId);
     void deleteAllFkByLessonId(Long lessonId);
+    void updateContentType(Long lessonId, String contenType);
 }

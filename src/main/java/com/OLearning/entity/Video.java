@@ -21,6 +21,7 @@ public class Video {
     @Column(nullable = false)
     private String videoUrl;
     private LocalDateTime uploadDate;
+    private Integer duration;
     @OneToOne
     @JoinColumn(name = "lesson_id")
     private Lesson lesson;

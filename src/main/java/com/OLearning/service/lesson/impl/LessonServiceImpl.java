@@ -44,4 +44,10 @@ public class LessonServiceImpl implements LessonService {
         //bay gio thi xoa bay chapter id thi minh phai tim list lesson trong chapter id do va xoa theo lesson id
     }
 
+    @Override
+    public void updateContentType(Long lessonId, String contenType) {
+        Lesson lesson = lessonRepository.findById(lessonId).orElseThrow();
+        lesson.setContentType(contenType);
+        lessonRepository.save(lesson);
+    }
 }
