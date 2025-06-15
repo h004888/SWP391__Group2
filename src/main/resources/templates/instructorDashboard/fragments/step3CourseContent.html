@@ -81,7 +81,7 @@
                                     <label class="form-label">
                                         Chapter Order <strong><em>(If you leave this field empty, the system will automatically generate the chapter order for you.)</em></strong>
                                     </label>
-                                    <input type="text" th:field="*{orderNumberChapter}" class="form-control" id="chapterOrder" min="1" placeholder="Enter the chapter order (e.g., 1, 2, 3...)">
+                                    <input type="number" th:field="*{orderNumberChapter}" class="form-control" id="chapterOrder" min="1" placeholder="Enter the chapter order (e.g., 1, 2, 3...)">
                                     <div style="color: red" th:if="${#fields.hasErrors('orderNumberChapter')}" th:errors="*{orderNumberChapter}"></div>
                                 </div>
                             </div>
@@ -179,11 +179,11 @@
                                         </div>
 
                                         <!-- Show video if exists -->
-                                        <div th:if="${lesson.video != null}" class="video-content">
+                                        <div th:if="${lesson.video != null and lesson.video.videoUrl != null}" class="video-content">
                                             <div class="d-flex align-items-center gap-2">
                                                 <i class="bi bi-play-circle-fill text-primary"></i>
-                                                <a href="#" class="text-decoration-none lesson-video-link" 
-                                                   th:attr="data-videoid=${lesson.video.videoUrl}" 
+                                                <a href="#" class="text-decoration-none lesson-video-link"
+                                                   th:attr="data-videoid=${lesson.video.videoUrl}"
                                                    onclick="playVideo(this)">
                                                     <span th:text="${lesson.title}"></span>
                                                 </a>
@@ -215,11 +215,18 @@
                                                     <div class="modal-content">
                                                         <div class="modal-header">
                                                             <h5 class="modal-title" th:text="${lesson.quiz.title}"></h5>
+                                                            <span class="badge bg-info ms-2">
+                                                                            <i class="bi bi-clock me-1"></i>
+                                                                            <span th:if="${(lesson.quiz.timeLimit ?: 0) < 60}"
+                                                                                  th:text="${(lesson.quiz.timeLimit ?: 0) + 'm'}"></span>
+                                                                            <span th:unless="${(lesson.quiz.timeLimit ?: 0) < 60}"
+                                                                                  th:text="${((lesson.quiz.timeLimit ?: 0) / 60) + 'h' + ((lesson.quiz.timeLimit ?: 0) % 60) + 'm'}"></span>
+                                                                        </span>
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                         </div>
                                                         <div class="modal-body">
                                                             <p class="text-muted mb-4" th:text="${lesson.quiz.description}"></p>
-                                                            
+
                                                             <div class="questions-list">
                                                                 <div th:each="question, stat : ${lesson.quiz.questions}" class="question-item mb-4">
                                                                     <div class="card">
@@ -300,24 +307,24 @@
                                             <div class="quiz-section d-none">
                                                 <form th:action="@{/instructordashboard/createcourse/addquiz}" method="post" id="quizForm">
                                                     <input type="hidden" name="lessonId" th:value="${lesson.lessonId}" />
-        
+
                                                     <div class="mb-3">
                                                         <label class="form-label">Quiz Title*</label>
                                                         <input type="text" name="title" class="form-control" placeholder="Enter quiz title">
                                                     </div>
-        
+
                                                     <div class="mb-3">
                                                         <label class="form-label">Quiz Description</label>
                                                         <textarea name="description" class="form-control" rows="2" placeholder="Enter quiz description"></textarea>
                                                     </div>
-        
+
                                                     <div class="mb-3">
                                                         <label class="form-label">Time Limit (minutes)*</label>
                                                         <input type="number" name="timeLimit" class="form-control"  min="1">
                                                     </div>
-        
+
                                                     <h5 class="mt-4 mb-3">Quiz Questions</h5>
-        
+
                                                     <!-- Quiz List -->
                                                     <div class="quiz-list mb-3">
                                                         <!-- Quizzes will be added here -->
@@ -725,16 +732,16 @@
         const videoId = element.getAttribute('data-videoid');
         const videoSource = document.getElementById('videoSource');
         const video = document.getElementById('lessonVideo');
-        
+
         // Set the video source
         videoSource.src = videoId;
         video.load(); // Reload the video element
-        
+
         // Show the modal
         const videoModal = new bootstrap.Modal(document.getElementById('videoModal'));
         videoModal.show();
     }
-    
+
     function stopVideo() {
         const video = document.getElementById('lessonVideo');
         video.pause();

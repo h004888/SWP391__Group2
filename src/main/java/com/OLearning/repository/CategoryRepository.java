@@ -1,9 +1,11 @@
 package com.OLearning.repository;
 
-import com.OLearning.entity.Packages;
+import com.OLearning.entity.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface InstructorPackagesRepository extends JpaRepository<Packages, Long> {
+public interface CategoryRepository extends JpaRepository<Category, Long> {
+    Category findByName(String name);
+
 }

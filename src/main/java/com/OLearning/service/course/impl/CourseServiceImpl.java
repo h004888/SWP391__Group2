@@ -1,7 +1,6 @@
 package com.OLearning.service.course.impl;
 
 import com.OLearning.dto.course.AddCourseStep1DTO;
-import com.OLearning.dto.course.AddCourseStep3DTO;
 import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.course.CourseMediaDTO;
 import com.OLearning.entity.Category;
@@ -19,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -28,17 +28,17 @@ public class CourseServiceImpl implements CourseService {
     @Autowired
     private UploadFile uploadFile;
     @Autowired
-    private InstructorCourseRepo instructorCourseRepo;
+    private CourseRepository courseRepository;
     @Autowired
     private CourseMapper courseMapper;
     @Autowired
-    private InstructorCategoryRepo instructorCategoryRepo;
+    private CategoryRepository categoryRepository;
     @Autowired
-    private InstructorUserRepo instructorUserRepo;
+    private UserRepository userRepository;
 
     @Override
     public List<CourseDTO> findCourseByUserId(Long userId) {
-        List<Course> listCourseRepo = instructorCourseRepo.findByInstructorUserId(userId);
+        List<Course> listCourseRepo = courseRepository.findByInstructorUserId(userId);
         List<CourseDTO> courseDTOList = new ArrayList<>();
         for (Course course : listCourseRepo) {
             CourseDTO courseDTO = courseMapper.MapCourseDTO(course);
@@ -55,7 +55,7 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Page<CourseDTO> findCourseByUserId(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Course> coursePage = instructorCourseRepo.findByInstructorUserId(userId, pageable);//Page<Course> la doi tuong chua ca danh sach khoa hoc
+        Page<Course> coursePage = courseRepository.findByInstructorUserId(userId, pageable);//Page<Course> la doi tuong chua ca danh sach khoa hoc
         List<CourseDTO> courseDTOList = new ArrayList<>();
         for (Course course : coursePage.getContent()) {
             CourseDTO courseDTO = courseMapper.MapCourseDTO(course);
@@ -72,12 +72,12 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public void deleteCourse(Long courseId) {
-        instructorCourseRepo.deleteById(courseId);
+        courseRepository.deleteById(courseId);
     }
 
     @Override
     public Course findCourseById(Long courseId) {
-        Optional<Course> course = instructorCourseRepo.findById(courseId);
+        Optional<Course> course = courseRepository.findById(courseId);
         if (course.isPresent()) {
             return course.get();
         }
@@ -88,15 +88,16 @@ public class CourseServiceImpl implements CourseService {
     public Course createCourseStep1(Long courseId, AddCourseStep1DTO addCourseStep1DTO) {
         Course course = (courseId == null) ? new Course() : findCourseById(courseId);
         courseMapper.CourseBasic(addCourseStep1DTO, course);
-        Category category = instructorCategoryRepo.findByName(addCourseStep1DTO.getCategoryName());
+        Category category = categoryRepository.findByName(addCourseStep1DTO.getCategoryName());
         if (category == null) {
             throw new RuntimeException("not found: " + addCourseStep1DTO.getCategoryName());
         }
         addCourseStep1DTO.setUserId(2L);
-        User instructor = instructorUserRepo.findById(addCourseStep1DTO.getUserId()).orElseThrow();
+        User instructor = userRepository.findById(addCourseStep1DTO.getUserId()).orElseThrow();
         course.setInstructor(instructor);
         course.setCategory(category);
-        return instructorCourseRepo.save(course);
+        course.setUpdatedAt(LocalDateTime.now());
+        return courseRepository.save(course);
     }
     @Autowired
     ChapterRepository chapterRepo;
@@ -107,8 +108,9 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Course submitCourse(Long courseId, String status) {
         Course course = (courseId == null) ? new Course() : findCourseById(courseId);
+        course.setUpdatedAt(LocalDateTime.now());
         course.setStatus(status);
-        return instructorCourseRepo.save(course);
+        return courseRepository.save(course);
     }
 
 
@@ -131,8 +133,8 @@ public class CourseServiceImpl implements CourseService {
             String videoUrl = uploadFile.uploadVideoFile(CourseMediaDTO.getVideo());
             course.setVideoUrlPreview(videoUrl);
         }
-        
-        return instructorCourseRepo.save(course);
+        course.setUpdatedAt(LocalDateTime.now());
+        return courseRepository.save(course);
     } catch (IOException e) {
         throw new RuntimeException("Failed to upload course media", e);
     }
@@ -141,6 +143,7 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public void saveCourse(Long courseId) {
         Course course = (courseId == null) ? new Course() : findCourseById(courseId);
-        instructorCourseRepo.save(course);
+        course.setUpdatedAt(LocalDateTime.now());
+        courseRepository.save(course);
     }
 }

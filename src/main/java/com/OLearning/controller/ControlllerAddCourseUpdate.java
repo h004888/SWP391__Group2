@@ -2,11 +2,9 @@ package com.OLearning.controller;
 
 import com.OLearning.dto.chapter.ChapterDTO;
 import com.OLearning.dto.course.AddCourseStep1DTO;
-import com.OLearning.dto.course.CourseContentDTO;
 import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.course.CourseMediaDTO;
 import com.OLearning.dto.lesson.LessonTitleDTO;
-import com.OLearning.dto.lesson.LessonVideoDTO;
 import com.OLearning.dto.quiz.QuizDTO;
 import com.OLearning.dto.quiz.QuizQuestionDTO;
 import com.OLearning.dto.video.VideoDTO;
@@ -23,16 +21,17 @@ import com.OLearning.service.course.CourseService;
 import com.OLearning.service.lesson.LessonService;
 import com.OLearning.service.quiz.QuizService;
 import com.OLearning.service.video.VideoService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -56,13 +55,7 @@ public class ControlllerAddCourseUpdate {
     @Autowired
     private LessonChapterService lessonChapterService;
     @Autowired
-    private CourseMapper courseMapper;
-    @Autowired
-    private ChapterRepository chapterRepository;
-    @Autowired
     private VideoService videoService;
-    @Autowired
-    private VideoRepository videoRepository;
     @Autowired
     private QuizService quizService;
     @Autowired
@@ -91,7 +84,7 @@ public class ControlllerAddCourseUpdate {
         modelMap.put("totalElements", coursePage.getTotalElements());
         modelMap.put("size", size);
         model.addAttribute("categories", categoryService.findAll());
-        model.addAttribute("fragmentContent", "instructorDashboard/fragments/CoursesContent :: listsCourseContent");
+        model.addAttribute("fragmentContent", "instructorDashboard/fragments/coursesContent :: listsCourseContent");
         return "instructorDashboard/indexUpdate";
     }
 
@@ -116,7 +109,7 @@ public class ControlllerAddCourseUpdate {
             model.addAttribute("chapters", chapters);
         }
         model.addAttribute("courseId", courseId);
-        model.addAttribute("fragmentContent", "instructorDashboard/fragments/courseDetailContent :: courseDetailContent");
+        model.addAttribute("fragmentContent", "instructorDashboard/fragments/courseDetailContent_new :: courseDetailContent");
         return "instructorDashboard/indexUpdate";
     }
 
@@ -127,7 +120,7 @@ public class ControlllerAddCourseUpdate {
         if (courseId == null) {
             model.addAttribute("coursestep1", new AddCourseStep1DTO());//tao doi tương AddCourseStep1DTO de luu thong tin
             model.addAttribute("categories", categoryService.findAll());//in ra thong tin category
-            model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step1BasicInfor :: step1Content");
+            model.addAttribute("fragmentContent", "instructorDashboard/fragments/step1BasicInfor :: step1Content");
             return "instructorDashboard/indexUpdate";
         }
         //khi nay la khi draft xong roi ma minh muon update lai course
@@ -136,8 +129,24 @@ public class ControlllerAddCourseUpdate {
         // ---chuyen doi course da draft sang AddCourseStep1DTO
         model.addAttribute("coursestep1", coursestep1);
         model.addAttribute("categories", categoryService.findAll());
-        model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step1BasicInfor :: step1Content");
+        model.addAttribute("fragmentContent", "instructorDashboard/fragments/step1BasicInfor :: step1Content");
         return "instructorDashboard/indexUpdate";
+    }
+
+    //ham lay cookieCourseId tu cookie
+    private Long getCourseIdFromCookie(HttpServletRequest request) {
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("cookieCourseId".equals(cookie.getName())) {
+                    try {
+                        return Long.parseLong(cookie.getValue());
+                    } catch (NumberFormatException e) {
+                        return null;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     //next to save course basic information
@@ -148,8 +157,7 @@ public class ControlllerAddCourseUpdate {
                                   @RequestParam(name = "id", defaultValue = "2") Long id,
                                   @RequestParam(name = "action") String action,
                                   Model model,
-                                  ModelMap modelMap,
-                                  HttpSession session) {
+                                  HttpServletResponse response) {
         if (result.hasErrors()) {
             result.getFieldErrors().forEach(fieldError -> {
                 if (fieldError.getCode().equals("typeMismatch") && fieldError.getField().equals("price")) {
@@ -158,7 +166,7 @@ public class ControlllerAddCourseUpdate {
             });
             model.addAttribute("coursestep1", courseStep1);
             model.addAttribute("categories", categoryService.findAll());
-            model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step1BasicInfor :: step1Content");
+            model.addAttribute("fragmentContent", "instructorDashboard/fragments/step1BasicInfor :: step1Content");
             return "instructorDashboard/indexUpdate";
         }
         if (action.equalsIgnoreCase("draft")) {
@@ -168,12 +176,15 @@ public class ControlllerAddCourseUpdate {
         }
 
         Course course = courseService.createCourseStep1(courseStep1.getId(), courseStep1);//course=null thi se tao moi, con khong thi se update lai
-        session.setAttribute("course", course);
+        Cookie courseCookie = new Cookie("cookieCourseId", course.getCourseId().toString());
+        courseCookie.setMaxAge(60 * 60 * 24);
+        courseCookie.setPath("/");
+        response.addCookie(courseCookie);
         courseStep1.setId(course.getCourseId());//gan lai id cua course vao DTO
         Long courseId = course.getCourseId();
         model.addAttribute("courseId", courseId);
         model.addAttribute("coursestep2", new CourseMediaDTO());
-        model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step2CourseMedia :: step2Content");
+        model.addAttribute("fragmentContent", "instructorDashboard/fragments/step2CourseMedia :: step2Content");
         return "instructorDashboard/indexUpdate";
     }
 
@@ -185,28 +196,28 @@ public class ControlllerAddCourseUpdate {
                                   @RequestParam(name = "id", defaultValue = "2") Long id,
                                   Model model,
                                   @RequestParam(name = "action") String action,
-                                  HttpSession session) {
+                                  HttpServletRequest request) {
         if (result.hasErrors()) {
             model.addAttribute("coursestep2", courseMediaDTO);
-            model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step2CourseMedia :: step2Content");
+            model.addAttribute("fragmentContent", "instructorDashboard/fragments/step2CourseMedia :: step2Content");
             return "instructorDashboard/indexUpdate";
         }
         if (action.equalsIgnoreCase("draft")) {
             Course course = courseService.createCourseMedia(courseMediaDTO.getCourseId(), courseMediaDTO);
+            courseService.submitCourse(course.getCourseId(), "draft");
             return "redirect:../courses";
         }
         if (action.equalsIgnoreCase("previousstep")) {
-            Course course = session.getAttribute("course") != null ? (Course) session.getAttribute("course") : new Course();
+            Long courseId = getCourseIdFromCookie(request);
+            Course course = courseService.findCourseById(courseId);
             AddCourseStep1DTO courseStep1 = courseService.draftCourseStep1(course);
             model.addAttribute("coursestep1", courseStep1);
             model.addAttribute("categories", categoryService.findAll());
-            model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step1BasicInfor :: step1Content");
+            model.addAttribute("fragmentContent", "instructorDashboard/fragments/step1BasicInfor :: step1Content");
             return "instructorDashboard/indexUpdate";
         }
 
         Course course = courseService.createCourseMedia(courseMediaDTO.getCourseId(), courseMediaDTO);
-        session.setAttribute("course", course);// gan lai course vao session de dung cho cac buoc tiep theo
-        //tao demo chapter
         ChapterDTO chapterDTO = new ChapterDTO();
         model.addAttribute("chapter", chapterDTO);
         List<Chapter> chapters = chapterService.chapterListByCourse(course.getCourseId());
@@ -221,7 +232,7 @@ public class ControlllerAddCourseUpdate {
         }
         model.addAttribute("lessontitle", new LessonTitleDTO());
         model.addAttribute("videoDTO", new VideoDTO());
-        model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step3CourseContent :: step3Content");
+        model.addAttribute("fragmentContent", "instructorDashboard/fragments/step3CourseContent :: step3Content");
         return "instructorDashboard/indexUpdate";
     }
 
@@ -231,9 +242,8 @@ public class ControlllerAddCourseUpdate {
                                 BindingResult result,
                                 Model model,
                                 RedirectAttributes redirectAttributes,
-                                HttpSession session
-    ) {
-        Long courseId = ((Course) session.getAttribute("course")).getCourseId();
+                                HttpServletRequest request) {
+        Long courseId = getCourseIdFromCookie(request);
         if (result.hasErrors()) {
             model.addAttribute("showForm", true);
             List<Chapter> chapters = chapterService.chapterListByCourse(courseId);
@@ -242,7 +252,7 @@ public class ControlllerAddCourseUpdate {
             model.addAttribute("lessontitle", new LessonTitleDTO());
             model.addAttribute("videoDTO", new VideoDTO());
             model.addAttribute("quizDTO", new QuizDTO());
-            model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step3CourseContent :: step3Content");
+            model.addAttribute("fragmentContent", "instructorDashboard/fragments/step3CourseContent :: step3Content");
             return "instructorDashboard/indexUpdate";
         }
         chapterDTO.setCourseId(courseId);
@@ -259,9 +269,11 @@ public class ControlllerAddCourseUpdate {
                 if (chapter.getOrderNumber() == chapterDTO.getOrderNumberChapter()) {
                     model.addAttribute("errorMessage", "Order number already exists. Please choose a different order number.");
                     model.addAttribute("chapter", chapterDTO);
+                    model.addAttribute("videoDTO", new VideoDTO());
+                    model.addAttribute("quizDTO", new QuizDTO());
                     model.addAttribute("lessontitle", new LessonTitleDTO());
                     model.addAttribute("chapters", chapters);
-                    model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step3CourseContent :: step3Content");
+                    model.addAttribute("fragmentContent", "instructorDashboard/fragments/step3CourseContent :: step3Content");
                     return "instructorDashboard/indexUpdate";
                 }
             }
@@ -274,8 +286,7 @@ public class ControlllerAddCourseUpdate {
     //delete chapter
     @PostMapping("/createcourse/deletechapter")
     public String deleteChapter(@RequestParam(name = "chapterId") Long chapterId
-            , RedirectAttributes redirectAttributes,
-                                HttpSession session) {
+            , RedirectAttributes redirectAttributes) {
         lessonChapterService.deleteChapter(chapterId);
         redirectAttributes.addFlashAttribute("errorMessage", "Chapter deleted successfully.");
         return "redirect:../createcourse/coursecontent";
@@ -287,16 +298,18 @@ public class ControlllerAddCourseUpdate {
                                BindingResult result,
                                Model model,
                                RedirectAttributes redirectAttributes,
-                               HttpSession session,
+                               HttpServletRequest request,
                                @RequestParam(name = "chapterId") Long chapterId) {
-        Long courseId = ((Course) session.getAttribute("course")).getCourseId();
+        Long courseId = getCourseIdFromCookie(request);
         if (result.hasErrors()) {
             List<Chapter> chapters = chapterService.chapterListByCourse(courseId);
             model.addAttribute("chapters", chapters);
-            //khong biet co phai tim chapterDTO de hien thi lai khong nhi
             model.addAttribute("chapter", new ChapterDTO());
             model.addAttribute("lessontitle", lessonTitleDTO);
-            model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step3CourseContent :: step3Content");
+            model.addAttribute("videoDTO", new VideoDTO());
+            model.addAttribute("quizDTO", new QuizDTO());
+            model.addAttribute("quizQuestionDTO", new QuizQuestionDTO());
+            model.addAttribute("fragmentContent", "instructorDashboard/fragments/step3CourseContent :: step3Content");
             return "instructorDashboard/indexUpdate";
         }
         lessonTitleDTO.setChapterId(chapterId);
@@ -319,7 +332,7 @@ public class ControlllerAddCourseUpdate {
                     model.addAttribute("quizQuestionDTO", new QuizQuestionDTO());
                     List<Chapter> chapters = chapterService.chapterListByCourse(courseId);
                     model.addAttribute("chapters", chapters);
-                    model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step3CourseContent :: step3Content");
+                    model.addAttribute("fragmentContent", "instructorDashboard/fragments/step3CourseContent :: step3Content");
                     return "instructorDashboard/indexUpdate";
                 }
             }
@@ -340,6 +353,7 @@ public class ControlllerAddCourseUpdate {
             lessonService.updateContentType(lessonId, "video");
             Lesson lesson = lessonRepository.findById(lessonId).orElseThrow();
             lesson.setDuration(videoDTO.getDuration());
+            lesson.setContentType("video");
             lesson.setUpdatedAt(LocalDateTime.now());
             lesson.setVideo(video);
             lessonRepository.save(lesson);
@@ -362,10 +376,10 @@ public class ControlllerAddCourseUpdate {
 
     //view course sau khi create chapter or lesson
     @GetMapping("createcourse/coursecontent")
-    public String showCourseContent(Model model, HttpSession session) {
+    public String showCourseContent(Model model, HttpServletRequest request) {
         ChapterDTO chapterDTO = new ChapterDTO();
         model.addAttribute("chapter", chapterDTO);
-        Long courseId = ((Course) session.getAttribute("course")).getCourseId();
+        Long courseId = getCourseIdFromCookie(request);
         List<Chapter> chapters = chapterService.chapterListByCourse(courseId);
         for (Chapter chapter : chapters) {
             List<Lesson> lessons = lessonService.findLessonsByChapterId(chapter.getId());
@@ -380,7 +394,7 @@ public class ControlllerAddCourseUpdate {
         model.addAttribute("videoDTO", new VideoDTO());
         model.addAttribute("quizDTO", new QuizDTO());
         model.addAttribute("quizQuestionDTO", new QuizQuestionDTO());
-        model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step3CourseContent :: step3Content");
+        model.addAttribute("fragmentContent", "instructorDashboard/fragments/step3CourseContent :: step3Content");
         return "instructorDashboard/indexUpdate";
     }
 
@@ -446,52 +460,72 @@ public class ControlllerAddCourseUpdate {
 
     //save totalduration va total lesson in course content and next to submit
     @PostMapping("/createcourse/submitcourse")
-    public String saveCourseContent(HttpSession session, RedirectAttributes redirectAttributes,
+    public String saveCourseContent(RedirectAttributes redirectAttributes,
                                     @RequestParam(name = "action") String action,
-                                    Model model) {
-        Course course = (Course) session.getAttribute("course");
-        Long courseId = ((Course) session.getAttribute("course")).getCourseId();
-//        if (action.equalsIgnoreCase("draft")) {
-//            courseService.submitCourse(courseId, "draft");
-//            return "redirect:../courses";
-//        }
-//        if (action.equalsIgnoreCase("previousstep")) {
-//            return "redirect:../createcourse/coursemedia";
-//        }
+                                    Model model,
+                                    HttpServletRequest request) {
+        Long courseId = getCourseIdFromCookie(request);
+        if (courseId == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Course ID not found. Please start the course creation process again.");
+            return "redirect:../createcourse/coursecontent";
+        }
+        Course course = courseService.findCourseById(courseId);
+        if (action.equalsIgnoreCase("previousstep")) {
+            //lay dc ve link video va link anh cu de hien thi duoc len co
+            //chi cần hiển thị ảnh và video lên thoi, còn link k cần luuư vì thấy xấu thfi đổi thôi chứ k càn
+            CourseMediaDTO courseMediaDTO = new CourseMediaDTO();
+            courseMediaDTO.setCourseId(course.getCourseId());
+//            courseMediaDTO.setImage(course.getCourseImg());
+            //set nguoc lai thi deo duoc
+//            courseMediaDTO.setVideo(course.getVideoUrlPreview());
+            model.addAttribute("coursestep2", courseMediaDTO);
+            model.addAttribute("fragmentContent", "instructorDashboard/fragments/step2CourseMedia :: step2Content");
+            return "instructorDashboard/indexUpdate";
+        }
         int totalLesson = 0;
         int totalDuration = 0;
         List<Chapter> chapters = chapterService.chapterListByCourse(courseId);
-        for(Chapter chapter: chapters){
+        for (Chapter chapter : chapters) {
             List<Lesson> lessons = lessonService.findLessonsByChapterId(chapter.getId());
             if (lessons != null && lessons.size() > 0) {
                 totalLesson += lessons.size();
-                for(Lesson lesson: lessons){
-                    totalDuration += lesson.getDuration();
+                for (Lesson lesson : lessons) {
+                    if(lesson.getDuration() != null) {
+                        totalDuration += lesson.getDuration();
+                    }
                 }
             }
         }
         course.setTotalLessons(totalLesson);
         course.setDuration(totalDuration);
         courseService.saveCourse(courseId);
-        session.setAttribute("course", course);
-        model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step4SubmitCourse :: step4Content");
+        if (action.equalsIgnoreCase("draft")) {
+            courseService.submitCourse(courseId, "draft");
+            return "redirect:../courses";
+        }
+        model.addAttribute("fragmentContent", "instructorDashboard/fragments/step4SubmitCourse :: step4Content");
         return "instructorDashboard/indexUpdate";
     }
 
     //submit course
     @PostMapping("/createcourse/savecourse")
-    public String submitCourse(HttpSession session, Model model, @RequestParam(name = "action") String action,
-                               @RequestParam(name = "id", defaultValue = "2") Long userid, ModelMap modelMap) {
-        Course course = (Course) session.getAttribute("course");
-        Long courseId = course.getCourseId();
-        //        if (action.equalsIgnoreCase("draft")) {
-//            courseService.submitCourse(courseId, "draft");
-//            return "redirect:../courses";
-//        }
-//        if (action.equalsIgnoreCase("previousstep")) {
-//            return "redirect:../createcourse/coursecontent";
-//        }
+    public String submitCourse(Model model, @RequestParam(name = "action") String action,
+                               HttpServletRequest request, HttpServletResponse response) {
+
+        Long courseId = getCourseIdFromCookie(request);
+        if (action.equalsIgnoreCase("draft")) {
+            courseService.submitCourse(courseId, "draft");
+            return "redirect:../courses";
+        }
+        if (action.equalsIgnoreCase("previousstep")) {
+            return "redirect:../createcourse/coursecontent";
+        }
         courseService.submitCourse(courseId, "pending");
-        return "redirect:../courses";
+        Cookie cookie = new Cookie("cookieCourseId", null);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+        model.addAttribute("fragmentContent", "instructorDashboard/fragments/courseAdded :: courseAdded");
+        return "instructorDashboard/indexUpdate";
     }
 }

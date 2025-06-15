@@ -1,12 +1,10 @@
 package com.OLearning.service.course;
 
 import com.OLearning.dto.course.AddCourseStep1DTO;
-import com.OLearning.dto.course.AddCourseStep3DTO;
 import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.course.CourseMediaDTO;
 import com.OLearning.entity.Course;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 

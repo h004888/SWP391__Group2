@@ -33,9 +33,5 @@ public class User {
 
     @OneToMany(mappedBy = "instructor")
     private List<Course> courses;
-
-    @OneToMany(mappedBy = "instructor", fetch = FetchType.LAZY)
-    private List<BuyPackages> listOfBuyPackage;
-
 }
 

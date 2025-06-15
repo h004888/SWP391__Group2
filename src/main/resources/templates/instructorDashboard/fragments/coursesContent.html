@@ -120,7 +120,7 @@
                                 <!-- Status item -->
                                 <td>
                                     <div th:switch="${course.status}">
-                                        <span th:case="null" class="badge bg-secondary">Draft</span>
+                                        <span th:case="draft" class="badge bg-secondary">Draft</span>
                                         <span th:case="'published'" class="badge bg-success">Published</span>
                                         <span th:case="'pending'" class="badge bg-warning text-dark">Pending</span>
                                         <span th:case="'rejected'" class="badge bg-danger">Rejected</span>
@@ -128,7 +128,7 @@
                                 </td>
 
                                 <!-- Price item -->
-                                <td th:utext="'$' + ${course.price}"></td>
+                                <td th:utext="${course.price}"></td>
                                 <!--is free-->
                                 <td>
                                     <span th:if="${course.isFree == true}" class="badge bg-success">Free</span>
@@ -137,8 +137,8 @@
                                 </td>
                                 <!-- Action item -->
                                 <td>
-                                    <a href="#" class="btn btn-sm btn-success-soft btn-round me-1 mb-0" title="Edit"
-                                       th:if="${course.status == null}">
+                                    <a th:href="@{/instructordashboard/createcourse/coursebasic(courseId=${course.courseId})}" class="btn btn-sm btn-success-soft btn-round me-1 mb-0" title="Edit"
+                                       th:if="${course.status == 'draft'}">
                                         <i class="far fa-fw fa-edit"></i>
                                     </a>
                                     <button class="btn btn-sm btn-danger-soft btn-round mb-0"><i
