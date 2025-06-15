@@ -9,10 +9,8 @@ import com.OLearning.dto.quiz.QuizDTO;
 import com.OLearning.dto.quiz.QuizQuestionDTO;
 import com.OLearning.dto.video.VideoDTO;
 import com.OLearning.entity.*;
-import com.OLearning.mapper.course.CourseMapper;
-import com.OLearning.repository.ChapterRepository;
 import com.OLearning.repository.LessonRepository;
-import com.OLearning.repository.VideoRepository;
+import com.OLearning.service.CourseChapterService;
 import com.OLearning.service.LessonChapterService;
 import com.OLearning.service.LessonQuizService;
 import com.OLearning.service.category.CategoryService;
@@ -24,7 +22,6 @@ import com.OLearning.service.video.VideoService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -60,6 +57,8 @@ public class ControlllerAddCourseUpdate {
     private QuizService quizService;
     @Autowired
     private LessonRepository lessonRepository;
+    @Autowired
+    private CourseChapterService courseChapterService;
 
     //dashhboard
     @GetMapping()
@@ -87,7 +86,14 @@ public class ControlllerAddCourseUpdate {
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/coursesContent :: listsCourseContent");
         return "instructorDashboard/indexUpdate";
     }
-
+    //delete course
+    @PostMapping("/createcourse/deletecourse")
+    public String deletecourse(@RequestParam(name = "courseId") Long courseId
+            , RedirectAttributes redirectAttributes, HttpServletRequest request) {
+        courseChapterService.deleteCourseFK(courseId);
+        redirectAttributes.addFlashAttribute("errorMessage", "course deleted successfully.");
+        return "redirect:../courses";
+    }
     //viewCourseDetail
     @GetMapping("/courses/detail/{courseId}")
     public String viewCourseDetail(@PathVariable("courseId") Long courseId, Model model) {
@@ -202,13 +208,20 @@ public class ControlllerAddCourseUpdate {
             model.addAttribute("fragmentContent", "instructorDashboard/fragments/step2CourseMedia :: step2Content");
             return "instructorDashboard/indexUpdate";
         }
+
+        // Lấy courseId từ DTO hoặc cookie nếu không có
+        Long courseId = courseMediaDTO.getCourseId();
+        if (courseId == null) {
+            courseId = getCourseIdFromCookie(request);
+            courseMediaDTO.setCourseId(courseId);
+        }
+
         if (action.equalsIgnoreCase("draft")) {
-            Course course = courseService.createCourseMedia(courseMediaDTO.getCourseId(), courseMediaDTO);
+            Course course = courseService.createCourseMedia(courseId, courseMediaDTO);
             courseService.submitCourse(course.getCourseId(), "draft");
             return "redirect:../courses";
         }
         if (action.equalsIgnoreCase("previousstep")) {
-            Long courseId = getCourseIdFromCookie(request);
             Course course = courseService.findCourseById(courseId);
             AddCourseStep1DTO courseStep1 = courseService.draftCourseStep1(course);
             model.addAttribute("coursestep1", courseStep1);
@@ -217,7 +230,7 @@ public class ControlllerAddCourseUpdate {
             return "instructorDashboard/indexUpdate";
         }
 
-        Course course = courseService.createCourseMedia(courseMediaDTO.getCourseId(), courseMediaDTO);
+        Course course = courseService.createCourseMedia(courseId, courseMediaDTO);
         ChapterDTO chapterDTO = new ChapterDTO();
         model.addAttribute("chapter", chapterDTO);
         List<Chapter> chapters = chapterService.chapterListByCourse(course.getCourseId());
@@ -286,9 +299,28 @@ public class ControlllerAddCourseUpdate {
     //delete chapter
     @PostMapping("/createcourse/deletechapter")
     public String deleteChapter(@RequestParam(name = "chapterId") Long chapterId
-            , RedirectAttributes redirectAttributes) {
+            , RedirectAttributes redirectAttributes, HttpServletRequest request) {
         lessonChapterService.deleteChapter(chapterId);
         redirectAttributes.addFlashAttribute("errorMessage", "Chapter deleted successfully.");
+        int totalLesson = 0;
+        int totalDuration = 0;
+        Long courseId = getCourseIdFromCookie(request);
+        Course course = courseService.findCourseById(courseId);
+        List<Chapter> chapters = chapterService.chapterListByCourse(courseId);
+        for (Chapter chapter : chapters) {
+            List<Lesson> lessons = lessonService.findLessonsByChapterId(chapter.getId());
+            if (lessons != null && lessons.size() > 0) {
+                totalLesson += lessons.size();
+                for (Lesson lesson : lessons) {
+                    if(lesson.getDuration() != null) {
+                        totalDuration += lesson.getDuration();
+                    }
+                }
+            }
+        }
+        course.setTotalLessons(totalLesson);
+        course.setDuration(totalDuration);
+        courseService.saveCourse(courseId);
         return "redirect:../createcourse/coursecontent";
     }
 
@@ -368,9 +400,28 @@ public class ControlllerAddCourseUpdate {
     //delete lesson
     @PostMapping("/createcourse/deletelesson")
     public String deleteLesson(@RequestParam(name = "lessonId") Long lessonId
-            , RedirectAttributes redirectAttributes) {
+            , RedirectAttributes redirectAttributes, HttpServletRequest request) {
         lessonQuizService.deleteAllFkByLessonId(lessonId);
         redirectAttributes.addFlashAttribute("errorMessage", "Lesson deleted successfully.");
+        int totalLesson = 0;
+        int totalDuration = 0;
+        Long courseId = getCourseIdFromCookie(request);
+        Course course = courseService.findCourseById(courseId);
+        List<Chapter> chapters = chapterService.chapterListByCourse(courseId);
+        for (Chapter chapter : chapters) {
+            List<Lesson> lessons = lessonService.findLessonsByChapterId(chapter.getId());
+            if (lessons != null && lessons.size() > 0) {
+                totalLesson += lessons.size();
+                for (Lesson lesson : lessons) {
+                    if(lesson.getDuration() != null) {
+                        totalDuration += lesson.getDuration();
+                    }
+                }
+            }
+        }
+        course.setTotalLessons(totalLesson);
+        course.setDuration(totalDuration);
+        courseService.saveCourse(courseId);
         return "redirect:../createcourse/coursecontent";
     }
 
@@ -471,13 +522,9 @@ public class ControlllerAddCourseUpdate {
         }
         Course course = courseService.findCourseById(courseId);
         if (action.equalsIgnoreCase("previousstep")) {
-            //lay dc ve link video va link anh cu de hien thi duoc len co
-            //chi cần hiển thị ảnh và video lên thoi, còn link k cần luuư vì thấy xấu thfi đổi thôi chứ k càn
             CourseMediaDTO courseMediaDTO = new CourseMediaDTO();
             courseMediaDTO.setCourseId(course.getCourseId());
-//            courseMediaDTO.setImage(course.getCourseImg());
-            //set nguoc lai thi deo duoc
-//            courseMediaDTO.setVideo(course.getVideoUrlPreview());
+            model.addAttribute("courseId", course.getCourseId());
             model.addAttribute("coursestep2", courseMediaDTO);
             model.addAttribute("fragmentContent", "instructorDashboard/fragments/step2CourseMedia :: step2Content");
             return "instructorDashboard/indexUpdate";
