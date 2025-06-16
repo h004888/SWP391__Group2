@@ -26,6 +26,7 @@ public class User {
     private LocalDate birthday;
     private String address;
     private String profilePicture;
+    private Boolean status;
 
     @ManyToOne
     @JoinColumn(name = "roleId")
