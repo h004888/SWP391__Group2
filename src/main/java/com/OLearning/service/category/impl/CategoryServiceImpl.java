@@ -51,6 +51,11 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public Page<Category> findAll(Pageable pageable) {
+        return categoriesRepository.findAll(pageable);
+    }
+
+    @Override
     public Category findById(int id) {
         return categoriesRepository.findById(id);
     }
@@ -107,8 +112,4 @@ public class CategoryServiceImpl implements CategoryService {
         return categoriesRepository.findTop5ByOrderByIdAsc();
     }
 
-    @Override
-    public Page<Category> findAll(Pageable pageable) {
-        return categoriesRepository.findAll(pageable);
-    }
 }

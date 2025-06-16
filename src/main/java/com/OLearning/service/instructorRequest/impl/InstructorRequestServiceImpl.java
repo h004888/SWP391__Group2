@@ -1,4 +1,4 @@
-package com.OLearning.service.InstructorRequest.impl;
+package com.OLearning.service.instructorRequest.impl;
 
 import com.OLearning.entity.InstructorRequest;
 import com.OLearning.entity.Role;
@@ -6,7 +6,8 @@ import com.OLearning.entity.User;
 import com.OLearning.repository.InstructorRequestRepository;
 import com.OLearning.repository.RoleRepository;
 import com.OLearning.repository.UserRepository;
-import com.OLearning.service.InstructorRequest.InstructorRequestService;
+import com.OLearning.service.email.EmailService;
+import com.OLearning.service.instructorRequest.InstructorRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +28,8 @@ public class InstructorRequestServiceImpl implements InstructorRequestService {
     
     @Autowired
     private RoleRepository roleRepository;
+    @Autowired
+    private EmailService emailService;
 
     @Override
     public Page<InstructorRequest> getAllInstructorRequests(Pageable pageable) {
@@ -57,7 +60,9 @@ public class InstructorRequestServiceImpl implements InstructorRequestService {
                 .orElseThrow(() -> new RuntimeException("Instructor role not found"));
         user.setRole(instructorRole);
         userRepository.save(user);
-        
+
+//        send mail
+        emailService.sendBecomeInstructorEmail(user, true);
         return instructorRequestRepository.save(request);
     }
     
@@ -73,6 +78,9 @@ public class InstructorRequestServiceImpl implements InstructorRequestService {
         request.setDecisionDate(LocalDateTime.now());
         request.setAdmin(admin);
         request.setNote(rejectionReason);
+
+        //send mail
+        emailService.sendBecomeInstructorEmail(request.getUser(), false);
         
         return instructorRequestRepository.save(request);
     }

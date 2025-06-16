@@ -3,11 +3,12 @@ package com.OLearning.controller.adminDashBoard;
 import com.OLearning.dto.user.UserDTO;
 import com.OLearning.entity.InstructorRequest;
 import com.OLearning.entity.User;
+import com.OLearning.repository.UserRepository;
 import com.OLearning.security.CustomUserDetails;
-import com.OLearning.service.InstructorRequest.InstructorRequestService;
+import com.OLearning.service.email.EmailService;
+import com.OLearning.service.instructorRequest.InstructorRequestService;
 import com.OLearning.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,13 +39,17 @@ public class InstructorMnController {
 
     @Autowired
     private InstructorRequestService instructorRequestService;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private EmailService emailService;
 
     @GetMapping()
     public String getInstructorPage(
             Model model,
             @RequestParam(required = false, defaultValue = "0") int page) {
 
-        Pageable prs = PageRequest.of(page, 5);
+        Pageable prs = PageRequest.of(page, 6);
         Page<UserDTO> listInstructor = userService.getUsersByRoleWithPagination(roleInstructor, prs);
         List<UserDTO> listUser = listInstructor.getContent();
 
@@ -67,6 +72,37 @@ public class InstructorMnController {
         model.addAttribute("userStudentCountMap", userStudentCountMap);
         model.addAttribute("accNamePage", "Management Instructor");
         return "adminDashBoard/index";
+    }
+
+    @GetMapping("/filter")
+    public String filterInstructors(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "6") int size,
+            @RequestParam(defaultValue = "grid") String view,
+            Model model) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<UserDTO> listInstructor = userService.filterInstructors(keyword, pageable);
+        List<UserDTO> listUser = listInstructor.getContent();
+
+        Map<Long, Integer> userStudentCountMap = new HashMap<>();
+        for (UserDTO user : listUser) {
+            int totalStudents = user.getCourse().stream()
+                    .mapToInt(course -> course.getTotalStudentEnrolled() != null ? course.getTotalStudentEnrolled() : 0)
+                    .sum();
+            userStudentCountMap.put(user.getUserId(), totalStudents);
+        }
+
+        model.addAttribute("listInstructor", listUser);
+        model.addAttribute("userStudentCountMap", userStudentCountMap);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", listInstructor.getTotalPages());
+        model.addAttribute("totalItems", listInstructor.getTotalElements());
+
+        return view.equals("grid") ?
+                "adminDashBoard/fragments/instructorListContent :: instructorTableFragment" :
+                "adminDashBoard/fragments/instructorListContent :: instructorListTableFragment";
     }
 
     @GetMapping("/request")
@@ -151,4 +187,23 @@ public class InstructorMnController {
         
         return "adminDashBoard/fragments/instructorRequestContent :: requestTableFragment";
     }
+    
+    @PostMapping("/sendMessage")
+    public ResponseEntity<?> sendMessage(
+            @RequestParam Long instructorId,
+            @RequestParam String message) {
+        try {
+            User instructor = userRepository.findById(instructorId)
+                    .orElseThrow(() -> new RuntimeException("Instructor not found"));
+            emailService.sendMessageToInstructor(
+                    instructor.getEmail(),
+                    instructor.getFullName(),
+                    message
+            );
+            return ResponseEntity.ok().body("Message sent successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error sending message: " + e.getMessage());
+        }
+    }
+
 }

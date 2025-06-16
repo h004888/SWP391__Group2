@@ -12,11 +12,16 @@ import java.util.Map;
 @Service
 public interface CourseMaintenanceService {
     List<CourseMaintenance> getAllCourseMaintenances();
+
     List<CourseMaintenance> searchByUsername(String username);
+
     void processMonthlyMaintenance();
+
     Map<String, Object> getMaintenanceRevenueByDateRange(LocalDate startDate, LocalDate endDate);
-    
-    // New methods for pagination
+
     Page<CourseMaintenance> getAllCourseMaintenances(Pageable pageable);
+
     Page<CourseMaintenance> filterMaintenances(String username, String status, LocalDate monthYear, Pageable pageable);
+
+    void checkOverdueMaintenance();
 }

@@ -4,6 +4,11 @@
     <div class="row mb-3">
         <div class="col-12">
             <h1 class="h3 mb-2 mb-sm-0" th:text="${accNamePage}">Course Maintenances</h1>
+            <div class="d-flex justify-content-end">
+                <a class="btn btn-success" th:href="@{/admin/courseMaintenance/check-overdue}">
+                    <i class="fas fa-check-circle me-2"></i> Check Overdue
+                </a>
+            </div>
         </div>
     </div>
 
@@ -33,8 +38,10 @@
                 <!-- Search bar -->
                 <div class="col-md-8">
                     <form id="filterForm" class="rounded position-relative">
-                        <input class="form-control bg-body" type="search" id="searchInput" placeholder="Search by username..." aria-label="Search">
-                        <button class="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset" type="submit">
+                        <input class="form-control bg-body" type="search" id="searchInput"
+                               placeholder="Search by username..." aria-label="Search">
+                        <button class="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset"
+                                type="submit">
                             <i class="fas fa-search fs-6"></i>
                         </button>
                     </form>
@@ -44,7 +51,8 @@
                 <div class="col-md-4">
                     <div class="row g-2">
                         <div class="col-md-6">
-                            <select class="form-select js-choice border-0 z-index-9 bg-transparent" id="statusFilter" aria-label=".form-select-sm">
+                            <select class="form-select js-choice border-0 z-index-9 bg-transparent" id="statusFilter"
+                                    aria-label=".form-select-sm">
                                 <option value="">All Status</option>
                                 <option value="pending">Pending</option>
                                 <option value="completed">Completed</option>
@@ -66,38 +74,52 @@
             <!-- Course maintenance table START -->
             <div id="maintenanceTableWrapper" th:fragment="maintenanceTableFragment">
                 <div class="table-responsive border-0">
-                    <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                    <table class="table table-dark-gray align-middle p-4 mb-0 table-hover text-center">
                         <!-- Table head -->
                         <thead>
-                            <tr>
-                                <th>Id</th>
-                                <th>Month Year</th>
-                                <th>Enrollment Count</th>
-                                <th>Fee</th>
-                                <th>Course Name</th>
-                                <th>User Name</th>
-                                <th>Status</th>
-                                <th>Due Date</th>
-                            </tr>
+                        <tr>
+                            <th>Id</th>
+                            <th>Month Year</th>
+                            <th>Enrollment Count</th>
+                            <th>Fee</th>
+                            <th>Course Name</th>
+                            <th>User Name</th>
+                            <th>Status</th>
+                            <th>Due Date</th>
+                            <th>Actions</th>
+                        </tr>
                         </thead>
                         <!-- Table body -->
                         <tbody>
-                            <tr th:each="cm : ${courseMaintenances}">
-                                <td th:text="${cm.maintenanceId != null ? cm.maintenanceId : 'N/A'}"></td>
-                                <td th:text="${cm.monthYear != null ? #temporals.format(cm.monthYear, 'MM/yyyy') : 'N/A'}"></td>
-                                <td th:text="${cm.enrollmentCount != null ? cm.enrollmentCount : 'N/A'}"></td>
-                                <td th:text="${cm.fee != null ? #numbers.formatDecimal(cm.fee.maintenanceFee, 0, 'COMMA', 0, 'POINT') : 'N/A'}"></td>
-                                <td th:text="${cm.course != null ? cm.course.title : 'N/A'}"></td>
-                                <td th:text="${cm.course != null && cm.course.instructor != null ? cm.course.instructor.username : 'N/A'}"></td>
-                                <td>
+                        <tr th:each="cm : ${courseMaintenances}">
+                            <td th:text="${cm.maintenanceId != null ? cm.maintenanceId : 'N/A'}"></td>
+                            <td th:text="${cm.monthYear != null ? #temporals.format(cm.monthYear, 'MM/yyyy') : 'N/A'}"></td>
+                            <td th:text="${cm.enrollmentCount != null ? cm.enrollmentCount : 'N/A'}"></td>
+                            <td th:text="${cm.fee != null ? #numbers.formatDecimal(cm.fee.maintenanceFee, 0, 'COMMA', 0, 'POINT') : 'N/A'}"></td>
+                            <td>
+                                <a th:href="@{/admin/course/detail/{courseId}(courseId=${cm.course.courseId})}"
+                                   th:text="${cm.course != null ? cm.course.title : 'N/A'}">
+                                </a>
+                            </td>
+                            <td th:text="${cm.course != null && cm.course.instructor != null ? cm.course.instructor.username : 'N/A'}"></td>
+                            <td>
                                     <span th:class="${cm.status == 'completed' ? 'badge bg-success' : 
                                                     (cm.status == 'pending' ? 'badge bg-warning' : 
                                                     (cm.status == 'overdue' ? 'badge bg-danger' : 'badge bg-secondary'))}"
                                           th:text="${cm.status != null ? cm.status : 'N/A'}">
                                     </span>
-                                </td>
-                                <td th:text="${cm.dueDate != null ? #temporals.format(cm.dueDate, 'dd/MM/yyyy') : 'N/A'}"></td>
-                            </tr>
+                            </td>
+                            <td th:class="${cm.status == 'pending' ? 'text-danger' :
+                                                    (cm.status == 'overdue' ? 'text-danger'  : '')}"
+                                th:text="${cm.dueDate != null ? #temporals.format(cm.dueDate, 'dd/MM/yyyy') : 'N/A'}"></td>
+                            <td>
+                                <a th:href="@{/admin/courseMaintenance/view/{maintenanceId}(maintenanceId=${cm.maintenanceId})}"
+                                   class="btn btn-success-soft btn-round me-1 mb-1 mb-md-0"
+                                   data-bs-toggle="tooltip" data-bs-placement="top" title="Message">
+                                    <i class="bi bi-envelope"></i>
+                                </a>
+                            </td>
+                        </tr>
                         </tbody>
                     </table>
                 </div>
@@ -141,7 +163,7 @@
 
     <!-- Add JavaScript for handling search and pagination -->
     <script th:inline="javascript">
-        $(document).ready(function() {
+        $(document).ready(function () {
             let typingTimer;
             const debounceDelay = 300;
             let currentUsername = '';
@@ -150,7 +172,7 @@
             let currentPage = 0;
 
             // Handle search input with debounce
-            $('#searchInput').on('input', function() {
+            $('#searchInput').on('input', function () {
                 clearTimeout(typingTimer);
                 typingTimer = setTimeout(() => {
                     currentUsername = $(this).val().trim();
@@ -160,21 +182,21 @@
             });
 
             // Handle status filter change
-            $('#statusFilter').on('change', function() {
+            $('#statusFilter').on('change', function () {
                 currentStatus = $(this).val();
                 currentPage = 0;
                 fetchMaintenances(currentPage);
             });
 
             // Handle month year filter change
-            $('#monthYearFilter').on('change', function() {
+            $('#monthYearFilter').on('change', function () {
                 currentMonthYear = $(this).val();
                 currentPage = 0;
                 fetchMaintenances(currentPage);
             });
 
             // Handle pagination clicks
-            $(document).on('click', '.pagination a', function(e) {
+            $(document).on('click', '.pagination a', function (e) {
                 e.preventDefault();
                 const page = $(this).data('page');
                 if (page !== undefined) {
@@ -184,7 +206,7 @@
             });
 
             // Prevent form submission
-            $('#filterForm').on('submit', function(e) {
+            $('#filterForm').on('submit', function (e) {
                 e.preventDefault();
                 currentPage = 0;
                 fetchMaintenances(currentPage);
@@ -205,10 +227,10 @@
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    success: function(response) {
+                    success: function (response) {
                         $('#maintenanceTableWrapper').html(response);
                     },
-                    error: function(xhr, status, error) {
+                    error: function (xhr, status, error) {
                         console.error("Error fetching maintenances:", status, error);
                         alert("Error loading maintenances. Please try again.");
                     }
@@ -223,6 +245,6 @@
         setTimeout(function () {
             $('#success-alert').fadeOut('slow');
             $('#error-alert').fadeOut('slow');
-        }, 3000);
+        }, 5000);
     </script>
 </div>

@@ -1,4 +1,4 @@
-package com.OLearning.service.InstructorRequest;
+package com.OLearning.service.instructorRequest;
 
 import com.OLearning.entity.InstructorRequest;
 import org.springframework.data.domain.Page;

@@ -2,6 +2,7 @@ let currentRole = 1; // Default to admin (role ID 1)
 let searchTimer;
 let currentPage = 0;
 let totalPages = 0;
+let currentStatus = 'true'; // Default to active status
 
 // Event listeners
 $(document).ready(function () {
@@ -39,11 +40,6 @@ $(document).ready(function () {
         }
     });
 
-
-// Load initial data for admin tab
-
-    // loadUsers(1, ); // Load trang đầu tiên cho admin
-
     // Tab change
     $('#accountTabs button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
         const roleId = parseInt($(e.target).data('role'));
@@ -66,8 +62,16 @@ $(document).ready(function () {
         }, 300);
     });
 
+    // Status filter change event
+    $('#statusFilter').on('change', function() {
+        currentStatus = $(this).val();
+        currentPage = 0;
+        const keyword = $('#searchInput').val().trim();
+        loadUsers(currentRole, keyword, 0);
+    });
+
     // Khi click nút block
-    $(document).on('click', '.btn-danger[title="Blocked"]', function (e) {
+    $(document).on('click', '.btn-danger-soft[title="Blocked"]', function (e) {
         e.preventDefault();
 
         const blockUrl = $(this).attr('href');
@@ -101,7 +105,6 @@ $(document).ready(function () {
 
         $('#deleteModal').modal('show');
     });
-
 
     // Confirm block button click
     $(document).on('click', '#confirmDelete', function (e) {
@@ -153,6 +156,13 @@ function loadUsers(roleId, keyword = '', page = 0) {
         console.error("Table body element NOT FOUND for role:", roleId);
         return;
     }
+
+    // Convert status string to boolean or null
+    let statusParam = null;
+    if (currentStatus !== 'all') {
+        statusParam = currentStatus === 'true';
+    }
+
     $.ajax({
         url: '/admin/account/filter',
         method: 'GET',
@@ -160,11 +170,12 @@ function loadUsers(roleId, keyword = '', page = 0) {
             keyword: keyword || null,
             role: roleId,
             page: page,
-            size: 5
+            size: 5,
+            status: statusParam
         },
         beforeSend: function () {
             console.log("=== AJAX SENDING ===");
-            console.log("Data:", {keyword: keyword || null, role: roleId, page: page});
+            console.log("Data:", {keyword: keyword || null, role: roleId, page: page, status: statusParam});
         },
         success: function (data) {
             //Parse response để lấy cả table content và pagination info
@@ -227,6 +238,12 @@ function blockUser(userId, userEmail) {
 }
 
 function getPaginationInfo(roleId, keyword = '', page = 0) {
+    // Convert status string to boolean or null
+    let statusParam = null;
+    if (currentStatus !== 'all') {
+        statusParam = currentStatus === 'true';
+    }
+
     $.ajax({
         url: '/admin/account/pagination-info',
         method: 'GET',
@@ -234,7 +251,8 @@ function getPaginationInfo(roleId, keyword = '', page = 0) {
             keyword: keyword || null,
             role: roleId,
             page: page,
-            size: 5
+            size: 5,
+            status: statusParam
         },
         success: function (paginationData) {
             totalPages = paginationData.totalPages;
@@ -308,7 +326,6 @@ $(document).on('click', '.btn-reset-password', function (e) {
     });
 });
 
-
 function getTableBodyElement(roleId) {
     switch (roleId) {
         case 1:
@@ -352,5 +369,3 @@ function updateCountBadge(roleId, data) {
         badgeElement.textContent = rowCount;
     }
 }
-
-

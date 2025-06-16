@@ -65,6 +65,7 @@ public class UserController {
             @RequestParam(required = false, name = "role") Long roleId,
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "5") int size,
+            @RequestParam(required = false) Boolean status,
             Model model) {
 
         if (roleId == null) {
@@ -79,9 +80,17 @@ public class UserController {
         Page<UserDTO> userPage;
 
         if (keyword != null && !keyword.trim().isEmpty()) {
-            userPage = userService.searchByNameWithPagination(keyword.trim(), roleId, pageable);
+            if (status != null) {
+                userPage = userService.searchByNameAndStatusWithPagination(keyword.trim(), roleId, status, pageable);
+            } else {
+                userPage = userService.searchByNameWithPagination(keyword.trim(), roleId, pageable);
+            }
         } else {
-            userPage = userService.getUsersByRoleWithPagination(roleId, pageable);
+            if (status != null) {
+                userPage = userService.getUsersByRoleAndStatusWithPagination(roleId, status, pageable);
+            } else {
+                userPage = userService.getUsersByRoleWithPagination(roleId, pageable);
+            }
         }
 
         //Add pagination information to model
@@ -91,6 +100,7 @@ public class UserController {
         model.addAttribute("totalItems", userPage.getTotalElements());
         model.addAttribute("keyword", keyword);
         model.addAttribute("roleId", roleId);
+        model.addAttribute("status", status);
 
         return "adminDashBoard/fragments/userTableRowContent :: userTableRows";
     }
@@ -102,7 +112,8 @@ public class UserController {
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false, name = "role") Long roleId,
             @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "5") int size) {
+            @RequestParam(required = false, defaultValue = "5") int size,
+            @RequestParam(required = false) Boolean status) {
 
         if (roleId == null) {
             Map<String, Object> response = new HashMap<>();
@@ -117,9 +128,17 @@ public class UserController {
         Page<UserDTO> userPage;
 
         if (keyword != null && !keyword.trim().isEmpty()) {
-            userPage = userService.searchByNameWithPagination(keyword.trim(), roleId, pageable);
+            if (status != null) {
+                userPage = userService.searchByNameAndStatusWithPagination(keyword.trim(), roleId, status, pageable);
+            } else {
+                userPage = userService.searchByNameWithPagination(keyword.trim(), roleId, pageable);
+            }
         } else {
-            userPage = userService.getUsersByRoleWithPagination(roleId, pageable);
+            if (status != null) {
+                userPage = userService.getUsersByRoleAndStatusWithPagination(roleId, status, pageable);
+            } else {
+                userPage = userService.getUsersByRoleWithPagination(roleId, pageable);
+            }
         }
 
         Map<String, Object> response = new HashMap<>();

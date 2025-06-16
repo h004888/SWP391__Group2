@@ -11,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -93,5 +94,20 @@ public class CourseMaintenanceController {
         model.addAttribute("totalItems", courseMaintenances.getTotalElements());
         
         return "adminDashBoard/fragments/courseMaintenanceContent :: maintenanceTableFragment";
+    }
+
+    //use to create maintenance fee for all courses
+    @GetMapping("/process-monthly")
+    public String processMonthlyMaintenance(Model model, RedirectAttributes redirectAttributes) {
+        courseMaintenanceService.processMonthlyMaintenance();
+        redirectAttributes.addFlashAttribute("successMessage", "Monthly maintenance process completed successfully");
+        return "redirect:/admin/courseMaintenance";
+    }
+
+    @GetMapping("/check-overdue")
+    public String checkOverdueMaintenance(Model model, RedirectAttributes redirectAttributes) {
+        courseMaintenanceService.checkOverdueMaintenance();
+        redirectAttributes.addFlashAttribute("successMessage", "Overdue maintenance check completed successfully");
+        return "redirect:/admin/courseMaintenance";
     }
 }

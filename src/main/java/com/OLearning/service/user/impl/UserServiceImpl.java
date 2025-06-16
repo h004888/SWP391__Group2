@@ -60,6 +60,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Page<UserDTO> getUsersByRoleAndStatusWithPagination(Long roleId, boolean status, Pageable pageable) {
+        Page<User> userPage = userRepository.findByRole_RoleIdAndStatus(roleId, status, pageable);
+        return userPage.map(userMapper::toDTO);
+    }
+
+    @Override
+    public Page<UserDTO> searchByNameAndStatusWithPagination(String keyword, Long roleId, boolean status, Pageable pageable) {
+        Page<User> userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleIdAndStatus(keyword, roleId, status, pageable);
+        return userPage.map(userMapper::toDTO);
+    }
+
+    @Override
     public Optional<UserDetailDTO> getInfoUser(Long id) {
         return userRepository.findById(id)
                 .map(userDetailMapper::toDetailDTO);
@@ -105,16 +117,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void validateRegistrationData(RegisterDTO registrationDto) {
-        // Check if passwords match
-        if (!registrationDto.isPasswordsMatch()) {
-            throw new RuntimeException("Passwords do not match");
-        }
-
-        // Check if email already exists
         if (userRepository.existsByEmail(registrationDto.getEmail())) {
             throw new RuntimeException("Email address is already registered");
         }
-
         // Check terms agreement
         if (!registrationDto.isAgreeToTerms()) {
             throw new RuntimeException("You must agree to the Terms of Service and Privacy Policy");
@@ -132,19 +137,6 @@ public class UserServiceImpl implements UserService {
         user.setRole(role);
         userRepository.save(user);
     }
-
-
-//    @Override
-//    public List<UserDTO> searchByName(String keyword, Long roleId) {
-//        String processedKeyword = null;
-//        if (keyword != null && !keyword.trim().isEmpty()) {
-//            processedKeyword = keyword.trim().toLowerCase();
-//        }
-//        List<User> users = userRepository.searchByNameAndRole(processedKeyword, roleId);
-//        return users.stream()
-//                .map(userMapper::toDTO)
-//                .collect(Collectors.toList());
-//    }
 
     @Override
     public List<UserDTO> getUsersByRole(Long roleId) {
@@ -172,7 +164,7 @@ public class UserServiceImpl implements UserService {
 
         return userRepository.save(user);
     }
-    
+
     @Override
     public UserDTO getUserByEmail(String email) {
         User user = userRepository.findByEmail(email)
@@ -220,6 +212,17 @@ public class UserServiceImpl implements UserService {
                 .limit(limit)
                 .map(userMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<UserDTO> filterInstructors(String keyword, Pageable pageable) {
+        Page<User> userPage;
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleId(keyword.trim(), 3L, pageable);
+        } else {
+            userPage = userRepository.findByRole_RoleId(3L, pageable);
+        }
+        return userPage.map(userMapper::toDTO);
     }
 
 }
