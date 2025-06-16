@@ -16,7 +16,7 @@ public class CourseChapterService {
     private LessonChapterService lessonChapterService;
     public void deleteCourseFK(Long courseId) {
         chapterService.chapterListByCourse(courseId).forEach(chapter -> {
-            lessonChapterService.deleteChapter(chapter.getId());
+            lessonChapterService.deleteChapter(chapter.getChapterId());
         });
         courseService.deleteCourse(courseId);
     }

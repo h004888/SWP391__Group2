@@ -1,0 +1,409 @@
+<div class="container-fluid" id="loadCategory" th:fragment="categoryList">
+    <!-- Add Choices.js CSS and JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+    <!-- Title -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <h1 class="h3 mb-2 mb-sm-0">Management <strong>Category</strong></h1>
+        </div>
+    </div>
+
+    <!-- Success Alert -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-4 shadow"
+        role="alert" id="success-alert" style="z-index: 1055; min-width: 300px;">
+        <strong th:text="${successMessage}">Success!</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Error Alert -->
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show position-fixed top-0 end-0 m-4 shadow"
+        role="alert" id="error-alert" style="z-index: 1055; min-width: 300px;">
+        <strong th:text="${errorMessage}">Error occurred!</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Main card START -->
+    <div class="card bg-transparent border">
+        <!-- Card header START -->
+        <div class="card-header bg-light border-bottom">
+            <!-- Search and select START -->
+            <div class="row g-3 align-items-center justify-content-between">
+                <!-- Search bar -->
+                <div class="col-md-4">
+                    <form id="filterForm" class="rounded position-relative">
+                        <input class="form-control bg-body" type="search" id="searchInput" name="name" th:value="${name}" placeholder="Search categories..." aria-label="Search">
+                        <button class="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset" type="submit">
+                            <i class="fas fa-search fs-6"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Select options -->
+                <div class="col-md-8">
+                    <div class="d-flex gap-4">
+                        <select class="form-select js-choice border-0 z-index-9 bg-transparent" id="sortSelect" name="sort">
+                            <option value="" th:selected="${sort == null or sort == ''}">All Categories</option>
+                            <option value="asc" th:selected="${sort == 'asc'}">A to Z</option>
+                            <option value="desc" th:selected="${sort == 'desc'}">Z to A</option>
+                        </select>
+                        <div class="d-flex align-items-center">
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#categoryModal">
+                                <i class="fas fa-plus"></i> Add Category
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Search and select END -->
+        </div>
+        <!-- Card header END -->
+
+        <!-- Card body START -->
+        <div class="card-body">
+            <!-- Category table START -->
+            <div th:fragment="categoryPage" id="categoryPage">
+                <div class="table-responsive border-0">
+                    <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                        <!-- Table head -->
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <!-- Table body -->
+                        <tbody>
+                            <tr th:each="category,stat : ${category}">
+                                <td th:text="${stat.index + 1}"></td>
+                                <td>
+                                    <div class="d-flex align-items-center position-relative">
+                                        <div class="mb-0">
+                                            <h6 class="mb-0">
+                                                <a th:href="@{/admin/category/showmore(id=${category.id})}" class="stretched-link" th:text="${category.name}">Category Name</a>
+                                            </h6>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a th:href="@{/admin/category/edit(id=${category.id}, page=${currentPage}, sort=${sort}, name=${name})}"
+                                        class="btn btn-primary-soft me-1 mb-1 mb-lg-0" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-danger-soft me-1 mb-1 mb-lg-0 delete-category" 
+                                        th:data-id="${category.id}" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <input type="hidden" id="currentPageInput" th:value="${currentPage}" />
+                    <input type="hidden" id="totalPagesInput" th:value="${totalPages}" />
+                    <input type="hidden" id="pageSizeInput" th:value="${pageSize}" />
+                </div>
+
+                <!-- Pagination & info -->
+                <div class="d-sm-flex justify-content-sm-between align-items-sm-center mt-2">
+                    <p class="mb-0 text-center text-sm-start" th:if="${totalItems > 0}">
+                        Showing <span th:text="${currentPage * 5 + 1}">1</span> to 
+                        <span th:text="${(currentPage * 5) + 5 > totalItems ? totalItems : (currentPage * 5) + 5}">5</span> of 
+                        <span th:text="${totalItems}">20</span> entries
+                    </p>
+                    <p class="mb-0 text-center text-sm-start" th:if="${totalItems == 0}">
+                        No entries found
+                    </p>
+                    <nav class="d-flex justify-content-center mb-0" aria-label="navigation" th:if="${totalPages > 1}">
+                        <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
+                            <li class="page-item mb-0" th:classappend="${currentPage == 0} ? 'disabled'">
+                                <a class="page-link" th:href="@{/admin/category(page=${currentPage - 1}, size=${pageSize}, sort=${sort}, name=${name})}"
+                                   th:if="${currentPage > 0}"><i class="fas fa-angle-left"></i></a>
+                            </li>
+                            <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                class="page-item mb-0" th:classappend="${currentPage == i} ? 'active'">
+                                <a th:href="@{/admin/category(page=${i}, size=${pageSize}, sort=${sort}, name=${name})}"
+                                   th:text="${i + 1}" class="page-link"></a>
+                            </li>
+                            <li class="page-item mb-0" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                <a class="page-link" th:href="@{/admin/category(page=${currentPage + 1}, size=${pageSize}, sort=${sort}, name=${name})}"
+                                   th:if="${currentPage < totalPages - 1}"><i class="fas fa-angle-right"></i></a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            <!-- Category table END -->
+        </div>
+        <!-- Card body END -->
+    </div>
+    <!-- Main card END -->
+
+    <!-- Add Category Modal -->
+    <div class="modal fade" id="categoryModal" tabindex="-1" role="dialog" aria-labelledby="categoryModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <form id="categoryForm" th:action="@{/admin/category/add}" method="post">
+                <div class="modal-content">
+                    <div class="modal-header bg-dark">
+                        <h5 class="modal-title text-white" id="categoryModalLabel">Add Category</h5>
+                        <button type="button" class="btn btn-sm btn-light mb-0 ms-auto" data-bs-dismiss="modal" aria-label="Close">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body p-5">
+                        <div class="form-group">
+                            <label for="categoryName">Category Name</label>
+                            <input type="text" class="form-control" id="categoryName" name="name" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">Add</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div th:fragment="editCategory">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card">
+                <div class="card-header bg-dark">
+                    <h2 class="card-title mb-0 text-white">Edit <b>Category</b></h2>
+                </div>
+                <div class="card-body p-5">
+                    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+                    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+
+                    <form th:action="@{/admin/category/edit}" method="post">
+                        <input type="hidden" name="id" th:value="${category.id}" />
+                        <input type="hidden" name="page" th:value="${currentPage}" />
+                        <input type="hidden" name="sort" th:value="${sort}" />
+                        <input type="hidden" name="search" th:value="${name}" />
+
+                        <div class="form-group">
+                            <label for="categoryName">Name:</label>
+                            <input type="text" name="name" th:value="${category.name}" class="form-control" required>
+                        </div>
+
+                        <div class="form-group text-right mt-4">
+                            <button type="submit" class="btn btn-primary me-2">Update</button>
+                            <a th:href="@{/admin/category}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Global variables to track current state
+    let currentPage = 0;
+    let currentSize = 5;
+    let currentName = '';
+    let currentSort = '';
+    let choicesInstance = null;
+
+    function filterCategories(page = 0, size = 5) {
+        // Get current values
+        let name = document.getElementById('searchInput').value.trim();
+        let sort = document.getElementById('sortSelect').value;
+
+        // Update global state
+        currentPage = page;
+        currentSize = size;
+        currentName = name;
+        currentSort = sort;
+
+        console.log("Filtering with name:", name, "sort:", sort, "page:", page, "size:", size);
+
+        // Create URL
+        let url = new URL(window.location.origin + '/admin/category');
+        url.searchParams.set('page', page);
+        url.searchParams.set('size', size);
+        if (name) url.searchParams.set('name', name);
+        if (sort) url.searchParams.set('sort', sort);
+
+        // Send AJAX request
+        fetch('/admin/category?' + new URLSearchParams({
+            page: page,
+            size: size,
+            name: name,
+            sort: sort
+        }), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('categoryPage').innerHTML = html;
+            // Update URL without reloading page
+            window.history.pushState({}, '', url);
+            console.log("Categories filter successful, URL updated to:", url.toString());
+        })
+        .catch(error => {
+            console.error("AJAX Error:", error);
+            showAlert("An error occurred while loading data: " + error, 'error');
+        });
+    }
+
+    function showAlert(message, type) {
+        const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+        const alertId = type === 'success' ? 'success-alert' : 'error-alert';
+        
+        // Remove existing alerts
+        const existingAlerts = document.querySelectorAll('#success-alert, #error-alert');
+        existingAlerts.forEach(alert => alert.remove());
+        
+        // Create new alert
+        const alert = document.createElement('div');
+        alert.className = `alert ${alertClass} alert-dismissible fade show position-fixed top-0 end-0 m-4 shadow`;
+        alert.id = alertId;
+        alert.style.zIndex = '1055';
+        alert.style.minWidth = '300px';
+        alert.innerHTML = `
+            <strong>${message}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        
+        // Add alert to body
+        document.body.appendChild(alert);
+        
+        // Auto hide after 3 seconds
+        setTimeout(() => {
+            alert.style.opacity = '0';
+            setTimeout(() => alert.remove(), 300);
+        }, 3000);
+    }
+
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("Script loaded and DOM ready");
+
+        // Initialize Choices.js
+        const selectElement = document.querySelector('.js-choice');
+        if (selectElement) {
+            choicesInstance = new Choices(selectElement, {
+                searchEnabled: false,
+                itemSelectText: '',
+                shouldSort: false
+            });
+        }
+
+        // Initialize current state from form values
+        currentName = document.getElementById('searchInput').value || '';
+        currentSort = document.getElementById('sortSelect').value || '';
+
+        // Get current page from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        currentPage = parseInt(urlParams.get('page')) || 0;
+
+        // Add click event listeners to pagination links
+        document.querySelectorAll('.pagination .page-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                console.log("Pagination link clicked");
+                const href = this.getAttribute('href');
+                console.log("Link href:", href);
+
+                if (href) {
+                    const url = new URL(href, window.location.origin);
+                    const targetPage = parseInt(url.searchParams.get('page')) || 0;
+                    console.log("Target page:", targetPage);
+                    console.log("Current page:", currentPage);
+
+                    if (targetPage >= 0) {
+                        filterCategories(targetPage, currentSize);
+                    }
+                }
+            });
+        });
+
+        // Handle sort change
+        document.getElementById('sortSelect').addEventListener('change', function() {
+            console.log("Sort changed:", this.value);
+            filterCategories(0, currentSize);
+        });
+
+        // Handle search input
+        let searchTimer;
+        document.getElementById('searchInput').addEventListener('input', function() {
+            console.log("Search input:", this.value);
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => filterCategories(0, currentSize), 300);
+        });
+
+        // Handle delete
+        document.querySelectorAll('.delete-category').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const id = this.dataset.id;
+                if (!confirm('Bạn có chắc chắn muốn xoá danh mục này?')) {
+                    return;
+                }
+
+                fetch('/admin/category/delete?id=' + id, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.text())
+                .then(result => {
+                    if (result === 'success') {
+                        filterCategories(currentPage, currentSize);
+                        showAlert('Category deleted successfully!', 'success');
+                    } else {
+                        showAlert('Error deleting category!', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error("Error deleting category:", error);
+                    showAlert("An error occurred while deleting category.", 'error');
+                });
+            });
+        });
+
+        // Handle form submission
+        document.getElementById('categoryForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const formData = new FormData(this);
+            formData.append('sort', currentSort);
+            formData.append('search', currentName);
+            formData.append('page', currentPage);
+            formData.append('size', currentSize);
+
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('categoryPage').innerHTML = html;
+                const modal = bootstrap.Modal.getInstance(document.getElementById('categoryModal'));
+                if (modal) modal.hide();
+                this.reset();
+                showAlert('Category added successfully!', 'success');
+                filterCategories(currentPage, currentSize);
+            })
+            .catch(error => {
+                console.error("Error adding category:", error);
+                showAlert("An error occurred while adding category.", 'error');
+            });
+        });
+    });
+</script>

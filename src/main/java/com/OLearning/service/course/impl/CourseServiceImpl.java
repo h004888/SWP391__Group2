@@ -2,10 +2,12 @@ package com.OLearning.service.course.impl;
 
 import com.OLearning.dto.course.AddCourseStep1DTO;
 import com.OLearning.dto.course.CourseDTO;
+import com.OLearning.dto.course.CourseDetailDTO;
 import com.OLearning.dto.course.CourseMediaDTO;
 import com.OLearning.entity.Category;
 import com.OLearning.entity.Course;
 import com.OLearning.entity.User;
+import com.OLearning.mapper.course.CourseDetailMapper;
 import com.OLearning.mapper.course.CourseMapper;
 import com.OLearning.repository.*;
 import com.OLearning.service.cloudinary.UploadFile;
@@ -35,22 +37,15 @@ public class CourseServiceImpl implements CourseService {
     private CategoryRepository categoryRepository;
     @Autowired
     private UserRepository userRepository;
-
+    @Autowired
+    private CourseDetailMapper courseDetailMapper;
     @Override
-    public List<CourseDTO> findCourseByUserId(Long userId) {
-        List<Course> listCourseRepo = courseRepository.findByInstructorUserId(userId);
-        List<CourseDTO> courseDTOList = new ArrayList<>();
-        for (Course course : listCourseRepo) {
-            CourseDTO courseDTO = courseMapper.MapCourseDTO(course);
-            if (course.getCategory() != null) {
-                courseDTO.setCategoryName(course.getCategory().getName());
-            } else {
-                courseDTO.setCategoryName("not found");
-            }
-            courseDTOList.add(courseDTO);
-        }
-        return courseDTOList;
+    public Page<CourseDTO> getAllCourses(Pageable pageable) {
+        Page<Course> courseList = courseRepository.findAll(pageable);
+        return courseList.map(courseMapper::MapCourseDTO);
     }
+
+
     //courses phan trang
     @Override
     public Page<CourseDTO> findCourseByUserId(Long userId, int page, int size) {
@@ -66,13 +61,49 @@ public class CourseServiceImpl implements CourseService {
             }
             courseDTOList.add(courseDTO);
         }
-            return new PageImpl<>(courseDTOList, pageable, coursePage.getTotalElements());
+        return new PageImpl<>(courseDTOList, pageable, coursePage.getTotalElements());
+    }
+
+    @Override
+    public Page<CourseDTO> searchCourse(Long userId, String title, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Course> coursePage = courseRepository.searchCoursesByKeyWord(title, userId, pageable);
+        List<CourseDTO> courseDTOList = new ArrayList<>();
+        for (Course course : coursePage.getContent()) {
+            CourseDTO courseDTO = courseMapper.MapCourseDTO(course);
+            if (course.getCategory() != null) {
+                courseDTO.setCategoryName(course.getCategory().getName());
+            } else {
+                courseDTO.setCategoryName("not found");
+            }
+            courseDTOList.add(courseDTO);
+        }
+        return new PageImpl<>(courseDTOList, pageable, coursePage.getTotalElements());
     }
 
 
     @Override
     public void deleteCourse(Long courseId) {
-        courseRepository.deleteById(courseId);
+        courseRepository.deleteById(courseId);}
+    @Override
+    public Optional<CourseDetailDTO> getDetailCourse(Long id) {
+        return courseRepository.findById(id).map(courseDetailMapper::toDTO);
+    }
+
+
+    @Override
+    public boolean approveCourse(Long id) {
+        return courseRepository.findById(id)
+                .map(course -> {
+                    if (!"approved".equalsIgnoreCase(course.getStatus())) {
+                        course.setStatus("approved");
+                        course.setUpdatedAt(LocalDateTime.now());
+                        courseRepository.save(course);
+                        return true;
+                    }
+                    return false;
+                })
+                .orElse(false);
     }
 
     @Override
@@ -82,6 +113,21 @@ public class CourseServiceImpl implements CourseService {
             return course.get();
         }
         return null;
+    }
+
+    @Override
+    public boolean rejectCourse(Long id) {
+        return courseRepository.findById(id)
+                .map(course -> {
+                    if (!"rejected".equalsIgnoreCase(course.getStatus())) {
+                        course.setStatus("rejected");
+                        course.setUpdatedAt(LocalDateTime.now());
+                        courseRepository.save(course);
+                        return true;
+                    }
+                    return false;
+                })
+                .orElse(false);
     }
 
     @Override
@@ -114,12 +160,23 @@ public class CourseServiceImpl implements CourseService {
     }
 
 
-
     @Override
+    public Page<CourseDTO> filterCoursesWithPagination(String keyword, Integer category, String price, String
+            status, int page, int size) {
+        String searchKeyword = keyword != null && !keyword.trim().isEmpty() ? keyword.trim() : null;
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Course> coursePage = courseRepository.filterCourses(
+                searchKeyword, category, price, status, pageable
+        );
+        return coursePage.map(courseMapper::MapCourseDTO);
+    }
+
     public AddCourseStep1DTO draftCourseStep1(Course course) {
         AddCourseStep1DTO courseDTO = courseMapper.DraftStep1(course);
         return courseDTO;
     }
+
     @Override
     public Course createCourseMedia(Long courseId, CourseMediaDTO CourseMediaDTO) {
         Course course = (courseId == null) ? new Course() : findCourseById(courseId);
@@ -145,5 +202,22 @@ public class CourseServiceImpl implements CourseService {
         Course course = (courseId == null) ? new Course() : findCourseById(courseId);
         course.setUpdatedAt(LocalDateTime.now());
         courseRepository.save(course);
+    }
+
+    @Override
+    public Page<CourseDTO> filterCourseByCategoryName(String categoryName, Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Course> coursePage = courseRepository.findByCategoryName(categoryName, userId, pageable);
+        List<CourseDTO> courseDTOList = new ArrayList<>();
+        for (Course course : coursePage.getContent()) {
+            CourseDTO courseDTO = courseMapper.MapCourseDTO(course);
+            if (course.getCategory() != null) {
+                courseDTO.setCategoryName(course.getCategory().getName());
+            } else {
+                courseDTO.setCategoryName("not found");
+            }
+            courseDTOList.add(courseDTO);
+        }
+        return new PageImpl<>(courseDTOList, pageable, coursePage.getTotalElements());
     }
 }

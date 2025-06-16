@@ -1,7 +1,12 @@
 package com.OLearning.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -19,6 +24,7 @@ public class Category {
     @Id
     private Long id;
     @Column(name = "Name", nullable = false, length = 100, columnDefinition = "NVARCHAR(100)")
+
     private String name;
 
     @OneToMany(mappedBy = "category")

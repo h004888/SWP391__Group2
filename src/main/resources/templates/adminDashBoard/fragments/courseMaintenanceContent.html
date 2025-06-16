@@ -1,0 +1,228 @@
+<div th:fragment="contentCourseMaintenances">
+
+    <!-- Title -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <h1 class="h3 mb-2 mb-sm-0" th:text="${accNamePage}">Course Maintenances</h1>
+        </div>
+    </div>
+
+    <!-- Success Alert -->
+    <div th:if="${successMessage}"
+         class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-4 shadow"
+         role="alert" id="success-alert" style="z-index: 1055; min-width: 300px;">
+        <strong th:text="${successMessage}">Thành công!</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Error Alert -->
+    <div th:if="${errorMessage}"
+         class="alert alert-danger alert-dismissible fade show position-fixed top-0 end-0 m-4 shadow"
+         role="alert" id="error-alert" style="z-index: 1055; min-width: 300px;">
+        <strong th:text="${errorMessage}">Lỗi xảy ra!</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Main card START -->
+    <div class="card bg-transparent border">
+
+        <!-- Card header START -->
+        <div class="card-header bg-light border-bottom">
+            <!-- Search and select START -->
+            <div class="row g-3 align-items-center justify-content-between">
+                <!-- Search bar -->
+                <div class="col-md-8">
+                    <form id="filterForm" class="rounded position-relative">
+                        <input class="form-control bg-body" type="search" id="searchInput" placeholder="Search by username..." aria-label="Search">
+                        <button class="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset" type="submit">
+                            <i class="fas fa-search fs-6"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Select options -->
+                <div class="col-md-4">
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <select class="form-select js-choice border-0 z-index-9 bg-transparent" id="statusFilter" aria-label=".form-select-sm">
+                                <option value="">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="completed">Completed</option>
+                                <option value="overdue">Overdue</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="month" id="monthYearFilter" class="form-control" placeholder="Select Month">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Search and select END -->
+        </div>
+        <!-- Card header END -->
+
+        <!-- Card body START -->
+        <div class="card-body">
+            <!-- Course maintenance table START -->
+            <div id="maintenanceTableWrapper" th:fragment="maintenanceTableFragment">
+                <div class="table-responsive border-0">
+                    <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                        <!-- Table head -->
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Month Year</th>
+                                <th>Enrollment Count</th>
+                                <th>Fee</th>
+                                <th>Course Name</th>
+                                <th>User Name</th>
+                                <th>Status</th>
+                                <th>Due Date</th>
+                            </tr>
+                        </thead>
+                        <!-- Table body -->
+                        <tbody>
+                            <tr th:each="cm : ${courseMaintenances}">
+                                <td th:text="${cm.maintenanceId != null ? cm.maintenanceId : 'N/A'}"></td>
+                                <td th:text="${cm.monthYear != null ? #temporals.format(cm.monthYear, 'MM/yyyy') : 'N/A'}"></td>
+                                <td th:text="${cm.enrollmentCount != null ? cm.enrollmentCount : 'N/A'}"></td>
+                                <td th:text="${cm.fee != null ? #numbers.formatDecimal(cm.fee.maintenanceFee, 0, 'COMMA', 0, 'POINT') : 'N/A'}"></td>
+                                <td th:text="${cm.course != null ? cm.course.title : 'N/A'}"></td>
+                                <td th:text="${cm.course != null && cm.course.instructor != null ? cm.course.instructor.username : 'N/A'}"></td>
+                                <td>
+                                    <span th:class="${cm.status == 'completed' ? 'badge bg-success' : 
+                                                    (cm.status == 'pending' ? 'badge bg-warning' : 
+                                                    (cm.status == 'overdue' ? 'badge bg-danger' : 'badge bg-secondary'))}"
+                                          th:text="${cm.status != null ? cm.status : 'N/A'}">
+                                    </span>
+                                </td>
+                                <td th:text="${cm.dueDate != null ? #temporals.format(cm.dueDate, 'dd/MM/yyyy') : 'N/A'}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination & info -->
+                <div class="d-sm-flex justify-content-sm-between align-items-sm-center mt-2">
+                    <p class="mb-0 text-center text-sm-start" th:if="${totalItems > 0}">
+                        Showing <span th:text="${currentPage * 10 + 1}">1</span> to
+                        <span th:text="${(currentPage * 10) + 10 > totalItems ? totalItems : (currentPage * 10) + 10}">10</span>
+                        of
+                        <span th:text="${totalItems}">20</span> entries
+                    </p>
+                    <p class="mb-0 text-center text-sm-start" th:if="${totalItems == 0}">
+                        No entries found
+                    </p>
+                    <nav class="d-flex justify-content-center mb-0" aria-label="navigation" th:if="${totalPages > 1}">
+                        <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
+                            <li class="page-item mb-0" th:classappend="${currentPage == 0} ? 'disabled'">
+                                <a class="page-link" href="#" th:data-page="${currentPage - 1}">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item mb-0" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                th:classappend="${currentPage == i} ? 'active'">
+                                <a class="page-link" href="#" th:data-page="${i}" th:text="${i + 1}"></a>
+                            </li>
+                            <li class="page-item mb-0" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                <a class="page-link" href="#" th:data-page="${currentPage + 1}">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            <!-- Course maintenance table END -->
+        </div>
+        <!-- Card body END -->
+    </div>
+    <!-- Main card END -->
+
+    <!-- Add JavaScript for handling search and pagination -->
+    <script th:inline="javascript">
+        $(document).ready(function() {
+            let typingTimer;
+            const debounceDelay = 300;
+            let currentUsername = '';
+            let currentStatus = '';
+            let currentMonthYear = '';
+            let currentPage = 0;
+
+            // Handle search input with debounce
+            $('#searchInput').on('input', function() {
+                clearTimeout(typingTimer);
+                typingTimer = setTimeout(() => {
+                    currentUsername = $(this).val().trim();
+                    currentPage = 0;
+                    fetchMaintenances(currentPage);
+                }, debounceDelay);
+            });
+
+            // Handle status filter change
+            $('#statusFilter').on('change', function() {
+                currentStatus = $(this).val();
+                currentPage = 0;
+                fetchMaintenances(currentPage);
+            });
+
+            // Handle month year filter change
+            $('#monthYearFilter').on('change', function() {
+                currentMonthYear = $(this).val();
+                currentPage = 0;
+                fetchMaintenances(currentPage);
+            });
+
+            // Handle pagination clicks
+            $(document).on('click', '.pagination a', function(e) {
+                e.preventDefault();
+                const page = $(this).data('page');
+                if (page !== undefined) {
+                    currentPage = page;
+                    fetchMaintenances(currentPage);
+                }
+            });
+
+            // Prevent form submission
+            $('#filterForm').on('submit', function(e) {
+                e.preventDefault();
+                currentPage = 0;
+                fetchMaintenances(currentPage);
+            });
+
+            // Function to fetch maintenances using AJAX
+            function fetchMaintenances(page) {
+                $.ajax({
+                    url: '/admin/courseMaintenance/filter',
+                    type: 'GET',
+                    data: {
+                        username: currentUsername,
+                        status: currentStatus,
+                        monthYear: currentMonthYear,
+                        page: page,
+                        size: 10
+                    },
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    success: function(response) {
+                        $('#maintenanceTableWrapper').html(response);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error fetching maintenances:", status, error);
+                        alert("Error loading maintenances. Please try again.");
+                    }
+                });
+            }
+
+            // Initial load
+            fetchMaintenances(currentPage);
+        });
+
+        // Auto-hide alerts after 3 seconds
+        setTimeout(function () {
+            $('#success-alert').fadeOut('slow');
+            $('#error-alert').fadeOut('slow');
+        }, 3000);
+    </script>
+</div>

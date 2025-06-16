@@ -1,0 +1,217 @@
+<div id="content" class="container-fluid" th:fragment="contentOrders">
+    <!-- Title -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <h1 class="h3 mb-2 mb-sm-0" th:text="${accNamePage}">Management <b>Order</b></h1>
+        </div>
+    </div>
+
+    <!-- Main card START -->
+    <div class="card bg-transparent border">
+        <!-- Card header START -->
+        <div class="card-header bg-light border-bottom">
+            <!-- Search and select START -->
+            <div class="row g-3 align-items-center justify-content-between">
+                <!-- Search bar -->
+                <div class="col-md-4">
+                    <form id="filterForm" class="rounded position-relative">
+                        <input class="form-control bg-body" type="search" id="filterUsername" name="username" th:value="${username}" placeholder="Search by username..." aria-label="Search">
+                        <button class="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset" type="submit">
+                            <i class="fas fa-search fs-6"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Select options -->
+                <div class="col-md-8">
+                    <div class="d-flex gap-4">
+                        <select class="form-select js-choice border-0 z-index-9 bg-transparent" name="amountDirection" id="filterAmount">
+                            <option value="" th:selected="${amountDirection == null or amountDirection == ''}">All Amounts</option>
+                            <option value="asc" th:selected="${amountDirection == 'asc'}">Low to High</option>
+                            <option value="desc" th:selected="${amountDirection == 'desc'}">High to Low</option>
+                        </select>
+                        <select class="form-select js-choice border-0 z-index-9 bg-transparent" name="orderType" id="filterOrderType">
+                            <option value="" th:selected="${orderType == null or orderType == ''}">All Types</option>
+                            <option value="course_purchase" th:selected="${orderType == 'course_purchase'}">Course Purchase</option>
+                            <option value="creation_fee" th:selected="${orderType == 'creation_fee'}">Creation Fee</option>
+                        </select>
+                        <div class="d-flex align-items-center gap-4">
+                            <input class="form-control" type="date" id="filterStartDate" name="startDate" 
+                                   th:value="${startDate != null ? startDate : #temporals.format(#temporals.createNow().withDayOfYear(1), 'yyyy-MM-dd')}">
+                            <span>To</span>
+                            <input class="form-control" type="date" id="filterEndDate" name="endDate" 
+                                   th:value="${endDate != null ? endDate : #temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Search and select END -->
+        </div>
+        <!-- Card header END -->
+
+        <!-- Card body START -->
+        <div class="card-body">
+            <!-- Orders table START -->
+            <div th:fragment="ordersTableBody" id="ordersTableBody" class="table-responsive border-0">
+                <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Amount</th>
+                            <th>Order Type</th>
+                            <th>Status</th>
+                            <th>Order Date</th>
+                            <th>Note</th>
+                            <th>Username</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="order : ${orders}">
+                            <td th:text="${order.orderId} ?: 'N/A'"></td>
+                            <td th:text="${order.amount} ?: 'N/A'"></td>
+                            <td th:text="${order.orderType} ?: 'N/A'"></td>
+                            <td th:text="${order.status} ?: 'N/A'">
+                                <span th:if="${order.status == 'PAID'}" class="badge bg-success">Paid</span>
+                                <span th:if="${order.status == 'REFUNDED'}" class="badge bg-warning">Refunded</span>
+                            </td>
+                            <td th:with="formatter=${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}"
+                                th:text="${formatter}"></td>
+                            <td th:text="${order.note} ?: 'N/A'"></td>
+                            <td th:text="${order.username} ?: 'N/A'"></td>
+                            <td>
+                                <a th:href="@{/admin/orders/view/{orderId}(orderId=${order.orderId})}"
+                                   class="btn btn-primary-soft btn-sm" title="View Detail"><i class="fas fa-eye"></i></a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Pagination & info -->
+                <div class="d-sm-flex justify-content-sm-between align-items-sm-center mt-2">
+                    <p class="mb-0 text-center text-sm-start" th:if="${totalItems > 0}">
+                        Showing <span th:text="${currentPage * 10 + 1}">1</span> to
+                        <span th:text="${(currentPage * 10) + 10 > totalItems ? totalItems : (currentPage * 10) + 10}">10</span>
+                        of
+                        <span th:text="${totalItems}">20</span> entries
+                    </p>
+                    <p class="mb-0 text-center text-sm-start" th:if="${totalItems == 0}">
+                        No entries found
+                    </p>
+                    <nav class="d-flex justify-content-center mb-0" aria-label="navigation" th:if="${totalPages > 1}">
+                        <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
+                            <li class="page-item mb-0" th:classappend="${currentPage == 0} ? 'disabled'">
+                                <a class="page-link" th:href="@{/admin/orders(page=${currentPage - 1}, size=${pageSize}, username=${username}, amountDirection=${amountDirection}, orderType=${orderType}, startDate=${startDate}, endDate=${endDate})}"
+                                   th:if="${currentPage > 0}"><i class="fas fa-angle-left"></i></a>
+                            </li>
+                            <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                class="page-item mb-0" th:classappend="${currentPage == i} ? 'active'">
+                                <a th:href="@{/admin/orders(page=${i}, size=${pageSize}, username=${username}, amountDirection=${amountDirection}, orderType=${orderType}, startDate=${startDate}, endDate=${endDate})}"
+                                   th:text="${i + 1}" class="page-link"></a>
+                            </li>
+                            <li class="page-item mb-0" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                <a class="page-link" th:href="@{/admin/orders(page=${currentPage + 1}, size=${pageSize}, username=${username}, amountDirection=${amountDirection}, orderType=${orderType}, startDate=${startDate}, endDate=${endDate})}"
+                                   th:if="${currentPage < totalPages - 1}"><i class="fas fa-angle-right"></i></a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            <!-- Orders table END -->
+        </div>
+        <!-- Card body END -->
+    </div>
+    <!-- Main card END -->
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function filterOrders(page = 0, size = 10) {
+            let username = $('#filterUsername').val().trim();
+            let amountDirection = $('#filterAmount').val();
+            let orderType = $('#filterOrderType').val();
+            let startDate = $('#filterStartDate').val();
+            let endDate = $('#filterEndDate').val();
+
+            console.log("Filtering with username:", username, "amountDirection:", amountDirection, "orderType:", orderType, "startDate:", startDate, "endDate:", endDate, "page:", page, "size:", size);
+
+            // Tạo URL mới
+            let url = new URL(window.location.origin + '/admin/orders');
+            url.searchParams.set('page', page);
+            url.searchParams.set('size', size);
+            if (username) url.searchParams.set('username', username);
+            if (amountDirection) url.searchParams.set('amountDirection', amountDirection);
+            if (orderType) url.searchParams.set('orderType', orderType);
+            if (startDate) url.searchParams.set('startDate', startDate);
+            if (endDate) url.searchParams.set('endDate', endDate);
+
+            // Gửi yêu cầu AJAX
+            $.ajax({
+                url: '/admin/orders/filter',
+                method: 'GET',
+                data: {
+                    username: username || null,
+                    amountDirection: amountDirection || null,
+                    orderType: orderType || null,
+                    startDate: startDate || null,
+                    endDate: endDate || null,
+                    page: page,
+                    size: size
+                },
+                success: function (data) {
+                    $('#ordersTableBody').html(data);
+                    // Cập nhật URL mà không tải lại trang
+                    window.history.pushState({}, '', url);
+                    // Cập nhật input ẩn currentPage
+                    $('#currentPage').val(page);
+                    console.log("Orders filter successful, URL updated to:", url.toString());
+                },
+                error: function (xhr, status, error) {
+                    console.error("AJAX Error:", status, error);
+                    alert("An error occurred while loading data: " + error);
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            // Trigger filter on select change
+            $('#filterAmount, #filterOrderType, #filterStartDate, #filterEndDate').on('change', function () {
+                console.log("Filter changed:", $(this).attr('id'), $(this).val());
+                filterOrders(0, $('#pageSize').val()); // Reset về trang 0 khi thay đổi bộ lọc
+            });
+
+            // Debounce username input
+            let timer;
+            $('#filterUsername').on('input', function () {
+                console.log("Username input:", $(this).val());
+                clearTimeout(timer);
+                timer = setTimeout(() => filterOrders(0, $('#pageSize').val()), 300);
+            });
+
+            // Handle pagination clicks
+            $(document).on('click', '.page-link', function (e) {
+                e.preventDefault();
+                let page = $(this).text() - 1; // Page number from link
+                if ($(this).find('i.fa-angle-double-left').length) {
+                    page = parseInt($('#currentPage').val()) - 1;
+                } else if ($(this).find('i.fa-angle-double-right').length) {
+                    page = parseInt($('#currentPage').val()) + 1;
+                }
+                if (page >= 0) {
+                    filterOrders(page, $('#pageSize').val());
+                }
+            });
+
+            // Trigger initial filter if parameters exist
+            let initialUsername = $('#filterUsername').val();
+            let initialAmount = $('#filterAmount').val();
+            let initialOrderType = $('#filterOrderType').val();
+            let initialStartDate = $('#filterStartDate').val();
+            let initialEndDate = $('#filterEndDate').val();
+            let initialPage = $('#currentPage').val() || 0;
+            let initialSize = $('#pageSize').val() || 10;
+            if (initialUsername || initialAmount || initialOrderType || initialStartDate || initialEndDate || initialPage) {
+                filterOrders(initialPage, initialSize);
+            }
+        });
+    </script>
+</div>

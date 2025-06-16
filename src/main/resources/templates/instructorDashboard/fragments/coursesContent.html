@@ -43,11 +43,9 @@
                     <div class="row g-3 align-items-center justify-content-between mb-4">
                         <!-- Search -->
                         <div class="col-md-6">
-                            <form class="rounded position-relative">
-                                <input class="form-control pe-5 bg-transparent" type="search" placeholder="Search"
-                                       aria-label="Search">
-                                <button class="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset"
-                                        type="submit">
+                            <form class="rounded position-relative" method="get" action="/instructordashboard/courses/searchcourse">
+                                <input class="form-control pe-5 bg-transparent" type="search" name="title" placeholder="Search" aria-label="Search">
+                                <button class="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset" type="submit">
                                     <i class="fas fa-search fs-6 "></i>
                                 </button>
                             </form>
@@ -55,11 +53,12 @@
 
                         <div class="col-md-3">
                             <div class="form-floating">
-                                <select class="form-select" id="courseCategory" required>
-                                    <option value="">Find All</option>
+                                <select class="form-select" id="courseCategory" name="categoryName">
+                                    <option value="" th:selected="${categoryName == null or categoryName == ''}">Find All</option>
                                     <option th:each="cat : ${categories}"
-                                            th:value="${cat.categoryName}"
-                                            th:text="${cat.categoryName}">
+                                            th:value="${cat.name}"
+                                            th:text="${cat.name}"
+                                            th:selected="${cat.name == categoryName}">
                                     </option>
                                 </select>
                                 <label for="courseCategory">Category</label>
@@ -74,7 +73,7 @@
                                     <option value="">Sort by</option>
                                     <option>Free</option>
                                     <option>Newest</option>
-                                    <option>Most Viewed</option>
+                                    <option>Oldest</option>
                                 </select>
                             </form>
                         </div>
@@ -253,6 +252,56 @@
                     toastElList.forEach(function (toastEl) {
                         const toast = new bootstrap.Toast(toastEl, { delay: 5000 });
                         toast.show();
+                    });
+                });
+            </script>
+
+            <script th:inline="javascript">
+                document.addEventListener('DOMContentLoaded', function() {
+                    const categorySelect = document.getElementById('courseCategory');
+                    
+                    categorySelect.addEventListener('change', function() {
+                        const selectedCategory = this.value;
+                        const userId = /*[[${userId}]]*/ 2;
+                        
+                        // Show loading indicator
+                        const tableBody = document.querySelector('table tbody');
+                        tableBody.innerHTML = '<tr><td colspan="8" class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>';
+                        
+                        // Make Ajax request to the existing endpoint
+                        fetch(`/instructordashboard/courses?id=${userId}&categoryName=${selectedCategory}&page=0&size=7`, {
+                            method: 'GET',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                        .then(response => response.text())
+                        .then(html => {
+                            // Create a temporary div to parse the HTML
+                            const tempDiv = document.createElement('div');
+                            tempDiv.innerHTML = html;
+                            
+                            // Extract the table content from the response
+                            const newTableBody = tempDiv.querySelector('table tbody');
+                            const newPagination = tempDiv.querySelector('.pagination');
+                            
+                            // Update the table and pagination
+                            document.querySelector('table tbody').innerHTML = newTableBody.innerHTML;
+                            const paginationContainer = document.querySelector('.d-flex.justify-content-center.mb-0');
+                            if (paginationContainer) {
+                                paginationContainer.innerHTML = newPagination ? newPagination.innerHTML : '';
+                            }
+                            
+                            // Update the "Showing X to Y of Z entries" text
+                            const showingText = tempDiv.querySelector('.mb-0.text-center.text-sm-start');
+                            if (showingText) {
+                                document.querySelector('.mb-0.text-center.text-sm-start').innerHTML = showingText.innerHTML;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            tableBody.innerHTML = '<tr><td colspan="8" class="text-center text-danger">Error loading data. Please try again.</td></tr>';
+                        });
                     });
                 });
             </script>

@@ -86,6 +86,46 @@ public class ControlllerAddCourseUpdate {
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/coursesContent :: listsCourseContent");
         return "instructorDashboard/indexUpdate";
     }
+
+    //search course
+    @GetMapping("courses/searchcourse")
+    public String searchCourse(
+            @RequestParam(name = "id", defaultValue = "2") Long id,
+            @RequestParam(required = false) String title,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "7") int size,
+            Model model, ModelMap modelMap) {
+        Page<CourseDTO> coursePage = courseService.searchCourse(id, title, page, size);
+        modelMap.put("courses", coursePage.getContent());
+        modelMap.put("userId", id);
+        modelMap.put("currentPage", page);
+        modelMap.put("totalPages", coursePage.getTotalPages());
+        modelMap.put("totalElements", coursePage.getTotalElements());
+        modelMap.put("size", size);
+        model.addAttribute("categories", categoryService.findAll());
+        model.addAttribute("fragmentContent", "instructorDashboard/fragments/coursesContent :: listsCourseContent");
+        return "instructorDashboard/indexUpdate";
+    }
+
+    //filter by category name
+    @GetMapping("/courses/filtercategory")
+    public String filterCourseByCategoryName(
+            @RequestParam(name = "id", defaultValue = "2") Long id,
+            @RequestParam(required = false) String categoryName,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "7") int size,
+            Model model, ModelMap modelMap) {
+        Page<CourseDTO> coursePage = courseService.filterCourseByCategoryName(categoryName, id, page, size);
+        modelMap.put("courses", coursePage.getContent());
+        modelMap.put("userId", id);
+        modelMap.put("currentPage", page);
+        modelMap.put("totalPages", coursePage.getTotalPages());
+        modelMap.put("totalElements", coursePage.getTotalElements());
+        modelMap.put("size", size);
+        model.addAttribute("categories", categoryService.findAll());
+        model.addAttribute("fragmentContent", "instructorDashboard/fragments/coursesContent :: listsCourseContent");
+        return "instructorDashboard/indexUpdate";
+    }
     //delete course
     @PostMapping("/createcourse/deletecourse")
     public String deletecourse(@RequestParam(name = "courseId") Long courseId
@@ -106,7 +146,7 @@ public class ControlllerAddCourseUpdate {
         model.addAttribute("instructor", instructor);
         List<Chapter> chapters = chapterService.chapterListByCourse(courseId);//tim list chapter theo courseID
         for (Chapter chapter : chapters) {
-            List<Lesson> lessons = lessonService.findLessonsByChapterId(chapter.getId());
+            List<Lesson> lessons = lessonService.findLessonsByChapterId(chapter.getChapterId());
             if (lessons != null && lessons.size() > 0) {
                 chapter.setLessons(lessons);
             }
@@ -235,7 +275,7 @@ public class ControlllerAddCourseUpdate {
         model.addAttribute("chapter", chapterDTO);
         List<Chapter> chapters = chapterService.chapterListByCourse(course.getCourseId());
         for (Chapter chapter : chapters) {
-            List<Lesson> lessons = lessonService.findLessonsByChapterId(chapter.getId());
+            List<Lesson> lessons = lessonService.findLessonsByChapterId(chapter.getChapterId());
             if (lessons != null && lessons.size() > 0) {
                 chapter.setLessons(lessons);
             }
@@ -308,7 +348,7 @@ public class ControlllerAddCourseUpdate {
         Course course = courseService.findCourseById(courseId);
         List<Chapter> chapters = chapterService.chapterListByCourse(courseId);
         for (Chapter chapter : chapters) {
-            List<Lesson> lessons = lessonService.findLessonsByChapterId(chapter.getId());
+            List<Lesson> lessons = lessonService.findLessonsByChapterId(chapter.getChapterId());
             if (lessons != null && lessons.size() > 0) {
                 totalLesson += lessons.size();
                 for (Lesson lesson : lessons) {
@@ -409,7 +449,7 @@ public class ControlllerAddCourseUpdate {
         Course course = courseService.findCourseById(courseId);
         List<Chapter> chapters = chapterService.chapterListByCourse(courseId);
         for (Chapter chapter : chapters) {
-            List<Lesson> lessons = lessonService.findLessonsByChapterId(chapter.getId());
+            List<Lesson> lessons = lessonService.findLessonsByChapterId(chapter.getChapterId());
             if (lessons != null && lessons.size() > 0) {
                 totalLesson += lessons.size();
                 for (Lesson lesson : lessons) {
@@ -433,7 +473,7 @@ public class ControlllerAddCourseUpdate {
         Long courseId = getCourseIdFromCookie(request);
         List<Chapter> chapters = chapterService.chapterListByCourse(courseId);
         for (Chapter chapter : chapters) {
-            List<Lesson> lessons = lessonService.findLessonsByChapterId(chapter.getId());
+            List<Lesson> lessons = lessonService.findLessonsByChapterId(chapter.getChapterId());
             if (lessons != null && lessons.size() > 0) {
                 chapter.setLessons(lessons);
             }
@@ -533,7 +573,7 @@ public class ControlllerAddCourseUpdate {
         int totalDuration = 0;
         List<Chapter> chapters = chapterService.chapterListByCourse(courseId);
         for (Chapter chapter : chapters) {
-            List<Lesson> lessons = lessonService.findLessonsByChapterId(chapter.getId());
+            List<Lesson> lessons = lessonService.findLessonsByChapterId(chapter.getChapterId());
             if (lessons != null && lessons.size() > 0) {
                 totalLesson += lessons.size();
                 for (Lesson lesson : lessons) {
@@ -575,4 +615,5 @@ public class ControlllerAddCourseUpdate {
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/courseAdded :: courseAdded");
         return "instructorDashboard/indexUpdate";
     }
+
 }

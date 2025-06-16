@@ -19,7 +19,7 @@ public class Chapter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="chapterId")
-    private Long id;
+    private Long chapterId;
     @Column(nullable = false)
     private String title;
     private String description;
@@ -28,10 +28,9 @@ public class Chapter {
     private LocalDateTime updateAt;
 
     @OneToMany(mappedBy = "chapter", fetch = FetchType.LAZY)
-  private List<Lesson> lessons;
+    private List<Lesson> lessons;
 
     @ManyToOne
     @JoinColumn(name = "courseId")
     private Course course;
-
 }

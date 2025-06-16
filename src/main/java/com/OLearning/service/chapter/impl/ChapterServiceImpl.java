@@ -11,11 +11,15 @@ import com.OLearning.service.course.CourseService;
 import com.OLearning.service.lesson.LessonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 @Service
 public class ChapterServiceImpl implements ChapterService {
+    private static final Logger logger = LoggerFactory.getLogger(ChapterServiceImpl.class);
+    
     @Autowired
     private ChapterRepository chapterRepository;
     @Autowired
@@ -27,10 +31,24 @@ public class ChapterServiceImpl implements ChapterService {
 
     @Override
     public Chapter saveChapter(ChapterDTO chapterDTO) {
+        logger.info("Saving chapter with title: {}", chapterDTO.getTitle());
+        logger.info("Course ID: {}", chapterDTO.getCourseId());
+        
         Chapter chapter = chapterMapper.dtoToChapter(chapterDTO);
+        logger.info("Mapped chapter entity: {}", chapter);
+        
         Course course = courseService.findCourseById(chapterDTO.getCourseId());
+        if (course == null) {
+            logger.error("Course not found with ID: {}", chapterDTO.getCourseId());
+            throw new RuntimeException("Course not found");
+        }
+        logger.info("Found course: {}", course.getCourseId());
+        
         chapter.setCourse(course);
-        return chapterRepository.save(chapter);
+        Chapter savedChapter = chapterRepository.save(chapter);
+        logger.info("Saved chapter with ID: {}", savedChapter.getChapterId());
+        
+        return savedChapter;
     }
 
     @Override
