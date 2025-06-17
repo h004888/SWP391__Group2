@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,5 +22,5 @@ public class UserDetailDTO {
     private String address;
     private String profilePicture;
 
-//    private List<String> enrolledCourseTitles;
+    private List<String> enrolledCourseTitles;
 }

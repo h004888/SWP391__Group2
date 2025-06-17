@@ -1,111 +1,93 @@
 package com.OLearning.service.course.impl;
 
-import com.OLearning.dto.course.CourseAddDTO;
 import com.OLearning.dto.course.CourseDTO;
-import com.OLearning.entity.Categories;
+import com.OLearning.dto.course.CourseDetailDTO;
 import com.OLearning.entity.Course;
-import com.OLearning.entity.User;
+import com.OLearning.mapper.course.CourseDetailMapper;
 import com.OLearning.mapper.course.CourseMapper;
-import com.OLearning.repository.InstructorCategoryRepo;
-import com.OLearning.repository.InstructorCourseRepo;
-import com.OLearning.repository.InstructorBuyPackagesRepository;
-import com.OLearning.repository.InstructorUserRepo;
+import com.OLearning.repository.CourseRepository;
 import com.OLearning.service.course.CourseService;
-import com.OLearning.service.FileHelper.FileHelper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class CourseServiceImpl implements CourseService {
 
-    @Autowired
-    private InstructorCourseRepo instructorCourseRepo;
-    @Autowired
-    private InstructorBuyPackagesRepository buyPackageRepository;
-    @Autowired
-    private CourseMapper courseMapper;
-    @Autowired
-    private InstructorCategoryRepo instructorCategoryRepo;
-    @Autowired
-    private InstructorUserRepo instructorUserRepo;
+    private final CourseMapper courseMapper;
+    private final CourseRepository courseRepository;
+    private final CourseDetailMapper courseDetailMapper;
+
     @Override
-    public boolean canCreateCourse(Long userId) {
-        List<Object[]> result = buyPackageRepository.findValidPackagesByUserId(userId);
-        return !result.isEmpty();
-        //if emty => false
-        //else true
+    public Page<CourseDTO> getAllCourses(Pageable pageable) {
+        Page<Course> courseList = courseRepository.findAll(pageable);
+        return courseList.map(courseMapper::toDTO);
+    }
+
+    @Override
+    public Optional<CourseDetailDTO> getDetailCourse(Long id) {
+        return courseRepository.findById(id).map(courseDetailMapper::toDTO);
+    }
+
+    @Override
+    public boolean approveCourse(Long id) {
+        return courseRepository.findById(id)
+                .map(course -> {
+                    if (!"approved".equalsIgnoreCase(course.getStatus())) {
+                        course.setStatus("approved");
+                        course.setUpdatedAt(LocalDateTime.now());
+                        courseRepository.save(course);
+                        return true;
+                    }
+                    return false;
+                })
+                .orElse(false);
+    }
+
+    @Override
+    public boolean rejectCourse(Long id) {
+        return courseRepository.findById(id)
+                .map(course -> {
+                    if (!"rejected".equalsIgnoreCase(course.getStatus())) {
+                        course.setStatus("rejected");
+                        course.setUpdatedAt(LocalDateTime.now());
+                        courseRepository.save(course);
+                        return true;
+                    }
+                    return false;
+                })
+                .orElse(false);
     }
 
 
     @Override
-    public List<CourseDTO> findCourseByUserId(Long userId) {
-        List<Course> listCourseRepo = instructorCourseRepo.findByInstructorUserId(userId);
-        //da tim duoc ra danh sach theo user roi, gio can do ra dto de inra man hinh thoi
-        List<CourseDTO> courseDTOList = new ArrayList<>();
-        for (Course course : listCourseRepo) {
-            CourseDTO courseDTO = new CourseDTO();
-            courseDTO.setCourseId(course.getCourseId());
-            courseDTO.setCourseImg(course.getCourseImg());
-            courseDTO.setTitle(course.getTitle());
-            courseDTO.setCreatedAt(course.getCreatedAt());
-            courseDTO.setPrice(course.getPrice());
-            courseDTO.setDuration(course.getDuration());
-            courseDTO.setDiscount(course.getDiscount());
-            courseDTO.setTotalLessons(course.getTotalLessons());
-
-            if (course.getCategory() != null) {
-                courseDTO.setCategoryName(course.getCategory().getName());
-            } else {
-                courseDTO.setCategoryName("Không rõ");
-            }
-
-            courseDTOList.add(courseDTO);
+    public boolean deleteCourse(Long id) {
+        if (courseRepository.existsById(id)) {
+            courseRepository.deleteById(id);
+            return true;
         }
-        return courseDTOList;
+        return false;
     }
 
-
-    //create new course service
     @Override
-    public void createCourse(CourseAddDTO courseAddDTO, MultipartFile courseImg) {
-        courseAddDTO.setUserId(2L);
-        Course course = courseMapper.MapCourseAdd(courseAddDTO);
-        Categories category = instructorCategoryRepo.findByName(courseAddDTO.getCategoryName());
-        if (category == null) {
-            throw new RuntimeException("not found: " + courseAddDTO.getCategoryName());
-        }
-        User instructor = instructorUserRepo.findById(courseAddDTO.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("not found user: " + courseAddDTO.getUserId()));
+    public Page<CourseDTO> filterCoursesWithPagination(String keyword, Integer category, String price, String status, int page, int size) {
+        String searchKeyword = keyword != null && !keyword.trim().isEmpty() ? keyword.trim() : null;
 
-
-        MultipartFile imageFile = courseAddDTO.getCourseImg();
-        if(imageFile != null && !imageFile.isEmpty()) {
-            try{
-                File imageFoldder = new File(new ClassPathResource(".").getFile().getPath() + "/static/img");
-                if(!imageFoldder.exists()){
-                    imageFoldder.mkdirs();
-                }
-                String fileName = FileHelper.generateFileName(imageFile.getOriginalFilename());
-                Path path = Paths.get(imageFoldder.getAbsolutePath() + File.separator + fileName);
-
-                Files.copy(imageFile.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-                course.setCourseImg(fileName);
-            }catch(Exception e){
-                e.printStackTrace();
-            }
-        }
-        course.setInstructor(instructor);
-        course.setCategory(category);
-        instructorCourseRepo.save(course);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Course> coursePage = courseRepository.filterCourses(
+                searchKeyword, category, price, status, pageable
+        );
+        return coursePage.map(courseMapper::toDTO);
     }
+
+
 }

@@ -1,0 +1,103 @@
+package com.OLearning.controller.adminDashBoard;
+
+import com.OLearning.dto.notification.NotificationDTO;
+import com.OLearning.entity.Notification;
+import com.OLearning.mapper.notification.NotificationMapper;
+import com.OLearning.security.CustomUserDetails;
+import com.OLearning.service.notification.NotificationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
+
+@Controller
+@RequestMapping("/admin/notifications")
+public class AdminNotificationsController {
+
+    @Autowired
+    private NotificationService notificationService;
+    @Autowired
+    private NotificationMapper notificationsMapper;
+
+    @GetMapping
+    public String viewNotifications(Authentication authentication, Model model) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long userId = userDetails.getUserId(); // lấy trực tiếp userId
+
+        List<NotificationDTO> notifications = notificationService.getNotificationsByUserId(userId);
+        model.addAttribute("notifications", notifications);
+        model.addAttribute("fragmentContent", "adminDashBoard/fragments/adminNotificationContent :: adminNotificationContent");
+        return "adminDashBoard/index";
+    }
+
+
+    @GetMapping("/search")
+    public String searchNotifications(@RequestParam("keyword") String keyword,
+
+                                      Model model) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            Long userId = userDetails.getUserId();
+            List<NotificationDTO> notifications = notificationService.searchNotificationsByUser(keyword,userId);
+            model.addAttribute("notifications", notifications);
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Error searching notifications: " + e.getMessage());
+            model.addAttribute("notifications", List.of());
+        }
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("fragmentContent", "adminDashBoard/fragments/adminNotificationContent :: adminNotificationContent");
+        return "adminDashBoard/index";
+
+    }
+
+    @PostMapping("/{id}/mark-read")
+    @ResponseBody
+    public ResponseEntity<?> markAsRead(@PathVariable Long id) {
+        try {
+            notificationService.markAsRead(id);
+            return ResponseEntity.ok("Notification marked as read");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update");
+        }
+    }
+
+    @PostMapping("/mark-all-read")
+    public String markAllAsRead(Authentication authentication) {
+        // Ép kiểu để lấy ra CustomUserDetails
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+
+        // Lấy userId từ CustomUserDetails
+        Long userId = userDetails.getUserId();
+
+        // Gọi service để đánh dấu tất cả thông báo là đã đọc
+        notificationService.markAllAsRead(userId);
+
+        // Redirect về trang thông báo (không cần truyền userId)
+        return "redirect:/admin/notifications";
+    }
+
+    @GetMapping("/view/{id}")
+    public String viewNotificationDetail(@PathVariable("id") Long notificationId, Model model) {
+        Optional<Notification> notificationOpt = notificationService.findById(notificationId);
+        if (notificationOpt.isPresent()) {
+            Notification notification = notificationOpt.get();
+            if (!"sent".equals(notification.getStatus())) {
+                notificationService.markAsRead(notificationId);
+                notification.setStatus("sent"); // update status for view
+            }
+            model.addAttribute("notification", notificationsMapper.toDTO(notification));
+            model.addAttribute("fragmentContent", "adminDashBoard/fragments/adminNotificationDetailContent :: adminNotificationDetailContent");
+            return "adminDashBoard/index";
+        } else {
+            return "redirect:/admindashBoard/notifications";
+        }
+    }
+}

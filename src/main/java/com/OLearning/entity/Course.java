@@ -1,10 +1,11 @@
 package com.OLearning.entity;
 
 import jakarta.persistence.*;
-import jdk.jfr.Category;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "Courses")
@@ -18,7 +19,10 @@ public class Course {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long courseId;
 
+    @Column(columnDefinition = "nvarchar(255)")
     private String title;
+
+    @Column(columnDefinition = "nvarchar(max)")
     private String description;
     private Double price;
     private Double discount;
@@ -29,18 +33,25 @@ public class Course {
     private Integer totalStudentEnrolled;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Boolean isChecked;
+    private String status;
+    private Boolean canResubmit;
 
     @ManyToOne
     @JoinColumn(name = "userId")
     private User instructor;
 
     @ManyToOne
-    @JoinColumn(name = "categoryId")
-    private Categories category;
-    @ManyToOne
-    @JoinColumn(name = "lessonId")
-    private Lesson lesson;
-}
+    @JoinColumn(name = "CategoryID")
+    private Category category;
 
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<OrderDetail> orderDetails;
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Notification> notifications;
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Chapter> listOfChapters;
+
+}
 

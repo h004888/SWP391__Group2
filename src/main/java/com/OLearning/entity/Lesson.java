@@ -11,23 +11,28 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
 public class Lesson {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long lessonId;
+    private Long lessonId;
 
-    @ManyToOne
-    @JoinColumn(name = "courseId")
-    private Course course;
+    @Column(columnDefinition = "nvarchar(255)")
     private String title;
+
+    @Column(columnDefinition = "nvarchar(max)")
     private String description;
+
     private String contentType;
-    @Column(length = 1000)
-    private String content;
-    private int duration;
-    private boolean isFree;
+    private Integer orderNumber= 0;
+    private Integer duration;
+    private Boolean isFree;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    @ManyToOne
+    @JoinColumn(name = "chapterId")
+    private Chapter chapter;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "videoId")
+    private Video video;
 }

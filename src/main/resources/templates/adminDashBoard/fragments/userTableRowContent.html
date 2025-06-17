@@ -1,0 +1,133 @@
+<!-- Fragment for table rows only - accountContent.html -->
+<div th:fragment="userTableRows">
+
+    <tr th:each="u : ${listU}">
+        <td>
+            <div class="d-flex align-items-center position-relative">
+                <!-- Image -->
+                <div class="avatar avatar-md">
+                    <img th:src="${u.profilePicture}" class="rounded-circle" alt="">
+                </div>
+                <div class="mb-0 ms-2">
+                    <!-- Title -->
+                    <h6 class="mb-0" th:text="${u.userName}"></h6>
+                </div>
+            </div>
+        </td>
+        <td th:text="${u.userName}"></td>
+        <td th:text="${u.email}"></td>
+        <td th:text="${u.roleName}"></td>
+        <td>
+           <span th:class="'badge rounded-pill px-3 py-2 ' + (${u.status} ? 'bg-success' : 'bg-danger')"
+                 th:text="${u.status} ? 'Active' : 'Inactive'">
+           </span>
+        </td>
+
+        </td>
+        <td style="white-space: nowrap;">
+            <a th:href="@{/admin/account/viewInfo/{userId}(userId=${u.userId})}"
+               class="btn btn-info btn-sm" title="View">
+                <i class="fas fa-eye"></i>
+            </a>
+            <!-- Nếu đang active thì hiển thị nút block -->
+            <a th:if="${u.status}"
+               th:href="@{/admin/account/block/{userId}(userId=${u.userId})}"
+               class="btn btn-danger-soft btn-sm"
+               title="Blocked">
+                <i class="fas fa-lock"></i>
+            </a>
+            <!-- Nếu đang inactive thì hiển thị nút active -->
+            <a th:unless="${u.status}"
+               th:href="@{/admin/account/block/{userId}(userId=${u.userId})}"
+               class="btn btn-warning btn-sm"
+               title="Activate">
+                <i class="fas fa-unlock"></i>
+            </a>
+            <a th:if="${u.roleName=='Admin'}"
+               th:href="@{/admin/account/delete/{userId}(userId=${u.userId})}"
+               class="btn btn-danger-soft btn-sm"
+               onclick="return confirm('Bạn có chắc chắn muốn xóa nhân viên này không?')"
+               title="Delete">
+                <i class="fas fa-trash"></i>
+            </a>
+        </td>
+        <td style="white-space: nowrap;">
+            <a th:attr="data-userid=${u.userId}"
+               class="btn btn-success btn-sm btn-reset-password"
+               title="Reset Password">
+                <i class="fas fa-key"></i>
+            </a>
+        </td>
+    </tr>
+</div>
+
+<div th:fragment="paginationInfo" xmlns:th="http://www.thymeleaf.org">
+    <nav class="mt-4" aria-label="navigation" th:if="${totalPages > 0}">
+        <div class="hint-text mb-2 text-center">
+            Showing <b th:text="${listU.size()}"></b> out of <b th:text="${totalItems}"></b> entries
+        </div>
+        <ul class="pagination pagination-soft rounded justify-content-end">
+            <!-- Previous button -->
+            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                <a class="page-link"
+                   th:data-page="${currentPage - 1}"
+                   th:data-role="${roleId}"
+                   th:data-keyword="${keyword}"
+                   href="#" title="Previous">
+                    <i class="fas fa-angle-double-left"></i>
+                </a>
+            </li>
+
+            <!-- Optional: Dải số trang với giới hạn hiển thị -->
+            <th:block th:with="startPage=${currentPage - 2 < 0 ? 0 : currentPage - 2},
+                              endPage=${currentPage + 2 >= totalPages ? totalPages - 1 : currentPage + 2}">
+
+                <!-- Show first page if not in range -->
+                <li class="page-item" th:if="${startPage > 0}">
+                    <a class="page-link" th:data-page="0" th:text="1"
+                       th:data-role="${roleId}" th:data-keyword="${keyword}" href="#"></a>
+                </li>
+                <li class="page-item disabled" th:if="${startPage > 1}">
+                    <span class="page-link">..</span>
+                </li>
+
+                <!-- Page numbers -->
+                <li class="page-item"
+                    th:each="i : ${#numbers.sequence(startPage, endPage)}"
+                    th:classappend="${currentPage == i} ? 'active'">
+                    <a class="page-link"
+                       th:data-page="${i}"
+                       th:text="${i + 1}"
+                       th:data-role="${roleId}"
+                       th:data-keyword="${keyword}"
+                       href="#"></a>
+                </li>
+
+                <!-- Show last page if not in range -->
+                <li class="page-item disabled" th:if="${endPage < totalPages - 2}">
+                    <span class="page-link">..</span>
+                </li>
+                <li class="page-item" th:if="${endPage < totalPages - 1}">
+                    <a class="page-link"
+                       th:data-page="${totalPages - 1}"
+                       th:text="${totalPages}"
+                       th:data-role="${roleId}"
+                       th:data-keyword="${keyword}"
+                       href="#"></a>
+                </li>
+            </th:block>
+
+            <!-- Next button -->
+            <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                <a class="page-link"
+                   th:data-page="${currentPage + 1}"
+                   th:data-role="${roleId}"
+                   th:data-keyword="${keyword}"
+                   href="#" title="Next">
+                    <i class="fas fa-angle-double-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+

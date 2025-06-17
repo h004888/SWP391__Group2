@@ -6,18 +6,19 @@ import lombok.*;
 import java.time.LocalDate;
 import java.util.List;
 
-@Entity
-@Table(name = "Users")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @ToString
+@Entity
+@Table(name = "Users")
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
+
     private String username;
     private String email;
     private String password;
@@ -26,6 +27,8 @@ public class User {
     private LocalDate birthday;
     private String address;
     private String profilePicture;
+    private String personalSkill;
+    private boolean status;//new
 
     @ManyToOne
     @JoinColumn(name = "roleId")
@@ -34,8 +37,11 @@ public class User {
     @OneToMany(mappedBy = "instructor")
     private List<Course> courses;
 
-    @OneToMany(mappedBy = "instructor", fetch = FetchType.LAZY)
-    private List<BuyPackages> listOfBuyPackage;
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
+    private List<Order> orders;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Notification> notifications;
 
 }
 

@@ -1,0 +1,103 @@
+package com.OLearning.service.notification.impl;
+
+import com.OLearning.dto.notification.NotificationDTO;
+import com.OLearning.entity.Course;
+import com.OLearning.entity.Notification;
+import com.OLearning.entity.User;
+import com.OLearning.mapper.notification.NotificationMapper;
+import com.OLearning.repository.CourseRepository;
+import com.OLearning.repository.NotificationRepository;
+import com.OLearning.repository.UserRepository;
+import com.OLearning.service.notification.NotificationService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class NotificationServiceImpl implements NotificationService {
+
+    @Autowired
+    private NotificationRepository notificationRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private CourseRepository courseRepository;
+    @Autowired
+    private NotificationMapper notificationMapper;
+
+
+    @Override
+    public Notification sendMess(Notification notification) {
+        return notificationRepository.save(notification);
+    }
+
+    @Override
+    public void rejectCourseMess(NotificationDTO dto, boolean allowResubmission) {
+        User user = userRepository.findById(dto.getUser().getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Course course = courseRepository.findById(dto.getCourse().getCourseId())
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+
+        String fullMessage = "Your course was rejected: " + dto.getMessage();
+        if (allowResubmission) {
+            fullMessage += " You may revise and resubmit.";
+        } else {
+            fullMessage += " You are not allowed to resubmit.";
+        }
+
+        dto.setMessage(fullMessage);
+        dto.setSentAt(LocalDateTime.now());
+        dto.setType("COURSE_REJECTION");
+        dto.setStatus("failed");
+
+        Notification notification = notificationMapper.toEntity(dto, user, course);
+        notificationRepository.save(notification);
+
+        //set Course when reject
+        course.setCanResubmit(allowResubmission);
+        course.setStatus("rejected");
+        courseRepository.save(course);
+
+    }
+    @Override
+    public List<NotificationDTO> getNotificationsByUserId(Long userId) {
+
+        return notificationRepository.findByUser_UserIdOrderBySentAtDesc(userId)
+                .stream()
+                .map(notificationMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<NotificationDTO> searchNotificationsByUser(String keyword, Long userId) {
+        List<Notification> entities = notificationRepository.findByUserIdAndKeyword(userId, keyword);
+        return entities.stream().map(notificationMapper::toDTO).collect(Collectors.toList());
+    }
+
+
+    @Override
+    public void markAsRead(Long notificationId) {
+        notificationRepository.findById(notificationId).ifPresent(notification -> {
+            notification.setStatus("sent"); // true = read
+            notificationRepository.save(notification);
+        });
+
+    }
+
+    @Override
+    public Optional<Notification> findById(Long id) {
+        return notificationRepository.findById(id);
+    }
+    @Override
+    @Transactional
+    public void markAllAsRead(Long userId) {
+        notificationRepository.markAllAsReadByUserId(userId);
+    }
+}
