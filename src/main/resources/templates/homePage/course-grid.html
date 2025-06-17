@@ -666,27 +666,7 @@ Page content START -->
 										</div>
 									</div>
 									<!-- Category END -->
-									<!-- Price Level START -->
-									<div class="card card-body shadow p-4 mb-4">
-										<h4 class="mb-3">Price Level</h4>
-										<ul class="list-inline mb-0">
-											<!-- Free -->
-											<li class="list-inline-item mb-2">
-												<input type="checkbox" class="btn-check price-filter" id="price-free"
-													value="Free">
-												<label class="btn btn-light btn-primary-soft-check"
-													for="price-free">Free</label>
-											</li>
-											<!-- Paid -->
-											<li class="list-inline-item mb-2">
-												<input type="checkbox" class="btn-check price-filter" id="price-paid"
-													value="Paid">
-												<label class="btn btn-light btn-primary-soft-check"
-													for="price-paid">Paid</label>
-											</li>
-										</ul>
-									</div>
-									<!-- Price Level END -->
+
 
 
 									<!-- Skill Level START -->
@@ -967,16 +947,36 @@ Footer END -->
 		$(document).ready(function () {
 
 			function fetchCourses(page = 0) {
-				const selectedCategories = $('input[name="categoryIds"]:checked').map(function () {
-					return $(this).val();
-				}).get();
+				// 1. Lấy category
+				const selectedCategories = $('input[name="categoryIds"]:checked')
+					.map(function () { return $(this).val(); })
+					.get();
 
-				const selectedPrices = $('.price-filter:checked').map(function () {
-					return $(this).val();
-				}).get();
+				// 2. Lấy price filters
+				const selectedPrices = $('.price-filter:checked')
+					.map(function () { return $(this).val(); })
+					.get();
 
+				// 3. Lấy skill levels
+				const selectedLevels = $('.btn-check:checked')
+					.map(function () {
+						return $(this).next('label').text().trim();
+					})
+					.get();
+
+				// 4. Lấy sortBy và keyword
 				const sortBy = $('select[name="sortBy"]').val();
 				const keyword = $('input[name="keyword"]').val();
+
+				// ==== Debug logs ====
+				console.log('--- Fetch Courses Params ---');
+				console.log('Page:', page);
+				console.log('Categories:', selectedCategories);
+				console.log('Prices:', selectedPrices);
+				console.log('Levels:', selectedLevels);
+				console.log('Sort By:', sortBy);
+				console.log('Keyword:', keyword);
+				console.log('-----------------------------');
 
 				$.ajax({
 					url: 'fragments/coursesGrid',
@@ -984,6 +984,7 @@ Footer END -->
 					data: {
 						categoryIds: selectedCategories,
 						priceFilter: selectedPrices,
+						levels: selectedLevels,
 						sortBy: sortBy,
 						keyword: keyword,
 						page: page
@@ -998,7 +999,7 @@ Footer END -->
 				});
 			}
 
-			// Checkbox "All"
+			// Checkbox "All" cho categories
 			$('#checkAll').on('change', function () {
 				const isChecked = $(this).is(':checked');
 				$('input[name="categoryIds"]').prop('checked', isChecked);
@@ -1030,6 +1031,11 @@ Footer END -->
 				fetchCourses();
 			});
 
+			// Checkbox skill levels
+			$('.btn-check').on('change', function () {
+				fetchCourses();
+			});
+
 			// Click phân trang
 			$(document).on('click', '.pagination-link', function (e) {
 				e.preventDefault();
@@ -1043,6 +1049,8 @@ Footer END -->
 			fetchCourses();
 		});
 	</script>
+
+
 
 </body>
 

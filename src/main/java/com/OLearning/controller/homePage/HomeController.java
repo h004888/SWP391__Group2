@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.OLearning.dto.CourseDTO;
+import com.OLearning.entity.Course;
 import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.course.CourseService;
 
@@ -55,6 +56,13 @@ public class HomeController {
         model.addAttribute("totalPages", courses.getTotalPages());
         model.addAttribute("totalItems", courses.getTotalElements());
         return "homePage/course-grid";
+    }
+
+    @GetMapping("/course-detail")
+    public String courseDetail(@RequestParam("id") Long id, Model model) {
+        Course course = courseService.findById(id);
+        model.addAttribute("course", course);
+        return "homePage/course-detail";
     }
 
 }

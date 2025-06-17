@@ -14,32 +14,34 @@ import java.util.Optional;
 @Service
 public interface CourseService {
 
-    List<CourseDTO> getAllCourses();
+        List<CourseDTO> getAllCourses();
 
-    Optional<CourseDetailDTO> getDetailCourse(Long id);
+        Optional<CourseDetailDTO> getDetailCourse(Long id);
 
-    boolean deleteCourse(Long id);
+        boolean deleteCourse(Long id);
 
-    List<CourseDTO> filterCourses(String keyword, Integer categoryId, String price, String status);
+        List<CourseDTO> filterCourses(String keyword, Integer categoryId, String price, String status);
 
-    List<Course> getTopCourses();
+        List<Course> getTopCourses();
 
-    Page<CourseDTO> getCoursesByTotalRatings(Pageable pageable);
+        Page<CourseDTO> getCoursesByTotalRatings(Pageable pageable);
 
-    Page<CourseDTO> searchCourses(
-            List<Long> categoryIds,
-            String priceFilter,
-            String sortBy,
-            int page,
-            int size);
+        Course findById(Long id);
 
-    Page<CourseDTO> searchCoursesGrid(
-            List<Long> categoryIds,
-            List<String> priceFilters, // đổi kiểu ở đây
-            String sortBy,
-            String keyword,
-            int page,
-            int size);
+        Page<CourseDTO> searchCourses(
+                        List<Long> categoryIds,
+                        String priceFilter,
+                        String sortBy,
+                        int page,
+                        int size);
 
+        Page<CourseDTO> searchCoursesGrid(
+                        List<Long> categoryIds,
+                        List<String> priceFilters,
+                        List<String> levels,
+                        String sortBy,
+                        String keyword,
+                        int page,
+                        int size);
 
 }

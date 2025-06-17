@@ -63,7 +63,7 @@ public class Course {
 
     @ManyToOne
     @JoinColumn(name = "UserID")
-    private User instructor;
+    private User instructor;    
 
     @ManyToOne
     @JoinColumn(name = "CategoryID")

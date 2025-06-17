@@ -6,11 +6,12 @@
                 <img th:src="@{/assets/images/courses/4by3/01.jpg}" class="card-img-top" alt="course image">
                 <div class="card-body pb-0">
                     <div class="d-flex justify-content-between mb-2">
-                        <a href="#" class="badge bg-purple bg-opacity-10 text-purple">All level</a>
+                        <a href="#" class="badge bg-purple bg-opacity-10 text-purple"
+                            th:text="${course.courseLevel}">All level</a>
                         <a href="#" class="h6 fw-light mb-0"><i class="far fa-heart"></i></a>
                     </div>
                     <h5 class="card-title"><a th:text="${course.title}"
-                            th:href="@{'/course/' + ${course.courseId}}"></a></h5>
+                            th:href="@{'/course-detail?id=' + ${course.courseId}}"></a></h5>
                     <p class="mb-2 text-truncate-2" th:text="${course.description}"></p>
                     <ul class="list-inline mb-0">
                         <li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>

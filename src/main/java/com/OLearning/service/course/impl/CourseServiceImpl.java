@@ -84,7 +84,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public Page<CourseDTO> searchCourses(List<Long> categoryIds, String priceFilter, String sortBy, int page,
-                                         int size) {
+            int size) {
         Pageable pageable = getPageable(page, size, sortBy);
         Page<Course> resultPage = courseRepository.filterCourses(
                 categoryIds == null || categoryIds.isEmpty() ? null : categoryIds,
@@ -115,42 +115,58 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    public Course findById(Long id) {
+        return courseRepository.findById(id).orElse(null);
+    }
+
+    @Override
     public Page<CourseDTO> searchCoursesGrid(
             List<Long> categoryIds,
-            List<String> priceFilters,   // Đổi từ String sang List<String>
+            List<String> priceFilters,
+            List<String> levels,
             String sortBy,
             String keyword,
             int page,
             int size) {
 
-        // Chuẩn hóa keyword
+        // 1. Chuẩn hóa keyword: nếu rỗng hoặc toàn khoảng trắng => null
         if (keyword != null && keyword.trim().isEmpty()) {
             keyword = null;
         }
 
-        // Chuẩn hóa categoryIds
+        // 2. Chuẩn hóa categoryIds: nếu list rỗng => null (bỏ điều kiện)
         if (categoryIds != null && categoryIds.isEmpty()) {
             categoryIds = null;
         }
 
-        // Chuẩn hóa priceFilters
+        // 3. Chuẩn hóa priceFilters: nếu có "All" 
         if (priceFilters != null) {
             if (priceFilters.contains("All")) {
-                priceFilters = null; // Bỏ lọc nếu có "All"
+                priceFilters = null;
             }
         }
 
+        // 4. Chuẩn hóa levels: nếu list rỗng hoặc chứa "All levels" => null (bỏ lọc
+        // level)
+        if (levels != null) {
+            if (levels.isEmpty()) {
+                levels = null;
+            }
+        }
+
+        // 5. Tạo Pageable với sort
         Pageable pageable = getPageable(page, size, sortBy);
 
+        // 6. Gọi repository
         Page<Course> coursesPage = courseRepository.searchCourses(
                 keyword,
                 categoryIds,
                 priceFilters,
-                pageable
-        );
+                levels,
+                pageable);
 
+        // 7. Ánh xạ về DTO
         return coursesPage.map(CourseMapper::toDTO);
     }
-
 
 }
