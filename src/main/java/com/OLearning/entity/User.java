@@ -20,14 +20,26 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
+    @Column(name = "Username", unique = true)
     private String username;
+    @Column(name = "Email", unique = true)
     private String email;
+    @Column(name = "Password")
     private String password;
+    @Column(name = "FullName")
     private String fullName;
+    @Column(name = "Phone")
     private String phone;
+    @Column(name = "Birthday")
     private LocalDate birthday;
+    @Column(name = "Address")
     private String address;
+    @Column(name = "ProfilePicture")
     private String profilePicture;
+    @Column(name = "PersonalSkill")
+    private String personalSkill;
+    @Column(name = "Coin")
+    private Double coin;
 
     @OneToMany(mappedBy = "user")
     private List<Enrollment> enrollments;
@@ -41,5 +53,5 @@ public class User {
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Order> orders;
-    
+
 }

@@ -56,17 +56,21 @@ public class HomeController {
         return "homePage/course-grid";
     }
 
-    // @GetMapping("/course-detail")
-    // public String courseDetail(@RequestParam("id") Long id, Model model) {
-    // Course course = courseService.findById(id);
-    // int totalStudents = course.getInstructor().getCourses()
-    // .stream()
-    // .mapToInt(c -> c.getEnrollments().size())
-    // .sum();
-    // model.addAttribute("totalStudents", totalStudents);
+    @GetMapping("/course-detail")
+    public String courseDetail(@RequestParam("id") Long id, Model model) {
+        Course course = courseService.findById(id);
 
-    // model.addAttribute("course", course);
-    // return "homePage/course-detail";
-    // }
+        int totalStudents = course.getInstructor().getCourses()
+                .stream()
+                .mapToInt(c -> c.getEnrollments().size())
+                .sum();
+        model.addAttribute("totalStudents", totalStudents);
+        model.addAttribute("courseByInstructor",
+                course.getInstructor().getCourses().stream().limit(2).collect(Collectors.toList()));
+        model.addAttribute("courseByCategory",
+                course.getCategory().getCourses().stream().limit(5).collect(Collectors.toList()));
+        model.addAttribute("course", course);
+        return "homePage/course-detail";
+    }
 
 }

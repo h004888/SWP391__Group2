@@ -13,6 +13,8 @@ import java.util.Optional;
 
 @Service
 public interface CourseService {
+
+        Course findById(Long id);
         
         List<Course> getTopCourses();
 

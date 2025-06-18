@@ -549,16 +549,18 @@ Page intro START -->
 						<!-- Content -->
 						<ul class="list-inline mb-0">
 							<li class="list-inline-item h6 me-3 mb-1 mb-sm-0"><i
-									class="fas fa-star text-warning me-2"></i>4.5/5.0</li>
+									class="fas fa-star text-warning me-2"></i><span
+									th:text="${course.averageRating + '/5.0'}">4.5</span></span></li>
 							<li class="list-inline-item h6 me-3 mb-1 mb-sm-0"><i
 									class="fas fa-user-graduate text-orange me-2"></i><span
-									th:text="${course.totalStudentEnrolled + ' Enrolled'}"></span></li>
+									th:text="${course.totalStudentEnrolled() + ' Enrolled'}"></span></li>
 							<li class="list-inline-item h6 me-3 mb-1 mb-sm-0"><i
 									class="fas fa-signal text-success me-2"></i> <span
 									th:text="${course.courseLevel}">All levels</span></li>
-							<li class="list-inline-item h6 me-3 mb-1 mb-sm-0"><i
-									class="bi bi-patch-exclamation-fill text-danger me-2"></i><span
-									th:text="${course.updatedAt + ' Last updated'}"></span>
+							<li class="list-inline-item h6 me-3 mb-1 mb-sm-0">
+								<i class="bi bi-patch-exclamation-fill text-danger me-2"></i>
+								<span th:text="'Last updated ' + ${#temporals.format(course.updatedAt, 'MM/yyyy')}">Last
+									updated 09/2021</span>
 							</li>
 							<li class="list-inline-item h6 mb-0"><i class="fas fa-globe text-info me-2"></i>English</li>
 						</ul>
@@ -771,7 +773,8 @@ Page content START -->
 														<!-- Title -->
 														<h3 class="card-title mb-0"
 															th:text="${course.instructor.fullName}">Louis Ferguson</h3>
-														<p class="mb-2" th>Instructor of Marketing</p>
+														<p class="mb-2" th:text="${course.instructor.personalSkill}">
+															Instructor of Marketing</p>
 														<!-- Social button -->
 														<ul class="list-inline mb-3">
 															<li class="list-inline-item me-3">
@@ -807,14 +810,7 @@ Page content START -->
 																		th:text="${totalStudents + ' Students'}">9.1k</span>
 																</div>
 															</li>
-															<li class="list-inline-item">
-																<div class="d-flex align-items-center me-3 mb-2">
-																	<span
-																		class="icon-md bg-warning bg-opacity-15 text-warning rounded-circle"><i
-																			class="fas fa-star"></i></span>
-																	<span class="h6 fw-light mb-0 ms-2">4.5</span>
-																</div>
-															</li>
+
 															<li class="list-inline-item">
 																<div class="d-flex align-items-center me-3 mb-2">
 																	<span
@@ -830,7 +826,8 @@ Page content START -->
 																	<span
 																		class="icon-md bg-info bg-opacity-10 text-info rounded-circle"><i
 																			class="fas fa-comment-dots"></i></span>
-																	<span class="h6 fw-light mb-0 ms-2">205</span>
+																	<span class="h6 fw-light mb-0 ms-2"
+																		th:text="${course.getReviewCount()}">205</span>
 																</div>
 															</li>
 														</ul>
@@ -1568,8 +1565,10 @@ Page content START -->
 											<!-- Price and time -->
 											<div>
 												<div class="d-flex align-items-center">
-													<h3 class="fw-bold mb-0 me-2">$150</h3>
-													<span class="text-decoration-line-through mb-0 me-2">$350</span>
+													<h3 class="fw-bold mb-0 me-2" th:text="${course.price} + ' ₫'">$150
+													</h3>
+													<span class="text-decoration-line-through mb-0 me-2"
+														th:text="${course.price + course.price*0.6} + ' ₫'">$350</span>
 													<span class="badge text-bg-orange mb-0">60% off</span>
 												</div>
 												<p class="mb-0 text-danger"><i class="fas fa-stopwatch me-2"></i>5 days
@@ -1593,8 +1592,12 @@ Page content START -->
 													</li>
 													<li><a class="dropdown-item" href="#"><i
 																class="fab fa-linkedin me-2"></i>LinkedIn</a></li>
-													<li><a class="dropdown-item" href="#"><i
-																class="fas fa-copy me-2"></i>Copy link</a></li>
+													<li>
+														<a class="dropdown-item" href="#" id="copyLinkBtn">
+															<i class="fas fa-copy me-2"></i>Copy link
+														</a>
+													</li>
+
 												</ul>
 											</div>
 										</div>
@@ -1621,7 +1624,7 @@ Page content START -->
 										<li class="list-group-item d-flex justify-content-between align-items-center">
 											<span class="h6 fw-light mb-0"><i
 													class="fas fa-fw fa-clock text-primary"></i>Duration</span>
-											<span th:text="${course.duration} + 'h'">4h 50m</span>
+											<span th:text="${course.duration/60} + 'h'">4h 50m</span>
 										</li>
 										<li class="list-group-item d-flex justify-content-between align-items-center">
 											<span class="h6 fw-light mb-0"><i
@@ -1630,9 +1633,11 @@ Page content START -->
 										</li>
 
 										<li class="list-group-item d-flex justify-content-between align-items-center">
-											<span class="h6 fw-light mb-0"><i
-													class="fas fa-fw fa-user-clock text-primary"></i>Deadline</span>
-											<span th:text="${course.updatedAt }">Nov 30 2021</span>
+											<span class="h6 fw-light mb-0">
+												<i class="fas fa-fw fa-user-clock text-primary"></i>Deadline
+											</span>
+											<span th:text="${#temporals.format(course.updatedAt, 'MMM dd yyyy')}">Nov 30
+												2021</span>
 										</li>
 										<li class="list-group-item d-flex justify-content-between align-items-center">
 											<span class="h6 fw-light mb-0"><i
@@ -1650,19 +1655,23 @@ Page content START -->
 									<!-- Title -->
 									<h4 class="mb-3">Recently Viewed</h4>
 									<!-- Course item START -->
-									<div class="row gx-3 mb-3">
+									<div class="row gx-3 mb-3" th:each="course : ${courseByInstructor}">
 										<!-- Image -->
 										<div class="col-4">
 											<img class="rounded" src="assets/images/courses/4by3/21.jpg" alt="">
 										</div>
 										<!-- Info -->
 										<div class="col-8">
-											<h6 class="mb-0"><a href="#">Fundamentals of Business Analysis</a></h6>
+											<h6 class="mb-0"><a
+													th:href="@{'/home/course-detail?id=' + ${course.courseId}}"
+													th:text="${course.title}">Fundamentals of Business Analysis</a></h6>
 											<ul
 												class="list-group list-group-borderless mt-1 d-flex justify-content-between">
 												<li class="list-group-item px-0 d-flex justify-content-between">
-													<span class="text-success">$130</span>
-													<span class="h6 fw-light">4.5<i
+													<span class="text-success"
+														th:text="${course.price} + ' ₫'">$130</span>
+													<span class="h6 fw-light"><span
+															th:text="${course.averageRating}"></span><i
 															class="fas fa-star text-warning ms-1"></i></span>
 												</li>
 											</ul>
@@ -1670,26 +1679,7 @@ Page content START -->
 									</div>
 									<!-- Course item END -->
 
-									<!-- Course item START -->
-									<div class="row gx-3">
-										<!-- Image -->
-										<div class="col-4">
-											<img class="rounded" src="assets/images/courses/4by3/18.jpg" alt="">
-										</div>
-										<!-- Info -->
-										<div class="col-8">
-											<h6 class="mb-0"><a href="#">The Complete Video Production Bootcamp</a></h6>
-											<ul
-												class="list-group list-group-borderless mt-1 d-flex justify-content-between">
-												<li class="list-group-item px-0 d-flex justify-content-between">
-													<span class="text-success">$150</span>
-													<span class="h6 fw-light">4.0<i
-															class="fas fa-star text-warning ms-1"></i></span>
-												</li>
-											</ul>
-										</div>
-									</div>
-									<!-- Course item END -->
+
 								</div>
 								<!-- Recently Viewed END -->
 
@@ -1743,7 +1733,7 @@ Listed courses START -->
 							data-dots="false" data-items="3" data-items-lg="2" data-items-sm="1">
 
 							<!-- Card Item START -->
-							<div class="pb-4">
+							<div class="pb-4" th:each="course : ${courseByCategory}">
 								<div class="card p-2 border">
 									<div class="rounded-top overflow-hidden">
 										<div class="card-overlay-hover">
@@ -1771,7 +1761,10 @@ Listed courses START -->
 														class="icon-md bg-orange bg-opacity-10 text-orange rounded-circle">
 														<i class="fas fa-user-graduate"></i>
 													</div>
-													<span class="h6 fw-light ms-2 mb-0">9.1k</span>
+													<span class="h6 fw-light ms-2 mb-0"
+														th:text="${course.totalStudentEnrolled}">
+
+													</span>
 												</li>
 												<!-- Rating -->
 												<li
@@ -1780,7 +1773,8 @@ Listed courses START -->
 														class="icon-md bg-warning bg-opacity-15 text-warning rounded-circle">
 														<i class="fas fa-star"></i>
 													</div>
-													<span class="h6 fw-light ms-2 mb-0">4.5</span>
+													<span class="h6 fw-light ms-2 mb-0"
+														th:text="${course.averageRating}"></span>
 												</li>
 											</ul>
 											<!-- Avatar -->
@@ -1792,207 +1786,17 @@ Listed courses START -->
 										<!-- Divider -->
 										<hr>
 										<!-- Title -->
-										<h5 class="card-title"><a href="#">The Complete Digital Marketing Course - 12
+										<h5 class="card-title"><a
+												th:href="@{'/home/course-detail?id=' + ${course.courseId}}"
+												th:text="${course.title}">The Complete Digital Marketing Course - 12
 												Courses in 1</a></h5>
 										<!-- Badge and Price -->
 										<div class="d-flex justify-content-between align-items-center">
 											<a href="#" class="badge bg-info bg-opacity-10 text-info"><i
-													class="fas fa-circle small fw-bold me-2"></i>Personal
-												Development</a>
+													class="fas fa-circle small fw-bold me-2"></i><span
+													th:text="${course.category.name}"></span></a>
 											<!-- Price -->
-											<h3 class="text-success mb-0">$140</h3>
-										</div>
-									</div>
-								</div>
-							</div>
-							<!-- Card Item END -->
-
-							<!-- Card Item START -->
-							<div class="pb-4">
-								<div class="card p-2 border">
-									<div class="rounded-top overflow-hidden">
-										<div class="card-overlay-hover">
-											<img src="assets/images/courses/4by3/18.jpg" class="card-img-top"
-												alt="course image">
-										</div>
-										<!-- Hover element -->
-										<div class="card-img-overlay">
-											<div class="card-element-hover d-flex justify-content-end">
-												<a href="#" class="icon-md bg-white rounded-circle text-center">
-													<i class="fas fa-shopping-cart text-danger"></i>
-												</a>
-											</div>
-										</div>
-									</div>
-									<div class="card-body">
-										<!-- Badge and icon -->
-										<div class="d-flex justify-content-between">
-											<!-- Rating and info -->
-											<ul class="list-inline hstack gap-2 mb-0">
-												<!-- Info -->
-												<li
-													class="list-inline-item d-flex justify-content-center align-items-center">
-													<div
-														class="icon-md bg-orange bg-opacity-10 text-orange rounded-circle">
-														<i class="fas fa-user-graduate"></i>
-													</div>
-													<span class="h6 fw-light ms-2 mb-0">2.5k</span>
-												</li>
-												<!-- Rating -->
-												<li
-													class="list-inline-item d-flex justify-content-center align-items-center">
-													<div
-														class="icon-md bg-warning bg-opacity-15 text-warning rounded-circle">
-														<i class="fas fa-star"></i>
-													</div>
-													<span class="h6 fw-light ms-2 mb-0">3.6</span>
-												</li>
-											</ul>
-											<!-- Avatar -->
-											<div class="avatar avatar-sm">
-												<img class="avatar-img rounded-circle" src="assets/images/avatar/07.jpg"
-													alt="avatar">
-											</div>
-										</div>
-										<!-- Divider -->
-										<hr>
-										<!-- Title -->
-										<h5 class="card-title"><a href="#">Fundamentals of Business Analysis</a></h5>
-										<!-- Badge and Price -->
-										<div class="d-flex justify-content-between align-items-center">
-											<a href="#" class="badge bg-info bg-opacity-10 text-info"><i
-													class="fas fa-circle small fw-bold me-2"></i>Business
-												Development</a>
-											<!-- Price -->
-											<h3 class="text-success mb-0">$160</h3>
-										</div>
-									</div>
-								</div>
-							</div>
-							<!-- Card Item END -->
-
-							<!-- Card Item START -->
-							<div class="pb-4">
-								<div class="card p-2 border">
-									<div class="rounded-top overflow-hidden">
-										<div class="card-overlay-hover">
-											<img src="assets/images/courses/4by3/21.jpg" class="card-img-top"
-												alt="course image">
-										</div>
-										<!-- Hover element -->
-										<div class="card-img-overlay">
-											<div class="card-element-hover d-flex justify-content-end">
-												<a href="#" class="icon-md bg-white rounded-circle text-center">
-													<i class="fas fa-shopping-cart text-danger"></i>
-												</a>
-											</div>
-										</div>
-									</div>
-									<div class="card-body">
-										<!-- Badge and icon -->
-										<div class="d-flex justify-content-between">
-											<!-- Rating and info -->
-											<ul class="list-inline hstack gap-2 mb-0">
-												<!-- Info -->
-												<li
-													class="list-inline-item d-flex justify-content-center align-items-center">
-													<div
-														class="icon-md bg-orange bg-opacity-10 text-orange rounded-circle">
-														<i class="fas fa-user-graduate"></i>
-													</div>
-													<span class="h6 fw-light ms-2 mb-0">6k</span>
-												</li>
-												<!-- Rating -->
-												<li
-													class="list-inline-item d-flex justify-content-center align-items-center">
-													<div
-														class="icon-md bg-warning bg-opacity-15 text-warning rounded-circle">
-														<i class="fas fa-star"></i>
-													</div>
-													<span class="h6 fw-light ms-2 mb-0">3.8</span>
-												</li>
-											</ul>
-											<!-- Avatar -->
-											<div class="avatar avatar-sm">
-												<img class="avatar-img rounded-circle" src="assets/images/avatar/05.jpg"
-													alt="avatar">
-											</div>
-										</div>
-										<!-- Divider -->
-										<hr>
-										<!-- Title -->
-										<h5 class="card-title"><a href="#">Google Ads Training: Become a PPC Expert</a>
-										</h5>
-										<!-- Badge and Price -->
-										<div class="d-flex justify-content-between align-items-center">
-											<a href="#" class="badge bg-info bg-opacity-10 text-info"><i
-													class="fas fa-circle small fw-bold me-2"></i> SEO</a>
-											<!-- Price -->
-											<h3 class="text-success mb-0">$226</h3>
-										</div>
-									</div>
-								</div>
-							</div>
-							<!-- Card Item END -->
-
-							<!-- Card Item START -->
-							<div class="pb-4">
-								<div class="card p-2 border">
-									<div class="rounded-top overflow-hidden">
-										<div class="card-overlay-hover">
-											<img src="assets/images/courses/4by3/20.jpg" class="card-img-top"
-												alt="course image">
-										</div>
-										<!-- Hover element -->
-										<div class="card-img-overlay">
-											<div class="card-element-hover d-flex justify-content-end">
-												<a href="#" class="icon-md bg-white rounded-circle text-center">
-													<i class="fas fa-shopping-cart text-danger"></i>
-												</a>
-											</div>
-										</div>
-									</div>
-									<div class="card-body">
-										<!-- Badge and icon -->
-										<div class="d-flex justify-content-between">
-											<!-- Rating and info -->
-											<ul class="list-inline hstack gap-2 mb-0">
-												<!-- Info -->
-												<li
-													class="list-inline-item d-flex justify-content-center align-items-center">
-													<div
-														class="icon-md bg-orange bg-opacity-10 text-orange rounded-circle">
-														<i class="fas fa-user-graduate"></i>
-													</div>
-													<span class="h6 fw-light ms-2 mb-0">15k</span>
-												</li>
-												<!-- Rating -->
-												<li
-													class="list-inline-item d-flex justify-content-center align-items-center">
-													<div
-														class="icon-md bg-warning bg-opacity-15 text-warning rounded-circle">
-														<i class="fas fa-star"></i>
-													</div>
-													<span class="h6 fw-light ms-2 mb-0">4.8</span>
-												</li>
-											</ul>
-											<!-- Avatar -->
-											<div class="avatar avatar-sm">
-												<img class="avatar-img rounded-circle" src="assets/images/avatar/02.jpg"
-													alt="avatar">
-											</div>
-										</div>
-										<!-- Divider -->
-										<hr>
-										<!-- Title -->
-										<h5 class="card-title"><a href="#">Behavior, Psychology and Care Training</a>
-										</h5>
-										<!-- Badge and Price -->
-										<div class="d-flex justify-content-between align-items-center">
-											<a href="#" class="badge bg-info bg-opacity-10 text-info"><i
-													class="fas fa-circle small fw-bold me-2"></i>Lifestyle</a>
-											<!-- Price -->
-											<h3 class="text-success mb-0">$342</h3>
+											<h3 class="text-success mb-0" th:text="${course.price} + ' ₫'">$140</h3>
 										</div>
 									</div>
 								</div>
@@ -2238,6 +2042,20 @@ Footer END -->
 
 	<!-- Template Functions -->
 	<script src="assets/js/functions.js"></script>
+	<script>
+		document.getElementById("copyLinkBtn").addEventListener("click", function (e) {
+			e.preventDefault();
+			const url = window.location.href;
+			navigator.clipboard.writeText(url)
+				.then(() => {
+					alert("🔗 Link copied to clipboard!");
+				})
+				.catch(err => {
+					console.error("Failed to copy link: ", err);
+				});
+		});
+	</script>
+
 
 </body>
 
