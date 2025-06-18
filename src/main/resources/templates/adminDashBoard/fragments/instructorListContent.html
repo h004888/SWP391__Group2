@@ -75,7 +75,7 @@
                                             <!-- Info -->
                                             <div class="ms-0 ms-sm-2 mt-2 mt-sm-0">
                                                 <h5 class="mb-0" th:text="${u.userName}"><a
-                                                        th:href="@{/admin/account/viewInfo/{userId}(userId=${u.userId})}">Lori
+                                                        th:href="@{/admin/mnInstructors/viewInfo/{userId}(userId=${u.userId})}">Lori
                                                     Stevens</a></h5>
                                                 <p class="mb-0 small" th:text="${u.email}"></p>
                                             </div>
@@ -92,11 +92,12 @@
                                                 aria-labelledby="dropdownShare1">
                                                 <li>
                                                     <a class="dropdown-item"
-                                                       th:href="@{/admin/account/viewInfo/{userId}(userId=${u.userId})}">
+                                                       th:href="@{/admin/mnInstructors/viewInfo/{userId}(userId=${u.userId})}">
                                                         <i class="bi bi-eye fa-fw me-2"></i>View</a>
                                                 </li>
                                                 <li>
-                                                    <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#messageModal" 
+                                                    <a href="#" class="dropdown-item" data-bs-toggle="modal"
+                                                       data-bs-target="#messageModal"
                                                        th:data-instructor-id="${u.userId}"
                                                        th:data-instructor-name="${u.userName}">
                                                         <i class="bi bi-envelope-fill"> Message</i>
@@ -115,7 +116,7 @@
                                                 <h6 class="mb-0 ms-2 fw-light">Total Students</h6>
                                             </div>
                                             <span class="mb-0 fw-bold"
-                                                  th:text="${userStudentCountMap[u.userId]}">5,354</span>
+                                                  th:text="${enrollmentService.getStudentCountByInstructorId(u.userId)}">5,354</span>
                                         </div>
 
                                         <!-- Total courses -->
@@ -219,7 +220,7 @@
                                             <div class="mb-0 ms-2">
                                                 <!-- Title -->
                                                 <h6 class="mb-0" th:text="${u.userName}"><a
-                                                        th:href="@{/admin/account/viewInfo/{userId}(userId=${u.userId})}"
+                                                        th:href="@{/admin/mnInstructors/viewInfo/{userId}(userId=${u.userId})}"
                                                         class="stretched-link">Lori Stevens</a></h6>
                                             </div>
                                         </div>
@@ -234,11 +235,11 @@
                                     <td th:text="${u.course.size()}">15</td>
 
                                     <!-- Table data -->
-                                    <td th:text="${userStudentCountMap[u.userId]}">5,354</td>
+                                    <td th:text="${enrollmentService.getStudentCountByInstructorId(u.userId)}">5,354</td>
 
                                     <!-- Table data -->
                                     <td>
-                                        <a th:href="@{/admin/account/viewInfo/{userId}(userId=${u.userId})}"
+                                        <a th:href="@{/admin/mnInstructors/viewInfo/{userId}(userId=${u.userId})}"
                                            class="btn btn-info-soft btn-round me-1 mb-1 mb-md-0"
                                            data-bs-toggle="tooltip" data-bs-placement="top" title="View">
                                             <i class="bi bi-eye"></i>
@@ -376,7 +377,7 @@
             });
 
             // Handle message modal
-            $(document).on('click', '[data-bs-target="#messageModal"]', function() {
+            $(document).on('click', '[data-bs-target="#messageModal"]', function () {
                 const instructorId = $(this).data('instructor-id');
                 const instructorName = $(this).data('instructor-name');
                 $('#instructorId').val(instructorId);
@@ -384,7 +385,7 @@
             });
 
             // Handle message form submission
-            $('#messageForm').on('submit', function(e) {
+            $('#messageForm').on('submit', function (e) {
                 e.preventDefault();
                 const instructorId = $('#instructorId').val();
                 const message = $('textarea[name="message"]').val();
@@ -396,12 +397,12 @@
                         instructorId: instructorId,
                         message: message
                     },
-                    success: function(response) {
+                    success: function (response) {
                         $('#messageModal').modal('hide');
                         $('textarea[name="message"]').val('');
 
                     },
-                    error: function(xhr, status, error) {
+                    error: function (xhr, status, error) {
                         alert('Error sending message. Please try again.');
                     }
                 });

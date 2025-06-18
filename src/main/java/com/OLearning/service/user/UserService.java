@@ -19,7 +19,11 @@ public interface UserService {
 
     Page<UserDTO> getUsersByRoleWithPagination(Long roleId, Pageable pageable);
 
+    Page<UserDTO> getInstructorsByRoleIdOrderByCourseCountDesc(Long roleId, Pageable pageable);
+
     Page<UserDTO> searchByNameWithPagination(String keyword, Long roleId, Pageable pageable);
+
+    Page<UserDTO> getInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(String keyword, Long roleId, Pageable pageable);
 
     Page<UserDTO> getUsersByRoleAndStatusWithPagination(Long roleId, boolean status, Pageable pageable);
 

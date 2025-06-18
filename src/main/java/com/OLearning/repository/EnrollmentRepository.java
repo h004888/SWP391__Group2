@@ -36,4 +36,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
 
     @Query("SELECT COUNT(e) FROM Enrollment e WHERE e.status = 'completed'")
     Long countCompletedEnrollments();
+
+    @Query("SELECT COUNT(e) FROM Enrollment e WHERE e.course.instructor.userId = :instructorId")
+    Long countStudentsByInstructorId(@Param("instructorId") Long instructorId);
 }

@@ -15,9 +15,9 @@ public class OrdersMapper {
         dto.setOrderId(orders.getOrderId());
         dto.setAmount(orders.getAmount());
         dto.setOrderType(orders.getOrderType());
-        dto.setStatus(orders.getStatus());
+        dto.setStatus(orders.getStatus().toUpperCase());//upperCase status
         dto.setOrderDate(orders.getOrderDate());
-        dto.setNote(orders.getNote());
+        dto.setRefCode(orders.getRefCode());
         dto.setUsername(orders.getUser() != null ? orders.getUser().getUsername() : null);
         dto.setRole(orders.getUser() != null && orders.getUser().getRole() != null
                 ? orders.getUser().getRole().getName()

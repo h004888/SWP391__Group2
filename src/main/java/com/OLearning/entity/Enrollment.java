@@ -25,11 +25,11 @@ public class Enrollment {
     private int enrollmentID;
 
     @ManyToOne
-    @JoinColumn(name = "UserID", nullable = false)
+    @JoinColumn(name = "userId", nullable = false)
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "CourseID", nullable = false)
+    @JoinColumn(name = "courseId", nullable = false)
     private Course course;
 
     @Column(name = "EnrollmentDate")
@@ -43,7 +43,8 @@ public class Enrollment {
     private String status;
 
     @ManyToOne
-    @JoinColumn(name = "OrderID")
+    @JoinColumn(name = "orderId")
     private Order order;
+
 
 }

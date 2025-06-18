@@ -18,4 +18,6 @@ public interface EnrollmentService {
     Long getTotalStudents();
 
     Long getCompletedEnrollments();
+
+    Long getStudentCountByInstructorId(Long instructorId);
 }

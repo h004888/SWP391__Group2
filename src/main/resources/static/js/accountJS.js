@@ -330,9 +330,9 @@ function getTableBodyElement(roleId) {
     switch (roleId) {
         case 1:
             return document.getElementById('adminTableBody');
-        case 3:
-            return document.getElementById('instructorTableBody');
         case 2:
+            return document.getElementById('instructorTableBody');
+        case 3:
             return document.getElementById('userTableBody');
         default:
             return null;
@@ -354,15 +354,14 @@ function updateCountBadge(roleId, data) {
         case 1:
             badgeElement = document.getElementById('adminCount');
             break;
-        case 3:
+        case 2:
             badgeElement = document.getElementById('instructorCount');
             break;
-        case 2:
+        case 3:
             badgeElement = document.getElementById('userCount');
             break;
     }
 
-    // Trừ đi hàng "Không tìm thấy tài khoản nào" nếu có
     const rowCount = Array.from(rows).filter(row => !row.textContent.includes("Không tìm thấy")).length;
 
     if (badgeElement) {

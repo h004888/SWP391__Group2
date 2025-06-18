@@ -50,7 +50,7 @@ public class InstructorRequestServiceImpl implements InstructorRequestService {
                 .orElseThrow(() -> new RuntimeException("Admin not found with id: " + adminId));
         
         // Update request status
-        request.setStatus("ACCEPTED");
+        request.setStatus("APPROVED");
         request.setDecisionDate(LocalDateTime.now());
         request.setAdmin(admin);
         

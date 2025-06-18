@@ -41,4 +41,9 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     public Long getCompletedEnrollments() {
         return enrollmentRepository.countCompletedEnrollments();
     }
+
+    @Override
+    public Long getStudentCountByInstructorId(Long instructorId) {
+        return enrollmentRepository.countStudentsByInstructorId(instructorId);
+    }
 }

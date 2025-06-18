@@ -1,14 +1,22 @@
 package com.OLearning.controller.adminDashBoard;
 
+import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.user.UserDTO;
+import com.OLearning.dto.user.UserDetailDTO;
+import com.OLearning.entity.Course;
+import com.OLearning.entity.CourseReview;
 import com.OLearning.entity.InstructorRequest;
 import com.OLearning.entity.User;
 import com.OLearning.repository.UserRepository;
 import com.OLearning.security.CustomUserDetails;
+import com.OLearning.service.course.CourseService;
+import com.OLearning.service.courseReview.CourseReviewService;
 import com.OLearning.service.email.EmailService;
+import com.OLearning.service.enrollment.EnrollmentService;
 import com.OLearning.service.instructorRequest.InstructorRequestService;
 import com.OLearning.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +28,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -27,22 +36,28 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/admin/mnInstructors")
 public class InstructorMnController {
 
-    private final Long roleInstructor = 3L;
+    private final Long roleInstructor = 2L;
 
     @Autowired
     private UserService userService;
-
     @Autowired
     private InstructorRequestService instructorRequestService;
     @Autowired
     private UserRepository userRepository;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private CourseService courseService;
+    @Autowired
+    private EnrollmentService enrollmentService;
+    @Autowired
+    private CourseReviewService courseReviewService;
 
     @GetMapping()
     public String getInstructorPage(
@@ -50,18 +65,8 @@ public class InstructorMnController {
             @RequestParam(required = false, defaultValue = "0") int page) {
 
         Pageable prs = PageRequest.of(page, 6);
-        Page<UserDTO> listInstructor = userService.getUsersByRoleWithPagination(roleInstructor, prs);
+        Page<UserDTO> listInstructor = userService.getInstructorsByRoleIdOrderByCourseCountDesc(roleInstructor, prs);
         List<UserDTO> listUser = listInstructor.getContent();
-
-        Map<Long, Integer> userStudentCountMap = new HashMap<>();
-
-        for (UserDTO user : listUser) {
-            int totalStudents = user.getCourse().stream()
-                    .mapToInt(course -> course.getTotalStudentEnrolled() != null ? course.getTotalStudentEnrolled() : 0)
-                    .sum();
-
-            userStudentCountMap.put(user.getUserId(), totalStudents);
-        }
 
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", listInstructor.getTotalPages());
@@ -69,9 +74,70 @@ public class InstructorMnController {
 
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/instructorListContent :: instructorListContent");
         model.addAttribute("listInstructor", listUser);
-        model.addAttribute("userStudentCountMap", userStudentCountMap);
+        model.addAttribute("enrollmentService", enrollmentService);
         model.addAttribute("accNamePage", "Management Instructor");
         return "adminDashBoard/index";
+    }
+
+    @GetMapping("/viewInfo/{userId}")
+    public String getDetailAccount(
+            Model model,
+            @PathVariable("userId") long id,
+            @RequestParam(defaultValue = "0") int coursePage,
+            @RequestParam(defaultValue = "0") int reviewPage,
+            @RequestParam(defaultValue = "5") int courseSize,
+            @RequestParam(defaultValue = "5") int reviewSize) {
+        Optional<UserDetailDTO> userDetailDTO = userService.getInfoUser(id);
+        Page<CourseDTO> listCourses = courseService.findCourseByUserId(id, coursePage, courseSize);
+        Page<CourseReview> listReview = courseReviewService.getCourseReviewsByInstructorId(id, reviewPage, reviewSize);
+
+        model.addAttribute("listReview", listReview.getContent());
+        model.addAttribute("reviewCurrentPage", reviewPage);
+        model.addAttribute("reviewTotalPages", listReview.getTotalPages());
+        model.addAttribute("reviewTotalItems", listReview.getTotalElements());
+
+        model.addAttribute("listCourses", listCourses.getContent());
+        model.addAttribute("courseCurrentPage", coursePage);
+        model.addAttribute("courseTotalPages", listCourses.getTotalPages());
+        model.addAttribute("courseTotalItems", listCourses.getTotalElements());
+
+        model.addAttribute("userId", id);
+        if (userDetailDTO.isPresent()) {
+            model.addAttribute("fragmentContent", "adminDashBoard/fragments/instructorDetailContent :: instructorDetailContent");
+            model.addAttribute("accNamePage", "Detail Account");
+            model.addAttribute("userDetail", userDetailDTO.get());
+            return "adminDashBoard/index";
+        } else {
+            return "redirect:/admin/account";
+        }
+    }
+
+    @GetMapping("/viewInfo/{userId}/pagingCourse")
+    public String pagingCourseInstructor(
+            @PathVariable("userId") long id,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            Model model) {
+        Page<CourseDTO> listCourses = courseService.findCourseByUserId(id, page, size);
+        model.addAttribute("listCourses", listCourses.getContent());
+        model.addAttribute("courseCurrentPage", page);
+        model.addAttribute("courseTotalPages", listCourses.getTotalPages());
+        model.addAttribute("courseTotalItems", listCourses.getTotalElements());
+        return "adminDashBoard/fragments/instructorDetailContent :: courseListFragment";
+    }
+
+    @GetMapping("/viewInfo/{userId}/pagingReview")
+    public String pagingReview(
+            @PathVariable("userId") long id,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            Model model) {
+        Page<CourseReview> listReview = courseReviewService.getCourseReviewsByInstructorId(id, page, size);
+        model.addAttribute("listReview", listReview.getContent());
+        model.addAttribute("reviewCurrentPage", page);
+        model.addAttribute("reviewTotalPages", listReview.getTotalPages());
+        model.addAttribute("reviewTotalItems", listReview.getTotalElements());
+        return "adminDashBoard/fragments/instructorDetailContent :: reviewTableFragment";
     }
 
     @GetMapping("/filter")
@@ -86,16 +152,8 @@ public class InstructorMnController {
         Page<UserDTO> listInstructor = userService.filterInstructors(keyword, pageable);
         List<UserDTO> listUser = listInstructor.getContent();
 
-        Map<Long, Integer> userStudentCountMap = new HashMap<>();
-        for (UserDTO user : listUser) {
-            int totalStudents = user.getCourse().stream()
-                    .mapToInt(course -> course.getTotalStudentEnrolled() != null ? course.getTotalStudentEnrolled() : 0)
-                    .sum();
-            userStudentCountMap.put(user.getUserId(), totalStudents);
-        }
-
         model.addAttribute("listInstructor", listUser);
-        model.addAttribute("userStudentCountMap", userStudentCountMap);
+        model.addAttribute("enrollmentService", enrollmentService);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", listInstructor.getTotalPages());
         model.addAttribute("totalItems", listInstructor.getTotalElements());

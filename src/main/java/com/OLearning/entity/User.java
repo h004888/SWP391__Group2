@@ -38,17 +38,18 @@ public class User {
     @OneToMany(mappedBy = "instructor")
     private List<Course> courses;
 
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Order> orders;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Notification> notifications;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<InstructorRequest> instructorRequests;
 
-    @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<InstructorRequest> approvedRequests;
+
 //    @OneToMany(mappedBy = "user")
 //    private List<CoinTransaction> coinTransactions;
 }

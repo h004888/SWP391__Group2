@@ -68,6 +68,60 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
     public Page<CourseMaintenance> filterMaintenances(String username, String status, LocalDate monthYear, Pageable pageable) {
         return courseMaintenanceRepository.findByUsernameAndStatusAndMonthYear(username, status, monthYear, pageable);
     }
+    
+    @Override
+    public List<Fees> getListFees() {
+        return feesRepository.findAll();
+    }
+
+    @Override
+    public void updateFee(Long feeId, Long minEnrollments, Long maxEnrollments, Long maintenanceFee) {
+        Fees fee = feesRepository.findById(feeId)
+                .orElseThrow(() -> new RuntimeException("Fee not found"));
+        
+        fee.setMinEnrollments(minEnrollments);
+        fee.setMaxEnrollments(maxEnrollments);
+        fee.setMaintenanceFee(maintenanceFee);
+        
+        feesRepository.save(fee);
+    }
+
+    @Override
+    public void deleteFee(Long feeId) {
+        Fees fee = feesRepository.findById(feeId)
+                .orElseThrow(() -> new RuntimeException("Fee not found"));
+        
+        // Check if fee is being used in any course maintenance
+        if (!fee.getCourseMaintenances().isEmpty()) {
+            throw new RuntimeException("Cannot delete fee that is being used in course maintenances");
+        }
+        
+        feesRepository.delete(fee);
+    }
+
+    @Override
+    public void addFee(Long minEnrollments, Long maxEnrollments, Long maintenanceFee) {
+        // Validate input
+        if (minEnrollments >= maxEnrollments) {
+            throw new RuntimeException("Min enrollments must be less than max enrollments");
+        }
+        
+        // Check for overlapping ranges
+        List<Fees> existingFees = feesRepository.findAll();
+        for (Fees existingFee : existingFees) {
+            if ((minEnrollments <= existingFee.getMaxEnrollments() && 
+                 maxEnrollments >= existingFee.getMinEnrollments())) {
+                throw new RuntimeException("Fee range overlaps with existing fee range");
+            }
+        }
+        
+        Fees newFee = new Fees();
+        newFee.setMinEnrollments(minEnrollments);
+        newFee.setMaxEnrollments(maxEnrollments);
+        newFee.setMaintenanceFee(maintenanceFee);
+        
+        feesRepository.save(newFee);
+    }
 
     @Scheduled(cron = "0 59 23 L * ?") // Chạy vào 23:59 ngày cuối tháng
     @Override

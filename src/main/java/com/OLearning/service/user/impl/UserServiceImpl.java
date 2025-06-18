@@ -53,9 +53,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Page<UserDTO> getInstructorsByRoleIdOrderByCourseCountDesc(Long roleId, Pageable pageable) {
+        Page<User> userPage = userRepository.findInstructorsByRoleIdOrderByCourseCountDesc(roleId, pageable);
+        return userPage.map(userMapper::toDTO);
+    }
+
+    @Override
     public Page<UserDTO> searchByNameWithPagination(String keyword, Long roleId, Pageable pageable) {
         // Sử dụng repository method với pagination
         Page<User> userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleId(keyword, roleId, pageable);
+        return userPage.map(userMapper::toDTO);
+    }
+
+    @Override
+    public Page<UserDTO> getInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(String keyword, Long roleId, Pageable pageable) {
+        Page<User> userPage = userRepository.findInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(roleId, keyword, pageable);
         return userPage.map(userMapper::toDTO);
     }
 
@@ -200,8 +212,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDTO> getTopInstructorsByCourseCount(int limit) {
-        // Get all instructors (roleId = 3)
-        List<User> instructors = userRepository.findByRoleId(3L);
+        // Get all instructors (roleId = 2)
+        List<User> instructors = userRepository.findByRoleId(2L);
         
         // Sort instructors by number of courses in descending order
         return instructors.stream()
@@ -218,9 +230,9 @@ public class UserServiceImpl implements UserService {
     public Page<UserDTO> filterInstructors(String keyword, Pageable pageable) {
         Page<User> userPage;
         if (keyword != null && !keyword.trim().isEmpty()) {
-            userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleId(keyword.trim(), 3L, pageable);
+            userPage = userRepository.findInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(2L, keyword.trim(), pageable);
         } else {
-            userPage = userRepository.findByRole_RoleId(3L, pageable);
+            userPage = userRepository.findInstructorsByRoleIdOrderByCourseCountDesc(2L, pageable);
         }
         return userPage.map(userMapper::toDTO);
     }

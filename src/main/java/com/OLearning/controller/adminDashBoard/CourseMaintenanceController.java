@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -38,6 +39,7 @@ public class CourseMaintenanceController {
         model.addAttribute("totalPages", courseMaintenances.getTotalPages());
         model.addAttribute("totalItems", courseMaintenances.getTotalElements());
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/courseMaintenanceContent :: contentCourseMaintenances");
+        model.addAttribute("fees", courseMaintenanceService.getListFees());
         return "adminDashBoard/index";
     }
 
@@ -96,7 +98,50 @@ public class CourseMaintenanceController {
         return "adminDashBoard/fragments/courseMaintenanceContent :: maintenanceTableFragment";
     }
 
-    //use to create maintenance fee for all courses
+    @PostMapping("/fees/update")
+    public String updateFee(
+            @RequestParam Long feeId,
+            @RequestParam Long minEnrollments,
+            @RequestParam Long maxEnrollments,
+            @RequestParam Long maintenanceFee,
+            RedirectAttributes redirectAttributes) {
+        try {
+            courseMaintenanceService.updateFee(feeId, minEnrollments, maxEnrollments, maintenanceFee);
+            redirectAttributes.addFlashAttribute("successMessage", "Fee rule updated successfully");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error updating fee rule: " + e.getMessage());
+        }
+        return "redirect:/admin/courseMaintenance";
+    }
+
+    @PostMapping("/fees/delete")
+    public String deleteFee(
+            @RequestParam Long feeId,
+            RedirectAttributes redirectAttributes) {
+        try {
+            courseMaintenanceService.deleteFee(feeId);
+            redirectAttributes.addFlashAttribute("successMessage", "Fee rule deleted successfully");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error deleting fee rule: " + e.getMessage());
+        }
+        return "redirect:/admin/courseMaintenance";
+    }
+
+    @PostMapping("/fees/add")
+    public String addFee(
+            @RequestParam Long minEnrollments,
+            @RequestParam Long maxEnrollments,
+            @RequestParam Long maintenanceFee,
+            RedirectAttributes redirectAttributes) {
+        try {
+            courseMaintenanceService.addFee(minEnrollments, maxEnrollments, maintenanceFee);
+            redirectAttributes.addFlashAttribute("successMessage", "New fee rule added successfully");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error adding new fee rule: " + e.getMessage());
+        }
+        return "redirect:/admin/courseMaintenance";
+    }
+
     @GetMapping("/process-monthly")
     public String processMonthlyMaintenance(Model model, RedirectAttributes redirectAttributes) {
         courseMaintenanceService.processMonthlyMaintenance();

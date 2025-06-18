@@ -35,4 +35,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Page<User> findByUsernameContainingIgnoreCaseAndRole_RoleIdAndStatus(String username, Long roleId, boolean status, Pageable pageable);
 
+    @Query("SELECT u FROM User u JOIN u.role r WHERE r.id = :roleId ORDER BY SIZE(u.courses) DESC")
+    Page<User> findInstructorsByRoleIdOrderByCourseCountDesc(@Param("roleId") Long roleId, Pageable pageable);
+
+    @Query("SELECT u FROM User u JOIN u.role r WHERE r.id = :roleId AND LOWER(u.username) LIKE LOWER(CONCAT('%', :keyword, '%')) ORDER BY SIZE(u.courses) DESC")
+    Page<User> findInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(@Param("roleId") Long roleId, @Param("keyword") String keyword, Pageable pageable);
+
 }

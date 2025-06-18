@@ -29,13 +29,20 @@ public interface CourseService {
 //    List<CourseDTO> filterCourses(String keyword, Integer categoryId, String price, String status);
 
     Page<CourseDTO> filterCoursesWithPagination(String keyword, Integer category, String price, String status, int page, int size);
+
     List<CourseDTO> findCourseByUserId(Long userId);
 
     Course findCourseById(Long courseId);
+
     Course createCourseStep1(Long courseId, AddCourseStep1DTO addCourseStep1DTO);
+
     AddCourseStep1DTO draftCourseStep1(Course course);
+
     Course submitCourse(Long courseId, String status);
+
     Page<CourseDTO> findCourseByUserId(Long userId, int page, int size);
+
     Course createCourseMedia(Long courseId, CourseMediaDTO CourseMediaDTO);
+
     void saveCourse(Long courseId);
 }

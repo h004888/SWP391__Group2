@@ -18,17 +18,17 @@ import java.util.List;
 public class Chapter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "chapterId")
+    @Column(name = "chapterID")
     private Long id;
     @Column(nullable = false)
     private String title;
     private String description;
     @Column(name = "orderNumber")
     private Integer orderNumber = 0; //stt chuong trong khoa hoc
-    @Column(name = "createAt")
-    private LocalDateTime createAt;
-    @Column(name = "updateAt")
-    private LocalDateTime updateAt;
+    @Column(name = "createdAt")
+    private LocalDateTime createdAt;
+    @Column(name = "updatedAt")
+    private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "chapter", fetch = FetchType.LAZY)
     private List<Lesson> lessons;

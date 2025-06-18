@@ -22,16 +22,12 @@ public class Course {
     private Double price;
     private Double discount;
     private String courseImg;
-    private Integer duration; //step 2 //lay tu o trong
-    private Integer totalLessons;//step 2
-    private Integer totalRatings;
-    private Integer totalStudentEnrolled;
     private String courseLevel; //beginner, intermediate, advanced
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String status; //=draft
     private Boolean canResubmit;
-    @Column(name = "videoUrlPreview", columnDefinition = "nvarchar(max)")
+    @Column(name = "VideoUrlPreview", columnDefinition = "nvarchar(max)")
     private String videoUrlPreview;
     @ManyToOne
     @JoinColumn(name = "userId")
@@ -41,6 +37,9 @@ public class Course {
     private Category category;
     @OneToMany(mappedBy = "course", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Chapter> listOfChapters;
-
+    @OneToMany(mappedBy = "course", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Enrollment> enrollments;
+    @OneToMany(mappedBy = "course", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<CourseReview> courseReviews;
 }
 

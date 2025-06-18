@@ -1,6 +1,7 @@
 package com.OLearning.service.courseMaintance;
 
 import com.OLearning.entity.CourseMaintenance;
+import com.OLearning.entity.Fees;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,4 +25,12 @@ public interface CourseMaintenanceService {
     Page<CourseMaintenance> filterMaintenances(String username, String status, LocalDate monthYear, Pageable pageable);
 
     void checkOverdueMaintenance();
+
+    List<Fees> getListFees();
+
+    void updateFee(Long feeId, Long minEnrollments, Long maxEnrollments, Long maintenanceFee);
+
+    void deleteFee(Long feeId);
+
+    void addFee(Long minEnrollments, Long maxEnrollments, Long maintenanceFee);
 }
