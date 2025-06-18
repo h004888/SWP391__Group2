@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString(exclude = "users") // ✅ tránh đệ quy vô hạn
+@ToString(exclude = "users")
 public class Role {
 
     @Id

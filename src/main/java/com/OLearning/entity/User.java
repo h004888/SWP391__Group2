@@ -40,6 +40,8 @@ public class User {
     private String personalSkill;
     @Column(name = "Coin")
     private Double coin;
+    @Column(name = "Status")
+    private boolean status;
 
     @OneToMany(mappedBy = "user")
     private List<Enrollment> enrollments;
