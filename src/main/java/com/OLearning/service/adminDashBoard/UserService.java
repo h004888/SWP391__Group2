@@ -1,7 +1,7 @@
 package com.OLearning.service.adminDashBoard;
 
-import com.OLearning.dto.UserDTO;
-import com.OLearning.dto.UserDetailDTO;
+import com.OLearning.dto.user.UserDTO;
+import com.OLearning.dto.user.UserDetailDTO;
 import com.OLearning.entity.Role;
 import com.OLearning.entity.User;
 import org.springframework.stereotype.Service;

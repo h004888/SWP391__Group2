@@ -1,11 +1,11 @@
 package com.OLearning.service.adminDashBoard.impl;
 
-import com.OLearning.dto.UserDTO;
-import com.OLearning.dto.UserDetailDTO;
+import com.OLearning.dto.user.UserDTO;
+import com.OLearning.dto.user.UserDetailDTO;
 import com.OLearning.entity.Role;
 import com.OLearning.entity.User;
-import com.OLearning.mapper.UserDetailMapper;
-import com.OLearning.mapper.UserMapper;
+import com.OLearning.mapper.user.UserMapper;
+import com.OLearning.mapper.user.UserDetailMapper;
 import com.OLearning.repository.RoleRepository;
 import com.OLearning.repository.UserRepository;
 import com.OLearning.service.adminDashBoard.UserService;
@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;

@@ -1,4 +1,4 @@
-package com.OLearning.dto;
+package com.OLearning.dto.course;
 
 import com.OLearning.entity.Category;
 import com.OLearning.entity.User;

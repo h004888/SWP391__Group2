@@ -1,4 +1,4 @@
-package com.OLearning.dto;
+package com.OLearning.dto.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

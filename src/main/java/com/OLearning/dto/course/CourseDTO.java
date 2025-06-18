@@ -1,4 +1,4 @@
-package com.OLearning.dto;
+package com.OLearning.dto.course;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,12 +22,11 @@ public class CourseDTO {
     private BigDecimal price;
     private BigDecimal discount;
     private String courseImg;
-    private Integer duration;
-    private Integer totalLessons;
-    private Integer totalRatings;
-    private Integer totalStudentEnrolled;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String courseLevel;
+    private Double averageRating;
+    private Long reviewCount;
+    private Integer duration;
 
 }

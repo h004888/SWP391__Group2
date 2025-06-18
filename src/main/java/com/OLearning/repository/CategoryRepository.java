@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface CategoriesRepository extends JpaRepository<Category, Integer> {
+public interface CategoryRepository extends JpaRepository<Category, Integer> {
     Page<Category> findAll(Pageable pageable);
 
     Category findByName(String name);
@@ -38,6 +38,7 @@ public interface CategoriesRepository extends JpaRepository<Category, Integer> {
     @Query("UPDATE Category c SET c.name = :name WHERE c.id = :id")
     void updateCategory(@Param("id") int id, @Param("name") String name);
 
-    List<Category> findTop5ByOrderByIdAsc();
+    @Query("SELECT c FROM Category c LEFT JOIN c.courses cs GROUP BY c.id, c.name ORDER BY COUNT(cs) DESC")
+    List<Category> findTopCategoriesByCourseCount(Pageable pageable);
 
 }

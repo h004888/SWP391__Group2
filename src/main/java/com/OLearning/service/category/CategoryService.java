@@ -1,6 +1,6 @@
 package com.OLearning.service.category;
 
-import com.OLearning.dto.CategoryDTO;
+import com.OLearning.dto.category.CategoryDTO;
 import com.OLearning.entity.Category;
 
 import org.springframework.data.domain.Page;

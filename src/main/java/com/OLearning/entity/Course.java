@@ -7,6 +7,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.hibernate.annotations.Formula;
+
 @Entity
 @Table(name = "Courses")
 @Getter
@@ -15,70 +17,76 @@ import java.util.List;
 @AllArgsConstructor
 public class Course {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "CourseID")
-    private Long courseId;
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        @Column(name = "CourseID")
+        private Long courseId;
 
-    @Column(name = "Title")
-    private String title;
+        @Column(name = "Title")
+        private String title;
 
-    @Column(name = "Description")
-    private String description;
+        @Column(name = "Description")
+        private String description;
 
-    @Column(name = "Price")
-    private BigDecimal price;
+        @Column(name = "Price")
+        private BigDecimal price;
 
-    @Column(name = "Discount")
-    private BigDecimal discount;
+        @Column(name = "Discount")
+        private BigDecimal discount;
 
-    @Column(name = "CourseImg")
-    private String courseImg;
+        @Column(name = "CourseImg")
+        private String courseImg;
 
-    @Column(name = "Duration")
-    private Integer duration;
+        @Column(name = "CreatedAt")
+        private LocalDateTime createdAt;
 
-    @Column(name = "TotalLessons")
-    private Integer totalLessons;
+        @Column(name = "UpdatedAt")
+        private LocalDateTime updatedAt;
 
-    @Column(name = "TotalRatings")
-    private Integer totalRatings;
+        @Column(name = "Status")
+        private String status = "pending";
 
-    @Column(name = "TotalStudentEnrolled")
-    private Integer totalStudentEnrolled;
+        @Column(name = "CanResubmit")
+        private Boolean canResubmit;
 
-    @Column(name = "CreatedAt")
-    private LocalDateTime createdAt;
+        @Column(name = "CourseLevel")
+        private String courseLevel;
 
-    @Column(name = "UpdatedAt")
-    private LocalDateTime updatedAt;
+        @ManyToOne
+        @JoinColumn(name = "UserID")
+        private User instructor;
 
-    @Column(name = "Status")
-    private String status = "pending";
+        @ManyToOne
+        @JoinColumn(name = "CategoryID")
+        private Category category;
 
-    @Column(name = "CanResubmit")
-    private Boolean canResubmit;
-    @Column(name = "CourseLevel")
-    private String courseLevel; 
+        @OneToMany(mappedBy = "course", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+        private List<Chapters> chapters;
 
-    @ManyToOne
-    @JoinColumn(name = "UserID")
-    private User instructor;    
+        @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
+        private List<Enrollment> enrollments;
 
-    @ManyToOne
-    @JoinColumn(name = "CategoryID")
-    private Category category;
+        @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
+        private List<OrderDetail> orderDetails;
 
-    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
-    private List<Lesson> listOfLessons;
+        @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
+        private List<CourseReview> courseReviews;
 
-    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
-    private List<Enrollment> enrollments;
+        public Double getAverageRating() {
+                return courseReviews.stream().mapToDouble(CourseReview::getRating).average().orElse(0.0);
+        }
 
-    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
-    private List<Chapters> chapters;
+        public Long getReviewCount() {
+                return (long) courseReviews.size();
+        }
 
-    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
-    private List<OrderDetail> orderDetails;
+        public Integer getDuration() {
+                return chapters.stream()
+                                .mapToInt(ch -> ch.getLessons().stream().mapToInt(Lesson::getDuration).sum())
+                                .sum();
+        }
 
+        public Integer getTotalLessons() {
+                return chapters.stream().mapToInt(ch -> ch.getLessons().size()).sum();
+        }
 }

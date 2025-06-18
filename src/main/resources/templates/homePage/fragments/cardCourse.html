@@ -38,9 +38,9 @@
                         <hr>
                         <div class="d-flex justify-content-between">
                             <span class="h6 fw-light mb-0"><i class="far fa-clock text-danger me-2"></i><span
-                                    th:text="${course.duration + 'h'}">12h 56m</span></span>
+                                    th:text="${course.getDuration() + 'h'}">12h 56m</span></span>
                             <span class="h6 fw-light mb-0"><i class="fas fa-table text-orange me-2"></i><span
-                                    th:text="${course.totalLessons + ' lectures'}">15</span></span>
+                                    th:text="${course.getTotalLessons() + ' lectures'}">15</span></span>
                         </div>
                     </div>
                 </div>

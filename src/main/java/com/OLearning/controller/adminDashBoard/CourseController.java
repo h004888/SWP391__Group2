@@ -1,7 +1,7 @@
 package com.OLearning.controller.adminDashBoard;
 
-import com.OLearning.dto.CourseDTO;
-import com.OLearning.dto.CourseDetailDTO;
+import com.OLearning.dto.course.CourseDTO;
+import com.OLearning.dto.course.CourseDetailDTO;
 import com.OLearning.entity.Category;
 import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.course.CourseService;
@@ -22,48 +22,49 @@ public class CourseController {
     @Autowired
     private CategoryService categoriesService;
 
-    @GetMapping
-    public String getCoursePage(Model model) {
-        List<CourseDTO> listCourse = courseService.getAllCourses();
-        List<Category> listCategories = categoriesService.getListCategories();
+    // @GetMapping
+    // public String getCoursePage(Model model) {
+    // List<CourseDTO> listCourse = courseService.getAllCourses();
+    // List<Category> listCategories = categoriesService.getListCategories();
 
-        model.addAttribute("accNamePage", "Management Course");
-        model.addAttribute("fragmentContent", "adminDashboard/fragments/courseContent :: courseContent");
-        model.addAttribute("listCourse", listCourse);
-        model.addAttribute("listCategories", listCategories);
-        return "adminDashboard/index";
-    }
+    // model.addAttribute("accNamePage", "Management Course");
+    // model.addAttribute("fragmentContent", "adminDashboard/fragments/courseContent
+    // :: courseContent");
+    // model.addAttribute("listCourse", listCourse);
+    // model.addAttribute("listCategories", listCategories);
+    // return "adminDashboard/index";
+    // }
 
-    //Filter with ajax
-    @GetMapping("/filter")
-    public String filterCourses(@RequestParam(required = false) String keyword,
-                                @RequestParam(required = false) Integer category,
-                                @RequestParam(required = false) String price,
-                                @RequestParam(required = false) String status,
-                                Model model) {
-        List<CourseDTO> listCourse = courseService.filterCourses(keyword, category, price,status);
-        model.addAttribute("listCourse", listCourse);
-        return "adminDashboard/fragments/courseContent :: courseTableBody";
-    }
+    // //Filter with ajax
+    // @GetMapping("/filter")
+    // public String filterCourses(@RequestParam(required = false) String keyword,
+    // @RequestParam(required = false) Integer category,
+    // @RequestParam(required = false) String price,
+    // @RequestParam(required = false) String status,
+    // Model model) {
+    // List<CourseDTO> listCourse = courseService.filterCourses(keyword, category,
+    // price,status);
+    // model.addAttribute("listCourse", listCourse);
+    // return "adminDashboard/fragments/courseContent :: courseTableBody";
+    // }
 
+    // @GetMapping("/delete/{id}")
+    // public String deleteCourse(@PathVariable("id") Long id) {
+    // courseService.deleteCourse(id);
+    // return "redirect:/admin/course";
+    // }
 
+    // @GetMapping("/detail/{id}")
+    // public String viewCourseDetail(Model model, @PathVariable("id") Long id) {
+    // model.addAttribute("fragmentContent",
+    // "adminDashboard/fragments/courseDetailContent :: courseDetail");
+    // Optional<CourseDetailDTO> optionalDetail = courseService.getDetailCourse(id);
+    // if (optionalDetail.isPresent()) {
+    // model.addAttribute("detailCourse", optionalDetail.get());
+    // return "adminDashboard/index";
+    // } else {
+    // return "redirect:/admin/course";
+    // }
 
-    @GetMapping("/delete/{id}")
-    public String deleteCourse(@PathVariable("id") Long id) {
-        courseService.deleteCourse(id);
-        return "redirect:/admin/course";
-    }
-
-    @GetMapping("/detail/{id}")
-    public String viewCourseDetail(Model model, @PathVariable("id") Long id) {
-        model.addAttribute("fragmentContent", "adminDashboard/fragments/courseDetailContent :: courseDetail");
-        Optional<CourseDetailDTO> optionalDetail = courseService.getDetailCourse(id);
-        if (optionalDetail.isPresent()) {
-            model.addAttribute("detailCourse", optionalDetail.get());
-            return "adminDashboard/index";
-        } else {
-            return "redirect:/admin/course";
-        }
-
-    }
+    // }
 }

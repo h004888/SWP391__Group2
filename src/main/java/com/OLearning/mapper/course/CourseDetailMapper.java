@@ -1,6 +1,6 @@
-package com.OLearning.mapper;
+package com.OLearning.mapper.course;
 
-import com.OLearning.dto.CourseDetailDTO;
+import com.OLearning.dto.course.CourseDetailDTO;
 import com.OLearning.entity.Course;
 import org.springframework.stereotype.Component;
 
@@ -8,7 +8,8 @@ import org.springframework.stereotype.Component;
 public class CourseDetailMapper {
 
     public CourseDetailDTO toDTO(Course course) {
-        if (course == null) return null;
+        if (course == null)
+            return null;
 
         CourseDetailDTO dto = new CourseDetailDTO();
         dto.setCourseId(course.getCourseId());
@@ -17,16 +18,11 @@ public class CourseDetailMapper {
         dto.setPrice(course.getPrice().doubleValue());
         dto.setDiscount(course.getDiscount().doubleValue());
         dto.setCourseImg(course.getCourseImg());
-        dto.setDuration(course.getDuration());
-        dto.setTotalLessons(course.getTotalLessons());
-        dto.setTotalRatings(course.getTotalRatings());
-        dto.setTotalStudentEnrolled(course.getTotalStudentEnrolled());
         dto.setCreatedAt(course.getCreatedAt());
         dto.setUpdatedAt(course.getUpdatedAt());
         dto.setInstructor(course.getInstructor());
-        dto.setCategory(course.getCategory());  
+        dto.setCategory(course.getCategory());
         return dto;
     }
-
 
 }

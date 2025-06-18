@@ -38,17 +38,52 @@ Footer END -->
 	<!-- Template Functions -->
 	<script src="assets/js/functions.js"></script>
 
-	<!-- Biến allCategories từ Thymeleaf -->
-	<script th:inline="javascript">
-		/*<![CDATA[*/
-		var allCategories = /*[[${allCategories}]]*/ [];
-		/*]]>*/
-		console.log(allCategories);
+
+
+	<script>
+		function toggleMoreCategories(event) {
+			event.preventDefault();
+			document.querySelectorAll("#moreCategories").forEach(el => el.style.display = "block");
+			event.target.style.display = "none";
+		}
+		$(document).ready(function () {
+			function loadCoursesByCategory(categoryId) {
+				console.log('Loading courses for Category ID:', categoryId);
+
+				$.ajax({
+					url: 'fragments/courseByCategory',
+					type: 'GET',
+					data: {
+						'categoryId': categoryId
+					},
+					success: function (data) {
+						$('#course-pills-tabContent').html(data);
+					},
+					error: function () {
+						console.error('Lỗi khi tải dữ liệu');
+					}
+				});
+			}
+
+			// Bắt sự kiện click vào các tab
+			$('#course-pills-tab .nav-link').on('click', function (e) {
+				e.preventDefault();
+
+				$('#course-pills-tab .nav-link').removeClass('active');
+				$(this).addClass('active');
+
+				const categoryId = $(this).data('category-id');
+				loadCoursesByCategory(categoryId);
+			});
+
+			// 🔥 Khi vừa load trang, gọi luôn AJAX cho tab đầu tiên (tab mặc định active)
+			const firstActiveTab = $('#course-pills-tab .nav-link.active');
+			if (firstActiveTab.length > 0) {
+				const defaultCategoryId = firstActiveTab.data('category-id');
+				loadCoursesByCategory(defaultCategoryId);
+			}
+		});
 	</script>
-
-	<!-- File JavaScript của bạn -->
-	<script src="js/homePage/home.js"></script>
-
 
 
 

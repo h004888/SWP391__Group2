@@ -3,6 +3,8 @@ package com.OLearning.entity;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -45,5 +47,7 @@ public class Enrollment {
     @ManyToOne
     @JoinColumn(name = "OrderID")
     private Order order;
+    @OneToMany(mappedBy = "enrollmentId")
+    private List<CourseReview> courseReviews;
 
 }

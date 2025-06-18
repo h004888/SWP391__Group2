@@ -1,7 +1,7 @@
 package com.OLearning.service.course;
 
-import com.OLearning.dto.CourseDTO;
-import com.OLearning.dto.CourseDetailDTO;
+import com.OLearning.dto.course.CourseDTO;
+import com.OLearning.dto.course.CourseDetailDTO;
 import com.OLearning.entity.Course;
 
 import org.springframework.data.domain.Page;
@@ -13,27 +13,6 @@ import java.util.Optional;
 
 @Service
 public interface CourseService {
-
-        List<CourseDTO> getAllCourses();
-
-        Optional<CourseDetailDTO> getDetailCourse(Long id);
-
-        boolean deleteCourse(Long id);
-
-        List<CourseDTO> filterCourses(String keyword, Integer categoryId, String price, String status);
-
-        List<Course> getTopCourses();
-
-        Page<CourseDTO> getCoursesByTotalRatings(Pageable pageable);
-
-        Course findById(Long id);
-
-        Page<CourseDTO> searchCourses(
-                        List<Long> categoryIds,
-                        String priceFilter,
-                        String sortBy,
-                        int page,
-                        int size);
 
         Page<CourseDTO> searchCoursesGrid(
                         List<Long> categoryIds,
