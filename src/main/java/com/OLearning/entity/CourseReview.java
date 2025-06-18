@@ -26,15 +26,16 @@ public class CourseReview {
     @JoinColumn(name = "courseId", nullable = false)
     private Course course;
 
-    @ManyToOne
-    @JoinColumn(name = "userId", nullable = false)
-    private User user; // cần thêm nếu muốn biết ai là người comment
 
-    @Column(nullable = false)
+
+    @Column(nullable = true)
     private Integer rating;
 
     @Column(length = 1000)
     private String comment;
+
+    @Column(nullable = false)
+    private boolean hidden = false;
 
     private LocalDateTime createdAt;
 
@@ -49,5 +50,9 @@ public class CourseReview {
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+    @Transient
+    public User getUser() {
+        return enrollment != null ? enrollment.getUser() : null;
     }
 }

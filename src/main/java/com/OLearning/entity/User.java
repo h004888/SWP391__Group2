@@ -18,7 +18,6 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
-
     private String username;
     private String email;
     private String password;
@@ -30,6 +29,9 @@ public class User {
     private String personalSkill;
     private boolean status;//new
 
+    @OneToMany(mappedBy = "user")
+    private List<Enrollment> enrollments;
+
     @ManyToOne
     @JoinColumn(name = "roleId")
     private Role role;
@@ -37,11 +39,14 @@ public class User {
     @OneToMany(mappedBy = "instructor")
     private List<Course> courses;
 
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "instructor", fetch = FetchType.LAZY)
+    private List<BuyPackages> listOfBuyPackage;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Order> orders;
+
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Notification> notifications;
 
 }
-

@@ -1,5 +1,6 @@
 package com.OLearning.service.category.impl;
 
+import com.OLearning.dto.CategoryDTO;
 import com.OLearning.entity.Category;
 import com.OLearning.repository.CategoriesRepository;
 import com.OLearning.service.category.CategoryService;
@@ -7,13 +8,12 @@ import com.OLearning.service.category.CategoryService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -40,14 +40,21 @@ public class CategoryServiceImpl implements CategoryService {
         return categoriesRepository.existsById(id);
     }
 
-    @Override
-    public boolean existsByName(String name) {
-        return categoriesRepository.existsByName(name);
-    }
+//    @Override
+//    public List<CategoryDTO> getAllCategory() {
+//        return categoriesRepository.findAll().stream()
+//                .map(c -> new CategoryDTO(c.getId(), c.getName()))
+//                .collect(Collectors.toList());
+//    }
 
     @Override
     public List<Category> findAll() {
-        return categoriesRepository.findAll();
+        return List.of();
+    }
+
+    @Override
+    public boolean existsByName(String name) {
+        return categoriesRepository.existsByName(name);
     }
 
     @Override

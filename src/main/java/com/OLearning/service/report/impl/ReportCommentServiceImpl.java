@@ -12,6 +12,8 @@ import com.OLearning.service.report.ReportCommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ReportCommentServiceImpl implements ReportCommentService {
@@ -23,7 +25,18 @@ public class ReportCommentServiceImpl implements ReportCommentService {
     public void report(ReportCommentDTO dto) {
         User user = userRepo.findById(dto.getUserId()).orElseThrow();
         Course course = courseRepo.findById(dto.getCourseId()).orElseThrow();
-        Notification noti = mapper.toNotification(dto, user, course);
-        notiRepo.save(noti);
+        // Lấy tất cả admin users (roleId = 1 là admin)
+        List<User> adminUsers = userRepo.findByRoleId(1L);
+        for (User admin : adminUsers) {
+            Notification noti = mapper.toNotification(dto, user, course);
+            noti.setUser(admin);
+            noti.setMessage("Report Comment ID " + dto.getCommentId() + " by " + user.getFullName() + " (" + user.getEmail() + ") - Reason: " + dto.getReason());
+            noti.setStatus("failed");
+            noti.setType("REPORT_COMMENT");
+            noti.setSentAt(java.time.LocalDateTime.now());
+            noti.setCommentId(dto.getCommentId());
+            noti.setCourse(course);
+            notiRepo.save(noti);
+        }
     }
 }

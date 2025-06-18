@@ -1,7 +1,8 @@
 package com.OLearning.controller.home;
 
+import com.OLearning.security.CustomUserDetails;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.ui.Model;
-
 import com.OLearning.dto.comment.CommentDTO;
 import com.OLearning.dto.report.ReportCommentDTO;
 import com.OLearning.dto.report.ReportCourseDTO;
@@ -15,15 +16,16 @@ import com.OLearning.service.comment.CommentService;
 import com.OLearning.service.report.ReportCommentService;
 import com.OLearning.service.report.ReportCourseService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -36,18 +38,18 @@ public class CourseDetailController {
     private final CourseReviewRepository reviewRepo;
     private final UserRepository userRepo;
 
-    @GetMapping("/home/course/{courseId}")
-    public String courseDetailPage(@PathVariable Long courseId, Model model, Principal principal) {
+    @GetMapping("/course/{courseId}")
+    public String courseDetailPage(@PathVariable Long courseId,
+                                   Model model,
+                                   @AuthenticationPrincipal CustomUserDetails userDetails) {
         Course course = courseRepo.findById(courseId)
-                .orElseThrow(() -> new RuntimeException("Course not found with id: " + courseId));
+                .orElseThrow(() -> new RuntimeException("Course not found"));
 
-        List<CourseReview> reviews = reviewRepo.findByCourse(course);
         model.addAttribute("course", course);
-        model.addAttribute("reviews", reviews);
+        model.addAttribute("reviews", reviewRepo.findByCourseWithUser(course));
 
-        if (principal != null) {
-            User user = userRepo.findByEmail(principal.getName()).orElse(null);
-            model.addAttribute("user", user);
+        if (userDetails != null) {
+            model.addAttribute("user", userDetails.getUser()); // đầy đủ User
         }
 
         model.addAttribute("commentDTO", new CommentDTO());
@@ -58,21 +60,276 @@ public class CourseDetailController {
         return "homePage/index";
     }
 
-    @PostMapping("/home/course/{courseId}/comment")
-    public String postComment(@PathVariable Long courseId, @ModelAttribute CommentDTO dto) {
-        commentService.postComment(dto);
+    // REST API endpoints cho AJAX
+    @PostMapping("/api/course/{courseId}/comment")
+    @ResponseBody
+    public ResponseEntity<?> postCommentAjax(@PathVariable Long courseId,
+                                             @RequestBody CommentDTO dto,
+                                             Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Please login to post a comment"));
+        }
+        
+        User user = userRepo.findByEmail(principal.getName()).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "User not found"));
+        }
+        
+        dto.setUserId(user.getUserId());
+        dto.setCourseId(courseId);
+        
+        // Validate comment
+        if (dto.getComment() == null || dto.getComment().trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Comment cannot be empty"));
+        }
+        
+        try {
+            commentService.postComment(dto);
+            return ResponseEntity.ok(Map.of("success", "Comment posted successfully!"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/api/course/{courseId}/report")
+    @ResponseBody
+    public ResponseEntity<?> submitCourseReportAjax(@PathVariable Long courseId,
+                                                    @RequestBody ReportCourseDTO dto,
+                                                    Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Please login to report a course"));
+        }
+        
+        User user = userRepo.findByEmail(principal.getName()).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "User not found"));
+        }
+        
+        dto.setUserId(user.getUserId());
+        dto.setCourseId(courseId);
+        
+        // Validate reason
+        if (dto.getReason() == null || dto.getReason().trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Please provide a reason for reporting this course"));
+        }
+        
+        try {
+            reportCourseService.report(dto);
+            return ResponseEntity.ok(Map.of("success", "Course report submitted successfully. Admin will review it."));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Failed to submit report: " + e.getMessage()));
+        }
+    }
+
+    @PostMapping("/api/course/{courseId}/comment/{commentId}/report")
+    @ResponseBody
+    public ResponseEntity<?> submitCommentReportAjax(@PathVariable Long courseId,
+                                                     @PathVariable Long commentId,
+                                                     @RequestBody ReportCommentDTO dto,
+                                                     Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Please login to report a comment"));
+        }
+        User user = userRepo.findByEmail(principal.getName()).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "User not found"));
+        }
+        dto.setUserId(user.getUserId());
+        dto.setCourseId(courseId);
+        dto.setCommentId(commentId);
+        if (dto.getReason() == null || dto.getReason().trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Please provide a reason for reporting this comment"));
+        }
+        // Kiểm tra user không được report comment của chính mình
+        CourseReview review = reviewRepo.findById(commentId).orElse(null);
+        if (review != null && review.getEnrollment().getUser().getUserId().equals(user.getUserId())) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "You cannot report your own comment."));
+        }
+        try {
+            reportCommentService.report(dto);
+            return ResponseEntity.ok(Map.of("success", "Comment report submitted successfully. Admin will review it."));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Failed to submit report: " + e.getMessage()));
+        }
+    }
+
+    @PostMapping("/api/course/{courseId}/comment/{reviewId}/update")
+    @ResponseBody
+    public ResponseEntity<?> updateCommentAjax(@PathVariable Long courseId,
+                                               @PathVariable Long reviewId,
+                                               @RequestBody CommentDTO dto,
+                                               Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Please login to update a comment"));
+        }
+        
+        User user = userRepo.findByEmail(principal.getName()).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "User not found"));
+        }
+        
+        dto.setUserId(user.getUserId());
+        dto.setCourseId(courseId);
+        dto.setReviewId(reviewId);
+        
+        // Validate comment
+        if (dto.getComment() == null || dto.getComment().trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Comment cannot be empty"));
+        }
+        
+        try {
+            commentService.updateComment(dto);
+            return ResponseEntity.ok(Map.of("success", "Comment updated successfully!"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    // Endpoint để lấy danh sách comment mới nhất
+    @GetMapping("/api/course/{courseId}/comments")
+    @ResponseBody
+    public ResponseEntity<?> getComments(@PathVariable Long courseId, Principal principal) {
+        try {
+            Course course = courseRepo.findById(courseId)
+                    .orElseThrow(() -> new RuntimeException("Course not found"));
+            List<CourseReview> reviews = reviewRepo.findByCourseWithUser(course);
+            Long currentUserId = null;
+            if (principal != null) {
+                User user = userRepo.findByEmail(principal.getName()).orElse(null);
+                if (user != null) currentUserId = user.getUserId();
+            }
+            return ResponseEntity.ok(Map.of(
+                "comments", reviews,
+                "currentUserId", currentUserId
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    // Các endpoint cũ (giữ lại để tương thích)
+    @PostMapping("/course/{courseId}/comment")
+    public String postComment(@PathVariable Long courseId,
+                              @ModelAttribute CommentDTO dto,
+                              Principal principal,
+                              RedirectAttributes redirect) {
+        if (principal != null) {
+            User user = userRepo.findByEmail(principal.getName()).orElse(null);
+            if (user != null) {
+                dto.setUserId(user.getUserId());
+                dto.setCourseId(courseId);
+                
+                // Validate comment
+                if (dto.getComment() == null || dto.getComment().trim().isEmpty()) {
+                    redirect.addFlashAttribute("error", "Comment cannot be empty");
+                    return "redirect:/course/" + courseId;
+                }
+                
+                // Rating có thể null, không cần validate
+                
+                try {
+                    commentService.postComment(dto);
+                    redirect.addFlashAttribute("success", "Comment posted successfully!");
+                } catch (RuntimeException e) {
+                    redirect.addFlashAttribute("error", e.getMessage());
+                }
+            } else {
+                redirect.addFlashAttribute("error", "User not found");
+            }
+        } else {
+            redirect.addFlashAttribute("error", "Please login to post a comment");
+        }
         return "redirect:/course/" + courseId;
     }
 
-    @PostMapping("/home/course/{courseId}/report")
-    public String submitCourseReport(@PathVariable Long courseId, @ModelAttribute ReportCourseDTO dto) {
-        reportCourseService.report(dto);
+    @PostMapping("/course/{courseId}/comment/{reviewId}/update")
+    public String updateComment(@PathVariable Long courseId,
+                                @PathVariable Long reviewId,
+                                @ModelAttribute CommentDTO dto,
+                                Principal principal,
+                                RedirectAttributes redirect) {
+        if (principal != null) {
+            User user = userRepo.findByEmail(principal.getName()).orElse(null);
+            if (user != null) {
+                dto.setUserId(user.getUserId());
+                dto.setCourseId(courseId);
+                dto.setReviewId(reviewId);
+                
+                // Validate comment
+                if (dto.getComment() == null || dto.getComment().trim().isEmpty()) {
+                    redirect.addFlashAttribute("error", "Comment cannot be empty");
+                    return "redirect:/course/" + courseId;
+                }
+                
+                try {
+                    commentService.updateComment(dto);
+                    redirect.addFlashAttribute("success", "Comment updated successfully!");
+                } catch (RuntimeException e) {
+                    redirect.addFlashAttribute("error", e.getMessage());
+                }
+            } else {
+                redirect.addFlashAttribute("error", "User not found");
+            }
+        } else {
+            redirect.addFlashAttribute("error", "Please login to update a comment");
+        }
         return "redirect:/course/" + courseId;
     }
 
-    @PostMapping("/home/course/{courseId}/comment/{commentId}/report")
+    @PostMapping("/course/{courseId}/report")
+    public String submitCourseReport(@PathVariable Long courseId, 
+                                     @ModelAttribute ReportCourseDTO dto,
+                                     Principal principal,
+                                     RedirectAttributes redirect) {
+        if (principal != null) {
+            User user = userRepo.findByEmail(principal.getName()).orElse(null);
+            if (user != null) {
+                dto.setUserId(user.getUserId());
+                dto.setCourseId(courseId);
+                
+                // Validate reason
+                if (dto.getReason() == null || dto.getReason().trim().isEmpty()) {
+                    redirect.addFlashAttribute("error", "Please provide a reason for reporting this course");
+                    return "redirect:/course/" + courseId;
+                }
+                
+                try {
+                    reportCourseService.report(dto);
+                    redirect.addFlashAttribute("success", "Course report submitted successfully. Admin will review it.");
+                } catch (RuntimeException e) {
+                    redirect.addFlashAttribute("error", "Failed to submit report: " + e.getMessage());
+                }
+            } else {
+                redirect.addFlashAttribute("error", "User not found");
+            }
+        } else {
+            redirect.addFlashAttribute("error", "Please login to report a course");
+        }
+        return "redirect:/course/" + courseId;
+    }
+
+    @PostMapping("/course/{courseId}/comment/{commentId}/report")
     public String submitCommentReport(@PathVariable Long courseId, @PathVariable Long commentId, @ModelAttribute ReportCommentDTO dto) {
         reportCommentService.report(dto);
         return "redirect:/course/" + courseId;
     }
 }
+

@@ -23,4 +23,5 @@ public class CourseDTO {
     private LocalDateTime updatedAt;
     private String status;
     private Category category;
+    private String description;
 }

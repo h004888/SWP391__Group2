@@ -9,10 +9,13 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+
 public class CommentDTO {
+    private Long reviewId;
     private Long courseId;
     private Long userId;
     private String comment;
-    private int rating;
+    private Integer rating;
 }
+
 

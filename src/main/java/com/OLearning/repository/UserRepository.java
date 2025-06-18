@@ -13,8 +13,6 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> findByUsername(String username);
-
     Optional<User> findByEmail(String email);
 
     boolean existsByUsername(String username);
@@ -24,9 +22,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u JOIN u.role r WHERE r.id = :roleId")
     List<User> findByRoleId(@Param("roleId") Long roleId);
 
-    @Query("SELECT u FROM User u JOIN u.role r WHERE r.id = :roleId")
-    Page<User> findByRoleIdWithPagination(@Param("roleId") Long roleId, Pageable pageable);
-
     Page<User> findAll(Pageable pageable);
 
     Page<User> findByRole_RoleId(Long roleId, Pageable pageable);
@@ -35,4 +30,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByRole_RoleId(Long id);
 
+    Page<User> findByRole_RoleIdAndStatus(Long roleId, boolean status, Pageable pageable);
+
+    Page<User> findByUsernameContainingIgnoreCaseAndRole_RoleIdAndStatus(String username, Long roleId, boolean status, Pageable pageable);
+    @Query("SELECT u FROM User u WHERE " +
+            "(:keyword IS NULL OR :keyword = '' OR LOWER(u.username) LIKE CONCAT('%', :keyword, '%')) AND "
+            +
+            "(:roleId IS NULL OR u.role.roleId = :roleId)")
+    List<User> searchByKeyword(@Param("keyword") String keyword,
+                               @Param("roleId") Integer roleId);
 }

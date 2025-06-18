@@ -168,7 +168,7 @@ CREATE TABLE CourseReviews
     ReviewID     INT IDENTITY(1,1) PRIMARY KEY,
     EnrollmentID INT NOT NULL UNIQUE,
     CourseID     INT NOT NULL,
-    Rating       INT NOT NULL CHECK (Rating BETWEEN 1 AND 5),
+    Rating       INT NULL CHECK (Rating IS NULL OR (Rating BETWEEN 1 AND 5)), -- Cho phép NULL
     Comment      NVARCHAR(1000),
     CreatedAt    DATETIME DEFAULT GETDATE(),
     UpdatedAt    DATETIME DEFAULT GETDATE(),

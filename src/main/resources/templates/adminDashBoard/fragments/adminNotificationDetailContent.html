@@ -81,8 +81,8 @@
                     <p class="lead" th:text="${notification.message}"></p>
 
                     <div class="mt-4">
-                                <span th:class="'badge fs-6 ' + ${notification.type == 'COURSE_REJECTION' ? 'bg-danger' : (notification.type == 'ENROLLMENT' ? 'bg-success' : 'bg-info')}">
-                                    <i th:class="'fas me-2 ' + ${notification.type == 'COURSE_REJECTION' ? 'fa-times-circle' : (notification.type == 'ENROLLMENT' ? 'fa-user-plus' : 'fa-info-circle')}"></i>
+                                <span th:class="'badge fs-6 ' + ${notification.type == 'COURSE_REJECTION' ? 'bg-danger' : (notification.type == 'ENROLLMENT' ? 'bg-success' : (notification.type == 'REPORT_COURSE' ? 'bg-danger' : 'bg-info'))}">
+                                    <i th:class="'fas me-2 ' + ${notification.type == 'COURSE_REJECTION' ? 'fa-times-circle' : (notification.type == 'ENROLLMENT' ? 'fa-user-plus' : (notification.type == 'REPORT_COURSE' ? 'fa-flag' : 'fa-info-circle'))}"></i>
                                     <span th:text="${notification.type}"></span>
                                 </span>
                     </div>
@@ -111,15 +111,15 @@
                 </button>
             </form>
 
-            <!-- Edit course for rejections -->
-<!--            <a th:if="${notification.type == 'COURSE_REJECTION'}"-->
-<!--               th:href="@{/instructordashboard/courses/edit(rejectionNotificationId=${notification.notificationId})}"-->
-<!--               class="btn btn-warning">-->
-<!--                <i class="fas fa-edit me-2"></i>Edit Course-->
-<!--            </a>-->
+            <!-- Review course for report notifications -->
+            <a th:if="${notification.type == 'REPORT_COURSE'}"
+               th:href="@{/admin/course/detail/{courseId}(courseId=${notification.course.courseId})}"
+               class="btn btn-warning">
+                <i class="fas fa-gavel me-2"></i>Review Course
+            </a>
 
             <!-- View course for other types -->
-            <a th:if="${notification.type != 'COURSE_REJECTION'}"
+            <a th:if="${notification.type != 'COURSE_REJECTION' and notification.type != 'REPORT_COURSE'}"
                th:href="@{/instructordashboard/courses/view(fromNotification=${notification.notificationId})}"
                class="btn btn-success">
                 <i class="fas fa-book-open me-2"></i>View Course

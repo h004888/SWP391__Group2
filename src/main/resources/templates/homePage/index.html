@@ -12,7 +12,8 @@
 	<!-- Header END -->
 
 	<!-- **************** MAIN CONTENT START **************** -->
-	<div th:replace="~{homePage/fragments/courseDetailContent :: courseDetailContent}"></div>
+<!--	<div th:replace="~{homePage/fragments/mainContent :: mainContent}"></div>-->
+	<div th:replace="~{__${fragmentContent}__}"></div>
 	<!-- **************** MAIN CONTENT END **************** -->
 
 	<!-- =======================
@@ -24,16 +25,33 @@ Footer END -->
 	<!-- Back to top -->
 	<div class="back-top"><i class="bi bi-arrow-up-short position-absolute top-50 start-50 translate-middle"></i></div>
 
-	<!-- Bootstrap JS -->
-	<script th:src="@{assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js}"></script>
+	<!-- jQuery LUÔN ĐỂ TRƯỚC các file khác -->
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-	<!-- Vendors -->
-	<script th:src="@{assets/vendor/tiny-slider/tiny-slider.js}"></script>
-	<script th:src="@{assets/vendor/glightbox/js/glightbox.js}"></script>
-	<script th:src="@{assets/vendor/purecounterjs/dist/purecounter_vanilla.js}"></script>
+	<!-- Bootstrap JS -->
+	<script th:src="@{/assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js}"></script>
+
+	<!-- Các vendor khác -->
+	<script th:src="@{/assets/vendor/tiny-slider/tiny-slider.js}"></script>
+	<script th:src="@{/assets/vendor/glightbox/js/glightbox.js}"></script>
+	<script th:src="@{/assets/vendor/purecounterjs/dist/purecounter_vanilla.js}"></script>
 
 	<!-- Template Functions -->
-	<script th:src="@{assets/js/functions.js}"></script>
+	<script th:src="@{/assets/js/functions.js}"></script>
+
+	<!-- Biến allCategories từ Thymeleaf -->
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+		var allCategories = /*[[${allCategories}]]*/ [];
+		/*]]>*/
+		console.log(allCategories);
+	</script>
+
+	<!-- File JavaScript của bạn -->
+	<script th:src="@{/js/homePage/home.js}"></script>
+
+
+
 
 </body>
 

@@ -11,9 +11,14 @@ import com.OLearning.repository.UserRepository;
 import com.OLearning.service.report.ReportCourseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ReportCourseServiceImpl implements ReportCourseService {
     private final NotificationRepository notiRepo;
     private final UserRepository userRepo;
@@ -23,7 +28,20 @@ public class ReportCourseServiceImpl implements ReportCourseService {
     public void report(ReportCourseDTO dto) {
         User user = userRepo.findById(dto.getUserId()).orElseThrow();
         Course course = courseRepo.findById(dto.getCourseId()).orElseThrow();
-        Notification noti = mapper.toNotification(dto, user, course);
-        notiRepo.save(noti);
+        
+        // Lấy tất cả admin users (roleId = 1 là admin)
+        List<User> adminUsers = userRepo.findByRoleId(1L);
+        
+        // Gửi thông báo cho tất cả admin
+        for (User admin : adminUsers) {
+            Notification noti = mapper.toNotification(dto, user, course);
+            noti.setUser(admin);
+            noti.setMessage("Course Report: " + course.getTitle() + " - Reported by " + user.getFullName() + " (" + user.getEmail() + ") - Reason: " + dto.getReason());
+            noti.setSentAt(LocalDateTime.now());
+            noti.setStatus("failed");
+            noti.setType("REPORT_COURSE");
+            noti.setCourse(course);// Set admin là người nhận thông báo
+            notiRepo.save(noti);
+        }
     }
 }

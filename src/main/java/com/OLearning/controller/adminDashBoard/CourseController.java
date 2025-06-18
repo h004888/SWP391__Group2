@@ -2,20 +2,27 @@ package com.OLearning.controller.adminDashBoard;
 
 import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.course.CourseDetailDTO;
-import com.OLearning.dto.notification.NotificationDTO;
 import com.OLearning.entity.Category;
+import com.OLearning.entity.Course;
+import com.OLearning.entity.Notification;
+import com.OLearning.entity.User;
+import com.OLearning.repository.CourseRepository;
+import com.OLearning.repository.NotificationRepository;
+import com.OLearning.repository.UserRepository;
 import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.course.CourseService;
 import com.OLearning.service.notification.NotificationService;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.thymeleaf.spring6.SpringTemplateEngine;
 
-import java.util.*;
+import java.security.Principal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/admin/course")
@@ -25,41 +32,22 @@ public class CourseController {
     @Autowired
     private CategoryService categoryService;
     @Autowired
-    private NotificationService notificationService;
+    private CourseRepository courseRepository;
     @Autowired
-    private SpringTemplateEngine templateEngine;
-
+    private UserRepository userRepository;
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     @GetMapping
-    public String getCoursePage(Model model,
-                                @RequestParam(defaultValue = "0") int page,
-                                @RequestParam(defaultValue = "5") int size,
-                                @RequestParam(required = false) String keyword,
-                                @RequestParam(required = false) Integer category,
-                                @RequestParam(required = false) String price) {
-
-        Page<CourseDTO> pendingCourses = courseService.filterCoursesWithPagination(
-                keyword, category, price, "pending", page, size);
-
+    public String getCoursePage(Model model) {
+        List<CourseDTO> listCourse = courseService.getAllCourses();
         List<Category> listCategories = categoryService.getListCategories();
 
         model.addAttribute("accNamePage", "Management Course");
-        model.addAttribute("fragmentContent", "adminDashBoard/fragments/courseContent :: courseContent");
+        model.addAttribute("fragmentContent", "adminDashboard/fragments/courseContent :: courseContent");
+        model.addAttribute("listCourse", listCourse);
         model.addAttribute("listCategories", listCategories);
-
-        // Initial data for pending tab
-        model.addAttribute("listCourse", pendingCourses.getContent());
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", pendingCourses.getTotalPages());
-        model.addAttribute("totalItems", pendingCourses.getTotalElements());
-        model.addAttribute("pageSize", size);
-
-        // Preserve filter parameters
-        model.addAttribute("keyword", keyword);
-        model.addAttribute("selectedCategory", category);
-        model.addAttribute("selectedPrice", price);
-
-        return "adminDashBoard/index";
+        return "adminDashboard/index";
     }
 
     //Filter with ajax
@@ -68,85 +56,10 @@ public class CourseController {
                                 @RequestParam(required = false) Integer category,
                                 @RequestParam(required = false) String price,
                                 @RequestParam(required = false) String status,
-                                @RequestParam(defaultValue = "0") int page,
-                                @RequestParam(defaultValue = "5") int size,
                                 Model model) {
-
-        Page<CourseDTO> coursePage = courseService.filterCoursesWithPagination(
-                keyword, category, price, status, page, size);
-
-        model.addAttribute("listCourse", coursePage.getContent());
-
-        return "adminDashBoard/fragments/courseTableRowContent :: courseTableRowContent";
-    }
-
-    // New endpoint for pagination only
-    @GetMapping("/pagination")
-    public String getPagination(@RequestParam(required = false) String keyword,
-                                @RequestParam(required = false) Integer category,
-                                @RequestParam(required = false) String price,
-                                @RequestParam(required = false) String status,
-                                @RequestParam(defaultValue = "0") int page,
-                                @RequestParam(defaultValue = "5") int size,
-                                Model model) {
-
-        Page<CourseDTO> coursePage = courseService.filterCoursesWithPagination(
-                keyword, category, price, status, page, size);
-
-        model.addAttribute("listCourse", coursePage.getContent());
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", coursePage.getTotalPages());
-        model.addAttribute("totalItems", coursePage.getTotalElements());
-        model.addAttribute("pageSize", size);
-
-        return "adminDashBoard/fragments/courseTableRowContent :: coursePagination";
-    }
-
-    // New endpoint to get total count for badge
-    @GetMapping("/count")
-    @ResponseBody
-    public long getCourseCount(@RequestParam(required = false) String keyword,
-                               @RequestParam(required = false) Integer category,
-                               @RequestParam(required = false) String price,
-                               @RequestParam(required = false) String status) {
-
-        Page<CourseDTO> coursePage = courseService.filterCoursesWithPagination(
-                keyword, category, price, status, 0, 1); // Get only 1 item to check total
-
-        return coursePage.getTotalElements();
-    }
-
-    @GetMapping("/detail/{id}")
-    public String viewCourseDetail(Model model, @PathVariable("id") Long id) {
-        model.addAttribute("notification", new NotificationDTO());
-        model.addAttribute("fragmentContent", "adminDashBoard/fragments/courseDetailContent :: courseDetail");
-        Optional<CourseDetailDTO> optionalDetail = courseService.getDetailCourse(id);
-        if (optionalDetail.isPresent()) {
-            CourseDetailDTO course = optionalDetail.get();
-            model.addAttribute("detailCourse", optionalDetail.get());
-            return "adminDashBoard/index";
-        } else {
-            return "redirect:/admin/course";
-        }
-    }
-
-    @PostMapping("/approve/{id}")
-    public String approveCourse(@PathVariable("id") Long id) {
-        courseService.approveCourse(id);
-        return "redirect:/admin/course";
-    }
-
-    @PostMapping("/reject")
-    public String rejectCourse(@ModelAttribute("notification") NotificationDTO notificationDTO,
-                               @RequestParam(name = "allowResubmission", defaultValue = "false") boolean allowResubmission,
-                               RedirectAttributes redirectAttributes) {
-        try {
-            notificationService.rejectCourseMess(notificationDTO, allowResubmission);
-            redirectAttributes.addFlashAttribute("successMessage", "Course rejected and notification sent successfully.");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error rejecting course: " + e.getMessage());
-        }
-        return "redirect:/admin/course";
+        List<CourseDTO> listCourse = courseService.filterCourses(keyword, category, price,status);
+        model.addAttribute("listCourse", listCourse);
+        return "adminDashboard/fragments/courseContent :: courseTableBody";
     }
 
     @GetMapping("/delete/{id}")
@@ -155,4 +68,82 @@ public class CourseController {
         return "redirect:/admin/course";
     }
 
+    @GetMapping("/detail/{id}")
+    public String viewCourseDetail(Model model, @PathVariable("id") Long id) {
+        model.addAttribute("fragmentContent", "adminDashboard/fragments/courseDetailContent :: courseDetail");
+        Optional<CourseDetailDTO> optionalDetail = courseService.getDetailCourse(id);
+        if (optionalDetail.isPresent()) {
+            model.addAttribute("detailCourse", optionalDetail.get());
+            return "adminDashboard/index";
+        } else {
+            return "redirect:/admin/course";
+        }
+    }
+
+    @PostMapping("/{courseId}/block")
+    public String blockCourse(@PathVariable Long courseId, 
+                              @RequestParam String reason,
+                              Principal principal,
+                              RedirectAttributes redirect) {
+        try {
+            Course course = courseRepository.findById(courseId)
+                    .orElseThrow(() -> new RuntimeException("Course not found"));
+            
+            // Khóa course bằng cách set status = "blocked"
+            course.setStatus("blocked");
+            courseRepository.save(course);
+            
+            // Gửi thông báo cho instructor
+            User instructor = course.getInstructor();
+            if (instructor != null) {
+                Notification notification = new Notification();
+                notification.setUser(instructor);
+                notification.setCourse(course);
+                notification.setMessage("Your course '" + course.getTitle() + "' has been blocked by admin. Reason: " + reason);
+                notification.setType("COURSE_BLOCKED");
+                notification.setStatus("unread");
+                notification.setSentAt(LocalDateTime.now());
+                notificationRepository.save(notification);
+            }
+            
+            redirect.addFlashAttribute("success", "Course has been blocked successfully");
+        } catch (Exception e) {
+            redirect.addFlashAttribute("error", "Failed to block course: " + e.getMessage());
+        }
+        
+        return "redirect:/admin/course/detail/" + courseId;
+    }
+
+    @PostMapping("/{courseId}/unblock")
+    public String unblockCourse(@PathVariable Long courseId,
+                                Principal principal,
+                                RedirectAttributes redirect) {
+        try {
+            Course course = courseRepository.findById(courseId)
+                    .orElseThrow(() -> new RuntimeException("Course not found"));
+            
+            // Mở khóa course bằng cách set status = "approved"
+            course.setStatus("approved");
+            courseRepository.save(course);
+            
+            // Gửi thông báo cho instructor
+            User instructor = course.getInstructor();
+            if (instructor != null) {
+                Notification notification = new Notification();
+                notification.setUser(instructor);
+                notification.setCourse(course);
+                notification.setMessage("Your course '" + course.getTitle() + "' has been unblocked by admin.");
+                notification.setType("COURSE_UNBLOCKED");
+                notification.setStatus("unread");
+                notification.setSentAt(LocalDateTime.now());
+                notificationRepository.save(notification);
+            }
+            
+            redirect.addFlashAttribute("success", "Course has been unblocked successfully");
+        } catch (Exception e) {
+            redirect.addFlashAttribute("error", "Failed to unblock course: " + e.getMessage());
+        }
+        
+        return "redirect:/admin/course/detail/" + courseId;
+    }
 }

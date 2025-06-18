@@ -10,13 +10,12 @@ import java.time.LocalDateTime;
 
 @Component
 public class ReportCourseMapper {
-    public Notification toNotification(ReportCourseDTO dto, User user, Course course) {
+    public Notification toNotification(ReportCourseDTO dto, User reporter, Course course) {
         Notification noti = new Notification();
-        noti.setUser(user);
         noti.setCourse(course);
-        noti.setMessage("Report Course: " + dto.getReason());
+        noti.setMessage("Course Report: " + course.getTitle() + " - Reported by " + reporter.getFullName() + " (" + reporter.getEmail() + ") - Reason: " + dto.getReason());
         noti.setType("REPORT_COURSE");
-        noti.setStatus("sent");
+        noti.setStatus("unread");
         noti.setSentAt(LocalDateTime.now());
         return noti;
     }

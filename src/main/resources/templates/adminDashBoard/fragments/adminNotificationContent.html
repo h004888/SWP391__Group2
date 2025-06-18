@@ -267,8 +267,8 @@
                     <!--                                    </div>-->
                     <!--                                </td>-->
                     <td>
-                                    <span th:class="'badge notification-type-badge ' + ${n.type == 'COURSE_REJECTION' ? 'bg-danger' : (n.type == 'ENROLLMENT' ? 'bg-success' : 'bg-info')}">
-                                        <i th:class="'fas me-1 ' + ${n.type == 'COURSE_REJECTION' ? 'fa-times-circle' : (n.type == 'ENROLLMENT' ? 'fa-user-plus' : 'fa-info-circle')}"></i>
+                                    <span th:class="'badge notification-type-badge ' + ${n.type == 'COURSE_REJECTION' ? 'bg-danger' : (n.type == 'ENROLLMENT' ? 'bg-success' : (n.type == 'REPORT_COURSE' ? 'bg-danger' : 'bg-info'))}">
+                                        <i th:class="'fas me-1 ' + ${n.type == 'COURSE_REJECTION' ? 'fa-times-circle' : (n.type == 'ENROLLMENT' ? 'fa-user-plus' : (n.type == 'REPORT_COURSE' ? 'fa-flag' : 'fa-info-circle'))}"></i>
                                         <span th:text="${n.type}"></span>
                                     </span>
                     </td>
@@ -297,13 +297,21 @@
                             <i class="fas fa-eye"></i>
                         </a>
 
-                        <!-- View course for non-rejection notifications -->
-<!--                        <a th:if="${n.type != 'COURSE_REJECTION'}"-->
-<!--                           th:href="@{/instructordashboard/courses/view(fromNotification=${n.notificationId})}"-->
-<!--                           class="btn btn-success btn-sm action-btn ms-1"-->
-<!--                           title="View Course">-->
-<!--                            <i class="fas fa-book-open"></i>-->
-<!--                        </a>-->
+                        <!-- View course for report notifications -->
+                        <a th:if="${n.type == 'REPORT_COURSE'}"
+                           th:href="@{/admin/course/detail/{courseId}(courseId=${n.course.courseId})}"
+                           class="btn btn-warning btn-sm action-btn ms-1"
+                           title="Review Course">
+                            <i class="fas fa-gavel"></i>
+                        </a>
+
+                        <!-- View course for other types -->
+                        <a th:if="${n.type != 'COURSE_REJECTION' and n.type != 'REPORT_COURSE'}"
+                           th:href="@{/instructordashboard/courses/view(fromNotification=${n.notificationId})}"
+                           class="btn btn-success btn-sm action-btn ms-1"
+                           title="View Course">
+                            <i class="fas fa-book-open"></i>
+                        </a>
                     </td>
                 </tr>
 

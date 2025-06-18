@@ -72,7 +72,7 @@ Page content START -->
                                 <li class="nav-item me-2 me-sm-4" role="presentation">
                                     <button class="nav-link mb-2 mb-md-0" id="course-pills-tab-5" data-bs-toggle="pill"
                                             data-bs-target="#course-pills-5" type="button" role="tab"
-                                            aria-controls="course-pills-5" aria-selected="false">FAQs </button>
+                                            aria-controls="course-pills-5" aria-selected="false">Report </button>
                                 </li>
                                 <!-- Tab item -->
                                 <li class="nav-item me-2 me-sm-4" role="presentation">
@@ -94,24 +94,24 @@ Page content START -->
                                     <h5 class="mb-3">Course Description</h5>
                                     <p class="mb-3">Welcome to the <strong> Digital Marketing Ultimate Course Bundle -
                                         12 Courses in 1 (Over 36 hours of content)</strong></p>
-                                    <p class="mb-3">In this practical hands-on training, you’re going to learn to become
+                                    <p class="mb-3">In this practical hands-on training, you're going to learn to become
                                         a digital marketing expert with this <strong> ultimate course bundle that
                                             includes 12 digital marketing courses in 1!</strong></p>
                                     <p class="mb-3">If you wish to find out the skills that should be covered in a basic
                                         digital marketing course syllabus in India or anywhere around the world, then
                                         reading this blog will help. Before we delve into the advanced <strong><a
                                                 href="#" class="text-reset text-decoration-underline">digital marketing
-                                            course</a></strong> syllabus, let’s look at the scope of digital
+                                            course</a></strong> syllabus, let's look at the scope of digital
                                         marketing and what the future holds.</p>
                                     <p class="mb-0">We focus a great deal on the understanding of behavioral psychology
                                         and influence triggers which are crucial for becoming a well rounded Digital
                                         Marketer. We understand that theory is important to build a solid foundation, we
-                                        understand that theory alone isn’t going to get the job done so that’s why this
+                                        understand that theory alone isn't going to get the job done so that's why this
                                         course is packed with practical hands-on examples that you can follow step by
                                         step.</p>
 
                                     <!-- List content -->
-                                    <h5 class="mt-4">What you’ll learn</h5>
+                                    <h5 class="mt-4">What you'll learn</h5>
                                     <ul class="list-group list-group-borderless mb-3">
                                         <li class="list-group-item h6 fw-light d-flex mb-0"><i
                                                 class="fas fa-check-circle text-success me-2"></i>Digital marketing
@@ -1427,38 +1427,53 @@ Page content START -->
                                 <!-- Content END -->
 
                                 <!-- Content START -->
+                                <!-- Tab: Report Course -->
                                 <div class="tab-pane fade" id="course-pills-5" role="tabpanel"
                                      aria-labelledby="course-pills-tab-5">
                                     <h5 class="mb-3">Report Course</h5>
-                                    <form th:action="@{/home/course/1}" method="post">
+
+                                    <!-- Success Message -->
+                                    <div th:if="${success}" class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        <span th:text="${success}"></span>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+
+                                    <!-- Error Message -->
+                                    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        <span th:text="${error}"></span>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+
+                                    <form id="reportForm">
                                         <input type="hidden" name="courseId" th:value="${course.courseId}" />
                                         <p class="mb-2">Please select the reason(s) for reporting this course:</p>
 
                                         <div class="form-check mb-2">
-                                            <input class="form-check-input" type="checkbox" id="reason1"
-                                                   name="reportReasons" value="Inappropriate content">
+                                            <input class="form-check-input" type="radio" id="reason1"
+                                                   name="reason" value="Inappropriate content" required>
                                             <label class="form-check-label" for="reason1">Inappropriate content</label>
                                         </div>
                                         <div class="form-check mb-2">
-                                            <input class="form-check-input" type="checkbox" id="reason2"
-                                                   name="reportReasons" value="Spam or misleading">
+                                            <input class="form-check-input" type="radio" id="reason2"
+                                                   name="reason" value="Spam or misleading" required>
                                             <label class="form-check-label" for="reason2">Spam or misleading</label>
                                         </div>
                                         <div class="form-check mb-2">
-                                            <input class="form-check-input" type="checkbox" id="reason3"
-                                                   name="reportReasons" value="Copyright infringement">
+                                            <input class="form-check-input" type="radio" id="reason3"
+                                                   name="reason" value="Copyright infringement" required>
                                             <label class="form-check-label" for="reason3">Copyright infringement</label>
                                         </div>
                                         <div class="form-check mb-2">
-                                            <input class="form-check-input" type="checkbox" id="reason4"
-                                                   name="reportReasons" value="Offensive language">
+                                            <input class="form-check-input" type="radio" id="reason4"
+                                                   name="reason" value="Offensive language" required>
                                             <label class="form-check-label" for="reason4">Offensive language</label>
                                         </div>
                                         <div class="form-check mb-3">
-                                            <input class="form-check-input" type="checkbox" id="reasonOther"
-                                                   name="reportReasons" value="Other">
-                                            <label class="form-check-label" for="reasonOther">Other (please
-                                                specify):</label>
+                                            <input class="form-check-input" type="radio" id="reasonOther"
+                                                   name="reason" value="Other" required>
+                                            <label class="form-check-label" for="reasonOther">Other (please specify):</label>
                                         </div>
 
                                         <div class="mb-3">
@@ -1469,301 +1484,333 @@ Page content START -->
                                         <button type="submit" class="btn btn-danger">Submit Report</button>
                                     </form>
 
-                                    <script>
-                                        document.addEventListener('DOMContentLoaded', function () {
-                                            var otherCheckbox = document.getElementById('reasonOther');
-                                            var otherInput = document.getElementById('otherReasonText');
-                                            if (otherCheckbox && otherInput) {
-                                                otherCheckbox.addEventListener('change', function () {
-                                                    otherInput.disabled = !this.checked;
-                                                    if (!this.checked) otherInput.value = '';
-                                                });
-                                            }
-                                        });
-                                    </script>
+                                    <!-- Report Message -->
+                                    <div id="reportMessage"></div>
                                 </div>
-                                <!-- Accordion END -->
-                            </div>
-                            <!-- Content END -->
 
-                            <!-- Content START -->
-                            <div class="tab-pane fade" id="course-pills-6" role="tabpanel"
-                                 aria-labelledby="course-pills-tab-6">
-                                <div class="row">
-                                    <div class="col-12">
-                                        <h5 class="mb-4">Ask Your Question</h5>
-                                        <div class="d-flex mb-4">
-                                            <!-- Avatar -->
-                                            <div class="avatar avatar-sm flex-shrink-0 me-2">
-                                                <a href="#">
-                                                    <img class="avatar-img rounded-circle"
-                                                         th:src="@{/assets/images/avatar/default.jpg}" alt="avatar">
-                                                </a>
+                                <!-- Tab: Comment Section -->
+                                <div class="tab-pane fade" id="course-pills-6" role="tabpanel"
+                                     aria-labelledby="course-pills-tab-6">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <h5 class="mb-4">Ask Your Question</h5>
+
+                                            <!-- Success Message -->
+                                            <div th:if="${success}" class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                                                <i class="fas fa-check-circle me-2"></i>
+                                                <span th:text="${success}"></span>
+                                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                                             </div>
 
-                                            <!-- Comment form -->
-                                            <form class="w-100 d-flex" th:action="@{/courseDetail/postComment}"
-                                                  method="post">
-                                                <input type="hidden" name="courseId" th:value="${course.courseId}" />
-                                                <textarea class="form-control pe-4 bg-light" name="comment" rows="1"
-                                                          placeholder="Add a comment..." required></textarea>
-                                                <button class="btn btn-primary ms-2 mb-0" type="submit">Post</button>
-                                            </form>
+                                            <!-- Error Message -->
+                                            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                                <span th:text="${error}"></span>
+                                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                            </div>
+
+                                            <!-- Comment Form -->
+                                            <div class="d-flex mb-4" th:if="${user != null}">
+                                                <div class="avatar avatar-sm flex-shrink-0 me-2">
+                                                    <img class="avatar-img rounded-circle"
+                                                         th:src="${user != null and user.profilePicture != null and user.profilePicture != ''} ? ${user.profilePicture} : @{/assets/images/avatar/default.jpg}"
+                                                         th:alt="${user != null ? user.fullName : 'User'}">
+                                                </div>
+                                                <form id="commentForm" class="w-100 d-flex">
+                                                    <input type="hidden" name="courseId" th:value="${course.courseId}" />
+                                                    <div class="flex-grow-1 me-2">
+                                                        <textarea class="form-control pe-4 bg-light" name="comment" rows="1"
+                                                                  placeholder="Add a comment..." required></textarea>
+                                                    </div>
+                                                    <button class="btn btn-primary mb-0" type="submit">Post</button>
+                                                </form>
+                                            </div>
+
+                                            <!-- Comment Message -->
+                                            <div id="commentMessage"></div>
+
+                                            <!-- Comment List -->
+                                            <div class="border p-2 p-sm-4 rounded-3 mb-4">
+                                                <div th:if="${#lists.isEmpty(reviews)}" class="text-center py-4">
+                                                    <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                                                    <p class="text-muted mb-0">Chưa có bình luận nào. Hãy là người đầu tiên bình luận!</p>
+                                                </div>
+                                                <ul class="list-unstyled mb-0 comment-list" th:if="${!#lists.isEmpty(reviews)}">
+                                                    <li class="comment-item" th:each="review : ${reviews}">
+                                                        <div class="d-flex mb-3">
+                                                            <div class="avatar avatar-sm flex-shrink-0 me-2">
+                                                                <img class="avatar-img rounded-circle"
+                                                                     th:src="${review.user.profilePicture != null and review.user.profilePicture != ''} ? ${review.user.profilePicture} : @{/assets/images/avatar/default.jpg}"
+                                                                     th:alt="${review.user.fullName}">
+                                                            </div>
+                                                            <div class="ms-2 w-100">
+                                                                <div class="bg-light p-3 rounded">
+                                                                    <div class="d-flex justify-content-between">
+                                                                        <div>
+                                                                            <h6 class="mb-1 lead fw-bold" th:text="${review.user.fullName}">Student Name</h6>
+                                                                            <!-- Rating stars (chỉ hiển thị nếu có rating) -->
+                                                                            <div class="mb-2" th:if="${review.rating != null}">
+                                                                                <span class="text-warning">
+                                                                                    <i class="fas fa-star" th:each="i : ${#numbers.sequence(1, review.rating)}"></i>
+                                                                                    <i class="far fa-star" th:each="i : ${#numbers.sequence(review.rating + 1, 5)}"></i>
+                                                                                </span>
+                                                                                <span class="ms-2 small text-muted" th:text="${review.rating + '/5'}">4/5</span>
+                                                                            </div>
+                                                                            <p class="h6 mb-0" th:text="${review.comment}">Comment content</p>
+                                                                        </div>
+                                                                        <div class="text-end">
+                                                                            <small class="text-muted" th:text="${#temporals.format(review.createdAt, 'dd/MM/yyyy HH:mm')}">5hr</small>
+                                                                            <!-- Edit button (chỉ hiển thị cho user đã comment) -->
+                                                                            <div th:if="${user != null and user.userId == review.user.userId}" class="mt-1">
+                                                                                <button class="btn btn-sm btn-outline-primary edit-comment-btn"
+                                                                                        th:data-review-id="${review.reviewId}"
+                                                                                        th:data-comment="${review.comment}">
+                                                                                    <i class="fas fa-edit"></i> Edit
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- Edit Comment Form (ẩn mặc định) -->
+                                                                <div class="edit-comment-form mt-2" th:id="'edit-form-' + ${review.reviewId}" style="display: none;">
+                                                                    <form class="edit-comment-ajax-form">
+                                                                        <input type="hidden" name="courseId" th:value="${course.courseId}" />
+                                                                        <input type="hidden" name="reviewId" th:value="${review.reviewId}" />
+                                                                        <div class="d-flex">
+                                                                            <textarea class="form-control me-2" name="comment" rows="2" required></textarea>
+                                                                            <div class="d-flex flex-column">
+                                                                                <button type="submit" class="btn btn-success btn-sm mb-1">
+                                                                                    <i class="fas fa-check"></i> Save
+                                                                                </button>
+                                                                                <button type="button" class="btn btn-secondary btn-sm cancel-edit-btn"
+                                                                                        th:data-review-id="${review.reviewId}">
+                                                                                    <i class="fas fa-times"></i> Cancel
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
+
+                                                                <!-- React + Report -->
+                                                                <ul class="nav nav-divider py-2 small">
+                                                                    <li class="nav-item"><a class="text-primary-hover" href="#">Like</a></li>
+                                                                    <li class="nav-item"><a class="text-primary-hover" href="#">Reply</a></li>
+                                                                    <li class="nav-item">
+                                                                        <!-- Report Comment Form -->
+                                                                        <button type="button"
+                                                                                class="btn btn-link text-danger p-0 report-comment-btn-modal"
+                                                                                th:data-course-id="${course.courseId}"
+                                                                                th:data-comment-id="${review.reviewId}"
+                                                                                th:if="${user != null and user.userId != review.user.userId}">
+                                                                            Report
+                                                                        </button>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Content END -->
+
+                            </div>
+                        </div>
+                        <!-- Tab contents END -->
+                    </div>
+                </div>
+                <!-- Main content END -->
+
+                <!-- Right sidebar START -->
+                <div class="col-lg-4 pt-5 pt-lg-0">
+                    <div class="row mb-5 mb-lg-0">
+                        <div class="col-md-6 col-lg-12">
+                            <!-- Video START -->
+                            <div class="card shadow p-2 mb-4 z-index-9">
+                                <div class="overflow-hidden rounded-3">
+                                    <img src="assets/images/courses/4by3/01.jpg" class="card-img" alt="course image">
+                                    <!-- Overlay -->
+                                    <div class="bg-overlay bg-dark opacity-6"></div>
+                                    <div class="card-img-overlay d-flex align-items-start flex-column p-3">
+                                        <!-- Video button and link -->
+                                        <div class="m-auto">
+                                            <a href="https://www.youtube.com/embed/tXHviS-4ygo"
+                                               class="btn btn-lg text-danger btn-round btn-white-shadow mb-0"
+                                               data-glightbox="" data-gallery="course-video">
+                                                <i class="fas fa-play"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Card body -->
+                                <div class="card-body px-3">
+                                    <!-- Info -->
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <!-- Price and time -->
+                                        <div>
+                                            <div class="d-flex align-items-center">
+                                                <h3 class="fw-bold mb-0 me-2">$150</h3>
+                                                <span class="text-decoration-line-through mb-0 me-2">$350</span>
+                                                <span class="badge text-bg-orange mb-0">60% off</span>
+                                            </div>
+                                            <p class="mb-0 text-danger"><i class="fas fa-stopwatch me-2"></i>5 days left
+                                                at this price</p>
                                         </div>
 
-                                        <!-- Comment list -->
-                                        <div class="border p-2 p-sm-4 rounded-3 mb-4">
-                                            <ul class="list-unstyled mb-0">
-                                                <li class="comment-item" th:each="review : ${reviews}">
-                                                    <div class="d-flex mb-3">
-                                                        <div class="avatar avatar-sm flex-shrink-0">
-                                                            <a href="#"><img class="avatar-img rounded-circle"
-                                                                             th:src="@{/assets/images/avatar/default.jpg}"
-                                                                             alt=""></a>
-                                                        </div>
-                                                        <div class="ms-2 w-100">
-                                                            <div class="bg-light p-3 rounded">
-                                                                <div class="d-flex justify-content-between">
-                                                                    <div>
-                                                                        <h6 class="mb-1 lead fw-bold"
-                                                                            th:text="${review.userName}">Student Name
-                                                                        </h6>
-                                                                        <p class="h6 mb-0" th:text="${review.comment}">
-                                                                            Comment content</p>
-                                                                    </div>
-                                                                    <small
-                                                                            th:text="${#dates.format(review.createdAt, 'HH:mm dd/MM/yyyy')}">5hr</small>
-                                                                </div>
-                                                            </div>
-
-                                                            <!-- React + Report -->
-                                                            <ul class="nav nav-divider py-2 small">
-                                                                <li class="nav-item"><a class="text-primary-hover"
-                                                                                        href="#">Like</a></li>
-                                                                <li class="nav-item"><a class="text-primary-hover"
-                                                                                        href="#">Reply</a></li>
-                                                                <li class="nav-item">
-                                                                    <!-- Report comment form -->
-                                                                    <form th:action="@{/courseDetail/reportComment}"
-                                                                          method="post" class="d-inline">
-                                                                        <input type="hidden" name="courseId"
-                                                                               th:value="${course.courseId}" />
-                                                                        <input type="hidden" name="reviewId"
-                                                                               th:value="${review.courseId}" />
-                                                                        <input type="hidden" name="reason"
-                                                                               value="Reported by user" />
-                                                                        <button type="submit"
-                                                                                class="btn btn-link text-danger p-0">Report</button>
-                                                                    </form>
-                                                                </li>
-                                                            </ul>
-                                                        </div>
-                                                    </div>
-                                                </li>
+                                        <!-- Share button with dropdown -->
+                                        <div class="dropdown">
+                                            <!-- Share button -->
+                                            <a href="#" class="btn btn-sm btn-light rounded small" role="button"
+                                               id="dropdownShare" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="fas fa-fw fa-share-alt"></i>
+                                            </a>
+                                            <!-- dropdown button -->
+                                            <ul class="dropdown-menu dropdown-w-sm dropdown-menu-end min-w-auto shadow rounded"
+                                                aria-labelledby="dropdownShare">
+                                                <li><a class="dropdown-item" href="#"><i
+                                                        class="fab fa-twitter-square me-2"></i>Twitter</a></li>
+                                                <li><a class="dropdown-item" href="#"><i
+                                                        class="fab fa-facebook-square me-2"></i>Facebook</a></li>
+                                                <li><a class="dropdown-item" href="#"><i
+                                                        class="fab fa-linkedin me-2"></i>LinkedIn</a></li>
+                                                <li><a class="dropdown-item" href="#"><i
+                                                        class="fas fa-copy me-2"></i>Copy link</a></li>
                                             </ul>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                            <!-- Comment item END -->
 
-                        </div>
-
-                    </div>
-                </div>
-                <!-- Content END -->
-
-            </div>
-        </div>
-        <!-- Tab contents END -->
-        </div>
-        </div>
-        <!-- Main content END -->
-
-        <!-- Right sidebar START -->
-        <div class="col-lg-4 pt-5 pt-lg-0">
-            <div class="row mb-5 mb-lg-0">
-                <div class="col-md-6 col-lg-12">
-                    <!-- Video START -->
-                    <div class="card shadow p-2 mb-4 z-index-9">
-                        <div class="overflow-hidden rounded-3">
-                            <img src="assets/images/courses/4by3/01.jpg" class="card-img" alt="course image">
-                            <!-- Overlay -->
-                            <div class="bg-overlay bg-dark opacity-6"></div>
-                            <div class="card-img-overlay d-flex align-items-start flex-column p-3">
-                                <!-- Video button and link -->
-                                <div class="m-auto">
-                                    <a href="https://www.youtube.com/embed/tXHviS-4ygo"
-                                       class="btn btn-lg text-danger btn-round btn-white-shadow mb-0" data-glightbox=""
-                                       data-gallery="course-video">
-                                        <i class="fas fa-play"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Card body -->
-                        <div class="card-body px-3">
-                            <!-- Info -->
-                            <div class="d-flex justify-content-between align-items-center">
-                                <!-- Price and time -->
-                                <div>
-                                    <div class="d-flex align-items-center">
-                                        <h3 class="fw-bold mb-0 me-2">$150</h3>
-                                        <span class="text-decoration-line-through mb-0 me-2">$350</span>
-                                        <span class="badge text-bg-orange mb-0">60% off</span>
+                                    <!-- Buttons -->
+                                    <div class="mt-3 d-sm-flex justify-content-sm-between">
+                                        <a href="#" class="btn btn-outline-primary mb-0">Free trial</a>
+                                        <a href="#" class="btn btn-success mb-0">Buy course</a>
                                     </div>
-                                    <p class="mb-0 text-danger"><i class="fas fa-stopwatch me-2"></i>5 days left at this
-                                        price</p>
-                                </div>
-
-                                <!-- Share button with dropdown -->
-                                <div class="dropdown">
-                                    <!-- Share button -->
-                                    <a href="#" class="btn btn-sm btn-light rounded small" role="button"
-                                       id="dropdownShare" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="fas fa-fw fa-share-alt"></i>
-                                    </a>
-                                    <!-- dropdown button -->
-                                    <ul class="dropdown-menu dropdown-w-sm dropdown-menu-end min-w-auto shadow rounded"
-                                        aria-labelledby="dropdownShare">
-                                        <li><a class="dropdown-item" href="#"><i
-                                                class="fab fa-twitter-square me-2"></i>Twitter</a></li>
-                                        <li><a class="dropdown-item" href="#"><i
-                                                class="fab fa-facebook-square me-2"></i>Facebook</a></li>
-                                        <li><a class="dropdown-item" href="#"><i
-                                                class="fab fa-linkedin me-2"></i>LinkedIn</a></li>
-                                        <li><a class="dropdown-item" href="#"><i class="fas fa-copy me-2"></i>Copy
-                                            link</a></li>
-                                    </ul>
                                 </div>
                             </div>
+                            <!-- Video END -->
 
-                            <!-- Buttons -->
-                            <div class="mt-3 d-sm-flex justify-content-sm-between">
-                                <a href="#" class="btn btn-outline-primary mb-0">Free trial</a>
-                                <a href="#" class="btn btn-success mb-0">Buy course</a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Video END -->
-
-                    <!-- Course info START -->
-                    <div class="card card-body shadow p-4 mb-4">
-                        <!-- Title -->
-                        <h4 class="mb-3">This course includes</h4>
-                        <ul class="list-group list-group-borderless">
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-								<span class="h6 fw-light mb-0"><i
-                                        class="fas fa-fw fa-book-open text-primary"></i>Lectures</span>
-                                <span>30</span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-								<span class="h6 fw-light mb-0"><i
-                                        class="fas fa-fw fa-clock text-primary"></i>Duration</span>
-                                <span>4h 50m</span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-								<span class="h6 fw-light mb-0"><i
-                                        class="fas fa-fw fa-signal text-primary"></i>Skills</span>
-                                <span>Beginner</span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-								<span class="h6 fw-light mb-0"><i
-                                        class="fas fa-fw fa-globe text-primary"></i>Language</span>
-                                <span>English</span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-								<span class="h6 fw-light mb-0"><i
-                                        class="fas fa-fw fa-user-clock text-primary"></i>Deadline</span>
-                                <span>Nov 30 2021</span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-								<span class="h6 fw-light mb-0"><i
-                                        class="fas fa-fw fa-medal text-primary"></i>Certificate</span>
-                                <span>Yes</span>
-                            </li>
-                        </ul>
-                    </div>
-                    <!-- Course info END -->
-                </div>
-
-                <div class="col-md-6 col-lg-12">
-                    <!-- Recently Viewed START -->
-                    <div class="card card-body shadow p-4 mb-4">
-                        <!-- Title -->
-                        <h4 class="mb-3">Recently Viewed</h4>
-                        <!-- Course item START -->
-                        <div class="row gx-3 mb-3">
-                            <!-- Image -->
-                            <div class="col-4">
-                                <img class="rounded" src="assets/images/courses/4by3/21.jpg" alt="">
-                            </div>
-                            <!-- Info -->
-                            <div class="col-8">
-                                <h6 class="mb-0"><a href="#">Fundamentals of Business Analysis</a></h6>
-                                <ul class="list-group list-group-borderless mt-1 d-flex justify-content-between">
-                                    <li class="list-group-item px-0 d-flex justify-content-between">
-                                        <span class="text-success">$130</span>
-                                        <span class="h6 fw-light">4.5<i
-                                                class="fas fa-star text-warning ms-1"></i></span>
+                            <!-- Course info START -->
+                            <div class="card card-body shadow p-4 mb-4">
+                                <!-- Title -->
+                                <h4 class="mb-3">This course includes</h4>
+                                <ul class="list-group list-group-borderless">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+										<span class="h6 fw-light mb-0"><i
+                                                class="fas fa-fw fa-book-open text-primary"></i>Lectures</span>
+                                        <span>30</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+										<span class="h6 fw-light mb-0"><i
+                                                class="fas fa-fw fa-clock text-primary"></i>Duration</span>
+                                        <span>4h 50m</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+										<span class="h6 fw-light mb-0"><i
+                                                class="fas fa-fw fa-signal text-primary"></i>Skills</span>
+                                        <span>Beginner</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+										<span class="h6 fw-light mb-0"><i
+                                                class="fas fa-fw fa-globe text-primary"></i>Language</span>
+                                        <span>English</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+										<span class="h6 fw-light mb-0"><i
+                                                class="fas fa-fw fa-user-clock text-primary"></i>Deadline</span>
+                                        <span>Nov 30 2021</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+										<span class="h6 fw-light mb-0"><i
+                                                class="fas fa-fw fa-medal text-primary"></i>Certificate</span>
+                                        <span>Yes</span>
                                     </li>
                                 </ul>
                             </div>
+                            <!-- Course info END -->
                         </div>
-                        <!-- Course item END -->
 
-                        <!-- Course item START -->
-                        <div class="row gx-3">
-                            <!-- Image -->
-                            <div class="col-4">
-                                <img class="rounded" src="assets/images/courses/4by3/18.jpg" alt="">
+                        <div class="col-md-6 col-lg-12">
+                            <!-- Recently Viewed START -->
+                            <div class="card card-body shadow p-4 mb-4">
+                                <!-- Title -->
+                                <h4 class="mb-3">Recently Viewed</h4>
+                                <!-- Course item START -->
+                                <div class="row gx-3 mb-3">
+                                    <!-- Image -->
+                                    <div class="col-4">
+                                        <img class="rounded" src="assets/images/courses/4by3/21.jpg" alt="">
+                                    </div>
+                                    <!-- Info -->
+                                    <div class="col-8">
+                                        <h6 class="mb-0"><a href="#">Fundamentals of Business Analysis</a></h6>
+                                        <ul
+                                                class="list-group list-group-borderless mt-1 d-flex justify-content-between">
+                                            <li class="list-group-item px-0 d-flex justify-content-between">
+                                                <span class="text-success">$130</span>
+                                                <span class="h6 fw-light">4.5<i
+                                                        class="fas fa-star text-warning ms-1"></i></span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <!-- Course item END -->
+
+                                <!-- Course item START -->
+                                <div class="row gx-3">
+                                    <!-- Image -->
+                                    <div class="col-4">
+                                        <img class="rounded" src="assets/images/courses/4by3/18.jpg" alt="">
+                                    </div>
+                                    <!-- Info -->
+                                    <div class="col-8">
+                                        <h6 class="mb-0"><a href="#">The Complete Video Production Bootcamp</a></h6>
+                                        <ul
+                                                class="list-group list-group-borderless mt-1 d-flex justify-content-between">
+                                            <li class="list-group-item px-0 d-flex justify-content-between">
+                                                <span class="text-success">$150</span>
+                                                <span class="h6 fw-light">4.0<i
+                                                        class="fas fa-star text-warning ms-1"></i></span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <!-- Course item END -->
                             </div>
-                            <!-- Info -->
-                            <div class="col-8">
-                                <h6 class="mb-0"><a href="#">The Complete Video Production Bootcamp</a></h6>
-                                <ul class="list-group list-group-borderless mt-1 d-flex justify-content-between">
-                                    <li class="list-group-item px-0 d-flex justify-content-between">
-                                        <span class="text-success">$150</span>
-                                        <span class="h6 fw-light">4.0<i
-                                                class="fas fa-star text-warning ms-1"></i></span>
-                                    </li>
+                            <!-- Recently Viewed END -->
+
+                            <!-- Tags START -->
+                            <div class="card card-body shadow p-4">
+                                <h4 class="mb-3">Popular Tags</h4>
+                                <ul class="list-inline mb-0">
+                                    <li class="list-inline-item"> <a class="btn btn-outline-light btn-sm"
+                                                                     href="#">blog</a> </li>
+                                    <li class="list-inline-item"> <a class="btn btn-outline-light btn-sm"
+                                                                     href="#">business</a> </li>
+                                    <li class="list-inline-item"> <a class="btn btn-outline-light btn-sm"
+                                                                     href="#">theme</a> </li>
+                                    <li class="list-inline-item"> <a class="btn btn-outline-light btn-sm"
+                                                                     href="#">bootstrap</a> </li>
+                                    <li class="list-inline-item"> <a class="btn btn-outline-light btn-sm" href="#">data
+                                        science</a> </li>
+                                    <li class="list-inline-item"> <a class="btn btn-outline-light btn-sm" href="#">web
+                                        development</a> </li>
+                                    <li class="list-inline-item"> <a class="btn btn-outline-light btn-sm"
+                                                                     href="#">tips</a> </li>
+                                    <li class="list-inline-item"> <a class="btn btn-outline-light btn-sm"
+                                                                     href="#">machine learning</a> </li>
                                 </ul>
                             </div>
+                            <!-- Tags END -->
                         </div>
-                        <!-- Course item END -->
-                    </div>
-                    <!-- Recently Viewed END -->
-
-                    <!-- Tags START -->
-                    <div class="card card-body shadow p-4">
-                        <h4 class="mb-3">Popular Tags</h4>
-                        <ul class="list-inline mb-0">
-                            <li class="list-inline-item"> <a class="btn btn-outline-light btn-sm" href="#">blog</a>
-                            </li>
-                            <li class="list-inline-item"> <a class="btn btn-outline-light btn-sm" href="#">business</a>
-                            </li>
-                            <li class="list-inline-item"> <a class="btn btn-outline-light btn-sm" href="#">theme</a>
-                            </li>
-                            <li class="list-inline-item"> <a class="btn btn-outline-light btn-sm" href="#">bootstrap</a>
-                            </li>
-                            <li class="list-inline-item"> <a class="btn btn-outline-light btn-sm" href="#">data
-                                science</a> </li>
-                            <li class="list-inline-item"> <a class="btn btn-outline-light btn-sm" href="#">web
-                                development</a> </li>
-                            <li class="list-inline-item"> <a class="btn btn-outline-light btn-sm" href="#">tips</a>
-                            </li>
-                            <li class="list-inline-item"> <a class="btn btn-outline-light btn-sm" href="#">machine
-                                learning</a> </li>
-                        </ul>
-                    </div>
-                    <!-- Tags END -->
+                    </div><!-- Row End -->
                 </div>
-            </div><!-- Row End -->
-        </div>
-        <!-- Right sidebar END -->
+                <!-- Right sidebar END -->
 
-        </div><!-- Row END -->
+            </div><!-- Row END -->
         </div>
     </section>
     <!-- =======================
@@ -2033,4 +2080,435 @@ Listed courses START -->
     <!-- =======================
 Listed courses END -->
 
+    <!-- Modal Report Comment -->
+    <div class="modal fade" id="reportCommentModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form id="reportCommentForm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Report Comment</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="courseId" id="reportCommentCourseId" />
+                        <input type="hidden" name="commentId" id="reportCommentId" />
+                        <p class="mb-2">Please select the reason for reporting this comment:</p>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" id="cmtReason1" name="reason" value="Spam or advertising" required>
+                            <label class="form-check-label" for="cmtReason1">Spam or advertising</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" id="cmtReason2" name="reason" value="Offensive language" required>
+                            <label class="form-check-label" for="cmtReason2">Offensive language</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" id="cmtReason3" name="reason" value="Harassment or bullying" required>
+                            <label class="form-check-label" for="cmtReason3">Harassment or bullying</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" id="cmtReason4" name="reason" value="Inappropriate content" required>
+                            <label class="form-check-label" for="cmtReason4">Inappropriate content</label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" id="cmtReasonOther" name="reason" value="Other" required>
+                            <label class="form-check-label" for="cmtReasonOther">Other (please specify):</label>
+                        </div>
+                        <div class="mb-3">
+                            <input type="text" class="form-control" id="cmtOtherReasonText" name="otherReason" placeholder="Enter your reason here" disabled>
+                        </div>
+                        <div id="reportCommentMsg"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Submit Report</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Comment AJAX
+            const commentForm = document.getElementById('commentForm');
+            if (commentForm) {
+                commentForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const formData = new FormData(commentForm);
+                    const data = {};
+                    formData.forEach((value, key) => { data[key] = value; });
+
+                    fetch('/api/course/' + data.courseId + '/comment', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    .then(res => res.json())
+                    .then(json => {
+                        const msgDiv = document.getElementById('commentMessage');
+                        if (json.success) {
+                            msgDiv.innerHTML = `<div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <i class="fas fa-check-circle me-2"></i>${json.success}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>`;
+                            commentForm.reset();
+                            // Reload comment list
+                            loadComments(data.courseId);
+                        } else if (json.error) {
+                            msgDiv.innerHTML = `<div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="fas fa-exclamation-triangle me-2"></i>${json.error}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>`;
+                        }
+                    })
+                    .catch(() => {
+                        document.getElementById('commentMessage').innerHTML = `<div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Error! Please try again.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>`;
+                    });
+                });
+            }
+
+            // Report Course AJAX
+            const reportForm = document.getElementById('reportForm');
+            if (reportForm) {
+                const otherRadio = document.getElementById('reasonOther');
+                const otherInput = document.getElementById('otherReasonText');
+
+                if (otherRadio && otherInput) {
+                    otherRadio.addEventListener('change', function () {
+                        otherInput.disabled = !this.checked;
+                        if (!this.checked) otherInput.value = '';
+                    });
+                }
+
+                reportForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const formData = new FormData(reportForm);
+                    const data = {};
+                    formData.forEach((value, key) => { data[key] = value; });
+
+                    // Validate reason
+                    const selectedReason = document.querySelector('input[name="reason"]:checked');
+                    if (!selectedReason) {
+                        alert('Please select a reason for reporting this course.');
+                        return false;
+                    }
+
+                    if (selectedReason.value === 'Other') {
+                        const otherText = document.getElementById('otherReasonText').value.trim();
+                        if (!otherText) {
+                            alert('Please specify the reason for reporting.');
+                            return false;
+                        }
+                        data.reason = otherText;
+                    } else {
+                        data.reason = selectedReason.value;
+                    }
+
+                    fetch('/api/course/' + data.courseId + '/report', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    .then(res => res.json())
+                    .then(json => {
+                        const msgDiv = document.getElementById('reportMessage');
+                        if (json.success) {
+                            msgDiv.innerHTML = `<div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <i class="fas fa-check-circle me-2"></i>${json.success}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>`;
+                            reportForm.reset();
+                            otherInput.disabled = true;
+                        } else if (json.error) {
+                            msgDiv.innerHTML = `<div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="fas fa-exclamation-triangle me-2"></i>${json.error}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>`;
+                        }
+                    })
+                    .catch(() => {
+                        document.getElementById('reportMessage').innerHTML = `<div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Error! Please try again.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>`;
+                    });
+                });
+            }
+
+            // Report Comment AJAX
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('report-comment-btn') || e.target.closest('.report-comment-btn')) {
+                    const btn = e.target.classList.contains('report-comment-btn') ? e.target : e.target.closest('.report-comment-btn');
+                    const courseId = btn.getAttribute('data-course-id');
+                    const commentId = btn.getAttribute('data-comment-id');
+
+                    if (confirm('Are you sure you want to report this comment?')) {
+                        const data = {
+                            courseId: courseId,
+                            commentId: commentId
+                        };
+
+                        fetch('/api/course/' + courseId + '/comment/' + commentId + '/report', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(data)
+                        })
+                        .then(res => res.json())
+                        .then(json => {
+                            if (json.success) {
+                                alert(json.success);
+                            } else if (json.error) {
+                                alert(json.error);
+                            }
+                        })
+                        .catch(() => {
+                            alert('Error! Please try again.');
+                        });
+                    }
+                }
+            });
+
+            // Edit comment functionality
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('edit-comment-btn') || e.target.closest('.edit-comment-btn')) {
+                    var btn = e.target.classList.contains('edit-comment-btn') ? e.target : e.target.closest('.edit-comment-btn');
+                    var reviewId = btn.getAttribute('data-review-id');
+                    var comment = btn.getAttribute('data-comment');
+
+                    // Hide all edit forms first
+                    document.querySelectorAll('.edit-comment-form').forEach(function(form) {
+                        form.style.display = 'none';
+                    });
+
+                    // Show the edit form for this comment
+                    var editForm = document.getElementById('edit-form-' + reviewId);
+                    if (editForm) {
+                        editForm.style.display = 'block';
+                        var textarea = editForm.querySelector('textarea[name="comment"]');
+                        textarea.value = comment;
+                        textarea.focus();
+                    }
+                }
+
+                if (e.target.classList.contains('cancel-edit-btn') || e.target.closest('.cancel-edit-btn')) {
+                    var btn = e.target.classList.contains('cancel-edit-btn') ? e.target : e.target.closest('.cancel-edit-btn');
+                    var reviewId = btn.getAttribute('data-review-id');
+
+                    // Hide the edit form
+                    var editForm = document.getElementById('edit-form-' + reviewId);
+                    if (editForm) {
+                        editForm.style.display = 'none';
+                    }
+                }
+            });
+
+            // Function to reload comments
+            function loadComments(courseId) {
+                fetch('/api/course/' + courseId + '/comments')
+                .then(res => res.json())
+                .then(json => {
+                    if (json.comments) {
+                        // Update comment list in DOM
+                        const commentList = document.querySelector('.comment-list');
+                        if (commentList) {
+                            // Clear existing comments
+                            commentList.innerHTML = '';
+
+                            // Add new comments
+                            json.comments.forEach(comment => {
+                                const commentHtml = createCommentHTML(comment);
+                                commentList.insertAdjacentHTML('beforeend', commentHtml);
+                            });
+                        }
+                    }
+                })
+                .catch(() => {
+                    console.log('Error loading comments');
+                });
+            }
+
+            // Function to create comment HTML
+            function createCommentHTML(comment) {
+                const ratingStars = comment.rating ?
+                    `<div class="mb-2">
+                        <span class="text-warning">
+                            ${'<i class="fas fa-star"></i>'.repeat(comment.rating)}
+                            ${'<i class="far fa-star"></i>'.repeat(5 - comment.rating)}
+                        </span>
+                        <span class="ms-2 small text-muted">${comment.rating}/5</span>
+                    </div>` : '';
+
+                return `
+                    <li class="comment-item">
+                        <div class="d-flex mb-3">
+                            <div class="avatar avatar-sm flex-shrink-0 me-2">
+                                <img class="avatar-img rounded-circle"
+                                     src="${comment.user.profilePicture || '/assets/images/avatar/default.jpg'}"
+                                     alt="${comment.user.fullName}">
+                            </div>
+                            <div class="ms-2 w-100">
+                                <div class="bg-light p-3 rounded">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="mb-1 lead fw-bold">${comment.user.fullName}</h6>
+                                            ${ratingStars}
+                                            <p class="h6 mb-0">${comment.comment}</p>
+                                        </div>
+                                        <div class="text-end">
+                                            <small class="text-muted">${new Date(comment.createdAt).toLocaleString()}</small>
+                                            <div class="mt-1">
+                                                <button class="btn btn-sm btn-outline-primary edit-comment-btn"
+                                                        data-review-id="${comment.reviewId}"
+                                                        data-comment="${comment.comment}">
+                                                    <i class="fas fa-edit"></i> Edit
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <ul class="nav nav-divider py-2 small">
+                                    <li class="nav-item"><a class="text-primary-hover" href="#">Like</a></li>
+                                    <li class="nav-item"><a class="text-primary-hover" href="#">Reply</a></li>
+                                    <li class="nav-item">
+                                        <button type="button"
+                                                class="btn btn-link text-danger p-0 report-comment-btn-modal"
+                                                data-course-id="${comment.courseId}"
+                                                data-comment-id="${comment.reviewId}">
+                                            Report
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                `;
+            }
+
+            // Edit comment AJAX
+            document.addEventListener('submit', function(e) {
+                if (e.target.classList.contains('edit-comment-ajax-form')) {
+                    e.preventDefault();
+                    const formData = new FormData(e.target);
+                    const data = {};
+                    formData.forEach((value, key) => { data[key] = value; });
+
+                    fetch('/api/course/' + data.courseId + '/comment/' + data.reviewId + '/update', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    .then(res => res.json())
+                    .then(json => {
+                        if (json.success) {
+                            // Hide edit form
+                            const editForm = document.getElementById('edit-form-' + data.reviewId);
+                            if (editForm) {
+                                editForm.style.display = 'none';
+                            }
+                            // Update comment text in DOM
+                            const commentText = document.querySelector(`[data-review-id="${data.reviewId}"]`).closest('.comment-item').querySelector('.h6');
+                            if (commentText) {
+                                commentText.textContent = data.comment;
+                            }
+                            // Show success message
+                            const msgDiv = document.getElementById('commentMessage');
+                            msgDiv.innerHTML = `<div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <i class="fas fa-check-circle me-2"></i>${json.success}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>`;
+                        } else if (json.error) {
+                            alert(json.error);
+                        }
+                    })
+                    .catch(() => {
+                        alert('Error! Please try again.');
+                    });
+                }
+            });
+
+            // Modal Report Comment
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('report-comment-btn-modal') || e.target.closest('.report-comment-btn-modal')) {
+                    const btn = e.target.classList.contains('report-comment-btn-modal') ? e.target : e.target.closest('.report-comment-btn-modal');
+                    const courseId = btn.getAttribute('data-course-id');
+                    const commentId = btn.getAttribute('data-comment-id');
+                    document.getElementById('reportCommentCourseId').value = courseId;
+                    document.getElementById('reportCommentId').value = commentId;
+                    // Reset form
+                    document.getElementById('reportCommentForm').reset();
+                    document.getElementById('cmtOtherReasonText').disabled = true;
+                    document.getElementById('reportCommentMsg').innerHTML = '';
+                    // Show modal
+                    const modal = new bootstrap.Modal(document.getElementById('reportCommentModal'));
+                    modal.show();
+                }
+            });
+
+            // Enable/disable other reason input
+            document.addEventListener('change', function(e) {
+                if (e.target.name === 'reason') {
+                    document.getElementById('cmtOtherReasonText').disabled = (e.target.value !== 'Other');
+                    if (e.target.value !== 'Other') document.getElementById('cmtOtherReasonText').value = '';
+                }
+            });
+
+            // Submit report comment AJAX
+            const reportCommentForm = document.getElementById('reportCommentForm');
+            if (reportCommentForm) {
+                reportCommentForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const formData = new FormData(reportCommentForm);
+                    const data = {};
+                    formData.forEach((value, key) => { data[key] = value; });
+                    // Validate reason
+                    const selectedReason = reportCommentForm.querySelector('input[name="reason"]:checked');
+                    if (!selectedReason) {
+                        document.getElementById('reportCommentMsg').innerHTML = '<div class="alert alert-danger">Please select a reason.</div>';
+                        return;
+                    }
+                    if (selectedReason.value === 'Other') {
+                        const otherText = document.getElementById('cmtOtherReasonText').value.trim();
+                        if (!otherText) {
+                            document.getElementById('reportCommentMsg').innerHTML = '<div class="alert alert-danger">Please specify the reason.</div>';
+                            return;
+                        }
+                        data.reason = otherText;
+                    } else {
+                        data.reason = selectedReason.value;
+                    }
+                    // AJAX
+                    fetch(`/api/course/${data.courseId}/comment/${data.commentId}/report`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    })
+                    .then(res => res.json())
+                    .then(json => {
+                        if (json.success) {
+                            document.getElementById('reportCommentMsg').innerHTML = `<div class="alert alert-success">${json.success}</div>`;
+                            setTimeout(() => {
+                                bootstrap.Modal.getInstance(document.getElementById('reportCommentModal')).hide();
+                            }, 1200);
+                        } else {
+                            document.getElementById('reportCommentMsg').innerHTML = `<div class="alert alert-danger">${json.error || 'Error!'}</div>`;
+                        }
+                    })
+                    .catch(() => {
+                        document.getElementById('reportCommentMsg').innerHTML = '<div class="alert alert-danger">Error! Please try again.</div>';
+                    });
+                });
+            }
+        });
+    </script>
 </main>
