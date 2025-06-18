@@ -1,170 +1,229 @@
-<div class="container" th:fragment="listsCourseContent">
+<div class="container" th:fragment="listsCourseContent" id="courseContentContainer">
     <div class="row">
-        <!-- Left sidebar START -->
-
-        <!-- Left sidebar END -->
-
         <!-- Main content START -->
         <div class="col-xl-12">
-            <!-- Card START -->
+            <!-- Toast notifications -->
             <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
-                <div th:if="${successMessage}" class="toast align-items-center text-white bg-success border-0 show" role="alert">
+                <div th:if="${successMessage}" class="toast align-items-center text-white bg-success border-0 show"
+                     role="alert">
                     <div class="d-flex">
                         <div class="toast-body">
                             <span th:text="${successMessage}"></span>
                         </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                                aria-label="Close"></button>
                     </div>
                 </div>
-                <div th:if="${errorMessage}" class="toast align-items-center text-white bg-danger border-0 show" role="alert">
+                <div th:if="${errorMessage}" class="toast align-items-center text-white bg-danger border-0 show"
+                     role="alert">
                     <div class="d-flex">
                         <div class="toast-body">
                             <span th:text="${errorMessage}"></span>
                         </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                                aria-label="Close"></button>
                     </div>
                 </div>
             </div>
 
             <div class="card border bg-transparent rounded-3">
                 <!-- Card header START -->
-                <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0">My Courses List</h3>
-                    <a href="/instructordashboard/createcourse/coursebasic" class="btn btn-success">
-                        <i class="bi bi-plus-circle me-1"></i> Create Course
-                    </a>
+                <div class="card-header bg-transparent border-bottom">
+                    <div class="row align-items-center">
+                        <div class="col-md-4">
+                            <h3 class="mb-0">My Courses List</h3>
+                        </div>
+                        <div class="col-md-4">
+                            <form class="rounded position-relative" method="get"
+                                  action="/instructordashboard/courses/searchcourse">
+                                <input class="form-control pe-5 bg-transparent" type="search" name="title"
+                                       placeholder="Search courses..." aria-label="Search">
+                                <button class="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset"
+                                        type="submit">
+                                    <i class="fas fa-search fs-6"></i>
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a href="/instructordashboard/createcourse/coursebasic" class="btn btn-success">
+                                <i class="bi bi-plus-circle me-1"></i> Create Course
+                            </a>
+                        </div>
+                    </div>
                 </div>
                 <!-- Card header END -->
 
                 <!-- Card body START -->
                 <div class="card-body">
-
-                    <!-- Search and select START -->
+                    <!-- Filter Form START -->
                     <div class="row g-3 align-items-center justify-content-between mb-4">
-                        <!-- Search -->
-                        <div class="col-md-6">
-                            <form class="rounded position-relative" method="get" action="/instructordashboard/courses/searchcourse">
-                                <input class="form-control pe-5 bg-transparent" type="search" name="title" placeholder="Search" aria-label="Search">
-                                <button class="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset" type="submit">
-                                    <i class="fas fa-search fs-6 "></i>
-                                </button>
-                            </form>
-                        </div>
+                        <div class="col-12">
+                            <form id="filterForm" class="row g-3">
+                                <!-- Category filter -->
+                                <div class="col-md-4">
+                                    <label for="filterCategory" class="form-label">Category</label>
+                                    <select class="form-select" name="category" id="filterCategory">
+                                        <option value="">All Categories</option>
+                                        <option th:each="cate : ${categories}"
+                                                th:value="${cate.id}"
+                                                th:text="${cate.name}"
+                                                th:selected="${cate.id == selectedCategory}"></option>
+                                    </select>
+                                </div>
 
-                        <div class="col-md-3">
-                            <div class="form-floating">
-                                <select class="form-select" id="courseCategory" name="categoryName">
-                                    <option value="" th:selected="${categoryName == null or categoryName == ''}">Find All</option>
-                                    <option th:each="cat : ${categories}"
-                                            th:value="${cat.name}"
-                                            th:text="${cat.name}"
-                                            th:selected="${cat.name == categoryName}">
-                                    </option>
-                                </select>
-                                <label for="courseCategory">Category</label>
-                            </div>
-                        </div>
-                        <!-- Select option -->
-                        <div class="col-md-3">
-                            <!-- Short by filter -->
-                            <form>
-                                <select class="form-select js-choice border-0 z-index-9 bg-transparent"
-                                        aria-label=".form-select-sm">
-                                    <option value="">Sort by</option>
-                                    <option>Free</option>
-                                    <option>Newest</option>
-                                    <option>Oldest</option>
-                                </select>
+                                <!-- Status filter -->
+                                <div class="col-md-4">
+                                    <label for="courseStatus" class="form-label">Status</label>
+                                    <select class="form-select" id="courseStatus" name="status">
+                                        <option value="">All Status</option>
+                                        <option value="draft" th:selected="${status == 'draft'}">Draft</option>
+                                        <option value="approved" th:selected="${status == 'approved'}">Approved</option>
+                                        <option value="pending" th:selected="${status == 'pending'}">Pending</option>
+                                        <option value="resubmit" th:selected="${status == 'resubmit'}">Resubmit</option>
+                                        <option value="blocked" th:selected="${status == 'blocked'}">Blocked</option>
+                                        <option value="live" th:selected="${status == 'live'}">Live</option>
+                                        <option value="rejected" th:selected="${status == 'rejected'}">Rejected</option>
+                                        <option value="unknown" th:selected="${status == 'unknown'}">Unknown</option>
+                                    </select>
+                                </div>
+
+                                <!-- Price filter -->
+                                <div class="col-md-4">
+                                    <label for="filterPrice" class="form-label">Price Range</label>
+                                    <select class="form-select" name="price" id="filterPrice">
+                                        <option value="">All Prices</option>
+                                        <option value="free" th:selected="${selectedPrice == 'free'}">Free</option>
+                                        <option value="paid" th:selected="${selectedPrice == 'paid'}">Paid</option>
+                                        <option value="low" th:selected="${selectedPrice == 'low'}">Below $50</option>
+                                        <option value="mid" th:selected="${selectedPrice == 'mid'}">$50 - $100</option>
+                                        <option value="high" th:selected="${selectedPrice == 'high'}">Above $100
+                                        </option>
+                                    </select>
+                                </div>
                             </form>
                         </div>
                     </div>
-                    <!-- Search and select END -->
+                    <!-- Filter Form END -->
+
+                    <!-- Loading indicator -->
+                    <div id="loadingIndicator" class="text-center py-4" style="display: none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 mb-0">Loading courses...</p>
+                    </div>
 
                     <!-- Course list table START -->
-                    <div class="table-responsive border-0">
-                        <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                    <div class="table-responsive border-0" id="courseTableContainer">
+                        <table class="table table-hover align-middle p-4 mb-0">
                             <!-- Table head -->
-                            <thead>
+                            <thead class="table-dark">
                             <tr>
                                 <th scope="col" class="border-0 rounded-start">Course Title</th>
-                                <th scope="col" class="border-0">Category Name</th>
-                                <th scope="col" class="border-0">Course Level</th>
+                                <th scope="col" class="border-0">Category</th>
+                                <th scope="col" class="border-0">Level</th>
                                 <th scope="col" class="border-0">Enrolled</th>
                                 <th scope="col" class="border-0">Status</th>
                                 <th scope="col" class="border-0">Price</th>
-                                <th scope="col" class="border-0">IsFree</th>
-                                <th scope="col" class="border-0 rounded-end">Action</th>
+                                <th scope="col" class="border-0 rounded-end">Actions</th>
                             </tr>
                             </thead>
 
                             <!-- Table body START -->
-                            <tbody>
+                            <tbody id="courseTableBody">
                             <!-- Table item -->
                             <tr th:each="course : ${courses}">
                                 <!-- Course item -->
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <!-- Image -->
-                                        <div class="w-80px">
-                                            <img th:src="@{${course.courseImg}}" class="rounded" alt="">
+                                        <div class="flex-shrink-0">
+                                            <img th:src="@{${course.courseImg}}" class="rounded" alt="Course Image"
+                                                 style="width: 80px; height: 60px; object-fit: contain;">
                                         </div>
-                                        <div class="mb-0 ms-2">
+                                        <div class="ms-3">
                                             <!-- Title -->
-                                            <h6>
+                                            <h6 class="mb-1">
                                                 <a th:href="@{|/instructordashboard/courses/detail/${course.courseId}|}"
-                                                   th:utext="${course.title}"></a>
+                                                   th:text="${course.title}" class="text-decoration-none"></a>
                                             </h6>
                                             <!-- Info -->
-                                            <div class="d-sm-flex">
-                                                <p class="h6 fw-light mb-0 small me-3">
-                                                    <i class="fas fa-table text-orange me-2"></i>
-                                                    <span th:text="${course.totalLessons} + ' lesson'"></span>
-                                                </p>
-                                            </div>
+                                            <small class="text-muted">
+                                                <i class="fas fa-table text-warning me-1"></i>
+                                                <span th:text="${course.totalLessons} + ' lessons'"></span>
+                                            </small>
                                         </div>
                                     </div>
                                 </td>
+
                                 <!-- Category Name item -->
                                 <td>
-                                    <span class="badge bg-primary text-white rounded-pill"
-                                          th:text="${course.categoryName}"></span>
+                                    <span class="badge bg-primary rounded-pill" th:text="${course.categoryName}"></span>
                                 </td>
+
+                                <!-- Course Level -->
                                 <td>
                                     <span class="badge bg-success bg-opacity-10 text-success"
                                           th:text="${course.courseLevel}"></span>
                                 </td>
+
                                 <!-- Enrolled item -->
-                                <td class="text-center text-sm-start">0</td>
+                                <td class="text-center">
+                                    <span class="fw-bold">0</span>
+                                </td>
+
                                 <!-- Status item -->
                                 <td>
                                     <div th:switch="${course.status}">
-                                        <span th:case="draft" class="badge bg-secondary">Draft</span>
+                                        <span th:case="'draft'" class="badge bg-secondary">Draft</span>
                                         <span th:case="'published'" class="badge bg-success">Published</span>
                                         <span th:case="'pending'" class="badge bg-warning text-dark">Pending</span>
                                         <span th:case="'rejected'" class="badge bg-danger">Rejected</span>
+                                        <span th:case="'approved'" class="badge bg-info">Approved</span>
+                                        <span th:case="'live'" class="badge bg-success">Live</span>
+                                        <span th:case="'blocked'" class="badge bg-danger">Blocked</span>
+                                        <span th:case="'resubmit'" class="badge bg-warning">Resubmit</span>
+                                        <span th:case="null" class="badge bg-secondary">Unknown</span>
+                                        <span th:case="*" class="badge bg-secondary">Unknown</span>
                                     </div>
                                 </td>
 
                                 <!-- Price item -->
-                                <td th:utext="${course.price}"></td>
-                                <!--is free-->
                                 <td>
-                                    <span th:if="${course.isFree == true}" class="badge bg-success">Free</span>
-                                    <span th:if="${course.isFree == false}" class="badge bg-danger">Not Free</span>
-                                    <span th:if="${course.isFree == null}" class="badge bg-secondary">Unknown</span>
+                                    <span class="fw-bold text-success"
+                                          th:text="${course.price == 0 ? 'Free' : '$' + course.price}"></span>
                                 </td>
+
                                 <!-- Action item -->
                                 <td>
-                                    <a th:href="@{/instructordashboard/createcourse/coursebasic(courseId=${course.courseId})}" class="btn btn-sm btn-success-soft btn-round me-1 mb-0" title="Edit"
-                                       th:if="${course.status == 'draft'}">
-                                        <i class="far fa-fw fa-edit"></i>
-                                    </a>
-                                    <!-- Delete Confirmation Modal -->
-                                    <form th:action="@{/instructordashboard/createcourse/deletecourse}" method="post" onsubmit="return confirm('Are you sure you want to delete this course?');">
-                                        <input type="hidden" name="courseId" th:value="${course.courseId}" />
-                                        <button type="submit" class="btn btn-sm btn-danger-soft btn-round mb-0"><i
-                                                class="fas fa-fw fa-times"></i></button>
-                                    </form>
+                                    <div class="d-flex gap-1">
+                                        <!-- Edit button -->
+                                        <a th:href="@{/instructordashboard/createcourse/coursebasic(courseId=${course.courseId})}"
+                                           class="btn btn-sm btn-outline-primary"
+                                           title="Edit Course"
+                                           th:if="${course.status == 'draft' or course.status == null}">
+                                            <i class="far fa-edit"></i>
+                                        </a>
+
+                                        <!-- Delete button -->
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-danger"
+                                                title="Delete Course"
+                                                th:data-id="${course.courseId}" th:data-title="${course.title}" onclick="deleteCourse(this.getAttribute('data-id'), this.getAttribute('data-title'))">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Empty state -->
+                            <tr th:if="${#lists.isEmpty(courses)}">
+                                <td colspan="7" class="text-center py-4">
+                                    <div class="text-muted">
+                                        <i class="fas fa-book fa-3x mb-3 opacity-50"></i>
+                                        <h5>No courses found</h5>
+                                        <p>Try adjusting your filters or create a new course.</p>
+                                    </div>
                                 </td>
                             </tr>
                             </tbody>
@@ -172,141 +231,95 @@
                         </table>
                     </div>
                     <!-- Course list table END -->
-                   
+
                     <!-- Pagination START -->
-                    <div class="d-sm-flex justify-content-sm-between align-items-sm-center mt-4 mt-sm-3">
-                        <!-- Content -->
-                        <p class="mb-0 text-center text-sm-start">
+                    <div class="d-flex justify-content-between align-items-center mt-4" th:if="${totalElements > 0}">
+                        <!-- Results info -->
+                        <div class="text-muted">
                             Showing
-                            <span th:text="${currentPage * size + 1}"></span>
+                            <span class="fw-bold" th:text="${currentPage * size + 1}"></span>
                             to
-                            <span th:text="${(currentPage + 1) * size > totalElements ? totalElements : (currentPage + 1) * size}"></span>
+                            <span class="fw-bold"
+                                  th:text="${(currentPage + 1) * size > totalElements ? totalElements : (currentPage + 1) * size}"></span>
                             of
-                            <span th:text="${totalElements}"></span>
+                            <span class="fw-bold" th:text="${totalElements}"></span>
                             entries
-                        </p>
+                        </div>
+
                         <!-- Pagination -->
-                        <nav class="d-flex justify-content-center mb-0" aria-label="navigation"
-                             th:if="${totalPages > 1}">
-                            <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
-                                <!-- Previous -->
-                                <li class="page-item mb-0" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <nav aria-label="Course pagination" th:if="${totalPages > 1}">
+                            <ul class="pagination pagination-sm mb-0">
+                                <!-- Previous button -->
+                                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
                                     <a class="page-link"
-                                       th:href="@{|/instructordashboard/courses?id=${userId}&page=${currentPage > 0 ? currentPage - 1 : 0}|}"
+                                       href="#"
+                                       th:data-page="${currentPage > 0 ? currentPage - 1 : 0}"
                                        tabindex="-1">
                                         <i class="fas fa-angle-left"></i>
                                     </a>
                                 </li>
+
                                 <!-- Page numbers -->
-                                <li class="page-item mb-0"
+                                <li class="page-item"
                                     th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                                    th:classappend="${i == currentPage} ? ' active' : ''">
+                                    th:classappend="${i == currentPage} ? 'active' : ''">
                                     <a class="page-link"
-                                       th:href="@{|/instructordashboard/courses?id=${userId}&page=${i}|}"
+                                       href="#"
+                                       th:data-page="${i}"
                                        th:text="${i + 1}"></a>
                                 </li>
-                                <!-- Next -->
-                                <li class="page-item mb-0"
-                                    th:classappend="${currentPage + 1 == totalPages} ? 'disabled'">
+
+                                <!-- Next button -->
+                                <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
                                     <a class="page-link"
-                                       th:href="@{|/instructordashboard/courses?id=${userId}&page=${currentPage + 1 < totalPages ? currentPage + 1 : currentPage}|}">
+                                       href="#"
+                                       th:data-page="${currentPage + 1 < totalPages ? currentPage + 1 : currentPage}">
                                         <i class="fas fa-angle-right"></i>
                                     </a>
                                 </li>
                             </ul>
                         </nav>
-                        <!-- Card body START -->
-
                     </div>
-                    <!-- Card END -->
+                    <!-- Pagination END -->
                 </div>
-                <!-- Main content END -->
-            </div><!-- Row END -->
+                <!-- Card body END -->
+            </div>
+            <!-- Card END -->
+        </div>
+        <!-- Main content END -->
+    </div>
 
-            <script src="assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-
-            <!-- Vendors -->
-            <script src="assets/vendor/choices/js/choices.min.js"></script>
-
-            <!-- Template Functions -->
-            <script src="assets/js/functions.js"></script>
-            <!-- Favicon -->
-            <link rel="shortcut icon" href="assets/images/favicon.ico">
-
-            <!-- Google Font -->
-            <link rel="preconnect" href="https://fonts.googleapis.com/">
-            <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
-            <link rel="stylesheet"
-                  href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&amp;family=Roboto:wght@400;500;700&amp;display=swap">
-
-            <!-- Plugins CSS -->
-            <link rel="stylesheet" type="text/css" href="assets/vendor/font-awesome/css/all.min.css">
-            <link rel="stylesheet" type="text/css" href="assets/vendor/bootstrap-icons/bootstrap-icons.css">
-            <link rel="stylesheet" type="text/css" href="assets/vendor/choices/css/choices.min.css">
-
-            <!-- Theme CSS -->
-            <link rel="stylesheet" type="text/css" href="assets/css/style.css">
-            <script>
-                window.addEventListener('DOMContentLoaded', (event) => {
-                    const toastElList = [].slice.call(document.querySelectorAll('.toast'));
-                    toastElList.forEach(function (toastEl) {
-                        const toast = new bootstrap.Toast(toastEl, { delay: 5000 });
-                        toast.show();
-                    });
-                });
-            </script>
-
-            <script th:inline="javascript">
-                document.addEventListener('DOMContentLoaded', function() {
-                    const categorySelect = document.getElementById('courseCategory');
-                    
-                    categorySelect.addEventListener('change', function() {
-                        const selectedCategory = this.value;
-                        const userId = /*[[${userId}]]*/ 2;
-                        
-                        // Show loading indicator
-                        const tableBody = document.querySelector('table tbody');
-                        tableBody.innerHTML = '<tr><td colspan="8" class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>';
-                        
-                        // Make Ajax request to the existing endpoint
-                        fetch(`/instructordashboard/courses?id=${userId}&categoryName=${selectedCategory}&page=0&size=7`, {
-                            method: 'GET',
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest'
-                            }
-                        })
-                        .then(response => response.text())
-                        .then(html => {
-                            // Create a temporary div to parse the HTML
-                            const tempDiv = document.createElement('div');
-                            tempDiv.innerHTML = html;
-                            
-                            // Extract the table content from the response
-                            const newTableBody = tempDiv.querySelector('table tbody');
-                            const newPagination = tempDiv.querySelector('.pagination');
-                            
-                            // Update the table and pagination
-                            document.querySelector('table tbody').innerHTML = newTableBody.innerHTML;
-                            const paginationContainer = document.querySelector('.d-flex.justify-content-center.mb-0');
-                            if (paginationContainer) {
-                                paginationContainer.innerHTML = newPagination ? newPagination.innerHTML : '';
-                            }
-                            
-                            // Update the "Showing X to Y of Z entries" text
-                            const showingText = tempDiv.querySelector('.mb-0.text-center.text-sm-start');
-                            if (showingText) {
-                                document.querySelector('.mb-0.text-center.text-sm-start').innerHTML = showingText.innerHTML;
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            tableBody.innerHTML = '<tr><td colspan="8" class="text-center text-danger">Error loading data. Please try again.</td></tr>';
-                        });
-                    });
-                });
-            </script>
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the course "<span id="courseTitle"></span>"?</p>
+                    <p class="text-danger"><small>This action cannot be undone.</small></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form id="deleteForm" method="post" action="/instructordashboard/createcourse/deletecourse"
+                          style="display: inline;">
+                        <input type="hidden" name="courseId" id="deleteCourseId">
+                        <button type="submit" class="btn btn-danger">Delete Course</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
-    <!-- Pagination END -->
-</div>
+
+    <!-- Scripts -->
+    <script th:src="@{/js/instructorFilter.js}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
 </div>

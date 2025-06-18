@@ -232,13 +232,13 @@
                                 <div class="accordion-item border-0 mb-3" th:each="chapter : ${chapters}">
                                     <h2 class="accordion-header">
                                         <button class="accordion-button bg-light rounded-3" type="button"
-                                            data-bs-toggle="collapse" th:data-bs-target="${'#section' + chapter.id}">
+                                            data-bs-toggle="collapse" th:data-bs-target="${'#section' + chapter.chapterId}">
                                             <i class="bi bi-collection me-2"></i>
                                             <span th:text="${chapter.title}"></span>
                                         </button>
                                     </h2>
 
-                                    <div th:id="${'section' + chapter.id}" class="accordion-collapse collapse show"
+                                    <div th:id="${'section' + chapter.chapterId}" class="accordion-collapse collapse show"
                                         data-bs-parent="#lessonsAccordion">
                                         <div class="accordion-body p-0" th:if="${chapter.lessons != null}">
                                             <div class="list-group list-group-flush">

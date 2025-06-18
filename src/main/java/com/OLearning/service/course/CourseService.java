@@ -27,6 +27,7 @@ public interface CourseService {
 //    List<CourseDTO> filterCourses(String keyword, Integer categoryId, String price, String status);
 
     Page<CourseDTO> filterCoursesWithPagination(String keyword, Integer category, String price, String status, int page, int size);
+    Page<CourseDTO> filterCoursesInstructorManage(Long userId, Integer categoryId, String status, String price, int page, int size);
     void deleteCourse(Long courseId);
     Course findCourseById(Long courseId);
     Course createCourseStep1(Long courseId, AddCourseStep1DTO addCourseStep1DTO);
@@ -36,8 +37,4 @@ public interface CourseService {
     Page<CourseDTO> searchCourse(Long userId, String title, int page, int size);
     Course createCourseMedia(Long courseId, CourseMediaDTO CourseMediaDTO);
     void saveCourse(Long courseId);
-    Page<CourseDTO> filterCourseByCategoryName(String categoryName, Long userId, int page, int size);
-    //list bao gom course
-    //page no lai bao gon list, moi page la 1 list
-
 }

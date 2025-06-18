@@ -1,21 +1,16 @@
-package com.OLearning.service;
+package com.OLearning.service.servicecommon;
 
 import com.OLearning.dto.lesson.LessonTitleDTO;
-import com.OLearning.dto.lesson.LessonVideoDTO;
 import com.OLearning.entity.Chapter;
 import com.OLearning.entity.Lesson;
 import com.OLearning.mapper.lesson.LessonMapper;
 import com.OLearning.repository.ChapterRepository;
 import com.OLearning.repository.LessonRepository;
-import com.OLearning.repository.VideoRepository;
 import com.OLearning.service.chapter.ChapterService;
-import com.OLearning.service.lesson.LessonService;
-import com.OLearning.service.video.VideoService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service

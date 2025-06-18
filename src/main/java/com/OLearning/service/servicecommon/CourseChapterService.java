@@ -1,6 +1,5 @@
-package com.OLearning.service;
+package com.OLearning.service.servicecommon;
 
-import com.OLearning.repository.ChapterRepository;
 import com.OLearning.service.chapter.ChapterService;
 import com.OLearning.service.course.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;

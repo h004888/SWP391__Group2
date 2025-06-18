@@ -1,4 +1,4 @@
-package com.OLearning.controller;
+package com.OLearning.controller.instructorDashBoard;
 
 import com.OLearning.repository.CourseRepository;
 import com.OLearning.service.cloudinary.UploadFile;

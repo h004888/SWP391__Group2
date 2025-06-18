@@ -1,4 +1,4 @@
-package com.OLearning.controller;
+package com.OLearning.controller.instructorDashBoard;
 
 import com.OLearning.dto.chapter.ChapterDTO;
 import com.OLearning.dto.course.AddCourseStep1DTO;
@@ -7,17 +7,20 @@ import com.OLearning.dto.course.CourseMediaDTO;
 import com.OLearning.dto.lesson.LessonTitleDTO;
 import com.OLearning.dto.quiz.QuizDTO;
 import com.OLearning.dto.quiz.QuizQuestionDTO;
+import com.OLearning.dto.user.UserDTO;
 import com.OLearning.dto.video.VideoDTO;
 import com.OLearning.entity.*;
 import com.OLearning.repository.LessonRepository;
-import com.OLearning.service.CourseChapterService;
-import com.OLearning.service.LessonChapterService;
-import com.OLearning.service.LessonQuizService;
+import com.OLearning.security.CustomUserDetails;
 import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.chapter.ChapterService;
 import com.OLearning.service.course.CourseService;
 import com.OLearning.service.lesson.LessonService;
 import com.OLearning.service.quiz.QuizService;
+import com.OLearning.service.servicecommon.CourseChapterService;
+import com.OLearning.service.servicecommon.LessonChapterService;
+import com.OLearning.service.servicecommon.LessonQuizService;
+import com.OLearning.service.user.UserService;
 import com.OLearning.service.video.VideoService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,6 +28,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
@@ -59,6 +64,8 @@ public class ControlllerAddCourseUpdate {
     private LessonRepository lessonRepository;
     @Autowired
     private CourseChapterService courseChapterService;
+    @Autowired
+    private UserService userService;
 
     //dashhboard
     @GetMapping()
@@ -70,14 +77,17 @@ public class ControlllerAddCourseUpdate {
 
     //viewAllCourses
     @GetMapping("/courses")
-    public String viewCourse(
-            @RequestParam(name = "id", defaultValue = "2") Long id,
-            @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "7") int size,
-            Model model, ModelMap modelMap) {
+    public String viewCourse(@RequestParam(name = "id", defaultValue = "2") Long id,
+                             @RequestParam(name = "page", defaultValue = "0") int page,
+                             @RequestParam(name = "size", defaultValue = "7") int size,
+                             Model model, ModelMap modelMap) {
+        //lay ra course tu userId dang nhap
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long userId = userDetails.getUserId();
+
         Page<CourseDTO> coursePage = courseService.findCourseByUserId(id, page, size);
         modelMap.put("courses", coursePage.getContent());
-        modelMap.put("userId", id);
         modelMap.put("currentPage", page);
         modelMap.put("totalPages", coursePage.getTotalPages());
         modelMap.put("totalElements", coursePage.getTotalElements());
@@ -95,9 +105,11 @@ public class ControlllerAddCourseUpdate {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "7") int size,
             Model model, ModelMap modelMap) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long userId = userDetails.getUserId();
         Page<CourseDTO> coursePage = courseService.searchCourse(id, title, page, size);
         modelMap.put("courses", coursePage.getContent());
-        modelMap.put("userId", id);
         modelMap.put("currentPage", page);
         modelMap.put("totalPages", coursePage.getTotalPages());
         modelMap.put("totalElements", coursePage.getTotalElements());
@@ -107,24 +119,46 @@ public class ControlllerAddCourseUpdate {
         return "instructorDashboard/indexUpdate";
     }
 
-    //filter by category name
-    @GetMapping("/courses/filtercategory")
-    public String filterCourseByCategoryName(
+    //filter Course
+    @GetMapping("courses/filter")
+    public String filterCourses(
             @RequestParam(name = "id", defaultValue = "2") Long id,
-            @RequestParam(required = false) String categoryName,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String price,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "7") int size,
-            Model model, ModelMap modelMap) {
-        Page<CourseDTO> coursePage = courseService.filterCourseByCategoryName(categoryName, id, page, size);
-        modelMap.put("courses", coursePage.getContent());
-        modelMap.put("userId", id);
-        modelMap.put("currentPage", page);
-        modelMap.put("totalPages", coursePage.getTotalPages());
-        modelMap.put("totalElements", coursePage.getTotalElements());
-        modelMap.put("size", size);
-        model.addAttribute("categories", categoryService.findAll());
-        model.addAttribute("fragmentContent", "instructorDashboard/fragments/coursesContent :: listsCourseContent");
-        return "instructorDashboard/indexUpdate";
+            Model model) {
+
+        // Lấy ID của người dùng hiện tại
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long userId = userDetails.getUserId();
+
+        Integer categoryId = null;
+        if (category != null && !category.isEmpty()) {
+            try {
+                categoryId = Integer.parseInt(category);
+            } catch (NumberFormatException e) {
+            }
+        }
+
+        Page<CourseDTO> coursePage = courseService.filterCoursesInstructorManage(
+                id, categoryId, status, price, page, size);
+
+        List<Category> categories = categoryService.findAll();
+
+        model.addAttribute("courses", coursePage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", coursePage.getTotalPages());
+        model.addAttribute("totalElements", coursePage.getTotalElements());
+        model.addAttribute("size", size);
+        model.addAttribute("categories", categories);
+        model.addAttribute("selectedCategory", categoryId);
+        model.addAttribute("status", status);
+        model.addAttribute("selectedPrice", price);
+
+        return "instructorDashboard/fragments/coursesContent :: listsCourseContent";
     }
     //delete course
     @PostMapping("/createcourse/deletecourse")
@@ -134,6 +168,7 @@ public class ControlllerAddCourseUpdate {
         redirectAttributes.addFlashAttribute("errorMessage", "course deleted successfully.");
         return "redirect:../courses";
     }
+
     //viewCourseDetail
     @GetMapping("/courses/detail/{courseId}")
     public String viewCourseDetail(@PathVariable("courseId") Long courseId, Model model) {
@@ -200,7 +235,6 @@ public class ControlllerAddCourseUpdate {
     @PostMapping("/createcourse/coursemedia")
     public String saveCourseBasic(@Valid @ModelAttribute("coursestep1") AddCourseStep1DTO courseStep1,
                                   BindingResult result,
-                                  @RequestParam(name = "id", defaultValue = "2") Long id,
                                   @RequestParam(name = "action") String action,
                                   Model model,
                                   HttpServletResponse response) {
@@ -239,7 +273,6 @@ public class ControlllerAddCourseUpdate {
     @PostMapping("/createcourse/coursecontent")
     public String saveCourseMedia(@Valid @ModelAttribute("coursestep2") CourseMediaDTO courseMediaDTO,
                                   BindingResult result,
-                                  @RequestParam(name = "id", defaultValue = "2") Long id,
                                   Model model,
                                   @RequestParam(name = "action") String action,
                                   HttpServletRequest request) {
@@ -352,7 +385,7 @@ public class ControlllerAddCourseUpdate {
             if (lessons != null && lessons.size() > 0) {
                 totalLesson += lessons.size();
                 for (Lesson lesson : lessons) {
-                    if(lesson.getDuration() != null) {
+                    if (lesson.getDuration() != null) {
                         totalDuration += lesson.getDuration();
                     }
                 }
@@ -453,7 +486,7 @@ public class ControlllerAddCourseUpdate {
             if (lessons != null && lessons.size() > 0) {
                 totalLesson += lessons.size();
                 for (Lesson lesson : lessons) {
-                    if(lesson.getDuration() != null) {
+                    if (lesson.getDuration() != null) {
                         totalDuration += lesson.getDuration();
                     }
                 }
@@ -577,7 +610,7 @@ public class ControlllerAddCourseUpdate {
             if (lessons != null && lessons.size() > 0) {
                 totalLesson += lessons.size();
                 for (Lesson lesson : lessons) {
-                    if(lesson.getDuration() != null) {
+                    if (lesson.getDuration() != null) {
                         totalDuration += lesson.getDuration();
                     }
                 }
