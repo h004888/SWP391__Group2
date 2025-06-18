@@ -150,7 +150,7 @@
                                             <!-- Info -->
                                             <small class="text-muted">
                                                 <i class="fas fa-table text-warning me-1"></i>
-                                                <span th:text="${course.totalLessons} + ' lessons'"></span>
+                                                <span th:text="${course.totalLessons ?: 0} + ' lesson'"></span>
                                             </small>
                                         </div>
                                     </div>
@@ -302,12 +302,13 @@
                     <p class="text-danger"><small>This action cannot be undone.</small></p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <form id="deleteForm" method="post" action="/instructordashboard/createcourse/deletecourse"
-                          style="display: inline;">
-                        <input type="hidden" name="courseId" id="deleteCourseId">
-                        <button type="submit" class="btn btn-danger">Delete Course</button>
-                    </form>
+                    <div class="d-flex gap-2" style="min-width: 300px;">
+                        <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancel</button>
+                        <form id="deleteForm" method="post" action="/instructordashboard/createcourse/deletecourse" style="width: 100%;">
+                            <input type="hidden" name="courseId" id="deleteCourseId">
+                            <button type="submit" class="btn btn-danger w-100">Delete Course</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

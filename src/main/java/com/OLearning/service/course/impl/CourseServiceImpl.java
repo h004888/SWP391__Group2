@@ -176,9 +176,6 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Page<CourseDTO> filterCoursesInstructorManage(Long userId, Integer categoryId, String status, String price, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        System.out.println("Service - CategoryId: " + categoryId);
-        System.out.println("Service - Status: " + status);
-        System.out.println("Service - Price: " + price);
         Page<Course> coursePage;
 
         if (categoryId != null || (status != null && !status.isEmpty()) || (price != null && !price.isEmpty())) {

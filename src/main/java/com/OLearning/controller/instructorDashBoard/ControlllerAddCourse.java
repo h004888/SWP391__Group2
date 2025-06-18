@@ -7,7 +7,6 @@ import com.OLearning.dto.course.CourseMediaDTO;
 import com.OLearning.dto.lesson.LessonTitleDTO;
 import com.OLearning.dto.quiz.QuizDTO;
 import com.OLearning.dto.quiz.QuizQuestionDTO;
-import com.OLearning.dto.user.UserDTO;
 import com.OLearning.dto.video.VideoDTO;
 import com.OLearning.entity.*;
 import com.OLearning.repository.LessonRepository;
@@ -43,7 +42,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/instructordashboard")
-public class ControlllerAddCourseUpdate {
+public class ControlllerAddCourse {
     @Autowired
     private CourseService courseService;
     @Autowired
@@ -77,8 +76,7 @@ public class ControlllerAddCourseUpdate {
 
     //viewAllCourses
     @GetMapping("/courses")
-    public String viewCourse(@RequestParam(name = "id", defaultValue = "2") Long id,
-                             @RequestParam(name = "page", defaultValue = "0") int page,
+    public String viewCourse(@RequestParam(name = "page", defaultValue = "0") int page,
                              @RequestParam(name = "size", defaultValue = "7") int size,
                              Model model, ModelMap modelMap) {
         //lay ra course tu userId dang nhap
@@ -86,7 +84,7 @@ public class ControlllerAddCourseUpdate {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
 
-        Page<CourseDTO> coursePage = courseService.findCourseByUserId(id, page, size);
+        Page<CourseDTO> coursePage = courseService.findCourseByUserId(userId, page, size);
         modelMap.put("courses", coursePage.getContent());
         modelMap.put("currentPage", page);
         modelMap.put("totalPages", coursePage.getTotalPages());
@@ -100,7 +98,6 @@ public class ControlllerAddCourseUpdate {
     //search course
     @GetMapping("courses/searchcourse")
     public String searchCourse(
-            @RequestParam(name = "id", defaultValue = "2") Long id,
             @RequestParam(required = false) String title,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "7") int size,
@@ -108,7 +105,7 @@ public class ControlllerAddCourseUpdate {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
-        Page<CourseDTO> coursePage = courseService.searchCourse(id, title, page, size);
+        Page<CourseDTO> coursePage = courseService.searchCourse(userId, title, page, size);
         modelMap.put("courses", coursePage.getContent());
         modelMap.put("currentPage", page);
         modelMap.put("totalPages", coursePage.getTotalPages());
@@ -122,7 +119,6 @@ public class ControlllerAddCourseUpdate {
     //filter Course
     @GetMapping("courses/filter")
     public String filterCourses(
-            @RequestParam(name = "id", defaultValue = "2") Long id,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String price,
@@ -144,7 +140,7 @@ public class ControlllerAddCourseUpdate {
         }
 
         Page<CourseDTO> coursePage = courseService.filterCoursesInstructorManage(
-                id, categoryId, status, price, page, size);
+                userId, categoryId, status, price, page, size);
 
         List<Category> categories = categoryService.findAll();
 

@@ -46,4 +46,6 @@ public interface UserService {
     List<UserDTO> getTopInstructorsByCourseCount(int limit);
     
     UserDTO getUserByEmail(String username);
+
+    User findById(Long id);
 }

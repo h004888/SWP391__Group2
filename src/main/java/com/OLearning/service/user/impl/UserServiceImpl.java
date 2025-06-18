@@ -181,6 +181,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User findById(Long id) {
+        Optional<User> userOptional = userRepository.findById(id);
+        if (userOptional.isEmpty()) {
+            return null;
+        }
+        return userOptional.get();
+    }
+
+    @Override
     public boolean deleteAcc(Long id) {
         Optional<User> userOptional = userRepository.findById(id);
         if(userOptional.isEmpty()) {

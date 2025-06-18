@@ -1,6 +1,8 @@
 package com.OLearning.repository;
 
 import com.OLearning.entity.Course;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,6 +14,7 @@ import jakarta.transaction.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @Transactional
@@ -36,4 +39,14 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
 
     @Query("SELECT COUNT(e) FROM Enrollment e WHERE e.status = 'completed'")
     Long countCompletedEnrollments();
+
+    @Query("SELECT e FROM Enrollment e WHERE e.user.userId = :userId AND e.course.courseId = :courseId")
+    Enrollment findByUserIdAndCourseId(@Param("userId") Long userId, @Param("courseId") Long courseId);
+
+    //muốn làm theo phân trang
+    //query lấy tất cả enrolled by Id
+    @Query("SELECT e FROM Enrollment e WHERE e.course.instructor.userId = :userId")
+    Page<Enrollment> findEnrollmentsByInstructorId(@Param("userId") Long userId, Pageable pageable);
+    @Query("SELECT e FROM Enrollment e WHERE e.enrollmentId = :enrollmentId")
+    Optional<Enrollment> findByEnrollmentId(int enrollmentId);
 }

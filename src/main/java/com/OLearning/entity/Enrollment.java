@@ -21,8 +21,8 @@ import lombok.ToString;
 public class Enrollment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "EnrollmentID")
-    private int enrollmentID;
+    @Column(name = "EnrollmentId")
+    private int enrollmentId;
 
     @ManyToOne
     @JoinColumn(name = "UserID", nullable = false)
@@ -37,7 +37,7 @@ public class Enrollment {
     private Date enrollmentDate;
 
     @Column(name = "Progress")
-    private BigDecimal progress;
+    private double progress;
 
     @Column(name = "Status", length = 20)
     private String status;

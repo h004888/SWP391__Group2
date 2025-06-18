@@ -128,6 +128,11 @@ function deleteCourse(courseId, courseTitle) {
 $('#deleteForm').on('submit', function(e) {
     e.preventDefault();
 
+    // Lưu lại các giá trị filter hiện tại để tải lại sau khi xóa
+    let category = $('#filterCategory').val();
+    let status = $('#courseStatus').val();
+    let price = $('#filterPrice').val();
+
     $.ajax({
         url: $(this).attr('action'),
         type: 'POST',
@@ -136,15 +141,55 @@ $('#deleteForm').on('submit', function(e) {
             // Close modal
             bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
 
-            // Refresh the course list
-            filterCourses();
+            // Tải lại danh sách khóa học với filter hiện tại
+            $.ajax({
+                url: '/instructordashboard/courses/filter',
+                type: 'GET',
+                data: {
+                    category: category,
+                    status: status,
+                    price: price,
+                    page: 0
+                },
+                success: function(response) {
+                    // Cập nhật nội dung
+                    $('#courseContentContainer').html(response);
 
-            // Show success message
-            showToast('Course deleted successfully!', 'success');
+                    // Hiển thị thông báo thành công
+                    let toastHtml = `
+                        <div class="toast align-items-center text-white bg-success border-0" role="alert">
+                            <div class="d-flex">
+                                <div class="toast-body">Course deleted successfully!</div>
+                                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                            </div>
+                        </div>
+                    `;
+
+                    $('.position-fixed.bottom-0.end-0').append(toastHtml);
+                    let toast = new bootstrap.Toast($('.toast').last()[0], { delay: 5000 });
+                    toast.show();
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error refreshing courses:", error);
+                }
+            });
         },
         error: function(xhr, status, error) {
             console.error("Error deleting course:", error);
-            showToast('An error occurred while deleting the course. Please try again.', 'error');
+
+            // Hiển thị thông báo lỗi
+            let toastHtml = `
+                <div class="toast align-items-center text-white bg-danger border-0" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">An error occurred while deleting the course. Please try again.</div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+
+            $('.position-fixed.bottom-0.end-0').append(toastHtml);
+            let toast = new bootstrap.Toast($('.toast').last()[0], { delay: 5000 });
+            toast.show();
         }
     });
 });
