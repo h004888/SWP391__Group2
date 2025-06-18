@@ -41,4 +41,6 @@ public interface CategoryService {
     List<Category> filterCategories(String name, String select);
 
     Page<Category> findByNameContaining(String name, Pageable pageable);
+
+    Page<Category> filterCategories(String name, String sort, Pageable pageable);
 }

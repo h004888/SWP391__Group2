@@ -40,4 +40,6 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
 
     List<Category> findTop5ByOrderByIdAsc();
 
+    Page<Category> findByNameContainingIgnoreCase(String name, Pageable pageable);
+
 }

@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import com.OLearning.repository.EnrollmentRepository;
 import com.OLearning.service.enrollment.EnrollmentService;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,5 +47,19 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Override
     public Long getStudentCountByInstructorId(Long instructorId) {
         return enrollmentRepository.countStudentsByInstructorId(instructorId);
+    }
+
+    @Override
+    public Long countEnrollmentsByInstructorAndMonth(long instructorId, int year, int month) {
+        return enrollmentRepository.countByInstructorIdAndMonth(instructorId, year, month);
+    }
+
+    @Override
+    public Long countEnrollmentsByInstructorAndDateRange(long instructorId, LocalDate start, LocalDate end) {
+        LocalDateTime startDateTime = start.atStartOfDay();
+        LocalDateTime endDateTime = end.atTime(23, 59, 59);
+        Date startDate = Date.from(startDateTime.atZone(java.time.ZoneId.systemDefault()).toInstant());
+        Date endDate = Date.from(endDateTime.atZone(java.time.ZoneId.systemDefault()).toInstant());
+        return enrollmentRepository.countByInstructorIdAndDateRange(instructorId, startDate, endDate);
     }
 }

@@ -156,8 +156,8 @@
                         <!-- Pagination & info -->
                         <div class="d-sm-flex justify-content-sm-between align-items-sm-center mt-2">
                             <p class="mb-0 text-center text-sm-start" th:if="${totalItems > 0}">
-                                Showing <span th:text="${currentPage * 10 + 1}">1</span> to
-                                <span th:text="${(currentPage * 10) + 10 > totalItems ? totalItems : (currentPage * 10) + 10}">10</span>
+                                Showing <span th:text="${currentPage * 6 + 1}">1</span> to
+                                <span th:text="${(currentPage * 6) + 6 > totalItems ? totalItems : (currentPage * 6) + 6}">6</span>
                                 of
                                 <span th:text="${totalItems}">20</span> entries
                             </p>
@@ -194,14 +194,14 @@
                     <!-- Table START -->
                     <div id="instructorListTableWrapper" th:fragment="instructorListTableFragment">
                         <div class="table-responsive border-0">
-                            <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                            <table class="table table-dark-gray align-middle p-4 mb-0 table-hover ">
                                 <!-- Table head -->
                                 <thead>
                                 <tr>
-                                    <th scope="col" class="border-0 rounded-start">Instructor name</th>
-                                    <th scope="col" class="border-0">PersonalSkillPersonalSkill</th>
+                                    <th scope="col" class="border-0 rounded-start">Instructor Name</th>
+                                    <th scope="col" class="border-0">PersonalSkill</th>
                                     <th scope="col" class="border-0">Courses</th>
-                                    <th scope="col" class="border-0">Total studentss</th>
+                                    <th scope="col" class="border-0">Total students</th>
                                     <th scope="col" class="border-0 rounded-end">Action</th>
                                 </tr>
                                 </thead>
@@ -263,8 +263,8 @@
                         <!-- Pagination & info -->
                         <div class="d-sm-flex justify-content-sm-between align-items-sm-center mt-2">
                             <p class="mb-0 text-center text-sm-start" th:if="${totalItems > 0}">
-                                Showing <span th:text="${currentPage * 10 + 1}">1</span> to
-                                <span th:text="${(currentPage * 10) + 10 > totalItems ? totalItems : (currentPage * 10) + 10}">10</span>
+                                Showing <span th:text="${currentPage * 6 + 1}">1</span> to
+                                <span th:text="${(currentPage * 6) + 6 > totalItems ? totalItems : (currentPage * 6) + 6}">6</span>
                                 of
                                 <span th:text="${totalItems}">20</span> entries
                             </p>

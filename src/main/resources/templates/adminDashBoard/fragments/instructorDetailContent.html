@@ -94,27 +94,6 @@
         <div class="col-xxl-5">
             <div class="row g-4">
 
-                <!-- Active student START -->
-                <div class="col-md-6 col-xxl-12">
-                    <div class="card bg-transparent border overflow-hidden">
-                        <!-- Card header -->
-                        <div class="card-header bg-light border-bottom">
-                            <h5 class="card-header-title mb-0">Active Students</h5>
-                        </div>
-                        <!-- Card body -->
-                        <div class="card-body p-0">
-                            <div class="d-sm-flex justify-content-between p-4">
-                                <h4 class="text-blue mb-0">984</h4>
-                                <p class="mb-0"><span class="text-success me-1">0.20%<i
-                                        class="bi bi-arrow-up"></i></span>vs last Week</p>
-                            </div>
-                            <!-- Apex chart -->
-                            <div id="activeChartstudent"></div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Active student END -->
-
                 <!-- Enrolled START -->
                 <div class="col-md-6 col-xxl-12">
                     <div class="card bg-transparent border overflow-hidden">
@@ -125,9 +104,21 @@
                         <!-- Card body -->
                         <div class="card-body p-0">
                             <div class="d-sm-flex justify-content-between p-4">
-                                <h4 class="text-blue mb-0">140</h4>
-                                <p class="mb-0"><span class="text-success me-1">0.35%<i
-                                        class="bi bi-arrow-up"></i></span>vs last Week</p>
+                                <h4 class="text-blue mb-0" th:text="${instructorEnrollmentTotal}">0</h4>
+                                <p class="mb-0">
+                                    <span th:if="${instructorEnrollmentChangePercent > 0}" class="text-success me-1">
+                                        <span th:text="${#numbers.formatDecimal(instructorEnrollmentChangePercent, 1, 2)} + '%'">0%</span>
+                                        <i class="bi bi-arrow-up"></i>
+                                    </span>
+                                    <span th:if="${instructorEnrollmentChangePercent < 0}" class="text-danger me-1">
+                                        <span th:text="${#numbers.formatDecimal(instructorEnrollmentChangePercent, 1, 2)} + '%'">0%</span>
+                                        <i class="bi bi-arrow-down"></i>
+                                    </span>
+                                    <span th:if="${instructorEnrollmentChangePercent == 0}" class="text-secondary me-1">
+                                        0%
+                                    </span>
+                                    so với tuần trước
+                                </p>
                             </div>
                             <!-- Apex chart -->
                             <div id="activeChartstudent2"></div>
@@ -157,16 +148,17 @@
                                 <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
                                     <thead>
                                     <tr>
-                                        <th scope="col" class="border-0 rounded-start">Course Name</th>
-                                        <th scope="col" class="border-0 rounded-start">Category</th>
+                                        <th scope="col" class="border-0">Course ID</th>
+                                        <th scope="col" class="border-0">Course Name</th>
+                                        <th scope="col" class="border-0">Category</th>
                                         <th scope="col" class="border-0">Course Level</th>
                                         <th scope="col" class="border-0">Enrolled</th>
                                         <th scope="col" class="border-0">Status</th>
-                                        <th scope="col" class="border-0 rounded-end">Action</th>
                                     </tr>
                                     </thead>
                                     <tbody >
                                     <tr th:each="course : ${listCourses}">
+                                        <td th:text="${course.courseId}">1</td>
                                         <td class="d-flex align-items-center position-relative">
                                             <div class="w-60px"><img th:src="${course.courseImg}" class="rounded" alt=""></div>
                                             <h6 class="table-responsive-title mb-0 ms-2">
@@ -187,9 +179,7 @@
                                 <span th:case="*" class="badge bg-secondary" th:text="${course.status}"></span>
                             </span>
                                         </td>
-                                        <td>
-                                            <a href="#" class="btn btn-sm btn-info-soft mb-0">View</a>
-                                        </td>
+
                                     </tr>
                                     </tbody>
                                 </table>
@@ -304,8 +294,15 @@
 
                                 <!-- Table data -->
                                 <td>
-                                    <a href="#" class="btn btn-sm btn-info-soft mb-0" data-bs-toggle="modal"
-                                       data-bs-target="#viewReview">View</a>
+                                    <a href="#" class="btn btn-sm btn-info-soft mb-0"
+                                       data-bs-toggle="modal"
+                                       data-bs-target="#appDetail"
+                                       th:attr="data-review-id=${review.reviewId},
+                                                data-fullname=${review.enrollment.user.fullName},
+                                                data-email=${review.enrollment.user.email},
+                                                data-phone=${review.enrollment.user.phone},
+                                                data-date=${review.createdAt},
+                                                data-comment=${review.comment}">View</a>
                                 </td>
                             </tr>
 
@@ -353,9 +350,59 @@
         <!-- Student review END -->
 
     </div> <!-- Row END -->
+
+        <!-- View review Modal -->
+        <div class="modal fade" id="appDetail" tabindex="-1" aria-labelledby="appDetaillabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+
+                    <!-- Modal header -->
+                    <div class="modal-header bg-dark">
+                        <h5 class="modal-title text-white" id="appDetaillabel">Review details</h5>
+                        <button type="button" class="btn btn-sm btn-light mb-0 ms-auto" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-x-lg"></i></button>
+                    </div>
+
+                    <!-- Modal body -->
+                    <div class="modal-body p-5">
+                        <!-- Name -->
+                        <span class="small">Name:</span>
+                        <h6 class="mb-3" id="applicantName">Loading...</h6>
+
+                        <!-- Email -->
+                        <span class="small">Email:</span>
+                        <h6 class="mb-3" id="applicantEmail">Loading...</h6>
+
+                        <!-- Phone number -->
+                        <span class="small">Phone number:</span>
+                        <h6 class="mb-3" id="applicantPhone">Loading...</h6>
+
+                        <!-- Request Date -->
+                        <span class="small">Date:</span>
+                        <h6 class="mb-3" id="requestDate">Loading...</h6>
+
+                        <!-- Note -->
+                        <span class="small">Note:</span>
+                        <p class="text-dark mb-2" id="requestNote">Loading...</p>
+                    </div>
+
+                    <!-- Modal footer -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger-soft my-0" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+         <!-- View review Modal END -->
+
     <script th:inline="javascript">
         /*<![CDATA[*/
         var userId = /*[[${userId}]]*/ 0;
+        // Truyền dữ liệu enrollment chart cho chart2
+        window.instructorEnrollmentChartData = /*[[${instructorEnrollmentChartData}]]*/ {};
+
         $(document).ready(function() {
             // Course paging
             $(document).on('click', '.course-page-link', function(e) {
@@ -368,6 +415,7 @@
                         data: { page: page, size: 5 },
                         success: function(response) {
                             $('#courseListWrapper').html(response);
+                            e.activeChart2();
                         }
                     });
                 }
@@ -387,6 +435,14 @@
                     });
                 }
             });
+        });
+        $(document).on('click', '[data-bs-target=\"#appDetail\"]', function() {
+            const $btn = $(this);
+            $('#applicantName').text($btn.data('fullname') || 'N/A');
+            $('#applicantEmail').text($btn.data('email') || 'N/A');
+            $('#applicantPhone').text($btn.data('phone') || 'N/A');
+            $('#requestDate').text($btn.data('date') || 'N/A');
+            $('#requestNote').text($btn.data('comment') || 'No note provided.');
         });
         /*]]>*/
     </script>

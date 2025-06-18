@@ -20,4 +20,9 @@ public interface EnrollmentService {
     Long getCompletedEnrollments();
 
     Long getStudentCountByInstructorId(Long instructorId);
+
+    // Đếm số lượng enrollment theo instructor, năm, tháng
+    Long countEnrollmentsByInstructorAndMonth(long instructorId, int year, int month);
+
+    Long countEnrollmentsByInstructorAndDateRange(long instructorId, java.time.LocalDate start, java.time.LocalDate end);
 }

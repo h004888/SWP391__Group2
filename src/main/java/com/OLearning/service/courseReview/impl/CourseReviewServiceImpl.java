@@ -17,9 +17,8 @@ public class CourseReviewServiceImpl implements CourseReviewService {
     private  CourseReviewRepository courseReviewRepository;
 
     @Override
-    public Page<CourseReview> getCourseReviews( int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return courseReviewRepository.findAll( pageable);
+    public CourseReview getCourseReviews(Long id ) {
+        return courseReviewRepository.findByReviewId(id);
     }
 
     @Override

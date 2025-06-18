@@ -69,7 +69,7 @@
                     <tbody>
                         <tr th:each="order : ${orders}">
                             <td th:text="${order.orderId} ?: 'N/A'"></td>
-                            <td th:text="${order.amount} ?: 'N/A'"></td>
+                            <td th:text="${order.amount != null ? #numbers.formatDecimal(order.amount, 0, 'COMMA', 0, 'POINT') : 'N/A'}"></td>
                             <td th:text="${order.orderType} ?: 'N/A'"></td>
                             <td>
                                 <span th:if="${order.status == 'PAID'}" class="badge bg-success">Paid</span>

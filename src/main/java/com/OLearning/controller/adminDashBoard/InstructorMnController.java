@@ -31,8 +31,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,17 +83,51 @@ public class InstructorMnController {
     }
 
     @GetMapping("/viewInfo/{userId}")
-    public String getDetailAccount(
+    public String getDetailAccountPage(
             Model model,
             @PathVariable("userId") long id,
             @RequestParam(defaultValue = "0") int coursePage,
             @RequestParam(defaultValue = "0") int reviewPage,
             @RequestParam(defaultValue = "5") int courseSize,
             @RequestParam(defaultValue = "5") int reviewSize) {
+        //paging
         Optional<UserDetailDTO> userDetailDTO = userService.getInfoUser(id);
         Page<CourseDTO> listCourses = courseService.findCourseByUserId(id, coursePage, courseSize);
         Page<CourseReview> listReview = courseReviewService.getCourseReviewsByInstructorId(id, reviewPage, reviewSize);
 
+        // Get enrollment data for current year
+        int year = java.time.LocalDate.now().getYear();
+        Map<String, Long> instructorEnrollmentChartData = new java.util.LinkedHashMap<>();
+        for (int month = 1; month <= 12; month++) {
+            Long count = enrollmentService.countEnrollmentsByInstructorAndMonth(id, year, month);
+            String label = String.format("%02d/%d", month, year);
+            instructorEnrollmentChartData.put(label, count);
+        }
+        model.addAttribute("instructorEnrollmentChartData", instructorEnrollmentChartData);
+
+        // Calculate total enrollments for the year
+        long instructorEnrollmentTotal = instructorEnrollmentChartData.values().stream().mapToLong(Long::longValue).sum();
+        model.addAttribute("instructorEnrollmentTotal", instructorEnrollmentTotal);
+
+        // Calculate enrollments for this week and last week
+        LocalDate now = LocalDate.now();
+        LocalDate startOfThisWeek = now.with(DayOfWeek.MONDAY);
+        LocalDate endOfThisWeek = startOfThisWeek.plusDays(6);
+        LocalDate startOfLastWeek = startOfThisWeek.minusWeeks(1);
+        LocalDate endOfLastWeek = startOfThisWeek.minusDays(1);
+        long instructorEnrollmentThisWeek = enrollmentService.countEnrollmentsByInstructorAndDateRange(id, startOfThisWeek, endOfThisWeek);
+        long instructorEnrollmentLastWeek = enrollmentService.countEnrollmentsByInstructorAndDateRange(id, startOfLastWeek, endOfLastWeek);
+        model.addAttribute("instructorEnrollmentThisWeek", instructorEnrollmentThisWeek);
+        model.addAttribute("instructorEnrollmentLastWeek", instructorEnrollmentLastWeek);
+        double instructorEnrollmentChangePercent = 0.0;
+        if (instructorEnrollmentLastWeek == 0) {
+            instructorEnrollmentChangePercent = instructorEnrollmentThisWeek > 0 ? 100.0 : 0.0;
+        } else {
+            instructorEnrollmentChangePercent = ((double)(instructorEnrollmentThisWeek - instructorEnrollmentLastWeek) / instructorEnrollmentLastWeek) * 100.0;
+        }
+        model.addAttribute("instructorEnrollmentChangePercent", instructorEnrollmentChangePercent);
+
+        // Add pagination information to model
         model.addAttribute("listReview", listReview.getContent());
         model.addAttribute("reviewCurrentPage", reviewPage);
         model.addAttribute("reviewTotalPages", listReview.getTotalPages());
@@ -102,6 +139,7 @@ public class InstructorMnController {
         model.addAttribute("courseTotalItems", listCourses.getTotalElements());
 
         model.addAttribute("userId", id);
+
         if (userDetailDTO.isPresent()) {
             model.addAttribute("fragmentContent", "adminDashBoard/fragments/instructorDetailContent :: instructorDetailContent");
             model.addAttribute("accNamePage", "Detail Account");
@@ -140,6 +178,12 @@ public class InstructorMnController {
         return "adminDashBoard/fragments/instructorDetailContent :: reviewTableFragment";
     }
 
+    @GetMapping("/viewInfo/details/{id}")
+    public ResponseEntity<CourseReview> getReviewDetails(@PathVariable Long id) {
+        CourseReview review = courseReviewService.getCourseReviews(id);
+        return ResponseEntity.ok(review);
+    }
+
     @GetMapping("/filter")
     public String filterInstructors(
             @RequestParam(required = false) String keyword,
@@ -164,7 +208,7 @@ public class InstructorMnController {
     }
 
     @GetMapping("/request")
-    public String getRequestInstrutor(@RequestParam(required = false, defaultValue = "0") int page,
+    public String getRequestInstrutorListPage(@RequestParam(required = false, defaultValue = "0") int page,
                                       Model model) {
         Pageable prs = PageRequest.of(page, 5);
         Page<InstructorRequest> listRequest = instructorRequestService.getAllInstructorRequests(prs);
@@ -228,7 +272,7 @@ public class InstructorMnController {
     }
 
     @GetMapping("/request/filter")
-    public String filterRequests(
+    public String filterRequestsPage(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String status,
             @RequestParam(defaultValue = "0") int page,

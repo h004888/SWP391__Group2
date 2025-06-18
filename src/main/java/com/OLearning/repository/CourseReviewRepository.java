@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 @Repository
 public interface CourseReviewRepository extends JpaRepository<CourseReview, Long> {
 
-    Page<CourseReview> findAll( Pageable pageable);
+    CourseReview findByReviewId(Long id);
 
     @Query("SELECT cr FROM CourseReview cr WHERE cr.course.instructor.userId = :instructorId ORDER BY cr.rating DESC")
     Page<CourseReview> findByInstructorId(@Param("instructorId") Long instructorId, Pageable pageable);

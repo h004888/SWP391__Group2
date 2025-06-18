@@ -11,6 +11,7 @@ import com.OLearning.entity.Enrollment;
 import jakarta.transaction.Transactional;
 
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -39,4 +40,10 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
 
     @Query("SELECT COUNT(e) FROM Enrollment e WHERE e.course.instructor.userId = :instructorId")
     Long countStudentsByInstructorId(@Param("instructorId") Long instructorId);
+
+    @Query("SELECT COUNT(e) FROM Enrollment e WHERE e.course.instructor.userId = :instructorId AND YEAR(e.enrollmentDate) = :year AND MONTH(e.enrollmentDate) = :month")
+    Long countByInstructorIdAndMonth(@Param("instructorId") long instructorId, @Param("year") int year, @Param("month") int month);
+
+    @Query("SELECT COUNT(e) FROM Enrollment e WHERE e.course.instructor.userId = :instructorId AND e.enrollmentDate >= :startDate AND e.enrollmentDate <= :endDate")
+    Long countByInstructorIdAndDateRange(@Param("instructorId") long instructorId, @Param("startDate") Date start, @Param("endDate") Date end);
 }

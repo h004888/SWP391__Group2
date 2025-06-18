@@ -8,6 +8,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -108,6 +110,22 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<Category> findTop5ByOrderByIdAsc() {
         return categoryRepository.findTop5ByOrderByIdAsc();
+    }
+
+    @Override
+    public Page<Category> filterCategories(String name, String sort, Pageable pageable) {
+        Sort sortObj = Sort.unsorted();
+        if ("asc".equalsIgnoreCase(sort)) {
+            sortObj = Sort.by("name").ascending();
+        } else if ("desc".equalsIgnoreCase(sort)) {
+            sortObj = Sort.by("name").descending();
+        }
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortObj);
+        if (name != null && !name.trim().isEmpty()) {
+            return categoryRepository.findByNameContainingIgnoreCase(name, sortedPageable);
+        } else {
+            return categoryRepository.findAll(sortedPageable);
+        }
     }
 
 }

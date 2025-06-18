@@ -6,6 +6,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface CourseReviewService {
-Page<CourseReview> getCourseReviews( int page, int size);
+CourseReview getCourseReviews(Long id);
 Page<CourseReview> getCourseReviewsByInstructorId(Long instructorId, int page, int size);
 }
