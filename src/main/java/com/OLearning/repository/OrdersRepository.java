@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface OrdersRepository extends JpaRepository<Orders, Long> {
@@ -18,21 +19,7 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 
     Page<Orders> findByUserUsernameContaining(String username, Pageable pageable);
 
-    List<Orders> findAllByOrderByAmountAsc();
-
-    List<Orders> findAllByOrderByAmountDesc();
-
-    List<Orders> findAllByOrderByOrderDateAsc();
-
-    List<Orders> findAllByOrderByOrderDateDesc();
-
-    Page<Orders> findByUserUsernameContainingOrderByAmountAsc(String username, Pageable pageable);
-
-    Page<Orders> findByUserUsernameContainingOrderByAmountDesc(String username, Pageable pageable);
-
-    Page<Orders> findByUserUsernameContainingOrderByOrderDateAsc(String username, Pageable pageable);
-
-    Page<Orders> findByUserUsernameContainingOrderByOrderDateDesc(String username, Pageable pageable);
 
     List<Orders> findByUserAndStatus(User user, String status);
+    Optional<Orders> findByUserUserIdAndAmount(Long userId, Double amount);
 }

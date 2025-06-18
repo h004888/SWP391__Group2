@@ -18,7 +18,7 @@ public class OrdersDTO {
     private String orderType;
     private String status;
     private LocalDateTime orderDate;
-    private String note;
+    private String refCode;
     private String username;
     private String role;
 }

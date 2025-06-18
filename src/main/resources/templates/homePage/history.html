@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Coin Transactions</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    .pagination {
+      margin-top: 20px;
+    }
+    .pagination a {
+      margin: 0 5px;
+      text-decoration: none;
+      padding: 5px 10px;
+      border: 1px solid #ddd;
+      color: #333;
+    }
+    .pagination a.active {
+      background-color: #007bff;
+      color: white;
+      border-color: #007bff;
+    }
+    .pagination a.disabled {
+      color: #ccc;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+<h1>My Coin Transactions</h1>
+<table>
+  <thead>
+  <tr>
+    <th>ID</th>
+    <th>Amount</th>
+    <th>Type</th>
+    <th>Status</th>
+    <th>Note</th>
+    <th>Course</th>
+    <th>Created At</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="transaction : ${transactions}">
+    <td th:text="${transaction.transactionId}"></td>
+    <td th:text="${transaction.amount}"></td>
+    <td th:text="${transaction.transactionType}"></td>
+    <td th:text="${transaction.status}"></td>
+    <td th:text="${transaction.note}"></td>
+    <td th:text="${transaction.courseName ?: 'N/A'}"></td>
+    <td th:text="${transaction.createdAt}"></td>
+  </tr>
+  </tbody>
+</table>
+
+<div class="pagination" th:if="${totalPages > 1}">
+  <a th:class="${currentPage == 0 ? 'disabled' : ''}"
+     th:href="@{/coin-transactions(page=${currentPage - 1}, size=${pageSize})}">Previous</a>
+
+  <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+     th:class="${i == currentPage ? 'active' : ''}"
+     th:href="@{/coin-transactions(page=${i}, size=${pageSize})}"
+     th:text="${i + 1}"></a>
+
+  <a th:class="${currentPage == totalPages - 1 ? 'disabled' : ''}"
+     th:href="@{/coin-transactions(page=${currentPage + 1}, size=${pageSize})}">Next</a>
+</div>
+
+<p th:text="'Showing ' + ${transactions.size()} + ' of ' + ${totalItems} + ' transactions'"></p>
+</body>
+</html>

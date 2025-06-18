@@ -1,7 +1,11 @@
 package com.OLearning.service.coinTransaction;
 
-import java.math.BigDecimal;
+import com.OLearning.dto.coinTransaction.CoinTransactionDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
+@Service
 public interface CoinTransactionService {
-    void recordTransaction(Long userId, BigDecimal amount, String transactionType, String status, String refCode, String note);
+    Page<CoinTransactionDTO> getUserCoinTransactions(Long userId, Pageable pageable);
 }

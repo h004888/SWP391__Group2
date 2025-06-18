@@ -53,7 +53,7 @@
             <td th:text="${order.orderType} ?: 'N/A'"></td>
             <td th:text="${order.status} ?: 'N/A'"></td>
             <td th:with="formatter=${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}" th:text="${formatter}"></td>
-            <td th:text="${order.note} ?: 'N/A'"></td>
+            <td th:text="${order.refCode} ?: 'N/A'"></td>
             <td th:text="${order.username} ?: 'N/A'"></td>
             <td th:text="${order.role} ?: 'N/A'"></td>
             <td>

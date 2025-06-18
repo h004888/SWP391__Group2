@@ -19,11 +19,11 @@ public class Orders {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderId;
-    private double amount;
+    private Double amount;
     private String orderType;
     private String status;
     private LocalDateTime orderDate;
-    private String note;
+    private String refCode;
 
     @ManyToOne
     @JoinColumn(name = "userId", nullable = false)

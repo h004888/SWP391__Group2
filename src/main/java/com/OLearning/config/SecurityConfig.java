@@ -63,7 +63,7 @@ public class SecurityConfig {
 
                                 // User có thể truy cập /user/** và /home
 //                        .requestMatchers("/home").hasAnyRole("USER","INSTRUCTOR")
-
+                                .requestMatchers("/vnpay_return", "/vnpay_ipn").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

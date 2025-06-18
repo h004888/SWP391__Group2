@@ -19,7 +19,6 @@ public class CoinTransaction {
     private BigDecimal amount;
     private String transactionType;
     private String status;
-    private String refCode;
     private String note;
     private LocalDateTime createdAt ;
 

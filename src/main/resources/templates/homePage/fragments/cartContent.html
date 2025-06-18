@@ -67,7 +67,7 @@
                   </td>
                   <td class="text-center">
                     <h5 class="text-success mb-0"
-                        th:text="'$' + ${#numbers.formatDecimal(item.price, 0, 'COMMA', 2, 'POINT')}">Price</h5>
+                        th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 2, 'POINT')+ ' đ'}">Price</h5>
                   </td>
                   <td class="text-end">
                     <a th:href="@{'/cart/remove/' + ${item.id}}"
@@ -102,12 +102,12 @@
             <ul class="list-group list-group-borderless mb-2">
               <li class="list-group-item px-0 d-flex justify-content-between">
                 <span class="h6 fw-light mb-0">Original Price</span>
-                <span class="h6 fw-light mb-0 fw-bold" th:text="'$' + ${#numbers.formatDecimal(totalPrice, 0, 'COMMA', 2, 'POINT')}">$0.00</span>
+                <span class="h6 fw-light mb-0 fw-bold" th:text="${#numbers.formatDecimal(totalPrice, 0, 'COMMA', 2, 'POINT')+' đ' }">0.00</span>
               </li>
               <hr class="my-1">
               <li class="list-group-item px-0 d-flex justify-content-between">
                 <span class="h5 mb-0">Total</span>
-                <span class="h5 mb-0" th:text="'Total: $' + ${#numbers.formatDecimal(totalPrice, 0, 'COMMA', 2, 'POINT')}">$0.00</span>
+                <span class="h5 mb-0" th:text="'Total:' + ${#numbers.formatDecimal(totalPrice, 0, 'COMMA', 2, 'POINT') +' đ'}">0.00</span>
               </li>
             </ul>
             <div class="d-flex justify-content-center">
