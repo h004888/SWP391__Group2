@@ -80,6 +80,10 @@ public class Course {
                 return (long) courseReviews.size();
         }
 
+        public Integer totalStudentEnrolled() {
+                return enrollments.size();
+        }
+
         public Integer getDuration() {
                 return chapters.stream()
                                 .mapToInt(ch -> ch.getLessons().stream().mapToInt(Lesson::getDuration).sum())
@@ -89,4 +93,5 @@ public class Course {
         public Integer getTotalLessons() {
                 return chapters.stream().mapToInt(ch -> ch.getLessons().size()).sum();
         }
+
 }

@@ -12,11 +12,13 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -32,18 +34,12 @@ public class CourseServiceImpl implements CourseService {
     private CourseDetailMapper courseDetailMapper;
 
     public Pageable getPageable(int page, int size, String sortBy) {
-        switch (sortBy) {
-            case "Newest":
-                return PageRequest.of(page, size, Sort.by("createdAt").descending());
-            case "MostPopular":
-                return PageRequest.of(page, size, Sort.by("totalRatings").descending());
-            case "MostViewed":
-                return PageRequest.of(page, size, Sort.by("totalStudentEnrolled").descending());
-            case "Free":
-                return PageRequest.of(page, size, Sort.by("createdAt").descending());
-            default:
-                return PageRequest.of(page, size); // Không sort
+        // Chỉ cho phép sort trong DB với các field có trong DB thật
+        if ("Newest".equals(sortBy) || "Free".equals(sortBy)) {
+            return PageRequest.of(page, size, Sort.by("createdAt").descending());
         }
+        // Với MostPopular & MostViewed: sort sau khi lấy dữ liệu
+        return PageRequest.of(page, size); // Không sort trong DB
     }
 
     @Override
@@ -85,7 +81,25 @@ public class CourseServiceImpl implements CourseService {
                 levels,
                 pageable);
 
-        return coursesPage.map(CourseMapper::toDTO);
+        List<Course> result = new ArrayList<>(coursesPage.getContent());
+
+        // Sort bằng Java nếu là MostPopular hoặc MostViewed
+        if ("MostPopular".equals(sortBy)) {
+            result.sort((a, b) -> Long.compare(b.getReviewCount(), a.getReviewCount()));
+        } else if ("MostViewed".equals(sortBy)) {
+            result.sort((a, b) -> Integer.compare(b.totalStudentEnrolled(), a.totalStudentEnrolled()));
+        }
+
+        // Trả về lại Page<CourseDTO>
+        return new PageImpl<>(
+                result,
+                pageable,
+                coursesPage.getTotalElements()).map(CourseMapper::toDTO);
+    }
+
+    @Override
+    public List<Course> getTopCourses() {
+        return courseRepository.findAllOrderByStudentCountDesc();
     }
 
 }

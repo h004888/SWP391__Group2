@@ -28,5 +28,7 @@ public class CourseDTO {
     private Double averageRating;
     private Long reviewCount;
     private Integer duration;
+    private Integer totalLessons;
+    private Integer totalStudentEnrolled;
 
 }

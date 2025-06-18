@@ -14,30 +14,33 @@ import java.util.List;
 
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Long> {
-      // function search + filter + sort
-      @Query("""
-                      SELECT c FROM Course c
-                      WHERE (:keyword       IS NULL
-                             OR LOWER(c.title)       LIKE LOWER(CONCAT('%', :keyword, '%'))
-                             OR LOWER(c.description) LIKE LOWER(CONCAT('%', :keyword, '%')))
-                        AND (:categoryIds  IS NULL OR c.category.id    IN :categoryIds)
-                        AND (
-                             :priceFilters IS NULL
-                             OR (
-                                 ('Free' IN (:priceFilters)  AND c.price = 0)
-                              OR ('Paid' IN (:priceFilters)  AND c.price > 0)
-                             )
-                        )
-                        AND (
-                             :levels IS NULL
-                          OR c.courseLevel IN :levels
-                        )
-                  """)
-      Page<Course> searchCourses(
-                  @Param("keyword") String keyword,
-                  @Param("categoryIds") List<Long> categoryIds,
-                  @Param("priceFilters") List<String> priceFilters,
-                  @Param("levels") List<String> levels,
-                  Pageable pageable);
+     @Query("SELECT c FROM Course c LEFT JOIN c.enrollments e GROUP BY c ORDER BY COUNT(e) DESC")
+     List<Course> findAllOrderByStudentCountDesc();
+
+     // function search + filter + sort
+     @Query("""
+                   SELECT c FROM Course c
+                   WHERE (:keyword       IS NULL
+                          OR LOWER(c.title)       LIKE LOWER(CONCAT('%', :keyword, '%'))
+                          OR LOWER(c.description) LIKE LOWER(CONCAT('%', :keyword, '%')))
+                     AND (:categoryIds  IS NULL OR c.category.id    IN :categoryIds)
+                     AND (
+                          :priceFilters IS NULL
+                          OR (
+                              ('Free' IN (:priceFilters)  AND c.price = 0)
+                           OR ('Paid' IN (:priceFilters)  AND c.price > 0)
+                          )
+                     )
+                     AND (
+                          :levels IS NULL
+                       OR c.courseLevel IN :levels
+                     )
+               """)
+     Page<Course> searchCourses(
+               @Param("keyword") String keyword,
+               @Param("categoryIds") List<Long> categoryIds,
+               @Param("priceFilters") List<String> priceFilters,
+               @Param("levels") List<String> levels,
+               Pageable pageable);
 
 }

@@ -21,9 +21,11 @@ public class CourseMapper {
                 course.getCreatedAt(),
                 course.getUpdatedAt(),
                 course.getCourseLevel(),
-                course.getAverageRating(),  // Tính từ method trong entity
-                course.getReviewCount(),    // Tính từ method trong entity
-                course.getDuration()        // Tính từ method trong entity
+                course.getAverageRating(), // Tính từ method trong entity
+                course.getReviewCount(), // Tính từ method trong entity
+                course.getDuration(),
+                course.getTotalLessons(),
+                course.totalStudentEnrolled() // Tính từ method trong entity
         );
     }
 

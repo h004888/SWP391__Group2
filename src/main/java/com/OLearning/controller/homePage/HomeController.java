@@ -26,39 +26,17 @@ public class HomeController {
     @Autowired
     private CourseService courseService;
 
-    // @GetMapping
-    // public String home(Model model) {
-    // model.addAttribute("categories", categoryService.findTop5ByOrderByIdAsc());
-    // model.addAttribute("allCategories", categoryService.getAllCategory());
-    // model.addAttribute("topCourses", courseService.getTopCourses());
-
     @GetMapping()
     public String getMethodName(Model model) {
         // chia làm 2 danh sách:
         List<CategoryDTO> firstFive = categoryService.getAllCategory().stream().limit(5).toList();
         List<CategoryDTO> nextFive = categoryService.getAllCategory().stream().skip(5).limit(5).toList();
+        model.addAttribute("topCourses", courseService.getTopCourses().stream().limit(5).collect(Collectors.toList()));
         model.addAttribute("topCategories", categoryService.findTop5ByOrderByIdAsc());
         model.addAttribute("firstFive", firstFive);
         model.addAttribute("nextFive", nextFive);
         return "homePage/index";
     }
-
-    // return "homePage/index";
-    // }
-
-    // @GetMapping("/courses")
-    // public String courses(Model model, @RequestParam(defaultValue = "0") int
-    // page,
-    // @RequestParam(defaultValue = "7") int size) {
-    // Pageable pageable = PageRequest.of(page, size);
-    // Page<CourseDTO> courses = courseService.getCoursesByTotalRatings(pageable);
-    // // lưu ý trả về Page<CourseDTO>
-    // model.addAttribute("categories", categoryService.findTop5ByOrderByIdAsc());
-    // model.addAttribute("courses", courses.getContent());
-    // model.addAttribute("currentPage", page);
-    // model.addAttribute("totalPages", courses.getTotalPages());
-    // return "homePage/course-list";
-    // }
 
     @GetMapping("/coursesGrid")
     public String coursesGrid(Model model, @RequestParam(defaultValue = "0") int page,

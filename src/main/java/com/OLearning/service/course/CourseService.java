@@ -13,6 +13,8 @@ import java.util.Optional;
 
 @Service
 public interface CourseService {
+        
+        List<Course> getTopCourses();
 
         Page<CourseDTO> searchCoursesGrid(
                         List<Long> categoryIds,
