@@ -61,7 +61,7 @@ public class Course {
         private Category category;
 
         @OneToMany(mappedBy = "course", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-        private List<Chapters> chapters;
+        private List<Chapter> chapters;
 
         @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
         private List<Enrollment> enrollments;

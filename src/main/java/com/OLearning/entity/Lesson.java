@@ -45,16 +45,17 @@ public class Lesson {
 
     @ManyToOne
     @JoinColumn(name = "ChapterID")
-    private Chapters chapter;
+    private Chapter chapter;
 
-    // XÓA: Course course;
-
-    @OneToMany(mappedBy = "lesson")
+    // Danh sách video thuộc bài học
+    @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL)
     private List<Video> videos;
 
-    @OneToMany(mappedBy = "lesson")
+    // Danh sách quiz thuộc bài học
+    @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL)
     private List<Quiz> quizzes;
 
-    @OneToMany(mappedBy = "videoLesson")
-    private List<Video> listOfVideos;
+    // Danh sách người dùng đã hoàn thành bài học này
+    @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL)
+    private List<LessonCompletion> completions;
 }

@@ -20,12 +20,16 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Autowired
     private CourseService courseService;
 
-
     @Override
     public List<Course> getCoursesByUserId(Long userId) {
         return enrollmentRepository.findByUserUserId(userId)
                 .stream()
                 .map(Enrollment::getCourse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean hasEnrolled(Long userId, Long courseId) {
+        return enrollmentRepository.existsByUserUserIdAndCourseCourseId(userId, courseId);
     }
 }

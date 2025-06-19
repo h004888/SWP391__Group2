@@ -386,7 +386,7 @@
 										</div>
 
 										<!-- Title -->
-										<h5 class="card-title mt-3 mb-0"><a href="#" th:text="${course.title}">The
+										<h5 class="card-title mt-3 mb-0"><a th:href="@{/learning/course/{courseId}(courseId=${course.courseId})}" th:text="${course.title}">The
 												Complete Digital Marketing
 												Course - 12 Courses in 1</a></h5>
 

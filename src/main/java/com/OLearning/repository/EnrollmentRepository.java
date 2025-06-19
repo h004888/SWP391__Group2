@@ -14,4 +14,6 @@ import java.util.Optional;
 @Transactional
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer> {
     List<Enrollment> findByUserUserId(Long userId);
+
+    boolean existsByUserUserIdAndCourseCourseId(Long userId, Long courseId);
 }

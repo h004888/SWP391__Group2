@@ -2,9 +2,11 @@ package com.OLearning.service.course.impl;
 
 import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.course.CourseDetailDTO;
+import com.OLearning.entity.Chapter;
 import com.OLearning.entity.Course;
 import com.OLearning.mapper.course.CourseMapper;
 import com.OLearning.mapper.course.CourseDetailMapper;
+import com.OLearning.repository.ChapterRepository;
 import com.OLearning.repository.CourseRepository;
 import com.OLearning.service.course.CourseService;
 
@@ -32,6 +34,8 @@ public class CourseServiceImpl implements CourseService {
     private CourseRepository courseRepository;
     @Autowired
     private CourseDetailMapper courseDetailMapper;
+    @Autowired
+    private ChapterRepository chapterRepository;
 
     public Pageable getPageable(int page, int size, String sortBy) {
         // Chỉ cho phép sort trong DB với các field có trong DB thật
@@ -105,6 +109,11 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Course findById(Long id) {
         return courseRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public List<Chapter> getChaptersWithLessons(Long courseId) {
+        return chapterRepository.findByCourseIdWithLessons(courseId);
     }
 
 }

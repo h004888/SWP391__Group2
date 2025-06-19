@@ -10,7 +10,8 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // Map URL "/home/assets/**" tới thư mục resources/static/assets/
-        registry.addResourceHandler("/home/assets/**")
+        registry.addResourceHandler("/home/assets/**", "/learning/course/assets/**", "/assets/**",
+                "/learning/lesson/view/assets/**")
                 .addResourceLocations("classpath:/static/assets/");
     }
 }

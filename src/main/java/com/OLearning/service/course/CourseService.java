@@ -2,6 +2,7 @@ package com.OLearning.service.course;
 
 import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.course.CourseDetailDTO;
+import com.OLearning.entity.Chapter;
 import com.OLearning.entity.Course;
 
 import org.springframework.data.domain.Page;
@@ -15,7 +16,9 @@ import java.util.Optional;
 public interface CourseService {
 
         Course findById(Long id);
-        
+
+        List<Chapter> getChaptersWithLessons(Long courseId);
+
         List<Course> getTopCourses();
 
         Page<CourseDTO> searchCoursesGrid(
