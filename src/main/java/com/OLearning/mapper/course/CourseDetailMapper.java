@@ -25,6 +25,8 @@ public class CourseDetailMapper {
         dto.setUpdatedAt(course.getUpdatedAt());
         dto.setInstructor(course.getInstructor());
         dto.setCategory(course.getCategory());
+        dto.setStatus(course.getStatus());
+        dto.setCanResubmit(course.getCanResubmit());
         return dto;
     }
 

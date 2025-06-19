@@ -2145,30 +2145,30 @@ Listed courses END -->
                         },
                         body: JSON.stringify(data)
                     })
-                    .then(res => res.json())
-                    .then(json => {
-                        const msgDiv = document.getElementById('commentMessage');
-                        if (json.success) {
-                            msgDiv.innerHTML = `<div class="alert alert-success alert-dismissible fade show" role="alert">
+                        .then(res => res.json())
+                        .then(json => {
+                            const msgDiv = document.getElementById('commentMessage');
+                            if (json.success) {
+                                msgDiv.innerHTML = `<div class="alert alert-success alert-dismissible fade show" role="alert">
                                 <i class="fas fa-check-circle me-2"></i>${json.success}
                                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>`;
-                            commentForm.reset();
-                            // Reload comment list
-                            loadComments(data.courseId);
-                        } else if (json.error) {
-                            msgDiv.innerHTML = `<div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                commentForm.reset();
+                                // Reload comment list
+                                loadComments(data.courseId);
+                            } else if (json.error) {
+                                msgDiv.innerHTML = `<div class="alert alert-danger alert-dismissible fade show" role="alert">
                                 <i class="fas fa-exclamation-triangle me-2"></i>${json.error}
                                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>`;
-                        }
-                    })
-                    .catch(() => {
-                        document.getElementById('commentMessage').innerHTML = `<div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            }
+                        })
+                        .catch(() => {
+                            document.getElementById('commentMessage').innerHTML = `<div class="alert alert-danger alert-dismissible fade show" role="alert">
                             <i class="fas fa-exclamation-triangle me-2"></i>Error! Please try again.
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>`;
-                    });
+                        });
                 });
             }
 
@@ -2216,29 +2216,29 @@ Listed courses END -->
                         },
                         body: JSON.stringify(data)
                     })
-                    .then(res => res.json())
-                    .then(json => {
-                        const msgDiv = document.getElementById('reportMessage');
-                        if (json.success) {
-                            msgDiv.innerHTML = `<div class="alert alert-success alert-dismissible fade show" role="alert">
+                        .then(res => res.json())
+                        .then(json => {
+                            const msgDiv = document.getElementById('reportMessage');
+                            if (json.success) {
+                                msgDiv.innerHTML = `<div class="alert alert-success alert-dismissible fade show" role="alert">
                                 <i class="fas fa-check-circle me-2"></i>${json.success}
                                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>`;
-                            reportForm.reset();
-                            otherInput.disabled = true;
-                        } else if (json.error) {
-                            msgDiv.innerHTML = `<div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                reportForm.reset();
+                                otherInput.disabled = true;
+                            } else if (json.error) {
+                                msgDiv.innerHTML = `<div class="alert alert-danger alert-dismissible fade show" role="alert">
                                 <i class="fas fa-exclamation-triangle me-2"></i>${json.error}
                                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>`;
-                        }
-                    })
-                    .catch(() => {
-                        document.getElementById('reportMessage').innerHTML = `<div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            }
+                        })
+                        .catch(() => {
+                            document.getElementById('reportMessage').innerHTML = `<div class="alert alert-danger alert-dismissible fade show" role="alert">
                             <i class="fas fa-exclamation-triangle me-2"></i>Error! Please try again.
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>`;
-                    });
+                        });
                 });
             }
 
@@ -2262,17 +2262,17 @@ Listed courses END -->
                             },
                             body: JSON.stringify(data)
                         })
-                        .then(res => res.json())
-                        .then(json => {
-                            if (json.success) {
-                                alert(json.success);
-                            } else if (json.error) {
-                                alert(json.error);
-                            }
-                        })
-                        .catch(() => {
-                            alert('Error! Please try again.');
-                        });
+                            .then(res => res.json())
+                            .then(json => {
+                                if (json.success) {
+                                    alert(json.success);
+                                } else if (json.error) {
+                                    alert(json.error);
+                                }
+                            })
+                            .catch(() => {
+                                alert('Error! Please try again.');
+                            });
                     }
                 }
             });
@@ -2314,26 +2314,26 @@ Listed courses END -->
             // Function to reload comments
             function loadComments(courseId) {
                 fetch('/api/course/' + courseId + '/comments')
-                .then(res => res.json())
-                .then(json => {
-                    if (json.comments) {
-                        // Update comment list in DOM
-                        const commentList = document.querySelector('.comment-list');
-                        if (commentList) {
-                            // Clear existing comments
-                            commentList.innerHTML = '';
+                    .then(res => res.json())
+                    .then(json => {
+                        if (json.comments) {
+                            // Update comment list in DOM
+                            const commentList = document.querySelector('.comment-list');
+                            if (commentList) {
+                                // Clear existing comments
+                                commentList.innerHTML = '';
 
-                            // Add new comments
-                            json.comments.forEach(comment => {
-                                const commentHtml = createCommentHTML(comment);
-                                commentList.insertAdjacentHTML('beforeend', commentHtml);
-                            });
+                                // Add new comments
+                                json.comments.forEach(comment => {
+                                    const commentHtml = createCommentHTML(comment);
+                                    commentList.insertAdjacentHTML('beforeend', commentHtml);
+                                });
+                            }
                         }
-                    }
-                })
-                .catch(() => {
-                    console.log('Error loading comments');
-                });
+                    })
+                    .catch(() => {
+                        console.log('Error loading comments');
+                    });
             }
 
             // Function to create comment HTML
@@ -2408,32 +2408,32 @@ Listed courses END -->
                         },
                         body: JSON.stringify(data)
                     })
-                    .then(res => res.json())
-                    .then(json => {
-                        if (json.success) {
-                            // Hide edit form
-                            const editForm = document.getElementById('edit-form-' + data.reviewId);
-                            if (editForm) {
-                                editForm.style.display = 'none';
-                            }
-                            // Update comment text in DOM
-                            const commentText = document.querySelector(`[data-review-id="${data.reviewId}"]`).closest('.comment-item').querySelector('.h6');
-                            if (commentText) {
-                                commentText.textContent = data.comment;
-                            }
-                            // Show success message
-                            const msgDiv = document.getElementById('commentMessage');
-                            msgDiv.innerHTML = `<div class="alert alert-success alert-dismissible fade show" role="alert">
+                        .then(res => res.json())
+                        .then(json => {
+                            if (json.success) {
+                                // Hide edit form
+                                const editForm = document.getElementById('edit-form-' + data.reviewId);
+                                if (editForm) {
+                                    editForm.style.display = 'none';
+                                }
+                                // Update comment text in DOM
+                                const commentText = document.querySelector(`[data-review-id="${data.reviewId}"]`).closest('.comment-item').querySelector('.h6');
+                                if (commentText) {
+                                    commentText.textContent = data.comment;
+                                }
+                                // Show success message
+                                const msgDiv = document.getElementById('commentMessage');
+                                msgDiv.innerHTML = `<div class="alert alert-success alert-dismissible fade show" role="alert">
                                 <i class="fas fa-check-circle me-2"></i>${json.success}
                                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>`;
-                        } else if (json.error) {
-                            alert(json.error);
-                        }
-                    })
-                    .catch(() => {
-                        alert('Error! Please try again.');
-                    });
+                            } else if (json.error) {
+                                alert(json.error);
+                            }
+                        })
+                        .catch(() => {
+                            alert('Error! Please try again.');
+                        });
                 }
             });
 
@@ -2493,20 +2493,20 @@ Listed courses END -->
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(data)
                     })
-                    .then(res => res.json())
-                    .then(json => {
-                        if (json.success) {
-                            document.getElementById('reportCommentMsg').innerHTML = `<div class="alert alert-success">${json.success}</div>`;
-                            setTimeout(() => {
-                                bootstrap.Modal.getInstance(document.getElementById('reportCommentModal')).hide();
-                            }, 1200);
-                        } else {
-                            document.getElementById('reportCommentMsg').innerHTML = `<div class="alert alert-danger">${json.error || 'Error!'}</div>`;
-                        }
-                    })
-                    .catch(() => {
-                        document.getElementById('reportCommentMsg').innerHTML = '<div class="alert alert-danger">Error! Please try again.</div>';
-                    });
+                        .then(res => res.json())
+                        .then(json => {
+                            if (json.success) {
+                                document.getElementById('reportCommentMsg').innerHTML = `<div class="alert alert-success">${json.success}</div>`;
+                                setTimeout(() => {
+                                    bootstrap.Modal.getInstance(document.getElementById('reportCommentModal')).hide();
+                                }, 1200);
+                            } else {
+                                document.getElementById('reportCommentMsg').innerHTML = `<div class="alert alert-danger">${json.error || 'Error!'}</div>`;
+                            }
+                        })
+                        .catch(() => {
+                            document.getElementById('reportCommentMsg').innerHTML = '<div class="alert alert-danger">Error! Please try again.</div>';
+                        });
                 });
             }
         });

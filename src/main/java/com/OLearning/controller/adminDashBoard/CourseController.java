@@ -9,6 +9,7 @@ import com.OLearning.entity.User;
 import com.OLearning.repository.CourseRepository;
 import com.OLearning.repository.NotificationRepository;
 import com.OLearning.repository.UserRepository;
+import com.OLearning.repository.CourseReviewRepository;
 import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.course.CourseService;
 import com.OLearning.service.notification.NotificationService;
@@ -37,6 +38,8 @@ public class CourseController {
     private UserRepository userRepository;
     @Autowired
     private NotificationRepository notificationRepository;
+    @Autowired
+    private CourseReviewRepository courseReviewRepository;
 
     @GetMapping
     public String getCoursePage(Model model) {
@@ -44,23 +47,23 @@ public class CourseController {
         List<Category> listCategories = categoryService.getListCategories();
 
         model.addAttribute("accNamePage", "Management Course");
-        model.addAttribute("fragmentContent", "adminDashboard/fragments/courseContent :: courseContent");
+        model.addAttribute("fragmentContent", "adminDashBoard/fragments/courseContent :: courseContent");
         model.addAttribute("listCourse", listCourse);
         model.addAttribute("listCategories", listCategories);
-        return "adminDashboard/index";
+        return "adminDashBoard/index";
     }
 
     //Filter with ajax
-    @GetMapping("/filter")
-    public String filterCourses(@RequestParam(required = false) String keyword,
-                                @RequestParam(required = false) Integer category,
-                                @RequestParam(required = false) String price,
-                                @RequestParam(required = false) String status,
-                                Model model) {
-        List<CourseDTO> listCourse = courseService.filterCourses(keyword, category, price,status);
-        model.addAttribute("listCourse", listCourse);
-        return "adminDashboard/fragments/courseContent :: courseTableBody";
-    }
+//    @GetMapping("/filter")
+//    public String filterCourses(@RequestParam(required = false) String keyword,
+//                                @RequestParam(required = false) Integer category,
+//                                @RequestParam(required = false) String price,
+//                                @RequestParam(required = false) String status,
+//                                Model model) {
+//        List<CourseDTO> listCourse = courseService.filterCourses(keyword, category, price,status);
+//        model.addAttribute("listCourse", listCourse);
+//        return "adminDashBoard/fragments/courseContent :: courseTableRowContent";
+//    }
 
     @GetMapping("/delete/{id}")
     public String deleteCourse(@PathVariable("id") Long id) {
@@ -70,14 +73,26 @@ public class CourseController {
 
     @GetMapping("/detail/{id}")
     public String viewCourseDetail(Model model, @PathVariable("id") Long id) {
-        model.addAttribute("fragmentContent", "adminDashboard/fragments/courseDetailContent :: courseDetail");
+        Long userId = id;
         Optional<CourseDetailDTO> optionalDetail = courseService.getDetailCourse(id);
-        if (optionalDetail.isPresent()) {
-            model.addAttribute("detailCourse", optionalDetail.get());
-            return "adminDashboard/index";
-        } else {
+        if (!optionalDetail.isPresent()) {
             return "redirect:/admin/course";
         }
+
+        model.addAttribute("accNamePage", "Management Course");
+        List<CourseDTO> listCourse = courseService.getAllCourses();
+        List<Category> listCategories = categoryService.getListCategories();
+        model.addAttribute("listCourse", listCourse);
+        model.addAttribute("listCategories", listCategories);
+        model.addAttribute("detailCourse", optionalDetail.get());
+        
+        // Lấy entity Course từ repository
+        Course course = courseRepository.findById(id).orElse(null);
+        if (course != null) {
+            model.addAttribute("reviews", courseReviewRepository.findByCourseWithUser(course));
+        }
+        model.addAttribute("fragmentContent", "adminDashBoard/fragments/courseDetailContent :: courseDetail");
+        return "adminDashBoard/index";
     }
 
     @PostMapping("/{courseId}/block")
@@ -101,7 +116,7 @@ public class CourseController {
                 notification.setCourse(course);
                 notification.setMessage("Your course '" + course.getTitle() + "' has been blocked by admin. Reason: " + reason);
                 notification.setType("COURSE_BLOCKED");
-                notification.setStatus("unread");
+                notification.setStatus("failed");
                 notification.setSentAt(LocalDateTime.now());
                 notificationRepository.save(notification);
             }
@@ -134,7 +149,7 @@ public class CourseController {
                 notification.setCourse(course);
                 notification.setMessage("Your course '" + course.getTitle() + "' has been unblocked by admin.");
                 notification.setType("COURSE_UNBLOCKED");
-                notification.setStatus("unread");
+                notification.setStatus("failed");
                 notification.setSentAt(LocalDateTime.now());
                 notificationRepository.save(notification);
             }

@@ -307,7 +307,7 @@
 
                         <!-- View course for other types -->
                         <a th:if="${n.type != 'COURSE_REJECTION' and n.type != 'REPORT_COURSE'}"
-                           th:href="@{/instructordashboard/courses/view(fromNotification=${n.notificationId})}"
+                           th:href="@{/admin/course/detail/{courseId}(courseId=${n.course.courseId})}"
                            class="btn btn-success btn-sm action-btn ms-1"
                            title="View Course">
                             <i class="fas fa-book-open"></i>
