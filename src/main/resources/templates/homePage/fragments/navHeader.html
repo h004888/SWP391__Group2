@@ -37,8 +37,9 @@
                             <!-- Hiển thị 5 category đầu tiên -->
                             <li th:each="cat : ${firstFive}">
                                 <a class="dropdown-item" th:text="${cat.name}"
-                                    th:href="@{/courses/category/{id}(id=${cat.id})}"></a>
+                                    th:href="@{'/home/coursesGrid'(categoryIds=${cat.id})}"></a>
                             </li>
+
 
                             <!-- Nút View all -->
                             <li>
@@ -510,8 +511,17 @@
             </div>
             <!-- Main navbar END -->
 
+            <div class="navbar-nav ms-2">
+                <button type="button" sec:authorize="isAnonymous()" th:onclick="|window.location='@{/login}'|"
+                    class="btn btn-sm btn-dark mb-0">
+                    <i class="bi bi-power me-2"></i>
+                    Sign In
+                </button>
+            </div>
+
+
             <!-- Profile START -->
-            <div class="dropdown ms-1 ms-lg-0">
+            <div class="dropdown ms-1 ms-lg-0" sec:authorize="isAuthenticated()">
                 <a class="avatar avatar-sm p-0" href="#" id="profileDropdown" role="button" data-bs-auto-close="outside"
                     data-bs-display="static" data-bs-toggle="dropdown" aria-expanded="false">
                     <img class="avatar-img rounded-circle" src="assets/images/avatar/01.jpg" alt="avatar">
@@ -527,8 +537,10 @@
                                     alt="avatar">
                             </div>
                             <div>
-                                <a class="h6" href="#">Lori Ferguson</a>
-                                <p class="small m-0">example@gmail.com</p>
+                                <a class="h6" href="#" th:text="${#authentication.principal.userEntity.username}">Lori
+                                    Ferguson</a>
+                                <p class="small m-0" th:text="${#authentication.principal.userEntity.email}">
+                                    example@gmail.com</p>
                             </div>
                         </div>
                     </li>
@@ -539,10 +551,14 @@
                     <li><a class="dropdown-item" href="#"><i class="bi bi-person fa-fw me-2"></i>Edit Profile</a></li>
                     <li><a class="dropdown-item" href="#"><i class="bi bi-gear fa-fw me-2"></i>Account Settings</a></li>
                     <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle fa-fw me-2"></i>Help</a></li>
-                    <li><a class="dropdown-item bg-danger-soft-hover" href="#"><i
-                                class="bi bi-power fa-fw me-2"></i>Sign Out</a></li>
                     <li>
-                        <hr class="dropdown-divider">
+                        <a class="dropdown-item bg-danger-soft-hover" th:href="@{/logout}">
+                            <i class="bi bi-power fa-fw me-2"></i>
+                            Sign Out
+                        </a>
+                    </li>
+
+                    <hr class="dropdown-divider">
                     </li>
                     <!-- Dark mode options START -->
                     <li>

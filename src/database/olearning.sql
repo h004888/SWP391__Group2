@@ -184,3 +184,70 @@ CREATE TABLE BuyPackages
     CONSTRAINT FK_BuyPackages_Package FOREIGN KEY (PackageId) REFERENCES Packages (PackageId),
     CONSTRAINT FK_BuyPackages_User FOREIGN KEY (UserId) REFERENCES Users (UserId)
 );
+CREATE TABLE LessonCompletion (
+    CompletionID INT IDENTITY(1,1) PRIMARY KEY,
+    UserID INT NOT NULL,
+    LessonID INT NOT NULL,
+    CompletedAt DATETIME NOT NULL DEFAULT GETDATE(),
+    FOREIGN KEY (UserID) REFERENCES Users(UserID),
+    FOREIGN KEY (LessonID) REFERENCES Lessons(LessonID),
+    CONSTRAINT UQ_User_Lesson UNIQUE (UserID, LessonID)
+);
+CREATE PROCEDURE sp_UpdateEnrollmentProgress
+    @UserId INT,
+    @CourseId INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Tính tổng số bài học của khóa học
+    DECLARE @TotalLessons INT = (
+        SELECT COUNT(*)
+        FROM Lessons L
+        JOIN Chapters C ON L.ChapterID = C.ChapterID
+        WHERE C.CourseID = @CourseId
+    );
+
+    -- Tính số bài học đã hoàn thành của user
+    DECLARE @CompletedLessons INT = (
+        SELECT COUNT(*)
+        FROM LessonCompletion LC
+        JOIN Lessons L ON LC.LessonID = L.LessonID
+        JOIN Chapters C ON L.ChapterID = C.ChapterID
+        WHERE LC.UserID = @UserId AND C.CourseID = @CourseId
+    );
+
+    -- Tính % progress
+    DECLARE @Progress DECIMAL(5,2) = 
+        CASE 
+            WHEN @TotalLessons = 0 THEN 0
+            ELSE CAST(@CompletedLessons * 100.0 / @TotalLessons AS DECIMAL(5,2))
+        END;
+
+    -- Cập nhật vào bảng Enrollments
+    UPDATE Enrollments
+    SET Progress = @Progress,
+        Status = CASE WHEN @Progress = 100 THEN 'completed' ELSE 'onGoing' END
+    WHERE UserID = @UserId AND CourseID = @CourseId;
+END;
+GO
+CREATE TRIGGER trg_UpdateProgress_AfterLessonComplete
+ON LessonCompletion
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @UserId INT, @LessonId INT, @CourseId INT;
+
+    SELECT TOP 1 @UserId = i.UserID, @LessonId = i.LessonID
+    FROM inserted i;
+
+    SELECT TOP 1 @CourseId = C.CourseID
+    FROM Lessons L
+    JOIN Chapters C ON L.ChapterID = C.ChapterID
+    WHERE L.LessonID = @LessonId;
+
+    EXEC sp_UpdateEnrollmentProgress @UserId = @UserId, @CourseId = @CourseId;
+END;
+GO

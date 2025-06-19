@@ -39,7 +39,7 @@ public class User {
     @Column(name = "PersonalSkill")
     private String personalSkill;
     @Column(name = "Coin")
-    private Double coin;
+    private Double coin = 0.0;
     @Column(name = "Status")
     private boolean status;
 

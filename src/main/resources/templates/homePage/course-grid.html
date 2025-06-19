@@ -445,7 +445,7 @@
 				<!-- Main navbar END -->
 
 				<!-- Profile START -->
-				<div class="dropdown ms-1 ms-lg-0">
+				<div class="dropdown ms-1 ms-lg-0" sec:authorize="isAuthenticated()">
 					<a class="avatar avatar-sm p-0" href="#" id="profileDropdown" role="button"
 						data-bs-auto-close="outside" data-bs-display="static" data-bs-toggle="dropdown"
 						aria-expanded="false">
@@ -462,8 +462,11 @@
 										alt="avatar">
 								</div>
 								<div>
-									<a class="h6" href="#">Lori Ferguson</a>
-									<p class="small m-0">example@gmail.com</p>
+									<a class="h6" href="#"
+										th:text="${#authentication.principal.userEntity.username}">Lori
+										Ferguson</a>
+									<p class="small m-0" th:text="${#authentication.principal.userEntity.email}">
+										example@gmail.com</p>
 								</div>
 							</div>
 						</li>
@@ -476,10 +479,14 @@
 						<li><a class="dropdown-item" href="#"><i class="bi bi-gear fa-fw me-2"></i>Account Settings</a>
 						</li>
 						<li><a class="dropdown-item" href="#"><i class="bi bi-info-circle fa-fw me-2"></i>Help</a></li>
-						<li><a class="dropdown-item bg-danger-soft-hover" href="#"><i
-									class="bi bi-power fa-fw me-2"></i>Sign Out</a></li>
 						<li>
-							<hr class="dropdown-divider">
+							<a class="dropdown-item bg-danger-soft-hover" th:href="@{/logout}">
+								<i class="bi bi-power fa-fw me-2"></i>
+								Sign Out
+							</a>
+						</li>
+
+						<hr class="dropdown-divider">
 						</li>
 						<!-- Dark mode options START -->
 						<li>
@@ -589,7 +596,7 @@ Page content START -->
 							</div>
 						</div>
 
-						<div id="mainCourseGrid"></div>
+						<div id="mainCourseGrid" th:replace="homePage/fragments/mainCourseGrid :: mainCourseGrid"></div>
 					</div>
 					<!-- Main content END -->
 
@@ -626,7 +633,9 @@ Page content START -->
 												<div class="form-check">
 													<input class="form-check-input" type="checkbox"
 														th:id="'category_' + ${category.id}" th:value="${category.id}"
-														name="categoryIds">
+														name="categoryIds"
+														th:checked="${categoryIds != null and categoryIds.contains(category.id)}">
+
 													<label class="form-check-label"
 														th:for="'category_' + ${category.id}"
 														th:text="${category.name}">Category name</label>
@@ -1045,8 +1054,7 @@ Footer END -->
 				}
 			});
 
-			// Gọi lần đầu
-			fetchCourses();
+
 		});
 	</script>
 

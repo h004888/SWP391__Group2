@@ -25,102 +25,100 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final CustomUserDetailsService customUserDetailsService;
-    private final CustomOAuth2UserService customOAuth2UserService;
+        private final CustomUserDetailsService customUserDetailsService;
+        private final CustomOAuth2UserService customOAuth2UserService;
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        //Use NoOpPasswordEncoder cho password chưa mã hóa
-      return NoOpPasswordEncoder.getInstance();
-//        return new BCryptPasswordEncoder();
-    }
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                // Use NoOpPasswordEncoder cho password chưa mã hóa
+                return NoOpPasswordEncoder.getInstance();
+                // return new BCryptPasswordEncoder();
+        }
 
-    @Bean
-    public AuthenticationSuccessHandler authenticationSuccessHandler() {
-        return new CustomAuthenticationSuccessHandler();
-    }
+        @Bean
+        public AuthenticationSuccessHandler authenticationSuccessHandler() {
+                return new CustomAuthenticationSuccessHandler();
+        }
 
-    @Bean
-    public SessionRegistry sessionRegistry() {
-        return new SessionRegistryImpl();
-    }
+        @Bean
+        public SessionRegistry sessionRegistry() {
+                return new SessionRegistryImpl();
+        }
 
-    @Bean
-    public HttpSessionEventPublisher httpSessionEventPublisher() {
-        return new HttpSessionEventPublisher();
-    }
+        @Bean
+        public HttpSessionEventPublisher httpSessionEventPublisher() {
+                return new HttpSessionEventPublisher();
+        }
 
-    //Config to use customUserDetailsService
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
-    }
+        // Config to use customUserDetailsService
+        @Bean
+        public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+                return config.getAuthenticationManager();
+        }
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests(authz -> authz
-                                // Cho phép truy cập public resources
-                                .requestMatchers("/css/**", "/js/**", "/images/**", "/static/**","/assets/**").permitAll()
-                                .requestMatchers("/login", "/register", "/select-role", "/assign-role","/forgot-password","/reset-password","/otp-verification").permitAll()
-                                .requestMatchers("/error", "/403" ,"/fragments/**").permitAll()
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+                http
+                                .authorizeHttpRequests(authz -> authz
+                                                // Cho phép truy cập public resources
+                                                .requestMatchers("/css/**", "/js/**", "/images/**", "/static/**",
+                                                                "/assets/**")
+                                                .permitAll()
+                                                .requestMatchers("/login", "/register", "/select-role", "/assign-role",
+                                                                "/forgot-password", "/reset-password",
+                                                                "/otp-verification")
+                                                .permitAll()
+                                                .requestMatchers("/error", "/403", "/fragments/**", "/myCourses/**")
+                                                .permitAll()
 
-                                // Root path redirect
-                                .requestMatchers("/home/**").permitAll()
+                                                // Root path redirect
+                                                .requestMatchers("/home/**").permitAll()
 
-                                // Chỉ admin mới được truy cập /admin/**
-                                .requestMatchers("/admin/**").hasRole("ADMIN")
+                                                // Chỉ admin mới được truy cập /admin/**
+                                                .requestMatchers("/admin/**").hasRole("ADMIN")
 
-                                // Chỉ INSTRUCTOR mới được truy cập /instructordashboard/**
-                                .requestMatchers("/instructordashboard/**").hasRole("INSTRUCTOR")
+                                                // Chỉ INSTRUCTOR mới được truy cập /instructordashboard/**
+                                                .requestMatchers("/instructordashboard/**").hasRole("INSTRUCTOR")
 
-                                // User có thể truy cập /user/** và /home
-//                        .requestMatchers("/home").hasAnyRole("USER","INSTRUCTOR")
+                                                // User có thể truy cập /user/** và /home
+                                                // .requestMatchers("/home").hasAnyRole("USER","INSTRUCTOR")
 
-                                .anyRequest().authenticated()
-                )
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .loginProcessingUrl("/perform_login")
-                        .usernameParameter("email")
-                        .passwordParameter("password")
-                        .successHandler(authenticationSuccessHandler())
-                        .failureUrl("/login?error=true")
-                        .permitAll()
-                )
-                .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/login") // Dùng chung trang login
-                        .successHandler(authenticationSuccessHandler())
-                        .failureUrl("/login?error=true")
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService)
-                        )
-                )
-                .logout(logout -> logout
-                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                        .logoutSuccessUrl("/login?logout=true")
-                        .deleteCookies("JSESSIONID")
-                        .invalidateHttpSession(true)
-                        .permitAll()
-                )
-                .exceptionHandling(ex -> ex
-                        .accessDeniedPage("/403")
-                )
-                .sessionManagement(session -> session
-                        .maximumSessions(1)
-                        .maxSessionsPreventsLogin(true)
-                        .expiredUrl("/login?expired=true")
-                        .sessionRegistry(sessionRegistry())
-                )
-                .rememberMe(remember -> remember
-                        .key("my-unique-key")
-                        .rememberMeParameter("remember-me")
-                        .tokenValiditySeconds(7 * 24 * 60 * 60) // 7days
-                )
-                .csrf(csrf -> csrf.disable()); // Disable CSRF
+                                                .anyRequest().authenticated())
+                                .formLogin(form -> form
+                                                .loginPage("/login")
+                                                .loginProcessingUrl("/perform_login")
+                                                .usernameParameter("email")
+                                                .passwordParameter("password")
+                                                .successHandler(authenticationSuccessHandler())
+                                                .failureUrl("/login?error=true")
+                                                .permitAll())
+                                .oauth2Login(oauth2 -> oauth2
+                                                .loginPage("/login") // Dùng chung trang login
+                                                .successHandler(authenticationSuccessHandler())
+                                                .failureUrl("/login?error=true")
+                                                .userInfoEndpoint(userInfo -> userInfo
+                                                                .userService(customOAuth2UserService)))
+                                .logout(logout -> logout
+                                                .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                                                .logoutSuccessUrl("/login?logout=true")
+                                                .deleteCookies("JSESSIONID")
+                                                .invalidateHttpSession(true)
+                                                .permitAll())
+                                .exceptionHandling(ex -> ex
+                                                .accessDeniedPage("/403"))
+                                .sessionManagement(session -> session
+                                                .maximumSessions(1)
+                                                .maxSessionsPreventsLogin(true)
+                                                .expiredUrl("/login?expired=true")
+                                                .sessionRegistry(sessionRegistry()))
+                                .rememberMe(remember -> remember
+                                                .key("my-unique-key")
+                                                .rememberMeParameter("remember-me")
+                                                .tokenValiditySeconds(7 * 24 * 60 * 60) // 7days
+                                )
+                                .csrf(csrf -> csrf.disable()); // Disable CSRF
 
-        return http.build();
-    }
-
+                return http.build();
+        }
 
 }
