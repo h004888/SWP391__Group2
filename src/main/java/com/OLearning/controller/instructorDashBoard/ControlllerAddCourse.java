@@ -9,7 +9,10 @@ import com.OLearning.dto.quiz.QuizDTO;
 import com.OLearning.dto.quiz.QuizQuestionDTO;
 import com.OLearning.dto.video.VideoDTO;
 import com.OLearning.entity.*;
+import com.OLearning.repository.CourseRepository;
 import com.OLearning.repository.LessonRepository;
+import com.OLearning.repository.QuizRepository;
+import com.OLearning.repository.VideoRepository;
 import com.OLearning.security.CustomUserDetails;
 import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.chapter.ChapterService;
@@ -68,6 +71,12 @@ public class ControlllerAddCourse {
     private CourseChapterService courseChapterService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private VideoRepository videoRepository;
+    @Autowired
+    private QuizRepository quizRepository;
+    @Autowired
+    private CourseRepository courseRepository;
 
     //dashhboard
     @GetMapping()
@@ -485,18 +494,32 @@ public class ControlllerAddCourse {
                            @RequestParam(name = "lessonId") Long lessonId,
                            RedirectAttributes redirectAttributes) {
         try {
+            System.out.println("Adding video for lesson ID: " + lessonId);
+            System.out.println("Video duration received: " + videoDTO.getDuration());
+
+            // Đảm bảo duration không null
+            if (videoDTO.getDuration() == null) {
+                videoDTO.setDuration(0);
+                System.out.println("Duration was null, set to default 0");
+            }
+
             // Save video and associate with lesson
             Video video = videoService.saveVideo(videoDTO, lessonId);
-            lessonService.updateContentType(lessonId, "video");
+
+            // Update lesson
             Lesson lesson = lessonRepository.findById(lessonId).orElseThrow();
-            lesson.setDuration(videoDTO.getDuration());
             lesson.setContentType("video");
+            lesson.setDuration(videoDTO.getDuration());
             lesson.setUpdatedAt(LocalDateTime.now());
             lesson.setVideo(video);
             lessonRepository.save(lesson);
 
+            // Update course totals
+            updateCourseTotals(lesson.getChapter().getCourse().getCourseId());
+
             redirectAttributes.addFlashAttribute("successMessage", "Video added successfully.");
         } catch (Exception e) {
+            e.printStackTrace();
             redirectAttributes.addFlashAttribute("errorMessage", "Error adding video: " + e.getMessage());
         }
         return "redirect:../createcourse/coursecontent";
@@ -682,57 +705,189 @@ public class ControlllerAddCourse {
     }
 
     @PostMapping("/createcourse/updatelesson")
-    @ResponseBody
-    public Map<String, Object> updateLesson(
-            @RequestParam("lessonId") Long lessonId,
-            @RequestParam("title") String title,
-            @RequestParam("description") String description,
-            @RequestParam("orderNumber") Integer orderNumber,
-            @RequestParam(value = "duration", required = false) Integer duration,
-            @RequestParam(value = "isFree", required = false) Boolean isFree,
-            @RequestParam(value = "contentType") String contentType,
-            @RequestParam(value = "videoFile", required = false) MultipartFile videoFile,
-            @RequestParam(value = "quizTitle", required = false) String quizTitle,
-            @RequestParam(value = "quizDescription", required = false) String quizDescription,
-            @RequestParam(value = "quizTimeLimit", required = false) Integer quizTimeLimit
-    ) {
-        Map<String, Object> result = new HashMap<>();
+    public String updateLesson(@RequestParam("lessonId") Long lessonId,
+                               @RequestParam("title") String title,
+                               @RequestParam("description") String description,
+                               @RequestParam("orderNumber") Integer orderNumber,
+                               @RequestParam(value = "isFree", required = false) Boolean isFree,
+                               @RequestParam("contentType") String contentType,
+                               @RequestParam(value = "videoFile", required = false) MultipartFile videoFile,
+                               @RequestParam(value = "duration", required = false) Integer duration,
+                               @RequestParam(value = "quizTitle", required = false) String quizTitle,
+                               @RequestParam(value = "quizDescription", required = false) String quizDescription,
+                               @RequestParam(value = "quizTimeLimit", required = false) Integer quizTimeLimit,
+                               @RequestParam(value = "questions[]", required = false) List<String> questions,
+                               @RequestParam(value = "optionAs[]", required = false) List<String> optionAs,
+                               @RequestParam(value = "optionBs[]", required = false) List<String> optionBs,
+                               @RequestParam(value = "optionCs[]", required = false) List<String> optionCs,
+                               @RequestParam(value = "optionDs[]", required = false) List<String> optionDs,
+                               @RequestParam(value = "correctAnswers[]", required = false) List<String> correctAnswers,
+                               @RequestParam(value = "questionIds[]", required = false) List<Long> questionIds,
+                               RedirectAttributes redirectAttributes,
+                               HttpServletRequest request) {
         try {
-            Lesson lesson = lessonRepository.findById(lessonId).orElseThrow();
+            // Lấy lesson hiện tại
+            Lesson lesson = lessonRepository.findById(lessonId)
+                    .orElseThrow(() -> new RuntimeException("Lesson not found with ID: " + lessonId));
+            
+            // Lấy chapterId từ lesson
+            Long chapterId = lesson.getChapter().getChapterId();
+            
+            // Kiểm tra trùng order number (trừ chính lesson đang update)
+            if (orderNumber != null) {
+                List<Lesson> lessons = lessonService.findLessonsByChapterId(chapterId);
+                for (Lesson existingLesson : lessons) {
+                    if (!existingLesson.getLessonId().equals(lessonId) && 
+                        existingLesson.getOrderNumber().equals(orderNumber)) {
+                        redirectAttributes.addFlashAttribute("errorMessage", 
+                            "Order number already exists. Please choose a different order number.");
+                        return "redirect:../createcourse/coursecontent";
+                    }
+                }
+            }
+            
+            // Cập nhật thông tin cơ bản
             lesson.setTitle(title);
             lesson.setDescription(description);
             lesson.setOrderNumber(orderNumber);
-            lesson.setIsFree(isFree);
-            lesson.setUpdatedAt(java.time.LocalDateTime.now());
+            lesson.setIsFree(isFree != null ? isFree : false);
+            lesson.setUpdatedAt(LocalDateTime.now());
             lesson.setContentType(contentType);
+            
+            // Xử lý theo loại nội dung
             if ("video".equals(contentType)) {
-                // Update video
+                // Cập nhật video
                 if (videoFile != null && !videoFile.isEmpty()) {
                     VideoDTO videoDTO = new VideoDTO();
                     videoDTO.setVideoUrl(videoFile);
                     videoDTO.setDuration(duration);
+                    
                     Video video = videoService.saveVideo(videoDTO, lessonId);
                     lesson.setVideo(video);
                 }
-                lesson.setDuration(duration);
+                
+                // Cập nhật duration nếu có
+                if (duration != null) {
+                    lesson.setDuration(duration);
+                }
+                
+                // Xóa quiz nếu có
+                if (lesson.getQuiz() != null) {
+                    Quiz quiz = lesson.getQuiz();
+                    lesson.setQuiz(null);
+                    lessonRepository.save(lesson);
+                    quizService.deleteQuiz(quiz.getId());
+                }
             } else if ("quiz".equals(contentType)) {
-                // Update quiz
+                // Cập nhật quiz
                 QuizDTO quizDTO = new QuizDTO();
                 quizDTO.setTitle(quizTitle);
                 quizDTO.setDescription(quizDescription);
                 quizDTO.setTimeLimit(quizTimeLimit);
                 quizDTO.setLessonId(lessonId);
+                
+                // Nếu đã có quiz, cập nhật quiz đó
+                if (lesson.getQuiz() != null) {
+                    quizDTO.setId(lesson.getQuiz().getId());
+                }
+                
+                // Thêm câu hỏi vào quiz nếu có
+                if (questions != null && !questions.isEmpty()) {
+                    List<QuizQuestionDTO> questionDTOs = new ArrayList<>();
+                    
+                    for (int i = 0; i < questions.size(); i++) {
+                        QuizQuestionDTO questionDTO = new QuizQuestionDTO();
+                        
+                        // Nếu có ID câu hỏi, đây là câu hỏi đã tồn tại
+                        if (questionIds != null && i < questionIds.size() && questionIds.get(i) != null) {
+                            questionDTO.setId(questionIds.get(i));
+                        }
+                        
+                        questionDTO.setQuestion(questions.get(i));
+                        questionDTO.setOptionA(optionAs != null && i < optionAs.size() ? optionAs.get(i) : "");
+                        questionDTO.setOptionB(optionBs != null && i < optionBs.size() ? optionBs.get(i) : "");
+                        questionDTO.setOptionC(optionCs != null && i < optionCs.size() ? optionCs.get(i) : "");
+                        questionDTO.setOptionD(optionDs != null && i < optionDs.size() ? optionDs.get(i) : "");
+                        questionDTO.setCorrectAnswer(correctAnswers != null && i < correctAnswers.size() ? correctAnswers.get(i) : "A");
+                        questionDTO.setOrderNumber(i + 1);
+                        
+                        questionDTOs.add(questionDTO);
+                    }
+                    
+                    quizDTO.setQuestions(questionDTOs);
+                }
+                
                 Quiz quiz = quizService.saveQuiz(quizDTO, lessonId);
                 lesson.setQuiz(quiz);
                 lesson.setDuration(quizTimeLimit);
+                
+                // Xóa video nếu có
+                if (lesson.getVideo() != null) {
+                    Video video = lesson.getVideo();
+                    lesson.setVideo(null);
+                    lessonRepository.save(lesson);
+                    videoRepository.delete(video);
+                }
+            } else {
+                // Basic lesson (chỉ có title và description)
+                lesson.setContentType("basic");
+                lesson.setDuration(0);
+                
+                // Xóa cả video và quiz nếu có
+                if (lesson.getVideo() != null) {
+                    Video video = lesson.getVideo();
+                    lesson.setVideo(null);
+                    lessonRepository.save(lesson);
+                    videoRepository.delete(video);
+                }
+                
+                if (lesson.getQuiz() != null) {
+                    Quiz quiz = lesson.getQuiz();
+                    lesson.setQuiz(null);
+                    lessonRepository.save(lesson);
+                    quizService.deleteQuiz(quiz.getId());
+                }
             }
+            
+            // Lưu lesson
             lessonRepository.save(lesson);
-            result.put("success", true);
+            
+            // Cập nhật tổng số lesson và duration cho course
+            updateCourseTotals(lesson.getChapter().getCourse().getCourseId());
+            
+            redirectAttributes.addFlashAttribute("successMessage", "Lesson updated successfully.");
         } catch (Exception e) {
-            result.put("success", false);
-            result.put("message", e.getMessage());
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", "Error updating lesson: " + e.getMessage());
         }
-        return result;
+        
+        return "redirect:../createcourse/coursecontent";
+    }
+
+    // Helper method để cập nhật tổng số lesson và duration cho course
+    private void updateCourseTotals(Long courseId) {
+        Course course = courseService.findCourseById(courseId);
+        if (course != null) {
+            int totalLesson = 0;
+            int totalDuration = 0;
+            
+            List<Chapter> chapters = chapterService.chapterListByCourse(courseId);
+            for (Chapter chapter : chapters) {
+                List<Lesson> lessons = lessonRepository.findByChapterId(chapter.getChapterId());
+                if (lessons != null) {
+                    totalLesson += lessons.size();
+                    for (Lesson lesson : lessons) {
+                        if (lesson.getDuration() != null) {
+                            totalDuration += lesson.getDuration();
+                        }
+                    }
+                }
+            }
+            
+            course.setTotalLessons(totalLesson);
+            course.setDuration(totalDuration);
+            courseService.saveCourse(course.getCourseId());
+        }
     }
 
 }

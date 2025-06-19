@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Getter
 @AllArgsConstructor
 public class VideoDTO {
-
+    Long id;
     MultipartFile videoUrl;
     Integer duration;
     Long lessonId;

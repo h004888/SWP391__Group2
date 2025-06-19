@@ -39,7 +39,7 @@
                     <i class="bi bi-plus me-1"></i> Add Chapter
                 </button>
                 <!-- Toast Container -->
-                <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
+                <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1056">
                     <div th:if="${successMessage}" class="toast align-items-center text-white bg-success border-0 show" role="alert">
                         <div class="d-flex">
                             <div class="toast-body">
@@ -342,23 +342,27 @@
                                             </select>
                                         </div>
 
+
+
                                         <!-- Video Form -->
                                         <div id="videoForm" class="video-form">
-                                            <form th:action="@{/instructordashboard/createcourse/addvideo}" th:object="${videoDTO}" method="post" enctype="multipart/form-data">
+                                            <form th:action="@{/instructordashboard/createcourse/addvideo}" th:object="${videoDTO}" method="post" enctype="multipart/form-data" class="video-upload-form">
                                                 <input type="hidden" name="lessonId" th:value="${lesson.lessonId}" />
-                                                <!-- Free/Premium Icon -->
                                                 <div class="mb-3">
                                                     <label class="form-label">Upload video</label>
                                                     <div class="input-group mb-3">
-                                                        <input type="file" th:field="*{videoUrl}" class="form-control" id="videoFile" accept="video/mp4">
+                                                        <input type="file" th:field="*{videoUrl}" class="form-control video-file-input" id="videoFile" accept="video/mp4" required>
                                                         <label class="input-group-text">.mp4</label>
                                                     </div>
                                                 </div>
                                                 <div class="mb-3">
                                                     <label class="form-label">Duration (minutes)</label>
-                                                    <input type="number" th:field="*{duration}" class="form-control" name="duration" id="videoDuration" readonly>
+                                                    <input type="number" th:field="*{duration}" class="form-control video-duration-input" id="videoDuration" readonly>
+                                                    <small class="form-text text-muted">Duration will be calculated automatically when you select a video file.</small>
                                                 </div>
-                                                <button type="submit" class="btn btn-primary">Save Video</button>
+                                                <div class="d-flex justify-content-end">
+                                                    <button type="submit" class="btn btn-primary">Save Video</button>
+                                                </div>
                                             </form>
                                         </div>
 
@@ -490,6 +494,57 @@
             details summary { cursor: pointer; }
             details summary > * { display: inline; }
             .quiz-container { border-left: 3px solid #cdcbc8; padding-left: 15px; margin-top: 10px; }
+            
+            /* Fix modal backdrop issues */
+            .modal-backdrop {
+                z-index: 1040 !important;
+            }
+            
+            .modal {
+                z-index: 1055 !important;
+            }
+            
+            /* Ensure proper modal stacking */
+            .modal.show {
+                display: block !important;
+            }
+            
+            /* Fix body scroll when modal is open */
+            body.modal-open {
+                overflow: hidden;
+                padding-right: 0 !important;
+            }
+            
+            /* Ensure backdrop is properly removed */
+            .modal-backdrop.show {
+                opacity: 0.5;
+            }
+            
+            /* Fix toast z-index */
+            .toast {
+                z-index: 1056 !important;
+            }
+            
+            /* Additional modal fixes */
+            .modal-dialog {
+                pointer-events: auto;
+            }
+            
+            .modal-content {
+                pointer-events: auto;
+            }
+            
+            /* Ensure proper stacking context */
+            .modal.show {
+                display: block !important;
+                background-color: rgba(0, 0, 0, 0.5);
+            }
+            
+            /* Fix for multiple backdrops */
+            .modal-backdrop + .modal-backdrop {
+                z-index: 1039 !important;
+            }
+            
             body {
                 min-height: 100vh;
                 background-color: #f8f9fa;
@@ -791,7 +846,7 @@
                 <form id="updateChapterForm" th:action="@{/instructordashboard/createcourse/updatechapter}" method="post">
                     <div class="modal-header">
                         <h5 class="modal-title" id="updateChapterModalLabel">Update Chapter</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closeModalSafely('updateChapterModal')"></button>
                     </div>
                     <div class="modal-body">
                         <input type="hidden" name="chapterId" id="modalChapterId">
@@ -809,7 +864,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeModalSafely('updateChapterModal')">Cancel</button>
                         <button type="submit" class="btn btn-primary">Save</button>
                     </div>
                 </form>
@@ -865,6 +920,31 @@
                 });
             }
 
+            // Fix modal backdrop issues for all modals
+            const allModals = document.querySelectorAll('.modal');
+            allModals.forEach(modal => {
+                modal.addEventListener('hidden.bs.modal', function() {
+                    // Remove any leftover backdrops
+                    const backdrops = document.querySelectorAll('.modal-backdrop');
+                    backdrops.forEach(backdrop => {
+                        backdrop.remove();
+                    });
+                    
+                    // Remove modal-open class from body
+                    document.body.classList.remove('modal-open');
+                    document.body.style.overflow = '';
+                    document.body.style.paddingRight = '';
+                });
+
+                // Handle backdrop click
+                modal.addEventListener('click', function(event) {
+                    if (event.target === modal) {
+                        const modalId = modal.id;
+                        closeModalSafely(modalId);
+                    }
+                });
+            });
+
             // Optional: Hiển thị message sau khi update (nếu có)
             var urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('successMessage')) {
@@ -876,25 +956,47 @@
         });
     </script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const videoFileInput = document.getElementById('videoFile');
-            const durationInput = document.getElementById('videoDuration');
-            if (videoFileInput && durationInput) {
-                videoFileInput.addEventListener('change', function(event) {
-                    const file = event.target.files[0];
-                    if (file) {
-                        const video = document.createElement('video');
-                        video.preload = 'metadata';
-                        video.onloadedmetadata = function() {
-                            window.URL.revokeObjectURL(video.src);
-                            // duration tính bằng giây, chuyển sang phút, làm tròn lên
-                            const durationMinutes = Math.ceil(video.duration / 60);
-                            durationInput.value = durationMinutes;
+        // Hàm để thiết lập tính toán duration cho mỗi form video
+        function setupVideoForms() {
+            // Lấy tất cả các form video
+            document.querySelectorAll('.video-form form').forEach(function(form) {
+                const fileInput = form.querySelector('input[type="file"]');
+                const durationInput = form.querySelector('input[name="duration"]');
+                
+                if (fileInput && durationInput) {
+                    fileInput.addEventListener('change', function(event) {
+                        const file = event.target.files[0];
+                        if (file) {
+                            const video = document.createElement('video');
+                            video.preload = 'metadata';
+                            video.onloadedmetadata = function() {
+                                window.URL.revokeObjectURL(video.src);
+                                const durationMinutes = Math.ceil(video.duration / 60);
+                                durationInput.value = durationMinutes;
+                                console.log("Duration set to:", durationMinutes, "for form:", form);
+                            }
+                            video.src = URL.createObjectURL(file);
                         }
-                        video.src = URL.createObjectURL(file);
+                    });
+                }
+            });
+        }
+        
+        // Chạy khi DOM đã tải xong
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM loaded, setting up video forms");
+            setupVideoForms();
+            
+            // Thiết lập lại khi có thay đổi trong DOM (ví dụ: khi thêm lesson mới)
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.addedNodes.length) {
+                        setupVideoForms();
                     }
                 });
-            }
+            });
+            
+            observer.observe(document.body, { childList: true, subtree: true });
         });
     </script>
     <!-- Lesson Update Modal -->
@@ -903,7 +1005,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="updateLessonModalLabel">Update Lesson</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closeModalSafely('updateLessonModal')"></button>
                 </div>
                 <div class="modal-body">
                     <!-- Common Lesson Information -->
@@ -914,7 +1016,6 @@
                             <option value="quiz">Quiz</option>
                         </select>
                     </div>
-
                     <!-- Common Form Fields -->
                     <form id="updateLessonForm" th:action="@{/instructordashboard/createcourse/updatelesson}" method="post" enctype="multipart/form-data">
                         <input type="hidden" name="lessonId" id="lessonModalId">
@@ -1007,7 +1108,7 @@
                         </div>
 
                         <div class="modal-footer mt-4">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-secondary" onclick="closeModalSafely('updateLessonModal')">Cancel</button>
                             <button type="submit" class="btn btn-primary">Save Changes</button>
                         </div>
                     </form>
@@ -1064,6 +1165,53 @@
         </div>
     </template>
     <script>
+        // Clean up function to fix modal issues
+        function cleanupModalIssues() {
+            // Remove any leftover backdrops
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => backdrop.remove());
+            
+            // Remove modal-open class from body
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+            
+            // Hide any visible modals
+            const visibleModals = document.querySelectorAll('.modal.show');
+            visibleModals.forEach(modal => {
+                modal.classList.remove('show');
+                modal.style.display = 'none';
+            });
+        }
+
+        // Run cleanup on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            cleanupModalIssues();
+            
+            // Also run cleanup when page becomes visible (in case of tab switching)
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) {
+                    cleanupModalIssues();
+                }
+            });
+        });
+
+        // Hàm đóng modal an toàn
+        function closeModalSafely(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                const bootstrapModal = bootstrap.Modal.getInstance(modal);
+                if (bootstrapModal) {
+                    bootstrapModal.hide();
+                }
+                
+                // Force remove backdrop and clean up
+                setTimeout(() => {
+                    cleanupModalIssues();
+                }, 150);
+            }
+        }
+
         // Hàm chuẩn bị form edit lesson
         function prepareEditLesson(button) {
             console.log("Edit button clicked");
@@ -1240,6 +1388,23 @@
                     }
                 });
             }
+
+            // Fix modal backdrop issues
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                modal.addEventListener('hidden.bs.modal', function() {
+                    // Remove any leftover backdrops
+                    const backdrops = document.querySelectorAll('.modal-backdrop');
+                    backdrops.forEach(backdrop => {
+                        backdrop.remove();
+                    });
+                    
+                    // Remove modal-open class from body
+                    document.body.classList.remove('modal-open');
+                    document.body.style.overflow = '';
+                    document.body.style.paddingRight = '';
+                });
+            });
         });
     </script>
 </div>
