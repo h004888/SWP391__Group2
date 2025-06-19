@@ -68,8 +68,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
     @Override
     public List<NotificationDTO> getNotificationsByUserId(Long userId) {
-
-        return notificationRepository.findByUser_UserIdOrderBySentAtDesc(userId)
+        return notificationRepository.findByUser_UserIdOrderByUnreadFirstAndSentAtDesc(userId)
                 .stream()
                 .map(notificationMapper::toDTO)
                 .collect(Collectors.toList());
@@ -77,7 +76,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public List<NotificationDTO> searchNotificationsByUser(String keyword, Long userId) {
-        List<Notification> entities = notificationRepository.findByUserIdAndKeyword(userId, keyword);
+        List<Notification> entities = notificationRepository.findByUserIdAndKeywordUnreadFirst(userId, keyword);
         return entities.stream().map(notificationMapper::toDTO).collect(Collectors.toList());
     }
 

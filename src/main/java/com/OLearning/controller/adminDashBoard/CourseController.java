@@ -2,6 +2,7 @@ package com.OLearning.controller.adminDashBoard;
 
 import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.course.CourseDetailDTO;
+import com.OLearning.dto.notification.NotificationDTO;
 import com.OLearning.entity.Category;
 import com.OLearning.entity.Course;
 import com.OLearning.entity.Notification;
@@ -15,6 +16,7 @@ import com.OLearning.service.course.CourseService;
 import com.OLearning.service.notification.NotificationService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -40,6 +42,8 @@ public class CourseController {
     private NotificationRepository notificationRepository;
     @Autowired
     private CourseReviewRepository courseReviewRepository;
+    @Autowired
+    private NotificationService notificationService;
 
     @GetMapping
     public String getCoursePage(Model model) {
@@ -59,12 +63,40 @@ public class CourseController {
 //                                @RequestParam(required = false) Integer category,
 //                                @RequestParam(required = false) String price,
 //                                @RequestParam(required = false) String status,
+//                                @RequestParam(defaultValue = "0") int page,
+//                                @RequestParam(defaultValue = "5") int size,
 //                                Model model) {
-//        List<CourseDTO> listCourse = courseService.filterCourses(keyword, category, price,status);
-//        model.addAttribute("listCourse", listCourse);
-//        return "adminDashBoard/fragments/courseContent :: courseTableRowContent";
+//
+//        Page<CourseDTO> coursePage = courseService.filterCoursesWithPagination(
+//                keyword, category, price, status, page, size);
+//
+//        model.addAttribute("listCourse", coursePage.getContent());
+//
+//        return "adminDashBoard/fragments/courseTableRowContent :: courseTableRowContent";
 //    }
+    @PostMapping("/approve/{id}")
+    public String approveCourse(@PathVariable("id") Long id) {
+        courseService.approveCourse(id);
+        return "redirect:/admin/course";
+    }
 
+    @PostMapping("/reject")
+    public String rejectCourse(@ModelAttribute("notification") NotificationDTO notificationDTO,
+                               @RequestParam(name = "allowResubmission", defaultValue = "false") boolean allowResubmission,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            // Lấy user và course từ id (binding từ form)
+            User user = userRepository.findById(notificationDTO.getUserId()).orElseThrow(() -> new RuntimeException("User not found"));
+            Course course = courseRepository.findById(notificationDTO.getCourseId()).orElseThrow(() -> new RuntimeException("Course not found"));
+            notificationDTO.setUser(user);
+            notificationDTO.setCourse(course);
+            notificationService.rejectCourseMess(notificationDTO, allowResubmission);
+            redirectAttributes.addFlashAttribute("successMessage", "Course rejected and notification sent successfully.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error rejecting course: " + e.getMessage());
+        }
+        return "redirect:/admin/course";
+    }
     @GetMapping("/delete/{id}")
     public String deleteCourse(@PathVariable("id") Long id) {
         courseService.deleteCourse(id);

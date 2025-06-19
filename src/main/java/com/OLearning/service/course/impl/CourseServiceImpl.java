@@ -6,6 +6,8 @@ import com.OLearning.entity.Course;
 import com.OLearning.mapper.course.CourseDetailMapper;
 import com.OLearning.mapper.course.CourseMapper;
 import com.OLearning.repository.CourseRepository;
+import com.OLearning.repository.NotificationRepository;
+import com.OLearning.repository.UserRepository;
 import com.OLearning.service.course.CourseService;
 
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -28,6 +31,10 @@ public class CourseServiceImpl implements CourseService {
     private  CourseRepository courseRepository;
     @Autowired
     private  CourseDetailMapper courseDetailMapper;
+    @Autowired
+    private NotificationRepository notificationRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     public List<CourseDTO> getAllCourses() {
@@ -137,5 +144,44 @@ public class CourseServiceImpl implements CourseService {
         );
 
         return coursesPage.map(CourseMapper::toDTO);
+    }
+    @Override
+    public boolean approveCourse(Long id) {
+        return courseRepository.findById(id)
+                .map(course -> {
+                    if (!"approved".equalsIgnoreCase(course.getStatus())) {
+                        course.setStatus("approved");
+                        course.setUpdatedAt(LocalDateTime.now());
+                        courseRepository.save(course);
+                        // Gửi notification cho instructor
+                        if (course.getInstructor() != null) {
+                            com.OLearning.entity.Notification notification = new com.OLearning.entity.Notification();
+                            notification.setUser(course.getInstructor());
+                            notification.setCourse(course);
+                            notification.setMessage("Khóa học '" + course.getTitle() + "' của bạn đã được admin phê duyệt.");
+                            notification.setType("COURSE_APPROVED");
+                            notification.setStatus("failed");
+                            notification.setSentAt(LocalDateTime.now());
+                            notificationRepository.save(notification);
+                        }
+                        return true;
+                    }
+                    return false;
+                })
+                .orElse(false);
+    }
+    @Override
+    public boolean rejectCourse(Long id) {
+        return courseRepository.findById(id)
+                .map(course -> {
+                    if (!"rejected".equalsIgnoreCase(course.getStatus())) {
+                        course.setStatus("rejected");
+                        course.setUpdatedAt(LocalDateTime.now());
+                        courseRepository.save(course);
+                        return true;
+                    }
+                    return false;
+                })
+                .orElse(false);
     }
 }

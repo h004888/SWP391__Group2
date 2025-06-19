@@ -21,4 +21,6 @@ public class NotificationDTO {
     private String status;
     private User user;
     private Course course;
+    private Long userId;
+    private Long courseId;
 }

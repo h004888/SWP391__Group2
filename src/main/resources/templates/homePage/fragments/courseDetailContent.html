@@ -1567,6 +1567,12 @@ Page content START -->
                                                                                         th:data-comment="${review.comment}">
                                                                                     <i class="fas fa-edit"></i> Edit
                                                                                 </button>
+                                                                                <!-- Nút xóa comment -->
+                                                                                <button class="btn btn-sm btn-outline-danger ms-2 delete-comment-btn"
+                                                                                        th:data-review-id="${review.reviewId}"
+                                                                                        th:data-course-id="${course.courseId}">
+                                                                                    <i class="fas fa-trash"></i> Xóa
+                                                                                </button>
                                                                             </div>
                                                                         </div>
                                                                     </div>
@@ -2510,5 +2516,32 @@ Listed courses END -->
                 });
             }
         });
+    </script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.delete-comment-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    if(confirm('Bạn có chắc chắn muốn xóa bình luận này?')) {
+                        const reviewId = btn.getAttribute('data-review-id');
+                        const courseId = btn.getAttribute('data-course-id');
+                        fetch(`/api/course/${courseId}/comment/${reviewId}/delete`, {
+                            method: 'DELETE',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if(data.success) {
+                                btn.closest('.comment-item').remove();
+                            } else {
+                                alert(data.error || 'Xóa bình luận thất bại!');
+                            }
+                        })
+                        .catch(() => alert('Có lỗi xảy ra!'));
+                    }
+                });
+            });
+        });
+        /*]]>*/
     </script>
 </main>

@@ -331,5 +331,33 @@ public class CourseDetailController {
         reportCommentService.report(dto);
         return "redirect:/course/" + courseId;
     }
+
+    @DeleteMapping("/api/course/{courseId}/comment/{reviewId}/delete")
+    @ResponseBody
+    public ResponseEntity<?> deleteComment(@PathVariable Long courseId,
+                                           @PathVariable Long reviewId,
+                                           Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Please login to delete a comment"));
+        }
+        User user = userRepo.findByEmail(principal.getName()).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "User not found"));
+        }
+        CourseReview review = reviewRepo.findById(reviewId).orElse(null);
+        if (review == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "Comment not found"));
+        }
+        // Chỉ cho phép xóa nếu là chủ comment
+        if (!review.getEnrollment().getUser().getUserId().equals(user.getUserId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "You can only delete your own comment"));
+        }
+        reviewRepo.deleteById(reviewId);
+        return ResponseEntity.ok(Map.of("success", "Comment deleted successfully"));
+    }
 }
 
