@@ -35,10 +35,13 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/instructordashboard")
@@ -364,6 +367,39 @@ public class ControlllerAddCourse {
         redirectAttributes.addFlashAttribute("successMessage", "Chapter added successfully.");
         return "redirect:../createcourse/coursecontent";
     }
+    //update chapter
+    @PostMapping("/createcourse/updatechapter")
+    public String updateChapter(@RequestParam("chapterId") Long chapterId,
+                                @RequestParam("title") String title,
+                                @RequestParam("description") String description,
+                                @RequestParam("orderNumber") Integer orderNumber,
+                                RedirectAttributes redirectAttributes,
+                                HttpServletRequest request) {
+        Long courseId = getCourseIdFromCookie(request);
+        // Kiểm tra orderNumber có bị trùng không (trừ chính chapter đang update)
+        List<Chapter> chapters = chapterService.chapterListByCourse(courseId);
+        for (Chapter chapter : chapters) {
+            if (!chapter.getChapterId().equals(chapterId) && chapter.getOrderNumber().equals(orderNumber)) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Order number already exists. Please choose a different order number.");
+                return "redirect:../createcourse/coursecontent";
+            }
+        }
+        Chapter chapter = chapterService.getChapterById(chapterId);// tim dc chapter theo chapter Id
+        if (chapter == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Chapter not found.");
+            return "redirect:../createcourse/coursecontent";
+        }
+        //update lai thong tin trong chapter do
+        chapter.setTitle(title);
+        chapter.setDescription(description);
+        chapter.setOrderNumber(orderNumber);
+        chapter.setUpdateAt(java.time.LocalDateTime.now());
+        chapterService.updateChapter(chapter);
+        // Lưu lại ID để đảm bảo update đúng chapter
+        chapter.setChapterId(chapterId);
+        redirectAttributes.addFlashAttribute("successMessage", "Chapter updated successfully.");
+        return "redirect:../createcourse/coursecontent";
+    }
 
     //delete chapter
     @PostMapping("/createcourse/deletechapter")
@@ -643,6 +679,60 @@ public class ControlllerAddCourse {
         response.addCookie(cookie);
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/courseAdded :: courseAdded");
         return "instructorDashboard/indexUpdate";
+    }
+
+    @PostMapping("/createcourse/updatelesson")
+    @ResponseBody
+    public Map<String, Object> updateLesson(
+            @RequestParam("lessonId") Long lessonId,
+            @RequestParam("title") String title,
+            @RequestParam("description") String description,
+            @RequestParam("orderNumber") Integer orderNumber,
+            @RequestParam(value = "duration", required = false) Integer duration,
+            @RequestParam(value = "isFree", required = false) Boolean isFree,
+            @RequestParam(value = "contentType") String contentType,
+            @RequestParam(value = "videoFile", required = false) MultipartFile videoFile,
+            @RequestParam(value = "quizTitle", required = false) String quizTitle,
+            @RequestParam(value = "quizDescription", required = false) String quizDescription,
+            @RequestParam(value = "quizTimeLimit", required = false) Integer quizTimeLimit
+    ) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            Lesson lesson = lessonRepository.findById(lessonId).orElseThrow();
+            lesson.setTitle(title);
+            lesson.setDescription(description);
+            lesson.setOrderNumber(orderNumber);
+            lesson.setIsFree(isFree);
+            lesson.setUpdatedAt(java.time.LocalDateTime.now());
+            lesson.setContentType(contentType);
+            if ("video".equals(contentType)) {
+                // Update video
+                if (videoFile != null && !videoFile.isEmpty()) {
+                    VideoDTO videoDTO = new VideoDTO();
+                    videoDTO.setVideoUrl(videoFile);
+                    videoDTO.setDuration(duration);
+                    Video video = videoService.saveVideo(videoDTO, lessonId);
+                    lesson.setVideo(video);
+                }
+                lesson.setDuration(duration);
+            } else if ("quiz".equals(contentType)) {
+                // Update quiz
+                QuizDTO quizDTO = new QuizDTO();
+                quizDTO.setTitle(quizTitle);
+                quizDTO.setDescription(quizDescription);
+                quizDTO.setTimeLimit(quizTimeLimit);
+                quizDTO.setLessonId(lessonId);
+                Quiz quiz = quizService.saveQuiz(quizDTO, lessonId);
+                lesson.setQuiz(quiz);
+                lesson.setDuration(quizTimeLimit);
+            }
+            lessonRepository.save(lesson);
+            result.put("success", true);
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", e.getMessage());
+        }
+        return result;
     }
 
 }

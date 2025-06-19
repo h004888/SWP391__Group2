@@ -121,4 +121,13 @@ public class ControllerEnrolled {
             return "redirect:/instructordashboard/enrolled";
         }
     }
+    @PostMapping("/details/{id}")
+    public ResponseEntity<EnrollmentDTO> getRequestDetails(@PathVariable int id) {
+        try {
+            EnrollmentDTO request = enrollmentService.getRequestById(id);
+            return ResponseEntity.ok(request);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
 }

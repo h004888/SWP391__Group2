@@ -17,6 +17,7 @@ public class UserDetailDTO {
     private String fullName;
     private String email;
     private String phone;
+    private String birthday;
     private String roleName;
     private String address;
     private String profilePicture;

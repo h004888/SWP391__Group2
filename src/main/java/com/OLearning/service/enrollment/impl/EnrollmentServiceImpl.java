@@ -111,6 +111,12 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     @Override
+    public EnrollmentDTO getRequestById(int enrollmentId) {
+        return enrollmentRepository.findByEnrollmentId(enrollmentId).map(mapper::MapEnrollmentDTO)
+                .orElseThrow(() -> new RuntimeException("Enrollment request not found with id: " + enrollmentId));
+    }
+
+    @Override
     public boolean unblockEnrollment(int enrollmentId) {
         Optional<Enrollment> enrollmentOpt = enrollmentRepository.findById(enrollmentId);
 

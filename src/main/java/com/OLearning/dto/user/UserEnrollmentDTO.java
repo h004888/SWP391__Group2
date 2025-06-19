@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,4 +17,6 @@ public class UserEnrollmentDTO {
     private String profilePicture;
     private String fullName;
     private String address;
+    private LocalDate birthday;
+    private String phone;
 }

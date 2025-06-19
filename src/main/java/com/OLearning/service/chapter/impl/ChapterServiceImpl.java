@@ -61,6 +61,11 @@ public class ChapterServiceImpl implements ChapterService {
         return chapterRepository.findChapterById(id);
     }
 
+    @Override
+    public void updateChapter(Chapter chapter) {
+        chapterRepository.save(chapter);
+    }
+
 
 }
 

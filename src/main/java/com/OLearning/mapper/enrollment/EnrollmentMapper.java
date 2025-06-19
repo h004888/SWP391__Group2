@@ -4,6 +4,7 @@ import com.OLearning.dto.enrollment.EnrollmentDTO;
 import com.OLearning.dto.user.UserDTO;
 import com.OLearning.dto.user.UserEnrollmentDTO;
 import com.OLearning.entity.Enrollment;
+import com.OLearning.entity.User;
 import com.OLearning.mapper.user.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,6 +32,8 @@ public class EnrollmentMapper {
         userDTO.setProfilePicture(enrollment.getUser().getProfilePicture());
         userDTO.setFullName(enrollment.getUser().getFullName());
         userDTO.setAddress(enrollment.getUser().getAddress());
+        userDTO.setBirthday(enrollment.getUser().getBirthday());
+        userDTO.setPhone(enrollment.getUser().getPhone());
         enrollmentDTO.setUser(userDTO);
 
         return enrollmentDTO;
