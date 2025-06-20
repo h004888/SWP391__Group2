@@ -88,7 +88,7 @@ public class OrdersServiceImpl implements OrdersService {
                 // Set end date to end of day
                 LocalDateTime endDateTime = end.plusDays(1).atStartOfDay().minusSeconds(1);
                 
-                pageable = PageRequest.of(page, size, Sort.by("orderDate").ascending());
+                pageable = PageRequest.of(page, size, Sort.by("orderDate").descending());
                 Page<Order> ordersPage;
                 if (username != null && !username.trim().isEmpty() && orderType != null && !orderType.trim().isEmpty()) {
                     ordersPage = ordersRepository.findByUserUsernameContainingAndOrderTypeAndOrderDateBetween(
@@ -122,13 +122,13 @@ public class OrdersServiceImpl implements OrdersService {
                 return ordersPage.map(ordersMapper::toDTO);
             } catch (Exception e) {
                 // If date parsing fails, fall back to default sorting
-                pageable = PageRequest.of(page, size);
+                pageable = PageRequest.of(page, size, Sort.by("orderDate").descending());
             }
         } else if (amountDirection != null && !amountDirection.trim().isEmpty()) {
             pageable = PageRequest.of(page, size, "asc".equalsIgnoreCase(amountDirection) ? 
                 Sort.by("amount").ascending() : Sort.by("amount").descending());
         } else {
-            pageable = PageRequest.of(page, size);
+            pageable = PageRequest.of(page, size, Sort.by("orderDate").descending());
         }
 
         Page<Order> ordersPage;

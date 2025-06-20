@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "quiztest")
+@Table(name = "Quiz_test")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -19,6 +19,7 @@ import java.util.List;
 public class Quiz {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "QuizID")
     private Long id;
 
     private String title;

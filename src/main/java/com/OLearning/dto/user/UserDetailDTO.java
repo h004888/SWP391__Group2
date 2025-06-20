@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -19,7 +20,9 @@ public class UserDetailDTO {
     private String phone;
     private String roleName;
     private String address;
+    private LocalDate birthDay;
     private String profilePicture;
+    private String personalSkill;
 
     private List<String> enrolledCourseTitles;
 }

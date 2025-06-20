@@ -1,10 +1,19 @@
 package com.OLearning.controller.adminDashBoard;
 
+import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.user.UserDTO;
+import com.OLearning.dto.user.UserDetailDTO;
+import com.OLearning.entity.Course;
+import com.OLearning.entity.CourseReview;
 import com.OLearning.entity.InstructorRequest;
 import com.OLearning.entity.User;
+import com.OLearning.repository.UserRepository;
 import com.OLearning.security.CustomUserDetails;
-import com.OLearning.service.InstructorRequest.InstructorRequestService;
+import com.OLearning.service.course.CourseService;
+import com.OLearning.service.courseReview.CourseReviewService;
+import com.OLearning.service.email.EmailService;
+import com.OLearning.service.enrollment.EnrollmentService;
+import com.OLearning.service.instructorRequest.InstructorRequestService;
 import com.OLearning.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,44 +28,48 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/admin/mnInstructors")
 public class InstructorMnController {
 
-    private final Long roleInstructor = 3L;
+    private final Long roleInstructor = 2L;
 
     @Autowired
     private UserService userService;
-
     @Autowired
     private InstructorRequestService instructorRequestService;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private EmailService emailService;
+    @Autowired
+    private CourseService courseService;
+    @Autowired
+    private EnrollmentService enrollmentService;
+    @Autowired
+    private CourseReviewService courseReviewService;
 
     @GetMapping()
     public String getInstructorPage(
             Model model,
             @RequestParam(required = false, defaultValue = "0") int page) {
 
-        Pageable prs = PageRequest.of(page, 5);
-        Page<UserDTO> listInstructor = userService.getUsersByRoleWithPagination(roleInstructor, prs);
+        Pageable prs = PageRequest.of(page, 6);
+        Page<UserDTO> listInstructor = userService.getInstructorsByRoleIdOrderByCourseCountDesc(roleInstructor, prs);
         List<UserDTO> listUser = listInstructor.getContent();
-
-        Map<Long, Integer> userStudentCountMap = new HashMap<>();
-
-        for (UserDTO user : listUser) {
-            int totalStudents = user.getCourse().stream()
-                    .mapToInt(course -> course.getTotalStudentEnrolled() != null ? course.getTotalStudentEnrolled() : 0)
-                    .sum();
-
-            userStudentCountMap.put(user.getUserId(), totalStudents);
-        }
 
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", listInstructor.getTotalPages());
@@ -64,13 +77,138 @@ public class InstructorMnController {
 
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/instructorListContent :: instructorListContent");
         model.addAttribute("listInstructor", listUser);
-        model.addAttribute("userStudentCountMap", userStudentCountMap);
+        model.addAttribute("enrollmentService", enrollmentService);
         model.addAttribute("accNamePage", "Management Instructor");
         return "adminDashBoard/index";
     }
 
+    @GetMapping("/viewInfo/{userId}")
+    public String getDetailAccountPage(
+            Model model,
+            @PathVariable("userId") long id,
+            @RequestParam(defaultValue = "0") int coursePage,
+            @RequestParam(defaultValue = "0") int reviewPage,
+            @RequestParam(defaultValue = "5") int courseSize,
+            @RequestParam(defaultValue = "5") int reviewSize) {
+        //paging
+        Optional<UserDetailDTO> userDetailDTO = userService.getInfoUser(id);
+        Page<CourseDTO> listCourses = courseService.findCourseByUserId(id, coursePage, courseSize);
+        Page<CourseReview> listReview = courseReviewService.getCourseReviewsByInstructorId(id, reviewPage, reviewSize);
+
+        // Get enrollment data for current year
+        int year = java.time.LocalDate.now().getYear();
+        Map<String, Long> instructorEnrollmentChartData = new java.util.LinkedHashMap<>();
+        for (int month = 1; month <= 12; month++) {
+            Long count = enrollmentService.countEnrollmentsByInstructorAndMonth(id, year, month);
+            String label = String.format("%02d/%d", month, year);
+            instructorEnrollmentChartData.put(label, count);
+        }
+        model.addAttribute("instructorEnrollmentChartData", instructorEnrollmentChartData);
+
+        // Calculate total enrollments for the year
+        long instructorEnrollmentTotal = instructorEnrollmentChartData.values().stream().mapToLong(Long::longValue).sum();
+        model.addAttribute("instructorEnrollmentTotal", instructorEnrollmentTotal);
+
+        // Calculate enrollments for this week and last week
+        LocalDate now = LocalDate.now();
+        LocalDate startOfThisWeek = now.with(DayOfWeek.MONDAY);
+        LocalDate endOfThisWeek = startOfThisWeek.plusDays(6);
+        LocalDate startOfLastWeek = startOfThisWeek.minusWeeks(1);
+        LocalDate endOfLastWeek = startOfThisWeek.minusDays(1);
+        long instructorEnrollmentThisWeek = enrollmentService.countEnrollmentsByInstructorAndDateRange(id, startOfThisWeek, endOfThisWeek);
+        long instructorEnrollmentLastWeek = enrollmentService.countEnrollmentsByInstructorAndDateRange(id, startOfLastWeek, endOfLastWeek);
+        model.addAttribute("instructorEnrollmentThisWeek", instructorEnrollmentThisWeek);
+        model.addAttribute("instructorEnrollmentLastWeek", instructorEnrollmentLastWeek);
+        double instructorEnrollmentChangePercent = 0.0;
+        if (instructorEnrollmentLastWeek == 0) {
+            instructorEnrollmentChangePercent = instructorEnrollmentThisWeek > 0 ? 100.0 : 0.0;
+        } else {
+            instructorEnrollmentChangePercent = ((double)(instructorEnrollmentThisWeek - instructorEnrollmentLastWeek) / instructorEnrollmentLastWeek) * 100.0;
+        }
+        model.addAttribute("instructorEnrollmentChangePercent", instructorEnrollmentChangePercent);
+
+        // Add pagination information to model
+        model.addAttribute("listReview", listReview.getContent());
+        model.addAttribute("reviewCurrentPage", reviewPage);
+        model.addAttribute("reviewTotalPages", listReview.getTotalPages());
+        model.addAttribute("reviewTotalItems", listReview.getTotalElements());
+
+        model.addAttribute("listCourses", listCourses.getContent());
+        model.addAttribute("courseCurrentPage", coursePage);
+        model.addAttribute("courseTotalPages", listCourses.getTotalPages());
+        model.addAttribute("courseTotalItems", listCourses.getTotalElements());
+
+        model.addAttribute("userId", id);
+
+        if (userDetailDTO.isPresent()) {
+            model.addAttribute("fragmentContent", "adminDashBoard/fragments/instructorDetailContent :: instructorDetailContent");
+            model.addAttribute("accNamePage", "Detail Account");
+            model.addAttribute("userDetail", userDetailDTO.get());
+            return "adminDashBoard/index";
+        } else {
+            return "redirect:/admin/account";
+        }
+    }
+
+    @GetMapping("/viewInfo/{userId}/pagingCourse")
+    public String pagingCourseInstructor(
+            @PathVariable("userId") long id,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            Model model) {
+        Page<CourseDTO> listCourses = courseService.findCourseByUserId(id, page, size);
+        model.addAttribute("listCourses", listCourses.getContent());
+        model.addAttribute("courseCurrentPage", page);
+        model.addAttribute("courseTotalPages", listCourses.getTotalPages());
+        model.addAttribute("courseTotalItems", listCourses.getTotalElements());
+        return "adminDashBoard/fragments/instructorDetailContent :: courseListFragment";
+    }
+
+    @GetMapping("/viewInfo/{userId}/pagingReview")
+    public String pagingReview(
+            @PathVariable("userId") long id,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            Model model) {
+        Page<CourseReview> listReview = courseReviewService.getCourseReviewsByInstructorId(id, page, size);
+        model.addAttribute("listReview", listReview.getContent());
+        model.addAttribute("reviewCurrentPage", page);
+        model.addAttribute("reviewTotalPages", listReview.getTotalPages());
+        model.addAttribute("reviewTotalItems", listReview.getTotalElements());
+        return "adminDashBoard/fragments/instructorDetailContent :: reviewTableFragment";
+    }
+
+    @GetMapping("/viewInfo/details/{id}")
+    public ResponseEntity<CourseReview> getReviewDetails(@PathVariable Long id) {
+        CourseReview review = courseReviewService.getCourseReviews(id);
+        return ResponseEntity.ok(review);
+    }
+
+    @GetMapping("/filter")
+    public String filterInstructors(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "6") int size,
+            @RequestParam(defaultValue = "grid") String view,
+            Model model) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<UserDTO> listInstructor = userService.filterInstructors(keyword, pageable);
+        List<UserDTO> listUser = listInstructor.getContent();
+
+        model.addAttribute("listInstructor", listUser);
+        model.addAttribute("enrollmentService", enrollmentService);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", listInstructor.getTotalPages());
+        model.addAttribute("totalItems", listInstructor.getTotalElements());
+
+        return view.equals("grid") ?
+                "adminDashBoard/fragments/instructorListContent :: instructorTableFragment" :
+                "adminDashBoard/fragments/instructorListContent :: instructorListTableFragment";
+    }
+
     @GetMapping("/request")
-    public String getRequestInstrutor(@RequestParam(required = false, defaultValue = "0") int page,
+    public String getRequestInstrutorListPage(@RequestParam(required = false, defaultValue = "0") int page,
                                       Model model) {
         Pageable prs = PageRequest.of(page, 5);
         Page<InstructorRequest> listRequest = instructorRequestService.getAllInstructorRequests(prs);
@@ -134,7 +272,7 @@ public class InstructorMnController {
     }
 
     @GetMapping("/request/filter")
-    public String filterRequests(
+    public String filterRequestsPage(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String status,
             @RequestParam(defaultValue = "0") int page,
@@ -151,4 +289,23 @@ public class InstructorMnController {
         
         return "adminDashBoard/fragments/instructorRequestContent :: requestTableFragment";
     }
+    
+    @PostMapping("/sendMessage")
+    public ResponseEntity<?> sendMessage(
+            @RequestParam Long instructorId,
+            @RequestParam String message) {
+        try {
+            User instructor = userRepository.findById(instructorId)
+                    .orElseThrow(() -> new RuntimeException("Instructor not found"));
+            emailService.sendMessageToInstructor(
+                    instructor.getEmail(),
+                    instructor.getFullName(),
+                    message
+            );
+            return ResponseEntity.ok().body("Message sent successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error sending message: " + e.getMessage());
+        }
+    }
+
 }

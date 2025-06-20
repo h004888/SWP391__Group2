@@ -6,11 +6,25 @@
     <title>Access denied</title>
 </head>
 <body>
-<div class="text-center">
-    <div class="error mx-auto" data-text="403">403</div>
-    <p class="lead text-gray-800 mb-5">Access denied</p>
-    <p class="text-500 mb-0">You do not have permission to access this page...</p>
-    <a th:href="@{/login}">&larr; Back to Login</a>
-</div>
+<main>
+    <section class="pt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <!-- Image -->
+                    <img th:src="@{/assets/images/element/error404-01.svg}" class="h-200px h-md-400px mb-4" alt="">
+                    <!-- Title -->
+                    <h1 class="display-1 text-danger mb-0">403</h1>
+                    <!-- Subtitle -->
+                    <p class="text-500 mb-0">You do not have permission to access this page...</p>
+                    <!-- info -->
+                    <p class="mb-4">Either something went wrong or this page doesn't exist anymore.</p>
+                    <!-- Button -->
+                    <a th:href="@{/login}" class="btn btn-primary mb-0">Back to Login</a>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
 </body>
 </html>

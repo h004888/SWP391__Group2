@@ -122,8 +122,8 @@ public class CourseController {
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/courseDetailContent :: courseDetail");
         Optional<CourseDetailDTO> optionalDetail = courseService.getDetailCourse(id);
         if (optionalDetail.isPresent()) {
-            CourseDetailDTO course = optionalDetail.get();
-            model.addAttribute("detailCourse", optionalDetail.get());
+            CourseDetailDTO courseDetail = optionalDetail.get();
+            model.addAttribute("detailCourse",courseDetail);
             return "adminDashBoard/index";
         } else {
             return "redirect:/admin/course";

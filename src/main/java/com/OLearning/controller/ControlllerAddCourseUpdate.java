@@ -472,8 +472,7 @@ public class ControlllerAddCourseUpdate {
                 }
             }
         }
-        course.setTotalLessons(totalLesson);
-        course.setDuration(totalDuration);
+
         courseService.saveCourse(courseId);
         session.setAttribute("course", course);
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/Step4SubmitCourse :: step4Content");

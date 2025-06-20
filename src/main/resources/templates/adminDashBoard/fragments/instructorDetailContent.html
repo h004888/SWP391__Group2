@@ -1,0 +1,450 @@
+<th:block th:fragment="instructorDetailContent">
+
+    <!-- Title -->
+    <div class="row">
+        <div class="col-12 mb-3">
+            <h1 class="h3 mb-2 mb-sm-0">Instructor detail</h1>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Personal information START -->
+        <div class="col-xxl-7">
+            <div class="card bg-transparent border rounded-3 h-100">
+
+                <!-- Card header -->
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="card-header-title mb-0">Personal Information</h5>
+                </div>
+
+                <!-- Card body START -->
+                <div class="card-body">
+                    <!-- Profile picture -->
+                    <div class="avatar avatar-xl mb-3">
+                        <img class="avatar-img rounded-circle border border-white border-3 shadow"
+                             th:src="${userDetail.profilePicture}" alt="">
+                    </div>
+
+                    <!-- Information START -->
+                    <div class="row">
+
+                        <!-- Information item -->
+                        <div class="col-md-6">
+                            <ul class="list-group list-group-borderless">
+                                <li class="list-group-item">
+                                    <span>Full Name:</span>
+                                    <span class="h6 mb-0" th:text="${userDetail.fullName}">Louis Ferguson</span>
+                                </li>
+
+                                <li class="list-group-item">
+                                    <span>User Name:</span>
+                                    <span class="h6 mb-0" th:text="${userDetail.username}">Lousifer</span>
+                                </li>
+
+                                <li class="list-group-item">
+                                    <span>Phone Number:</span>
+                                    <span class="h6 mb-0" th:text="${userDetail.phone}">+123 456 789 10</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Information item -->
+                        <div class="col-md-6">
+                            <ul class="list-group list-group-borderless">
+                                <li class="list-group-item">
+                                    <span>Email:</span>
+                                    <span class="h6 mb-0" th:text="${userDetail.email}">example@gmail.com</span>
+                                </li>
+
+                                <li class="list-group-item">
+                                    <span>Adress:</span>
+                                    <span class="h6 mb-0" th:text="${userDetail.address}">California</span>
+                                </li>
+
+                                <li class="list-group-item">
+                                    <span>Birth Date:</span>
+                                    <span class="h6 mb-0" th:text="${userDetail.birthDay}">29 Aug 2019</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Information item -->
+                        <div class="col-12">
+                            <ul class="list-group list-group-borderless">
+                                <li class="list-group-item d-flex">
+                                    <span>Description:</span>
+                                    <p class="h6 mb-0" th:text="${userDetail.personalSkill}">As it so contrasted oh estimating instrument. Size like body
+                                        someone had. Are conduct viewing boy minutes warrant the expense Tolerably
+                                        behavior may admit daughters offending her ask own. Praise effect wishes change
+                                        way and any wanted. Lively use looked latter regard had. Do he it part more last
+                                        in</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- Information END -->
+                </div>
+                <!-- Card body END -->
+            </div>
+        </div>
+        <!-- Personal information END -->
+
+        <!-- Student status chart START -->
+        <div class="col-xxl-5">
+            <div class="row g-4">
+
+                <!-- Enrolled START -->
+                <div class="col-md-6 col-xxl-12">
+                    <div class="card bg-transparent border overflow-hidden">
+                        <!-- Card header -->
+                        <div class="card-header bg-light border-bottom">
+                            <h5 class="card-header-title mb-0">New Enrollment</h5>
+                        </div>
+                        <!-- Card body -->
+                        <div class="card-body p-0">
+                            <div class="d-sm-flex justify-content-between p-4">
+                                <h4 class="text-blue mb-0" th:text="${instructorEnrollmentTotal}">0</h4>
+                                <p class="mb-0">
+                                    <span th:if="${instructorEnrollmentChangePercent > 0}" class="text-success me-1">
+                                        <span th:text="${#numbers.formatDecimal(instructorEnrollmentChangePercent, 1, 2)} + '%'">0%</span>
+                                        <i class="bi bi-arrow-up"></i>
+                                    </span>
+                                    <span th:if="${instructorEnrollmentChangePercent < 0}" class="text-danger me-1">
+                                        <span th:text="${#numbers.formatDecimal(instructorEnrollmentChangePercent, 1, 2)} + '%'">0%</span>
+                                        <i class="bi bi-arrow-down"></i>
+                                    </span>
+                                    <span th:if="${instructorEnrollmentChangePercent == 0}" class="text-secondary me-1">
+                                        0%
+                                    </span>
+                                    so với tuần trước
+                                </p>
+                            </div>
+                            <!-- Apex chart -->
+                            <div id="activeChartstudent2"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Enrolled END -->
+
+            </div>
+        </div>
+        <!-- Student status chart END -->
+
+        <!-- Instructor course list START -->
+        <div class="col-12">
+            <div class="card bg-transparent border h-100">
+
+                <!-- Card header -->
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0">Courses List</h5>
+                </div>
+
+                <!-- Card body START -->
+                <div id="courseListWrapper" th:fragment="courseListFragment" >
+                    <!-- Course List Fragment START -->
+                        <div class="card-body">
+                            <div class="table-responsive border-0">
+                                <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                                    <thead>
+                                    <tr>
+                                        <th scope="col" class="border-0">Course ID</th>
+                                        <th scope="col" class="border-0">Course Name</th>
+                                        <th scope="col" class="border-0">Category</th>
+                                        <th scope="col" class="border-0">Course Level</th>
+                                        <th scope="col" class="border-0">Enrolled</th>
+                                        <th scope="col" class="border-0">Status</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody >
+                                    <tr th:each="course : ${listCourses}">
+                                        <td th:text="${course.courseId}">1</td>
+                                        <td class="d-flex align-items-center position-relative">
+                                            <div class="w-60px"><img th:src="${course.courseImg}" class="rounded" alt=""></div>
+                                            <h6 class="table-responsive-title mb-0 ms-2">
+                                                <a href="#" class="stretched-link" th:text="${course.title}">Course Title</a>
+                                            </h6>
+                                        </td>
+                                        <td th:text="${course.categoryName}">Programming</td>
+                                        <td th:text="${course.courseLevel==null ? 'N/A' : course.courseLevel}">Beginner</td>
+                                        <td th:text="${course.totalStudentEnrolled}">412</td>
+                                        <td>
+                            <span th:switch="${course.status}">
+                                <span th:case="null" class="badge bg-secondary">Draft</span>
+                                <span th:case="'pending'" class="badge bg-secondary">Pending</span>
+                                <span th:case="'live'" class="badge bg-success">Live</span>
+                                <span th:case="'approved'" class="badge bg-success">Approved</span>
+                                <span th:case="'blocked'" class="badge bg-danger">Blocked</span>
+                                <span th:case="'rejected'" class="badge bg-danger">Rejected</span>
+                                <span th:case="*" class="badge bg-secondary" th:text="${course.status}"></span>
+                            </span>
+                                        </td>
+
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- Pagination & info -->
+                            <div class="d-sm-flex justify-content-sm-between align-items-sm-center mt-2">
+                                <p class="mb-0 text-center text-sm-start" th:if="${courseTotalItems > 0}">
+                                    Showing <span th:text="${courseCurrentPage * 5 + 1}">1</span> to
+                                    <span th:text="${(courseCurrentPage * 5) + 5 > courseTotalItems ? courseTotalItems : (courseCurrentPage * 5) + 5}">5</span> of
+                                    <span th:text="${courseTotalItems}">20</span> entries
+                                </p>
+                                <p class="mb-0 text-center text-sm-start" th:if="${courseTotalItems == 0}">
+                                    No entries found
+                                </p>
+                                <nav class="d-flex justify-content-center mb-0" aria-label="navigation" th:if="${courseTotalPages > 1}">
+                                    <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
+                                        <li class="page-item mb-0" th:classappend="${courseCurrentPage == 0} ? 'disabled'">
+                                            <a class="page-link course-page-link" href="#" th:data-page="${courseCurrentPage - 1}">
+                                                <i class="fas fa-angle-left"></i>
+                                            </a>
+                                        </li>
+                                        <li class="page-item mb-0" th:each="i : ${#numbers.sequence(0, courseTotalPages - 1)}"
+                                            th:classappend="${courseCurrentPage == i} ? 'active'">
+                                            <a class="page-link course-page-link" href="#" th:data-page="${i}" th:text="${i + 1}"></a>
+                                        </li>
+                                        <li class="page-item mb-0" th:classappend="${courseCurrentPage == courseTotalPages - 1} ? 'disabled'">
+                                            <a class="page-link course-page-link" href="#" th:data-page="${courseCurrentPage + 1}">
+                                                <i class="fas fa-angle-right"></i>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                            <!-- Pagination & info END -->
+                        </div>
+                    <!-- Course List Fragment END -->
+                </div>
+            </div>
+        </div>
+        <!-- Instructor course list END -->
+
+
+
+        <!-- Student review START -->
+        <div class="col-12">
+            <div class="card bg-transparent border">
+
+                <!-- Card header START -->
+                <div class="card-header border-bottom bg-light">
+                    <h5 class="mb-0">All Reviews</h5>
+                </div>
+                <!-- Card header END -->
+           <div th:fragment="reviewTableFragment">
+           <div id="reviewTableWrapper">
+                <!-- Card body START -->
+                <div class="card-body pb-0">
+                    <!-- Table START -->
+                    <div class="table-responsive border-0">
+                        <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                            <!-- Table head -->
+                            <thead>
+                            <tr>
+                                <th scope="col" class="border-0 rounded-start">Student Name</th>
+                                <th scope="col" class="border-0">Course Name</th>
+                                <th scope="col" class="border-0">Comment</th>
+                                <th scope="col" class="border-0">Rating</th>
+                                <th scope="col" class="border-0 rounded-end">Action</th>
+                            </tr>
+                            </thead>
+
+                            <!-- Table body START -->
+                            <tbody >
+                            <!-- Table row -->
+                            <tr th:each="review : ${listReview}">
+                                <!-- Table data -->
+                                <td>
+                                    <div class="d-flex align-items-center position-relative">
+                                        <!-- Image -->
+                                        <div class="avatar avatar-xs mb-2 mb-md-0">
+                                            <img th:src="${review.enrollment.user.profilePicture}" class="rounded-circle" alt="">
+                                        </div>
+                                        <div class="mb-0 ms-2">
+                                            <!-- Title -->
+                                            <h6 class="mb-0"><a href="#" class="stretched-link" th:text="${review.enrollment.user.fullName}">Lori Stevens</a></h6>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Table data -->
+                                <td>
+                                    <h6 class="table-responsive-title mb-0"><a href="#" th:text="${review.course.title}">Building Scalable APIs with
+                                        GraphQL</a></h6>
+                                </td>
+
+                                <!-- Table data -->
+                                <td th:text="${review.comment}">This course exceeded my expectations! The instructor explains complex React
+                                    concepts in a way that's easy to understand. The projects are practical and
+                                    well-structured. I would definitely recommend this course to anyone looking to learn
+                                    React.</td>
+
+                                <!-- Table data -->
+                                <td>
+                                    <ul class="list-inline mb-0">
+                                        <li class="list-inline-item me-0 small" th:each="i : ${#numbers.sequence(1, review.rating)}">
+                                            <i class="fas fa-star text-warning"></i>
+                                        </li>
+                                        <li class="list-inline-item me-0 small" th:each="i : ${#numbers.sequence(1, 5 - review.rating)}" th:if="${review.rating < 5}">
+                                            <i class="fas fa-star text-secondary"></i>
+                                        </li>
+                                    </ul>
+                                </td>
+
+                                <!-- Table data -->
+                                <td>
+                                    <a href="#" class="btn btn-sm btn-info-soft mb-0"
+                                       data-bs-toggle="modal"
+                                       data-bs-target="#appDetail"
+                                       th:attr="data-review-id=${review.reviewId},
+                                                data-fullname=${review.enrollment.user.fullName},
+                                                data-email=${review.enrollment.user.email},
+                                                data-phone=${review.enrollment.user.phone},
+                                                data-date=${review.createdAt},
+                                                data-comment=${review.comment}">View</a>
+                                </td>
+                            </tr>
+
+                            </tbody>
+                            <!-- Table body END -->
+                        </table>
+                    </div>
+                    <!-- Table END -->
+                </div>
+                <!-- Card body END -->
+
+               <!-- Pagination & info -->
+               <div class="d-sm-flex justify-content-sm-between align-items-sm-center mt-2">
+                   <p class="mb-0 text-center text-sm-start" th:if="${reviewTotalItems > 0}">
+                       Showing <span th:text="${reviewCurrentPage * 5 + 1}">1</span> to
+                       <span th:text="${(reviewCurrentPage * 5) + 5 > reviewTotalItems ? reviewTotalItems : (reviewCurrentPage * 5) + 5}">5</span> of
+                       <span th:text="${reviewTotalItems}">20</span> entries
+                   </p>
+                   <p class="mb-0 text-center text-sm-start" th:if="${reviewTotalItems == 0}">
+                       No entries found
+                   </p>
+                   <nav class="d-flex justify-content-center mb-0" aria-label="navigation" th:if="${reviewTotalPages > 1}">
+                       <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
+                           <li class="page-item mb-0" th:classappend="${reviewCurrentPage == 0} ? 'disabled'">
+                               <a class="page-link review-page-link" href="#" th:data-page="${reviewCurrentPage - 1}">
+                                   <i class="fas fa-angle-left"></i>
+                               </a>
+                           </li>
+                           <li class="page-item mb-0" th:each="i : ${#numbers.sequence(0, reviewTotalPages - 1)}"
+                               th:classappend="${reviewCurrentPage == i} ? 'active'">
+                               <a class="page-link review-page-link" href="#" th:data-page="${i}" th:text="${i + 1}"></a>
+                           </li>
+                           <li class="page-item mb-0" th:classappend="${reviewCurrentPage == reviewTotalPages - 1} ? 'disabled'">
+                               <a class="page-link review-page-link" href="#" th:data-page="${reviewCurrentPage + 1}">
+                                   <i class="fas fa-angle-right"></i>
+                               </a>
+                           </li>
+                       </ul>
+                   </nav>
+               </div>
+               <!-- Pagination & info END -->
+            </div>
+            </div>
+            </div>
+        <!-- Student review END -->
+
+    </div> <!-- Row END -->
+
+        <!-- View review Modal -->
+        <div class="modal fade" id="appDetail" tabindex="-1" aria-labelledby="appDetaillabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+
+                    <!-- Modal header -->
+                    <div class="modal-header bg-dark">
+                        <h5 class="modal-title text-white" id="appDetaillabel">Review details</h5>
+                        <button type="button" class="btn btn-sm btn-light mb-0 ms-auto" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-x-lg"></i></button>
+                    </div>
+
+                    <!-- Modal body -->
+                    <div class="modal-body p-5">
+                        <!-- Name -->
+                        <span class="small">Name:</span>
+                        <h6 class="mb-3" id="applicantName">Loading...</h6>
+
+                        <!-- Email -->
+                        <span class="small">Email:</span>
+                        <h6 class="mb-3" id="applicantEmail">Loading...</h6>
+
+                        <!-- Phone number -->
+                        <span class="small">Phone number:</span>
+                        <h6 class="mb-3" id="applicantPhone">Loading...</h6>
+
+                        <!-- Request Date -->
+                        <span class="small">Date:</span>
+                        <h6 class="mb-3" id="requestDate">Loading...</h6>
+
+                        <!-- Note -->
+                        <span class="small">Note:</span>
+                        <p class="text-dark mb-2" id="requestNote">Loading...</p>
+                    </div>
+
+                    <!-- Modal footer -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger-soft my-0" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+         <!-- View review Modal END -->
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var userId = /*[[${userId}]]*/ 0;
+        // Truyền dữ liệu enrollment chart cho chart2
+        window.instructorEnrollmentChartData = /*[[${instructorEnrollmentChartData}]]*/ {};
+
+        $(document).ready(function() {
+            // Course paging
+            $(document).on('click', '.course-page-link', function(e) {
+                e.preventDefault();
+                const page = $(this).data('page');
+                if (page !== undefined) {
+                    $.ajax({
+                        url: '/admin/mnInstructors/viewInfo/' + userId + '/pagingCourse',
+                        type: 'GET',
+                        data: { page: page, size: 5 },
+                        success: function(response) {
+                            $('#courseListWrapper').html(response);
+                            e.activeChart2();
+                        }
+                    });
+                }
+            });
+            // Review paging
+            $(document).on('click', '.review-page-link', function(e) {
+                e.preventDefault();
+                const page = $(this).data('page');
+                if (page !== undefined) {
+                    $.ajax({
+                        url: '/admin/mnInstructors/viewInfo/' + userId + '/pagingReview',
+                        type: 'GET',
+                        data: { page: page, size: 5 },
+                        success: function(response) {
+                            $('#reviewTableWrapper').html(response);
+                        }
+                    });
+                }
+            });
+        });
+        $(document).on('click', '[data-bs-target=\"#appDetail\"]', function() {
+            const $btn = $(this);
+            $('#applicantName').text($btn.data('fullname') || 'N/A');
+            $('#applicantEmail').text($btn.data('email') || 'N/A');
+            $('#applicantPhone').text($btn.data('phone') || 'N/A');
+            $('#requestDate').text($btn.data('date') || 'N/A');
+            $('#requestNote').text($btn.data('comment') || 'No note provided.');
+        });
+        /*]]>*/
+    </script>
+
+</th:block>

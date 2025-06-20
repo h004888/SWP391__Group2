@@ -2,9 +2,9 @@
     <tr th:each="course : ${listCourse}">
         <td th:text="${course.courseId}"></td>
         <td th:text="${course.title}"></td>
-        <td th:text="${course.duration + ' phút'}"></td>
-        <td th:text="'$' + ${course.price}"></td>
-        <td th:text="${course.totalLessons}"></td>
+        <td th:text="${course.duration == null ? 'N/A' : course.duration + ' phút'}"></td>
+        <td th:text="${course.price != null ? #numbers.formatDecimal(course.price, 0, 'COMMA', 0, 'POINT') : 'N/A'}"></td>
+        <td th:text="${course.totalLessons == null ? 'N/A' : course.totalLessons}"></td>
         <td th:text="${#temporals.format(course.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
         <td th:text="${#temporals.format(course.updatedAt, 'dd/MM/yyyy HH:mm')}"></td>
         <td>

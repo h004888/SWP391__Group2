@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface CategoriesRepository extends JpaRepository<Category, Integer> {
+public interface CategoryRepository extends JpaRepository<Category, Integer> {
     Page<Category> findAll(Pageable pageable);
 
     Category findByName(String name);
@@ -39,5 +39,7 @@ public interface CategoriesRepository extends JpaRepository<Category, Integer> {
     void updateCategory(@Param("id") int id, @Param("name") String name);
 
     List<Category> findTop5ByOrderByIdAsc();
+
+    Page<Category> findByNameContainingIgnoreCase(String name, Pageable pageable);
 
 }

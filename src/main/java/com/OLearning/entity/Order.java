@@ -22,7 +22,7 @@ public class Order {
     private String orderType;
     private String status;
     private LocalDateTime orderDate;
-    private String note;
+    private String refCode;
 
     @ManyToOne
     @JoinColumn(name = "userId", nullable = false)
