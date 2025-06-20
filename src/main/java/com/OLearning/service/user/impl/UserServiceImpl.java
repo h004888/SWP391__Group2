@@ -61,13 +61,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public Page<UserDTO> searchByNameWithPagination(String keyword, Long roleId, Pageable pageable) {
         // Sử dụng repository method với pagination
-        Page<User> userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleId(keyword, roleId, pageable);
+        Page<User> userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleId(keyword, roleId,
+                pageable);
         return userPage.map(userMapper::toDTO);
     }
 
     @Override
-    public Page<UserDTO> getInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(String keyword, Long roleId, Pageable pageable) {
-        Page<User> userPage = userRepository.findInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(roleId, keyword, pageable);
+    public Page<UserDTO> getInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(String keyword, Long roleId,
+            Pageable pageable) {
+        Page<User> userPage = userRepository.findInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(roleId, keyword,
+                pageable);
         return userPage.map(userMapper::toDTO);
     }
 
@@ -78,8 +81,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<UserDTO> searchByNameAndStatusWithPagination(String keyword, Long roleId, boolean status, Pageable pageable) {
-        Page<User> userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleIdAndStatus(keyword, roleId, status, pageable);
+    public Page<UserDTO> searchByNameAndStatusWithPagination(String keyword, Long roleId, boolean status,
+            Pageable pageable) {
+        Page<User> userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleIdAndStatus(keyword, roleId,
+                status, pageable);
         return userPage.map(userMapper::toDTO);
     }
 
@@ -167,11 +172,11 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Role not found: " + userDTO.getRoleName());
         }
         User user = userMapper.toUser(userDTO, roleOpt.get());
-        //Default password
+        // Default password
         String encodedPassword = new BCryptPasswordEncoder().encode("123");
         user.setPassword(encodedPassword);
 
-        //Send notification email to new staff
+        // Send notification email to new staff
         emailService.sendPromotedToStaffEmail(user);
 
         return userRepository.save(user);
@@ -187,7 +192,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean deleteAcc(Long id) {
         Optional<User> userOptional = userRepository.findById(id);
-        if(userOptional.isEmpty()) {
+        if (userOptional.isEmpty()) {
             return false;
         }
         userRepository.deleteById(id);
@@ -202,11 +207,11 @@ public class UserServiceImpl implements UserService {
         }
         User user = optionalUser.get();
 
-        //Defaut reset password is 123
+        // Defaut reset password is 123
         String encodedPassword = new BCryptPasswordEncoder().encode("123");
         user.setPassword(encodedPassword);
         userRepository.save(user);
-        //sau khi doi pass gửi email cho user bt
+        // sau khi doi pass gửi email cho user bt
         return false;
     }
 
@@ -214,13 +219,12 @@ public class UserServiceImpl implements UserService {
     public List<UserDTO> getTopInstructorsByCourseCount(int limit) {
         // Get all instructors (roleId = 2)
         List<User> instructors = userRepository.findByRoleId(2L);
-        
+
         // Sort instructors by number of courses in descending order
         return instructors.stream()
                 .sorted((i1, i2) -> Integer.compare(
                         i2.getCourses().size(),
-                        i1.getCourses().size()
-                ))
+                        i1.getCourses().size()))
                 .limit(limit)
                 .map(userMapper::toDTO)
                 .collect(Collectors.toList());
@@ -230,11 +234,26 @@ public class UserServiceImpl implements UserService {
     public Page<UserDTO> filterInstructors(String keyword, Pageable pageable) {
         Page<User> userPage;
         if (keyword != null && !keyword.trim().isEmpty()) {
-            userPage = userRepository.findInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(2L, keyword.trim(), pageable);
+            userPage = userRepository.findInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(2L, keyword.trim(),
+                    pageable);
         } else {
             userPage = userRepository.findInstructorsByRoleIdOrderByCourseCountDesc(2L, pageable);
         }
         return userPage.map(userMapper::toDTO);
+    }
+
+    @Override
+    public Optional<User> findById(Long userId) {
+        return userRepository.findById(userId)
+                .or(() -> {
+                    throw new RuntimeException("User not found with id: " + userId);
+                });
+    }
+
+    @Override
+    public boolean existsById(Long userId) {
+
+        return userRepository.existsById(userId);
     }
 
 }

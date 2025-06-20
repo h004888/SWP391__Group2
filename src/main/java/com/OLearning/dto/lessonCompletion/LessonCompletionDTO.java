@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class LessonCompletionStatusDTO {
+public class LessonCompletionDTO {
     private Integer completionId;
     private Long userId;
     private Long lessonId;

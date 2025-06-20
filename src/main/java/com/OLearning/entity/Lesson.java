@@ -2,6 +2,7 @@ package com.OLearning.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import net.minidev.json.annotate.JsonIgnore;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -57,5 +58,6 @@ public class Lesson {
 
     // Danh sách người dùng đã hoàn thành bài học này
     @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<LessonCompletion> completions;
 }

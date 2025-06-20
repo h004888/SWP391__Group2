@@ -34,9 +34,45 @@ public interface LessonRepository extends JpaRepository<Lesson, Long> {
                 WHERE l.chapter.course.courseId = :courseId AND l.orderNumber = :orderNumber
             """)
     Optional<Lesson> findByCourseIdAndOrderNumber(@Param("courseId") Long courseId,
-            @Param("orderNumber") int orderNumber);
+                                                  @Param("orderNumber") int orderNumber);
 
     @Query("SELECT COUNT(l) FROM Lesson l WHERE l.chapter.course.courseId = :courseId")
     int countLessonsByCourseId(@Param("courseId") Long courseId);
+
+    @Query(value = """
+            SELECT TOP 1
+              L.* 
+            FROM Lessons AS L
+            INNER JOIN Chapters AS C
+              ON L.ChapterID = C.ChapterID
+            WHERE C.CourseID = :courseId
+              AND L.LessonID > :currentLessonId
+            ORDER BY L.LessonID ASC
+            """,
+            nativeQuery = true)
+    Optional<Lesson> findNextLesson(
+            @Param("courseId") Long courseId,
+            @Param("currentLessonId") Long currentLessonId
+    );
+
+    @Query("""
+            SELECT l 
+            FROM Lesson l 
+            WHERE l.chapter.course.courseId = :courseId 
+              AND l.lessonId NOT IN (
+                SELECT lc.lesson.lessonId 
+                FROM LessonCompletion lc 
+                WHERE lc.user.userId = :userId
+              )
+            ORDER BY l.chapter.chapterId ASC, l.orderNumber ASC
+            """)
+    List<Lesson> findNextUncompletedLessonForUser(
+            @Param("userId") Long userId,
+            @Param("courseId") Long courseId,
+            Pageable pageable
+    );
+
+
+    Optional<Lesson> findFirstByChapter_Course_CourseIdOrderByChapter_ChapterIdAscOrderNumberAsc(Long courseId);
 
 }

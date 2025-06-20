@@ -30,6 +30,6 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Override
     public boolean hasEnrolled(Long userId, Long courseId) {
-        return enrollmentRepository.existsByUserUserIdAndCourseCourseId(userId, courseId);
+        return enrollmentRepository.existsByUser_UserIdAndCourse_CourseId(userId, courseId);
     }
 }

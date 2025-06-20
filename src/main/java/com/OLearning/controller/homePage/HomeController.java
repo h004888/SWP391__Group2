@@ -61,7 +61,7 @@ public class HomeController {
 
         @GetMapping("/course-detail")
         public String courseDetail(@RequestParam("id") Long id, Model model) {
-                Course course = courseService.findById(id);
+                Course course = courseService.getCourseById(id);
 
                 int totalStudents = course.getInstructor().getCourses()
                                 .stream()

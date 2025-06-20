@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Long> {
@@ -42,5 +43,6 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
                @Param("priceFilters") List<String> priceFilters,
                @Param("levels") List<String> levels,
                Pageable pageable);
+
 
 }

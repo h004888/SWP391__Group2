@@ -73,6 +73,7 @@ public class SecurityConfig {
 
                                                 // Root path redirect
                                                 .requestMatchers("/home/**").permitAll()
+                                                .requestMatchers("/**").permitAll()
 
                                                 // Chỉ admin mới được truy cập /admin/**
                                                 .requestMatchers("/admin/**").hasRole("ADMIN")

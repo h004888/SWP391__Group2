@@ -1,11 +1,13 @@
 package com.OLearning.controller.homePage;
 
 import java.security.Principal;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-import com.OLearning.entity.Chapter;
-import com.OLearning.entity.Course;
-import com.OLearning.entity.Lesson;
+import com.OLearning.dto.lessonCompletion.LessonCompletionDTO;
+import com.OLearning.entity.*;
 import com.OLearning.service.enrollment.EnrollmentService;
 import com.OLearning.service.lesson.LessonService;
 import com.OLearning.service.lessonCompletion.LessonCompletionService;
@@ -16,9 +18,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.OLearning.entity.User;
 import com.OLearning.security.CustomUserDetails;
 import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.course.CourseService;
@@ -82,50 +84,100 @@ public class UserCourseController {
         return null;
     }
 
-    @GetMapping("/course/{courseId}")
-    public String showCourseDetail(@PathVariable Long courseId, Principal principal, Model model,
-            RedirectAttributes redirectAttributes) {
-        User currentUser = extractCurrentUser(principal);
-        if (currentUser == null)
+    // Controller đã fix
+    @GetMapping("/course/view")
+    public String showUserCourseDetail(Principal principal, Model model, @RequestParam("courseId") Long courseId) {
+        if (principal == null) {
             return "redirect:/login";
-
-        Long userId = currentUser.getUserId();
-        boolean isEnrolled = enrollmentService.hasEnrolled(userId, courseId);
-        if (!isEnrolled) {
-            redirectAttributes.addFlashAttribute("error", "Bạn chưa đăng ký khóa học này.");
-            return "redirect:/home/coursesGrid";
         }
 
-        Lesson currentLesson = lessonService.getCurrentLearningLesson(userId, courseId);
-        // Chuyển hướng sang giao diện học bài
-        return "redirect:/learning/lesson/view/" + currentLesson.getLessonId();
-    }
-
-    @GetMapping("/lesson/view/{lessonId}")
-    public String viewLesson(@PathVariable Long lessonId, Principal principal, Model model) {
         User currentUser = extractCurrentUser(principal);
         if (currentUser == null) {
             return "redirect:/login";
         }
-        Lesson lesson = lessonService.findLessonById(lessonId);
-        Long courseId = lesson.getChapter().getCourse().getCourseId();
-        Long userId = currentUser.getUserId();
 
-        // Danh sách bài học theo chương
-        List<Chapter> chapters = courseService.getChaptersWithLessons(courseId);
+        if (!enrollmentService.hasEnrolled(currentUser.getUserId(), courseId)) {
+            return "redirect:/learning";
+        }
 
-        // Tiến độ học
-        int totalLessons = lessonService.countLessonsInCourse(courseId);
-        int completedLessons = lessonCompletionService.countCompletedLessons(userId, courseId);
-        int progress = (int) ((completedLessons * 100.0) / totalLessons);
+        Lesson currentLesson;
+        if (lessonCompletionService.getByUserAndCourse(currentUser.getUserId(), courseId).size() == 0) {
+            currentLesson = lessonService.findFirstLesson(courseId);
+        } else {
+            currentLesson = lessonService.getNextLessonAfterCompleted(currentUser.getUserId(), courseId).orElse(null);
+        }
+        if (currentLesson == null) {
+            return "redirect:/learning"; // fallback nếu đã học hết
+        }
 
-        model.addAttribute("lesson", lesson);
-        model.addAttribute("currentLessonId", lessonId);
-        model.addAttribute("course", lesson.getChapter().getCourse());
-        model.addAttribute("chapters", chapters);
-        model.addAttribute("progress", progress);
+        List<Long> completedLessonIds = lessonCompletionService.getByUserAndCourse(currentUser.getUserId(), courseId).stream()
+                .map(LessonCompletionDTO::getLessonId)
+                .collect(Collectors.toList());
 
+        // Thêm logic để xác định bài có thể học được
+        Set<Long> accessibleLessonIds = new HashSet<>(completedLessonIds);
+        accessibleLessonIds.add(currentLesson.getLessonId()); // Bài hiện tại cũng có thể học
+
+        model.addAttribute("completedLessonIds", completedLessonIds);
+        model.addAttribute("accessibleLessonIds", accessibleLessonIds);
+        model.addAttribute("currentLessonId", currentLesson.getLessonId());
+        model.addAttribute("currentLesson", currentLesson);
+        Course course = courseService.getCourseById(courseId);
+        model.addAttribute("course", course);
+        model.addAttribute("chapters", course.getChapters());
         return "userPage/course-detail-min";
     }
 
+    @GetMapping("course/{courseId}/lesson/{lessonId}")
+    public String showUserLessonDetail(Principal principal, Model model, @PathVariable("lessonId") Long lessonId,
+                                       @PathVariable("courseId") Long courseId) {
+        User user = extractCurrentUser(principal);
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        // Thêm kiểm tra enrollment
+        if (!enrollmentService.hasEnrolled(user.getUserId(), courseId)) {
+            return "redirect:/learning";
+        }
+
+        Lesson currentLesson = lessonService.findLessonById(lessonId);
+        if (currentLesson == null) {
+            return "redirect:/learning/course/view?courseId=" + courseId;
+        }
+
+        // Kiểm tra xem user có quyền truy cập bài này không
+        List<Long> completedLessonIds = lessonCompletionService.getByUserAndCourse(user.getUserId(), courseId).stream()
+                .map(LessonCompletionDTO::getLessonId)
+                .collect(Collectors.toList());
+
+        Lesson nextAvailableLesson = lessonService.getNextLessonAfterCompleted(user.getUserId(), courseId).orElse(null);
+
+        // Chỉ cho phép truy cập nếu bài đã hoàn thành hoặc là bài tiếp theo có thể học
+        boolean canAccess = completedLessonIds.contains(lessonId) ||
+                (nextAvailableLesson != null && nextAvailableLesson.getLessonId().equals(lessonId));
+
+        if (!canAccess) {
+            return "redirect:/learning/course/view?courseId=" + courseId;
+        }
+
+        Lesson nextLesson = lessonService.getNextLesson(courseId, lessonId);
+        Course course = courseService.getCourseById(courseId);
+
+        // Xác định các bài có thể truy cập
+        Set<Long> accessibleLessonIds = new HashSet<>(completedLessonIds);
+        if (nextAvailableLesson != null) {
+            accessibleLessonIds.add(nextAvailableLesson.getLessonId());
+        }
+
+        model.addAttribute("completedLessonIds", completedLessonIds);
+        model.addAttribute("accessibleLessonIds", accessibleLessonIds);
+        // QUAN TRỌNG: currentLessonId bây giờ là bài đang được xem (lessonId từ URL)
+        model.addAttribute("currentLessonId", lessonId); // Thay đổi từ currentLesson.getLessonId() thành lessonId
+        model.addAttribute("currentLesson", currentLesson);
+        model.addAttribute("nextLesson", nextLesson);
+        model.addAttribute("course", course);
+        model.addAttribute("chapters", course.getChapters());
+        return "userPage/course-detail-min";
+    }
 }

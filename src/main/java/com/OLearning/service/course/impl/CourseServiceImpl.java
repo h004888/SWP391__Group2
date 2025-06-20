@@ -106,8 +106,9 @@ public class CourseServiceImpl implements CourseService {
         return courseRepository.findAllOrderByStudentCountDesc();
     }
 
+
     @Override
-    public Course findById(Long id) {
+    public Course getCourseById(Long id) {
         return courseRepository.findById(id).orElse(null);
     }
 

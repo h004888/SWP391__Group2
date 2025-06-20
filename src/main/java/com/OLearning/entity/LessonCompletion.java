@@ -1,48 +1,40 @@
 package com.OLearning.entity;
 
-import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.*;
+import lombok.*;
 
-import org.hibernate.annotations.CreationTimestamp;
+import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-
-@Getter
-@Setter
-@ToString
+@Entity
+@Table(name = "LessonCompletion",
+        uniqueConstraints = @UniqueConstraint(name = "UQ_User_Lesson", columnNames = {"UserID", "LessonID"}))
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "LessonCompletion")
+@Builder
 public class LessonCompletion {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "CompletionID") // Ánh xạ với cột CompletionID
-    private int completionID;
+    @Column(name = "CompletionID")
+    private Integer completionId;
 
-    @ManyToOne // Mối quan hệ nhiều-đến-một với User
-    @JoinColumn(name = "UserID", nullable = false) // Ánh xạ với khóa ngoại UserID
-    private User user; // Đối tượng User liên quan
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "UserID", nullable = false)
+    @JsonIgnoreProperties("LessonCompletion")
+    private User user;
 
-    @ManyToOne // Mối quan hệ nhiều-đến-một với Lesson
-    @JoinColumn(name = "LessonID", nullable = false) // Ánh xạ với khóa ngoại LessonID
-    private Lesson lesson; // Đối tượng Lesson liên quan
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "LessonID", nullable = false)
+    @JsonIgnoreProperties("LessonCompletion")
+    private Lesson lesson;
 
-    @Column(name = "CompletedAt", nullable = false, updatable = false) // Ánh xạ với cột CompletedAt
-    @Temporal(TemporalType.TIMESTAMP) // Chỉ định kiểu dữ liệu thời gian
-    @CreationTimestamp // Tự động điền thời gian khi tạo bản ghi mới
-    private Date completedAt;
+    @Column(name = "CompletedAt", nullable = false, updatable = false)
+    private LocalDateTime completedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.completedAt = LocalDateTime.now();
+    }
 }
