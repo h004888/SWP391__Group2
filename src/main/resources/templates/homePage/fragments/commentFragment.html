@@ -1,0 +1,68 @@
+<!-- Fragment: commentItemFragment -->
+<div th:fragment="commentItemFragment(review, course, user)">
+  <ul class="list-unstyled ms-5" th:if="${review.children != null and !review.children.isEmpty()}">
+    <li th:each="child : ${review.children}" class="comment-item">
+      <!-- Có thể copy lại toàn bộ block hiển thị comment ở trên, chỉ thay review -> child -->
+      <div class="d-flex mb-3">
+        <div class="avatar avatar-sm flex-shrink-0 me-2">
+          <img class="avatar-img rounded-circle"
+               th:src="${child.user.profilePicture != null and child.user.profilePicture != ''} ? ${child.user.profilePicture} : @{/assets/images/avatar/default.jpg}"
+               th:alt="${child.user.userName}">
+        </div>
+        <div class="ms-2 w-100">
+          <div class="bg-light p-3 rounded">
+            <div class="d-flex justify-content-between">
+              <div>
+                <h6 class="mb-1 lead fw-bold" th:text="${child.user.userName}">Student Name</h6>
+                <div class="mb-2" th:if="${child.rating != null}">
+                                                                                        <span class="text-warning">
+                                                                                            <i class="fas fa-star" th:each="i : ${#numbers.sequence(1, child.rating)}"></i>
+                                                                                            <i class="far fa-star" th:each="i : ${#numbers.sequence(child.rating + 1, 5)}"></i>
+                                                                                        </span>
+                  <span class="ms-2 small text-muted" th:text="${child.rating + '/5'}">4/5</span>
+                </div>
+                <p class="h6 mb-0" th:text="${child.comment}">Comment content</p>
+              </div>
+              <div class="text-end">
+                <small class="text-muted" th:text="${#temporals.format(child.createdAt, 'dd/MM/yyyy HH:mm')}">5hr</small>
+                <div th:if="${user != null and user.userId == child.user.userId}" class="mt-1">
+                  <button class="btn btn-sm btn-outline-primary edit-comment-btn"
+                          th:data-review-id="${child.reviewId}"
+                          th:data-comment="${child.comment}">
+                    <i class="fas fa-edit"></i> Edit
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger ms-2 delete-comment-btn"
+                          th:data-review-id="${child.reviewId}"
+                          th:data-course-id="${course.courseId}">
+                    <i class="fas fa-trash"></i> Xóa
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- React + Report cho reply -->
+          <ul class="nav nav-divider py-2 small">
+            <li class="nav-item"><a class="text-primary-hover show-reply-form" href="#" th:data-review-id="${child.reviewId}">Reply</a></li>
+            <li class="nav-item">
+              <button type="button"
+                      class="btn btn-link text-danger p-0 report-comment-btn-modal"
+                      th:data-course-id="${course.courseId}"
+                      th:data-comment-id="${child.reviewId}"
+                      th:if="${user != null and user.userId != child.user.userId}">
+                Report
+              </button>
+            </li>
+          </ul>
+          <div th:id="'reply-form-' + ${child.reviewId}" style="display:none; margin-top: 10px;">
+            <form class="reply-comment-form">
+              <input type="hidden" name="parentId" th:value="${child.reviewId}"/>
+              <input type="hidden" name="courseId" th:value="${course.courseId}"/>
+              <textarea name="comment" required class="form-control mb-2" placeholder="Nhập trả lời..."></textarea>
+              <button type="submit" class="btn btn-primary btn-sm">Gửi</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>

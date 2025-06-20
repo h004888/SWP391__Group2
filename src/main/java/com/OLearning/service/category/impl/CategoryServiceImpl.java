@@ -8,9 +8,7 @@ import com.OLearning.service.category.CategoryService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -42,11 +40,16 @@ public class CategoryServiceImpl implements CategoryService {
         return categoriesRepository.existsById(id);
     }
 
+//    @Override
+//    public List<CategoryDTO> getAllCategory() {
+//        return categoriesRepository.findAll().stream()
+//                .map(c -> new CategoryDTO(c.getId(), c.getName()))
+//                .collect(Collectors.toList());
+//    }
+
     @Override
-    public List<CategoryDTO> getAllCategory() {
-        return categoriesRepository.findAll().stream()
-                .map(c -> new CategoryDTO(c.getId(), c.getName()))
-                .collect(Collectors.toList());
+    public List<Category> findAll() {
+        return List.of();
     }
 
     @Override

@@ -11,6 +11,8 @@ import com.OLearning.repository.UserRepository;
 import com.OLearning.service.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -98,5 +100,17 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public void markAllAsRead(Long userId) {
         notificationRepository.markAllAsReadByUserId(userId);
+    }
+
+    @Override
+    public Page<NotificationDTO> getNotificationsByUserId(Long userId, Pageable pageable) {
+        return notificationRepository.findByUser_UserIdOrderByUnreadFirstAndSentAtDesc(userId, pageable)
+                .map(notificationMapper::toDTO);
+    }
+
+    @Override
+    public Page<NotificationDTO> searchNotificationsByUser(String keyword, Long userId, Pageable pageable) {
+        return notificationRepository.findByUserIdAndKeywordUnreadFirst(userId, keyword, pageable)
+                .map(notificationMapper::toDTO);
     }
 }

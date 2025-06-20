@@ -1,6 +1,8 @@
 package com.OLearning.repository;
 
 import com.OLearning.entity.Notification;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -14,9 +16,15 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     @Query("SELECT n FROM Notification n WHERE n.user.userId = :userId ORDER BY (CASE WHEN n.status <> 'sent' THEN 0 ELSE 1 END), n.sentAt DESC")
     List<Notification> findByUser_UserIdOrderByUnreadFirstAndSentAtDesc(@Param("userId") Long userId);
 
+    @Query("SELECT n FROM Notification n WHERE n.user.userId = :userId ORDER BY (CASE WHEN n.status <> 'sent' THEN 0 ELSE 1 END), n.sentAt DESC")
+    Page<Notification> findByUser_UserIdOrderByUnreadFirstAndSentAtDesc(@Param("userId") Long userId, Pageable pageable);
+
     // Tìm kiếm thông báo theo tên khóa học (nếu có liên kết), ưu tiên chưa đọc lên đầu
     @Query("SELECT n FROM Notification n WHERE n.user.userId = :userId AND (LOWER(n.course.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(n.message) LIKE LOWER(CONCAT('%', :keyword, '%'))) ORDER BY (CASE WHEN n.status <> 'sent' THEN 0 ELSE 1 END), n.sentAt DESC")
     List<Notification> findByUserIdAndKeywordUnreadFirst(@Param("userId") Long userId, @Param("keyword") String keyword);
+
+    @Query("SELECT n FROM Notification n WHERE n.user.userId = :userId AND (LOWER(n.course.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(n.message) LIKE LOWER(CONCAT('%', :keyword, '%'))) ORDER BY (CASE WHEN n.status <> 'sent' THEN 0 ELSE 1 END), n.sentAt DESC")
+    Page<Notification> findByUserIdAndKeywordUnreadFirst(@Param("userId") Long userId, @Param("keyword") String keyword, Pageable pageable);
 
     Optional<Notification> findById(Long id);
     @Modifying
