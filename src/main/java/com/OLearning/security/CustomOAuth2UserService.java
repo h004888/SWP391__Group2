@@ -29,7 +29,6 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oauth2User = new DefaultOAuth2UserService().loadUser(userRequest);
 
-        // Xử lý thông tin người dùng
         String email = oauth2User.getAttribute("email");
         String fullName = oauth2User.getAttribute("name");
         String picture = oauth2User.getAttribute("picture");
@@ -48,7 +47,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             user = new User();
             user.setEmail(email);
             user.setFullName(fullName);
-            user.setUsername(email);
+            user.setUsername(email.split("@")[0]);
             user.setStatus(true);
             user.setProfilePicture(picture);
 
@@ -66,7 +65,6 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         SimpleGrantedAuthority authority =
                 new SimpleGrantedAuthority("ROLE_" + user.getRole().getName().toUpperCase());
 
-        // Trả về CustomOAuth2UserDetails
         return new CustomUserDetails(user,
                 Collections.singleton(authority),
                 oauth2User.getAttributes());

@@ -19,32 +19,51 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
-        //check last url
-        var savedRequest = requestCache.getRequest(request, response);
 
-        if (savedRequest != null) {
-            String targetUrl = savedRequest.getRedirectUrl();
-            //check role
-            if (hasRole(authentication, "ROLE_ADMIN") || !targetUrl.contains("/admin")) {
-                response.sendRedirect(targetUrl);
+        String loginType = request.getParameter("loginType");
+        
+        // Lấy referer URL để xác định form nào được sử dụng
+        String referer = request.getHeader("Referer");
+        boolean isAdminLoginForm = referer != null && referer.contains("/dashboard_login");
+
+        if ("admin".equals(loginType) || isAdminLoginForm) {
+            // Đăng nhập từ form admin - chỉ cho phép ADMIN
+            if (hasRole(authentication, "ROLE_ADMIN")) {
+                response.sendRedirect(request.getContextPath() + "/admin");
                 return;
             } else {
-                response.sendRedirect(request.getContextPath() + "/403");
+                // User/Instructor cố gắng đăng nhập từ form admin
+                response.sendRedirect("/dashboard_login?error=unauthorized_user_login");
+                return;
+            }
+        } else {
+            // Đăng nhập từ form user - không cho phép ADMIN
+            if (hasRole(authentication, "ROLE_ADMIN")) {
+                // Admin cố gắng đăng nhập từ form user
+                response.sendRedirect("/login?error=unauthorized_admin_login");
+                return;
+            } else {
+                // Redirect theo role của user
+                redirectUserByRole(request, response, authentication);
                 return;
             }
         }
+    }
 
-        // Không có URL trước đó -> redirect theo vai trò
+    private void redirectUserByRole(HttpServletRequest request, HttpServletResponse response,
+                                    Authentication authentication) throws IOException {
         String redirectURL = request.getContextPath();
+
         if (hasRole(authentication, "ROLE_ADMIN")) {
             redirectURL += "/admin";
-        } else if (hasRole(authentication, "ROLE_USER")) {
-            redirectURL += "/home";
         } else if (hasRole(authentication, "ROLE_INSTRUCTOR")) {
             redirectURL += "/instructordashboard";
-        } else {
+        } else if (hasRole(authentication, "ROLE_USER")) {
             redirectURL += "/home";
+        } else {
+            redirectURL += "/home"; // default
         }
+
         response.sendRedirect(redirectURL);
     }
 

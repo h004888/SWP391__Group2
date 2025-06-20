@@ -143,7 +143,7 @@
         }
 
         .document-title {
-            font-size: 2.5rem;
+            font-size: 3rem;
             font-weight: bold;
             color: var(--text-primary);
             margin-bottom: 1rem;
@@ -255,6 +255,7 @@
         }
 
         .clause-content {
+            white-space: pre-line;
             font-size: 1rem;
             line-height: 1.8;
             color: var(--text-primary);
@@ -403,6 +404,11 @@
         .status-inactive {
             background-color: #e74c3c;
         }
+
+        .ck-editor__editable_inline {
+            min-height: 400px;
+            max-height: 600px;
+        }
     </style>
     </head>
     <body>
@@ -418,7 +424,7 @@
                 <h5 class="mb-0">Business Rules Contract - Version 2.1</h5>
             </div>
             <div class="document-actions">
-                <button class="btn-document btn-add-clause" onclick="addNewClause()">
+                <button class="btn-document btn-add-clause" data-bs-toggle="modal" data-bs-target="#clauseModal">
                     <i class="fas fa-plus me-2"></i>Add Clause
                 </button>
                 <button class="btn-document btn-save" onclick="saveDocument()">
@@ -459,7 +465,22 @@
 
                 <!-- Clauses Container -->
                 <div id="clausesContainer">
-                    <!-- Clauses will be populated by JavaScript -->
+                    <th:block th:each="clause, iterStat : ${terms}">
+                        <div class="clause">
+                            <div class="status-indicator" ></div>
+                            <div class="clause-header">
+                                <div class="d-flex align-items-center flex-grow-1">
+                                    <div class="clause-number">Điều <span th:text="${iterStat.index + 1}"></span></div>
+                                    <div class="clause-title" th:text="${clause.sectionTitle}"></div>
+                                </div>
+                            </div>
+                            <p th:utext="${#strings.replace(clause.content, '\n', '<br/>')}"></p>
+                            <div class="clause-metadata">
+                                <span><strong>Role:</strong> <span th:text="${clause.roleTarget}"></span></span>
+                                <span><strong>Last Modified:</strong> <span th:text="${#temporals.format(clause.updatedAt, 'dd/MM/yyyy')}"></span></span>
+                            </div>
+                        </div>
+                    </th:block>
                 </div>
 
                 <!-- Signature Section -->
@@ -494,15 +515,15 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="clauseForm">
+                    <form th:action="@{/admin/businessRule/add}" method="post">
                         <div class="row g-3">
                             <div class="col-md-8">
                                 <label class="form-label">Clause Title *</label>
-                                <input type="text" class="form-control" id="clauseTitle" required>
+                                <input type="text" class="form-control" id="clauseTitle" required name="sectionTitle">
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Status</label>
-                                <select class="form-select" id="clauseStatus">
+                                <select class="form-select" id="clauseStatus" required name="status">
                                     <option value="active">Active</option>
                                     <option value="pending">Pending</option>
                                     <option value="inactive">Inactive</option>
@@ -510,12 +531,11 @@
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Clause Content *</label>
-                                <textarea class="form-control" id="clauseContent" rows="8" required
-                                          placeholder="Enter the detailed content of this business rule clause..."></textarea>
+                                <textarea class="form-control" id="clauseContent" rows="18" style="min-height:350px;" required name="content"></textarea>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Category</label>
-                                <select class="form-select" id="clauseCategory">
+                                <select class="form-select" id="clauseCategory" required name="category">
                                     <option value="general">General Provisions</option>
                                     <option value="operational">Operational Rules</option>
                                     <option value="financial">Financial Regulations</option>
@@ -526,7 +546,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Priority Level</label>
-                                <select class="form-select" id="clausePriority">
+                                <select class="form-select" id="clausePriority" required name="priority">
                                     <option value="low">Low</option>
                                     <option value="medium" selected>Medium</option>
                                     <option value="high">High</option>
@@ -538,175 +558,16 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="saveClause">Save Clause</button>
+                    <button type="submit" class="btn btn-primary">Save Clause</button>
                 </div>
             </div>
         </div>
     </div>
 
+    </body>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
     <script>
-        // Sample business rules clauses
-        let businessClauses = [
-            {
-                id: 1,
-                title: "User Authentication and Access Control",
-                content: `<p><strong>1.1 Authentication Requirements:</strong> All users must authenticate using multi-factor authentication (MFA) before accessing the system. This includes:</p>
-                <ul>
-                    <li>Primary authentication via username and password</li>
-                    <li>Secondary authentication via SMS, email, or authenticator app</li>
-                    <li>Biometric verification for high-security areas</li>
-                </ul>
-                <p><strong>1.2 Access Control:</strong> User access rights shall be determined based on role-based access control (RBAC) principles, ensuring users only have access to resources necessary for their job functions.</p>
-                <p><strong>1.3 Session Management:</strong> User sessions must expire after 30 minutes of inactivity, and users must re-authenticate for sensitive operations.</p>`,
-                category: "security",
-                priority: "critical",
-                status: "active",
-                lastModified: "2024-01-15"
-            },
-            {
-                id: 2,
-                title: "Data Validation and Processing Rules",
-                content: `<p><strong>2.1 Input Validation:</strong> All data inputs must be validated according to the following criteria:</p>
-                <ol>
-                    <li>Data type validation (string, number, date, etc.)</li>
-                    <li>Format validation using predefined patterns</li>
-                    <li>Range and length validation</li>
-                    <li>Business logic validation</li>
-                </ol>
-                <p><strong>2.2 Data Processing:</strong> Data processing operations must follow these guidelines:</p>
-                <ul>
-                    <li>All calculations must be performed using appropriate precision</li>
-                    <li>Currency values must be rounded to two decimal places</li>
-                    <li>Date operations must account for timezone differences</li>
-                </ul>
-                <p><strong>2.3 Error Handling:</strong> Invalid data must be rejected with clear error messages, and all validation failures must be logged for audit purposes.</p>`,
-                category: "operational",
-                priority: "high",
-                status: "active",
-                lastModified: "2024-01-12"
-            },
-            {
-                id: 3,
-                title: "Financial Transaction Approval Workflow",
-                content: `<p><strong>3.1 Transaction Limits:</strong> Financial transactions are subject to the following approval requirements:</p>
-                <ul>
-                    <li>Transactions under $1,000: Automatic approval</li>
-                    <li>Transactions $1,000 - $10,000: Supervisor approval required</li>
-                    <li>Transactions $10,000 - $50,000: Manager approval required</li>
-                    <li>Transactions over $50,000: Executive approval required</li>
-                </ul>
-                <p><strong>3.2 Approval Process:</strong> All approval requests must include transaction details, business justification, and supporting documentation. Approvers have 48 hours to respond to approval requests.</p>
-                <p><strong>3.3 Emergency Procedures:</strong> In emergency situations, transactions may be processed with post-approval documentation, subject to executive review within 24 hours.</p>`,
-                category: "financial",
-                priority: "critical",
-                status: "active",
-                lastModified: "2024-01-10"
-            },
-            {
-                id: 4,
-                title: "Compliance and Audit Requirements",
-                content: `<p><strong>4.1 Regulatory Compliance:</strong> All business operations must comply with applicable laws and regulations, including but not limited to:</p>
-                <ul>
-                    <li>Data protection and privacy regulations (GDPR, CCPA)</li>
-                    <li>Financial reporting standards (SOX, GAAP)</li>
-                    <li>Industry-specific regulations</li>
-                </ul>
-                <p><strong>4.2 Audit Trail:</strong> The system must maintain comprehensive audit logs including:</p>
-                <ol>
-                    <li>User actions and system access</li>
-                    <li>Data modifications and deletions</li>
-                    <li>System configuration changes</li>
-                    <li>Security events and incidents</li>
-                </ol>
-                <p><strong>4.3 Reporting:</strong> Compliance reports must be generated monthly and reviewed by the compliance team. Any violations must be reported immediately to management.</p>`,
-                category: "compliance",
-                priority: "critical",
-                status: "pending",
-                lastModified: "2024-01-08"
-            },
-            {
-                id: 5,
-                title: "System Performance and Availability Standards",
-                content: `<p><strong>5.1 Performance Requirements:</strong> The system must meet the following performance standards:</p>
-                <ul>
-                    <li>Response time: 95% of requests must be processed within 2 seconds</li>
-                    <li>Throughput: System must handle minimum 1000 concurrent users</li>
-                    <li>Database queries must execute within 500ms for standard operations</li>
-                </ul>
-                <p><strong>5.2 Availability Standards:</strong> System availability must be maintained at 99.9% uptime, with planned maintenance windows scheduled during off-peak hours.</p>
-                <p><strong>5.3 Monitoring and Alerting:</strong> Continuous monitoring must be in place with automated alerts for performance degradation, system errors, and security incidents.</p>`,
-                category: "operational",
-                priority: "high",
-                status: "active",
-                lastModified: "2024-01-05"
-            }
-        ];
-
-        let editingClauseId = null;
-
-        // Initialize the application
-        document.addEventListener('DOMContentLoaded', function () {
-            renderClauses();
-            setupEventListeners();
-        });
-
-        function setupEventListeners() {
-            // Sidebar toggle for mobile
-            document.getElementById('sidebarToggle').addEventListener('click', function () {
-                document.getElementById('sidebar').classList.toggle('show');
-            });
-
-            // Save clause
-            document.getElementById('saveClause').addEventListener('click', saveClause);
-
-            // Reset form when modal is hidden
-            document.getElementById('clauseModal').addEventListener('hidden.bs.modal', function () {
-                resetForm();
-            });
-        }
-
-        function renderClauses() {
-            const container = document.getElementById('clausesContainer');
-            container.innerHTML = '';
-
-            businessClauses.forEach((clause, index) => {
-                const clauseElement = createClauseElement(clause, index + 1);
-                container.appendChild(clauseElement);
-            });
-        }
-
-        function createClauseElement(clause, number) {
-            const article = document.createElement('div');
-            article.className = 'clause';
-            article.innerHTML = `
-                <div class="status-indicator status-${clause.status}"></div>
-                <div class="clause-header">
-                    <div class="d-flex align-items-center flex-grow-1">
-                        <div class="clause-number">Article ${number}</div>
-                        <div class="clause-title">${clause.title}</div>
-                    </div>
-                    <div class="clause-actions">
-                        <button class="btn-clause-action btn-edit-clause" onclick="editClause(${clause.id})" title="Edit Clause">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn-clause-action btn-delete-clause" onclick="deleteClause(${clause.id})" title="Delete Clause">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="clause-content">
-                    ${clause.content}
-                </div>
-                <div class="clause-metadata">
-                    <span><strong>Category:</strong> ${clause.category.charAt(0).toUpperCase() + clause.category.slice(1)}</span>
-                    <span><strong>Priority:</strong> ${clause.priority.charAt(0).toUpperCase() + clause.priority.slice(1)}</span>
-                    <span><strong>Last Modified:</strong> ${formatDate(clause.lastModified)}</span>
-                </div>
-            `;
-            return article;
-        }
-
         function makeEditable(element) {
             if (element.classList.contains('editing')) return;
 
@@ -734,7 +595,7 @@
             }
 
             textarea.addEventListener('blur', saveEdit);
-            textarea.addEventListener('keydown', function (e) {
+            textarea.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter' && e.ctrlKey) {
                     saveEdit();
                 } else if (e.key === 'Escape') {
@@ -743,122 +604,18 @@
             });
         }
 
-        function addNewClause() {
-            editingClauseId = null;
-            document.getElementById('modalTitle').textContent = 'Add New Clause';
-            const modal = new bootstrap.Modal(document.getElementById('clauseModal'));
-            modal.show();
-        }
-
-        function editClause(id) {
-            const clause = businessClauses.find(c => c.id === id);
-            if (!clause) return;
-
-            editingClauseId = id;
-
-            // Populate form
-            document.getElementById('clauseTitle').value = clause.title;
-            document.getElementById('clauseContent').value = clause.content.replace(/<[^>]*>/g, ''); // Strip HTML for editing
-            document.getElementById('clauseCategory').value = clause.category;
-            document.getElementById('clausePriority').value = clause.priority;
-            document.getElementById('clauseStatus').value = clause.status;
-
-            // Update modal title
-            document.getElementById('modalTitle').textContent = 'Edit Clause';
-
-            // Show modal
-            const modal = new bootstrap.Modal(document.getElementById('clauseModal'));
-            modal.show();
-        }
-
-        function deleteClause(id) {
-            if (confirm('Are you sure you want to delete this clause? This action cannot be undone.')) {
-                businessClauses = businessClauses.filter(c => c.id !== id);
-                renderClauses();
-            }
-        }
-
-        function saveClause() {
-            const form = document.getElementById('clauseForm');
-            if (!form.checkValidity()) {
-                form.reportValidity();
-                return;
-            }
-
-            const content = document.getElementById('clauseContent').value;
-            const formattedContent = formatClauseContent(content);
-
-            const clauseData = {
-                title: document.getElementById('clauseTitle').value,
-                content: formattedContent,
-                category: document.getElementById('clauseCategory').value,
-                priority: document.getElementById('clausePriority').value,
-                status: document.getElementById('clauseStatus').value,
-                lastModified: new Date().toISOString().split('T')[0]
-            };
-
-            if (editingClauseId) {
-                // Update existing clause
-                const clauseIndex = businessClauses.findIndex(c => c.id === editingClauseId);
-                if (clauseIndex !== -1) {
-                    businessClauses[clauseIndex] = {...businessClauses[clauseIndex], ...clauseData};
-                }
-            } else {
-                // Add new clause
-                const newClause = {
-                    id: Math.max(...businessClauses.map(c => c.id)) + 1,
-                    ...clauseData
-                };
-                businessClauses.push(newClause);
-            }
-
-            renderClauses();
-
-            // Hide modal
-            const modal = bootstrap.Modal.getInstance(document.getElementById('clauseModal'));
-            modal.hide();
-        }
-
-        function formatClauseContent(content) {
-            // Simple formatting: convert line breaks to paragraphs
-            return content.split('\n\n').map(paragraph =>
-                paragraph.trim() ? `<p>${paragraph.trim()}</p>` : ''
-            ).join('');
-        }
-
-        function resetForm() {
-            document.getElementById('clauseForm').reset();
-            document.getElementById('modalTitle').textContent = 'Add New Clause';
-            editingClauseId = null;
-        }
-
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
+        ClassicEditor
+            .create(document.querySelector('#clauseContent'), {
+                // Set a larger height for the editor
+                height: '500px',
+                // You can also configure other options here
+                toolbar: [
+                    'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList',
+                    '|', 'indent', 'outdent', '|', 'blockQuote', 'insertTable', 'undo', 'redo'
+                ]
+            })
+            .catch(error => {
+                console.error(error);
             });
-        }
-
-        function saveDocument() {
-            alert('Document saved successfully!');
-        }
-
-        function exportDocument() {
-            const exportOptions = [
-                'Export as PDF',
-                'Export as Word Document',
-                'Export as HTML',
-                'Export as Plain Text'
-            ];
-
-            const choice = prompt('Choose export format:\n' + exportOptions.map((opt, i) => `${i + 1}. ${opt}`).join('\n'));
-
-            if (choice && choice >= 1 && choice <= 4) {
-                alert(`Exporting document as ${exportOptions[choice - 1]}...`);
-            }
-        }
     </script>
-    </body>
 </th:block>

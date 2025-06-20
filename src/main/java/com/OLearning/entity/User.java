@@ -24,7 +24,7 @@ public class User {
     private String password;
     private String fullName;
     private String phone;
-    private Long coin;
+    private Double coin = 0.0;
     private LocalDate birthday;
     private String address;
     private String profilePicture;
