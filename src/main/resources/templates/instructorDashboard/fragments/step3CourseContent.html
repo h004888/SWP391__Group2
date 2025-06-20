@@ -38,6 +38,18 @@
                 <button type="button" class="btn btn-primary mb-3" onclick="toggleChapterForm()">
                     <i class="bi bi-plus me-1"></i> Add Chapter
                 </button>
+                <form th:action="@{/instructordashboard/createcourse/autofillchapter}" method="post" id="autoFillChapterForm">
+                <button type="button" class="btn btn-primary mb-3" onclick="confirmAutoFillChapter()">
+                    <i class="bi bi-arrow-repeat me-1"></i> Fill Order Number Of Chapter
+                </button>
+                </form>
+                <script>
+                    function confirmAutoFillChapter() {
+                        if (confirm('This will automatically reorder all chapters. Are you sure you want to continue?')) {
+                            document.getElementById('autoFillChapterForm').submit();
+                        }
+                    }
+                </script>
                 <!-- Toast Container -->
                 <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1056">
                     <div th:if="${successMessage}" class="toast align-items-center text-white bg-success border-0 show" role="alert">
@@ -106,6 +118,20 @@
                                 <p class="text-muted mb-0" th:text="${chapter.description}"></p>
                             </div>
                             <div class="d-flex align-items-center gap-2 mb-3">
+<!--                                auto fill-->
+                                <form th:action="@{/instructordashboard/createcourse/autofilllesson}" method="post" th:id="'autoFillLessonForm' + ${chapter.chapterId}">
+                                    <input type="hidden" name="chapterId" th:value="${chapter.chapterId}" />
+                                <button type="button" class="btn btn-sm btn-primary" th:onclick="'confirmAutoFillLesson(' + ${chapter.chapterId} + ')'">
+                                    <i class="bi bi-arrow-repeat me-1"></i> Fill Order Number Of Lesson
+                                </button>
+                                </form>
+                                <script>
+                                    function confirmAutoFillLesson(chapterId) {
+                                        if (confirm('This will automatically reorder all lessons in this chapter. Are you sure you want to continue?')) {
+                                            document.getElementById('autoFillLessonForm' + chapterId).submit();
+                                        }
+                                    }
+                                </script>
                                 <!-- Add Lesson button -->
                                 <button type="button"
                                         class="btn btn-sm btn-primary"
@@ -494,57 +520,57 @@
             details summary { cursor: pointer; }
             details summary > * { display: inline; }
             .quiz-container { border-left: 3px solid #cdcbc8; padding-left: 15px; margin-top: 10px; }
-            
+
             /* Fix modal backdrop issues */
             .modal-backdrop {
                 z-index: 1040 !important;
             }
-            
+
             .modal {
                 z-index: 1055 !important;
             }
-            
+
             /* Ensure proper modal stacking */
             .modal.show {
                 display: block !important;
             }
-            
+
             /* Fix body scroll when modal is open */
             body.modal-open {
                 overflow: hidden;
                 padding-right: 0 !important;
             }
-            
+
             /* Ensure backdrop is properly removed */
             .modal-backdrop.show {
                 opacity: 0.5;
             }
-            
+
             /* Fix toast z-index */
             .toast {
                 z-index: 1056 !important;
             }
-            
+
             /* Additional modal fixes */
             .modal-dialog {
                 pointer-events: auto;
             }
-            
+
             .modal-content {
                 pointer-events: auto;
             }
-            
+
             /* Ensure proper stacking context */
             .modal.show {
                 display: block !important;
                 background-color: rgba(0, 0, 0, 0.5);
             }
-            
+
             /* Fix for multiple backdrops */
             .modal-backdrop + .modal-backdrop {
                 z-index: 1039 !important;
             }
-            
+
             body {
                 min-height: 100vh;
                 background-color: #f8f9fa;
@@ -929,7 +955,7 @@
                     backdrops.forEach(backdrop => {
                         backdrop.remove();
                     });
-                    
+
                     // Remove modal-open class from body
                     document.body.classList.remove('modal-open');
                     document.body.style.overflow = '';
@@ -962,7 +988,7 @@
             document.querySelectorAll('.video-form form').forEach(function(form) {
                 const fileInput = form.querySelector('input[type="file"]');
                 const durationInput = form.querySelector('input[name="duration"]');
-                
+
                 if (fileInput && durationInput) {
                     fileInput.addEventListener('change', function(event) {
                         const file = event.target.files[0];
@@ -981,12 +1007,12 @@
                 }
             });
         }
-        
+
         // Chạy khi DOM đã tải xong
         document.addEventListener('DOMContentLoaded', function() {
             console.log("DOM loaded, setting up video forms");
             setupVideoForms();
-            
+
             // Thiết lập lại khi có thay đổi trong DOM (ví dụ: khi thêm lesson mới)
             const observer = new MutationObserver(function(mutations) {
                 mutations.forEach(function(mutation) {
@@ -995,7 +1021,7 @@
                     }
                 });
             });
-            
+
             observer.observe(document.body, { childList: true, subtree: true });
         });
     </script>
@@ -1170,12 +1196,12 @@
             // Remove any leftover backdrops
             const backdrops = document.querySelectorAll('.modal-backdrop');
             backdrops.forEach(backdrop => backdrop.remove());
-            
+
             // Remove modal-open class from body
             document.body.classList.remove('modal-open');
             document.body.style.overflow = '';
             document.body.style.paddingRight = '';
-            
+
             // Hide any visible modals
             const visibleModals = document.querySelectorAll('.modal.show');
             visibleModals.forEach(modal => {
@@ -1187,7 +1213,7 @@
         // Run cleanup on page load
         document.addEventListener('DOMContentLoaded', function() {
             cleanupModalIssues();
-            
+
             // Also run cleanup when page becomes visible (in case of tab switching)
             document.addEventListener('visibilitychange', function() {
                 if (!document.hidden) {
@@ -1204,7 +1230,7 @@
                 if (bootstrapModal) {
                     bootstrapModal.hide();
                 }
-                
+
                 // Force remove backdrop and clean up
                 setTimeout(() => {
                     cleanupModalIssues();
@@ -1398,7 +1424,7 @@
                     backdrops.forEach(backdrop => {
                         backdrop.remove();
                     });
-                    
+
                     // Remove modal-open class from body
                     document.body.classList.remove('modal-open');
                     document.body.style.overflow = '';

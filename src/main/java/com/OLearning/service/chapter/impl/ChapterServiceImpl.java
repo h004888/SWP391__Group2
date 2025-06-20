@@ -66,6 +66,14 @@ public class ChapterServiceImpl implements ChapterService {
         chapterRepository.save(chapter);
     }
 
-
+    @Override
+    public void autoFillOrderNumbers(Long courseId) {
+        List<Chapter> chapters = chapterRepository.findChaptersByCourse(courseId);
+        int orderNumber = 1;
+        for (Chapter chapter : chapters) {
+            chapter.setOrderNumber(orderNumber++);
+            chapterRepository.save(chapter);
+        }
+    }
 }
 

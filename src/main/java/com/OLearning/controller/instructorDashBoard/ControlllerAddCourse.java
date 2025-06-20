@@ -272,6 +272,8 @@ public class ControlllerAddCourse {
         Long courseId = course.getCourseId();
         model.addAttribute("courseId", courseId);
         model.addAttribute("coursestep2", new CourseMediaDTO());
+        model.addAttribute("imageUrl", course.getCourseImg());
+        model.addAttribute("videoUrl", course.getVideoUrlPreview()); 
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/step2CourseMedia :: step2Content");
         return "instructorDashboard/indexUpdate";
     }
@@ -654,6 +656,8 @@ public class ControlllerAddCourse {
             courseMediaDTO.setCourseId(course.getCourseId());
             model.addAttribute("courseId", course.getCourseId());
             model.addAttribute("coursestep2", courseMediaDTO);
+            model.addAttribute("imageUrl", course.getCourseImg());
+            model.addAttribute("videoUrl", course.getVideoUrlPreview()); 
             model.addAttribute("fragmentContent", "instructorDashboard/fragments/step2CourseMedia :: step2Content");
             return "instructorDashboard/indexUpdate";
         }
@@ -889,5 +893,20 @@ public class ControlllerAddCourse {
             courseService.saveCourse(course.getCourseId());
         }
     }
+    @PostMapping("/createcourse/autofillchapter")
+    public String autoFillChapterOrderNumbers(RedirectAttributes redirectAttributes,
+                                              HttpServletRequest request) {
+        Long courseId = getCourseIdFromCookie(request);
+        chapterService.autoFillOrderNumbers(courseId);
+        redirectAttributes.addFlashAttribute("successMessage", "Chapter order numbers auto-filled successfully.");
+        return "redirect:../createcourse/coursecontent";
+    }
 
+    @PostMapping("/createcourse/autofilllesson")
+    public String autoFillLessonOrderNumbers(@RequestParam("chapterId") Long chapterId,
+                                             RedirectAttributes redirectAttributes) {
+        lessonService.autoFillOrderNumbers(chapterId);
+        redirectAttributes.addFlashAttribute("successMessage", "Lesson order numbers auto-filled successfully.");
+        return "redirect:../createcourse/coursecontent";
+    }
 }

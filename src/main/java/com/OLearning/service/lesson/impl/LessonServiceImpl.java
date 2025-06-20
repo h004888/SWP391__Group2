@@ -37,4 +37,14 @@ public class LessonServiceImpl implements LessonService {
         lesson.setContentType(contenType);
         lessonRepository.save(lesson);
     }
+
+    @Override
+    public void autoFillOrderNumbers(Long chapterId) {
+        List<Lesson> lessons = lessonRepository.findByChapterId(chapterId);
+        int orderNumber = 1;
+        for (Lesson lesson : lessons) {
+            lesson.setOrderNumber(orderNumber++);
+            lessonRepository.save(lesson);
+        }
+    }
 }
