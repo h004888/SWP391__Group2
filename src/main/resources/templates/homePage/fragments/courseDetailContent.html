@@ -1561,20 +1561,6 @@ Page content START -->
                                                                         </div>
                                                                         <div class="text-end">
                                                                             <small class="text-muted" th:text="${#temporals.format(review.createdAt, 'dd/MM/yyyy HH:mm')}">5hr</small>
-                                                                            <!-- Edit button (chỉ hiển thị cho user đã comment) -->
-                                                                            <div th:if="${user != null and user.userId == review.user.userId}" class="mt-1">
-                                                                                <button class="btn btn-sm btn-outline-primary edit-comment-btn"
-                                                                                        th:data-review-id="${review.reviewId}"
-                                                                                        th:data-comment="${review.comment}">
-                                                                                    <i class="fas fa-edit"></i> Edit
-                                                                                </button>
-                                                                                <!-- Nút xóa comment -->
-                                                                                <button class="btn btn-sm btn-outline-danger ms-2 delete-comment-btn"
-                                                                                        th:data-review-id="${review.reviewId}"
-                                                                                        th:data-course-id="${course.courseId}">
-                                                                                    <i class="fas fa-trash"></i> Xóa
-                                                                                </button>
-                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -1590,9 +1576,25 @@ Page content START -->
                                                                         </div>
                                                                     </form>
                                                                 </div>
-                                                                <!-- React + Report -->
+                                                                <!-- React + Report + Edit + Delete -->
                                                                 <ul class="nav nav-divider py-2 small">
-                                                                    <li class="nav-item"><a class="text-primary-hover show-reply-form" href="#" th:data-review-id="${review.reviewId}">Reply</a></li>
+                                                                    <li class="nav-item"><a class="text-success-hover show-reply-form" href="#" th:data-review-id="${review.reviewId}">Reply</a></li>
+                                                                    <!-- Edit button (chỉ hiển thị cho user đã comment) -->
+                                                                    <li class="nav-item" th:if="${user != null and user.userId == review.user.userId}">
+                                                                        <button class="btn btn-link text-primary p-0 edit-comment-btn"
+                                                                                th:data-review-id="${review.reviewId}"
+                                                                                th:data-comment="${review.comment}">
+                                                                            Edit
+                                                                        </button>
+                                                                    </li>
+                                                                    <!-- Delete button (chỉ hiển thị cho user đã comment) -->
+                                                                    <li class="nav-item" th:if="${user != null and user.userId == review.user.userId}">
+                                                                        <button class="btn btn-link text-danger p-0 delete-comment-btn"
+                                                                                th:data-review-id="${review.reviewId}"
+                                                                                th:data-course-id="${course.courseId}">
+                                                                            Delete
+                                                                        </button>
+                                                                    </li>
                                                                     <li class="nav-item">
                                                                         <!-- Report Comment Form -->
                                                                         <button type="button"
@@ -2510,26 +2512,30 @@ Listed courses END -->
                     </div>` : '';
 
                 const editDeleteButtons = comment.user && comment.user.userId === window.currentUserId ? 
-                    `<div class="mt-1">
-                        <button class="btn btn-sm btn-outline-primary edit-comment-btn"
+                    `<li class="nav-item">
+                        <button class="btn btn-link text-primary p-0 edit-comment-btn"
                                 data-review-id="${comment.reviewId}"
                                 data-comment="${comment.comment}">
-                            <i class="fas fa-edit"></i> Edit
+                            Edit
                         </button>
-                        <button class="btn btn-sm btn-outline-danger ms-2 delete-comment-btn"
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-link text-danger p-0 delete-comment-btn"
                                 data-review-id="${comment.reviewId}"
                                 data-course-id="${comment.courseId}">
-                            <i class="fas fa-trash"></i> Xóa
+                            Delete
                         </button>
-                    </div>` : '';
+                    </li>` : '';
 
                 const reportButton = comment.user && comment.user.userId !== window.currentUserId ?
-                    `<button type="button"
-                            class="btn btn-link text-danger p-0 report-comment-btn-modal"
-                            data-course-id="${comment.courseId}"
-                            data-comment-id="${comment.reviewId}">
-                        Report
-                    </button>` : '';
+                    `<li class="nav-item">
+                        <button type="button"
+                                class="btn btn-link text-danger p-0 report-comment-btn-modal"
+                                data-course-id="${comment.courseId}"
+                                data-comment-id="${comment.reviewId}">
+                            Report
+                        </button>
+                    </li>` : '';
 
                 return `
                     <li class="comment-item">
@@ -2549,7 +2555,6 @@ Listed courses END -->
                                         </div>
                                         <div class="text-end">
                                             <small class="text-muted">${new Date(comment.createdAt).toLocaleString()}</small>
-                                            ${editDeleteButtons}
                                         </div>
                                     </div>
                                 </div>
@@ -2566,8 +2571,9 @@ Listed courses END -->
                                     </form>
                                 </div>
                                 <ul class="nav nav-divider py-2 small">
-                                    <li class="nav-item"><a class="text-primary-hover show-reply-form" href="#" data-review-id="${comment.reviewId}">Reply</a></li>
-                                    <li class="nav-item">${reportButton}</li>
+                                    <li class="nav-item"><a class="text-success-hover show-reply-form" href="#" data-review-id="${comment.reviewId}">Reply</a></li>
+                                    ${editDeleteButtons}
+                                    ${reportButton}
                                 </ul>
                                 <!-- Reply form -->
                                 <div id="reply-form-${comment.reviewId}" style="display:none; margin-top: 10px;">
@@ -2599,26 +2605,30 @@ Listed courses END -->
                     </div>` : '';
 
                 const editDeleteButtons = reply.user && reply.user.userId === window.currentUserId ? 
-                    `<div class="mt-1">
-                        <button class="btn btn-sm btn-outline-primary edit-comment-btn"
+                    `<li class="nav-item">
+                        <button class="btn btn-link text-primary p-0 edit-comment-btn"
                                 data-review-id="${reply.reviewId}"
                                 data-comment="${reply.comment}">
-                            <i class="fas fa-edit"></i> Edit
+                            Edit
                         </button>
-                        <button class="btn btn-sm btn-outline-danger ms-2 delete-comment-btn"
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-link text-danger p-0 delete-comment-btn"
                                 data-review-id="${reply.reviewId}"
                                 data-course-id="${reply.courseId}">
-                            <i class="fas fa-trash"></i> Xóa
+                            Delete
                         </button>
-                    </div>` : '';
+                    </li>` : '';
 
                 const reportButton = reply.user && reply.user.userId !== window.currentUserId ?
-                    `<button type="button"
-                            class="btn btn-link text-danger p-0 report-comment-btn-modal"
-                            data-course-id="${reply.courseId}"
-                            data-comment-id="${reply.reviewId}">
-                        Report
-                    </button>` : '';
+                    `<li class="nav-item">
+                        <button type="button"
+                                class="btn btn-link text-danger p-0 report-comment-btn-modal"
+                                data-course-id="${reply.courseId}"
+                                data-comment-id="${reply.reviewId}">
+                            Report
+                        </button>
+                    </li>` : '';
 
                 return `
                     <li class="comment-item">
@@ -2638,7 +2648,6 @@ Listed courses END -->
                                         </div>
                                         <div class="text-end">
                                             <small class="text-muted">${new Date(reply.createdAt).toLocaleString()}</small>
-                                            ${editDeleteButtons}
                                         </div>
                                     </div>
                                 </div>
@@ -2655,8 +2664,9 @@ Listed courses END -->
                                     </form>
                                 </div>
                                 <ul class="nav nav-divider py-2 small">
-                                    <li class="nav-item"><a class="text-primary-hover show-reply-form" href="#" data-review-id="${reply.reviewId}">Reply</a></li>
-                                    <li class="nav-item">${reportButton}</li>
+                                    <li class="nav-item"><a class="text-success-hover show-reply-form" href="#" data-review-id="${reply.reviewId}">Reply</a></li>
+                                    ${editDeleteButtons}
+                                    ${reportButton}
                                 </ul>
                                 <!-- Reply form -->
                                 <div id="reply-form-${reply.reviewId}" style="display:none; margin-top: 10px;">

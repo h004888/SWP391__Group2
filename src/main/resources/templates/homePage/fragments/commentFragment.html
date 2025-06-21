@@ -25,18 +25,6 @@
               </div>
               <div class="text-end">
                 <small class="text-muted" th:text="${#temporals.format(child.createdAt, 'dd/MM/yyyy HH:mm')}">5hr</small>
-                <div th:if="${user != null and user.userId == child.user.userId}" class="mt-1">
-                  <button class="btn btn-sm btn-outline-primary edit-comment-btn"
-                          th:data-review-id="${child.reviewId}"
-                          th:data-comment="${child.comment}">
-                    <i class="fas fa-edit"></i> Edit
-                  </button>
-                  <button class="btn btn-sm btn-outline-danger ms-2 delete-comment-btn"
-                          th:data-review-id="${child.reviewId}"
-                          th:data-course-id="${course.courseId}">
-                    <i class="fas fa-trash"></i> Xóa
-                  </button>
-                </div>
               </div>
             </div>
           </div>
@@ -52,9 +40,25 @@
               </div>
             </form>
           </div>
-          <!-- React + Report cho reply -->
+          <!-- React + Report + Edit + Delete cho reply -->
           <ul class="nav nav-divider py-2 small">
-            <li class="nav-item"><a class="text-primary-hover show-reply-form" href="#" th:data-review-id="${child.reviewId}">Reply</a></li>
+            <li class="nav-item"><a class="text-success-hover show-reply-form" href="#" th:data-review-id="${child.reviewId}">Reply</a></li>
+            <!-- Edit button (chỉ hiển thị cho user đã comment) -->
+            <li class="nav-item" th:if="${user != null and user.userId == child.user.userId}">
+              <button class="btn btn-link text-primary p-0 edit-comment-btn"
+                      th:data-review-id="${child.reviewId}"
+                      th:data-comment="${child.comment}">
+                Edit
+              </button>
+            </li>
+            <!-- Delete button (chỉ hiển thị cho user đã comment) -->
+            <li class="nav-item" th:if="${user != null and user.userId == child.user.userId}">
+              <button class="btn btn-link text-danger p-0 delete-comment-btn"
+                      th:data-review-id="${child.reviewId}"
+                      th:data-course-id="${course.courseId}">
+                Delete
+              </button>
+            </li>
             <li class="nav-item">
               <button type="button"
                       class="btn btn-link text-danger p-0 report-comment-btn-modal"

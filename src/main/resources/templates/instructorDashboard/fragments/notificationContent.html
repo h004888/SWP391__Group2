@@ -219,12 +219,33 @@
                                        title="Edit Course">
                                         <i class="fas fa-edit"></i>
                                     </a>
+                                    <!-- View Details button for COURSE_REJECTION -->
+                                    <a th:if="${n.type == 'COURSE_REJECTION'}"
+                                       th:href="@{/instructordashboard/notifications/view/{id}(id=${n.notificationId})}"
+                                       class="btn btn-primary btn-sm"
+                                       title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
                                     <!-- Reply button for comment notifications -->
                                     <a th:if="${n.type == 'comment' and n.commentId != null}"
                                        th:href="@{/instructordashboard/notifications/view/{id}(id=${n.notificationId})}"
                                        class="btn btn-info btn-sm"
                                        title="Reply to Comment">
                                         <i class="fas fa-reply"></i>
+                                    </a>
+                                    <!-- View Course button for comment notifications -->
+                                    <a th:if="${n.type == 'comment' and n.commentId != null}"
+                                       th:href="@{/course/{courseId}(courseId=${n.course.courseId})}"
+                                       class="btn btn-success btn-sm"
+                                       title="View Course">
+                                        <i class="fas fa-book-open"></i>
+                                    </a>
+                                    <!-- View Details button for other notification types -->
+                                    <a th:if="${n.type != 'COURSE_REJECTION' and n.type != 'comment'}"
+                                       th:href="@{/instructordashboard/notifications/view/{id}(id=${n.notificationId})}"
+                                       class="btn btn-primary btn-sm"
+                                       title="View Details">
+                                        <i class="fas fa-eye"></i>
                                     </a>
                                 </div>
                             </td>
