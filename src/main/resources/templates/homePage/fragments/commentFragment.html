@@ -7,13 +7,13 @@
         <div class="avatar avatar-sm flex-shrink-0 me-2">
           <img class="avatar-img rounded-circle"
                th:src="${child.user.profilePicture != null and child.user.profilePicture != ''} ? ${child.user.profilePicture} : @{/assets/images/avatar/default.jpg}"
-               th:alt="${child.user.userName}">
+               th:alt="${child.user.username}">
         </div>
         <div class="ms-2 w-100">
           <div class="bg-light p-3 rounded">
             <div class="d-flex justify-content-between">
               <div>
-                <h6 class="mb-1 lead fw-bold" th:text="${child.user.userName}">Student Name</h6>
+                <h6 class="mb-1 lead fw-bold" th:text="${child.user.username}">Student Name</h6>
                 <div class="mb-2" th:if="${child.rating != null}">
                                                                                         <span class="text-warning">
                                                                                             <i class="fas fa-star" th:each="i : ${#numbers.sequence(1, child.rating)}"></i>
@@ -40,6 +40,18 @@
               </div>
             </div>
           </div>
+          <!-- Edit form cho reply comment -->
+          <div th:id="'edit-form-' + ${child.reviewId}" style="display:none; margin-top: 10px;">
+            <form class="edit-comment-ajax-form">
+              <input type="hidden" name="reviewId" th:value="${child.reviewId}"/>
+              <input type="hidden" name="courseId" th:value="${course.courseId}"/>
+              <textarea name="comment" required class="form-control mb-2" placeholder="Nhập nội dung comment..."></textarea>
+              <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-sm">Cập nhật</button>
+                <button type="button" class="btn btn-secondary btn-sm cancel-edit-btn" th:data-review-id="${child.reviewId}">Hủy</button>
+              </div>
+            </form>
+          </div>
           <!-- React + Report cho reply -->
           <ul class="nav nav-divider py-2 small">
             <li class="nav-item"><a class="text-primary-hover show-reply-form" href="#" th:data-review-id="${child.reviewId}">Reply</a></li>
@@ -58,7 +70,10 @@
               <input type="hidden" name="parentId" th:value="${child.reviewId}"/>
               <input type="hidden" name="courseId" th:value="${course.courseId}"/>
               <textarea name="comment" required class="form-control mb-2" placeholder="Nhập trả lời..."></textarea>
-              <button type="submit" class="btn btn-primary btn-sm">Gửi</button>
+              <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-sm">Gửi</button>
+                <button type="button" class="btn btn-secondary btn-sm cancel-reply-btn" th:data-review-id="${child.reviewId}">Hủy</button>
+              </div>
             </form>
           </div>
         </div>

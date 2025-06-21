@@ -1537,17 +1537,18 @@ Page content START -->
                                                 </div>
                                                 <ul class="list-unstyled mb-0 comment-list" th:if="${!#lists.isEmpty(reviews)}">
                                                     <li class="comment-item" th:each="review : ${reviews}">
+                                                        <!-- Hiển thị comment cha như cũ -->
                                                         <div class="d-flex mb-3">
                                                             <div class="avatar avatar-sm flex-shrink-0 me-2">
                                                                 <img class="avatar-img rounded-circle"
                                                                      th:src="${review.user.profilePicture != null and review.user.profilePicture != ''} ? ${review.user.profilePicture} : @{/assets/images/avatar/default.jpg}"
-                                                                     th:alt="${review.user.fullName}">
+                                                                     th:alt="${review.user.username}">
                                                             </div>
                                                             <div class="ms-2 w-100">
                                                                 <div class="bg-light p-3 rounded">
                                                                     <div class="d-flex justify-content-between">
                                                                         <div>
-                                                                            <h6 class="mb-1 lead fw-bold" th:text="${review.user.fullName}">Student Name</h6>
+                                                                            <h6 class="mb-1 lead fw-bold" th:text="${review.user.username}">Student Name</h6>
                                                                             <!-- Rating stars (chỉ hiển thị nếu có rating) -->
                                                                             <div class="mb-2" th:if="${review.rating != null}">
                                                                                 <span class="text-warning">
@@ -1577,31 +1578,21 @@ Page content START -->
                                                                         </div>
                                                                     </div>
                                                                 </div>
-
-                                                                <!-- Edit Comment Form (ẩn mặc định) -->
-                                                                <div class="edit-comment-form mt-2" th:id="'edit-form-' + ${review.reviewId}" style="display: none;">
+                                                                <!-- Edit form cho comment cha -->
+                                                                <div th:id="'edit-form-' + ${review.reviewId}" style="display:none; margin-top: 10px;">
                                                                     <form class="edit-comment-ajax-form">
-                                                                        <input type="hidden" name="courseId" th:value="${course.courseId}" />
-                                                                        <input type="hidden" name="reviewId" th:value="${review.reviewId}" />
-                                                                        <div class="d-flex">
-                                                                            <textarea class="form-control me-2" name="comment" rows="2" required></textarea>
-                                                                            <div class="d-flex flex-column">
-                                                                                <button type="submit" class="btn btn-success btn-sm mb-1">
-                                                                                    <i class="fas fa-check"></i> Save
-                                                                                </button>
-                                                                                <button type="button" class="btn btn-secondary btn-sm cancel-edit-btn"
-                                                                                        th:data-review-id="${review.reviewId}">
-                                                                                    <i class="fas fa-times"></i> Cancel
-                                                                                </button>
-                                                                            </div>
+                                                                        <input type="hidden" name="reviewId" th:value="${review.reviewId}"/>
+                                                                        <input type="hidden" name="courseId" th:value="${course.courseId}"/>
+                                                                        <textarea name="comment" required class="form-control mb-2" placeholder="Nhập nội dung comment..."></textarea>
+                                                                        <div class="d-flex gap-2">
+                                                                            <button type="submit" class="btn btn-primary btn-sm">Cập nhật</button>
+                                                                            <button type="button" class="btn btn-secondary btn-sm cancel-edit-btn" th:data-review-id="${review.reviewId}">Hủy</button>
                                                                         </div>
                                                                     </form>
                                                                 </div>
-
                                                                 <!-- React + Report -->
                                                                 <ul class="nav nav-divider py-2 small">
-                                                                    <li class="nav-item"><a class="text-primary-hover" href="#">Like</a></li>
-                                                                    <li class="nav-item"><a class="text-primary-hover" href="#">Reply</a></li>
+                                                                    <li class="nav-item"><a class="text-primary-hover show-reply-form" href="#" th:data-review-id="${review.reviewId}">Reply</a></li>
                                                                     <li class="nav-item">
                                                                         <!-- Report Comment Form -->
                                                                         <button type="button"
@@ -1613,6 +1604,20 @@ Page content START -->
                                                                         </button>
                                                                     </li>
                                                                 </ul>
+                                                                <!-- Form reply cho comment cha -->
+                                                                <div th:id="'reply-form-' + ${review.reviewId}" style="display:none; margin-top: 10px;">
+                                                                    <form class="reply-comment-form">
+                                                                        <input type="hidden" name="parentId" th:value="${review.reviewId}"/>
+                                                                        <input type="hidden" name="courseId" th:value="${course.courseId}"/>
+                                                                        <textarea name="comment" required class="form-control mb-2" placeholder="Nhập trả lời..."></textarea>
+                                                                        <div class="d-flex gap-2">
+                                                                            <button type="submit" class="btn btn-primary btn-sm">Gửi</button>
+                                                                            <button type="button" class="btn btn-secondary btn-sm cancel-reply-btn" th:data-review-id="${review.reviewId}">Hủy</button>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
+                                                                <!-- Hiển thị reply (children) -->
+                                                                <div th:replace="homePage/fragments/commentFragment :: commentItemFragment(${review}, ${course}, ${user})"></div>
                                                             </div>
                                                         </div>
                                                     </li>
@@ -2135,6 +2140,9 @@ Listed courses END -->
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Set current user ID for permission checking
+            window.currentUserId = /*[[${user != null ? user.userId : null}]]*/ null;
+            
             // Comment AJAX
             const commentForm = document.getElementById('commentForm');
             if (commentForm) {
@@ -2317,12 +2325,51 @@ Listed courses END -->
                 }
             });
 
+            // Show reply form functionality
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('show-reply-form') || e.target.closest('.show-reply-form')) {
+                    var link = e.target.classList.contains('show-reply-form') ? e.target : e.target.closest('.show-reply-form');
+                    var reviewId = link.getAttribute('data-review-id');
+                    
+                    // Hide all reply forms first
+                    document.querySelectorAll('[id^="reply-form-"]').forEach(function(form) {
+                        form.style.display = 'none';
+                    });
+                    
+                    // Show the reply form for this comment
+                    var replyForm = document.getElementById('reply-form-' + reviewId);
+                    if (replyForm) {
+                        replyForm.style.display = 'block';
+                        var textarea = replyForm.querySelector('textarea[name="comment"]');
+                        textarea.focus();
+                    }
+                }
+            });
+
+            // Cancel reply functionality
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('cancel-reply-btn') || e.target.closest('.cancel-reply-btn')) {
+                    var btn = e.target.classList.contains('cancel-reply-btn') ? e.target : e.target.closest('.cancel-reply-btn');
+                    var reviewId = btn.getAttribute('data-review-id');
+
+                    // Hide the reply form
+                    var replyForm = document.getElementById('reply-form-' + reviewId);
+                    if (replyForm) {
+                        replyForm.style.display = 'none';
+                        replyForm.reset();
+                    }
+                }
+            });
+
             // Function to reload comments
             function loadComments(courseId) {
                 fetch('/api/course/' + courseId + '/comments')
                     .then(res => res.json())
                     .then(json => {
                         if (json.comments) {
+                            // Update current user ID
+                            window.currentUserId = json.currentUserId;
+                            
                             // Update comment list in DOM
                             const commentList = document.querySelector('.comment-list');
                             if (commentList) {
@@ -2333,13 +2380,122 @@ Listed courses END -->
                                 json.comments.forEach(comment => {
                                     const commentHtml = createCommentHTML(comment);
                                     commentList.insertAdjacentHTML('beforeend', commentHtml);
+                                    
+                                    // Add reply comments if any
+                                    if (comment.children && comment.children.length > 0) {
+                                        const replyContainer = document.createElement('ul');
+                                        replyContainer.className = 'list-unstyled ms-5';
+                                        replyContainer.innerHTML = comment.children.map(child => createReplyHTML(child)).join('');
+                                        commentList.lastElementChild.appendChild(replyContainer);
+                                    }
                                 });
+                                
+                                // Re-attach event listeners for new elements
+                                attachEventListeners();
                             }
                         }
                     })
                     .catch(() => {
                         console.log('Error loading comments');
                     });
+            }
+
+            // Function to attach event listeners to new elements
+            function attachEventListeners() {
+                // Re-attach delete comment listeners
+                document.querySelectorAll('.delete-comment-btn').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        if(confirm('Bạn có chắc chắn muốn xóa bình luận này?')) {
+                            const reviewId = btn.getAttribute('data-review-id');
+                            const courseId = btn.getAttribute('data-course-id');
+                            fetch(`/api/course/${courseId}/comment/${reviewId}/delete`, {
+                                method: 'DELETE',
+                                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if(data.success) {
+                                    btn.closest('.comment-item').remove();
+                                    // Show success message
+                                    const msgDiv = document.getElementById('commentMessage');
+                                    msgDiv.innerHTML = `<div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="fas fa-check-circle me-2"></i>${data.success}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>`;
+                                } else {
+                                    alert(data.error || 'Xóa bình luận thất bại!');
+                                }
+                            })
+                            .catch(() => alert('Có lỗi xảy ra!'));
+                        }
+                    });
+                });
+
+                // Re-attach edit comment listeners
+                document.querySelectorAll('.edit-comment-btn').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        const reviewId = btn.getAttribute('data-review-id');
+                        const comment = btn.getAttribute('data-comment');
+
+                        // Hide all edit forms first
+                        document.querySelectorAll('[id^="edit-form-"]').forEach(function(form) {
+                            form.style.display = 'none';
+                        });
+
+                        // Show the edit form for this comment
+                        const editForm = document.getElementById('edit-form-' + reviewId);
+                        if (editForm) {
+                            editForm.style.display = 'block';
+                            const textarea = editForm.querySelector('textarea[name="comment"]');
+                            textarea.value = comment;
+                            textarea.focus();
+                        }
+                    });
+                });
+
+                // Re-attach show reply form listeners
+                document.querySelectorAll('.show-reply-form').forEach(function(link) {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const reviewId = this.getAttribute('data-review-id');
+                        
+                        // Hide all reply forms first
+                        document.querySelectorAll('[id^="reply-form-"]').forEach(function(form) {
+                            form.style.display = 'none';
+                        });
+                        
+                        // Show the reply form for this comment
+                        const replyForm = document.getElementById('reply-form-' + reviewId);
+                        if (replyForm) {
+                            replyForm.style.display = 'block';
+                            const textarea = replyForm.querySelector('textarea[name="comment"]');
+                            textarea.focus();
+                        }
+                    });
+                });
+
+                // Re-attach cancel edit listeners
+                document.querySelectorAll('.cancel-edit-btn').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        const reviewId = btn.getAttribute('data-review-id');
+                        const editForm = document.getElementById('edit-form-' + reviewId);
+                        if (editForm) {
+                            editForm.style.display = 'none';
+                        }
+                    });
+                });
+
+                // Re-attach cancel reply listeners
+                document.querySelectorAll('.cancel-reply-btn').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        const reviewId = btn.getAttribute('data-review-id');
+                        const replyForm = document.getElementById('reply-form-' + reviewId);
+                        if (replyForm) {
+                            replyForm.style.display = 'none';
+                            replyForm.reset();
+                        }
+                    });
+                });
             }
 
             // Function to create comment HTML
@@ -2353,46 +2509,167 @@ Listed courses END -->
                         <span class="ms-2 small text-muted">${comment.rating}/5</span>
                     </div>` : '';
 
+                const editDeleteButtons = comment.user && comment.user.userId === window.currentUserId ? 
+                    `<div class="mt-1">
+                        <button class="btn btn-sm btn-outline-primary edit-comment-btn"
+                                data-review-id="${comment.reviewId}"
+                                data-comment="${comment.comment}">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger ms-2 delete-comment-btn"
+                                data-review-id="${comment.reviewId}"
+                                data-course-id="${comment.courseId}">
+                            <i class="fas fa-trash"></i> Xóa
+                        </button>
+                    </div>` : '';
+
+                const reportButton = comment.user && comment.user.userId !== window.currentUserId ?
+                    `<button type="button"
+                            class="btn btn-link text-danger p-0 report-comment-btn-modal"
+                            data-course-id="${comment.courseId}"
+                            data-comment-id="${comment.reviewId}">
+                        Report
+                    </button>` : '';
+
                 return `
                     <li class="comment-item">
                         <div class="d-flex mb-3">
                             <div class="avatar avatar-sm flex-shrink-0 me-2">
                                 <img class="avatar-img rounded-circle"
                                      src="${comment.user.profilePicture || '/assets/images/avatar/default.jpg'}"
-                                     alt="${comment.user.fullName}">
+                                     alt="${comment.user.fullName || comment.user.username}">
                             </div>
                             <div class="ms-2 w-100">
                                 <div class="bg-light p-3 rounded">
                                     <div class="d-flex justify-content-between">
                                         <div>
-                                            <h6 class="mb-1 lead fw-bold">${comment.user.fullName}</h6>
+                                            <h6 class="mb-1 lead fw-bold">${comment.user.fullName || comment.user.username}</h6>
                                             ${ratingStars}
                                             <p class="h6 mb-0">${comment.comment}</p>
                                         </div>
                                         <div class="text-end">
                                             <small class="text-muted">${new Date(comment.createdAt).toLocaleString()}</small>
-                                            <div class="mt-1">
-                                                <button class="btn btn-sm btn-outline-primary edit-comment-btn"
-                                                        data-review-id="${comment.reviewId}"
-                                                        data-comment="${comment.comment}">
-                                                    <i class="fas fa-edit"></i> Edit
-                                                </button>
-                                            </div>
+                                            ${editDeleteButtons}
                                         </div>
                                     </div>
                                 </div>
+                                <!-- Edit form -->
+                                <div id="edit-form-${comment.reviewId}" style="display:none; margin-top: 10px;">
+                                    <form class="edit-comment-ajax-form">
+                                        <input type="hidden" name="reviewId" value="${comment.reviewId}"/>
+                                        <input type="hidden" name="courseId" value="${comment.courseId}"/>
+                                        <textarea name="comment" required class="form-control mb-2" placeholder="Nhập nội dung comment...">${comment.comment}</textarea>
+                                        <div class="d-flex gap-2">
+                                            <button type="submit" class="btn btn-primary btn-sm">Cập nhật</button>
+                                            <button type="button" class="btn btn-secondary btn-sm cancel-edit-btn" data-review-id="${comment.reviewId}">Hủy</button>
+                                        </div>
+                                    </form>
+                                </div>
                                 <ul class="nav nav-divider py-2 small">
-                                    <li class="nav-item"><a class="text-primary-hover" href="#">Like</a></li>
-                                    <li class="nav-item"><a class="text-primary-hover" href="#">Reply</a></li>
-                                    <li class="nav-item">
-                                        <button type="button"
-                                                class="btn btn-link text-danger p-0 report-comment-btn-modal"
-                                                data-course-id="${comment.courseId}"
-                                                data-comment-id="${comment.reviewId}">
-                                            Report
-                                        </button>
-                                    </li>
+                                    <li class="nav-item"><a class="text-primary-hover show-reply-form" href="#" data-review-id="${comment.reviewId}">Reply</a></li>
+                                    <li class="nav-item">${reportButton}</li>
                                 </ul>
+                                <!-- Reply form -->
+                                <div id="reply-form-${comment.reviewId}" style="display:none; margin-top: 10px;">
+                                    <form class="reply-comment-form">
+                                        <input type="hidden" name="parentId" value="${comment.reviewId}"/>
+                                        <input type="hidden" name="courseId" value="${comment.courseId}"/>
+                                        <textarea name="comment" required class="form-control mb-2" placeholder="Nhập trả lời..."></textarea>
+                                        <div class="d-flex gap-2">
+                                            <button type="submit" class="btn btn-primary btn-sm">Gửi</button>
+                                            <button type="button" class="btn btn-secondary btn-sm cancel-reply-btn" data-review-id="${comment.reviewId}">Hủy</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                `;
+            }
+
+            // Function to create reply HTML
+            function createReplyHTML(reply) {
+                const ratingStars = reply.rating ?
+                    `<div class="mb-2">
+                        <span class="text-warning">
+                            ${'<i class="fas fa-star"></i>'.repeat(reply.rating)}
+                            ${'<i class="far fa-star"></i>'.repeat(5 - reply.rating)}
+                        </span>
+                        <span class="ms-2 small text-muted">${reply.rating}/5</span>
+                    </div>` : '';
+
+                const editDeleteButtons = reply.user && reply.user.userId === window.currentUserId ? 
+                    `<div class="mt-1">
+                        <button class="btn btn-sm btn-outline-primary edit-comment-btn"
+                                data-review-id="${reply.reviewId}"
+                                data-comment="${reply.comment}">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger ms-2 delete-comment-btn"
+                                data-review-id="${reply.reviewId}"
+                                data-course-id="${reply.courseId}">
+                            <i class="fas fa-trash"></i> Xóa
+                        </button>
+                    </div>` : '';
+
+                const reportButton = reply.user && reply.user.userId !== window.currentUserId ?
+                    `<button type="button"
+                            class="btn btn-link text-danger p-0 report-comment-btn-modal"
+                            data-course-id="${reply.courseId}"
+                            data-comment-id="${reply.reviewId}">
+                        Report
+                    </button>` : '';
+
+                return `
+                    <li class="comment-item">
+                        <div class="d-flex mb-3">
+                            <div class="avatar avatar-sm flex-shrink-0 me-2">
+                                <img class="avatar-img rounded-circle"
+                                     src="${reply.user.profilePicture || '/assets/images/avatar/default.jpg'}"
+                                     alt="${reply.user.fullName || reply.user.username}">
+                            </div>
+                            <div class="ms-2 w-100">
+                                <div class="bg-light p-3 rounded">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="mb-1 lead fw-bold">${reply.user.fullName || reply.user.username}</h6>
+                                            ${ratingStars}
+                                            <p class="h6 mb-0">${reply.comment}</p>
+                                        </div>
+                                        <div class="text-end">
+                                            <small class="text-muted">${new Date(reply.createdAt).toLocaleString()}</small>
+                                            ${editDeleteButtons}
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Edit form -->
+                                <div id="edit-form-${reply.reviewId}" style="display:none; margin-top: 10px;">
+                                    <form class="edit-comment-ajax-form">
+                                        <input type="hidden" name="reviewId" value="${reply.reviewId}"/>
+                                        <input type="hidden" name="courseId" value="${reply.courseId}"/>
+                                        <textarea name="comment" required class="form-control mb-2" placeholder="Nhập nội dung comment...">${reply.comment}</textarea>
+                                        <div class="d-flex gap-2">
+                                            <button type="submit" class="btn btn-primary btn-sm">Cập nhật</button>
+                                            <button type="button" class="btn btn-secondary btn-sm cancel-edit-btn" data-review-id="${reply.reviewId}">Hủy</button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <ul class="nav nav-divider py-2 small">
+                                    <li class="nav-item"><a class="text-primary-hover show-reply-form" href="#" data-review-id="${reply.reviewId}">Reply</a></li>
+                                    <li class="nav-item">${reportButton}</li>
+                                </ul>
+                                <!-- Reply form -->
+                                <div id="reply-form-${reply.reviewId}" style="display:none; margin-top: 10px;">
+                                    <form class="reply-comment-form">
+                                        <input type="hidden" name="parentId" value="${reply.reviewId}"/>
+                                        <input type="hidden" name="courseId" value="${reply.courseId}"/>
+                                        <textarea name="comment" required class="form-control mb-2" placeholder="Nhập trả lời..."></textarea>
+                                        <div class="d-flex gap-2">
+                                            <button type="submit" class="btn btn-primary btn-sm">Gửi</button>
+                                            <button type="button" class="btn btn-secondary btn-sm cancel-reply-btn" data-review-id="${reply.reviewId}">Hủy</button>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </li>
@@ -2406,6 +2683,12 @@ Listed courses END -->
                     const formData = new FormData(e.target);
                     const data = {};
                     formData.forEach((value, key) => { data[key] = value; });
+
+                    // Validate comment
+                    if (!data.comment || data.comment.trim().length === 0) {
+                        alert('Comment không được để trống!');
+                        return;
+                    }
 
                     fetch('/api/course/' + data.courseId + '/comment/' + data.reviewId + '/update', {
                         method: 'POST',
@@ -2422,11 +2705,22 @@ Listed courses END -->
                                 if (editForm) {
                                     editForm.style.display = 'none';
                                 }
-                                // Update comment text in DOM
-                                const commentText = document.querySelector(`[data-review-id="${data.reviewId}"]`).closest('.comment-item').querySelector('.h6');
-                                if (commentText) {
-                                    commentText.textContent = data.comment;
+                                
+                                // Update comment text in DOM - tìm đúng element chứa comment text
+                                const commentItem = document.querySelector(`[data-review-id="${data.reviewId}"]`).closest('.comment-item');
+                                if (commentItem) {
+                                    const commentText = commentItem.querySelector('.h6.mb-0');
+                                    if (commentText) {
+                                        commentText.textContent = data.comment;
+                                    }
+                                    
+                                    // Cập nhật data attribute của edit button
+                                    const editBtn = commentItem.querySelector('.edit-comment-btn');
+                                    if (editBtn) {
+                                        editBtn.setAttribute('data-comment', data.comment);
+                                    }
                                 }
+                                
                                 // Show success message
                                 const msgDiv = document.getElementById('commentMessage');
                                 msgDiv.innerHTML = `<div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -2440,6 +2734,49 @@ Listed courses END -->
                         .catch(() => {
                             alert('Error! Please try again.');
                         });
+                }
+            });
+
+            // Xử lý submit reply comment
+            document.addEventListener('submit', function(e) {
+                if (e.target.classList.contains('reply-comment-form')) {
+                    e.preventDefault();
+                    const form = e.target;
+                    const formData = new FormData(form);
+                    const data = {};
+                    formData.forEach((value, key) => { data[key] = value; });
+                    
+                    // Validate comment
+                    if (!data.comment || data.comment.trim().length === 0) {
+                        alert('Reply không được để trống!');
+                        return;
+                    }
+                    
+                    fetch('/api/course/' + data.courseId + '/comment', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    })
+                    .then(res => res.json())
+                    .then(json => {
+                        if (json.success) {
+                            form.reset();
+                            form.style.display = 'none';
+                            // Reload comment list
+                            loadComments(data.courseId);
+                            // Show success message
+                            const msgDiv = document.getElementById('commentMessage');
+                            msgDiv.innerHTML = `<div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>${json.success}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>`;
+                        } else if (json.error) {
+                            alert(json.error);
+                        }
+                    })
+                    .catch(() => {
+                        alert('Error! Please try again.');
+                    });
                 }
             });
 
@@ -2515,11 +2852,8 @@ Listed courses END -->
                         });
                 });
             }
-        });
-    </script>
-    <script th:inline="javascript">
-        /*<![CDATA[*/
-        document.addEventListener('DOMContentLoaded', function() {
+
+            // Initial event listeners for delete buttons
             document.querySelectorAll('.delete-comment-btn').forEach(function(btn) {
                 btn.addEventListener('click', function() {
                     if(confirm('Bạn có chắc chắn muốn xóa bình luận này?')) {
@@ -2533,6 +2867,12 @@ Listed courses END -->
                         .then(data => {
                             if(data.success) {
                                 btn.closest('.comment-item').remove();
+                                // Show success message
+                                const msgDiv = document.getElementById('commentMessage');
+                                msgDiv.innerHTML = `<div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <i class="fas fa-check-circle me-2"></i>${data.success}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>`;
                             } else {
                                 alert(data.error || 'Xóa bình luận thất bại!');
                             }
@@ -2542,6 +2882,5 @@ Listed courses END -->
                 });
             });
         });
-        /*]]>*/
     </script>
 </main>

@@ -11,12 +11,13 @@ import java.time.LocalDateTime;
 
 @Component
 public class CommentMapper {
-    public CourseReview toEntity(CommentDTO dto, Enrollment enrollment, Course course) {
+    public CourseReview toEntity(CommentDTO dto, Enrollment enrollment, Course course, CourseReview parent) {
         return CourseReview.builder()
                 .enrollment(enrollment)
                 .course(course)
                 .comment(dto.getComment())
                 .rating(dto.getRating())
+                .parentReview(parent)
                 .build();
     }
 
@@ -27,13 +28,18 @@ public class CommentMapper {
         dto.setUserId(review.getEnrollment().getUser().getUserId());
         dto.setComment(review.getComment());
         dto.setRating(review.getRating());
+        dto.setParentId(review.getParentReview() != null ? review.getParentReview().getReviewId() : null);
+        dto.setUser(review.getEnrollment().getUser());
+        dto.setCreatedAt(review.getCreatedAt());
+        dto.setUpdatedAt(review.getUpdatedAt());
         return dto;
     }
     
-    public void updateEntity(CourseReview review, CommentDTO dto) {
+    public void updateEntity(CourseReview review, CommentDTO dto, CourseReview parent) {
         review.setComment(dto.getComment());
         review.setRating(dto.getRating());
         review.setUpdatedAt(LocalDateTime.now());
+        review.setParentReview(parent);
     }
 }
 

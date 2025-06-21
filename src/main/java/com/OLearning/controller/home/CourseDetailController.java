@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.OLearning.mapper.comment.CommentMapper;
 
 import java.security.Principal;
 import java.util.HashMap;
@@ -37,6 +38,7 @@ public class CourseDetailController {
     private final CourseRepository courseRepo;
     private final CourseReviewRepository reviewRepo;
     private final UserRepository userRepo;
+    private final CommentMapper commentMapper;
 
     @GetMapping("/course/{courseId}")
     public String courseDetailPage(@PathVariable Long courseId,
@@ -45,8 +47,36 @@ public class CourseDetailController {
         Course course = courseRepo.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("Course not found"));
 
+        // Lấy tất cả comment cha (không phải reply)
+        List<CourseReview> parentReviews = reviewRepo.findByCourseAndParentReviewIsNull(course);
+        // Nạp children cho từng comment cha
+        List<CommentDTO> parentDTOs = new java.util.ArrayList<>();
+        for (CourseReview parent : parentReviews) {
+            List<CourseReview> children = reviewRepo.findByParentReview(parent);
+            parent.setChildren(children);
+            CommentDTO parentDTO = commentMapper.toDTO(parent);
+            // Nạp children cho DTO (nếu cần hiển thị dạng cây DTO)
+            if (children != null && !children.isEmpty()) {
+                java.util.List<CommentDTO> childDTOs = new java.util.ArrayList<>();
+                for (CourseReview child : children) {
+                    CommentDTO childDTO = commentMapper.toDTO(child);
+                    // Đệ quy nạp children cho childDTO nếu có
+                    List<CourseReview> grandChildren = reviewRepo.findByParentReview(child);
+                    if (grandChildren != null && !grandChildren.isEmpty()) {
+                        List<CommentDTO> grandChildDTOs = new java.util.ArrayList<>();
+                        for (CourseReview grandChild : grandChildren) {
+                            grandChildDTOs.add(commentMapper.toDTO(grandChild));
+                        }
+                        childDTO.setChildren(grandChildDTOs);
+                    }
+                    childDTOs.add(childDTO);
+                }
+                parentDTO.setChildren(childDTOs);
+            }
+            parentDTOs.add(parentDTO);
+        }
         model.addAttribute("course", course);
-        model.addAttribute("reviews", reviewRepo.findByCourseWithUser(course));
+        model.addAttribute("reviews", parentDTOs);
 
         if (userDetails != null) {
             model.addAttribute("user", userDetails.getUser()); // đầy đủ User
@@ -209,14 +239,36 @@ public class CourseDetailController {
         try {
             Course course = courseRepo.findById(courseId)
                     .orElseThrow(() -> new RuntimeException("Course not found"));
-            List<CourseReview> reviews = reviewRepo.findByCourseWithUser(course);
+            
+            // Lấy tất cả comment cha (không phải reply)
+            List<CourseReview> parentReviews = reviewRepo.findByCourseAndParentReviewIsNull(course);
+            
+            // Nạp children cho từng comment cha
+            List<CommentDTO> parentDTOs = new java.util.ArrayList<>();
+            for (CourseReview parent : parentReviews) {
+                List<CourseReview> children = reviewRepo.findByParentReview(parent);
+                parent.setChildren(children);
+                CommentDTO parentDTO = commentMapper.toDTO(parent);
+                // Nạp children cho DTO
+                if (children != null && !children.isEmpty()) {
+                    java.util.List<CommentDTO> childDTOs = new java.util.ArrayList<>();
+                    for (CourseReview child : children) {
+                        CommentDTO childDTO = commentMapper.toDTO(child);
+                        childDTOs.add(childDTO);
+                    }
+                    parentDTO.setChildren(childDTOs);
+                }
+                parentDTOs.add(parentDTO);
+            }
+            
             Long currentUserId = null;
             if (principal != null) {
                 User user = userRepo.findByEmail(principal.getName()).orElse(null);
                 if (user != null) currentUserId = user.getUserId();
             }
+            
             return ResponseEntity.ok(Map.of(
-                "comments", reviews,
+                "comments", parentDTOs,
                 "currentUserId", currentUserId
             ));
         } catch (Exception e) {

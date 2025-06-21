@@ -27,7 +27,6 @@ public class UserMapper {
         user.setEmail(dto.getEmail());
         user.setRole(role);
         user.setProfilePicture(dto.getProfilePicture());
-        user.setProfilePicture(dto.getProfilePicture());
         user.setCourses(dto.getCourse());
         user.setStatus(true);
         return user;

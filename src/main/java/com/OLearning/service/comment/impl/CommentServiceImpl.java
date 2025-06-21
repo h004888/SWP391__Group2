@@ -27,14 +27,15 @@ public class CommentServiceImpl implements CommentService {
         Enrollment enrollment = enrollmentRepo.findByUser_UserIdAndCourse_CourseId(dto.getUserId(), dto.getCourseId())
                 .orElseThrow(() -> new RuntimeException("Bạn chưa tham gia khóa học này."));
 
-//        if (reviewRepo.findByEnrollment(enrollment).isPresent()) {
-//            throw new RuntimeException("Bạn đã bình luận trước đó.");
-//        }
-
         Course course = courseRepo.findById(dto.getCourseId())
                 .orElseThrow(() -> new RuntimeException("Course not found"));
 
-        CourseReview review = mapper.toEntity(dto, enrollment, course);
+        CourseReview parent = null;
+        if (dto.getParentId() != null) {
+            parent = reviewRepo.findById(dto.getParentId()).orElse(null);
+        }
+
+        CourseReview review = mapper.toEntity(dto, enrollment, course, parent);
         reviewRepo.save(review);
 
         // Gửi notification đến instructor
@@ -58,7 +59,12 @@ public class CommentServiceImpl implements CommentService {
             throw new RuntimeException("Bạn không có quyền chỉnh sửa comment này.");
         }
 
-        mapper.updateEntity(review, dto);
+        CourseReview parent = null;
+        if (dto.getParentId() != null) {
+            parent = reviewRepo.findById(dto.getParentId()).orElse(null);
+        }
+
+        mapper.updateEntity(review, dto, parent);
         reviewRepo.save(review);
     }
 

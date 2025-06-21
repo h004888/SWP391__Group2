@@ -29,5 +29,11 @@ public interface CourseReviewRepository extends JpaRepository<CourseReview, Long
 //    @Query("SELECT r FROM CourseReview r JOIN FETCH r.enrollment e JOIN FETCH e.user WHERE r.course.courseId = :courseId ORDER BY r.createdAt DESC")
 //    List<CourseReview> findByCourseIdWithUser(@Param("courseId") Long courseId);
 
+    // Lấy tất cả comment cha (không phải reply)
+    List<CourseReview> findByCourseAndParentReviewIsNull(Course course);
+
+    // Lấy tất cả reply (children) của 1 comment
+    List<CourseReview> findByParentReview(CourseReview parent);
+
 }
 

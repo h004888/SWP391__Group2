@@ -4,6 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import com.OLearning.entity.User;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -16,6 +20,11 @@ public class CommentDTO {
     private Long userId;
     private String comment;
     private Integer rating;
+    private Long parentId;
+    private User user;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private List<CommentDTO> children;
 }
 
 
