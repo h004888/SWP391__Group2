@@ -39,7 +39,107 @@
             padding: 1.5rem;
             border-left: 4px solid #2196f3;
         }
+
+        .comment-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .original-comment {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .reply-section {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
     </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle notification reply form
+            const notificationReplyForm = document.getElementById('notificationReplyForm');
+            if (notificationReplyForm) {
+                notificationReplyForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(this);
+                    const data = {};
+                    formData.forEach((value, key) => { data[key] = value; });
+                    
+                    // Validate comment
+                    if (!data.comment || data.comment.trim().length === 0) {
+                        showReplyMessage('Reply cannot be empty!', 'danger');
+                        return;
+                    }
+                    
+                    // Show loading state
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending...';
+                    submitBtn.disabled = true;
+                    
+                    // Send reply
+                    fetch('/api/course/' + data.courseId + '/comment/instructor-reply', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    })
+                    .then(res => res.json())
+                    .then(json => {
+                        if (json.success) {
+                            showReplyMessage(json.success, 'success');
+                            // Reset form
+                            this.reset();
+                            // Don't redirect, just show success message
+                        } else if (json.error) {
+                            showReplyMessage(json.error, 'danger');
+                        }
+                    })
+                    .catch(() => {
+                        showReplyMessage('Error! Please try again.', 'danger');
+                    })
+                    .finally(() => {
+                        // Reset button state
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                    });
+                });
+            }
+            
+            function showReplyMessage(message, type) {
+                const messageDiv = document.getElementById('replyMessage');
+                messageDiv.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>`;
+                
+                // Auto-hide success messages after 3 seconds
+                if (type === 'success') {
+                    setTimeout(() => {
+                        const alert = messageDiv.querySelector('.alert');
+                        if (alert) {
+                            alert.remove();
+                        }
+                    }, 3000);
+                }
+            }
+        });
+    </script>
         <!-- Main Content -->
         <div class="container-fluid px-4">
             <!-- Page Header -->
@@ -81,8 +181,8 @@
                         <p class="lead" th:text="${notification.message}"></p>
 
                         <div class="mt-4">
-                                <span th:class="'badge fs-6 ' + ${notification.type == 'COURSE_REJECTION' ? 'bg-danger' : (notification.type == 'ENROLLMENT' ? 'bg-success' : 'bg-info')}">
-                                    <i th:class="'fas me-2 ' + ${notification.type == 'COURSE_REJECTION' ? 'fa-times-circle' : (notification.type == 'ENROLLMENT' ? 'fa-user-plus' : 'fa-info-circle')}"></i>
+                                <span th:class="'badge fs-6 ' + ${notification.type == 'COURSE_REJECTION' ? 'bg-danger' : (notification.type == 'ENROLLMENT' ? 'bg-success' : (notification.type == 'comment' ? 'bg-info' : 'bg-primary'))}">
+                                    <i th:class="'fas me-2 ' + ${notification.type == 'COURSE_REJECTION' ? 'fa-times-circle' : (notification.type == 'ENROLLMENT' ? 'fa-user-plus' : (notification.type == 'comment' ? 'fa-comment' : 'fa-info-circle'))}"></i>
                                     <span th:text="${notification.type}"></span>
                                 </span>
                         </div>
@@ -124,6 +224,72 @@
                    class="btn btn-success">
                     <i class="fas fa-book-open me-2"></i>View Course
                 </a>
+            </div>
+
+            <!-- Comment Section for Comment Notifications -->
+            <div th:if="${notification.type == 'comment' and notification.commentId != null}" class="comment-section">
+                <div class="card border-0">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0">
+                            <i class="fas fa-comment me-2"></i>Comment Details
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <!-- Original Comment -->
+                        <div class="original-comment mb-3" th:if="${comment != null}">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-shrink-0 me-3">
+                                    <img class="avatar"
+                                         th:src="${comment.user != null and comment.user.profilePicture != null and comment.user.profilePicture != ''} ? ${comment.user.profilePicture} : @{/assets/images/avatar/default.jpg}"
+                                         th:alt="${comment.user != null ? comment.user.fullName : 'User'}">
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="bg-light p-3 rounded">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h6 class="mb-1 fw-bold" th:text="${comment.user != null ? comment.user.fullName : 'Unknown User'}">User Name</h6>
+                                                <p class="mb-0" th:text="${comment.comment}">Comment content</p>
+                                            </div>
+                                            <small class="text-muted" th:text="${comment.createdAt != null ? #temporals.format(comment.createdAt, 'dd/MM/yyyy HH:mm') : ''}">Time</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Fallback if comment not found -->
+                        <div th:if="${comment == null}" class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Comment information could not be loaded. The comment may have been deleted.
+                        </div>
+
+                        <!-- Reply Form -->
+                        <div class="reply-section" th:if="${comment != null}">
+                            <h6 class="mb-3">
+                                <i class="fas fa-reply me-2"></i>Reply to this comment
+                            </h6>
+                            <form id="notificationReplyForm" class="notification-reply-form">
+                                <input type="hidden" name="parentId" th:value="${notification.commentId}"/>
+                                <input type="hidden" name="courseId" th:value="${notification.course.courseId}"/>
+                                <div class="mb-3">
+                                    <textarea name="comment" required class="form-control" rows="3" 
+                                              placeholder="Write your reply to this comment..."></textarea>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-paper-plane me-2"></i>Send Reply
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+                                        <i class="fas fa-arrow-left me-2"></i>Back
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Reply Message -->
+                        <div id="replyMessage" class="mt-3"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

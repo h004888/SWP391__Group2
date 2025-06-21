@@ -21,14 +21,38 @@ public class CommentServiceImpl implements CommentService {
     private final CourseRepository courseRepo;
     private final NotificationRepository notificationRepo;
     private final CommentMapper mapper;
+    private final UserRepository userRepo;
 
     @Override
     public void postComment(CommentDTO dto) {
-        Enrollment enrollment = enrollmentRepo.findByUser_UserIdAndCourse_CourseId(dto.getUserId(), dto.getCourseId())
-                .orElseThrow(() -> new RuntimeException("Bạn chưa tham gia khóa học này."));
-
         Course course = courseRepo.findById(dto.getCourseId())
                 .orElseThrow(() -> new RuntimeException("Course not found"));
+
+        // Kiểm tra xem user có phải là instructor không
+        User user = userRepo.findById(dto.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        Enrollment enrollment;
+        
+        // Nếu là instructor, tạo enrollment nếu chưa có
+        if (course.getInstructor().getUserId().equals(user.getUserId())) {
+            enrollment = enrollmentRepo.findByUser_UserIdAndCourse_CourseId(user.getUserId(), course.getCourseId())
+                    .orElseGet(() -> {
+                        // Tạo enrollment cho instructor nếu chưa có
+                        Enrollment newEnrollment = Enrollment.builder()
+                                .user(user)
+                                .course(course)
+                                .enrollmentDate(new java.util.Date())
+                                .progress(new java.math.BigDecimal("100.00"))
+                                .status("completed")
+                                .build();
+                        return enrollmentRepo.save(newEnrollment);
+                    });
+        } else {
+            // Nếu không phải instructor, kiểm tra enrollment bình thường
+            enrollment = enrollmentRepo.findByUser_UserIdAndCourse_CourseId(dto.getUserId(), dto.getCourseId())
+                    .orElseThrow(() -> new RuntimeException("Bạn chưa tham gia khóa học này."));
+        }
 
         CourseReview parent = null;
         if (dto.getParentId() != null) {
@@ -38,15 +62,25 @@ public class CommentServiceImpl implements CommentService {
         CourseReview review = mapper.toEntity(dto, enrollment, course, parent);
         reviewRepo.save(review);
 
-        // Gửi notification đến instructor
-        Notification notification = new Notification();
-        notification.setMessage("Bạn có một bình luận mới trong khóa học: " + course.getTitle());
-        notification.setSentAt(LocalDateTime.now());
-        notification.setStatus("failed");
-        notification.setType("comment");
-        notification.setCourse(course);
-        notification.setUser(course.getInstructor());
-        notificationRepo.save(notification);
+        // Gửi notification đến instructor (chỉ khi không phải instructor comment)
+        if (!course.getInstructor().getUserId().equals(user.getUserId())) {
+            Notification notification = new Notification();
+            
+            // Tạo message với comment preview
+            String commentPreview = dto.getComment();
+            if (commentPreview != null && commentPreview.length() > 50) {
+                commentPreview = commentPreview.substring(0, 50) + "...";
+            }
+            
+            notification.setMessage("You have a new comment in the course: " + course.getTitle() + " - Comment: " + commentPreview);
+            notification.setSentAt(LocalDateTime.now());
+            notification.setStatus("failed");
+            notification.setType("comment");
+            notification.setCourse(course);
+            notification.setUser(course.getInstructor());
+            notification.setCommentId(review.getReviewId()); // Set comment ID for reply functionality
+            notificationRepo.save(notification);
+        }
     }
 
     @Override

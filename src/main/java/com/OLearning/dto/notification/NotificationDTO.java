@@ -23,4 +23,5 @@ public class NotificationDTO {
     private Course course;
     private Long userId;
     private Long courseId;
+    private Long commentId; // Add commentId field for comment notifications
 }

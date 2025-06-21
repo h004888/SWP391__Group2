@@ -47,12 +47,16 @@ public class CourseDetailController {
         Course course = courseRepo.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("Course not found"));
 
-        // Lấy tất cả comment cha (không phải reply)
-        List<CourseReview> parentReviews = reviewRepo.findByCourseAndParentReviewIsNull(course);
+        // Lấy tất cả comment cha (không phải reply) theo thứ tự mới nhất
+        List<CourseReview> allReviews = reviewRepo.findByCourseWithUser(course);
+        List<CourseReview> parentReviews = allReviews.stream()
+                .filter(review -> review.getParentReview() == null)
+                .toList();
+        
         // Nạp children cho từng comment cha
         List<CommentDTO> parentDTOs = new java.util.ArrayList<>();
         for (CourseReview parent : parentReviews) {
-            List<CourseReview> children = reviewRepo.findByParentReview(parent);
+            List<CourseReview> children = reviewRepo.findByParentReviewOrderByCreatedAtDesc(parent);
             parent.setChildren(children);
             CommentDTO parentDTO = commentMapper.toDTO(parent);
             // Nạp children cho DTO (nếu cần hiển thị dạng cây DTO)
@@ -61,7 +65,7 @@ public class CourseDetailController {
                 for (CourseReview child : children) {
                     CommentDTO childDTO = commentMapper.toDTO(child);
                     // Đệ quy nạp children cho childDTO nếu có
-                    List<CourseReview> grandChildren = reviewRepo.findByParentReview(child);
+                    List<CourseReview> grandChildren = reviewRepo.findByParentReviewOrderByCreatedAtDesc(child);
                     if (grandChildren != null && !grandChildren.isEmpty()) {
                         List<CommentDTO> grandChildDTOs = new java.util.ArrayList<>();
                         for (CourseReview grandChild : grandChildren) {
@@ -232,6 +236,50 @@ public class CourseDetailController {
         }
     }
 
+    // Endpoint để instructor reply từ notification
+    @PostMapping("/api/course/{courseId}/comment/instructor-reply")
+    @ResponseBody
+    public ResponseEntity<?> instructorReplyFromNotification(@PathVariable Long courseId,
+                                                             @RequestBody CommentDTO dto,
+                                                             Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Please login to reply"));
+        }
+        
+        User user = userRepo.findByEmail(principal.getName()).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "User not found"));
+        }
+        
+        // Kiểm tra xem user có phải là instructor của course này không
+        Course course = courseRepo.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+        
+        if (!course.getInstructor().getUserId().equals(user.getUserId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "You can only reply to comments in your own courses"));
+        }
+        
+        dto.setUserId(user.getUserId());
+        dto.setCourseId(courseId);
+        
+        // Validate comment
+        if (dto.getComment() == null || dto.getComment().trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Reply cannot be empty"));
+        }
+        
+        try {
+            commentService.postComment(dto);
+            return ResponseEntity.ok(Map.of("success", "Reply posted successfully!"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
     // Endpoint để lấy danh sách comment mới nhất
     @GetMapping("/api/course/{courseId}/comments")
     @ResponseBody
@@ -240,13 +288,16 @@ public class CourseDetailController {
             Course course = courseRepo.findById(courseId)
                     .orElseThrow(() -> new RuntimeException("Course not found"));
             
-            // Lấy tất cả comment cha (không phải reply)
-            List<CourseReview> parentReviews = reviewRepo.findByCourseAndParentReviewIsNull(course);
+            // Lấy tất cả comment cha (không phải reply) theo thứ tự mới nhất
+            List<CourseReview> allReviews = reviewRepo.findByCourseWithUser(course);
+            List<CourseReview> parentReviews = allReviews.stream()
+                    .filter(review -> review.getParentReview() == null)
+                    .toList();
             
             // Nạp children cho từng comment cha
             List<CommentDTO> parentDTOs = new java.util.ArrayList<>();
             for (CourseReview parent : parentReviews) {
-                List<CourseReview> children = reviewRepo.findByParentReview(parent);
+                List<CourseReview> children = reviewRepo.findByParentReviewOrderByCreatedAtDesc(parent);
                 parent.setChildren(children);
                 CommentDTO parentDTO = commentMapper.toDTO(parent);
                 // Nạp children cho DTO

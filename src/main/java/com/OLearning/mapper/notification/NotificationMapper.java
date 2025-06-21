@@ -18,7 +18,7 @@ public class NotificationMapper {
         dto.setStatus(notification.getStatus());
         dto.setUser(notification.getUser());
         dto.setCourse(notification.getCourse());
-
+        dto.setCommentId(notification.getCommentId()); // Map commentId
 
         return dto;
     }
@@ -32,6 +32,7 @@ public class NotificationMapper {
         notification.setStatus(dto.getStatus());
         notification.setUser(user);
         notification.setCourse(course); // có thể null nếu không liên quan
+        notification.setCommentId(dto.getCommentId()); // Map commentId
 
         return notification;
     }

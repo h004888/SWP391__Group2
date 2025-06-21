@@ -1,8 +1,12 @@
 package com.OLearning.controller.instructorDashboard;
 
+import com.OLearning.dto.comment.CommentDTO;
 import com.OLearning.dto.notification.NotificationDTO;
+import com.OLearning.entity.CourseReview;
 import com.OLearning.entity.Notification;
+import com.OLearning.mapper.comment.CommentMapper;
 import com.OLearning.mapper.notification.NotificationMapper;
+import com.OLearning.repository.CourseReviewRepository;
 import com.OLearning.security.CustomUserDetails;
 import com.OLearning.service.notification.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +22,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Controller
@@ -27,6 +32,10 @@ public class NotificationsController {
     private NotificationService notificationService;
     @Autowired
     private NotificationMapper notificationMapper;
+    @Autowired
+    private CourseReviewRepository courseReviewRepository;
+    @Autowired
+    private CommentMapper commentMapper;
 
     @GetMapping("/instructordashboard/notifications")
     public String viewNotifications(Authentication authentication, Model model,
@@ -36,6 +45,7 @@ public class NotificationsController {
         Long userId = userDetails.getUserId();
         Pageable pageable = PageRequest.of(page, size);
         Page<NotificationDTO> notificationPage = notificationService.getNotificationsByUserId(userId, pageable);
+        
         model.addAttribute("notifications", notificationPage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", notificationPage.getTotalPages());
@@ -104,11 +114,60 @@ public class NotificationsController {
                 notificationService.markAsRead(notificationId);
                 notification.setStatus("sent"); // update status for view
             }
-            model.addAttribute("notification", notificationMapper.toDTO(notification));
+            
+            NotificationDTO notificationDTO = notificationMapper.toDTO(notification);
+            model.addAttribute("notification", notificationDTO);
+            
+            // If this is a comment notification, get the comment details
+            if ("comment".equals(notification.getType()) && notification.getCommentId() != null) {
+                try {
+                    // Get comment details with user information using the new method
+                    Optional<CourseReview> commentOpt = courseReviewRepository.findByIdWithUser(notification.getCommentId());
+                    if (commentOpt.isPresent()) {
+                        CourseReview comment = commentOpt.get();
+                        CommentDTO commentDTO = commentMapper.toDTO(comment);
+                        model.addAttribute("comment", commentDTO);
+                    }
+                } catch (Exception e) {
+                    // Log error but don't break the page
+                    System.err.println("Error loading comment for notification: " + e.getMessage());
+                }
+            }
+            
             model.addAttribute("fragmentContent", "instructorDashboard/fragments/notificationDetailContent :: notificationDetailContent");
             return "instructorDashboard/index";
         } else {
             return "redirect:/instructordashboard/notifications";
+        }
+    }
+
+    // API endpoint để lấy thông tin comment cho notification
+    @GetMapping("/api/instructor/notifications/{notificationId}/comment")
+    @ResponseBody
+    public ResponseEntity<?> getCommentForNotification(@PathVariable Long notificationId) {
+        try {
+            Optional<Notification> notificationOpt = notificationService.findById(notificationId);
+            if (notificationOpt.isPresent()) {
+                Notification notification = notificationOpt.get();
+                
+                if ("comment".equals(notification.getType()) && notification.getCommentId() != null) {
+                    Optional<CourseReview> commentOpt = courseReviewRepository.findByIdWithUser(notification.getCommentId());
+                    if (commentOpt.isPresent()) {
+                        CourseReview comment = commentOpt.get();
+                        CommentDTO commentDTO = commentMapper.toDTO(comment);
+                        return ResponseEntity.ok(commentDTO);
+                    } else {
+                        return ResponseEntity.notFound().build();
+                    }
+                } else {
+                    return ResponseEntity.badRequest().body(Map.of("error", "This notification is not a comment notification"));
+                }
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error loading comment: " + e.getMessage()));
         }
     }
 }

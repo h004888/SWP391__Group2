@@ -35,5 +35,13 @@ public interface CourseReviewRepository extends JpaRepository<CourseReview, Long
     // Lấy tất cả reply (children) của 1 comment
     List<CourseReview> findByParentReview(CourseReview parent);
 
+    // Lấy tất cả reply (children) của 1 comment theo thứ tự mới nhất
+    @Query("SELECT r FROM CourseReview r JOIN FETCH r.enrollment e JOIN FETCH e.user WHERE r.parentReview = :parent ORDER BY r.createdAt DESC")
+    List<CourseReview> findByParentReviewOrderByCreatedAtDesc(@Param("parent") CourseReview parent);
+
+    // Fetch comment with user data for notification
+    @Query("SELECT r FROM CourseReview r JOIN FETCH r.enrollment e JOIN FETCH e.user u WHERE r.reviewId = :reviewId")
+    Optional<CourseReview> findByIdWithUser(@Param("reviewId") Long reviewId);
+
 }
 
