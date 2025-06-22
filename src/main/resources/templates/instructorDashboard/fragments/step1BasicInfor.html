@@ -70,7 +70,7 @@
                 <div class="col-md-6">
                   <label class="form-label">Course Price</label>
                   <div class="form-floating">
-                    <input type="text" class="form-control" th:field="*{price}" id="coursePrice" placeholder="Price" min="0" step="0.01">
+                    <input type="number" class="form-control" th:field="*{price}" id="coursePrice" placeholder="Price" min="0" step="0.01">
                     <label for="coursePrice">Enter course price</label>
                     <div style="color: red" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></div>
                     <div style="color: red" th:if="${priceTypeError}" th:text="${priceTypeError}"></div>

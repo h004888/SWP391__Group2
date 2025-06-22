@@ -30,7 +30,7 @@ public class QuizDTO{
     private String title;
     @NotBlank(message = "Description is required")
     private String description;
-    @Min(value = 1, message = "Time limit must be at least 1 minute")
+    @Min(value = 0, message = "Time limit must be at least 0 minute")
     @Digits(integer = 3, fraction = 0, message = "Time limit must be numeric")
     private Integer timeLimit;
     private Long lessonId;

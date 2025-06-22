@@ -51,6 +51,7 @@ public class QuizServiceImpl implements QuizService {
     @Override
     @Transactional
     public void deleteQuiz(Long quizId) {
+        quizQuestionRepository.deleteByQuizId(quizId);
         quizRepository.deleteById(quizId);
     }
 

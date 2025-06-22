@@ -14,12 +14,12 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "Chapters")
+@Table(name="Chapters")
 public class Chapter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "chapterID")
-    private Long id;
+    private Long chapterId;
     @Column(nullable = false)
     private String title;
     private String description;

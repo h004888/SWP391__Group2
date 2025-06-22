@@ -99,11 +99,11 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsById(id)) {
             Optional<User> user = userRepository.findById(id);
             try {
-                emailService.sendAccountStatusEmail(user.get(), user.get().isStatus());
+                emailService.sendAccountStatusEmail(user.get(), user.get().getStatus());
             } catch (MessagingException e) {
                 throw new RuntimeException(e);
             }
-            user.get().setStatus(!user.get().isStatus());
+            user.get().setStatus(!user.get().getStatus());
             userRepository.save(user.get());
 
             return true;
@@ -182,6 +182,15 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
         return userMapper.toDTO(user);
+    }
+
+    @Override
+    public User findById(Long id) {
+        Optional<User> userOptional = userRepository.findById(id);
+        if (userOptional.isEmpty()) {
+            return null;
+        }
+        return userOptional.get();
     }
 
     @Override

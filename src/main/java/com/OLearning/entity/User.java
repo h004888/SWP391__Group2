@@ -18,18 +18,17 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
-
     private String username;
     private String email;
     private String password;
     private String fullName;
     private String phone;
     private Double coin = 0.0;
-    private LocalDate birthday;
+    private LocalDate birthDay;
     private String address;
     private String profilePicture;
     private String personalSkill;
-    private boolean status;//new
+    private Boolean status;//new
 
     @ManyToOne
     @JoinColumn(name = "roleId")

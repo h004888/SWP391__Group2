@@ -9,4 +9,5 @@ import java.util.List;
 public interface LessonService {
     List<Lesson> findLessonsByChapterId(Long chapterId);
     void updateContentType(Long lessonId, String contenType);
+    void autoFillOrderNumbers(Long chapterId);
 }

@@ -20,7 +20,7 @@ public class UserDetailMapper {
         dto.setAddress(user.getAddress());
         dto.setProfilePicture(user.getProfilePicture());
         dto.setRoleName(user.getRole().getName());
-        dto.setBirthDay(user.getBirthday());
+        dto.setBirthDay(user.getBirthDay());
         dto.setPersonalSkill(user.getPersonalSkill());
         dto.setEnrolledCourseTitles(
                 user.getCourses().stream()

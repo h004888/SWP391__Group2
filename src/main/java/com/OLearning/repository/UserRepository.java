@@ -15,13 +15,17 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmail(String email);
-
+    @Query("SELECT u FROM User u WHERE u.userId = :id")
+    Optional<User> findById(Long id);
     boolean existsByUsername(String username);
 
     boolean existsByEmail(String email);
 
-    @Query("SELECT u FROM User u JOIN u.role r WHERE r.id = :roleId")
+    @Query("SELECT u FROM User u JOIN u.role r WHERE r.roleId = :roleId")
     List<User> findByRoleId(@Param("roleId") Long roleId);
+
+    @Query("SELECT u FROM User u JOIN u.role r WHERE r.roleId = :roleId")
+    Page<User> findByRoleIdWithPagination(@Param("roleId") Long roleId, Pageable pageable);
 
     Page<User> findAll(Pageable pageable);
 

@@ -9,6 +9,9 @@ import java.time.LocalDateTime;
 public class VideoMapper {
     public Video VideoMapper(VideoDTO videoDTO) {
         Video video = new Video();
+        if (videoDTO.getId() != null) {
+            video.setId(videoDTO.getId());
+        }
         video.setDuration(videoDTO.getDuration());
         video.setUploadDate(LocalDateTime.now());
         return video;

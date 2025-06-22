@@ -56,4 +56,6 @@ public interface UserService {
     UserDTO getUserByEmail(String username);
 
     Page<UserDTO> filterInstructors(String keyword, Pageable pageable);
+
+    User findById(Long id);
 }

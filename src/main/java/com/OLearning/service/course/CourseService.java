@@ -1,7 +1,6 @@
 package com.OLearning.service.course;
 
 import com.OLearning.dto.course.AddCourseStep1DTO;
-import com.OLearning.dto.course.AddCourseStep3DTO;
 import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.course.CourseDetailDTO;
 import com.OLearning.dto.course.CourseMediaDTO;
@@ -24,14 +23,13 @@ public interface CourseService {
 
     boolean rejectCourse(Long id);
 
-    boolean deleteCourse(Long id);
 
 //    List<CourseDTO> filterCourses(String keyword, Integer categoryId, String price, String status);
 
     Page<CourseDTO> filterCoursesWithPagination(String keyword, Integer category, String price, String status, int page, int size);
 
-    List<CourseDTO> findCourseByUserId(Long userId);
-
+    Page<CourseDTO> filterCoursesInstructorManage(Long userId, Integer categoryId, String status, String price, int page, int size);
+    void deleteCourse(Long courseId);
     Course findCourseById(Long courseId);
 
     Course createCourseStep1(Long courseId, AddCourseStep1DTO addCourseStep1DTO);
@@ -42,6 +40,7 @@ public interface CourseService {
 
     Page<CourseDTO> findCourseByUserId(Long userId, int page, int size);
 
+    Page<CourseDTO> searchCourse(Long userId, String title, int page, int size);
     Course createCourseMedia(Long courseId, CourseMediaDTO CourseMediaDTO);
 
     void saveCourse(Long courseId);

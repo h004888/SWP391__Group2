@@ -60,10 +60,13 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
             redirectURL += "/instructordashboard";
         } else if (hasRole(authentication, "ROLE_USER")) {
             redirectURL += "/home";
+        } else if (hasRole(authentication, "ROLE_INSTRUCTOR")) {
+            redirectURL += "/instructordashboard";
         } else {
             redirectURL += "/home"; // default
         }
 
+        response.sendRedirect(redirectURL);
         response.sendRedirect(redirectURL);
     }
 

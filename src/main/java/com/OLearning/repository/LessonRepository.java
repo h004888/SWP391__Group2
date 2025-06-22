@@ -11,6 +11,9 @@ import java.util.List;
 public interface LessonRepository extends JpaRepository<Lesson, Long> {
     @Query(value = "SELECT * FROM Lessons WHERE chapterId = :chapterId ORDER BY orderNumber ASC", nativeQuery = true)
     List<Lesson> findByChapterId(Long chapterId);
+    
+    @Query(value = "DELETE FROM Lessons WHERE chapterId = :chapterId", nativeQuery = true)
     void deleteByChapterId(Long chapterId);
+    
     void deleteByLessonId(Long lessonId);
 }

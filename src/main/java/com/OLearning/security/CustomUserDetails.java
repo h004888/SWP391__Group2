@@ -34,7 +34,7 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
     }
 
     public LocalDate getBirthday() {
-        return user.getBirthday();
+        return user.getBirthDay();
     }
 
     public String getAddress() {

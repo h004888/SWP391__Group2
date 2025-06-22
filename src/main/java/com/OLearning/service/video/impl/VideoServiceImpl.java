@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class VideoServiceImpl implements VideoService {
@@ -46,11 +47,32 @@ public class VideoServiceImpl implements VideoService {
 //video bang file to cloudinary
     @Override
     public Video saveVideo(VideoDTO videoDTO, Long lessonId) {
-        videoRepository.findByLesson_LessonId(lessonId).ifPresent(v -> videoRepository.delete(v));
-        Lesson lesson = lessonRepository.findById(lessonId).orElseThrow();
-        Video video = new Video();
+        // Kiểm tra xem lesson đã có video chưa
+        Optional<Video> existingVideo = videoRepository.findByLesson_LessonId(lessonId);
+        
+        Video video;
+        if (existingVideo.isPresent()) {
+            // Nếu đã có video, cập nhật video đó
+            video = existingVideo.get();
+        } else {
+            // Nếu chưa có video, tạo mới
+            video = new Video();
+            Lesson lesson = lessonRepository.findById(lessonId).orElseThrow();
+            video.setLesson(lesson);
+        }
+        
+        // Cập nhật thông tin video
         video = videoMapper.VideoMapper(videoDTO);
-        video.setLesson(lesson);
+        
+        // Đảm bảo giữ nguyên lesson
+        if (existingVideo.isPresent()) {
+            video.setId(existingVideo.get().getId());
+            video.setLesson(existingVideo.get().getLesson());
+        } else {
+            Lesson lesson = lessonRepository.findById(lessonId).orElseThrow();
+            video.setLesson(lesson);
+        }
+        
         try {
             if (videoDTO.getVideoUrl() != null && !videoDTO.getVideoUrl().isEmpty()) {
                 String videoUUID = uploadFile.uploadVideoFile(videoDTO.getVideoUrl());

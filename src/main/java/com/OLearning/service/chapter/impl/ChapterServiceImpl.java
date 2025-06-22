@@ -46,7 +46,7 @@ public class ChapterServiceImpl implements ChapterService {
         
         chapter.setCourse(course);
         Chapter savedChapter = chapterRepository.save(chapter);
-        logger.info("Saved chapter with ID: {}", savedChapter.getId());
+        logger.info("Saved chapter with ID: {}", savedChapter.getChapterId());
         
         return savedChapter;
     }
@@ -61,6 +61,19 @@ public class ChapterServiceImpl implements ChapterService {
         return chapterRepository.findChapterById(id);
     }
 
+    @Override
+    public void updateChapter(Chapter chapter) {
+        chapterRepository.save(chapter);
+    }
 
+    @Override
+    public void autoFillOrderNumbers(Long courseId) {
+        List<Chapter> chapters = chapterRepository.findChaptersByCourse(courseId);
+        int orderNumber = 1;
+        for (Chapter chapter : chapters) {
+            chapter.setOrderNumber(orderNumber++);
+            chapterRepository.save(chapter);
+        }
+    }
 }
 
