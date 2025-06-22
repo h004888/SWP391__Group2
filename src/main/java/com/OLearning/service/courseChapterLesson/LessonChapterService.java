@@ -1,4 +1,4 @@
-package com.OLearning.service.servicecommon;
+package com.OLearning.service.courseChapterLesson;
 
 import com.OLearning.dto.lesson.LessonTitleDTO;
 import com.OLearning.entity.Chapter;

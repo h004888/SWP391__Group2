@@ -19,9 +19,9 @@ import com.OLearning.service.chapter.ChapterService;
 import com.OLearning.service.course.CourseService;
 import com.OLearning.service.lesson.LessonService;
 import com.OLearning.service.quiz.QuizService;
-import com.OLearning.service.servicecommon.CourseChapterService;
-import com.OLearning.service.servicecommon.LessonChapterService;
-import com.OLearning.service.servicecommon.LessonQuizService;
+import com.OLearning.service.courseChapterLesson.CourseChapterService;
+import com.OLearning.service.courseChapterLesson.LessonChapterService;
+import com.OLearning.service.courseChapterLesson.LessonQuizService;
 import com.OLearning.service.user.UserService;
 import com.OLearning.service.video.VideoService;
 import jakarta.servlet.http.Cookie;
@@ -42,9 +42,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Controller
 @RequestMapping("/instructordashboard")

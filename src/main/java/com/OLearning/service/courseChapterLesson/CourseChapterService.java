@@ -1,4 +1,4 @@
-package com.OLearning.service.servicecommon;
+package com.OLearning.service.courseChapterLesson;
 
 import com.OLearning.service.chapter.ChapterService;
 import com.OLearning.service.course.CourseService;
