@@ -6,8 +6,9 @@ let currentStatus = 'true'; // Default to active status
 
 // Event listeners
 $(document).ready(function () {
+    // Load data for all tabs but only show pagination for admin tab initially
     [1, 2, 3].forEach(roleId => {
-        loadUsers(roleId,'', 0);
+        loadUsers(roleId,'', 0, roleId === 1); // Only show pagination for admin tab (roleId === 1)
     });
     function toggleAddButton(tabId) {
         if (tabId === "#admin") {
@@ -31,10 +32,10 @@ $(document).ready(function () {
         const page = $(this).data('page');
 
         // Kiểm tra page hợp lệ
-        if (page !== undefined && page >= 0 && page < totalPages) {
+        if (page !== undefined && page >= 0) {
             currentPage = page;
             const keyword = $('#searchInput').val().trim();
-            loadUsers(currentRole, keyword, currentPage);
+            loadUsers(currentRole, keyword, currentPage, true);
         } else {
             console.log("Invalid page number:", page);
         }
@@ -46,7 +47,7 @@ $(document).ready(function () {
         currentRole = roleId;
         currentPage = 0;
         const keyword = $('#searchInput').val().trim();
-        loadUsers(roleId, keyword, 0);
+        loadUsers(roleId, keyword, 0, true);
         console.log("Tab changed to role:", roleId);
     });
 
@@ -58,7 +59,7 @@ $(document).ready(function () {
         clearTimeout(searchTimer);
         searchTimer = setTimeout(function () {
             currentPage = 0; // Reset về trang đầu khi search
-            loadUsers(currentRole, keyword, 0);
+            loadUsers(currentRole, keyword, 0, true);
         }, 300);
     });
 
@@ -67,7 +68,7 @@ $(document).ready(function () {
         currentStatus = $(this).val();
         currentPage = 0;
         const keyword = $('#searchInput').val().trim();
-        loadUsers(currentRole, keyword, 0);
+        loadUsers(currentRole, keyword, 0, true);
     });
 
     // Khi click nút block
@@ -120,7 +121,7 @@ $(document).ready(function () {
                 success: function (response) {
                     $('#deleteModal').modal('hide');
                     const keyword = $('#searchInput').val().trim();
-                    loadUsers(currentRole, keyword, currentPage);
+                    loadUsers(currentRole, keyword, currentPage, true);
                 },
                 error: function () {
                     alert("Có lỗi xảy ra!");
@@ -149,7 +150,7 @@ $(document).ready(function () {
 });
 
 // Function to load users based on role and search keyword
-function loadUsers(roleId, keyword = '', page = 0) {
+function loadUsers(roleId, keyword = '', page = 0, showPagination = false) {
     const tableBodyElement = getTableBodyElement(roleId);
 
     if (!tableBodyElement) {
@@ -183,14 +184,18 @@ function loadUsers(roleId, keyword = '', page = 0) {
                 // Nếu server trả về object với tableContent và pagination
                 $(tableBodyElement).html(data.tableContent);
                 updateCountBadge(roleId, data.tableContent);
-                totalPages = data.pagination.totalPages;
+                if (showPagination) {
+                    totalPages = data.pagination.totalPages;
+                }
             } else {
                 // Nếu server chỉ trả về HTML content (current implementation)
                 $(tableBodyElement).html(data);
                 updateCountBadge(roleId, data);
 
                 //call API riêng để lấy pagination info hoặc modify server response
-                getPaginationInfo(roleId, keyword, page);
+                if (showPagination) {
+                    getPaginationInfo(roleId, keyword, page);
+                }
             }
         },
         error: function (xhr, status, error) {
@@ -211,7 +216,7 @@ function blockUser(userId, userEmail) {
         success: function (response) {
             $('#deleteModal').modal('hide');
             const keyword = $('#searchInput').val().trim();
-            loadUsers(currentRole, keyword, currentPage);
+            loadUsers(currentRole, keyword, currentPage, true);
         },
         error: function (xhr, status, error) {
             $('#deleteModal').modal('hide');
@@ -245,7 +250,7 @@ function getPaginationInfo(roleId, keyword = '', page = 0) {
     }
 
     $.ajax({
-        url: '/admin/account/pagination-info',
+        url: '/admin/account/pagination',
         method: 'GET',
         data: {
             keyword: keyword || null,
@@ -254,57 +259,14 @@ function getPaginationInfo(roleId, keyword = '', page = 0) {
             size: 5,
             status: statusParam
         },
-        success: function (paginationData) {
-            totalPages = paginationData.totalPages;
-            updatePaginationUI(paginationData, roleId, keyword, page);
+        success: function (paginationHtml) {
+            $('#accountPaginationContainer').html(paginationHtml);
         },
         error: function (xhr, status, error) {
             console.error("Error getting pagination info:", error);
+            $('#accountPaginationContainer').html('<div class="text-center text-danger">Error loading pagination</div>');
         }
     });
-}
-
-// update pagination UI
-function updatePaginationUI(pagination, roleId, keyword, currentPage) {
-    const paginationContainer = $('.pagination');
-
-    paginationContainer.parent().show();
-    paginationContainer.empty();
-
-    // Previous button
-    const prevDisabled = currentPage === 0 ? 'disabled' : '';
-    paginationContainer.append(`
-        <li class="page-item ${prevDisabled}">
-            <a class="page-link" data-page="${currentPage - 1}" href="#">
-                <i class="fa fa-angle-double-left"></i>
-            </a>
-        </li>
-    `);
-
-    // Page numbers
-    for (let i = 0; i < pagination.totalPages; i++) {
-        const active = currentPage === i ? 'active' : '';
-        paginationContainer.append(`
-            <li class="page-item ${active}">
-                <a class="page-link" data-page="${i}" href="#">${i + 1}</a>
-            </li>
-        `);
-    }
-
-    // Next button
-    const nextDisabled = currentPage + 1 >= pagination.totalPages ? 'disabled' : '';
-    paginationContainer.append(`
-        <li class="page-item ${nextDisabled}">
-            <a class="page-link" data-page="${currentPage + 1}" href="#">
-                <i class="fa fa-angle-double-right"></i>
-            </a>
-        </li>
-    `);
-
-    // Update hint text
-    $('.hint-text').html(`
-        Showing <b>${pagination.currentElements}</b> out of <b>${pagination.totalElements}</b> entries
-    `);
 }
 
 $(document).on('click', '.btn-reset-password', function (e) {
@@ -318,7 +280,7 @@ $(document).on('click', '.btn-reset-password', function (e) {
         success: function (response) {
             alert("Repassword sucessfully!")
             const keyword = $('#searchInput').val().trim();
-            loadUsers(currentRole, keyword, currentPage);
+            loadUsers(currentRole, keyword, currentPage, true);
         },
         error: function (xhr) {
             alert("Unexpected error: " + xhr.responseText);

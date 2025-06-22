@@ -166,8 +166,12 @@ public class LoginController {
 
     @GetMapping("/otp-verification")
     public String getOtpVerificationPage(@RequestParam("email") String email,
+                                         @RequestParam(value = "error", required = false) String error,
                                          Model model) {
         model.addAttribute("email", email);
+        if (error != null) {
+            model.addAttribute("errorMessage", "Mã OTP không hợp lệ hoặc đã hết hạn.");
+        }
         return "loginPage/normalLogin/otpVerification";
     }
 
@@ -180,7 +184,7 @@ public class LoginController {
         } else {
             model.addAttribute("email", email);
             model.addAttribute("errorMessage", "Mã OTP không hợp lệ hoặc đã hết hạn.");
-            return "loginPage/normalLoginotpVerification";
+            return "redirect:/otp-verification?email=" + email + "&error=true";
         }
     }
 

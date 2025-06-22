@@ -320,11 +320,69 @@
 
 <script>
     $(document).ready(function () {
-        let timeLeft = 300; // 5 phút
+        // Lấy timer state từ sessionStorage hoặc khởi tạo mới
+        let timeLeft = parseInt(sessionStorage.getItem('otpTimeLeft')) || 300; // 5 phút
         let timerInterval;
         let canResend = false;
+        let startTime = parseInt(sessionStorage.getItem('otpStartTime')) || Date.now();
+
+        // Kiểm tra xem có phải reload do lỗi OTP không
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasError = urlParams.get('error');
+        
+        if (hasError) {
+            // Nếu có lỗi, sử dụng thời gian còn lại từ sessionStorage
+            window.otpError = true;
+            // Clear OTP inputs khi có lỗi
+            $('.otp-input').val('').removeClass('filled error');
+            $('.otp-input[data-index="0"]').focus();
+            
+            // Đảm bảo timeLeft không âm
+            timeLeft = Math.max(0, timeLeft);
+        } else {
+            // Nếu không có lỗi và chưa có startTime, lưu thời gian bắt đầu
+            if (!sessionStorage.getItem('otpStartTime')) {
+                sessionStorage.setItem('otpStartTime', startTime.toString());
+            }
+            
+            // Tính toán thời gian còn lại dựa trên thời gian thực
+            const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+            timeLeft = Math.max(0, 300 - elapsedTime);
+            // Cập nhật sessionStorage
+            sessionStorage.setItem('otpTimeLeft', timeLeft.toString());
+        }
+
+        // Nếu hết thời gian, cho phép resend
+        if (timeLeft <= 0) {
+            canResend = true;
+            $('#resendBtn').removeClass('disabled');
+        }
+
+        // Cập nhật hiển thị timer ngay lập tức
+        updateTimerDisplay(timeLeft);
+
+        // Lưu timer state ngay khi bắt đầu (quan trọng cho lần đầu tiên)
+        saveTimerState();
 
         startTimer();
+
+        // Đảm bảo timer state được lưu sau khi trang load hoàn toàn
+        setTimeout(function() {
+            saveTimerState();
+        }, 100);
+
+        // Lưu timer state định kỳ để đảm bảo không bị mất
+        setInterval(function() {
+            if (!window.otpError) {
+                saveTimerState();
+            }
+        }, 5000); // Lưu mỗi 5 giây
+
+        // Hàm lưu timer state
+        function saveTimerState() {
+            sessionStorage.setItem('otpTimeLeft', timeLeft.toString());
+            sessionStorage.setItem('otpStartTime', startTime.toString());
+        }
 
         // Hàm kết hợp OTP
         window.combineOtp = function() {
@@ -350,14 +408,25 @@
         window.resendCode = function() {
             if (!canResend) return;
 
-            const email = $('#emailDisplay').text().trim();
+            // Lấy email từ URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const email = urlParams.get('email');
+
+            if (!email) {
+                alert('Không tìm thấy email. Vui lòng thử lại!');
+                return;
+            }
 
             // Gửi request resend OTP
             $.post('/forgot-password', {
                 email: email
             }).done(function(response) {
-                // Reset timer
+                // Reset timer và lưu vào sessionStorage
                 timeLeft = 300;
+                startTime = Date.now();
+                sessionStorage.setItem('otpTimeLeft', timeLeft.toString());
+                sessionStorage.setItem('otpStartTime', startTime.toString());
+                
                 canResend = false;
                 $('#resendBtn').addClass('disabled');
 
@@ -365,9 +434,17 @@
                 $('.otp-input').val('').removeClass('filled error');
                 $('.otp-input[data-index="0"]').focus();
 
+                // Cập nhật hiển thị timer ngay lập tức
+                updateTimerDisplay(timeLeft);
+
                 // Restart timer
                 clearInterval(timerInterval);
                 startTimer();
+
+                // Cập nhật URL để loại bỏ tham số error
+                const newUrl = window.location.pathname + '?email=' + email;
+                window.history.replaceState({}, '', newUrl);
+                window.otpError = false;
 
                 alert('Mã OTP mới đã được gửi đến email của bạn!');
             }).fail(function() {
@@ -418,6 +495,25 @@
             });
         });
 
+        // Hàm cập nhật hiển thị timer
+        function updateTimerDisplay(timeLeft) {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const timeString = minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
+
+            $('#countdown').text(timeString);
+
+            // Update timer color based on time left
+            const $timer = $('#timerDisplay');
+            if (timeLeft <= 60) {
+                $timer.removeClass('warning').addClass('danger');
+            } else if (timeLeft <= 120) {
+                $timer.removeClass('danger').addClass('warning');
+            } else {
+                $timer.removeClass('danger warning');
+            }
+        }
+
         // Hàm bắt đầu timer
         function startTimer() {
             $('#timerDisplay').removeClass('danger warning');
@@ -425,19 +521,11 @@
             timerInterval = setInterval(function () {
                 timeLeft--;
 
-                const minutes = Math.floor(timeLeft / 60);
-                const seconds = timeLeft % 60;
-                const timeString = minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
+                // Cập nhật sessionStorage
+                saveTimerState();
 
-                $('#countdown').text(timeString);
-
-                // Update timer color based on time left
-                const $timer = $('#timerDisplay');
-                if (timeLeft <= 60) {
-                    $timer.removeClass('warning').addClass('danger');
-                } else if (timeLeft <= 120) {
-                    $timer.removeClass('danger').addClass('warning');
-                }
+                // Cập nhật hiển thị
+                updateTimerDisplay(timeLeft);
 
                 // Enable resend when timer expires
                 if (timeLeft <= 0) {
@@ -445,6 +533,8 @@
                     $('#timerDisplay').html('<i class="fas fa-exclamation-triangle me-1"></i>Code has expired');
                     $('#resendBtn').removeClass('disabled');
                     canResend = true;
+                    // Cập nhật sessionStorage
+                    sessionStorage.setItem('otpTimeLeft', '0');
                 }
             }, 1000);
         }
@@ -454,6 +544,9 @@
 
         // Xử lý lỗi validation khi submit
         $('form').on('submit', function(e) {
+            // Lưu timer state trước khi submit để đảm bảo không bị mất
+            saveTimerState();
+            
             const inputs = document.querySelectorAll('.otp-input');
             let hasError = false;
 
@@ -474,6 +567,28 @@
 
             return combineOtp();
         });
+
+        // Cleanup sessionStorage khi rời khỏi trang
+        $(window).on('beforeunload', function() {
+            // Chỉ xóa sessionStorage nếu không phải là reload do lỗi OTP
+            if (!window.otpError) {
+                sessionStorage.removeItem('otpTimeLeft');
+                sessionStorage.removeItem('otpStartTime');
+            }
+        });
+
+        // Xóa sessionStorage khi chuyển đến trang khác (không phải reload)
+        $(document).on('click', 'a[href*="/login"], a[href*="/forgot-password"]', function() {
+            sessionStorage.removeItem('otpTimeLeft');
+            sessionStorage.removeItem('otpStartTime');
+        });
+
+        // Hàm chuyển hướng khi thành công
+        window.redirectToLogin = function() {
+            sessionStorage.removeItem('otpTimeLeft');
+            sessionStorage.removeItem('otpStartTime');
+            window.location.href = '/login';
+        };
 
     });
 </script>

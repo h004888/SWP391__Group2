@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
@@ -31,7 +32,8 @@ public class CourseMaintenanceController {
             @RequestParam(defaultValue = "10") int size) {
         
         Pageable pageable = PageRequest.of(page, size);
-        Page<CourseMaintenance> courseMaintenances = courseMaintenanceService.getAllCourseMaintenances(pageable);
+        Page<CourseMaintenance> courseMaintenances = courseMaintenanceService.filterMaintenances(
+            null, "pending", null, pageable);
         
         model.addAttribute("accNamePage", "Management Maintenance");
         model.addAttribute("courseMaintenances", courseMaintenances.getContent());
@@ -51,7 +53,7 @@ public class CourseMaintenanceController {
             @RequestParam(defaultValue = "10") int size) {
         
         Pageable pageable = PageRequest.of(page, size);
-        Page<CourseMaintenance> courseMaintenances = courseMaintenanceService.filterMaintenances(username, null, null, pageable);
+        Page<CourseMaintenance> courseMaintenances = courseMaintenanceService.filterMaintenances(username, "pending", null, pageable);
         
         model.addAttribute("accNamePage", "Management Maintenance");
         model.addAttribute("courseMaintenances", courseMaintenances.getContent());
@@ -63,6 +65,7 @@ public class CourseMaintenanceController {
         return "adminDashBoard/index";
     }
 
+    //Filter with ajax for tab functionality
     @GetMapping("/filter")
     public String filterMaintenances(
             @RequestParam(required = false) String username,
@@ -91,11 +94,68 @@ public class CourseMaintenanceController {
             username, status, monthYearDate, pageable);
         
         model.addAttribute("courseMaintenances", courseMaintenances.getContent());
+
+        return "adminDashBoard/fragments/courseMaintenanceTableRowContent :: maintenanceTableRowContent";
+    }
+
+    // New endpoint for pagination only
+    @GetMapping("/pagination")
+    public String getPagination(
+            @RequestParam(required = false) String username,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String monthYear,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Model model) {
+        
+        Pageable pageable = PageRequest.of(page, size);
+        
+        // Parse monthYear string to LocalDate if provided
+        LocalDate monthYearDate = null;
+        if (monthYear != null && !monthYear.isEmpty()) {
+            try {
+                YearMonth yearMonth = YearMonth.parse(monthYear, DateTimeFormatter.ofPattern("yyyy-MM"));
+                monthYearDate = yearMonth.atDay(1);
+            } catch (Exception e) {
+                System.err.println("Error parsing monthYear: " + e.getMessage());
+            }
+        }
+        
+        Page<CourseMaintenance> courseMaintenances = courseMaintenanceService.filterMaintenances(
+            username, status, monthYearDate, pageable);
+        
+        model.addAttribute("courseMaintenances", courseMaintenances.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", courseMaintenances.getTotalPages());
         model.addAttribute("totalItems", courseMaintenances.getTotalElements());
+        model.addAttribute("pageSize", size);
+
+        return "adminDashBoard/fragments/courseMaintenanceTableRowContent :: maintenancePagination";
+    }
+
+    // New endpoint to get total count for badge
+    @GetMapping("/count")
+    @ResponseBody
+    public long getMaintenanceCount(
+            @RequestParam(required = false) String username,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String monthYear) {
         
-        return "adminDashBoard/fragments/courseMaintenanceContent :: maintenanceTableFragment";
+        // Parse monthYear string to LocalDate if provided
+        LocalDate monthYearDate = null;
+        if (monthYear != null && !monthYear.isEmpty()) {
+            try {
+                YearMonth yearMonth = YearMonth.parse(monthYear, DateTimeFormatter.ofPattern("yyyy-MM"));
+                monthYearDate = yearMonth.atDay(1);
+            } catch (Exception e) {
+                System.err.println("Error parsing monthYear: " + e.getMessage());
+            }
+        }
+        
+        Page<CourseMaintenance> courseMaintenances = courseMaintenanceService.filterMaintenances(
+            username, status, monthYearDate, PageRequest.of(0, 1)); // Get only 1 item to check total
+
+        return courseMaintenances.getTotalElements();
     }
 
     @PostMapping("/fees/update")

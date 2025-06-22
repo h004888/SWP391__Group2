@@ -74,8 +74,9 @@ public class SecurityConfig {
                         // Chỉ admin mới được truy cập /admin/**
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
-                        // Chỉ INSTRUCTOR mới được truy cập /instructordashboard/**
-                        .requestMatchers("/instructordashboard/**").hasRole("INSTRUCTOR")
+                        // Cho phép cả ADMIN và INSTRUCTOR truy cập /instructordashboard/**
+                        // Filter sẽ xử lý logic chi tiết
+                        .requestMatchers("/instructordashboard/**").hasAnyRole("ADMIN", "INSTRUCTOR")
 
                         .anyRequest().authenticated()
                 )

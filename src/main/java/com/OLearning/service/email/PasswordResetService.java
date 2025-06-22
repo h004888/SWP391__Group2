@@ -7,13 +7,14 @@ import com.OLearning.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.Random;
 
 @Service
+@Transactional
 public class PasswordResetService {
 
     @Autowired
@@ -32,6 +33,7 @@ public class PasswordResetService {
     private static final int OTP_EXPIRY_MINUTES = 5;
     private static final int MAX_OTP_ATTEMPTS = 3;
 
+    @Transactional
     public void generateOTP(String email) {
         // Validate email
         if (email == null || email.trim().isEmpty()) {
@@ -41,11 +43,11 @@ public class PasswordResetService {
         User user = userRepository.findByEmail(email.trim().toLowerCase())
                 .orElseThrow(() -> new RuntimeException("Email không tồn tại"));
 
+        // Delete existing OTP for this user to prevent multiple active OTPs
+        deleteExistingOTP(user.getUserId());
+
         // Generate secure OTP
         String otp = generateSecureOTP();
-
-        // Delete existing OTP for this user to prevent multiple active OTPs
-        otpRepository.findByUser(user).ifPresent(otpRepository::delete);
 
         // Create new OTP record
         PasswordResetOTP resetOtp = new PasswordResetOTP();
@@ -65,8 +67,24 @@ public class PasswordResetService {
             emailService.sendOTP(user.getEmail(), subject, message);
         } catch (Exception e) {
             // If email sending fails, delete the OTP record
-            otpRepository.delete(resetOtp);
+            try {
+                otpRepository.delete(resetOtp);
+            } catch (Exception deleteException) {
+                System.err.println("Lỗi khi xóa OTP sau khi gửi email thất bại: " + deleteException.getMessage());
+            }
             throw new RuntimeException("Không thể gửi email. Vui lòng thử lại sau.");
+        }
+    }
+
+    /**
+     * Xóa OTP cũ của user trong transaction riêng biệt
+     */
+    @Transactional
+    public void deleteExistingOTP(Long userId) {
+        try {
+            otpRepository.deleteByUserId(userId);
+        } catch (Exception e) {
+            System.err.println("Lỗi khi xóa OTP cũ cho user " + userId + ": " + e.getMessage());
         }
     }
 
