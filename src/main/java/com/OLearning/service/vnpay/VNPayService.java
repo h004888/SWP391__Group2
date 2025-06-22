@@ -22,10 +22,14 @@ public class VNPayService {
         String vnp_IpAddr = "127.0.0.1";
         String vnp_TmnCode = VNPayConfig.vnp_TmnCode;
         String orderType = "order-type";
-
+//        if (vnp_TxnRef == null || vnp_TxnRef.trim().isEmpty()) {
+//            vnp_TxnRef = VNPayConfig.getRandomNumber(8);
+//        }
         int amount = (int) req.getAttribute("amount");
         String bankCode = req.getParameter("bankCode");
 
+        String urlReturn = (String) req.getAttribute("urlReturn");
+        urlReturn = urlReturn + VNPayConfig.vnp_ReturnUrl;
 
         Map<String, String> vnp_Params = new HashMap<>();
         vnp_Params.put("vnp_Amount",  String.valueOf(amount));
@@ -50,7 +54,7 @@ public class VNPayService {
         vnp_Params.put("vnp_OrderInfo", "Thanh toan don hang:" + vnp_TxnRef);
         vnp_Params.put("vnp_OrderType", orderType);
 
-        vnp_Params.put("vnp_ReturnUrl", VNPayConfig.vnp_ReturnUrl);
+        vnp_Params.put("vnp_ReturnUrl", urlReturn);
         vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
         vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
         vnp_Params.put("vnp_Version", vnp_Version);
@@ -79,35 +83,11 @@ public class VNPayService {
                 }
             }
         }
-        Map<String, String> testFields = new HashMap<>();
-        testFields.put("vnp_Amount", String.valueOf(amount));
-        testFields.put("vnp_Command", "pay");
-        testFields.put("vnp_CreateDate", vnp_CreateDate);
-        testFields.put("vnp_CurrCode", "VND");
-        testFields.put("vnp_ExpireDate", vnp_ExpireDate);
-        testFields.put("vnp_IpAddr", "127.0.0.1");
-        testFields.put("vnp_Locale", "vn");
-        testFields.put("vnp_OrderInfo", "Thanh toan don hang:" + vnp_TxnRef);
-        testFields.put("vnp_OrderType", "order-type");
-        testFields.put("vnp_ReturnUrl", VNPayConfig.vnp_ReturnUrl);
-        testFields.put("vnp_TmnCode", vnp_TmnCode);
-        testFields.put("vnp_TxnRef", vnp_TxnRef);
-        testFields.put("vnp_Version", "2.1.0");
 
-        // Loại bỏ hash fields nếu có
-        testFields.remove("vnp_SecureHash");
-        testFields.remove("vnp_SecureHashType");
-
-        String generatedHash = VNPayConfig.hashAllFields(testFields);
-        System.out.println("generatedHash = " + generatedHash);
-
-        System.out.println("HASHDATA = " + hashData);
         String queryUrl = query.toString();
         String vnp_SecureHash = VNPayConfig.hmacSHA512(VNPayConfig.vnp_HashSecret, hashData.toString());
-        System.out.println("SECURE_HASH = " + vnp_SecureHash);
         queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
         String paymentUrl = VNPayConfig.vnp_PayUrl + "?" + queryUrl;
-        System.out.println("URL = " + paymentUrl);
         return paymentUrl;
     }
 
@@ -129,14 +109,11 @@ public class VNPayService {
         if (vnp_SecureHash == null) return -1;
 
         String signValue = VNPayConfig.hashAllFields(fields); // Hàm này phải sort keys
-        System.out.println("Generated signValue: " + signValue);
-        System.out.println("Received vnp_SecureHash: " + vnp_SecureHash);
 
         if (signValue.equals(vnp_SecureHash)) {
             String status = request.getParameter("vnp_TransactionStatus");
             return "00".equals(status) ? 1 : 0;
         } else {
-            System.out.println("Chữ ký không khớp.");
             return -1;
         }
     }

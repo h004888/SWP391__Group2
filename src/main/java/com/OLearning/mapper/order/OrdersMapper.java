@@ -1,8 +1,8 @@
-package com.OLearning.mapper.orders;
+package com.OLearning.mapper.order;
 
-import com.OLearning.dto.orders.OrdersDTO;
+import com.OLearning.dto.order.OrdersDTO;
 
-import com.OLearning.entity.Orders;
+import com.OLearning.entity.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class OrdersMapper {
-    public OrdersDTO toDTO(Orders orders) {
+    public OrdersDTO toDTO(Order orders) {
         OrdersDTO dto = new OrdersDTO();
         dto.setOrderId(orders.getOrderId());
         dto.setAmount(orders.getAmount());
@@ -25,7 +25,7 @@ public class OrdersMapper {
         return dto;
     }
 
-    public List<OrdersDTO> toDTOList(List<Orders> orders) {
+    public List<OrdersDTO> toDTOList(List<Order> orders) {
         return orders.stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());

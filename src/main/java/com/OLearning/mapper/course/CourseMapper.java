@@ -18,15 +18,17 @@ public class CourseMapper {
                 course.getPrice(),
                 course.getDiscount(),
                 course.getCourseImg(),
+                course.getCreatedAt(),
+                course.getUpdatedAt(),
+                course.getCourseLevel(),
+                course.getAverageRating(), // Tính từ method trong entity
+                course.getReviewCount(), // Tính từ method trong entity
                 course.getDuration(),
                 course.getTotalLessons(),
-                course.getTotalRatings(),
-                course.getTotalStudentEnrolled(),
-                course.getCreatedAt(),
-                course.getUpdatedAt());
+                course.totalStudentEnrolled() // Tính từ method trong entity
+        );
     }
 
-    // Nếu cần từ DTO → Entity
     public static Course toEntity(CourseDTO dto) {
         if (dto == null)
             return null;
@@ -38,12 +40,10 @@ public class CourseMapper {
         course.setPrice(dto.getPrice());
         course.setDiscount(dto.getDiscount());
         course.setCourseImg(dto.getCourseImg());
-        course.setDuration(dto.getDuration());
-        course.setTotalLessons(dto.getTotalLessons());
-        course.setTotalRatings(dto.getTotalRatings());
-        course.setTotalStudentEnrolled(dto.getTotalStudentEnrolled());
         course.setCreatedAt(dto.getCreatedAt());
         course.setUpdatedAt(dto.getUpdatedAt());
+        course.setCourseLevel(dto.getCourseLevel());
+        // Không set averageRating, reviewCount, duration vì tính tự động
         return course;
     }
 }

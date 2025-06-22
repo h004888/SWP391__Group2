@@ -74,9 +74,14 @@
                                     <span class="text-decoration-line-through text-muted d-block"
                                           th:if="${course.discount != 0}"
                                           th:text="${#numbers.formatDecimal(course.price, 0, 'COMMA', 2, 'POINT')} + ' ₫'"></span>
-                                    <form th:action="@{'/cart/add/' + ${course.courseId}}" method="post" class="d-inline">
-                                        <button type="submit" class="btn btn-sm btn-success-soft item-show-hover m-1"><i class="fas fa-shopping-cart me-2"></i>Add to cart</button>
-                                    </form>
+                                    <div class="d-flex gap-2">
+                                        <form th:action="@{'/cart/add/' + ${course.courseId}}" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-success-soft item-show-hover m-1"><i class="fas fa-shopping-cart me-2"></i>Add to cart</button>
+                                        </form>
+                                        <form th:action="@{'/home/buy-now/' + ${course.courseId}}" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-primary item-show-hover m-1"><i class="fas fa-bolt me-2"></i>Mua ngay</button>
+                                        </form>
+                                    </div>
                                 </div>
                                 <!-- View more button -->
                                 <a th:href="@{'/course-detail/' + ${course.courseId}}" class="btn btn-dark">View

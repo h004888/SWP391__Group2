@@ -1,8 +1,8 @@
 package com.OLearning.controller.adminDashBoard;
 
-import com.OLearning.dto.orders.OrdersDTO;
+import com.OLearning.dto.order.OrdersDTO;
 import com.OLearning.entity.OrderDetail;
-import com.OLearning.service.orders.OrdersService;
+import com.OLearning.service.order.OrdersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -24,11 +24,13 @@ public class OrdersController {
     @GetMapping
     public String getAllOrders(Model model,
                                @RequestParam(value = "page", defaultValue = "0") int page,
-                               @RequestParam(value = "size", defaultValue = "5") int size,
+                               @RequestParam(value = "size", defaultValue = "10") int size,
                                @RequestParam(value = "username", required = false) String username,
                                @RequestParam(value = "amountDirection", required = false) String amountDirection,
-                               @RequestParam(value = "dateDirection", required = false) String dateDirection) {
-        Page<OrdersDTO> ordersPage = ordersService.filterAndSortOrders(username, amountDirection, dateDirection, page, size);
+                               @RequestParam(value = "orderType", required = false) String orderType,
+                               @RequestParam(value = "startDate", required = false) String startDate,
+                               @RequestParam(value = "endDate", required = false) String endDate) {
+        Page<OrdersDTO> ordersPage = ordersService.filterAndSortOrders(username, amountDirection, orderType, startDate, endDate, page, size);
         model.addAttribute("accNamePage", "Management Orders");
         model.addAttribute("orders", ordersPage.getContent());
         model.addAttribute("currentPage", page);
@@ -37,7 +39,9 @@ public class OrdersController {
         model.addAttribute("pageSize", size);
         model.addAttribute("username", username);
         model.addAttribute("amountDirection", amountDirection);
-        model.addAttribute("dateDirection", dateDirection);
+        model.addAttribute("orderType", orderType);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
         model.addAttribute("fragmentContent", "adminDashboard/fragments/ordersContent :: contentOrders");
         return "adminDashboard/index";
     }
@@ -46,11 +50,13 @@ public class OrdersController {
     public String filterOrders(
             @RequestParam(value = "username", required = false) String username,
             @RequestParam(value = "amountDirection", required = false) String amountDirection,
-            @RequestParam(value = "dateDirection", required = false) String dateDirection,
+            @RequestParam(value = "orderType", required = false) String orderType,
+            @RequestParam(value = "startDate", required = false) String startDate,
+            @RequestParam(value = "endDate", required = false) String endDate,
             @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "5") int size,
+            @RequestParam(value = "size", defaultValue = "10") int size,
             Model model) {
-        Page<OrdersDTO> ordersPage = ordersService.filterAndSortOrders(username, amountDirection, dateDirection, page, size);
+        Page<OrdersDTO> ordersPage = ordersService.filterAndSortOrders(username, amountDirection, orderType, startDate, endDate, page, size);
         model.addAttribute("orders", ordersPage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", ordersPage.getTotalPages());
@@ -58,17 +64,18 @@ public class OrdersController {
         model.addAttribute("pageSize", size);
         model.addAttribute("username", username);
         model.addAttribute("amountDirection", amountDirection);
-        model.addAttribute("dateDirection", dateDirection);
+        model.addAttribute("orderType", orderType);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
         return "adminDashboard/fragments/ordersContent :: ordersTableBody";
     }
 
     @GetMapping("/view/{orderId}")
     public String viewOrderDetails(@PathVariable("orderId") Long orderId, Model model) {
-        model.addAttribute("accNamePage", "Orders Details");
+        model.addAttribute("accNamePage", "Order Details");
         List<OrderDetail> orderDetails = ordersService.getOrderDetailsByOrderId(orderId);
         model.addAttribute("orderDetails", orderDetails);
         model.addAttribute("orderId", orderId);
         model.addAttribute("fragmentContent", "adminDashboard/fragments/orderDetailsContent :: contentOrderDetails");
         return "adminDashboard/index";
-    }
-}
+    }}

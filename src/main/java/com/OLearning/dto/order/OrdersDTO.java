@@ -1,4 +1,4 @@
-package com.OLearning.dto.orders;
+package com.OLearning.dto.order;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

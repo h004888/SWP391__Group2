@@ -1,5 +1,6 @@
 package com.OLearning.dto.coinTransaction;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,10 +14,10 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class CoinTransactionDTO {
     private Long transactionId;
+    @NotBlank
     private BigDecimal amount;
     private String transactionType;
     private String status;
     private String note;
     private LocalDateTime createdAt;
-    private String courseName;
 }

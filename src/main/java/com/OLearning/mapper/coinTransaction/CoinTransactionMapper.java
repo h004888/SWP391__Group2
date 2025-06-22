@@ -17,7 +17,6 @@ public class CoinTransactionMapper {
         dto.setStatus(coinTransaction.getStatus());
         dto.setNote(coinTransaction.getNote());
         dto.setCreatedAt(coinTransaction.getCreatedAt());
-        dto.setCourseName(null); // Set to null, service will handle actual value
         return dto;
     }
 

@@ -1,5 +1,5 @@
-package com.OLearning.service.course;
 
+package com.OLearning.service.course;
 
 import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.course.CourseDetailDTO;
@@ -15,15 +15,17 @@ import java.util.Optional;
 @Service
 public interface CourseService {
 
-    List<CourseDTO> getAllCourses();
-
-    Optional<CourseDetailDTO> getDetailCourse(Long id);
-
-    boolean deleteCourse(Long id);
-
-    List<CourseDTO> filterCourses(String keyword, Integer categoryId, String price, String status);
+    Course findById(Long id);
 
     List<Course> getTopCourses();
 
-    Page<CourseDTO> getCoursesByTotalRatings(Pageable pageable);
+    Page<CourseDTO> searchCoursesGrid(
+            List<Long> categoryIds,
+            List<String> priceFilters,
+            List<String> levels,
+            String sortBy,
+            String keyword,
+            int page,
+            int size);
+
 }

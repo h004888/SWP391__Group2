@@ -36,13 +36,6 @@ public class InstructorMnController {
 
         Map<Long, Integer> userStudentCountMap = new HashMap<>();
 
-        for (UserDTO user : listUser) {
-            int totalStudents = user.getCourse().stream()
-                    .mapToInt(course -> course.getTotalStudentEnrolled() != null ? course.getTotalStudentEnrolled() : 0)
-                    .sum();
-
-            userStudentCountMap.put(user.getUserId(), totalStudents);
-        }
 
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", listInstructor.getTotalPages());

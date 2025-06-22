@@ -1,47 +1,323 @@
 package com.OLearning.controller.homePage;
 
-import com.OLearning.dto.course.CourseDTO;
-import com.OLearning.service.category.CategoryService;
-import com.OLearning.service.course.CourseService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.OLearning.config.VNPayConfig;
+import com.OLearning.dto.category.CategoryDTO;
+import com.OLearning.dto.course.CourseDTO;
+import com.OLearning.entity.Course;
+import com.OLearning.entity.Order;
+import com.OLearning.entity.User;
+import com.OLearning.repository.CourseRepository;
+import com.OLearning.repository.UserRepository;
+import com.OLearning.service.cart.CartService;
+import com.OLearning.service.cart.impl.CartServiceImpl;
+import com.OLearning.service.category.CategoryService;
+import com.OLearning.service.course.CourseService;
+
+import com.OLearning.service.vnpay.VNPayService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Controller
-@RequestMapping("/")
+@RequestMapping("/home")
 public class HomeController {
     @Autowired
     private CategoryService categoryService;
     @Autowired
     private CourseService courseService;
 
-    @GetMapping
-    public String home(Model model) {
-        model.addAttribute("categories", categoryService.findTop5ByOrderByIdAsc());
-        model.addAttribute("allCategories", categoryService.getAllCategory());
-        model.addAttribute("topCourses", courseService.getTopCourses().stream().limit(5).collect(Collectors.toList()));
+    @Autowired
+    private CartService cartService;
 
+    @Autowired
+    private VNPayService vnPayService;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private CourseRepository courseRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private CartServiceImpl cartServiceImpl;
+
+    @GetMapping()
+    public String getMethodName(Model model) {
+        // chia làm 2 danh sách:
+        List<CategoryDTO> firstFive = categoryService.getAllCategory().stream().limit(5).toList();
+        List<CategoryDTO> nextFive = categoryService.getAllCategory().stream().skip(5).limit(5).toList();
+        model.addAttribute("topCourses", courseService.getTopCourses().stream().limit(5).collect(Collectors.toList()));
+        model.addAttribute("topCategories", categoryService.findTop5ByOrderByIdAsc());
+        model.addAttribute("firstFive", firstFive);
+        model.addAttribute("nextFive", nextFive);
         return "homePage/index";
     }
 
-    @GetMapping("/courses")
-    public String courses(Model model, @RequestParam(defaultValue = "0") int page,
-                          @RequestParam(defaultValue = "7") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<CourseDTO> courses = courseService.getCoursesByTotalRatings(pageable); // lưu ý trả về Page<CourseDTO>
-
+    @GetMapping("/coursesGrid")
+    public String coursesGrid(Model model, @RequestParam(defaultValue = "0") int page,
+                              @RequestParam(required = false) String keyword,
+                              @RequestParam(required = false) List<Long> categoryIds,
+                              @RequestParam(required = false) List<String> priceFilters,
+                              @RequestParam(required = false) List<String> levels,
+                              @RequestParam(defaultValue = "Newest") String sortBy,
+                              @RequestParam(defaultValue = "9") int size) {
+        Page<CourseDTO> courses = courseService.searchCoursesGrid(categoryIds, priceFilters, levels, sortBy, keyword,
+                page, size); // lưu ý trả về Page<CourseDTO>
+        model.addAttribute("categories", categoryService.getListCategories());
         model.addAttribute("courses", courses.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", courses.getTotalPages());
-        return "homePage/course-list";
+        model.addAttribute("totalItems", courses.getTotalElements());
+        return "homePage/course-grid";
+    }
+
+    @GetMapping("/course-detail")
+    public String courseDetail(@RequestParam("id") Long id, Model model) {
+        Course course = courseService.findById(id);
+
+        int totalStudents = course.getInstructor().getCourses()
+                .stream()
+                .mapToInt(c -> c.getEnrollments().size())
+                .sum();
+        model.addAttribute("totalStudents", totalStudents);
+        model.addAttribute("courseByInstructor",
+                course.getInstructor().getCourses().stream().limit(2).collect(Collectors.toList()));
+        model.addAttribute("courseByCategory",
+                course.getCategory().getCourses().stream().limit(5).collect(Collectors.toList()));
+        model.addAttribute("course", course);
+        return "homePage/course-detail";
+    }
+
+
+    @PostMapping("/buy-now")
+    public String buyNow(@AuthenticationPrincipal UserDetails userDetails,
+                         @RequestParam("courseId") Long courseId,
+                         HttpServletRequest request,
+                         HttpServletResponse response,
+                         RedirectAttributes redirectAttributes) {
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+
+        // Check if the course is already in the main cart using the service
+        String mainCartEncoded = getCartCookie(request, getUserIdFromUserDetails(userDetails));
+        if (cartService.isCourseInCart(mainCartEncoded, courseId, userDetails.getUsername())) {
+            redirectAttributes.addFlashAttribute("info", "This course is already in your cart. Please proceed to checkout from your cart.");
+            return "redirect:/cart";
+        }
+
+        try {
+            Long userId = getUserIdFromUserDetails(userDetails);
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new EntityNotFoundException("User not found"));
+            Course course = courseRepository.findById(courseId)
+                    .orElseThrow(() -> new EntityNotFoundException("Course not found: " + courseId));
+
+            cartServiceImpl.checkCoursePurchaseStatus(userDetails.getUsername(), courseId, course.getTitle());
+
+            Map<String, Object> cart = new HashMap<>();
+            cart.put("userId", userId);
+            List<Map<String, Object>> items = new ArrayList<>();
+            Map<String, Object> item = new HashMap<>();
+            item.put("id", UUID.randomUUID().toString());
+            item.put("courseId", courseId);
+            item.put("price", course.getPrice());
+            item.put("courseTitle", course.getTitle());
+            items.add(item);
+            cart.put("items", items);
+            cart.put("total", 1L);
+
+            String cartJson = objectMapper.writeValueAsString(cart);
+            double totalAmount = course.getPrice().doubleValue();
+
+            if (user.getCoin() >= totalAmount) {
+                Order order = new Order();
+                order.setUser(user);
+                order.setAmount(totalAmount);
+                cartService.processCheckout(cartJson, request.getRemoteAddr(), userDetails.getUsername());
+                cartService.completeCheckout(cart, order, true, null);
+                redirectAttributes.addFlashAttribute("message", "Purchase completed using wallet!");
+                return "redirect:/home/coursesGrid";
+            } else {
+                String encodedCartJson = Base64.getEncoder().encodeToString(cartJson.getBytes(StandardCharsets.UTF_8));
+                Cookie buyNowCookie = new Cookie("buy_now", encodedCartJson);
+                buyNowCookie.setPath("/");
+                buyNowCookie.setMaxAge(10 * 60);
+                buyNowCookie.setHttpOnly(true);
+                response.addCookie(buyNowCookie);
+                request.setAttribute("amount", (int) (totalAmount * 100));
+                String currentPath = request.getRequestURI();
+                String basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+                String returnUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                        .path(basePath)
+                        .build()
+                        .toUriString();
+                request.setAttribute("urlReturn", returnUrl);
+                return "redirect:" + vnPayService.createOrder(request);
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Purchase error: " + e.getMessage());
+            return "redirect:/home/coursesGrid";
+        }
+    }
+
+    @GetMapping("/vnpay-payment-return")
+    public String paymentCompleted(HttpServletRequest request,
+                                   HttpServletResponse response,
+                                   RedirectAttributes redirectAttributes,
+                                   @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+
+        Long userId = getUserIdFromUserDetails(userDetails);
+        String encodedBuyNowJson = getBuyNowCookie(request);
+        int paymentStatus = vnPayService.orderReturn(request);
+
+        if (paymentStatus == 1) {
+            try {
+                String cartJson;
+                Map<String, Object> cart;
+                boolean isBuyNow = encodedBuyNowJson != null;
+
+                if (isBuyNow) {
+
+                    byte[] decodedBytes = Base64.getDecoder().decode(encodedBuyNowJson);
+                    cartJson = new String(decodedBytes, StandardCharsets.UTF_8);
+                    cart = objectMapper.readValue(cartJson, Map.class);
+                    clearBuyNowCookie(response);
+                } else {
+                    String encodedCartJson = getCartCookie(request, userId);
+                    cart = decodeCartFromCookie(encodedCartJson, userDetails.getUsername());
+                    cartJson = objectMapper.writeValueAsString(cart);
+                }
+
+                User user = userRepository.findById(userId)
+                        .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                String transactionId = request.getParameter("vnp_TransactionNo");
+                String ipAddr = request.getRemoteAddr();
+                String amount = request.getParameter("vnp_Amount");
+                double totalAmount = Double.parseDouble(amount) / 100;
+
+                Order order = new Order();
+                order.setUser(user);
+                order.setAmount(totalAmount);
+                order.setRefCode(transactionId);
+
+                cartService.processCheckout(cartJson, ipAddr, userDetails.getUsername());
+                cartService.completeCheckout(cart, order, false, transactionId);
+
+                if (!isBuyNow) {
+                    String encodedCartJson = getCartCookie(request, userId);
+                    if (encodedCartJson != null && !encodedCartJson.isEmpty()) {
+                        updateCartCookie(cartService.clearCart(userDetails.getUsername()), response, userId);
+                    }
+                }
+
+                redirectAttributes.addFlashAttribute("message", "VNPay payment successful!");
+                return "redirect:/home/coursesGrid";
+            } catch (CartServiceImpl.CourseAlreadyPurchasedException e) {
+                redirectAttributes.addFlashAttribute("error", e.getMessage());
+                return "redirect:/home/coursesGrid";
+            } catch (Exception e) {
+                redirectAttributes.addFlashAttribute("error", "VNPay success but internal error: " + e.getMessage());
+                return "redirect:/home/coursesGrid";
+            }
+        } else {
+            redirectAttributes.addFlashAttribute("error", "VNPay payment failed.");
+            return "redirect:/home/coursesGrid";
+        }
+    }
+
+    private void updateCartCookie(Map<String, Object> cart, HttpServletResponse response, Long userId) throws Exception {
+        String cartJson = objectMapper.writeValueAsString(cart);
+        String encodedCartJson = Base64.getEncoder().encodeToString(cartJson.getBytes(StandardCharsets.UTF_8));
+        Cookie cartCookie = new Cookie("cart_" + userId, encodedCartJson);
+        cartCookie.setPath("/");
+        cartCookie.setMaxAge(7 * 24 * 60 * 60);
+        cartCookie.setHttpOnly(true);
+        response.addCookie(cartCookie);
+    }
+
+    private Map<String, Object> decodeCartFromCookie(String encodedCartJson, String userEmail) {
+        try {
+            if (encodedCartJson == null || encodedCartJson.isEmpty()) {
+                Map<String, Object> emptyCart = new HashMap<>();
+                Long userId = userRepository.findByEmail(userEmail)
+                        .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + userEmail))
+                        .getUserId();
+                emptyCart.put("userId", userId);
+                emptyCart.put("total", 0L);
+                emptyCart.put("items", new ArrayList<>());
+                return emptyCart;
+            }
+            byte[] decodedBytes = Base64.getDecoder().decode(encodedCartJson);
+            String decodedJson = new String(decodedBytes, StandardCharsets.UTF_8);
+            return cartService.getCartDetails(decodedJson, userEmail);
+        } catch (Exception e) {
+            Map<String, Object> emptyCart = new HashMap<>();
+            Long userId = userRepository.findByEmail(userEmail)
+                    .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + userEmail))
+                    .getUserId();
+            emptyCart.put("userId", userId);
+            emptyCart.put("total", 0L);
+            emptyCart.put("items", new ArrayList<>());
+            return emptyCart;
+        }
+    }
+
+    private Long getUserIdFromUserDetails(UserDetails userDetails) {
+        String email = userDetails.getUsername();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
+        return user.getUserId();
+    }
+
+    private String getCartCookie(HttpServletRequest request, Long userId) {
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if (cookie.getName().equals("cart_" + userId)) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return "";
+    }
+
+    private String getBuyNowCookie(HttpServletRequest request) {
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if (cookie.getName().equals("buy_now")) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
+    }
+
+    private void clearBuyNowCookie(HttpServletResponse response) {
+        Cookie cookie = new Cookie("buy_now", null);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        cookie.setHttpOnly(true);
+        response.addCookie(cookie);
     }
 }

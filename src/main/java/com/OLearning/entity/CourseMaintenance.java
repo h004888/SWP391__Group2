@@ -29,7 +29,7 @@ public class CourseMaintenance {
 
     @ManyToOne
     @JoinColumn(name = "orderId")
-    private Orders order;
+    private Order order;
 
     private LocalDate monthYear;
     private Long enrollmentCount;

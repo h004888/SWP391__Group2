@@ -15,7 +15,7 @@ import java.util.Set;
 @Setter
 @ToString
 
-public class Orders {
+public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderId;

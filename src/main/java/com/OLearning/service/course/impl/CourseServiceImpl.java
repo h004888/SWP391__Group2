@@ -1,11 +1,10 @@
 package com.OLearning.service.course.impl;
 
-
 import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.course.CourseDetailDTO;
 import com.OLearning.entity.Course;
-import com.OLearning.mapper.course.CourseDetailMapper;
 import com.OLearning.mapper.course.CourseMapper;
+import com.OLearning.mapper.course.CourseDetailMapper;
 import com.OLearning.repository.CourseRepository;
 import com.OLearning.service.course.CourseService;
 
@@ -13,9 +12,13 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,54 +33,78 @@ public class CourseServiceImpl implements CourseService {
     @Autowired
     private CourseDetailMapper courseDetailMapper;
 
-    @Override
-    public List<CourseDTO> getAllCourses() {
-        List<Course> courseList = courseRepository.findAll();
-        return courseList.stream()
-                .map(CourseMapper::toDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public Optional<CourseDetailDTO> getDetailCourse(Long id) {
-        return courseRepository.findById(id).map(courseDetailMapper::toDTO);
-    }
-
-    @Override
-    public boolean deleteCourse(Long id) {
-        if (courseRepository.existsById(id)) {
-            courseRepository.deleteById(id);
-            return true;
+    public Pageable getPageable(int page, int size, String sortBy) {
+        // Chỉ cho phép sort trong DB với các field có trong DB thật
+        if ("Newest".equals(sortBy) || "Free".equals(sortBy)) {
+            return PageRequest.of(page, size, Sort.by("createdAt").descending());
         }
-        return false;
+        // Với MostPopular & MostViewed: sort sau khi lấy dữ liệu
+        return PageRequest.of(page, size); // Không sort trong DB
     }
 
     @Override
-    public List<CourseDTO> filterCourses(String keyword, Integer categoryId, String price, String status) {
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            keyword = "%" + keyword.trim().toLowerCase() + "%";
-        } else {
+    public Page<CourseDTO> searchCoursesGrid(
+            List<Long> categoryIds,
+            List<String> priceFilters,
+            List<String> levels,
+            String sortBy,
+            String keyword,
+            int page,
+            int size) {
+
+        if (keyword != null && keyword.trim().isEmpty()) {
             keyword = null;
         }
-        if (categoryId != null && categoryId == 0)
-            categoryId = null;
-        if (price != null && price.trim().isEmpty())
-            price = null;
-        if (status != null && status.trim().isEmpty())
-            status = null;
 
-        return courseRepository.filterCourses(keyword, categoryId, price, status).stream()
-                .map(CourseMapper::toDTO)
-                .collect(Collectors.toList());
+        if (categoryIds != null && categoryIds.isEmpty()) {
+            categoryIds = null;
+        }
+
+        if (priceFilters != null) {
+            if (priceFilters.contains("All")) {
+                priceFilters = null;
+            }
+        }
+
+        if (levels != null) {
+            if (levels.isEmpty()) {
+                levels = null;
+            }
+        }
+
+        Pageable pageable = getPageable(page, size, sortBy);
+
+        Page<Course> coursesPage = courseRepository.searchCourses(
+                keyword,
+                categoryIds,
+                priceFilters,
+                levels,
+                pageable);
+
+        List<Course> result = new ArrayList<>(coursesPage.getContent());
+
+        // Sort bằng Java nếu là MostPopular hoặc MostViewed
+        if ("MostPopular".equals(sortBy)) {
+            result.sort((a, b) -> Long.compare(b.getReviewCount(), a.getReviewCount()));
+        } else if ("MostViewed".equals(sortBy)) {
+            result.sort((a, b) -> Integer.compare(b.totalStudentEnrolled(), a.totalStudentEnrolled()));
+        }
+
+        // Trả về lại Page<CourseDTO>
+        return new PageImpl<>(
+                result,
+                pageable,
+                coursesPage.getTotalElements()).map(CourseMapper::toDTO);
     }
 
     @Override
     public List<Course> getTopCourses() {
-        return courseRepository.findTop5ByOrderByTotalStudentEnrolledDesc();
+        return courseRepository.findAllOrderByStudentCountDesc();
     }
 
     @Override
-    public Page<CourseDTO> getCoursesByTotalRatings(Pageable pageable) {
-        return courseRepository.findAllByOrderByTotalRatingsDesc(pageable).map(CourseMapper::toDTO);
+    public Course findById(Long id) {
+        return courseRepository.findById(id).orElse(null);
     }
+
 }

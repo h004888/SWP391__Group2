@@ -1,13 +1,14 @@
 package com.OLearning.repository;
 
+import com.OLearning.entity.Order;
 import com.OLearning.entity.OrderDetail;
-import com.OLearning.entity.Orders;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import java.util.Collection;
 import java.util.List;
 
+@Repository
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> {
     List<OrderDetail> findByOrderOrderId(Long orderId);
-    List<OrderDetail> findByOrder(Orders order);
+    List<OrderDetail> findByOrder(Order order);
 }

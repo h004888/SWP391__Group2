@@ -1,7 +1,6 @@
 package com.OLearning.dto.course;
 
 import com.OLearning.entity.Category;
-import com.OLearning.entity.Chapter;
 import com.OLearning.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @Setter
@@ -24,16 +22,9 @@ public class CourseDetailDTO {
     private Double price;
     private Double discount;
     private String courseImg;
-    private Integer duration;
-    private Integer totalLessons;
-    private Integer totalRatings;
-    private Integer totalStudentEnrolled;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private String status;
-    private Boolean canResubmit;
+    private Boolean isChecked;
     private User instructor;
     private Category category;
-    private List<Chapter> listOfChapters;
-
 }

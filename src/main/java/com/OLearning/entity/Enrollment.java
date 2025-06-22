@@ -44,6 +44,6 @@ public class Enrollment {
 
     @ManyToOne
     @JoinColumn(name = "OrderID")
-    private Orders order;
+    private Order order;
 
 }

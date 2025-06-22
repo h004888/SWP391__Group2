@@ -73,7 +73,6 @@ public class CartServiceImpl implements CartService {
             }
             Long cartUserId = getLongValue(cart.getOrDefault("userId", -1L));
             if (!userId.equals(cartUserId)) {
-                // If cart belongs to another user, return an empty cart for the current user
                 Map<String, Object> emptyCart = new HashMap<>();
                 emptyCart.put("userId", userId);
                 emptyCart.put("total", 0L);
@@ -102,14 +101,11 @@ public class CartServiceImpl implements CartService {
                 .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + userEmail))
                 .getUserId();
 
-        // Set userId in cart if not already set
         cart.put("userId", userId);
 
-        // Fetch course
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new EntityNotFoundException("Course not found: " + courseId));
 
-        // Check if course is already in cart
         boolean courseInCart = items.stream()
                 .anyMatch(item -> {
                     Object itemCourseId = item.get("courseId");
@@ -119,19 +115,8 @@ public class CartServiceImpl implements CartService {
             throw new CourseAlreadyInCartException("Course '" + course.getTitle() + "' is already in your cart.");
         }
 
-        // Check if course already purchased
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + userEmail));
-        List<Orders> completedOrders = ordersRepository.findByUserAndStatus(user, "completed");
+        checkCoursePurchaseStatus(userEmail, courseId, course.getTitle());
 
-        boolean coursePurchased = completedOrders.stream()
-                .flatMap(order -> orderDetailRepository.findByOrder(order).stream())
-                .anyMatch(orderDetail -> orderDetail.getCourse().getCourseId().equals(courseId));
-        if (coursePurchased) {
-            throw new CourseAlreadyPurchasedException("Course '" + course.getTitle() + "' has already been purchased.");
-        }
-
-        // Add course to cart
         Map<String, Object> item = new HashMap<>();
         item.put("id", UUID.randomUUID().toString());
         item.put("courseId", courseId);
@@ -160,6 +145,18 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    public boolean isCourseInCart(String cartJson, Long courseId, String userEmail) {
+        Map<String, Object> cart = getCartDetails(cartJson, userEmail);
+        if (cart.get("items") instanceof List) {
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> items = (List<Map<String, Object>>) cart.get("items");
+            return items.stream()
+                    .anyMatch(item -> item.get("courseId") != null && ((Number) item.get("courseId")).longValue() == courseId);
+        }
+        return false;
+    }
+
+    @Override
     public Map<String, Object> clearCart(String userEmail) {
         Long userId = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + userEmail))
@@ -178,12 +175,21 @@ public class CartServiceImpl implements CartService {
         if (items.isEmpty()) {
             throw new IllegalStateException("Cannot checkout an empty cart");
         }
-        return null; // Handled in controller
+
+        for (Map<String, Object> item : items) {
+            Object courseIdObj = item.get("courseId");
+            Long courseId = getLongValue(courseIdObj);
+            Course course = courseRepository.findById(courseId)
+                    .orElseThrow(() -> new EntityNotFoundException("Course not found: " + courseId));
+            checkCoursePurchaseStatus(userEmail, courseId, course.getTitle());
+        }
+
+        return null;
     }
 
     @Override
     @Transactional
-    public void completeCheckout(Map<String, Object> cart, Orders order, boolean useCoins, String refCode) {
+    public void completeCheckout(Map<String, Object> cart, Order order, boolean useCoins, String refCode) {
         User user = userRepository.findById(getLongValue(order.getUser().getUserId()))
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
@@ -197,7 +203,6 @@ public class CartServiceImpl implements CartService {
                 })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // Set order details
         order.setOrderType("course_purchase");
         order.setStatus("completed");
         order.setOrderDate(LocalDateTime.now());
@@ -206,10 +211,9 @@ public class CartServiceImpl implements CartService {
 
         ordersRepository.save(order);
 
-        // 1. VNPay payment: Add money to system first (coin maintenance transaction)
         if (!useCoins) {
             CoinTransaction transaction = new CoinTransaction();
-            transaction.setUser(user); // System transaction
+            transaction.setUser(user);
             transaction.setAmount(totalPrice);
             transaction.setStatus("completed");
             transaction.setTransactionType("top_up");
@@ -219,21 +223,18 @@ public class CartServiceImpl implements CartService {
             user.setCoin(user.getCoin() + totalPrice.longValue());
         }
 
-        // Process each item in the cart
         for (Map<String, Object> item : items) {
             Object courseIdObj = item.get("courseId");
             Long courseId = getLongValue(courseIdObj);
             Course course = courseRepository.findById(courseId)
                     .orElseThrow(() -> new EntityNotFoundException("Course not found: " + courseId));
 
-            // Create order detail
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setOrder(order);
             orderDetail.setCourse(course);
             orderDetail.setUnitPrice(((Number) item.get("price")).doubleValue());
             orderDetailRepository.save(orderDetail);
 
-            // Create enrollment
             Enrollment enrollment = new Enrollment();
             enrollment.setUser(user);
             enrollment.setCourse(course);
@@ -245,7 +246,6 @@ public class CartServiceImpl implements CartService {
 
             BigDecimal coursePrice = BigDecimal.valueOf(((Number) item.get("price")).doubleValue());
 
-            // 2. Deduct money from user (for both payment methods)
             CoinTransaction studentTransaction = new CoinTransaction();
             studentTransaction.setUser(user);
             studentTransaction.setAmount(coursePrice.negate());
@@ -262,10 +262,8 @@ public class CartServiceImpl implements CartService {
 
             coinTransactionRepository.save(studentTransaction);
 
-            // Deduct coins from user
             user.setCoin(user.getCoin() - coursePrice.longValue());
 
-            // 3. Add money to instructor (for both payment methods)
             User instructor = course.getInstructor();
             if (instructor != null) {
                 CoinTransaction instructorTransaction = new CoinTransaction();
@@ -284,14 +282,25 @@ public class CartServiceImpl implements CartService {
 
                 coinTransactionRepository.save(instructorTransaction);
 
-                // Add coins to instructor
                 instructor.setCoin(instructor.getCoin() + coursePrice.longValue());
                 userRepository.save(instructor);
             }
         }
 
-        // Save user changes (coin deduction)
         userRepository.save(user);
+    }
+
+    public void checkCoursePurchaseStatus(String userEmail, Long courseId, String courseTitle) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + userEmail));
+        List<Order> completedOrders = ordersRepository.findByUserAndStatus(user, "completed");
+
+        boolean coursePurchased = completedOrders.stream()
+                .flatMap(order -> orderDetailRepository.findByOrder(order).stream())
+                .anyMatch(orderDetail -> orderDetail.getCourse().getCourseId().equals(courseId));
+        if (coursePurchased) {
+            throw new CourseAlreadyPurchasedException("Course '" + courseTitle + "' has already been purchased.");
+        }
     }
 
     private Long getLongValue(Object value) {

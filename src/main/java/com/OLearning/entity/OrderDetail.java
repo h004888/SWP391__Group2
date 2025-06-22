@@ -14,11 +14,12 @@ public class OrderDetail {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "OrderDetailID")
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "orderId")
-    private Orders order;
+    private Order order;
     @ManyToOne
     @JoinColumn(name = "CourseId")
     private Course course;
