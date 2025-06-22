@@ -1,4 +1,4 @@
-package com.OLearning.service;
+package com.OLearning.service.courseChapterLesson;
 
 import com.OLearning.repository.LessonRepository;
 import com.OLearning.repository.QuizRepository;

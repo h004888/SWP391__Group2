@@ -1,12 +1,10 @@
-package com.OLearning.controller;
+package com.OLearning.controller.instructorDashBoard;
 
 import com.OLearning.dto.chapter.ChapterDTO;
 import com.OLearning.dto.course.AddCourseStep1DTO;
-import com.OLearning.dto.course.CourseContentDTO;
 import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.course.CourseMediaDTO;
 import com.OLearning.dto.lesson.LessonTitleDTO;
-import com.OLearning.dto.lesson.LessonVideoDTO;
 import com.OLearning.dto.quiz.QuizDTO;
 import com.OLearning.dto.quiz.QuizQuestionDTO;
 import com.OLearning.dto.video.VideoDTO;
@@ -15,8 +13,8 @@ import com.OLearning.mapper.course.CourseMapper;
 import com.OLearning.repository.ChapterRepository;
 import com.OLearning.repository.LessonRepository;
 import com.OLearning.repository.VideoRepository;
-import com.OLearning.service.LessonChapterService;
-import com.OLearning.service.LessonQuizService;
+import com.OLearning.service.courseChapterLesson.LessonChapterService;
+import com.OLearning.service.courseChapterLesson.LessonQuizService;
 import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.chapter.ChapterService;
 import com.OLearning.service.course.CourseService;
@@ -26,13 +24,11 @@ import com.OLearning.service.video.VideoService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
