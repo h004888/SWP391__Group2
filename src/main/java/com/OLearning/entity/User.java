@@ -18,18 +18,17 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
-
     private String username;
     private String email;
     private String password;
     private String fullName;
     private String phone;
-    private Long coin;
-    private LocalDate birthday;
+    private Double coin = 0.0;
+    private LocalDate birthDay;
     private String address;
     private String profilePicture;
     private String personalSkill;
-    private boolean status;//new
+    private Boolean status;//new
 
     @ManyToOne
     @JoinColumn(name = "roleId")
@@ -38,17 +37,18 @@ public class User {
     @OneToMany(mappedBy = "instructor")
     private List<Course> courses;
 
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Order> orders;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Notification> notifications;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<InstructorRequest> instructorRequests;
 
-    @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<InstructorRequest> approvedRequests;
+
 //    @OneToMany(mappedBy = "user")
 //    private List<CoinTransaction> coinTransactions;
 }

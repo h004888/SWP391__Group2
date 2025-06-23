@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message from Instructor</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(0,0,0,0.08);
+            border: 1px solid #ddd;
+        }
+
+        .header {
+            background-color: #2d3e50;
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .logo {
+            max-width: 130px;
+            margin-bottom: 15px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .content {
+            padding: 25px 30px;
+            color: #444;
+            font-size: 15px;
+        }
+
+        .message-box {
+            background-color: #f9f9f9;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .instructor-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .instructor-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 15px;
+            object-fit: cover;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            margin-top: 25px;
+            background-color: #3498db;
+            color: white !important;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .footer {
+            background-color: #f0f0f0;
+            padding: 20px 25px;
+            font-size: 12px;
+            color: #777;
+            text-align: center;
+            border-top: 1px solid #ddd;
+        }
+
+        a {
+            color: #3498db;
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+
+    <div class="header">
+        <img alt="OLearning Logo" class="logo">
+        <h1>MESSAGE FROM YOUR INSTRUCTOR</h1>
+    </div>
+
+    <div class="content">
+        <p>Hello <strong th:text="${student.fullName}">Student</strong>,</p>
+
+        <p>
+            You have received a message from your instructor regarding the course 
+            <strong th:text="${course.title}">Course Title</strong>.
+        </p>
+
+        <div class="instructor-info">
+            <img th:if="${instructor.profilePicture}" th:src="${instructor.profilePicture}" class="instructor-avatar" alt="Instructor">
+            <div>
+                <strong th:text="${instructor.fullName}">Instructor Name</strong><br>
+                <small>Course Instructor</small>
+            </div>
+        </div>
+
+        <h3 th:text="${subject}">Message Subject</h3>
+
+        <div class="message-box">
+            <p th:text="${messageContent}">Message content goes here...</p>
+        </div>
+
+        <p>
+            You can reply directly to this email to respond to your instructor, or visit the course page to continue the conversation.
+        </p>
+
+        <div style="text-align: center;">
+            <a th:href="@{'https://olearning.com/course/' + ${course.id}}" class="button">GO TO COURSE</a>
+        </div>
+
+        <p style="margin-top: 30px;">Regards,<br><strong>OLearning Team</strong></p>
+    </div>
+
+    <div class="footer">
+        <p>© 2025 OLearning. All rights reserved.</p>
+        <p>
+            If you need assistance, please contact our support team at
+            <a th:href="'mailto:' + ${supportEmail}" th:text="${supportEmail}">support@olearning.com</a>.
+        </p>
+    </div>
+
+</div>
+</body>
+</html>

@@ -17,8 +17,9 @@ import java.time.LocalDateTime;
 public class Video {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "VideoID")
     private Long id;
-    @Column(nullable = false)
+    @Column(name = "videoUrl", nullable = false, length = 1000)
     private String videoUrl;
     private LocalDateTime uploadDate;
     private Integer duration;

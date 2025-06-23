@@ -120,4 +120,60 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
         Pageable pageable
     );
 
+    // Find orders by status with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    Page<Order> findByStatus(String status, Pageable pageable);
+
+    // Find orders by username and status with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    Page<Order> findByUserUsernameContainingAndStatus(String username, String status, Pageable pageable);
+
+    // Find orders by order type and status with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    Page<Order> findByOrderTypeAndStatus(String orderType, String status, Pageable pageable);
+
+    // Find orders by username, order type and status with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    Page<Order> findByUserUsernameContainingAndOrderTypeAndStatus(String username, String orderType, String status, Pageable pageable);
+
+    // Find orders by status and date range with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    Page<Order> findByStatusAndOrderDateBetween(
+        String status,
+        LocalDateTime startDate, 
+        LocalDateTime endDate, 
+        Pageable pageable
+    );
+
+    // Find orders by username, status and date range with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    Page<Order> findByUserUsernameContainingAndStatusAndOrderDateBetween(
+        String username, 
+        String status,
+        LocalDateTime startDate, 
+        LocalDateTime endDate, 
+        Pageable pageable
+    );
+
+    // Find orders by order type, status and date range with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    Page<Order> findByOrderTypeAndStatusAndOrderDateBetween(
+        String orderType,
+        String status,
+        LocalDateTime startDate, 
+        LocalDateTime endDate, 
+        Pageable pageable
+    );
+
+    // Find orders by username, order type, status and date range with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    Page<Order> findByUserUsernameContainingAndOrderTypeAndStatusAndOrderDateBetween(
+        String username, 
+        String orderType,
+        String status,
+        LocalDateTime startDate, 
+        LocalDateTime endDate, 
+        Pageable pageable
+    );
+
 }

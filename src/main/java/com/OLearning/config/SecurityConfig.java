@@ -16,8 +16,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import com.OLearning.security.AdminAccessFilter;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 
 @Configuration
 @EnableWebSecurity
@@ -29,14 +33,17 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        //Use NoOpPasswordEncoder cho password chưa mã hóa
-//      return NoOpPasswordEncoder.getInstance();
         return new BCryptPasswordEncoder();
     }
 
     @Bean
     public AuthenticationSuccessHandler authenticationSuccessHandler() {
         return new CustomAuthenticationSuccessHandler();
+    }
+
+    @Bean
+    public AuthenticationFailureHandler authenticationFailureHandler() {
+        return new com.OLearning.security.CustomAuthenticationFailureHandler();
     }
 
     @Bean
@@ -49,7 +56,6 @@ public class SecurityConfig {
         return new HttpSessionEventPublisher();
     }
 
-    //Config to use customUserDetailsService
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
@@ -59,24 +65,20 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authz -> authz
-                                // Cho phép truy cập public resources
-                                .requestMatchers("/css/**", "/js/**", "/images/**", "/static/**","/assets/**").permitAll()
-                                .requestMatchers("/login", "/register", "/select-role", "/assign-role","/forgot-password","/reset-password","/otp-verification").permitAll()
-                                .requestMatchers("/error", "/403").permitAll()
+                        // Cho phép truy cập public resources
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/static/**","/assets/**").permitAll()
+                        .requestMatchers("/login","/dashboard_login", "/register","/forgot-password","/reset-password","/otp-verification").permitAll()
+                        .requestMatchers("/error", "/403").permitAll()
+                        .requestMatchers("/home").permitAll()
 
-                                // Root path redirect
-                                .requestMatchers("/home").permitAll()
+                        // Chỉ admin mới được truy cập /admin/**
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
 
-                                // Chỉ admin mới được truy cập /admin/**
-                                .requestMatchers("/admin/**").hasRole("ADMIN")
+                        // Cho phép cả ADMIN và INSTRUCTOR truy cập /instructordashboard/**
+                        // Filter sẽ xử lý logic chi tiết
+                        .requestMatchers("/instructordashboard/**").hasAnyRole("ADMIN", "INSTRUCTOR")
 
-                                // Chỉ INSTRUCTOR mới được truy cập /instructordashboard/**
-                                .requestMatchers("/instructordashboard/**").hasRole("INSTRUCTOR")
-
-                                // User có thể truy cập /user/** và /home
-//                        .requestMatchers("/home").hasAnyRole("USER","INSTRUCTOR")
-
-                                .anyRequest().authenticated()
+                        .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
@@ -84,11 +86,11 @@ public class SecurityConfig {
                         .usernameParameter("email")
                         .passwordParameter("password")
                         .successHandler(authenticationSuccessHandler())
-                        .failureUrl("/login?error=true")
+                        .failureHandler(authenticationFailureHandler())
                         .permitAll()
                 )
                 .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/login") // Dùng chung trang login
+                        .loginPage("/login")
                         .successHandler(authenticationSuccessHandler())
                         .failureUrl("/login?error=true")
                         .userInfoEndpoint(userInfo -> userInfo
@@ -97,7 +99,7 @@ public class SecurityConfig {
                 )
                 .logout(logout -> logout
                         .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                        .logoutSuccessUrl("/login?logout=true")
+                        .logoutSuccessHandler(customLogoutSuccessHandler())
                         .deleteCookies("JSESSIONID")
                         .invalidateHttpSession(true)
                         .permitAll()
@@ -116,10 +118,22 @@ public class SecurityConfig {
                         .rememberMeParameter("remember-me")
                         .tokenValiditySeconds(7 * 24 * 60 * 60) // 7days
                 )
-                .csrf(csrf -> csrf.disable()); // Disable CSRF
+                .csrf(csrf -> csrf.disable());
 
         return http.build();
     }
 
+    @Bean
+    public LogoutSuccessHandler customLogoutSuccessHandler() {
+        return new com.OLearning.security.CustomLogoutSuccessHandler();
+    }
 
+    @Bean
+    public FilterRegistrationBean<AdminAccessFilter> adminAccessFilterRegistration(AdminAccessFilter filter) {
+        FilterRegistrationBean<AdminAccessFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(filter);
+        registration.addUrlPatterns("/*");
+        registration.setOrder(2); // sau security filter
+        return registration;
+    }
 }

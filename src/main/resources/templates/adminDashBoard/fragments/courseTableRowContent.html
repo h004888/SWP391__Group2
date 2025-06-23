@@ -2,12 +2,12 @@
     <tr th:each="course : ${listCourse}">
         <td th:text="${course.courseId}"></td>
         <td th:text="${course.title}"></td>
-        <td th:text="${course.duration + ' phút'}"></td>
-        <td th:text="'$' + ${course.price}"></td>
-        <td th:text="${course.totalLessons}"></td>
+        <td th:text="${course.duration == null ? 'N/A' : course.duration + ' phút'}"></td>
+        <td th:text="${course.price != null ? #numbers.formatDecimal(course.price, 0, 'COMMA', 0, 'POINT') : 'N/A'}"></td>
+        <td th:text="${course.totalLessons == null ? 'N/A' : course.totalLessons}"></td>
         <td th:text="${#temporals.format(course.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
         <td th:text="${#temporals.format(course.updatedAt, 'dd/MM/yyyy HH:mm')}"></td>
-        <td>
+        <td class="text-uppercase">
                          <span th:switch="${course.status}">
                              <span th:case="null" class="badge bg-secondary">
                                  <i class="fas fa-save"></i> Save Draft
@@ -45,17 +45,21 @@
 
 <div th:fragment="coursePagination" class="d-sm-flex justify-content-sm-between align-items-sm-center mt-2">
     <div class="mb-0 text-center text-sm-start">
-        Showing <b th:text="${listCourse.size()}"></b> out of <b th:text="${totalItems}"></b> entries
+        <p class="mb-0 text-center text-sm-start" th:if="${totalItems > 0}">
+            Showing <span th:text="${currentPage * 5 + 1}">1</span> to
+            <span th:text="${(currentPage * 5) + 5 > totalItems ? totalItems : (currentPage * 5) + 5}">5</span> of
+            <span th:text="${totalItems}">20</span> entries
+        </p>
+        <p class="mb-0 text-center text-sm-start" th:if="${totalItems == 0}">
+            No entries found
+        </p>
     </div>
-    <p class="mb-0 text-center text-sm-start" th:if="${totalItems == 0}">
-        No entries found
-    </p>
     <nav  class="d-flex justify-content-center mb-0" aria-label="navigation" th:if="${totalPages > 0}">
         <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
             <!-- First Page -->
             <li class="page-item mb-0" th:classappend="${currentPage == 0} ? 'disabled'">
                 <a class="page-link" th:data-page="0" href="#" tabindex="-1" title="First">
-                    <i class="fas fa-angle-double-left"></i>
+                    <i class="fas fa-angle-left"></i>
                 </a>
             </li>
 
@@ -90,7 +94,7 @@
             <!-- Last Page -->
             <li class="page-item mb-0" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
                 <a class="page-link" th:data-page="${totalPages - 1}" href="#" title="Last">
-                    <i class="fas fa-angle-double-right"></i>
+                    <i class="fas fa-angle-right"></i>
                 </a>
             </li>
         </ul>

@@ -29,7 +29,6 @@ public class CategoryController {
     @Autowired
     private CourseService courseService;
 
-    // Sửa đổi method loadPagedCategories để xử lý tham số name null/empty
     private void loadPagedCategories(Model model, String name, String sort, int page, int size) {
         // Handle null or empty name parameter
         String searchName = (name != null && !name.trim().isEmpty()) ? name.trim() : "";
@@ -37,13 +36,12 @@ public class CategoryController {
         Pageable pageable = PageRequest.of(page, size,
                 sort != null && sort.equals("asc") ? Sort.by("name").ascending()
                         : sort != null && sort.equals("desc") ? Sort.by("name").descending()
-                        : Sort.unsorted());
+                                : Sort.unsorted());
 
         Page<Category> categoriesPage;
 
-        // If search name is empty, find all categories with pagination
         if (searchName.isEmpty()) {
-            categoriesPage = categoryService.findAll(pageable); // Cần thêm method này vào service
+            categoriesPage = categoryService.findAll(pageable);
         } else {
             categoriesPage = categoryService.findByNameContaining(searchName, pageable);
         }
@@ -57,7 +55,6 @@ public class CategoryController {
         model.addAttribute("pageSize", size);
     }
 
-    // Sửa đổi method getAllCategories
     @GetMapping("/category")
     public String getAllCategories(
             @RequestParam(defaultValue = "") String name,
@@ -66,18 +63,25 @@ public class CategoryController {
             @RequestParam(defaultValue = "5") int size,
             @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
             Model model) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Category> categoryPage = categoryService.filterCategories(name, sort, pageable);
 
-        // Validate page parameter
-        if (page < 0) page = 0;
+        model.addAttribute("category", categoryPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", categoryPage.getTotalPages());
+        model.addAttribute("totalItems", categoryPage.getTotalElements());
+        model.addAttribute("fragmentContent", "adminDashBoard/fragments/category :: categoryList");
+        return "adminDashBoard/index";
 
-        loadPagedCategories(model, name, sort, page, size);
+    }
+    @GetMapping("/category/showmore")
+    public String showmore(@RequestParam("id") int id, Model model) {
+        Category category = categoryService.findById(id);
+        model.addAttribute("category", category);
+        model.addAttribute("coursesList", category.getCourses());
+        model.addAttribute(fragmentContent, "adminDashboard/fragments/showMore :: showMore");
+        return "adminDashboard/index";
 
-        if ("XMLHttpRequest".equals(requestedWith)) {
-            return categoryPagination;
-        } else {
-            model.addAttribute(fragmentContent, categoryList);
-            return adminDashBoardPath;
-        }
     }
 
     @GetMapping("/category/delete")
@@ -96,12 +100,12 @@ public class CategoryController {
 
     @PostMapping("/category/add")
     public String addCategory(@RequestParam("name") String name,
-                              @RequestParam(defaultValue = "") String sort,
-                              @RequestParam(defaultValue = "") String search,
-                              @RequestParam(defaultValue = "0") int page,
-                              @RequestParam(defaultValue = "5") int size,
-                              @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
-                              Model model) {
+            @RequestParam(defaultValue = "") String sort,
+            @RequestParam(defaultValue = "") String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
+            Model model) {
 
         if (categoryService.existsByName(name)) {
             model.addAttribute("errorMessage", "Category already exists");
@@ -113,7 +117,7 @@ public class CategoryController {
         }
 
         loadPagedCategories(model, search, sort, page, size);
-        
+
         if ("XMLHttpRequest".equals(requestedWith)) {
             return categoryPagination;
         } else {
@@ -124,10 +128,10 @@ public class CategoryController {
 
     @GetMapping("/category/edit")
     public String editCategory(@RequestParam("id") int id,
-                               @RequestParam(defaultValue = "0") int page,
-                               @RequestParam(defaultValue = "") String sort,
-                               @RequestParam(defaultValue = "") String name,
-                               Model model) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "") String sort,
+            @RequestParam(defaultValue = "") String name,
+            Model model) {
         Category category = categoryService.findById(id);
         if (category != null) {
             model.addAttribute("category", category);
@@ -143,12 +147,12 @@ public class CategoryController {
 
     @PostMapping("/category/edit")
     public String editCategory(@RequestParam("id") int id,
-                               @RequestParam("name") String name,
-                               @RequestParam(defaultValue = "0") int page,
-                               @RequestParam(defaultValue = "") String sort,
-                               @RequestParam(defaultValue = "") String search,
-                               @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
-                               Model model) {
+            @RequestParam("name") String name,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "") String sort,
+            @RequestParam(defaultValue = "") String search,
+            @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
+            Model model) {
         Category category = categoryService.findById(id);
 
         if (category == null) {
@@ -163,12 +167,34 @@ public class CategoryController {
         }
 
         loadPagedCategories(model, search, sort, page, 5);
-        
+
         if ("XMLHttpRequest".equals(requestedWith)) {
             return categoryPagination;
         } else {
             model.addAttribute(fragmentContent, categoryList);
             return adminDashBoardPath;
         }
+    }
+
+    @GetMapping("/category/filter")
+    public String filterCategories(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String sort,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            Model model) {
+
+        if (page < 0) page = 0;
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Category> categoryPage = categoryService.filterCategories(name, sort, pageable);
+
+        model.addAttribute("category", categoryPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", categoryPage.getTotalPages());
+        model.addAttribute("totalItems", categoryPage.getTotalElements());
+        model.addAttribute("pageSize", size);
+
+        return "adminDashBoard/fragments/category :: categoryTableFragment";
     }
 }

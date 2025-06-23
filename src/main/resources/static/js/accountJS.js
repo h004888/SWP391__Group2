@@ -2,11 +2,13 @@ let currentRole = 1; // Default to admin (role ID 1)
 let searchTimer;
 let currentPage = 0;
 let totalPages = 0;
+let currentStatus = 'true'; // Default to active status
 
 // Event listeners
 $(document).ready(function () {
+    // Load data for all tabs but only show pagination for admin tab initially
     [1, 2, 3].forEach(roleId => {
-        loadUsers(roleId,'', 0);
+        loadUsers(roleId,'', 0, roleId === 1); // Only show pagination for admin tab (roleId === 1)
     });
     function toggleAddButton(tabId) {
         if (tabId === "#admin") {
@@ -30,19 +32,14 @@ $(document).ready(function () {
         const page = $(this).data('page');
 
         // Kiểm tra page hợp lệ
-        if (page !== undefined && page >= 0 && page < totalPages) {
+        if (page !== undefined && page >= 0) {
             currentPage = page;
             const keyword = $('#searchInput').val().trim();
-            loadUsers(currentRole, keyword, currentPage);
+            loadUsers(currentRole, keyword, currentPage, true);
         } else {
             console.log("Invalid page number:", page);
         }
     });
-
-
-// Load initial data for admin tab
-
-    // loadUsers(1, ); // Load trang đầu tiên cho admin
 
     // Tab change
     $('#accountTabs button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
@@ -50,7 +47,7 @@ $(document).ready(function () {
         currentRole = roleId;
         currentPage = 0;
         const keyword = $('#searchInput').val().trim();
-        loadUsers(roleId, keyword, 0);
+        loadUsers(roleId, keyword, 0, true);
         console.log("Tab changed to role:", roleId);
     });
 
@@ -62,12 +59,20 @@ $(document).ready(function () {
         clearTimeout(searchTimer);
         searchTimer = setTimeout(function () {
             currentPage = 0; // Reset về trang đầu khi search
-            loadUsers(currentRole, keyword, 0);
+            loadUsers(currentRole, keyword, 0, true);
         }, 300);
     });
 
+    // Status filter change event
+    $('#statusFilter').on('change', function() {
+        currentStatus = $(this).val();
+        currentPage = 0;
+        const keyword = $('#searchInput').val().trim();
+        loadUsers(currentRole, keyword, 0, true);
+    });
+
     // Khi click nút block
-    $(document).on('click', '.btn-danger[title="Blocked"]', function (e) {
+    $(document).on('click', '.btn-danger-soft[title="Blocked"]', function (e) {
         e.preventDefault();
 
         const blockUrl = $(this).attr('href');
@@ -102,7 +107,6 @@ $(document).ready(function () {
         $('#deleteModal').modal('show');
     });
 
-
     // Confirm block button click
     $(document).on('click', '#confirmDelete', function (e) {
         e.preventDefault();
@@ -117,7 +121,7 @@ $(document).ready(function () {
                 success: function (response) {
                     $('#deleteModal').modal('hide');
                     const keyword = $('#searchInput').val().trim();
-                    loadUsers(currentRole, keyword, currentPage);
+                    loadUsers(currentRole, keyword, currentPage, true);
                 },
                 error: function () {
                     alert("Có lỗi xảy ra!");
@@ -146,13 +150,20 @@ $(document).ready(function () {
 });
 
 // Function to load users based on role and search keyword
-function loadUsers(roleId, keyword = '', page = 0) {
+function loadUsers(roleId, keyword = '', page = 0, showPagination = false) {
     const tableBodyElement = getTableBodyElement(roleId);
 
     if (!tableBodyElement) {
         console.error("Table body element NOT FOUND for role:", roleId);
         return;
     }
+
+    // Convert status string to boolean or null
+    let statusParam = null;
+    if (currentStatus !== 'all') {
+        statusParam = currentStatus === 'true';
+    }
+
     $.ajax({
         url: '/admin/account/filter',
         method: 'GET',
@@ -160,11 +171,12 @@ function loadUsers(roleId, keyword = '', page = 0) {
             keyword: keyword || null,
             role: roleId,
             page: page,
-            size: 5
+            size: 5,
+            status: statusParam
         },
         beforeSend: function () {
             console.log("=== AJAX SENDING ===");
-            console.log("Data:", {keyword: keyword || null, role: roleId, page: page});
+            console.log("Data:", {keyword: keyword || null, role: roleId, page: page, status: statusParam});
         },
         success: function (data) {
             //Parse response để lấy cả table content và pagination info
@@ -172,14 +184,18 @@ function loadUsers(roleId, keyword = '', page = 0) {
                 // Nếu server trả về object với tableContent và pagination
                 $(tableBodyElement).html(data.tableContent);
                 updateCountBadge(roleId, data.tableContent);
-                totalPages = data.pagination.totalPages;
+                if (showPagination) {
+                    totalPages = data.pagination.totalPages;
+                }
             } else {
                 // Nếu server chỉ trả về HTML content (current implementation)
                 $(tableBodyElement).html(data);
                 updateCountBadge(roleId, data);
 
                 //call API riêng để lấy pagination info hoặc modify server response
-                getPaginationInfo(roleId, keyword, page);
+                if (showPagination) {
+                    getPaginationInfo(roleId, keyword, page);
+                }
             }
         },
         error: function (xhr, status, error) {
@@ -200,7 +216,7 @@ function blockUser(userId, userEmail) {
         success: function (response) {
             $('#deleteModal').modal('hide');
             const keyword = $('#searchInput').val().trim();
-            loadUsers(currentRole, keyword, currentPage);
+            loadUsers(currentRole, keyword, currentPage, true);
         },
         error: function (xhr, status, error) {
             $('#deleteModal').modal('hide');
@@ -227,66 +243,30 @@ function blockUser(userId, userEmail) {
 }
 
 function getPaginationInfo(roleId, keyword = '', page = 0) {
+    // Convert status string to boolean or null
+    let statusParam = null;
+    if (currentStatus !== 'all') {
+        statusParam = currentStatus === 'true';
+    }
+
     $.ajax({
-        url: '/admin/account/pagination-info',
+        url: '/admin/account/pagination',
         method: 'GET',
         data: {
             keyword: keyword || null,
             role: roleId,
             page: page,
-            size: 5
+            size: 5,
+            status: statusParam
         },
-        success: function (paginationData) {
-            totalPages = paginationData.totalPages;
-            updatePaginationUI(paginationData, roleId, keyword, page);
+        success: function (paginationHtml) {
+            $('#accountPaginationContainer').html(paginationHtml);
         },
         error: function (xhr, status, error) {
             console.error("Error getting pagination info:", error);
+            $('#accountPaginationContainer').html('<div class="text-center text-danger">Error loading pagination</div>');
         }
     });
-}
-
-// update pagination UI
-function updatePaginationUI(pagination, roleId, keyword, currentPage) {
-    const paginationContainer = $('.pagination');
-
-    paginationContainer.parent().show();
-    paginationContainer.empty();
-
-    // Previous button
-    const prevDisabled = currentPage === 0 ? 'disabled' : '';
-    paginationContainer.append(`
-        <li class="page-item ${prevDisabled}">
-            <a class="page-link" data-page="${currentPage - 1}" href="#">
-                <i class="fa fa-angle-double-left"></i>
-            </a>
-        </li>
-    `);
-
-    // Page numbers
-    for (let i = 0; i < pagination.totalPages; i++) {
-        const active = currentPage === i ? 'active' : '';
-        paginationContainer.append(`
-            <li class="page-item ${active}">
-                <a class="page-link" data-page="${i}" href="#">${i + 1}</a>
-            </li>
-        `);
-    }
-
-    // Next button
-    const nextDisabled = currentPage + 1 >= pagination.totalPages ? 'disabled' : '';
-    paginationContainer.append(`
-        <li class="page-item ${nextDisabled}">
-            <a class="page-link" data-page="${currentPage + 1}" href="#">
-                <i class="fa fa-angle-double-right"></i>
-            </a>
-        </li>
-    `);
-
-    // Update hint text
-    $('.hint-text').html(`
-        Showing <b>${pagination.currentElements}</b> out of <b>${pagination.totalElements}</b> entries
-    `);
 }
 
 $(document).on('click', '.btn-reset-password', function (e) {
@@ -300,7 +280,7 @@ $(document).on('click', '.btn-reset-password', function (e) {
         success: function (response) {
             alert("Repassword sucessfully!")
             const keyword = $('#searchInput').val().trim();
-            loadUsers(currentRole, keyword, currentPage);
+            loadUsers(currentRole, keyword, currentPage, true);
         },
         error: function (xhr) {
             alert("Unexpected error: " + xhr.responseText);
@@ -308,14 +288,13 @@ $(document).on('click', '.btn-reset-password', function (e) {
     });
 });
 
-
 function getTableBodyElement(roleId) {
     switch (roleId) {
         case 1:
             return document.getElementById('adminTableBody');
-        case 3:
-            return document.getElementById('instructorTableBody');
         case 2:
+            return document.getElementById('instructorTableBody');
+        case 3:
             return document.getElementById('userTableBody');
         default:
             return null;
@@ -337,20 +316,17 @@ function updateCountBadge(roleId, data) {
         case 1:
             badgeElement = document.getElementById('adminCount');
             break;
-        case 3:
+        case 2:
             badgeElement = document.getElementById('instructorCount');
             break;
-        case 2:
+        case 3:
             badgeElement = document.getElementById('userCount');
             break;
     }
 
-    // Trừ đi hàng "Không tìm thấy tài khoản nào" nếu có
     const rowCount = Array.from(rows).filter(row => !row.textContent.includes("Không tìm thấy")).length;
 
     if (badgeElement) {
         badgeElement.textContent = rowCount;
     }
 }
-
-

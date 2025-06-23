@@ -13,8 +13,8 @@ public class ChapterMapper {
         chapter.setTitle(dto.getTitle());
         chapter.setDescription(dto.getDescription());
         chapter.setOrderNumber(dto.getOrderNumberChapter());
-        chapter.setCreateAt(LocalDateTime.now());
-        chapter.setUpdateAt(LocalDateTime.now());
+        chapter.setCreatedAt(LocalDateTime.now());
+        chapter.setUpdatedAt(LocalDateTime.now());
         return chapter;
     }
 }

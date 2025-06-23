@@ -56,7 +56,14 @@
                class="btn btn-success btn-sm btn-reset-password"
                title="Reset Password">
                 <i class="fas fa-key"></i>
-            </a>
+            </button>
+        </td>
+    </tr>
+    
+    <!-- Show message when no data found -->
+    <tr th:if="${#lists.isEmpty(listU)}">
+        <td colspan="7" class="text-center text-muted">
+            <i class="fas fa-search me-2"></i>Không tìm thấy tài khoản nào
         </td>
     </tr>
 </div>
@@ -92,3 +99,69 @@
     </div>
 </div>
 
+
+<div th:fragment="accountPagination">
+    <div class="d-sm-flex justify-content-sm-between align-items-sm-center mt-2" th:if="${totalItems > 0}">
+        <div class="mb-0 text-center text-sm-start">
+            <p class="mb-0 text-center text-sm-start" th:if="${totalItems > 0}">
+                Showing <span th:text="${currentPage * 5 + 1}">1</span> to
+                <span th:text="${(currentPage * 5) + 5 > totalItems ? totalItems : (currentPage * 5) + 5}">5</span>
+                of
+                <span th:text="${totalItems}">20</span> entries
+            </p>
+            <p class="mb-0 text-center text-sm-start" th:if="${totalItems == 0}">
+                No entries found
+            </p>
+        </div>
+        <nav class="d-flex justify-content-center mb-0" aria-label="navigation" th:if="${totalPages > 1}">
+            <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
+                <!-- First Page -->
+                <li class="page-item mb-0" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link" th:data-page="0" href="#" tabindex="-1" title="First">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </li>
+
+                <!-- Page Numbers -->
+                <th:block th:with="startPage=${currentPage - 2 < 0 ? 0 : currentPage - 2},
+                                  endPage=${currentPage + 2 >= totalPages ? totalPages - 1 : currentPage + 2}">
+
+                    <!-- Show first page if not in range -->
+                    <li class="page-item mb-0" th:if="${startPage > 0}">
+                        <a class="page-link" th:data-page="0" th:text="1" href="#"></a>
+                    </li>
+                    <li class="page-item disabled mb-0" th:if="${startPage > 1}">
+                        <span class="page-link">..</span>
+                    </li>
+
+                    <!-- Page range -->
+                    <li class="page-item mb-0"
+                        th:each="i : ${#numbers.sequence(startPage, endPage)}"
+                        th:classappend="${currentPage == i} ? 'active'">
+                        <a class="page-link" th:data-page="${i}" th:text="${i + 1}" href="#"></a>
+                    </li>
+
+                    <!-- Show last page if not in range -->
+                    <li class="page-item disabled mb-0" th:if="${endPage < totalPages - 2}">
+                        <span class="page-link">..</span>
+                    </li>
+                    <li class="page-item mb-0" th:if="${endPage < totalPages - 1}">
+                        <a class="page-link" th:data-page="${totalPages - 1}" th:text="${totalPages}" href="#"></a>
+                    </li>
+                </th:block>
+
+                <!-- Last Page -->
+                <li class="page-item mb-0" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                    <a class="page-link" th:data-page="${totalPages - 1}" href="#" title="Last">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Show message when no data -->
+    <div class="text-center text-muted mt-3" th:if="${totalItems == 0}">
+        <i class="fas fa-search me-2"></i>No entries found
+    </div>
+</div>

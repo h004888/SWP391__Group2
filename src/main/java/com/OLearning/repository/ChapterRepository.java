@@ -10,11 +10,10 @@ import java.util.List;
 
 @Repository
 public interface ChapterRepository extends JpaRepository<Chapter, Long> {
-    @Query(value = "SELECT chapterId, title, description, orderNumber, createAt, updateAt, courseId FROM Chapters WHERE courseId = :courseId ORDER BY orderNumber ASC", nativeQuery = true)
+    @Query(value = "SELECT * FROM Chapters WHERE courseId = :courseId ORDER BY orderNumber ASC", nativeQuery = true)
     List<Chapter> findChaptersByCourse(@Param("courseId") Long courseId);
 
-    @Query(value = "SELECT chapterId, title, description, orderNumber, createAt, updateAt, courseId FROM Chapters WHERE chapterId = :id", nativeQuery = true)
+    @Query(value = "SELECT * FROM Chapters WHERE  chapterId = :id", nativeQuery = true)
     Chapter findChapterById(@Param("id") Long id);
-
     void deleteById(Long id);
 }

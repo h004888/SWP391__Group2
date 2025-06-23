@@ -25,7 +25,7 @@ public class Lesson {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     @ManyToOne
-    @JoinColumn(name = "chapterId")
+    @JoinColumn(name = "chapterId", referencedColumnName = "chapterId")
     private Chapter chapter;
 
     @OneToOne(mappedBy = "lesson", cascade = CascadeType.ALL)

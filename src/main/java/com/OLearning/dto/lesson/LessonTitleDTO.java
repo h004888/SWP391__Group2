@@ -18,8 +18,6 @@ public class LessonTitleDTO {
     private String title;
     @NotBlank(message = "Description is required")
     private String description;
-//    @NotBlank(message = "Content type is required")
-//    private String contentType;
     @Min(value = 1, message = "Order number must be at least 1")
     @Digits(integer = 3, fraction = 0, message = "Order number must be numeric")
     private Integer orderNumber;

@@ -1,0 +1,326 @@
+<div class="container" th:fragment="listsCourseContent" id="courseContentContainer">
+    <div class="row">
+        <!-- Main content START -->
+        <div class="col-xl-12">
+            <!-- Toast notifications -->
+            <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
+                <div th:if="${successMessage}" class="toast align-items-center text-white bg-success border-0 show"
+                     role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <span th:text="${successMessage}"></span>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                                aria-label="Close"></button>
+                    </div>
+                </div>
+                <div th:if="${errorMessage}" class="toast align-items-center text-white bg-danger border-0 show"
+                     role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <span th:text="${errorMessage}"></span>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                                aria-label="Close"></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border bg-transparent rounded-3">
+                <!-- Card header START -->
+                <div class="card-header bg-transparent border-bottom">
+                    <div class="row align-items-center">
+                        <div class="col-md-4">
+                            <h3 class="mb-0">My Courses List</h3>
+                        </div>
+                        <div class="col-md-4">
+                            <form class="rounded position-relative" method="get"
+                                  action="/instructordashboard/courses/searchcourse">
+                                <input class="form-control pe-5 bg-transparent" type="search" name="title"
+                                       placeholder="Search courses..." aria-label="Search">
+                                <button class="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset"
+                                        type="submit">
+                                    <i class="fas fa-search fs-6"></i>
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a href="/instructordashboard/createcourse/coursebasic" class="btn btn-success">
+                                <i class="bi bi-plus-circle me-1"></i> Create Course
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <!-- Card header END -->
+
+                <!-- Card body START -->
+                <div class="card-body">
+                    <!-- Filter Form START -->
+                    <div class="row g-3 align-items-center justify-content-between mb-4">
+                        <div class="col-12">
+                            <form id="filterForm" class="row g-3">
+                                <!-- Category filter -->
+                                <div class="col-md-4">
+                                    <label for="filterCategory" class="form-label">Category</label>
+                                    <select class="form-select" name="category" id="filterCategory">
+                                        <option value="">All Categories</option>
+                                        <option th:each="cate : ${categories}"
+                                                th:value="${cate.id}"
+                                                th:text="${cate.name}"
+                                                th:selected="${cate.id == selectedCategory}"></option>
+                                    </select>
+                                </div>
+
+                                <!-- Status filter -->
+                                <div class="col-md-4">
+                                    <label for="courseStatus" class="form-label">Status</label>
+                                    <select class="form-select" id="courseStatus" name="status">
+                                        <option value="">All Status</option>
+                                        <option value="draft" th:selected="${status == 'draft'}">Draft</option>
+                                        <option value="approved" th:selected="${status == 'approved'}">Approved</option>
+                                        <option value="pending" th:selected="${status == 'pending'}">Pending</option>
+                                        <option value="resubmit" th:selected="${status == 'resubmit'}">Resubmit</option>
+                                        <option value="blocked" th:selected="${status == 'blocked'}">Blocked</option>
+                                        <option value="live" th:selected="${status == 'live'}">Live</option>
+                                        <option value="rejected" th:selected="${status == 'rejected'}">Rejected</option>
+                                        <option value="unknown" th:selected="${status == 'unknown'}">Unknown</option>
+                                    </select>
+                                </div>
+
+                                <!-- Price filter -->
+                                <div class="col-md-4">
+                                    <label for="filterPrice" class="form-label">Price Range</label>
+                                    <select class="form-select" name="price" id="filterPrice">
+                                        <option value="">All Prices</option>
+                                        <option value="free" th:selected="${selectedPrice == 'free'}">Free</option>
+                                        <option value="paid" th:selected="${selectedPrice == 'paid'}">Paid</option>
+                                        <option value="low" th:selected="${selectedPrice == 'low'}">Below $50</option>
+                                        <option value="mid" th:selected="${selectedPrice == 'mid'}">$50 - $100</option>
+                                        <option value="high" th:selected="${selectedPrice == 'high'}">Above $100
+                                        </option>
+                                    </select>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- Filter Form END -->
+
+                    <!-- Loading indicator -->
+                    <div id="loadingIndicator" class="text-center py-4" style="display: none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 mb-0">Loading courses...</p>
+                    </div>
+
+                    <!-- Course list table START -->
+                    <div class="table-responsive border-0" id="courseTableContainer">
+                        <table class="table table-hover align-middle p-4 mb-0">
+                            <!-- Table head -->
+                            <thead class="table-dark">
+                            <tr>
+                                <th scope="col" class="border-0 rounded-start">Course Title</th>
+                                <th scope="col" class="border-0">Category</th>
+                                <th scope="col" class="border-0">Level</th>
+                                <th scope="col" class="border-0">Enrolled</th>
+                                <th scope="col" class="border-0">Status</th>
+                                <th scope="col" class="border-0">Price</th>
+                                <th scope="col" class="border-0 rounded-end">Actions</th>
+                            </tr>
+                            </thead>
+
+                            <!-- Table body START -->
+                            <tbody id="courseTableBody">
+                            <!-- Table item -->
+                            <tr th:each="course : ${courses}">
+                                <!-- Course item -->
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <!-- Image -->
+                                        <div class="flex-shrink-0">
+                                            <img th:src="@{${course.courseImg}}" class="rounded" alt="Course Image"
+                                                 style="width: 80px; height: 60px; object-fit: contain;">
+                                        </div>
+                                        <div class="ms-3">
+                                            <!-- Title -->
+                                            <h6 class="mb-1">
+                                                <a th:href="@{|/instructordashboard/courses/detail/${course.courseId}|}"
+                                                   th:text="${course.title}" class="text-decoration-none"></a>
+                                            </h6>
+                                            <!-- Info -->
+                                            <small class="text-muted">
+                                                <i class="fas fa-table text-warning me-1"></i>
+                                                <span th:text="${course.totalLessons ?: 0} + ' lesson'"></span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Category Name item -->
+                                <td>
+                                    <span class="badge bg-primary rounded-pill" th:text="${course.categoryName}"></span>
+                                </td>
+
+                                <!-- Course Level -->
+                                <td>
+                                    <span class="badge bg-success bg-opacity-10 text-success"
+                                          th:text="${course.courseLevel}"></span>
+                                </td>
+
+                                <!-- Enrolled item -->
+                                <td class="text-center">
+                                    <span class="fw-bold">0</span>
+                                </td>
+
+                                <!-- Status item -->
+                                <td>
+                                    <div th:switch="${course.status}">
+                                        <span th:case="'draft'" class="badge bg-secondary">Draft</span>
+                                        <span th:case="'published'" class="badge bg-success">Published</span>
+                                        <span th:case="'pending'" class="badge bg-warning text-dark">Pending</span>
+                                        <span th:case="'rejected'" class="badge bg-danger">Rejected</span>
+                                        <span th:case="'approved'" class="badge bg-info">Approved</span>
+                                        <span th:case="'live'" class="badge bg-success">Live</span>
+                                        <span th:case="'blocked'" class="badge bg-danger">Blocked</span>
+                                        <span th:case="'resubmit'" class="badge bg-warning">Resubmit</span>
+                                        <span th:case="null" class="badge bg-secondary">Unknown</span>
+                                        <span th:case="*" class="badge bg-secondary">Unknown</span>
+                                    </div>
+                                </td>
+
+                                <!-- Price item -->
+                                <td>
+                                    <span class="fw-bold text-success"
+                                          th:text="${course.price == 0 ? 'Free' : '$' + course.price}"></span>
+                                </td>
+
+                                <!-- Action item -->
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        <!-- Edit button -->
+                                        <a th:href="@{/instructordashboard/createcourse/coursebasic(courseId=${course.courseId})}"
+                                           class="btn btn-sm btn-outline-primary"
+                                           title="Edit Course"
+                                           th:if="${course.status == 'draft' or course.status == null}">
+                                            <i class="far fa-edit"></i>
+                                        </a>
+
+                                        <!-- Delete button -->
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-danger"
+                                                title="Delete Course"
+                                                th:data-id="${course.courseId}" th:data-title="${course.title}" onclick="deleteCourse(this.getAttribute('data-id'), this.getAttribute('data-title'))">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Empty state -->
+                            <tr th:if="${#lists.isEmpty(courses)}">
+                                <td colspan="7" class="text-center py-4">
+                                    <div class="text-muted">
+                                        <i class="fas fa-book fa-3x mb-3 opacity-50"></i>
+                                        <h5>No courses found</h5>
+                                        <p>Try adjusting your filters or create a new course.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                            <!-- Table body END -->
+                        </table>
+                    </div>
+                    <!-- Course list table END -->
+
+                    <!-- Pagination START -->
+                    <div class="d-flex justify-content-between align-items-center mt-4" th:if="${totalElements > 0}">
+                        <!-- Results info -->
+                        <div class="text-muted">
+                            Showing
+                            <span class="fw-bold" th:text="${currentPage * size + 1}"></span>
+                            to
+                            <span class="fw-bold"
+                                  th:text="${(currentPage + 1) * size > totalElements ? totalElements : (currentPage + 1) * size}"></span>
+                            of
+                            <span class="fw-bold" th:text="${totalElements}"></span>
+                            entries
+                        </div>
+
+                        <!-- Pagination -->
+                        <nav aria-label="Course pagination" th:if="${totalPages > 1}">
+                            <ul class="pagination pagination-sm mb-0">
+                                <!-- Previous button -->
+                                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                    <a class="page-link"
+                                       href="#"
+                                       th:data-page="${currentPage > 0 ? currentPage - 1 : 0}"
+                                       tabindex="-1">
+                                        <i class="fas fa-angle-left"></i>
+                                    </a>
+                                </li>
+
+                                <!-- Page numbers -->
+                                <li class="page-item"
+                                    th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                    th:classappend="${i == currentPage} ? 'active' : ''">
+                                    <a class="page-link"
+                                       href="#"
+                                       th:data-page="${i}"
+                                       th:text="${i + 1}"></a>
+                                </li>
+
+                                <!-- Next button -->
+                                <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                                    <a class="page-link"
+                                       href="#"
+                                       th:data-page="${currentPage + 1 < totalPages ? currentPage + 1 : currentPage}">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                    <!-- Pagination END -->
+                </div>
+                <!-- Card body END -->
+            </div>
+            <!-- Card END -->
+        </div>
+        <!-- Main content END -->
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the course "<span id="courseTitle"></span>"?</p>
+                    <p class="text-danger"><small>This action cannot be undone.</small></p>
+                </div>
+                <div class="modal-footer">
+                    <div class="d-flex gap-2" style="min-width: 300px;">
+                        <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancel</button>
+                        <form id="deleteForm" method="post" action="/instructordashboard/createcourse/deletecourse" style="width: 100%;">
+                            <input type="hidden" name="courseId" id="deleteCourseId">
+                            <button type="submit" class="btn btn-danger w-100">Delete Course</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script th:src="@{/js/instructorFilter.js}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+</div>

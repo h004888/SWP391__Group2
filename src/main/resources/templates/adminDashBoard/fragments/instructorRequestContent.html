@@ -59,13 +59,14 @@
             <!-- Instructor request table START -->
             <div id="requestTableWrapper" th:fragment="requestTableFragment">
                 <div class="table-responsive border-0">
-                    <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                    <table class="table table-dark-gray align-middle p-4 mb-0 table-hover ">
                         <!-- Table head -->
                         <thead>
                             <tr>
                                 <th>Instructor name</th>
                                 <th>Requested Date</th>
                                 <th>Subject</th>
+                                <th>Status</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -93,6 +94,14 @@
                                 <td class="text-center text-sm-start">
                                     <h6 class="mb-0" th:text="${request.user.personalSkill}">Subject</h6>
                                 </td>
+
+                                <!-- Table data - Status -->
+                                <td>
+                                    <span th:if="${request.status == null || request.status == 'PENDING'}" class="badge bg-warning">Pending</span>
+                                    <span th:if="${request.status == 'APPROVED'}" class="badge bg-success">Approved</span>
+                                    <span th:if="${request.status == 'REJECTED'}" class="badge bg-danger">Rejected</span>
+                                </td>
+
                                 <!-- Table data -->
                                 <td>
                                     <a th:if="${request.status == null || request.status == 'PENDING'}" href="#" class="btn btn-success-soft me-1 mb-1 mb-lg-0" 
@@ -103,9 +112,7 @@
                                        data-bs-toggle="modal" data-bs-target="#rejectModal" 
                                        th:onclick="'openRejectModal(' + ${request.requestId} + ')'">Reject</a>
 
-                                    <a th:if="${request.status == 'ACCEPTED'}" href="#" class="btn btn-success me-1 mb-1 mb-md-0 disabled">Accepted</a>
-                                    <a th:if="${request.status == 'REJECTED'}" href="#" class="btn btn-secondary me-1 mb-1 mb-md-0 disabled">Rejected</a>
-                                    <a href="#" class="btn btn-primary-soft me-1 mb-0" data-bs-toggle="modal" data-bs-target="#appDetail" th:onclick="'loadRequestDetails(' + ${request.requestId} + ')'">View App</a>
+                                    <a href="#" class="btn btn-primary-soft me-1 mb-0" data-bs-toggle="modal" data-bs-target="#appDetail" th:onclick="'loadRequestDetails(' + ${request.requestId} + ')'">View Detail</a>
                                 </td>
                             </tr>
                         </tbody>
@@ -140,11 +147,15 @@
                         </ul>
                     </nav>
                 </div>
+                <!-- Pagination & info END -->
+
             </div>
             <!-- Instructor request table END -->
         </div>
         <!-- Card body END -->
     </div>
+    <!-- Main card END -->
+
     <!-- Approve Modal -->
     <div class="modal fade" id="acceptModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
@@ -166,7 +177,6 @@
             </div>
         </div>
     </div>
-
 
     <!-- Reject Modal -->
     <div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
@@ -198,7 +208,6 @@
         </div>
     </div>
 
-    <!-- Main card END -->
     <div class="modal fade" id="appDetail" tabindex="-1" aria-labelledby="appDetaillabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
@@ -234,16 +243,24 @@
                     <!-- Note -->
                     <span class="small">Note:</span>
                     <p class="text-dark mb-2" id="requestNote">Loading...</p>
+
+                    <!-- Hidden input for request ID -->
+                    <input type="hidden" id="detailRequestId" name="requestId"/>
                 </div>
 
                 <!-- Modal footer -->
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-danger-soft my-0" data-bs-dismiss="modal">Close</button>
+                    <!-- Action buttons - only show for pending requests -->
+                    <div id="actionButtons" style="display: none;">
+                        <button type="button" class="btn btn-success me-2" onclick="acceptRequest()">Accept Request</button>
+                        <button type="button" class="btn btn-danger me-2" onclick="showRejectReason()">Reject Request</button>
+                    </div>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
-
     </div>
+
     <script>
         setTimeout(function () {
             $('#success-alert').fadeOut('slow');
@@ -253,6 +270,9 @@
     <!-- JavaScript to handle loading request details -->
     <script th:inline="javascript">
         function loadRequestDetails(requestId) {
+            // Store the request ID for later use
+            document.getElementById('detailRequestId').value = requestId;
+            
             fetch('/admin/mnInstructors/request/details/' + requestId)
                 .then(response => response.json())
                 .then(data => {
@@ -263,8 +283,44 @@
                     document.getElementById('requestDate').textContent = new Date(data.requestDate).toLocaleDateString();
                     document.getElementById('requestStatus').textContent = data.status || 'PENDING';
                     document.getElementById('requestNote').textContent = data.note || 'No note provided.';
+                    
+                    // Show/hide action buttons based on status
+                    const actionButtons = document.getElementById('actionButtons');
+                    if (data.status === null || data.status === 'PENDING') {
+                        actionButtons.style.display = 'block';
+                    } else {
+                        actionButtons.style.display = 'none';
+                    }
                 })
                 .catch(error => console.error('Error loading request details:', error));
+        }
+
+        function acceptRequest() {
+            const requestId = document.getElementById('detailRequestId').value;
+            if (confirm('Are you sure you want to accept this instructor request? The user will be granted instructor privileges.')) {
+                // Create a form and submit it
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/admin/mnInstructors/request/accept/' + requestId;
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        function showRejectReason() {
+            const requestId = document.getElementById('detailRequestId').value;
+            document.getElementById('rejectRequestId').value = requestId;
+            document.getElementById('rejectForm').action = '/admin/mnInstructors/request/reject/' + requestId;
+            
+            // Close the detail modal and open the reject modal
+            const detailModal = bootstrap.Modal.getInstance(document.getElementById('appDetail'));
+            detailModal.hide();
+            
+            // Open reject modal after a short delay
+            setTimeout(() => {
+                const rejectModal = new bootstrap.Modal(document.getElementById('rejectModal'));
+                rejectModal.show();
+            }, 300);
         }
 
         function openAcceptModal(requestId) {

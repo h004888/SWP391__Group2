@@ -19,7 +19,15 @@ public interface UserService {
 
     Page<UserDTO> getUsersByRoleWithPagination(Long roleId, Pageable pageable);
 
+    Page<UserDTO> getInstructorsByRoleIdOrderByCourseCountDesc(Long roleId, Pageable pageable);
+
     Page<UserDTO> searchByNameWithPagination(String keyword, Long roleId, Pageable pageable);
+
+    Page<UserDTO> getInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(String keyword, Long roleId, Pageable pageable);
+
+    Page<UserDTO> getUsersByRoleAndStatusWithPagination(Long roleId, boolean status, Pageable pageable);
+
+    Page<UserDTO> searchByNameAndStatusWithPagination(String keyword, Long roleId, boolean status, Pageable pageable);
 
     Optional<UserDetailDTO> getInfoUser(Long id);
 
@@ -46,4 +54,8 @@ public interface UserService {
     List<UserDTO> getTopInstructorsByCourseCount(int limit);
     
     UserDTO getUserByEmail(String username);
+
+    Page<UserDTO> filterInstructors(String keyword, Pageable pageable);
+
+    User findById(Long id);
 }

@@ -17,8 +17,8 @@
 
                 <!-- Search bar -->
                 <div class="col-md-8">
-                    <form class="rounded position-relative">
-                        <input class="form-control bg-transparent" type="search" placeholder="Search"
+                    <form id="filterForm" class="rounded position-relative">
+                        <input class="form-control bg-transparent" type="search" id="searchInput" placeholder="Search"
                                aria-label="Search">
                         <button class="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset"
                                 type="submit">
@@ -59,194 +59,385 @@
 
                 <!-- Tabs content item START -->
                 <div class="tab-pane fade show active" id="nav-preview-tab-1">
-                    <div class="row g-4">
-
-                        <!-- Card item START -->
-                        <div class="col-md-6 col-xxl-4" th:each="u : ${listInstructor}">
-                            <div class="card bg-transparent border h-100">
-                                <!-- Card header -->
-                                <div class="card-header bg-transparent border-bottom d-flex align-items-sm-center justify-content-between">
-                                    <div class="d-sm-flex align-items-center">
-                                        <!-- Avatar -->
-                                        <div class="avatar avatar-md flex-shrink-0">
-                                            <img class="avatar-img rounded-circle" th:src="${u.profilePicture}"
-                                                 alt="avatar">
+                    <div id="instructorTableWrapper" th:fragment="instructorTableFragment">
+                        <div class="row g-4">
+                            <!-- Card item START -->
+                            <div class="col-md-6 col-xxl-4" th:each="u : ${listInstructor}">
+                                <div class="card bg-transparent border h-100">
+                                    <!-- Card header -->
+                                    <div class="card-header bg-transparent border-bottom d-flex align-items-sm-center justify-content-between">
+                                        <div class="d-sm-flex align-items-center">
+                                            <!-- Avatar -->
+                                            <div class="avatar avatar-md flex-shrink-0">
+                                                <img class="avatar-img rounded-circle" th:src="${u.profilePicture}"
+                                                     alt="avatar">
+                                            </div>
+                                            <!-- Info -->
+                                            <div class="ms-0 ms-sm-2 mt-2 mt-sm-0">
+                                                <h5 class="mb-0" th:text="${u.userName}"><a
+                                                        th:href="@{/admin/mnInstructors/viewInfo/{userId}(userId=${u.userId})}">Lori
+                                                    Stevens</a></h5>
+                                                <p class="mb-0 small" th:text="${u.email}"></p>
+                                            </div>
                                         </div>
-                                        <!-- Info -->
-                                        <div class="ms-0 ms-sm-2 mt-2 mt-sm-0">
-                                            <h5 class="mb-0" th:text="${u.userName}"><a
-                                                    th:href="@{/admin/account/viewInfo/{userId}(userId=${u.userId})}">Lori
-                                                Stevens</a></h5>
-                                            <!--                                            <p class="mb-0 small" th:text="${u.userName}">Web Designer</p>-->
+
+                                        <!-- Edit dropdown -->
+                                        <div class="dropdown">
+                                            <a href="#" class="btn btn-sm btn-light btn-round small mb-0" role="button"
+                                               id="dropdownShare1" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="bi bi-three-dots fa-fw"></i>
+                                            </a>
+                                            <!-- dropdown button -->
+                                            <ul class="dropdown-menu dropdown-w-sm dropdown-menu-end min-w-auto shadow rounded"
+                                                aria-labelledby="dropdownShare1">
+                                                <li>
+                                                    <a class="dropdown-item"
+                                                       th:href="@{/admin/mnInstructors/viewInfo/{userId}(userId=${u.userId})}">
+                                                        <i class="bi bi-eye fa-fw me-2"></i>View</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#" class="dropdown-item" data-bs-toggle="modal"
+                                                       data-bs-target="#messageModal"
+                                                       th:data-instructor-id="${u.userId}"
+                                                       th:data-instructor-name="${u.userName}">
+                                                        <i class="bi bi-envelope-fill"> Message</i>
+                                                    </a>
+                                                </li>
+                                            </ul>
                                         </div>
                                     </div>
 
-                                    <!-- Edit dropdown -->
-                                    <div class="dropdown">
-                                        <a href="#" class="btn btn-sm btn-light btn-round small mb-0" role="button"
-                                           id="dropdownShare1" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="bi bi-three-dots fa-fw"></i>
-                                        </a>
-                                        <!-- dropdown button -->
-                                        <ul class="dropdown-menu dropdown-w-sm dropdown-menu-end min-w-auto shadow rounded"
-                                            aria-labelledby="dropdownShare1">
-                                            <li><a class="dropdown-item"
-                                                   th:href="@{/admin/account/viewInfo/{userId}(userId=${u.userId})}">
-                                                <i class="bi bi-eye fa-fw me-2"></i>View</a></li>
-                                            <li><a href="#" class="dropdown-item">
-                                                <i class="bi bi-envelope-fill">Message</i>
-                                            </a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-
-                                <div class="card-body">
-                                    <!-- Total students -->
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <div class="d-flex align-items-center">
-                                            <div class="icon-md bg-orange bg-opacity-10 text-orange rounded-circle flex-shrink-0">
-                                                <i class="fas fa-user-graduate fa-fw"></i></div>
-                                            <h6 class="mb-0 ms-2 fw-light">Total Students</h6>
+                                    <div class="card-body">
+                                        <!-- Total students -->
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="icon-md bg-orange bg-opacity-10 text-orange rounded-circle flex-shrink-0">
+                                                    <i class="fas fa-user-graduate fa-fw"></i></div>
+                                                <h6 class="mb-0 ms-2 fw-light">Total Students</h6>
+                                            </div>
+                                            <span class="mb-0 fw-bold"
+                                                  th:text="${enrollmentService.getStudentCountByInstructorId(u.userId)}">5,354</span>
                                         </div>
-                                        <span class="mb-0 fw-bold"
-                                              th:text="${userStudentCountMap[u.userId]}">5,354</span>
-                                    </div>
 
-                                    <!-- Total courses -->
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div class="d-flex align-items-center">
-                                            <div class="icon-md bg-purple bg-opacity-10 text-purple rounded-circle flex-shrink-0">
-                                                <i class="fas fa-book fa-fw"></i></div>
-                                            <h6 class="mb-0 ms-2 fw-light">Total Courses</h6>
+                                        <!-- Total courses -->
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="d-flex align-items-center">
+                                                <div class="icon-md bg-purple bg-opacity-10 text-purple rounded-circle flex-shrink-0">
+                                                    <i class="fas fa-book fa-fw"></i></div>
+                                                <h6 class="mb-0 ms-2 fw-light">Total Courses</h6>
+                                            </div>
+                                            <span class="mb-0 fw-bold" th:text="${u.course.size()}">15</span>
                                         </div>
-                                        <span class="mb-0 fw-bold" th:text="${u.course.size()}">15</span>
                                     </div>
-                                </div>
 
-                                <!-- Card footer -->
-                                <div class="card-footer bg-transparent border-top">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <!-- Rating star -->
-                                        <ul class="list-inline mb-0">
-                                            <li class="list-inline-item me-0 small"><i
-                                                    class="fas fa-star text-warning"></i></li>
-                                            <li class="list-inline-item me-0 small"><i
-                                                    class="fas fa-star text-warning"></i></li>
-                                            <li class="list-inline-item me-0 small"><i
-                                                    class="fas fa-star text-warning"></i></li>
-                                            <li class="list-inline-item me-0 small"><i
-                                                    class="fas fa-star text-warning"></i></li>
-                                            <li class="list-inline-item me-0 small"><i
-                                                    class="far fa-star text-warning"></i></li>
-                                        </ul>
-
+                                    <!-- Card footer -->
+                                    <div class="card-footer bg-transparent border-top">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <!-- Rating star -->
+                                            <ul class="list-inline mb-0">
+                                                <li class="list-inline-item me-0 small"><i
+                                                        class="fas fa-star text-warning"></i></li>
+                                                <li class="list-inline-item me-0 small"><i
+                                                        class="fas fa-star text-warning"></i></li>
+                                                <li class="list-inline-item me-0 small"><i
+                                                        class="fas fa-star text-warning"></i></li>
+                                                <li class="list-inline-item me-0 small"><i
+                                                        class="fas fa-star text-warning"></i></li>
+                                                <li class="list-inline-item me-0 small"><i
+                                                        class="far fa-star text-warning"></i></li>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                            <!-- Card item END -->
                         </div>
-                        <!-- Card item END -->
 
-
-                    </div> <!-- Row END -->
+                        <!-- Pagination & info -->
+                        <div class="d-sm-flex justify-content-sm-between align-items-sm-center mt-2">
+                            <p class="mb-0 text-center text-sm-start" th:if="${totalItems > 0}">
+                                Showing <span th:text="${currentPage * 6 + 1}">1</span> to
+                                <span th:text="${(currentPage * 6) + 6 > totalItems ? totalItems : (currentPage * 6) + 6}">6</span>
+                                of
+                                <span th:text="${totalItems}">20</span> entries
+                            </p>
+                            <p class="mb-0 text-center text-sm-start" th:if="${totalItems == 0}">
+                                No entries found
+                            </p>
+                            <nav class="d-flex justify-content-center mb-0" aria-label="navigation"
+                                 th:if="${totalPages > 1}">
+                                <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
+                                    <li class="page-item mb-0" th:classappend="${currentPage == 0} ? 'disabled'">
+                                        <a class="page-link" href="#" th:data-page="${currentPage - 1}">
+                                            <i class="fas fa-angle-left"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item mb-0" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                        th:classappend="${currentPage == i} ? 'active'">
+                                        <a class="page-link" href="#" th:data-page="${i}" th:text="${i + 1}"></a>
+                                    </li>
+                                    <li class="page-item mb-0"
+                                        th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                        <a class="page-link" href="#" th:data-page="${currentPage + 1}">
+                                            <i class="fas fa-angle-right"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
                 </div>
                 <!-- Tabs content item END -->
 
                 <!-- Tabs content item START -->
                 <div class="tab-pane fade" id="nav-html-tab-1">
                     <!-- Table START -->
-                    <div class="table-responsive border-0">
-                        <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
-                            <!-- Table head -->
-                            <thead>
-                            <tr>
-                                <th scope="col" class="border-0 rounded-start">Instructor name</th>
-                                <th scope="col" class="border-0">PersonalSkillPersonalSkill</th>
-                                <th scope="col" class="border-0">Courses</th>
-                                <th scope="col" class="border-0">Total studentss</th>
-                                <th scope="col" class="border-0 rounded-end">Action</th>
-                            </tr>
-                            </thead>
+                    <div id="instructorListTableWrapper" th:fragment="instructorListTableFragment">
+                        <div class="table-responsive border-0">
+                            <table class="table table-dark-gray align-middle p-4 mb-0 table-hover ">
+                                <!-- Table head -->
+                                <thead>
+                                <tr>
+                                    <th scope="col" class="border-0 rounded-start">Instructor Name</th>
+                                    <th scope="col" class="border-0">PersonalSkill</th>
+                                    <th scope="col" class="border-0">Courses</th>
+                                    <th scope="col" class="border-0">Total students</th>
+                                    <th scope="col" class="border-0 rounded-end">Action</th>
+                                </tr>
+                                </thead>
 
-                            <!-- Table body START -->
-                            <tbody>
-                            <!-- Table row -->
-                            <tr th:each="u : ${listInstructor}">
-                                <!-- Table data -->
-                                <td>
-                                    <div class="d-flex align-items-center position-relative">
-                                        <!-- Image -->
-                                        <div class="avatar avatar-md">
-                                            <img th:src="${u.profilePicture}" class="rounded-circle" alt="">
+                                <!-- Table body START -->
+                                <tbody>
+                                <!-- Table row -->
+                                <tr th:each="u : ${listInstructor}">
+                                    <!-- Table data -->
+                                    <td>
+                                        <div class="d-flex align-items-center position-relative">
+                                            <!-- Image -->
+                                            <div class="avatar avatar-md">
+                                                <img th:src="${u.profilePicture}" class="rounded-circle" alt="">
+                                            </div>
+                                            <div class="mb-0 ms-2">
+                                                <!-- Title -->
+                                                <h6 class="mb-0" th:text="${u.userName}"><a
+                                                        th:href="@{/admin/mnInstructors/viewInfo/{userId}(userId=${u.userId})}"
+                                                        class="stretched-link">Lori Stevens</a></h6>
+                                            </div>
                                         </div>
-                                        <div class="mb-0 ms-2">
-                                            <!-- Title -->
-                                            <h6 class="mb-0" th:text="${u.userName}"><a
-                                                    th:href="@{/admin/account/viewInfo/{userId}(userId=${u.userId})}"
-                                                    class="stretched-link">Lori Stevens</a></h6>
-                                        </div>
-                                    </div>
-                                </td>
+                                    </td>
 
-                                <!-- Table data -->
-                                <td class="text-center text-sm-start">
-                                    <h6 class="mb-0" th:text="${u.personalSkill}">Web Designer</h6>
-                                </td>
+                                    <!-- Table data -->
+                                    <td class="text-center text-sm-start">
+                                        <h6 class="mb-0" th:text="${u.personalSkill}">Web Designer</h6>
+                                    </td>
 
-                                <!-- Table data -->
-                                <td th:text="${u.course.size()}">15</td>
+                                    <!-- Table data -->
+                                    <td th:text="${u.course.size()}">15</td>
 
-                                <!-- Table data -->
-                                <td th:text="${userStudentCountMap[u.userId]}">5,354</td>
+                                    <!-- Table data -->
+                                    <td th:text="${enrollmentService.getStudentCountByInstructorId(u.userId)}">5,354</td>
 
-                                <!-- Table data -->
-                                <td>
-                                    <a th:href="@{/admin/account/viewInfo/{userId}(userId=${u.userId})}"
-                                       class="btn btn-info-soft btn-round me-1 mb-1 mb-md-0"
-                                       data-bs-toggle="tooltip" data-bs-placement="top" title="View">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                    <a href="#" class="btn btn-success-soft btn-round me-1 mb-1 mb-md-0"
-                                       data-bs-toggle="tooltip" data-bs-placement="top" title="Message">
-                                        <i class="bi bi-envelope"></i>
-                                    </a>
-                                </td>
-                            </tr>
+                                    <!-- Table data -->
+                                    <td>
+                                        <a th:href="@{/admin/mnInstructors/viewInfo/{userId}(userId=${u.userId})}"
+                                           class="btn btn-info-soft btn-round me-1 mb-1 mb-md-0"
+                                           data-bs-toggle="tooltip" data-bs-placement="top" title="View">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-success-soft btn-round me-1 mb-1 mb-md-0"
+                                           data-bs-placement="top" title="Message"
+                                           data-bs-toggle="modal"
+                                           data-bs-target="#messageModal"
+                                           th:data-instructor-id="${u.userId}"
+                                           th:data-instructor-name="${u.userName}">
+                                            <i class="bi bi-envelope"></i>
+                                        </a>
+                                    </td>
+                                </tr>
 
-                            </tbody>
-                            <!-- Table body END -->
-                        </table>
+                                </tbody>
+                                <!-- Table body END -->
+                            </table>
+                        </div>
+
+                        <!-- Pagination & info -->
+                        <div class="d-sm-flex justify-content-sm-between align-items-sm-center mt-2">
+                            <p class="mb-0 text-center text-sm-start" th:if="${totalItems > 0}">
+                                Showing <span th:text="${currentPage * 6 + 1}">1</span> to
+                                <span th:text="${(currentPage * 6) + 6 > totalItems ? totalItems : (currentPage * 6) + 6}">6</span>
+                                of
+                                <span th:text="${totalItems}">20</span> entries
+                            </p>
+                            <p class="mb-0 text-center text-sm-start" th:if="${totalItems == 0}">
+                                No entries found
+                            </p>
+                            <nav class="d-flex justify-content-center mb-0" aria-label="navigation"
+                                 th:if="${totalPages > 1}">
+                                <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
+                                    <li class="page-item mb-0" th:classappend="${currentPage == 0} ? 'disabled'">
+                                        <a class="page-link" href="#" th:data-page="${currentPage - 1}">
+                                            <i class="fas fa-angle-left"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item mb-0" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                        th:classappend="${currentPage == i} ? 'active'">
+                                        <a class="page-link" href="#" th:data-page="${i}" th:text="${i + 1}"></a>
+                                    </li>
+                                    <li class="page-item mb-0"
+                                        th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                        <a class="page-link" href="#" th:data-page="${currentPage + 1}">
+                                            <i class="fas fa-angle-right"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
                     </div>
                     <!-- Table END -->
                 </div>
                 <!-- Tabs content item END -->
 
+
             </div>
             <!-- Tabs content END -->
         </div>
         <!-- Card body END -->
-
-        <!-- Card footer START -->
-        <div class="card-footer bg-transparent p-0">
-            <!-- Pagination START -->
-            <div class="d-sm-flex justify-content-sm-between align-items-sm-center">
-                <!-- Content -->
-                <p class="mb-0 text-center text-sm-start">Showing 1 to 8 of 20 entries</p>
-                <!-- Pagination -->
-                <nav class="d-flex justify-content-center mb-0" aria-label="navigation">
-                    <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
-                        <li class="page-item mb-0"><a class="page-link" href="#" tabindex="-1"><i
-                                class="fas fa-angle-left"></i></a></li>
-                        <li class="page-item mb-0"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item mb-0 active"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item mb-0"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item mb-0"><a class="page-link" href="#"><i class="fas fa-angle-right"></i></a>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
-            <!-- Pagination END -->
-        </div>
-        <!-- Card footer END -->
     </div>
     <!-- Card END -->
+    <!-- Message Modal -->
+    <div class="modal fade" id="messageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="messageForm" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Send Message to <span id="instructorName"></span></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Hidden input for instructor ID -->
+                        <input type="hidden" id="instructorId" name="instructorId"/>
+
+                        <div class="mb-3">
+                            <label class="form-label">Message</label>
+                            <textarea name="message" class="form-control" rows="4"
+                                      placeholder="Type your message here..."
+                                      required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Send Message</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add JavaScript for handling search and pagination -->
+    <script th:inline="javascript">
+        $(document).ready(function () {
+            let typingTimer;
+            const debounceDelay = 300;
+            let currentKeyword = '';
+            let currentPage = 0;
+            let currentView = 'grid'; // Track current view (grid or list)
+
+            // Handle tab changes
+            $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+                currentView = $(e.target).attr('href') === '#nav-preview-tab-1' ? 'grid' : 'list';
+                fetchInstructors(currentPage);
+            });
+
+            // Handle search input with debounce
+            $('#searchInput').on('input', function () {
+                clearTimeout(typingTimer);
+                typingTimer = setTimeout(() => {
+                    currentKeyword = $(this).val().trim();
+                    currentPage = 0;
+                    fetchInstructors(currentPage);
+                }, debounceDelay);
+            });
+
+            // Handle pagination clicks
+            $(document).on('click', '.pagination a', function (e) {
+                e.preventDefault();
+                const page = $(this).data('page');
+                if (page !== undefined) {
+                    currentPage = page;
+                    fetchInstructors(currentPage);
+                }
+            });
+
+            // Prevent form submission
+            $('#filterForm').on('submit', function (e) {
+                e.preventDefault();
+                currentPage = 0;
+                fetchInstructors(currentPage);
+            });
+
+            // Handle message modal
+            $(document).on('click', '[data-bs-target="#messageModal"]', function () {
+                const instructorId = $(this).data('instructor-id');
+                const instructorName = $(this).data('instructor-name');
+                $('#instructorId').val(instructorId);
+                $('#instructorName').text(instructorName);
+            });
+
+            // Handle message form submission
+            $('#messageForm').on('submit', function (e) {
+                e.preventDefault();
+                const instructorId = $('#instructorId').val();
+                const message = $('textarea[name="message"]').val();
+
+                $.ajax({
+                    url: '/admin/mnInstructors/sendMessage',
+                    type: 'POST',
+                    data: {
+                        instructorId: instructorId,
+                        message: message
+                    },
+                    success: function (response) {
+                        $('#messageModal').modal('hide');
+                        $('textarea[name="message"]').val('');
+
+                    },
+                    error: function (xhr, status, error) {
+                        alert('Error sending message. Please try again.');
+                    }
+                });
+            });
+
+            // Function to fetch instructors using AJAX
+            function fetchInstructors(page) {
+                $.ajax({
+                    url: '/admin/mnInstructors/filter',
+                    type: 'GET',
+                    data: {
+                        keyword: currentKeyword,
+                        page: page,
+                        size: 6,
+                        view: currentView
+                    },
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    success: function (response) {
+                        if (currentView === 'grid') {
+                            $('#instructorTableWrapper').html(response);
+                        } else {
+                            $('#instructorListTableWrapper').html(response);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error fetching instructors:", status, error);
+                        alert("Error loading instructors. Please try again.");
+                    }
+                });
+            }
+
+            // Initial load
+            fetchInstructors(currentPage);
+        });
+    </script>
 </div>

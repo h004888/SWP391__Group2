@@ -1,7 +1,6 @@
 package com.OLearning.mapper.course;
 
 import com.OLearning.dto.course.AddCourseStep1DTO;
-import com.OLearning.dto.course.AddCourseStep3DTO;
 import com.OLearning.dto.course.CourseAddDTO;
 import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.entity.Course;
@@ -17,15 +16,12 @@ public class CourseMapper {
         course.setTitle(dto.getTitle());
         course.setDescription(dto.getDescription());
         course.setPrice(dto.getPrice());
-        course.setTotalStudentEnrolled(0);
         course.setDiscount(dto.getDiscount());
-        course.setTotalLessons(0);
-        course.setTotalRatings(0);
         course.setCreatedAt(LocalDateTime.now());
         course.setUpdatedAt(LocalDateTime.now());
-        course.setDuration(0);
         return course;
     }
+    //hien thi course
     public CourseDTO MapCourseDTO(Course course) {
         CourseDTO courseDTO = new CourseDTO();
         courseDTO.setCourseId(course.getCourseId());
@@ -35,13 +31,18 @@ public class CourseMapper {
         courseDTO.setUpdatedAt(course.getUpdatedAt());
         courseDTO.setPrice(course.getPrice());
         courseDTO.setCourseLevel(course.getCourseLevel());
-        courseDTO.setDuration(course.getDuration());
         courseDTO.setDiscount(course.getDiscount());
-        courseDTO.setTotalLessons(course.getTotalLessons());
         courseDTO.setStatus(course.getStatus());
+        if (course.getCategory() != null) {
+            courseDTO.setCategoryName(course.getCategory().getName());
+        } else {
+            courseDTO.setCategoryName("N/A");
+        }
+        courseDTO.setTotalStudentEnrolled(course.getEnrollments().size());
         courseDTO.setIsFree(course.getIsFree());
         return courseDTO;
     }
+    //save course basic
     public Course CourseBasic(AddCourseStep1DTO dto, Course course) {
         course.setTitle(dto.getTitle());
         course.setDescription(dto.getDescription());
@@ -50,6 +51,7 @@ public class CourseMapper {
         course.setCourseLevel(dto.getCourseLevel());
         return course;
     }
+    //lay ve thong tin course basic khi previous step
     public AddCourseStep1DTO DraftStep1(Course course) {
         AddCourseStep1DTO dto = new AddCourseStep1DTO();
         dto.setId(course.getCourseId());

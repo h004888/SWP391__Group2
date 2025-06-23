@@ -1,20 +1,14 @@
 package com.OLearning.controller.login;
 
 import com.OLearning.dto.login.RegisterDTO;
-import com.OLearning.entity.User;
 import com.OLearning.service.email.PasswordResetService;
 import com.OLearning.service.user.impl.UserServiceImpl;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Controller
 public class LoginController {
@@ -44,13 +38,35 @@ public class LoginController {
         if (expired != null) {
             model.addAttribute("warningMessage", "Phiên đăng nhập đã hết hạn!");
         }
-        return "loginPage/login";
+        return "loginPage/normalLogin/login";
+    }
+
+    @GetMapping("/dashboard_login")
+    public String adminLoginPage(@RequestParam(value = "error", required = false) String error,
+                            @RequestParam(value = "logout", required = false) String logout,
+                            @RequestParam(value = "expired", required = false) String expired,
+                            Model model) {
+
+        if (error != null) {
+            if ("unauthorized_admin_login".equals(error)) {
+                model.addAttribute("errorMessage", "Tài khoản admin không được phép đăng nhập tại đây!");
+            } else {
+                model.addAttribute("errorMessage", "Tên đăng nhập hoặc mật khẩu không đúng!");
+            }
+        }
+        if (logout != null) {
+            model.addAttribute("successMessage", "Đăng xuất thành công!");
+        }
+        if (expired != null) {
+            model.addAttribute("warningMessage", "Phiên đăng nhập đã hết hạn!");
+        }
+        return "loginPage/adminLogin/sign-in";
     }
 
     @GetMapping("/register")
     public String signUpPage(Model model) {
         model.addAttribute("user", new RegisterDTO());
-        return "loginPage/signup";
+        return "loginPage/normalLogin/signup";
     }
 
     @PostMapping("/register")
@@ -61,14 +77,11 @@ public class LoginController {
         //validation errors
         if (bindingResult.hasErrors()) {
             model.addAttribute("user", registerDTO);
-            return "loginPage/signup";
+            return "loginPage/normalLogin/signup";
         }
 
         try {
-            User savedUser = userServiceImpl.registerAccount(registerDTO);
-
-            return "redirect:/select-role?userId=" + savedUser.getUserId();
-
+           userServiceImpl.registerAccount(registerDTO);
         } catch (RuntimeException e) {
             String errorMessage = e.getMessage();
 
@@ -82,36 +95,37 @@ public class LoginController {
                 model.addAttribute("error", errorMessage);
             }
 
-            return "loginPage/signup";
+            return "loginPage/normalLogin/signup";
 
         } catch (Exception e) {
             model.addAttribute("error", "An unexpected error occurred. Please try again.");
-            return "loginPage/signup";
+            return "loginPage/normalLogin/signup";
         }
+        return "redirect:/login";
     }
 
 
-    @GetMapping("/select-role")
-    public String selectRolePage(@RequestParam("userId") Long userId, Model model) {
-        model.addAttribute("userId", userId);
-        model.addAttribute("roles", userServiceImpl.getListRole());
-        return "loginPage/selectRole";
-    }
-
-    @PostMapping("/assign-role")
-    public String assignRole(@RequestParam("role") String role,
-                             @RequestParam("userId") Long userId,
-                             RedirectAttributes redirectAttributes) {
-        try {
-            userServiceImpl.assignRoleToUser(userId, role);
-            redirectAttributes.addFlashAttribute("success",
-                    "Registration successful! Welcome to OLearning, " + userServiceImpl.getInfoUser(userId).get().getFullName() + "!");
-            return "redirect:/login";
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "You need selected role before.");
-            return "redirect:/select-role?userId=" + userId;
-        }
-    }
+//    @GetMapping("/select-role")
+//    public String selectRolePage(@RequestParam("userId") Long userId, Model model) {
+//        model.addAttribute("userId", userId);
+//        model.addAttribute("roles", userServiceImpl.getListRole());
+//        return "loginPage/selectRole";
+//    }
+//
+//    @PostMapping("/assign-role")
+//    public String assignRole(@RequestParam("role") String role,
+//                             @RequestParam("userId") Long userId,
+//                             RedirectAttributes redirectAttributes) {
+//        try {
+//            userServiceImpl.assignRoleToUser(userId, role);
+//            redirectAttributes.addFlashAttribute("success",
+//                    "Registration successful! Welcome to OLearning, " + userServiceImpl.getInfoUser(userId).get().getFullName() + "!");
+//            return "redirect:/login";
+//        } catch (Exception e) {
+//            redirectAttributes.addFlashAttribute("error", "You need selected role before.");
+//            return "redirect:/select-role?userId=" + userId;
+//        }
+//    }
 
     @GetMapping("/403")
     public String errorPage() {
@@ -121,7 +135,7 @@ public class LoginController {
 
     @GetMapping("/forgot-password")
     public String getForgotPasswordPage() {
-        return "loginPage/forgotPassword";
+        return "loginPage/normalLogin/forgotPassword";
     }
 
     @PostMapping("/forgot-password")
@@ -152,9 +166,13 @@ public class LoginController {
 
     @GetMapping("/otp-verification")
     public String getOtpVerificationPage(@RequestParam("email") String email,
+                                         @RequestParam(value = "error", required = false) String error,
                                          Model model) {
         model.addAttribute("email", email);
-        return "loginPage/otpVerification";
+        if (error != null) {
+            model.addAttribute("errorMessage", "Mã OTP không hợp lệ hoặc đã hết hạn.");
+        }
+        return "loginPage/normalLogin/otpVerification";
     }
 
     @PostMapping("/otp-verification")
@@ -166,7 +184,7 @@ public class LoginController {
         } else {
             model.addAttribute("email", email);
             model.addAttribute("errorMessage", "Mã OTP không hợp lệ hoặc đã hết hạn.");
-            return "loginPage/otpVerification";
+            return "redirect:/otp-verification?email=" + email + "&error=true";
         }
     }
 
@@ -177,7 +195,7 @@ public class LoginController {
                                        Model model) {
         model.addAttribute("email", email);
         model.addAttribute("otp", otp);
-        return "loginPage/resetPassword";
+        return "loginPage/normalLogin/resetPassword";
     }
 
     @PostMapping("/reset-password")
