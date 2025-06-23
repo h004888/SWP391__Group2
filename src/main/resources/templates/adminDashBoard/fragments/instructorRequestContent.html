@@ -22,6 +22,7 @@
         <strong th:text="${errorMessage}">Lỗi xảy ra!</strong>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
+
     <!-- Main card START -->
     <div class="card bg-transparent border">
 
@@ -38,17 +39,6 @@
                         </button>
                     </form>
                 </div>
-
-                <!-- Select option -->
-                <div class="col-md-3">
-                    <!-- Short by filter -->
-                    <select class="form-select js-choice border-0 z-index-9 bg-transparent" id="statusFilter" aria-label=".form-select-sm">
-                        <option value="">All Status</option>
-                        <option value="PENDING">Pending</option>
-                        <option value="ACCEPTED">Accepted</option>
-                        <option value="REJECTED">Rejected</option>
-                        </select>
-                </div>
             </div>
             <!-- Search and select END -->
         </div>
@@ -56,157 +46,115 @@
 
         <!-- Card body START -->
         <div class="card-body">
-            <!-- Instructor request table START -->
-            <div id="requestTableWrapper" th:fragment="requestTableFragment">
-                <div class="table-responsive border-0">
-                    <table class="table table-dark-gray align-middle p-4 mb-0 table-hover ">
-                        <!-- Table head -->
-                        <thead>
-                            <tr>
-                                <th>Instructor name</th>
-                                <th>Requested Date</th>
-                                <th>Subject</th>
-                                <th>Status</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <!-- Table body -->
-                        <tbody id="requestTableBody">
-                            <tr th:each="request : ${listRequest}">
-                                <!-- Table data -->
-                                <td>
-                                    <div class="d-flex align-items-center position-relative">
-                                        <!-- Image -->
-                                        <div class="avatar avatar-md">
-                                            <img th:src="${request.user.profilePicture != null ? request.user.profilePicture : 'assets/images/avatar/default.jpg'}" class="rounded-circle" alt="">
-                                        </div>
-                                        <div class="mb-0 ms-2">
-                                            <!-- Title -->
-                                            <h6 class="mb-0"><a href="#" class="stretched-link" th:text="${request.user.fullName}">Instructor Name</a></h6>
-                                        </div>
-                                    </div>
-                                </td>
+            <!-- Status Tabs -->
+            <div class="custom-tabs mt-4">
+                <ul class="nav nav-tabs" id="requestTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="pending-tab" data-bs-toggle="tab"
+                                data-bs-target="#pending" type="button" role="tab" data-status="PENDING">
+                            Pending<span class="badge bg-light text-dark ms-2" id="pendingCount">0</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="approved-tab" data-bs-toggle="tab"
+                                data-bs-target="#approved" type="button" role="tab" data-status="APPROVED">
+                            Approved<span class="badge bg-light text-dark ms-2" id="approvedCount">0</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="rejected-tab" data-bs-toggle="tab"
+                                data-bs-target="#rejected" type="button" role="tab" data-status="REJECTED">
+                            Rejected<span class="badge bg-light text-dark ms-2" id="rejectedCount">0</span>
+                        </button>
+                    </li>
+                </ul>
 
-                                <!-- Table data -->
-                                <td th:text="${#temporals.format(request.requestDate, 'dd MMM yyyy')}">Request Date</td>
+                <div class="tab-content p-0" id="requestTabsContent">
 
-                                <!-- Table data -->
-                                <td class="text-center text-sm-start">
-                                    <h6 class="mb-0" th:text="${request.user.personalSkill}">Subject</h6>
-                                </td>
+                    <!-- Pending Tab -->
+                    <div class="tab-pane fade show active" id="pending" role="tabpanel">
+                        <div class="table-responsive border-0">
+                            <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                                <!-- Table head -->
+                                <thead>
+                                    <tr>
+                                        <th>Instructor name</th>
+                                        <th>Requested Date</th>
+                                        <th>Subject</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <!-- Table body -->
+                                <tbody id="pendingTableBody">
+                                    <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination for Pending -->
+                        <div id="pendingPagination" class="pagination-container">
+                            <!-- Pagination will be loaded here -->
+                        </div>
+                    </div>
 
-                                <!-- Table data - Status -->
-                                <td>
-                                    <span th:if="${request.status == null || request.status == 'PENDING'}" class="badge bg-warning">Pending</span>
-                                    <span th:if="${request.status == 'APPROVED'}" class="badge bg-success">Approved</span>
-                                    <span th:if="${request.status == 'REJECTED'}" class="badge bg-danger">Rejected</span>
-                                </td>
+                    <!-- Accepted Tab -->
+                    <div class="tab-pane fade" id="approved" role="tabpanel">
+                        <div class="table-responsive border-0">
+                            <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                                <!-- Table head -->
+                                <thead>
+                                    <tr>
+                                        <th>Instructor name</th>
+                                        <th>Requested Date</th>
+                                        <th>Subject</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <!-- Table body -->
+                                <tbody id="approvedTableBody">
+                                    <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination for Accepted -->
+                        <div id="approvedPagination" class="pagination-container">
+                            <!-- Pagination will be loaded here -->
+                        </div>
+                    </div>
 
-                                <!-- Table data -->
-                                <td>
-                                    <a th:if="${request.status == null || request.status == 'PENDING'}" href="#" class="btn btn-success-soft me-1 mb-1 mb-lg-0" 
-                                       data-bs-toggle="modal" data-bs-target="#acceptModal" 
-                                       th:onclick="'openAcceptModal(' + ${request.requestId} + ')'">Accept</a>
+                    <!-- Rejected Tab -->
+                    <div class="tab-pane fade" id="rejected" role="tabpanel">
+                        <div class="table-responsive border-0">
+                            <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                                <!-- Table head -->
+                                <thead>
+                                    <tr>
+                                        <th>Instructor name</th>
+                                        <th>Requested Date</th>
+                                        <th>Subject</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <!-- Table body -->
+                                <tbody id="rejectedTableBody">
+                                    <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination for Rejected -->
+                        <div id="rejectedPagination" class="pagination-container">
+                            <!-- Pagination will be loaded here -->
+                        </div>
+                    </div>
 
-                                    <a th:if="${request.status == null || request.status == 'PENDING'}" href="#" class="btn btn-secondary-soft me-1 mb-1 mb-lg-0" 
-                                       data-bs-toggle="modal" data-bs-target="#rejectModal" 
-                                       th:onclick="'openRejectModal(' + ${request.requestId} + ')'">Reject</a>
-
-                                    <a href="#" class="btn btn-primary-soft me-1 mb-0" data-bs-toggle="modal" data-bs-target="#appDetail" th:onclick="'loadRequestDetails(' + ${request.requestId} + ')'">View Detail</a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
                 </div>
-                <!-- Pagination & info -->
-                <div class="d-sm-flex justify-content-sm-between align-items-sm-center mt-2">
-                    <p class="mb-0 text-center text-sm-start" th:if="${totalItems > 0}">
-                        Showing <span th:text="${currentPage * 5 + 1}">1</span> to 
-                        <span th:text="${(currentPage * 5) + 5 > totalItems ? totalItems : (currentPage * 5) + 5}">5</span> of 
-                        <span th:text="${totalItems}">20</span> entries
-                    </p>
-                    <p class="mb-0 text-center text-sm-start" th:if="${totalItems == 0}">
-                        No entries found
-                    </p>
-                    <nav class="d-flex justify-content-center mb-0" aria-label="navigation" th:if="${totalPages > 1}">
-                        <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
-                            <li class="page-item mb-0" th:classappend="${currentPage == 0} ? 'disabled'">
-                                <a class="page-link" href="#" th:data-page="${currentPage - 1}">
-                                    <i class="fas fa-angle-left"></i>
-                                </a>
-                            </li>
-                            <li class="page-item mb-0" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" 
-                                th:classappend="${currentPage == i} ? 'active'">
-                                <a class="page-link" href="#" th:data-page="${i}" th:text="${i + 1}"></a>
-                            </li>
-                            <li class="page-item mb-0" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
-                                <a class="page-link" href="#" th:data-page="${currentPage + 1}">
-                                    <i class="fas fa-angle-right"></i>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
-                <!-- Pagination & info END -->
-
             </div>
-            <!-- Instructor request table END -->
         </div>
         <!-- Card body END -->
     </div>
     <!-- Main card END -->
-
-    <!-- Approve Modal -->
-    <div class="modal fade" id="acceptModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form id="acceptForm" method="post">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Accept Instructor Request</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Are you sure you want to accept this instructor request? The user will be granted instructor privileges.</p>
-                        <input type="hidden" id="acceptRequestId" name="requestId"/>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-success">Accept Request</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Reject Modal -->
-    <div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form id="rejectForm" method="post">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Reject Instructor Request</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>You are about to reject this instructor request.</p>
-
-                        <!-- Hidden input for request ID -->
-                        <input type="hidden" id="rejectRequestId" name="requestId"/>
-
-                        <div class="mb-3">
-                            <label class="form-label">Rejection Reason</label>
-                            <textarea name="rejectionReason" class="form-control" rows="4" 
-                                    placeholder="Explain why the request is rejected..." required></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-danger">Reject Request</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 
     <div class="modal fade" id="appDetail" tabindex="-1" aria-labelledby="appDetaillabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -261,12 +209,68 @@
         </div>
     </div>
 
+    <!-- Reject Reason Modal -->
+    <div class="modal fade" id="rejectReasonModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="rejectForm" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Reject Instructor Request</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>You are about to reject this instructor request.</p>
+
+                        <!-- Hidden input for request ID -->
+                        <input type="hidden" id="rejectRequestId" name="requestId"/>
+
+                        <div class="mb-3">
+                            <label class="form-label">Rejection Reason</label>
+                            <textarea name="rejectionReason" class="form-control" rows="4" 
+                                    placeholder="Explain why the request is rejected..." required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Reject Request</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Approve Confirmation Modal -->
+    <div class="modal fade" id="approveConfirmationModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="approveForm" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Approve Instructor Request</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>You are about to approve this instructor request.</p>
+                        <p class="text-warning"><strong>Warning:</strong> The user will be granted instructor privileges and will be able to create and manage courses.</p>
+
+                        <!-- Hidden input for request ID -->
+                        <input type="hidden" id="approveRequestId" name="requestId"/>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">Approve Request</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
         setTimeout(function () {
             $('#success-alert').fadeOut('slow');
             $('#error-alert').fadeOut('slow');
         }, 3000);
     </script>
+
     <!-- JavaScript to handle loading request details -->
     <script th:inline="javascript">
         function loadRequestDetails(requestId) {
@@ -297,14 +301,18 @@
 
         function acceptRequest() {
             const requestId = document.getElementById('detailRequestId').value;
-            if (confirm('Are you sure you want to accept this instructor request? The user will be granted instructor privileges.')) {
-                // Create a form and submit it
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = '/admin/mnInstructors/request/accept/' + requestId;
-                document.body.appendChild(form);
-                form.submit();
-            }
+            document.getElementById('approveRequestId').value = requestId;
+            document.getElementById('approveForm').action = '/admin/mnInstructors/request/accept/' + requestId;
+            
+            // Close the detail modal and open the approve modal
+            const detailModal = bootstrap.Modal.getInstance(document.getElementById('appDetail'));
+            detailModal.hide();
+            
+            // Open approve modal after a short delay
+            setTimeout(() => {
+                const approveModal = new bootstrap.Modal(document.getElementById('approveConfirmationModal'));
+                approveModal.show();
+            }, 300);
         }
 
         function showRejectReason() {
@@ -318,90 +326,193 @@
             
             // Open reject modal after a short delay
             setTimeout(() => {
-                const rejectModal = new bootstrap.Modal(document.getElementById('rejectModal'));
+                const rejectModal = new bootstrap.Modal(document.getElementById('rejectReasonModal'));
                 rejectModal.show();
             }, 300);
         }
-
-        function openAcceptModal(requestId) {
-            document.getElementById('acceptRequestId').value = requestId;
-            document.getElementById('acceptForm').action = '/admin/mnInstructors/request/accept/' + requestId;
-        }
-
-        function openRejectModal(requestId) {
-            document.getElementById('rejectRequestId').value = requestId;
-            document.getElementById('rejectForm').action = '/admin/mnInstructors/request/reject/' + requestId;
-        }
     </script>
-    <!-- Add JavaScript for handling search and filter -->
+
+    <!-- Add JavaScript for handling tabs, search and filter -->
     <script th:inline="javascript">
-        $(document).ready(function() {
-            let typingTimer;
-            const debounceDelay = 300;
-            let currentKeyword = '';
-            let currentStatus = '';
-            let currentPage = 0;
+        let currentStatus = 'PENDING';
+        let currentPages = {
+            PENDING: 0,
+            APPROVED: 0,
+            REJECTED: 0
+        };
 
-            // Handle search input with debounce
-            $('#searchInput').on('input', function() {
-                clearTimeout(typingTimer);
-                typingTimer = setTimeout(() => {
-                    currentKeyword = $(this).val().trim();
-                    currentPage = 0;
-                    fetchRequests(currentPage);
-                }, debounceDelay);
-            });
+        function getTableBodyElement(status) {
+            switch (status) {
+                case 'PENDING':
+                    return $('#pendingTableBody');
+                case 'APPROVED':
+                    return $('#approvedTableBody');
+                case 'REJECTED':
+                    return $('#rejectedTableBody');
+                default:
+                    return $('#pendingTableBody');
+            }
+        }
 
-            // Handle status filter change
-            $('#statusFilter').on('change', function() {
-                currentStatus = $(this).val();
-                currentPage = 0;
-                fetchRequests(currentPage);
-            });
+        function getPaginationElement(status) {
+            switch (status) {
+                case 'PENDING':
+                    return $('#pendingPagination');
+                case 'APPROVED':
+                    return $('#approvedPagination');
+                case 'REJECTED':
+                    return $('#rejectedPagination');
+                default:
+                    return $('#pendingPagination');
+            }
+        }
 
-            // Handle pagination clicks
-            $(document).on('click', '.pagination a', function(e) {
-                e.preventDefault();
-                const page = $(this).data('page');
-                if (page !== undefined) {
-                    currentPage = page;
-                    fetchRequests(currentPage);
+        function filterRequests(status, page = 0, size = 5) {
+            let keyword = $('#searchInput').val() ? $('#searchInput').val().trim() : '';
+
+            let tableBody = getTableBodyElement(status);
+            let paginationContainer = getPaginationElement(status);
+
+            if (!tableBody || tableBody.length === 0) {
+                console.error("Table body not found for status:", status);
+                return;
+            }
+
+            // Update current page for this status
+            currentPages[status] = page;
+
+            // Show loading state
+            tableBody.html('<tr><td colspan="5" class="text-center">Loading...</td></tr>');
+
+            // Load table data and pagination simultaneously
+            Promise.all([
+                // Load table rows
+                $.ajax({
+                    url: '/admin/mnInstructors/request/filter',
+                    method: 'GET',
+                    data: {
+                        keyword: keyword || null,
+                        status: status,
+                        page: page,
+                        size: size
+                    }
+                }),
+                // Load pagination
+                $.ajax({
+                    url: '/admin/mnInstructors/request/pagination',
+                    method: 'GET',
+                    data: {
+                        keyword: keyword || null,
+                        status: status,
+                        page: page,
+                        size: size
+                    }
+                }),
+                // Load total count for badge
+                $.ajax({
+                    url: '/admin/mnInstructors/request/count',
+                    method: 'GET',
+                    data: {
+                        keyword: keyword || null,
+                        status: status
+                    }
+                })
+            ]).then(function ([tableData, paginationData, countData]) {
+
+                // Update table
+                if (tableData && tableData.trim() !== '') {
+                    tableBody.html(tableData);
+                } else {
+                    tableBody.html('<tr><td colspan="5" class="text-center">No requests found</td></tr>');
                 }
+
+                // Update pagination
+                if (paginationData && paginationData.trim() !== '') {
+                    paginationContainer.html(paginationData);
+                } else {
+                    paginationContainer.html('');
+                }
+
+                // Update count badge
+                updateStatusCountBadge(status, countData);
+
+            }).catch(function (error) {
+                console.error("Error loading data for status:", status, error);
+                tableBody.html('<tr><td colspan="5" class="text-center text-danger">Error loading data</td></tr>');
+                paginationContainer.html('');
+            });
+        }
+
+        function updateStatusCountBadge(status, totalCount) {
+            const statusMap = {
+                'PENDING': 'pendingCount',
+                'APPROVED': 'approvedCount',
+                'REJECTED': 'rejectedCount'
+            };
+
+            const badgeId = statusMap[status];
+            const badgeElement = document.getElementById(badgeId);
+
+            if (!badgeElement) {
+                console.error("Badge element not found for status:", status);
+                return;
+            }
+
+            // Set the total count from server response
+            const count = typeof totalCount === 'number' ? totalCount : (totalCount ? parseInt(totalCount) : 0);
+            badgeElement.textContent = count;
+        }
+
+        function loadRequests(status, page = 0) {
+            console.log("Loading requests for status:", status, "page:", page);
+            filterRequests(status, page);
+        }
+
+        $(document).ready(function() {
+            // Load initial data for all tabs
+            const statuses = ['PENDING', 'APPROVED', 'REJECTED'];
+            statuses.forEach(status => {
+                loadRequests(status, 0);
+            });
+
+            // Tab change event
+            $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+                const status = $(this).data('status');
+                console.log("Tab changed to:", status);
+                currentStatus = status;
+                // Load current page for this status
+                filterRequests(currentStatus, currentPages[currentStatus] || 0);
+            });
+
+            // Search input with debounce
+            let searchTimer;
+            $('#searchInput').on('input', function () {
+                const searchValue = $(this).val();
+                console.log("Search input triggered - value:", searchValue);
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(function () {
+                    // Reset to first page when searching
+                    currentPages[currentStatus] = 0;
+                    filterRequests(currentStatus, 0);
+                }, 500);
             });
 
             // Prevent form submission
-            $('#filterForm').on('submit', function(e) {
+            $('#filterForm').on('submit', function (e) {
                 e.preventDefault();
-                currentPage = 0;
-                fetchRequests(currentPage);
+                currentPages[currentStatus] = 0;
+                filterRequests(currentStatus, 0);
             });
 
-            // Function to fetch requests using AJAX
-            function fetchRequests(page) {
-                $.ajax({
-                    url: '/admin/mnInstructors/request/filter',
-                    type: 'GET',
-                    data: {
-                        keyword: currentKeyword,
-                        status: currentStatus,
-                        page: page,
-                        size: 5
-                    },
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    success: function(response) {
-                        $('#requestTableWrapper').html(response);
-                    },
-                    error: function(xhr, status, error) {
-                        console.error("Error fetching requests:", status, error);
-                        alert("Error loading requests. Please try again.");
-                    }
-                });
-            }
-
-            // Initial load
-            fetchRequests(currentPage);
+            // Event handler for pagination clicks
+            $(document).on('click', '.pagination .page-link', function (e) {
+                e.preventDefault();
+                const page = parseInt($(this).data('page'));
+                if (!isNaN(page) && page >= 0) {
+                    console.log("Pagination clicked - page:", page, "for status:", currentStatus);
+                    filterRequests(currentStatus, page);
+                }
+            });
         });
     </script>
 </div>

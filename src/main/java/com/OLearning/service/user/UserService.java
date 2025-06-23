@@ -2,6 +2,7 @@ package com.OLearning.service.user;
 
 import com.OLearning.dto.user.UserDTO;
 import com.OLearning.dto.user.UserDetailDTO;
+import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.login.RegisterDTO;
 import com.OLearning.entity.Role;
 import com.OLearning.entity.User;
@@ -58,4 +59,5 @@ public interface UserService {
     Page<UserDTO> filterInstructors(String keyword, Pageable pageable);
 
     User findById(Long id);
+
 }

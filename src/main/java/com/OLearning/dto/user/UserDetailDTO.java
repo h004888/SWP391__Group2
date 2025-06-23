@@ -1,5 +1,7 @@
 package com.OLearning.dto.user;
 
+import com.OLearning.dto.course.CourseDTO;
+import com.OLearning.dto.enrollment.EnrollmentDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,6 +25,5 @@ public class UserDetailDTO {
     private LocalDate birthDay;
     private String profilePicture;
     private String personalSkill;
-
-    private List<String> enrolledCourseTitles;
+    private List<CourseDTO> enrolledCourses;
 }

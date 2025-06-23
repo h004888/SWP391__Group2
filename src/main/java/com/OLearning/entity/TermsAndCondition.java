@@ -27,6 +27,7 @@ public class TermsAndCondition {
     private String sectionTitle;
 
     // Nội dung chi tiết điều khoản
+    @Lob
     @Column(name="Content",columnDefinition = "nvarchar(max)", nullable = false)
     private String content;
 

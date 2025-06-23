@@ -3,11 +3,16 @@ package com.OLearning.service.user.impl;
 import com.OLearning.dto.user.UserDTO;
 import com.OLearning.dto.user.UserDetailDTO;
 import com.OLearning.dto.login.RegisterDTO;
+import com.OLearning.dto.course.CourseDTO;
+import com.OLearning.entity.Course;
+import com.OLearning.entity.Enrollment;
 import com.OLearning.entity.Role;
 import com.OLearning.entity.User;
+import com.OLearning.mapper.course.CourseMapper;
 import com.OLearning.mapper.user.UserDetailMapper;
 import com.OLearning.mapper.user.UserMapper;
 import com.OLearning.mapper.login.RegisterMapper;
+import com.OLearning.repository.EnrollmentRepository;
 import com.OLearning.repository.RoleRepository;
 import com.OLearning.repository.UserRepository;
 import com.OLearning.service.email.EmailService;
@@ -39,6 +44,10 @@ public class UserServiceImpl implements UserService {
     private RegisterMapper registerMapper;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private EnrollmentRepository enrollmentRepository;
+    @Autowired
+    private CourseMapper courseMapper;
 
     @Override
     public Page<UserDTO> getAllUsers(Pageable page) {
@@ -85,8 +94,23 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<UserDetailDTO> getInfoUser(Long id) {
-        return userRepository.findById(id)
-                .map(userDetailMapper::toDetailDTO);
+        Optional<User> userOptional = userRepository.findById(id);
+        if (userOptional.isEmpty()) {
+            return Optional.empty();
+        }
+
+        User user = userOptional.get();
+        UserDetailDTO userDetailDTO = userDetailMapper.toDetailDTO(user);
+
+        List<Enrollment> enrollments = enrollmentRepository.findEnrollmentsByUserId(user.getUserId());
+        List<CourseDTO> enrolledCourses = enrollments.stream()
+                .map(Enrollment::getCourse)
+                .map(courseMapper::MapCourseDTO)
+                .collect(Collectors.toList());
+
+        userDetailDTO.setEnrolledCourses(enrolledCourses);
+
+        return Optional.of(userDetailDTO);
     }
 
     @Override

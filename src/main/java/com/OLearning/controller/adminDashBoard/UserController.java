@@ -1,9 +1,13 @@
 package com.OLearning.controller.adminDashBoard;
 
+import com.OLearning.dto.course.CourseDTO;
+import com.OLearning.dto.enrollment.EnrollmentDTO;
 import com.OLearning.dto.user.UserDTO;
 import com.OLearning.dto.user.UserDetailDTO;
+import com.OLearning.service.enrollment.EnrollmentService;
 import com.OLearning.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -160,6 +164,21 @@ public class UserController {
             return "redirect:/admin/account";
         }
     }
+    @GetMapping("/account/viewInfo/{userId}/pagingEnrolledCourse")
+    public String pagingEnrolledCourses(
+            @PathVariable("userId") long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            Model model) {
+        Optional<UserDetailDTO> userDetailDTO = userService.getInfoUser(userId);
+        if (userDetailDTO.isPresent()) {
+            UserDetailDTO userDetail = userDetailDTO.get();
+            userDetail.getEnrolledCourses();
+            
+        }
+
+        return "adminDashBoard/fragments/accountDetailContent :: enrolledCourseListFragment";
+    }
 
     @GetMapping("/account/block/{userId}")
     public String blockAccount(Model model, @PathVariable("userId") long id) {
@@ -183,5 +202,7 @@ public class UserController {
         userService.deleteAcc(id);
         return "redirect:/admin/account";
     }
+
+
 
 }

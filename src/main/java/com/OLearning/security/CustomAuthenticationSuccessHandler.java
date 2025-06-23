@@ -37,13 +37,13 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
                 return;
             }
         } else {
-            // Đăng nhập từ form user - không cho phép ADMIN
+            // Đăng nhập từ form user thông thường
             if (hasRole(authentication, "ROLE_ADMIN")) {
                 // Admin cố gắng đăng nhập từ form user
                 response.sendRedirect("/login?error=unauthorized_admin_login");
                 return;
             } else {
-                // Redirect theo role của user
+                // User/Instructor đăng nhập từ form user - redirect theo role
                 redirectUserByRole(request, response, authentication);
                 return;
             }
@@ -54,19 +54,14 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
                                     Authentication authentication) throws IOException {
         String redirectURL = request.getContextPath();
 
-        if (hasRole(authentication, "ROLE_ADMIN")) {
-            redirectURL += "/admin";
-        } else if (hasRole(authentication, "ROLE_INSTRUCTOR")) {
+        if (hasRole(authentication, "ROLE_INSTRUCTOR")) {
             redirectURL += "/instructordashboard";
         } else if (hasRole(authentication, "ROLE_USER")) {
             redirectURL += "/home";
-        } else if (hasRole(authentication, "ROLE_INSTRUCTOR")) {
-            redirectURL += "/instructordashboard";
         } else {
             redirectURL += "/home"; // default
         }
 
-        response.sendRedirect(redirectURL);
         response.sendRedirect(redirectURL);
     }
 

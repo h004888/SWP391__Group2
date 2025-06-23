@@ -273,8 +273,8 @@ CREATE TABLE InstructorRequests (
                                     RequestID INT IDENTITY(1,1) PRIMARY KEY,
                                     EnrollmentID INT NOT NULL,
                                     RequestDate DATETIME NOT NULL DEFAULT GETDATE(),
-                                    Status NVARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (
-        Status IN ('pending','approved','rejected')
+                                    Status NVARCHAR(20) NOT NULL DEFAULT 'PENDING' CHECK (
+        Status IN ('PENDING','APPROVED','REJECTED')
     ),
                                     Note NVARCHAR(1000) NULL,
                                     AdminID INT NULL,

@@ -35,7 +35,7 @@ public class CourseMaintenanceController {
         Page<CourseMaintenance> courseMaintenances = courseMaintenanceService.filterMaintenances(
             null, "pending", null, pageable);
         
-        model.addAttribute("accNamePage", "Management Maintenance");
+        model.addAttribute("accNamePage", "Management Maintenance Fee");
         model.addAttribute("courseMaintenances", courseMaintenances.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", courseMaintenances.getTotalPages());
