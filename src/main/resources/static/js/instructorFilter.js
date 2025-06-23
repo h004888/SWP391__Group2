@@ -1,6 +1,10 @@
 $(document).ready(function() {
     // Initialize tooltips
-    $('[title]').tooltip();
+    $('[title]').each(function() {
+        if (!bootstrap.Tooltip.getInstance(this)) {
+            new bootstrap.Tooltip(this);
+        }
+    });
 
     // Initialize toasts
     $('.toast').each(function() {
@@ -64,7 +68,19 @@ $(document).ready(function() {
                 }, 300);
 
                 // Reinitialize tooltips
-                $('[title]').tooltip();
+                $('[title]').each(function() {
+                    var instance = bootstrap.Tooltip.getInstance(this);
+                    if (instance) {
+                        instance.dispose();
+                    }
+                    new bootstrap.Tooltip(this);
+                });
+
+                // Re-bind action handlers for dynamically loaded content
+                window.upToPublic = upToPublic;
+                window.unpublishCourse = unpublishCourse;
+                window.hideCourse = hideCourse;
+                window.deleteCourse = deleteCourse;
             },
             error: function(xhr, status, error) {
                 console.error("Error filtering courses:", error);
@@ -193,3 +209,70 @@ $('#deleteForm').on('submit', function(e) {
         }
     });
 });
+
+// Xử lý submit form xác nhận action (Up to Public, Unpublish, Hide) bằng AJAX
+$('#confirmActionForm').on('submit', function(e) {
+    e.preventDefault();
+    var $form = $(this);
+    var actionUrl = $form.attr('action');
+    var formData = $form.serialize();
+
+    // Lưu lại các giá trị filter hiện tại để tải lại sau khi xử lý
+    let category = $('#filterCategory').val();
+    let status = $('#courseStatus').val();
+    let price = $('#filterPrice').val();
+    let page = 0;
+
+    $.ajax({
+        url: actionUrl,
+        type: 'POST',
+        data: formData,
+        success: function(response) {
+            // Đóng modal
+            bootstrap.Modal.getInstance(document.getElementById('confirmActionModal')).hide();
+            // Tải lại danh sách khoá học với filter hiện tại
+            filterCourses(page);
+            // Hiển thị toast thành công
+            showToast('Action completed successfully!', 'success');
+        },
+        error: function(xhr, status, error) {
+            // Đóng modal
+            bootstrap.Modal.getInstance(document.getElementById('confirmActionModal')).hide();
+            // Hiển thị toast lỗi
+            showToast('An error occurred. Please try again.', 'error');
+        }
+    });
+});
+
+function upToPublic(courseId) {
+    const modal = new bootstrap.Modal(document.getElementById('confirmActionModal'));
+    $('#confirmActionMessage').text('Are you sure you want to make this course public?');
+    $('#confirmActionForm').attr('action', '/instructordashboard/courses/uptopublic');
+    $('#confirmActionCourseId').val(courseId);
+    $('#confirmActionSubmitBtn').text('Up to Public').removeClass('btn-danger').addClass('btn-primary');
+    modal.show();
+}
+
+function unpublishCourse(courseId) {
+    const modal = new bootstrap.Modal(document.getElementById('confirmActionModal'));
+    $('#confirmActionMessage').text('Are you sure you want to unpublish this course?');
+    $('#confirmActionForm').attr('action', '/instructordashboard/courses/unpublish');
+    $('#confirmActionCourseId').val(courseId);
+    $('#confirmActionSubmitBtn').text('Unpublish').removeClass('btn-danger').addClass('btn-primary');
+    modal.show();
+}
+
+function hideCourse(courseId) {
+    const modal = new bootstrap.Modal(document.getElementById('confirmActionModal'));
+    $('#confirmActionMessage').text('Are you sure you want to hide this course?');
+    $('#confirmActionForm').attr('action', '/instructordashboard/courses/hide');
+    $('#confirmActionCourseId').val(courseId);
+    $('#confirmActionSubmitBtn').text('Hide').removeClass('btn-primary').addClass('btn-danger');
+    modal.show();
+}
+
+// Đảm bảo các hàm action luôn được bind lại sau khi AJAX load content
+window.upToPublic = upToPublic;
+window.unpublishCourse = unpublishCourse;
+window.hideCourse = hideCourse;
+window.deleteCourse = deleteCourse;

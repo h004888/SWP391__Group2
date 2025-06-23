@@ -174,11 +174,40 @@ public class ControlllerAddCourse {
         redirectAttributes.addFlashAttribute("errorMessage", "course deleted successfully.");
         return "redirect:../courses";
     }
+    //uppublic course
+    @PostMapping("/courses/uptopublic")
+    public String upcourse(@RequestParam(name = "courseId") Long courseId
+            , RedirectAttributes redirectAttributes, HttpServletRequest request) {
+        //tim course theo course ID
+        //set status
+        courseService.submitCourse(courseId, "lived");
+        redirectAttributes.addFlashAttribute("successMessage", "course public successfully.");
+        return "redirect:../courses";
+    }
+    //unpublic course
+    @PostMapping("/courses/unpublish")
+    public String down(@RequestParam(name = "courseId") Long courseId
+            , RedirectAttributes redirectAttributes, HttpServletRequest request) {
+        courseService.submitCourse(courseId, "approved");
+        redirectAttributes.addFlashAttribute("successMessage", "course unpublish successfully.");
+        return "redirect:../courses";
+    }
+
+    //hidden course
+
+    @PostMapping("/courses/hide")
+    public String hide(@RequestParam(name = "courseId") Long courseId
+            , RedirectAttributes redirectAttributes, HttpServletRequest request) {
+        courseService.submitCourse(courseId, "hidden");
+        redirectAttributes.addFlashAttribute("successMessage", "course hidden successfully.");
+        return "redirect:../courses";
+    }
 
     //viewCourseDetail
     @GetMapping("/courses/detail/{courseId}")
     public String viewCourseDetail(@PathVariable("courseId") Long courseId, Model model) {
         Course course = courseService.findCourseById(courseId);
+        //viet theo DTO
         if (course == null) {
             return "redirect:/courses";
         }
