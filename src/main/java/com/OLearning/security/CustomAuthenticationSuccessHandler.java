@@ -40,6 +40,8 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
             redirectURL += "/admin";
         } else if (hasRole(authentication, "ROLE_USER")) {
             redirectURL += "/home";
+        } else if (hasRole(authentication, "ROLE_INSTRUCTOR")) {
+            redirectURL += "/instructordashboard";
         } else {
             redirectURL += "/home";
         }

@@ -10,31 +10,34 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
+@Table(name = "Chapters")
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "Chapters")
+@AllArgsConstructor
 public class Chapter {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long chapterId;
 
-    @Column(nullable = false, columnDefinition = "nvarchar(255)")
-    private String title;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "ChapterID")
+  private Long chapterId;
 
-    @Column(columnDefinition = "nvarchar(max)")
-    private String description;
+  @Column(name = "Title")
+  private String title;
 
-    private Integer orderNumber = 0; //stt chuong trong khoa hoc
-    private LocalDateTime createAt;
-    private LocalDateTime updateAt;
+  @Column(name = "Description")
+  private String description;
 
-    @OneToMany(mappedBy = "chapter")
-    private List<Lesson> lessons;
+  @Column(name = "OrderNumber")
+  private Integer orderNumber;
 
-    @ManyToOne
-    @JoinColumn(name = "courseId")
-    private Course course;
+  @Column(name = "CreatedAt")
+  private LocalDateTime createdAt;
 
+  @ManyToOne
+  @JoinColumn(name = "CourseID")
+  private Course course;
+
+  @OneToMany(mappedBy = "chapter", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  private List<Lesson> lessons;
 }

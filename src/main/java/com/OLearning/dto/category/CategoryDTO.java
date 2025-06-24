@@ -1,6 +1,5 @@
 package com.OLearning.dto.category;
 
-
 public class CategoryDTO {
     private int id;
     private String name;
@@ -36,4 +35,3 @@ public class CategoryDTO {
                 '}';
     }
 }
-

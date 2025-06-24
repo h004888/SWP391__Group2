@@ -17,84 +17,81 @@ import org.hibernate.annotations.Formula;
 @AllArgsConstructor
 public class Course {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "CourseID")
-    private Long courseId;
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        @Column(name = "CourseID")
+        private Long courseId;
 
-    @Column(name = "Title")
-    private String title;
+        @Column(name = "Title")
+        private String title;
 
-    @Column(name = "Description")
-    private String description;
+        @Column(name = "Description")
+        private String description;
 
-    @Column(name = "Price")
-    private BigDecimal price;
+        @Column(name = "Price")
+        private BigDecimal price;
 
-    @Column(name = "Discount")
-    private BigDecimal discount;
+        @Column(name = "Discount")
+        private BigDecimal discount;
 
-    @Column(name = "CourseImg")
-    private String courseImg;
+        @Column(name = "CourseImg")
+        private String courseImg;
 
-    @Column(name = "CreatedAt")
-    private LocalDateTime createdAt;
+        @Column(name = "CreatedAt")
+        private LocalDateTime createdAt;
 
-    @Column(name = "UpdatedAt")
-    private LocalDateTime updatedAt;
+        @Column(name = "UpdatedAt")
+        private LocalDateTime updatedAt;
 
-    @Column(name = "Status")
-    private String status = "pending";
+        @Column(name = "Status")
+        private String status = "pending";
 
-    @Column(name = "CanResubmit")
-    private Boolean canResubmit;
+        @Column(name = "CanResubmit")
+        private Boolean canResubmit;
 
-    @Column(name = "CourseLevel")
-    private String courseLevel;
+        @Column(name = "CourseLevel")
+        private String courseLevel;
 
-    @ManyToOne
-    @JoinColumn(name = "UserID")
-    private User instructor;
+        @ManyToOne
+        @JoinColumn(name = "UserID")
+        private User instructor;
 
-    @ManyToOne
-    @JoinColumn(name = "CategoryID")
-    private Category category;
+        @ManyToOne
+        @JoinColumn(name = "CategoryID")
+        private Category category;
 
-    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<Chapter> chapters;
+        @OneToMany(mappedBy = "course", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+        private List<Chapter> chapters;
 
-    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
-    private List<Enrollment> enrollments;
+        @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
+        private List<Enrollment> enrollments;
 
-    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
-    private List<OrderDetail> orderDetails;
+        @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
+        private List<OrderDetail> orderDetails;
 
-    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
-    private List<CourseReview> courseReviews;
+        @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
+        private List<CourseReview> courseReviews;
 
-    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
-    private List<VoucherCourse> voucherCourses;
+        public Double getAverageRating() {
+                return courseReviews.stream().mapToDouble(CourseReview::getRating).average().orElse(0.0);
+        }
 
-    public Double getAverageRating() {
-        return courseReviews.stream().mapToDouble(CourseReview::getRating).average().orElse(0.0);
-    }
+        public Long getReviewCount() {
+                return (long) courseReviews.size();
+        }
 
-    public Long getReviewCount() {
-        return (long) courseReviews.size();
-    }
+        public Integer totalStudentEnrolled() {
+                return enrollments.size();
+        }
 
-    public Integer totalStudentEnrolled() {
-        return enrollments.size();
-    }
+        public Integer getDuration() {
+                return chapters.stream()
+                                .mapToInt(ch -> ch.getLessons().stream().mapToInt(Lesson::getDuration).sum())
+                                .sum();
+        }
 
-    public Integer getDuration() {
-        return chapters.stream()
-                .mapToInt(ch -> ch.getLessons().stream().mapToInt(Lesson::getDuration).sum())
-                .sum();
-    }
-
-    public Integer getTotalLessons() {
-        return chapters.stream().mapToInt(ch -> ch.getLessons().size()).sum();
-    }
+        public Integer getTotalLessons() {
+                return chapters.stream().mapToInt(ch -> ch.getLessons().size()).sum();
+        }
 
 }

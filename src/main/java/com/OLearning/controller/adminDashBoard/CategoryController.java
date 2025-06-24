@@ -33,7 +33,7 @@ public class CategoryController {
         Pageable pageable = PageRequest.of(page, size,
                 sort.equals("asc") ? Sort.by("name").ascending()
                         : sort.equals("desc") ? Sort.by("name").descending()
-                        : Sort.unsorted());
+                                : Sort.unsorted());
 
         Page<Category> categoriesPage = categoriesService.findByNameContaining(name, pageable);
 
@@ -88,11 +88,11 @@ public class CategoryController {
 
     @PostMapping("/categories/add")
     public String addCategory(@RequestParam("name") String name,
-                              @RequestParam(defaultValue = "") String sort,
-                              @RequestParam(defaultValue = "") String search,
-                              @RequestParam(defaultValue = "0") int page,
-                              @RequestParam(defaultValue = "5") int size,
-                              Model model) {
+            @RequestParam(defaultValue = "") String sort,
+            @RequestParam(defaultValue = "") String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            Model model) {
 
         if (categoriesService.existsByName(name)) {
             model.addAttribute("errorMessage", "Category already exists");
@@ -110,10 +110,10 @@ public class CategoryController {
 
     @GetMapping("/categories/edit")
     public String editCategory(@RequestParam("id") int id,
-                               @RequestParam(defaultValue = "0") int page,
-                               @RequestParam(defaultValue = "") String sort,
-                               @RequestParam(defaultValue = "") String name,
-                               Model model) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "") String sort,
+            @RequestParam(defaultValue = "") String name,
+            Model model) {
         Category category = categoriesService.findById(id);
         if (category != null) {
             model.addAttribute("category", category);
@@ -129,11 +129,11 @@ public class CategoryController {
 
     @PostMapping("/categories/edit")
     public String editCategory(@RequestParam("id") int id,
-                               @RequestParam("name") String name,
-                               @RequestParam(defaultValue = "0") int page,
-                               @RequestParam(defaultValue = "") String sort,
-                               @RequestParam(defaultValue = "") String search,
-                               Model model) {
+            @RequestParam("name") String name,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "") String sort,
+            @RequestParam(defaultValue = "") String search,
+            Model model) {
         Category category = categoriesService.findById(id);
 
         if (category == null) {

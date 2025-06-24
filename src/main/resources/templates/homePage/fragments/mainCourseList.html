@@ -11,7 +11,7 @@
     </div>
     <div class="row g-4">
         <div class="col-12" th:each="course : ${courses}">
-            <div class="card shadow overflow-hidden p-2 action-trigger-hover">
+            <div class="card shadow overflow-hidden p-2">
                 <div class="row g-0">
                     <!-- Course Image -->
                     <div class="col-md-5 overflow-hidden">
@@ -68,7 +68,7 @@
                             <!-- Price -->
                             <div class="d-sm-flex justify-content-sm-between align-items-center mt-3">
                                 <div>
-                                    <span class="text-success mb-0 item-show"
+                                    <span class="h5 text-danger me-2"
                                           th:text="${#numbers.formatDecimal(course.price - course.discount, 0, 'COMMA', 2, 'POINT')} + ' ₫'">0
                                         $</span>
                                     <span class="text-decoration-line-through text-muted d-block"
@@ -87,6 +87,7 @@
                                 <a th:href="@{'/course-detail/' + ${course.courseId}}" class="btn btn-dark">View
                                     more</a>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -101,7 +102,7 @@
             <ul class="pagination pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
                 <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
                     <a class="page-link" href="#" th:onclick="'loadPage(' + (${currentPage - 1}) + ');return false;'"
-                       aria-label="Previous">
+                        aria-label="Previous">
                         <i class="fas fa-angle-double-left"></i>
                     </a>
                 </li>
@@ -109,12 +110,12 @@
                 <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                     th:classappend="${i == currentPage} ? 'active'">
                     <a class="page-link" href="#" th:text="${i + 1}"
-                       th:onclick="'loadPage(' + ${i} + ');return false;'"></a>
+                        th:onclick="'loadPage(' + ${i} + ');return false;'"></a>
                 </li>
 
                 <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
                     <a class="page-link" href="#" th:onclick="'loadPage(' + (${currentPage + 1}) + ');return false;'"
-                       aria-label="Next">
+                        aria-label="Next">
                         <i class="fas fa-angle-double-right"></i>
                     </a>
                 </li>

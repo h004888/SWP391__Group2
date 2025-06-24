@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
+@ToString(exclude = "users")
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,6 +21,4 @@ public class Role {
 
     @OneToMany(mappedBy = "role")
     private List<User> users;
-
-
 }

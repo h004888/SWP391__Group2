@@ -1,8 +1,8 @@
-
 package com.OLearning.service.course;
 
 import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.course.CourseDetailDTO;
+import com.OLearning.entity.Chapter;
 import com.OLearning.entity.Course;
 
 import org.springframework.data.domain.Page;
@@ -15,17 +15,19 @@ import java.util.Optional;
 @Service
 public interface CourseService {
 
-    Course findById(Long id);
+        Course getCourseById(Long id);
 
-    List<Course> getTopCourses();
+        List<Chapter> getChaptersWithLessons(Long courseId);
 
-    Page<CourseDTO> searchCoursesGrid(
-            List<Long> categoryIds,
-            List<String> priceFilters,
-            List<String> levels,
-            String sortBy,
-            String keyword,
-            int page,
-            int size);
+        List<Course> getTopCourses();
+
+        Page<CourseDTO> searchCoursesGrid(
+                        List<Long> categoryIds,
+                        List<String> priceFilters,
+                        List<String> levels,
+                        String sortBy,
+                        String keyword,
+                        int page,
+                        int size);
 
 }

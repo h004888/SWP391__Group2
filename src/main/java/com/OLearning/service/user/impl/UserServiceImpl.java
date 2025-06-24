@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
- public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -54,9 +54,38 @@ import java.util.stream.Collectors;
     }
 
     @Override
+    public Page<UserDTO> getInstructorsByRoleIdOrderByCourseCountDesc(Long roleId, Pageable pageable) {
+        Page<User> userPage = userRepository.findInstructorsByRoleIdOrderByCourseCountDesc(roleId, pageable);
+        return userPage.map(userMapper::toDTO);
+    }
+
+    @Override
     public Page<UserDTO> searchByNameWithPagination(String keyword, Long roleId, Pageable pageable) {
         // Sử dụng repository method với pagination
-        Page<User> userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleId(keyword, roleId, pageable);
+        Page<User> userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleId(keyword, roleId,
+                pageable);
+        return userPage.map(userMapper::toDTO);
+    }
+
+    @Override
+    public Page<UserDTO> getInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(String keyword, Long roleId,
+            Pageable pageable) {
+        Page<User> userPage = userRepository.findInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(roleId, keyword,
+                pageable);
+        return userPage.map(userMapper::toDTO);
+    }
+
+    @Override
+    public Page<UserDTO> getUsersByRoleAndStatusWithPagination(Long roleId, boolean status, Pageable pageable) {
+        Page<User> userPage = userRepository.findByRole_RoleIdAndStatus(roleId, status, pageable);
+        return userPage.map(userMapper::toDTO);
+    }
+
+    @Override
+    public Page<UserDTO> searchByNameAndStatusWithPagination(String keyword, Long roleId, boolean status,
+            Pageable pageable) {
+        Page<User> userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleIdAndStatus(keyword, roleId,
+                status, pageable);
         return userPage.map(userMapper::toDTO);
     }
 
@@ -106,16 +135,9 @@ import java.util.stream.Collectors;
 
     @Override
     public void validateRegistrationData(RegisterDTO registrationDto) {
-        // Check if passwords match
-        if (!registrationDto.isPasswordsMatch()) {
-            throw new RuntimeException("Passwords do not match");
-        }
-
-        // Check if email already exists
         if (userRepository.existsByEmail(registrationDto.getEmail())) {
             throw new RuntimeException("Email address is already registered");
         }
-
         // Check terms agreement
         if (!registrationDto.isAgreeToTerms()) {
             throw new RuntimeException("You must agree to the Terms of Service and Privacy Policy");
@@ -133,19 +155,6 @@ import java.util.stream.Collectors;
         user.setRole(role);
         userRepository.save(user);
     }
-
-
-//    @Override
-//    public List<UserDTO> searchByName(String keyword, Long roleId) {
-//        String processedKeyword = null;
-//        if (keyword != null && !keyword.trim().isEmpty()) {
-//            processedKeyword = keyword.trim().toLowerCase();
-//        }
-//        List<User> users = userRepository.searchByNameAndRole(processedKeyword, roleId);
-//        return users.stream()
-//                .map(userMapper::toDTO)
-//                .collect(Collectors.toList());
-//    }
 
     @Override
     public List<UserDTO> getUsersByRole(Long roleId) {
@@ -175,9 +184,16 @@ import java.util.stream.Collectors;
     }
 
     @Override
+    public UserDTO getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+        return userMapper.toDTO(user);
+    }
+
+    @Override
     public boolean deleteAcc(Long id) {
         Optional<User> userOptional = userRepository.findById(id);
-        if(userOptional.isEmpty()) {
+        if (userOptional.isEmpty()) {
             return false;
         }
         userRepository.deleteById(id);
@@ -201,9 +217,44 @@ import java.util.stream.Collectors;
     }
 
     @Override
-    public UserDetailDTO getUserDetailsByEmail(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
-        return userDetailMapper.toDetailDTO(user);
+    public List<UserDTO> getTopInstructorsByCourseCount(int limit) {
+        // Get all instructors (roleId = 2)
+        List<User> instructors = userRepository.findByRoleId(2L);
+
+        // Sort instructors by number of courses in descending order
+        return instructors.stream()
+                .sorted((i1, i2) -> Integer.compare(
+                        i2.getCourses().size(),
+                        i1.getCourses().size()))
+                .limit(limit)
+                .map(userMapper::toDTO)
+                .collect(Collectors.toList());
     }
+
+    @Override
+    public Page<UserDTO> filterInstructors(String keyword, Pageable pageable) {
+        Page<User> userPage;
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            userPage = userRepository.findInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(2L, keyword.trim(),
+                    pageable);
+        } else {
+            userPage = userRepository.findInstructorsByRoleIdOrderByCourseCountDesc(2L, pageable);
+        }
+        return userPage.map(userMapper::toDTO);
+    }
+
+    @Override
+    public Optional<User> findById(Long userId) {
+        return userRepository.findById(userId)
+                .or(() -> {
+                    throw new RuntimeException("User not found with id: " + userId);
+                });
+    }
+
+    @Override
+    public boolean existsById(Long userId) {
+
+        return userRepository.existsById(userId);
+    }
+
 }

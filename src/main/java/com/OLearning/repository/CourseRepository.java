@@ -11,14 +11,15 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Long> {
-    @Query("SELECT c FROM Course c LEFT JOIN c.enrollments e GROUP BY c ORDER BY COUNT(e) DESC")
-    List<Course> findAllOrderByStudentCountDesc();
+     @Query("SELECT c FROM Course c LEFT JOIN c.enrollments e GROUP BY c ORDER BY COUNT(e) DESC")
+     List<Course> findAllOrderByStudentCountDesc();
 
-    // function search + filter + sort
-    @Query("""
+     // function search + filter + sort
+     @Query("""
                    SELECT c FROM Course c
                    WHERE (:keyword       IS NULL
                           OR LOWER(c.title)       LIKE LOWER(CONCAT('%', :keyword, '%'))
@@ -36,11 +37,12 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
                        OR c.courseLevel IN :levels
                      )
                """)
-    Page<Course> searchCourses(
-            @Param("keyword") String keyword,
-            @Param("categoryIds") List<Long> categoryIds,
-            @Param("priceFilters") List<String> priceFilters,
-            @Param("levels") List<String> levels,
-            Pageable pageable);
+     Page<Course> searchCourses(
+               @Param("keyword") String keyword,
+               @Param("categoryIds") List<Long> categoryIds,
+               @Param("priceFilters") List<String> priceFilters,
+               @Param("levels") List<String> levels,
+               Pageable pageable);
+
 
 }

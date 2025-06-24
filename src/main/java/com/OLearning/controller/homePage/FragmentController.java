@@ -48,7 +48,7 @@ public class FragmentController {
     public String courses(
             @RequestParam(required = false) List<Long> categoryIds,
             @RequestParam(required = false, name = "priceFilters") List<String> priceFilters,
-            @RequestParam(required = false, name = "levels") List<String> levels,
+            @RequestParam(required = false, name = "levels") List<String> levels, // đổi kiểu
             @RequestParam(defaultValue = "Newest") String sortBy,
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "0") int page,
@@ -62,7 +62,7 @@ public class FragmentController {
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", courses.getTotalPages());
         model.addAttribute("keyword", keyword);
-        model.addAttribute("priceFilters", priceFilters);
+        model.addAttribute("priceFilters", priceFilters); // sửa ở đây
         model.addAttribute("categoryIds", categoryIds);
 
         return "homePage/fragments/mainCourseGrid :: mainCourseGrid";

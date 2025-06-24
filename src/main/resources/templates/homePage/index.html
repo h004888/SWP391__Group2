@@ -7,48 +7,83 @@
 
 <body>
 
-<!-- Header START -->
-<div th:replace="~{homePage/fragments/navHeader :: navHeader}"></div>
-<!-- Header END -->
+	<!-- Header START -->
+	<div th:replace="~{homePage/fragments/navHeader :: navHeader}"></div>
+	<!-- Header END -->
 
-<!-- **************** MAIN CONTENT START **************** -->
-<div th:replace="~{homePage/fragments/mainContent :: mainContent}"></div>
-<!-- **************** MAIN CONTENT END **************** -->
+	<!-- **************** MAIN CONTENT START **************** -->
+	<div th:replace="~{homePage/fragments/mainContent :: mainContent}"></div>
+	<!-- **************** MAIN CONTENT END **************** -->
 
-<!-- =======================
+	<!-- =======================
 Footer START -->
-<div th:replace="~{homePage/fragments/footer :: footer}"></div>
-<!-- =======================
+	<div th:replace="~{homePage/fragments/footer :: footer}"></div>
+	<!-- =======================
 Footer END -->
 
-<!-- Back to top -->
-<div class="back-top"><i class="bi bi-arrow-up-short position-absolute top-50 start-50 translate-middle"></i></div>
+	<!-- Back to top -->
+	<div class="back-top"><i class="bi bi-arrow-up-short position-absolute top-50 start-50 translate-middle"></i></div>
 
-<!-- jQuery LUÔN ĐỂ TRƯỚC các file khác -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<!-- jQuery LUÔN ĐỂ TRƯỚC các file khác -->
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<!-- Bootstrap JS -->
-<script src="assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+	<!-- Bootstrap JS -->
+	<script src="assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Các vendor khác -->
-<script src="assets/vendor/tiny-slider/tiny-slider.js"></script>
-<script src="assets/vendor/glightbox/js/glightbox.js"></script>
-<script src="assets/vendor/purecounterjs/dist/purecounter_vanilla.js"></script>
+	<!-- Các vendor khác -->
+	<script src="assets/vendor/tiny-slider/tiny-slider.js"></script>
+	<script src="assets/vendor/glightbox/js/glightbox.js"></script>
+	<script src="assets/vendor/purecounterjs/dist/purecounter_vanilla.js"></script>
 
-<!-- Template Functions -->
-<script src="assets/js/functions.js"></script>
+	<!-- Template Functions -->
+	<script src="assets/js/functions.js"></script>
 
-<!-- Biến allCategories từ Thymeleaf -->
-<script th:inline="javascript">
-	/*<![CDATA[*/
-	var allCategories = /*[[${allCategories}]]*/ [];
-	/*]]>*/
-	console.log(allCategories);
-</script>
 
-<!-- File JavaScript của bạn -->
-<script src="js/homePage/home.js"></script>
 
+	<script>
+		function toggleMoreCategories(event) {
+			event.preventDefault();
+			document.querySelectorAll("#moreCategories").forEach(el => el.style.display = "block");
+			event.target.style.display = "none";
+		}
+		$(document).ready(function () {
+			function loadCoursesByCategory(categoryId) {
+				console.log('Loading courses for Category ID:', categoryId);
+
+				$.ajax({
+					url: 'fragments/courseByCategory',
+					type: 'GET',
+					data: {
+						'categoryId': categoryId
+					},
+					success: function (data) {
+						$('#course-pills-tabContent').html(data);
+					},
+					error: function () {
+						console.error('Lỗi khi tải dữ liệu');
+					}
+				});
+			}
+
+			// Bắt sự kiện click vào các tab
+			$('#course-pills-tab .nav-link').on('click', function (e) {
+				e.preventDefault();
+
+				$('#course-pills-tab .nav-link').removeClass('active');
+				$(this).addClass('active');
+
+				const categoryId = $(this).data('category-id');
+				loadCoursesByCategory(categoryId);
+			});
+
+			// 🔥 Khi vừa load trang, gọi luôn AJAX cho tab đầu tiên (tab mặc định active)
+			const firstActiveTab = $('#course-pills-tab .nav-link.active');
+			if (firstActiveTab.length > 0) {
+				const defaultCategoryId = firstActiveTab.data('category-id');
+				loadCoursesByCategory(defaultCategoryId);
+			}
+		});
+	</script>
 
 
 

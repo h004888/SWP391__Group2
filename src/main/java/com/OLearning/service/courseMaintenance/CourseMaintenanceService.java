@@ -9,6 +9,4 @@ import java.util.List;
 public interface CourseMaintenanceService {
     List<CourseMaintenance> getAllCourseMaintenances();
     List<CourseMaintenance> searchByUsername(String username);
-    void processMonthlyMaintenance();
-    //void updateMaintenanceStatus();
 }

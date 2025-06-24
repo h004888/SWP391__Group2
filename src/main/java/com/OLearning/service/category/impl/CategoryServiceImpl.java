@@ -2,7 +2,7 @@ package com.OLearning.service.category.impl;
 
 import com.OLearning.dto.category.CategoryDTO;
 import com.OLearning.entity.Category;
-import com.OLearning.repository.CategoriesRepository;
+import com.OLearning.repository.CategoryRepository;
 import com.OLearning.service.category.CategoryService;
 
 import jakarta.transaction.Transactional;
@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -21,7 +20,7 @@ import java.util.stream.Collectors;
 @Transactional
 public class CategoryServiceImpl implements CategoryService {
     @Autowired
-    private CategoriesRepository categoriesRepository;
+    private CategoryRepository categoriesRepository;
 
     public List<Category> getListCategories() {
         return categoriesRepository.findAll();
@@ -108,7 +107,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<Category> findTop5ByOrderByIdAsc() {
-        return categoriesRepository.findTop5ByOrderByIdAsc();
+        return categoriesRepository.findTopCategoriesByCourseCount(PageRequest.of(0, 5));
     }
 
 }

@@ -1,7 +1,5 @@
 package com.OLearning.mapper.category;
 
-
-
 import com.OLearning.dto.category.CategoryDTO;
 import com.OLearning.entity.Category;
 
@@ -12,6 +10,7 @@ public class CategoryMapper {
         }
         return new CategoryDTO(category.getId(), category.getName());
     }
+
     public Category toCategory(CategoryDTO categoryDTO) {
         if (categoryDTO == null) {
             return null;
@@ -22,4 +21,3 @@ public class CategoryMapper {
         return category;
     }
 }
-
