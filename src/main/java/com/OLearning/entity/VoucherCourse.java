@@ -1,0 +1,4 @@
+package com.OLearning.entity;
+
+public class VoucherCourse {
+}
