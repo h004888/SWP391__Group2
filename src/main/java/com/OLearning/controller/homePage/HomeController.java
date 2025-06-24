@@ -5,15 +5,12 @@ import java.util.stream.Collectors;
 
 import com.OLearning.dto.category.CategoryDTO;
 import com.OLearning.dto.course.CourseDTO;
-import com.OLearning.entity.Category;
 import com.OLearning.entity.Course;
 import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.course.CourseService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -73,6 +70,7 @@ public class HomeController {
                 model.addAttribute("courseByCategory",
                                 course.getCategory().getCourses().stream().limit(5).collect(Collectors.toList()));
                 model.addAttribute("course", course);
+                        
                 return "homePage/course-detail";
         }
 

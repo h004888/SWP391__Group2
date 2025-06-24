@@ -413,7 +413,7 @@ Popular course START -->
             <!-- Title -->
             <div class="row mb-4">
                 <div class="col-lg-8 mx-auto text-center">
-                    <h2 class="fs-1">Most Popular Courses</h2>
+                    <h2 class="fs-1">Most Popular Categories</h2>
                     <p class="mb-0">Choose from hundreds of courses from specialist organizations</p>
                 </div>
             </div>
@@ -514,7 +514,7 @@ Trending courses START -->
                         data-dots="false" data-items="3" data-items-lg="2" data-items-sm="1">
                         <!-- Card item START -->
                         <div th:each="course : ${topCourses}">
-                            <div class="card action-trigger-hover border bg-transparent">
+                            <div class="card action-trigger-hover border bg-transparent" style="height: 580px;">
                                 <!-- Image -->
                                 <img src="assets/images/courses/4by3/14.jpg" class="card-img-top" alt="course image">
                                 <!-- Ribbon -->
@@ -539,7 +539,7 @@ Trending courses START -->
                                         <a href="#" class="h6 fw-light mb-0"><i class="far fa-bookmark"></i></a>
                                     </div>
                                     <!-- Title -->
-                                    <h5 class="card-title"><a href="#" th:text="${course.title}">The complete Digital
+                                    <h5 class="card-title"><a th:href="@{'/home/course-detail?id=' + ${course.courseId}}" th:text="${course.title}">The complete Digital
                                             Marketing Course - 8 Course
                                             in 1</a></h5>
                                     <!-- Rating -->
@@ -569,7 +569,7 @@ Trending courses START -->
                                     </div>
                                 </div>
                                 <!-- Card footer -->
-                                <div class="card-footer pt-0 bg-transparent">
+                                <div class="card-footer pt-0 bg-transparent" >
                                     <hr>
                                     <!-- Avatar and Price -->
                                     <div class="d-flex justify-content-between align-items-center">
@@ -586,8 +586,8 @@ Trending courses START -->
                                         <!-- Price -->
                                         <div>
 
-                                            <h4 class="text-success mb-0 item-show" th:if="${course.price>0}"><span
-                                                    th:text="${course.price} + ' ₫'"></span>
+                                            <h4 class="text-success mb-0 item-show " style="font-size: 1.2rem;" th:if="${course.price>0}"><span
+                                                    th:text="${course.price != null ? #numbers.formatDecimal(course.price, 0, 'COMMA', 0, 'POINT')+' ₫' : 'N/A'}"></span>
                                             </h4>
                                             <h4 class="text-success mb-0 item-show" th:if="${course.price==0}">Free
                                             </h4>

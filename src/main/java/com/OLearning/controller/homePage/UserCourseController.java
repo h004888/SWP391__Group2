@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+
 import com.OLearning.security.CustomUserDetails;
 import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.course.CourseService;
@@ -84,7 +85,6 @@ public class UserCourseController {
         return null;
     }
 
-    // Controller đã fix
     @GetMapping("/course/view")
     public String showUserCourseDetail(Principal principal, Model model, @RequestParam("courseId") Long courseId) {
         if (principal == null) {
@@ -107,10 +107,11 @@ public class UserCourseController {
             currentLesson = lessonService.getNextLessonAfterCompleted(currentUser.getUserId(), courseId).orElse(null);
         }
         if (currentLesson == null) {
-            return "redirect:/learning"; // fallback nếu đã học hết
+            currentLesson = lessonService.findFirstLesson(courseId);
         }
 
-        List<Long> completedLessonIds = lessonCompletionService.getByUserAndCourse(currentUser.getUserId(), courseId).stream()
+        List<Long> completedLessonIds = lessonCompletionService.getByUserAndCourse(currentUser.getUserId(), courseId)
+                .stream()
                 .map(LessonCompletionDTO::getLessonId)
                 .collect(Collectors.toList());
 
@@ -130,7 +131,7 @@ public class UserCourseController {
 
     @GetMapping("course/{courseId}/lesson/{lessonId}")
     public String showUserLessonDetail(Principal principal, Model model, @PathVariable("lessonId") Long lessonId,
-                                       @PathVariable("courseId") Long courseId) {
+            @PathVariable("courseId") Long courseId) {
         User user = extractCurrentUser(principal);
         if (user == null) {
             return "redirect:/login";

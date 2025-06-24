@@ -101,7 +101,7 @@
 		<nav class="navbar navbar-expand-xl z-index-9">
 			<div class="container">
 				<!-- Logo START -->
-				<a class="navbar-brand" href="index.html">
+				<a class="navbar-brand" th:href="@{/home}">
 					<img class="light-mode-item navbar-brand-item" src="assets/images/logo.svg" alt="logo">
 					<img class="dark-mode-item navbar-brand-item" src="assets/images/logo-light.svg" alt="logo">
 				</a>
@@ -145,7 +145,7 @@
 						<li class="nav-item dropdown"><a class="nav-link" href="#">My courses</a></li>
 
 						<!-- Nav item 3 My learning -->
-						<li class="nav-item"><a class="nav-link" href="#">My learning</a></li>
+						<li class="nav-item"><a class="nav-link active" href="#">My learning</a></li>
 					</ul>
 					<!-- Nav Main menu END -->
 				</div>
@@ -414,7 +414,7 @@
 											</ul>
 
 											<!-- Dropdown -->
-											<a href="#" class="btn btn-sm btn-primary-soft mb-0">Continue</a>
+											<a th:href="@{/learning/course/view(courseId=${course.courseId})}" class="btn btn-sm btn-primary-soft mb-0">Continue</a>
 										</div>
 									</div>
 								</div>
@@ -493,7 +493,7 @@ Trending course START -->
 										<div class="d-flex align-items-center bg-white p-2 rounded-2">
 											<!-- Avatar -->
 											<div class="avatar avatar-sm me-2">
-												<img class="avatar-img rounded-1" src="assets/images/avatar/10.jpg"
+												<img class="avatar-img rounded-1" th:src="@{/assets/images/avatar/10.jpg}"
 													alt="avatar">
 											</div>
 											<!-- Avatar info -->
@@ -1678,7 +1678,7 @@ Footer START -->
 				<!-- Widget 1 START -->
 				<div class="col-lg-3">
 					<!-- logo -->
-					<a class="me-0" href="index.html">
+					<a class="me-0" th:href="@{/home}">
 						<img class="h-40px" src="assets/images/logo-light.svg" alt="logo">
 					</a>
 					<p class="my-3 text-body-secondary">Eduport education theme, built specifically for the education
