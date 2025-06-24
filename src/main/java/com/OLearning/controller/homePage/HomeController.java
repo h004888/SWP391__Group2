@@ -121,7 +121,7 @@ public class HomeController {
         String mainCartEncoded = getCartCookie(request, getUserIdFromUserDetails(userDetails));
         if (cartService.isCourseInCart(mainCartEncoded, courseId, userDetails.getUsername())) {
             redirectAttributes.addFlashAttribute("info", "This course is already in your cart. Please proceed to checkout from your cart.");
-            return "redirect:/cart";
+            return "redirect:/home/coursesGrid";
         }
 
         try {
@@ -199,14 +199,13 @@ public class HomeController {
                 boolean isBuyNow = encodedBuyNowJson != null;
 
                 if (isBuyNow) {
-
                     byte[] decodedBytes = Base64.getDecoder().decode(encodedBuyNowJson);
                     cartJson = new String(decodedBytes, StandardCharsets.UTF_8);
                     cart = objectMapper.readValue(cartJson, Map.class);
                     clearBuyNowCookie(response);
                 } else {
                     String encodedCartJson = getCartCookie(request, userId);
-                    cart = decodeCartFromCookie(encodedCartJson, userDetails.getUsername());
+                    cart = cartService.getCartDetails(encodedCartJson, userDetails.getUsername());
                     cartJson = objectMapper.writeValueAsString(cart);
                 }
 
@@ -255,33 +254,6 @@ public class HomeController {
         cartCookie.setMaxAge(7 * 24 * 60 * 60);
         cartCookie.setHttpOnly(true);
         response.addCookie(cartCookie);
-    }
-
-    private Map<String, Object> decodeCartFromCookie(String encodedCartJson, String userEmail) {
-        try {
-            if (encodedCartJson == null || encodedCartJson.isEmpty()) {
-                Map<String, Object> emptyCart = new HashMap<>();
-                Long userId = userRepository.findByEmail(userEmail)
-                        .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + userEmail))
-                        .getUserId();
-                emptyCart.put("userId", userId);
-                emptyCart.put("total", 0L);
-                emptyCart.put("items", new ArrayList<>());
-                return emptyCart;
-            }
-            byte[] decodedBytes = Base64.getDecoder().decode(encodedCartJson);
-            String decodedJson = new String(decodedBytes, StandardCharsets.UTF_8);
-            return cartService.getCartDetails(decodedJson, userEmail);
-        } catch (Exception e) {
-            Map<String, Object> emptyCart = new HashMap<>();
-            Long userId = userRepository.findByEmail(userEmail)
-                    .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + userEmail))
-                    .getUserId();
-            emptyCart.put("userId", userId);
-            emptyCart.put("total", 0L);
-            emptyCart.put("items", new ArrayList<>());
-            return emptyCart;
-        }
     }
 
     private Long getUserIdFromUserDetails(UserDetails userDetails) {

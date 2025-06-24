@@ -53,7 +53,7 @@
             <div class="table-responsive border-0 rounded-3">
               <table class="table align-middle p-4 mb-0">
                 <tbody class="border-top-0">
-                <tr th:each="item : ${cartItems}">
+                <tr th:each="item : ${cartItems}" th:attr="data-course-id=${item.courseId}" class="cart-row">
                   <td>
                     <div class="d-lg-flex align-items-center">
                       <div class="ms-lg-3 mt-2 mt-lg-0">
@@ -66,8 +66,16 @@
                     </div>
                   </td>
                   <td class="text-center">
-                    <h5 class="text-success mb-0"
-                        th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 2, 'POINT')+ ' đ'}">Price</h5>
+                    <span th:id="'original-price-' + ${item.courseId}" style="text-decoration: none;" class="text-success mb-0 fw-bold">
+                      <span th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')+ ' đ'}">Price</span>
+                    </span>
+                    <span class="discounted-price text-danger fw-bold" th:id="'discounted-price-' + ${item.courseId}"></span>
+                    <button type="button" class="btn btn-outline-primary voucher-btn mt-2" th:attr="data-course-id=${item.courseId}">
+                      <i class="fas fa-ticket-alt"></i> Voucher
+                    </button>
+                    <div class="mt-1">
+                      <span class="applied-voucher" th:id="'applied-voucher-' + ${item.courseId}"></span>
+                    </div>
                   </td>
                   <td class="text-end">
                     <a th:href="@{'/cart/remove/' + ${item.id}}"
@@ -102,16 +110,17 @@
             <ul class="list-group list-group-borderless mb-2">
               <li class="list-group-item px-0 d-flex justify-content-between">
                 <span class="h6 fw-light mb-0">Original Price</span>
-                <span class="h6 fw-light mb-0 fw-bold" th:text="${#numbers.formatDecimal(totalPrice, 0, 'COMMA', 2, 'POINT')+' đ' }">0.00</span>
+                <span class="h6 fw-light mb-0 fw-bold" th:text="${#numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT')+' đ' }">0</span>
               </li>
               <hr class="my-1">
               <li class="list-group-item px-0 d-flex justify-content-between">
                 <span class="h5 mb-0">Total</span>
-                <span class="h5 mb-0" th:text="${#numbers.formatDecimal(totalPrice, 0, 'COMMA', 2, 'POINT') +' đ'}">0.00</span>
+                <span class="h5 mb-0" id="cart-total" th:text="${#numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT') +' đ'}">0</span>
               </li>
             </ul>
             <div class="d-flex justify-content-center">
-              <form th:action="@{/cart/checkout}" method="post">
+              <form th:action="@{/cart/checkout}" method="post" id="checkout-form">
+                <input type="hidden" id="voucherMapping" name="voucherMapping" />
                 <button type="submit" class="btn btn-lg btn-success"
                         onclick="return confirm('Are you sure you want to check out?')">
                   Checkout
@@ -138,4 +147,106 @@
       </div>
     </div>
   </section>
+
+  <!-- Modal chọn voucher -->
+  <div class="modal" id="voucherModal" tabindex="-1" style="display:none; background:rgba(0,0,0,0.3); position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:9999;">
+    <div class="modal-dialog" style="margin:10vh auto; max-width:400px;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Chọn voucher cho khóa học</h5>
+          <button type="button" class="btn-close" onclick="closeVoucherModal()"></button>
+        </div>
+        <div class="modal-body" id="voucher-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  let selectedCourseId = null;
+  const userId = /*[[${#authentication.principal.userId}]]*/ 1;
+  if (!window.selectedVouchers) window.selectedVouchers = {};
+
+  setTimeout(() => {
+    document.querySelectorAll('.voucher-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        selectedCourseId = this.getAttribute('data-course-id');
+        fetch(`/vouchers/course/${selectedCourseId}/user/${userId}`)
+          .then(res => res.json())
+          .then(data => {
+            let html = '';
+            let selectedVoucherId = window.selectedVouchers[selectedCourseId];
+            if (data.length === 0) {
+              html = '<p>Không có voucher phù hợp.</p>';
+            } else {
+              data.forEach(voucher => {
+                let isSelected = selectedVoucherId == voucher.voucherId;
+                html += `<div class='d-flex justify-content-between align-items-center mb-2'>
+                  <span>${voucher.voucherCode} - Giảm ${voucher.discount}%</span>
+                  <button class='btn btn-sm ${isSelected ? 'btn-secondary' : 'btn-success'}' 
+                    onclick='${isSelected ? `removeVoucher(${voucher.voucherId}, ${selectedCourseId})` : `applyVoucher(${voucher.voucherId}, ${selectedCourseId})`}' >
+                    ${isSelected ? 'Hủy chọn' : 'Áp dụng'}
+                  </button>
+                </div>`;
+              });
+            }
+            document.getElementById('voucher-list').innerHTML = html;
+            document.getElementById('voucherModal').style.display = 'block';
+          });
+      });
+    });
+  }, 500);
+
+  function applyVoucher(voucherId, courseId) {
+    fetch('/cart/apply-voucher', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({userId: userId, courseId: courseId, voucherId: voucherId})
+    })
+    .then(res => res.json())
+    .then(data => {
+      window.selectedVouchers[courseId] = voucherId;
+      document.getElementById('original-price-' + courseId).style.textDecoration = 'line-through';
+      document.getElementById('discounted-price-' + courseId).textContent = ' ' + formatNumberWithCommas(Number(data.discountedPrice)) + ' đ';
+      document.getElementById('voucherModal').style.display = 'none';
+      updateCartTotal();
+    });
+  }
+
+  function removeVoucher(voucherId, courseId) {
+    delete window.selectedVouchers[courseId];
+    document.getElementById('original-price-' + courseId).style.textDecoration = 'none';
+    document.getElementById('discounted-price-' + courseId).textContent = '';
+    document.getElementById('voucherModal').style.display = 'none';
+    updateCartTotal();
+  }
+
+  function updateCartTotal() {
+    let total = 0;
+    document.querySelectorAll('.cart-row').forEach(tr => {
+      const courseId = tr.getAttribute('data-course-id');
+      const discounted = document.getElementById('discounted-price-' + courseId);
+      let price = 0;
+      if (discounted && discounted.textContent.trim()) {
+        price = Number(discounted.textContent.replace(/[^\d]/g, ''));
+      } else {
+        const original = document.getElementById('original-price-' + courseId);
+        if (original) price = Number(original.textContent.replace(/[^\d]/g, ''));
+      }
+      if (!isNaN(price)) total += price;
+    });
+    document.getElementById('cart-total').textContent = formatNumberWithCommas(Number(total)) + ' đ';
+  }
+
+  function closeVoucherModal() {
+    document.getElementById('voucherModal').style.display = 'none';
+  }
+
+  function formatNumberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
+  document.getElementById('checkout-form').onsubmit = function() {
+    document.getElementById('voucherMapping').value = JSON.stringify(window.selectedVouchers);
+  };
+  </script>
 </main>

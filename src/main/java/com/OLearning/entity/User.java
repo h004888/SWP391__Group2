@@ -47,4 +47,9 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<CoinTransaction> coinTransactions;
 
+    @OneToMany(mappedBy = "instructor")
+    private List<Voucher> vouchers;
+
+    @OneToMany(mappedBy = "user")
+    private List<UserVoucher> userVouchers;
 }

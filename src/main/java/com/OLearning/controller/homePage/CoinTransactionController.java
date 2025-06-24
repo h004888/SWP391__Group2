@@ -215,7 +215,6 @@ public class CoinTransactionController {
 
         if (paymentStatus == 1) {
             try {
-                // Chỉ tạo và lưu giao dịch khi thanh toán thành công
                 coinTransactionService.saveDepositTransactionAfterPayment(
                         ((CustomUserDetails) userDetails).getUserId(),
                         BigDecimal.valueOf(amount),

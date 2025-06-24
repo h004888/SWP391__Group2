@@ -72,6 +72,9 @@ public class Course {
     @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
     private List<CourseReview> courseReviews;
 
+    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
+    private List<VoucherCourse> voucherCourses;
+
     public Double getAverageRating() {
         return courseReviews.stream().mapToDouble(CourseReview::getRating).average().orElse(0.0);
     }

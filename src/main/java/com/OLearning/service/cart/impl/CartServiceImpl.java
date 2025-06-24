@@ -13,6 +13,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.Base64;
+import java.nio.charset.StandardCharsets;
 
 @Service
 public class CartServiceImpl implements CartService {
@@ -51,17 +53,22 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public Map<String, Object> getCartDetails(String cartJson, String userEmail) {
+    public Map<String, Object> getCartDetails(String encodedCartJson, String userEmail) {
         try {
             Long userId = userRepository.findByEmail(userEmail)
                     .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + userEmail))
                     .getUserId();
-            if (cartJson == null || cartJson.trim().isEmpty()) {
+
+            String cartJson;
+            if (encodedCartJson == null || encodedCartJson.trim().isEmpty()) {
                 Map<String, Object> emptyCart = new HashMap<>();
                 emptyCart.put("userId", userId);
                 emptyCart.put("total", 0L);
                 emptyCart.put("items", new ArrayList<>());
                 return emptyCart;
+            } else {
+                byte[] decodedBytes = Base64.getDecoder().decode(encodedCartJson);
+                cartJson = new String(decodedBytes, StandardCharsets.UTF_8);
             }
             Map<String, Object> cart = objectMapper.readValue(cartJson, Map.class);
 
@@ -93,8 +100,8 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public Map<String, Object> addCourseToCart(String cartJson, Long courseId, String userEmail) {
-        Map<String, Object> cart = getCartDetails(cartJson, userEmail);
+    public Map<String, Object> addCourseToCart(String encodedCartJson, Long courseId, String userEmail) {
+        Map<String, Object> cart = getCartDetails(encodedCartJson, userEmail);
         List<Map<String, Object>> items = (List<Map<String, Object>>) cart.getOrDefault("items", new ArrayList<>());
         Long total = getLongValue(cart.getOrDefault("total", 0L));
         Long userId = userRepository.findByEmail(userEmail)
@@ -131,8 +138,8 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public Map<String, Object> removeCartDetail(String cartJson, String cartDetailId, String userEmail) {
-        Map<String, Object> cart = getCartDetails(cartJson, userEmail);
+    public Map<String, Object> removeCartDetail(String encodedCartJson, String cartDetailId, String userEmail) {
+        Map<String, Object> cart = getCartDetails(encodedCartJson, userEmail);
         List<Map<String, Object>> items = (List<Map<String, Object>>) cart.getOrDefault("items", new ArrayList<>());
 
         items = items.stream()
@@ -145,8 +152,8 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public boolean isCourseInCart(String cartJson, Long courseId, String userEmail) {
-        Map<String, Object> cart = getCartDetails(cartJson, userEmail);
+    public boolean isCourseInCart(String encodedCartJson, Long courseId, String userEmail) {
+        Map<String, Object> cart = getCartDetails(encodedCartJson, userEmail);
         if (cart.get("items") instanceof List) {
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> items = (List<Map<String, Object>>) cart.get("items");
@@ -169,8 +176,8 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public String processCheckout(String cartJson, String ipAddr, String userEmail) {
-        Map<String, Object> cart = getCartDetails(cartJson, userEmail);
+    public String processCheckout(String encodedCartJson, String ipAddr, String userEmail) {
+        Map<String, Object> cart = getCartDetails(encodedCartJson, userEmail);
         List<Map<String, Object>> items = (List<Map<String, Object>>) cart.getOrDefault("items", new ArrayList<>());
         if (items.isEmpty()) {
             throw new IllegalStateException("Cannot checkout an empty cart");
