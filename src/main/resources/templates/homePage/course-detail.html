@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:sec="http://www.w3.org/1999/xhtml">
 
 <!-- Mirrored from stackbros.in/eduport/landing/course-detail.html by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 06 Jun 2025 07:32:06 GMT -->
 
@@ -1294,31 +1294,27 @@ Page content START -->
 												<div class="d-flex align-items-center">
 													<h3 class="fw-bold mb-0 me-2" th:text="${course.price} + ' ₫'">$150
 													</h3>
-													<span class="text-decoration-line-through mb-0 me-2"
-														th:text="${course.price + course.price*0.6} + ' ₫'">$350</span>
-													<span class="badge text-bg-orange mb-0">60% off</span>
 												</div>
-												<p class="mb-0 text-danger"><i class="fas fa-stopwatch me-2"></i>5 days
-													left at this price</p>
+
 											</div>
 
 											<!-- Share button with dropdown -->
 											<div class="dropdown">
 												<!-- Share button -->
 												<a href="#" class="btn btn-sm btn-light rounded small" role="button"
-													id="dropdownShare" data-bs-toggle="dropdown" aria-expanded="false">
+												   id="dropdownShare" data-bs-toggle="dropdown" aria-expanded="false">
 													<i class="fas fa-fw fa-share-alt"></i>
 												</a>
 												<!-- dropdown button -->
 												<ul class="dropdown-menu dropdown-w-sm dropdown-menu-end min-w-auto shadow rounded"
 													aria-labelledby="dropdownShare">
 													<li><a class="dropdown-item" href="#"><i
-																class="fab fa-twitter-square me-2"></i>Twitter</a></li>
+															class="fab fa-twitter-square me-2"></i>Twitter</a></li>
 													<li><a class="dropdown-item" href="#"><i
-																class="fab fa-facebook-square me-2"></i>Facebook</a>
+															class="fab fa-facebook-square me-2"></i>Facebook</a>
 													</li>
 													<li><a class="dropdown-item" href="#"><i
-																class="fab fa-linkedin me-2"></i>LinkedIn</a></li>
+															class="fab fa-linkedin me-2"></i>LinkedIn</a></li>
 													<li>
 														<a class="dropdown-item" href="#" id="copyLinkBtn">
 															<i class="fas fa-copy me-2"></i>Copy link
@@ -1331,8 +1327,13 @@ Page content START -->
 
 										<!-- Buttons -->
 										<div class="mt-3 d-sm-flex justify-content-sm-between">
-											<a href="#" class="btn btn-outline-primary mb-0">Free trial</a>
-											<a href="#" class="btn btn-success mb-0">Buy course</a>
+											<form th:action="@{'/cart/add/' + ${course.courseId}}" method="post" class="d-inline">
+												<button type="submit" class="btn btn-sm btn-success-soft item-show-hover m-1"><i class="fas fa-shopping-cart me-2"></i>Add to cart</button>
+											</form>
+											<form th:action="@{'/home/buy-now'}" method="post" class="d-inline">
+												<input type="hidden" name="courseId" th:value="${course.courseId}"/>
+												<button type="submit" class="btn btn-success mb-0"><i class="fas fa-bolt me-2"></i>Buy now</button>
+											</form>
 										</div>
 									</div>
 								</div>

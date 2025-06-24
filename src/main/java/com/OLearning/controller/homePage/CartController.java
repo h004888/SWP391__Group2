@@ -3,8 +3,10 @@ package com.OLearning.controller.homePage;
 import com.OLearning.config.VNPayConfig;
 import com.OLearning.entity.Order;
 import com.OLearning.entity.User;
+import com.OLearning.repository.CourseRepository;
 import com.OLearning.repository.OrdersRepository;
 import com.OLearning.repository.UserRepository;
+import com.OLearning.repository.VoucherRepository;
 import com.OLearning.service.cart.CartService;
 import com.OLearning.service.cart.impl.CartServiceImpl;
 import com.OLearning.service.vnpay.VNPayService;
@@ -37,11 +39,9 @@ public class CartController {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private OrdersRepository ordersRepository;
+    private CourseRepository courseRepository;
     @Autowired
-    private com.OLearning.repository.CourseRepository courseRepository;
-    @Autowired
-    private com.OLearning.repository.VoucherRepository voucherRepository;
+    private VoucherRepository voucherRepository;
 
     @GetMapping
     public String getCart(@AuthenticationPrincipal UserDetails userDetails,

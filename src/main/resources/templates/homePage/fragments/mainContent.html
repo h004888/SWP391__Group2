@@ -590,9 +590,9 @@ Trending courses START -->
                                             </h4>
                                             <h4 class="text-success mb-0 item-show" th:if="${course.price==0}">Free
                                             </h4>
-
-                                            <a href="#" class="btn btn-sm btn-success-soft item-show-hover"><i
-                                                    class="fas fa-shopping-cart me-2"></i>Add to cart</a>
+                                            <form th:action="@{'/cart/add/' + ${course.courseId}}" method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-success-soft item-show-hover m-1"><i class="fas fa-shopping-cart me-2"></i>Add to cart</button>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
