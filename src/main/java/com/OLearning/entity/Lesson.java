@@ -52,9 +52,9 @@ public class Lesson {
     @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL)
     private List<Video> videos;
 
-    // Danh sách quiz thuộc bài học
-    @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL)
-    private List<Quiz> quizzes;
+
+   @OneToOne(mappedBy = "lesson", cascade = CascadeType.ALL)
+    private QuizTest quizTest;
 
     // Danh sách người dùng đã hoàn thành bài học này
     @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL)

@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
 import com.OLearning.security.CustomUserDetails;
@@ -69,7 +68,7 @@ public class UserCourseController {
             model.addAttribute("course", null); // hoặc ẩn phần này trên giao diện
         }
 
-        return "userPage/index-3";
+        return "userPage/LearningDashboard";
     }
 
     /**

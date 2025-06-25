@@ -25,19 +25,19 @@ public class LessonController {
     @Autowired
     private LessonService lessonService;
 
-    @GetMapping("/lesson/player/{id}")
-    public String lessonPlayer(@PathVariable Long lessonId, Model model, Principal principal) {
-        if (principal == null) {
-            return "redirect:/login";
-        }
-        User user = extractCurrentUser(principal);
-        if (user == null) {
-            return "redirect:/login";
-        }
+    @GetMapping("/lesson/player")
+    public String lessonPlayer(Model model) {
+        // if (principal == null) {
+        // return "redirect:/login";
+        // }
+        // User user = extractCurrentUser(principal);
+        // if (user == null) {
+        // return "redirect:/login";
+        // }
 
-        Lesson lesson = lessonService.findLessonById(lessonId);
-        model.addAttribute("lesson", lesson);
-        return "lesson-player";
+        // Lesson lesson = lessonService.findLessonById(lessonId);
+        // model.addAttribute("lesson", lesson);
+        return "UserPage/lessonVideo";
     }
 
     private User extractCurrentUser(Principal principal) {
