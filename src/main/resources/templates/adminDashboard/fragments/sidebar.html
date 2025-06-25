@@ -1,81 +1,85 @@
-<ul th:fragment="sidebar" class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+<nav th:fragment="sidebar" class="navbar sidebar navbar-expand-xl navbar-dark bg-dark">
 
-    <!-- Sidebar - Brand -->
-    <a class="sidebar-brand d-flex align-items-center justify-content-center" th:href="@{/admin}">
-        <div class="sidebar-brand-icon rotate-n-15">
-            <i class="fas fa-laugh-wink"></i>
-        </div>
-        <div class="sidebar-brand-text mx-3">Admin</div>
-    </a>
-
-    <!-- Divider -->
-    <hr class="sidebar-divider my-0">
-
-    <!-- Nav Item - Dashboard -->
-    <li class="nav-item active">
-        <a class="nav-link" th:href="@{/admin}">
-            <i class="fas fa-fw fa-tachometer-alt"></i>
-            <span>Dashboard</span></a>
-    </li>
-
-    <!-- Divider -->
-    <hr class="sidebar-divider">
-
-    <!-- Heading -->
-    <div class="sidebar-heading">
-        Manage
+    <!-- Navbar brand for xl START -->
+    <div class="d-flex align-items-center">
+        <a class="navbar-brand" th:href="@{/admin}">
+            <img class="navbar-brand-item" th:src="@{/assets/images/logo-light.svg}" alt="">
+        </a>
     </div>
+    <!-- Navbar brand for xl END -->
 
-    <!-- Nav Item - Pages Collapse Menu -->
-    <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true"
-            aria-controls="collapseTwo">
-            <i class="fas fa-fw fa-user"></i>
-            <span>Customers</span>
-        </a>
-        <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-            <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Custom Customer:</h6>
-                <a class="collapse-item" th:href="@{/admin/account}">Accounts</a>
-            </div>
+    <div class="offcanvas offcanvas-start flex-row custom-scrollbar h-100" data-bs-backdrop="true" tabindex="-1"
+         id="offcanvasSidebar">
+        <div class="offcanvas-body sidebar-content d-flex flex-column bg-dark">
+
+            <!-- Sidebar menu START -->
+            <ul class="navbar-nav flex-column" id="navbar-sidebar">
+
+                <!-- Menu item 1 -->
+                <li class="nav-item"><a th:href="@{/admin}" class="nav-link active"><i
+                        class="bi bi-house fa-fw me-2"></i>Dashboard</a></li>
+
+                <!-- Title -->
+                <li class="nav-item ms-2 my-2">Pages</li>
+
+                <!-- menu item 2 -->
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/account}">
+                        <i class="fas fa-fw fa-user"></i>
+                        <span>Accounts</span>
+                    </a>
+                </li>
+
+                <!-- Menu item 3 -->
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="collapse" href="#collapseinstructors" role="button"
+                       aria-expanded="true" aria-controls="collapseinstructors">
+                        <i class="fas fa-user-tie fa-fw me-2"></i><span>Instructors</span>
+                    </a>
+                    <ul class="nav collapse flex-column show" id="collapseinstructors" data-bs-parent="#navbar-sidebar">
+                        <li class="nav-item"><a class="nav-link active"
+                                                th:href="@{/admin/mnInstructors}">Instructors</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/admin/mnInstructors/request}">Instructor requests
+                                <!-- <span class="badge text-bg-success rounded-circle ms-2">2</span>-->
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Menu item 4 -->
+                <li class="nav-item"><a class="nav-link" th:href="@{/admin/course}">
+                    <i class="fas fa-fw fa-trophy"></i>
+                    <span>Courses</span>
+                </a></li>
+
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/category}">
+                        <i class="fas fa-list"></i>
+                        <span>Categories</span>
+                    </a>
+                </li>
+
+                <!-- Menu item 5 -->
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/orders}">
+                        <i class="fas fa-fw fa-credit-card"></i>
+                        <span>Orders & Payments</span>
+                    </a>
+                </li>
+
+                <!-- Menu item 6 -->
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/courseMaintenance}">
+                        <i class="fas fa-fw fa-receipt"></i>
+                        <span>CourseMaintenance</span>
+                    </a>
+                </li>
+
+
+            </ul>
+            <!-- Sidebar menu end -->
+
         </div>
-    </li>
-
-    <li class="nav-item">
-        <a class="nav-link" th:href="@{/admin/categories}">
-            <i class="fas fa-fw fa-trophy"></i>
-            <span>Categories</span>
-        </a>
-    </li>
-
-
-    <!-- Nav Item - Utilities Collapse Menu -->
-    <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities"
-            aria-expanded="true" aria-controls="collapseUtilities">
-            <i class="fas fa-fw fa-trophy"></i>
-            <span>Course</span>
-        </a>
-        <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
-            <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Custom Course:</h6>
-                <a class="collapse-item" th:href="@{/admin/course}">Course</a>
-                <a class="collapse-item" href="utilities-border.html">Orders & Payments</a>
-                <a class="collapse-item" href="utilities-animation.html">Analytics & Reports</a>
-                <a class="collapse-item" href="utilities-other.html">Review & FeedBack</a>
-                <a class="collapse-item" href="utilities-other.html">Quiz</a>
-            </div>
-        </div>
-    </li>
-
-    <!-- Divider -->
-    <hr class="sidebar-divider">
-
-    <!-- Sidebar Toggler (Sidebar) -->
-    <div class="text-center d-none d-md-inline">
-        <button class="rounded-circle border-0" id="sidebarToggle"></button>
     </div>
-
-    <!-- Sidebar Message -->
-
-</ul>
+</nav>

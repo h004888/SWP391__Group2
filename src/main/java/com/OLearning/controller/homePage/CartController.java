@@ -7,9 +7,11 @@ import com.OLearning.repository.CourseRepository;
 import com.OLearning.repository.OrdersRepository;
 import com.OLearning.repository.UserRepository;
 import com.OLearning.repository.VoucherRepository;
+import com.OLearning.repository.UserVoucherRepository;
 import com.OLearning.service.cart.CartService;
 import com.OLearning.service.cart.impl.CartServiceImpl;
 import com.OLearning.service.vnpay.VNPayService;
+import com.OLearning.service.voucher.VoucherService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.Cookie;
@@ -42,6 +44,10 @@ public class CartController {
     private CourseRepository courseRepository;
     @Autowired
     private VoucherRepository voucherRepository;
+    @Autowired
+    private UserVoucherRepository userVoucherRepository;
+    @Autowired
+    private VoucherService voucherService;
 
     @GetMapping
     public String getCart(@AuthenticationPrincipal UserDetails userDetails,
@@ -56,6 +62,7 @@ public class CartController {
         model.addAttribute("cartItems", cart.getOrDefault("items", List.of()));
         model.addAttribute("totalPrice", calculateTotalPrice(cart));
         model.addAttribute("cartTotal", getLongValue(cart.getOrDefault("total", 0L)));
+        model.addAttribute("currentUserId", userId);
         return "homePage/cart";
     }
 
@@ -75,26 +82,64 @@ public class CartController {
     }
 
     @PostMapping("/add/{courseId}")
-    public String addToCart(@PathVariable Long courseId,
+    @ResponseBody
+    public Object addToCart(@PathVariable Long courseId,
                             @AuthenticationPrincipal UserDetails userDetails,
                             HttpServletRequest request,
                             HttpServletResponse response,
-                            RedirectAttributes redirectAttributes) {
+                            Model model) {
+        boolean isAjax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
+        Map<String, Object> result = new HashMap<>();
         if (userDetails == null) {
-            return "redirect:/login";
+            if (isAjax) {
+                result.put("success", false);
+                result.put("error", "Bạn cần đăng nhập!");
+                return result;
+            } else {
+                return "redirect:/login";
+            }
         }
         Long userId = getUserIdFromUserDetails(userDetails);
         String encodedCartJson = getCartCookie(request, userId);
         try {
             Map<String, Object> cart = cartService.addCourseToCart(encodedCartJson, courseId, userDetails.getUsername());
             updateCartCookie(cart, response, userId);
-            redirectAttributes.addFlashAttribute("message", "Course added to cart successfully!");
+            if (isAjax) {
+                result.put("success", true);
+                return result;
+            } else {
+                model.addAttribute("message", "Course added to cart successfully!");
+            }
         } catch (CartServiceImpl.CourseAlreadyPurchasedException | CartServiceImpl.CourseAlreadyInCartException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            if (isAjax) {
+                result.put("success", false);
+                result.put("error", e.getMessage());
+                return result;
+            } else {
+                model.addAttribute("error", e.getMessage());
+            }
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Failed to add course to cart");
+            if (isAjax) {
+                result.put("success", false);
+                result.put("error", "Failed to add course to cart");
+                return result;
+            } else {
+                model.addAttribute("error", "Failed to add course to cart");
+            }
         }
-        return "redirect:/home/coursesGrid";
+        if (isAjax) {
+            if (!result.containsKey("success")) {
+                result.put("success", false);
+                result.put("error", "Unknown error");
+            }
+            return result;
+        } else {
+            String referer = request.getHeader("Referer");
+            if (referer != null) {
+                return "redirect:" + referer;
+            }
+            return "redirect:/home";
+        }
     }
 
     @GetMapping("/remove/{cartDetailId}")
@@ -102,7 +147,7 @@ public class CartController {
                                  @AuthenticationPrincipal UserDetails userDetails,
                                  HttpServletRequest request,
                                  HttpServletResponse response,
-                                 RedirectAttributes redirectAttributes) {
+                                 Model model) {
         if (userDetails == null) {
             return "redirect:/login";
         }
@@ -111,9 +156,9 @@ public class CartController {
         try {
             Map<String, Object> cart = cartService.removeCartDetail(encodedCartJson, cartDetailId, userDetails.getUsername());
             updateCartCookie(cart, response, userId);
-            redirectAttributes.addFlashAttribute("message", "Item removed from cart successfully!");
+            model.addAttribute("message", "Item removed from cart successfully!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Failed to remove item from cart");
+            model.addAttribute("error", "Failed to remove item from cart");
         }
         return "redirect:/cart";
     }
@@ -121,7 +166,7 @@ public class CartController {
     @PostMapping("/clear")
     public String clearCart(@AuthenticationPrincipal UserDetails userDetails,
                             HttpServletResponse response,
-                            RedirectAttributes redirectAttributes) {
+                            Model model) {
         if (userDetails == null) {
             return "redirect:/login";
         }
@@ -129,9 +174,9 @@ public class CartController {
         try {
             Map<String, Object> emptyCart = cartService.clearCart(userDetails.getUsername());
             updateCartCookie(emptyCart, response, userId);
-            redirectAttributes.addFlashAttribute("message", "Cart cleared successfully!");
+            model.addAttribute("message", "Cart cleared successfully!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Failed to clear cart");
+            model.addAttribute("error", "Failed to clear cart");
         }
         return "redirect:/cart";
     }
@@ -141,7 +186,7 @@ public class CartController {
                            @AuthenticationPrincipal UserDetails userDetails,
                            HttpServletRequest request,
                            HttpServletResponse response,
-                           RedirectAttributes redirectAttributes) {
+                           Model model) {
         if (userDetails == null) {
             return "redirect:/login";
         }
@@ -162,8 +207,18 @@ public class CartController {
                     Long voucherId = voucherMapping.get(courseId);
                     double discount = voucherRepository.findById(voucherId).map(v -> v.getDiscount()).orElse(0.0);
                     price = Math.round(price * (1 - discount / 100.0));
+                    item.put("price", price);
+                    item.put("appliedVoucherId", voucherId);
                 }
                 totalAmount += price;
+            }
+            cart.put("items", items);
+            updateCartCookie(cart, response, userId);
+            for (Map<String, Object> item : items) {
+                if (item.containsKey("appliedVoucherId")) {
+                    Long voucherId = Long.valueOf(item.get("appliedVoucherId").toString());
+                    voucherService.useVoucherForUserAndCourse(voucherId, userId);
+                }
             }
             String ipAddr = request.getRemoteAddr();
             User user = userRepository.findById(userId)
@@ -175,7 +230,7 @@ public class CartController {
                 cartService.processCheckout(encodedCartJson, ipAddr, userDetails.getUsername());
                 cartService.completeCheckout(cart, order, true, null);
                 updateCartCookie(cartService.clearCart(userDetails.getUsername()), response, userId);
-                redirectAttributes.addFlashAttribute("message", "Checkout completed using wallet!");
+                model.addAttribute("message", "Checkout completed using wallet!");
                 return "redirect:/cart";
             } else {
                 request.setAttribute("amount", (int) (totalAmount)*100);
@@ -190,7 +245,7 @@ public class CartController {
                 return "redirect:" + vnPayService.createOrder(request);
             }
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Checkout error: " + e.getMessage());
+            model.addAttribute("error", "Checkout error: " + e.getMessage());
             return "redirect:/cart";
         }
     }
@@ -198,7 +253,7 @@ public class CartController {
     @GetMapping("/vnpay-payment-return")
     public String paymentCompleted(HttpServletRequest request,
                                    HttpServletResponse response,
-                                   RedirectAttributes redirectAttributes,
+                                   Model model,
                                    @AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
             return "redirect:/login";
@@ -221,14 +276,14 @@ public class CartController {
                 cartService.processCheckout(encodedCartJson, ipAddr, userDetails.getUsername());
                 cartService.completeCheckout(cart, order, false, transactionId);
                 updateCartCookie(cartService.clearCart(userDetails.getUsername()), response, userId);
-                redirectAttributes.addFlashAttribute("message", "VNPay payment successful!");
+                model.addAttribute("message", "VNPay payment successful!");
                 return "redirect:/cart";
             } catch (Exception e) {
-                redirectAttributes.addFlashAttribute("error", "VNPay success but internal error: " + e.getMessage());
+                model.addAttribute("error", "VNPay success but internal error: " + e.getMessage());
                 return "redirect:/cart";
             }
         } else {
-            redirectAttributes.addFlashAttribute("error", "VNPay payment failed.");
+            model.addAttribute("error", "VNPay payment failed.");
             return "redirect:/cart";
         }
     }

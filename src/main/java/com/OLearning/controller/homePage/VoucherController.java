@@ -34,6 +34,7 @@ public class VoucherController {
         List<UserVoucherDTO> userVouchers = voucherService.getUserVouchers(userId);
         model.addAttribute("userVouchers", userVouchers);
         model.addAttribute("voucherCode", "");
+        model.addAttribute("currentUserId", userId);
         return "homePage/voucher";
     }
 
@@ -82,7 +83,8 @@ public class VoucherController {
     @GetMapping("/course/{courseId}/user/{userId}")
     @ResponseBody
     public List<UserVoucherDTO> getValidVouchersForCourseAndUser(@PathVariable Long courseId, @PathVariable Long userId) {
-        return voucherService.getValidVouchersForCourseAndUser(courseId, userId);
+        List<UserVoucherDTO> result = voucherService.getValidVouchersForCourseAndUser(courseId, userId);
+        return result;
     }
 
     private Long getUserIdFromUserDetails(UserDetails userDetails) {

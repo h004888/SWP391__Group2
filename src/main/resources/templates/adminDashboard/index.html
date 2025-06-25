@@ -1,44 +1,42 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
-<div th:insert="adminDashboard/fragments/header :: header"></div>
+<th:block th:replace="adminDashBoard/fragments/header :: header"></th:block>
 
-<body id="page-top">
+<body>
 
-    <!-- Page Wrapper -->
-    <div id="wrapper">
+<main>
 
-        <!-- Sidebar -->
-        <div th:replace="adminDashboard/fragments/sidebar :: sidebar"></div>
-        <!-- End of Sidebar -->
+    <!-- Sidebar -->
+    <th:block th:replace="adminDashBoard/fragments/sidebar :: sidebar"></th:block>
+    <!-- End of Sidebar -->
 
-        <!-- Content Wrapper -->
-        <div id="content-wrapper" class="d-flex flex-column">
+    <!-- Content Wrapper -->
+    <div class="page-content">
 
-            <!-- Main Content -->
-            <div id="content">
+        <!-- Topbar -->
+        <th:block th:replace="adminDashBoard/fragments/topbar :: topbar"></th:block>
+        <!-- End of Topbar -->
 
-                <!-- Topbar -->
-                <div th:replace="adminDashboard/fragments/topbar :: topbar"></div>
-                <!-- End of Topbar -->
-
-                <!-- Begin Page Content -->
-                <div th:replace="~{__${fragmentContent}__}"></div>
-
-                <!-- /.container-fluid -->
-
-            </div>
-            <!-- End of Main Content -->
-
-            <!-- Footer -->
-            <div th:insert="adminDashboard/fragments/footer :: footer"></div>
-            <!-- End of Footer -->
+        <!-- Main Content -->
+        <div class="page-content-wrapper border">
+            <!-- Begin Page Content -->
+            <div th:replace="~{__${fragmentContent}__}"></div>
 
         </div>
-        <!-- End of Content Wrapper -->
+        <!-- /.container-fluid -->
+
+        <!-- End of Main Content -->
+
+        <!-- Footer -->
+        <th:block th:replace="adminDashBoard/fragments/footer :: footer"></th:block>
+        <!-- End of Footer -->
 
     </div>
+    <!-- End of Content Wrapper -->
 
+    </div>
     <!-- End of Page Wrapper -->
 
     <!-- Scroll to Top Button-->
@@ -48,7 +46,7 @@
 
     <!-- Logout Modal-->
     <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
+         aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -60,30 +58,24 @@
                 <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="login.html">Logout</a>
-                </div>
 
+                    <form th:action="@{/logout}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-primary">Logout</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
+</main>
+<script th:src="@{/assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js}"></script>
 
-    <!-- Bootstrap core JavaScript-->
-    <script th:src="@{/vendor/jquery/jquery.min.js}"></script>
-    <script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<!-- Vendors -->
+<script th:src="@{/assets/vendor/purecounterjs/dist/purecounter_vanilla.js}"></script>
+<script th:src="@{/assets/vendor/apexcharts/js/apexcharts.min.js}"></script>
+<script th:src="@{/assets/vendor/overlay-scrollbar/js/overlayscrollbars.min.js}"></script>
 
-    <!-- Core plugin JavaScript-->
-    <script th:src="@{/vendor/jquery-easing/jquery.easing.min.js}"></script>
-
-    <!-- Custom scripts for all pages-->
-    <script th:src="@{/js/sb-admin-2.min.js}"></script>
-
-    <!-- Page level plugins -->
-    <script th:src="@{/vendor/chart.js/Chart.min.js}"></script>
-
-    <!-- Page level custom scripts -->
-    <script th:src="@{/js/demo/chart-area-demo.js}"></script>
-    <script th:src="@{/js/demo/chart-pie-demo.js}"></script>
-    <script th:src="@{/js/adminDashboard/Category.js}"></script>
+<!-- Template Functions -->
+<script th:src="@{/assets/js/functions.js}"></script>
 
 </body>
 

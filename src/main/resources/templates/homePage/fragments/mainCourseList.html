@@ -1,5 +1,6 @@
 <div th:fragment="mainCourseList">
     <!-- Course list START -->
+
     <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
         <span th:text="${message}"></span>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -75,9 +76,11 @@
                                           th:if="${course.discount != 0}"
                                           th:text="${#numbers.formatDecimal(course.price, 0, 'COMMA', 2, 'POINT')} + ' ₫'"></span>
                                     <div class="d-flex gap-2">
-                                        <form th:action="@{'/cart/add/' + ${course.courseId}}" method="post" class="d-inline">
-                                            <button type="submit" class="btn btn-sm btn-success-soft item-show-hover m-1"><i class="fas fa-shopping-cart me-2"></i>Add to cart</button>
-                                        </form>
+                                        <button type="button"
+                                                class="btn btn-sm btn-success-soft item-show-hover m-1 add-to-cart-btn"
+                                                th:attr="data-course-id=${course.courseId}">
+                                            <i class="fas fa-shopping-cart me-2"></i>Add to cart
+                                        </button>
                                         <form th:action="@{'/home/buy-now/' + ${course.courseId}}" method="post" class="d-inline">
                                             <button type="submit" class="btn btn-sm btn-primary item-show-hover m-1"><i class="fas fa-bolt me-2"></i>Mua ngay</button>
                                         </form>
@@ -123,55 +126,5 @@
         </nav>
     </div>
     <!-- Pagination END -->
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const toggleLinks = document.querySelectorAll('.wishlist-toggle');
-
-            toggleLinks.forEach(link => {
-                link.addEventListener('click', function (e) {
-                    e.preventDefault();
-
-                    const courseId = this.getAttribute('data-course-id');
-                    const courseTitle = this.getAttribute('data-course-title');
-                    const isInWishlist = this.classList.contains('fas') && this.classList.contains('text-danger');
-                    const icon = this.querySelector('i');
-
-                    // Send AJAX request to toggle wishlist status
-                    fetch('/wishlist/toggle/' + courseId, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').getAttribute('content')
-                        }
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                // Toggle icon appearance
-                                if (isInWishlist) {
-                                    this.classList.remove('fas', 'text-danger');
-                                    this.classList.add('far');
-                                    icon.classList.remove('fas', 'text-danger');
-                                    icon.classList.add('far');
-                                    alert(`Removed "${courseTitle}" from wishlist!`);
-                                } else {
-                                    this.classList.remove('far');
-                                    this.classList.add('fas', 'text-danger');
-                                    icon.classList.remove('far');
-                                    icon.classList.add('fas', 'text-danger');
-                                    alert(`Added "${courseTitle}" to wishlist!`);
-                                }
-                            } else {
-                                alert(data.message || 'An error occurred.');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Failed to update wishlist.');
-                        });
-                });
-            });
-        });
-    </script>
+    <script th:src="@{/js/homePage/addtocart.js}"></script>
 </div>

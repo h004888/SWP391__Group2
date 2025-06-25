@@ -37,7 +37,7 @@
           <img th:src="@{assets/images/element/cart.svg}" class="h-200px h-md-300px mb-3" alt="Empty Cart">
           <h2>Your cart is currently empty</h2>
           <p class="mb-0">Please check out all the available courses and buy some courses that fulfill your needs.</p>
-          <a th:href="@{/home/coursesGrid}" class="btn btn-primary mt-4 mb-0">Back to Shop</a>
+          <a th:href="@{/home}" class="btn btn-primary mt-4 mb-0">Back to Shop</a>
         </div>
       </div>
     </div>
@@ -70,8 +70,8 @@
                       <span th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')+ ' đ'}">Price</span>
                     </span>
                     <span class="discounted-price text-danger fw-bold" th:id="'discounted-price-' + ${item.courseId}"></span>
-                    <button type="button" class="btn btn-outline-primary voucher-btn mt-2" th:attr="data-course-id=${item.courseId}">
-                      <i class="fas fa-ticket-alt"></i> Voucher
+                    <button type="button" class="btn voucher-btn mt-1" th:attr="data-course-id=${item.courseId}">
+                      <i class="fas fa-ticket-alt"></i>
                     </button>
                     <div class="mt-1">
                       <span class="applied-voucher" th:id="'applied-voucher-' + ${item.courseId}"></span>
@@ -137,7 +137,7 @@
           <div class="card card-body p-4 shadow mt-4">
             <h5 class="mb-3">Continue Shopping</h5>
             <div class="d-grid">
-              <a th:href="@{/home/coursesGrid}" class="btn btn-outline-primary">
+              <a th:href="@{/home}" class="btn btn-outline-primary">
                 <i class="fas fa-arrow-left me-2"></i>Browse More Courses
               </a>
             </div>
@@ -161,92 +161,294 @@
     </div>
   </div>
 
-  <script>
-  let selectedCourseId = null;
-  const userId = /*[[${#authentication.principal.userId}]]*/ 1;
-  if (!window.selectedVouchers) window.selectedVouchers = {};
+  <style>
+    .original-price-strike {
+      text-decoration: line-through !important;
+      color: #888 !important;
+      font-size: 0.9em !important;
+      opacity: 0.8;
+      transition: all 0.2s;
+    }
+  </style>
 
-  setTimeout(() => {
-    document.querySelectorAll('.voucher-btn').forEach(btn => {
-      btn.addEventListener('click', function() {
-        selectedCourseId = this.getAttribute('data-course-id');
-        fetch(`/vouchers/course/${selectedCourseId}/user/${userId}`)
-          .then(res => res.json())
-          .then(data => {
-            let html = '';
-            let selectedVoucherId = window.selectedVouchers[selectedCourseId];
-            if (data.length === 0) {
-              html = '<p>Không có voucher phù hợp.</p>';
-            } else {
-              data.forEach(voucher => {
-                let isSelected = selectedVoucherId == voucher.voucherId;
-                html += `<div class='d-flex justify-content-between align-items-center mb-2'>
-                  <span>${voucher.voucherCode} - Giảm ${voucher.discount}%</span>
-                  <button class='btn btn-sm ${isSelected ? 'btn-secondary' : 'btn-success'}' 
-                    onclick='${isSelected ? `removeVoucher(${voucher.voucherId}, ${selectedCourseId})` : `applyVoucher(${voucher.voucherId}, ${selectedCourseId})`}' >
-                    ${isSelected ? 'Hủy chọn' : 'Áp dụng'}
-                  </button>
-                </div>`;
+  <script th:inline="javascript">
+    let selectedCourseId = null;
+    const userId = /*[[${currentUserId}]]*/ 1;
+
+    function saveSelectedVouchers() {
+      localStorage.setItem('selectedVouchers', JSON.stringify(window.selectedVouchers));
+    }
+    function loadSelectedVouchers() {
+      const data = localStorage.getItem('selectedVouchers');
+      if (data) {
+        window.selectedVouchers = JSON.parse(data);
+      } else {
+        window.selectedVouchers = {};
+      }
+    }
+
+    // Sử dụng DOMContentLoaded thay vì setTimeout
+    document.addEventListener('DOMContentLoaded', function() {
+      loadSelectedVouchers();
+      initializeVoucherButtons();
+      initializeCheckoutForm();
+      restoreVoucherUI();
+    });
+
+    function initializeVoucherButtons() {
+      document.querySelectorAll('.voucher-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          selectedCourseId = this.getAttribute('data-course-id');
+          console.log('Selected course ID:', selectedCourseId); // Debug log
+
+          fetch(`/vouchers/course/${selectedCourseId}/user/${userId}`)
+                  .then(res => {
+                    console.log('Response status:', res.status); // Debug log
+                    if (!res.ok) {
+                      throw new Error(`HTTP error! status: ${res.status}`);
+                    }
+                    return res.json();
+                  })
+                  .then(data => {
+                    console.log('Voucher data:', data); // Debug log
+                    displayVouchers(data);
+                  })
+                  .catch(error => {
+                    console.error('Error fetching vouchers:', error);
+                    document.getElementById('voucher-list').innerHTML = '<p class="text-danger">Lỗi khi tải voucher. Vui lòng thử lại.</p>';
+                    document.getElementById('voucherModal').style.display = 'block';
+                  });
+        });
+      });
+    }
+
+    function displayVouchers(data) {
+      let html = '';
+      let selectedVoucherId = window.selectedVouchers[selectedCourseId];
+
+      if (!data || data.length === 0) {
+        html = '<p>Không có voucher phù hợp.</p>';
+      } else {
+        data.forEach(voucher => {
+          // Đảm bảo các field tồn tại
+          const voucherCode = voucher.voucherCode || voucher.code || 'N/A';
+          const discount = voucher.discount || 0;
+          const voucherId = voucher.voucherId || voucher.id;
+
+          let isSelected = selectedVoucherId == voucherId;
+          html += `
+        <div class='d-flex justify-content-between align-items-center mb-2 p-2 border rounded'>
+          <div>
+            <strong>${voucherCode}</strong><br>
+            <small class="text-muted">Giảm ${discount}%</small>
+          </div>
+          <button class='btn btn-sm ${isSelected ? 'btn-secondary' : 'btn-success'}'
+            onclick='${isSelected ? `removeVoucher(${voucherId}, ${selectedCourseId})` : `applyVoucher(${voucherId}, ${selectedCourseId})`}'>
+            ${isSelected ? 'Hủy chọn' : 'Áp dụng'}
+          </button>
+        </div>`;
+        });
+      }
+
+      document.getElementById('voucher-list').innerHTML = html;
+      document.getElementById('voucherModal').style.display = 'block';
+    }
+
+    function applyVoucher(voucherId, courseId) {
+      // Đảm bảo 1 voucher chỉ áp dụng cho 1 course tại 1 thời điểm
+      let previousCourseId = null;
+      for (const [cId, vId] of Object.entries(window.selectedVouchers)) {
+        if (vId == voucherId && cId != courseId) {
+          previousCourseId = cId;
+          break;
+        }
+      }
+      // Nếu đã gán cho course khác, bỏ voucher khỏi course đó
+      if (previousCourseId) {
+        removeVoucher(voucherId, previousCourseId);
+        delete window.selectedVouchers[previousCourseId];
+      }
+      // Gán voucher cho course mới
+      window.selectedVouchers[courseId] = voucherId;
+      saveSelectedVouchers();
+
+      // Disable button để tránh click nhiều lần
+      const buttons = document.querySelectorAll(`button[onclick*="applyVoucher(${voucherId}, ${courseId})"]`);
+      buttons.forEach(btn => btn.disabled = true);
+
+      fetch('/cart/apply-voucher', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+          userId: userId,
+          courseId: courseId,
+          voucherId: voucherId
+        })
+      })
+              .then(res => {
+                if (!res.ok) {
+                  throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+              })
+              .then(data => {
+                console.log('Apply voucher response:', data); // Debug log
+
+                // Cập nhật UI
+                const originalPriceEl = document.getElementById('original-price-' + courseId);
+                const discountedPriceEl = document.getElementById('discounted-price-' + courseId);
+                const appliedVoucherEl = document.getElementById('applied-voucher-' + courseId);
+
+                if (originalPriceEl) {
+                  originalPriceEl.classList.add('original-price-strike');
+                }
+
+                if (discountedPriceEl && data.discountedPrice) {
+                  discountedPriceEl.textContent = ' ' + formatNumberWithCommas(Number(data.discountedPrice)) + ' đ';
+                }
+
+
+                closeVoucherModal();
+                updateCartTotal();
+              })
+              .catch(error => {
+                console.error('Error applying voucher:', error);
+                alert('Có lỗi xảy ra khi áp dụng voucher. Vui lòng thử lại.');
+              })
+              .finally(() => {
+                // Re-enable buttons
+                buttons.forEach(btn => btn.disabled = false);
               });
-            }
-            document.getElementById('voucher-list').innerHTML = html;
-            document.getElementById('voucherModal').style.display = 'block';
-          });
+    }
+
+    function removeVoucher(voucherId, courseId) {
+      // Không xóa khỏi window.selectedVouchers ở đây, chỉ reset UI
+      const originalPriceEl = document.getElementById('original-price-' + courseId);
+      const discountedPriceEl = document.getElementById('discounted-price-' + courseId);
+      const appliedVoucherEl = document.getElementById('applied-voucher-' + courseId);
+
+      if (originalPriceEl) {
+        originalPriceEl.classList.remove('original-price-strike');
+        originalPriceEl.style.textDecoration = 'none';
+      }
+      if (discountedPriceEl) {
+        discountedPriceEl.textContent = '';
+      }
+      if (appliedVoucherEl) {
+        appliedVoucherEl.textContent = '';
+      }
+      closeVoucherModal();
+      updateCartTotal();
+      delete window.selectedVouchers[courseId];
+      saveSelectedVouchers();
+    }
+
+    function updateCartTotal() {
+      let total = 0;
+
+      document.querySelectorAll('.cart-row').forEach(tr => {
+        const courseId = tr.getAttribute('data-course-id');
+        const discountedEl = document.getElementById('discounted-price-' + courseId);
+        const originalEl = document.getElementById('original-price-' + courseId);
+
+        let price = 0;
+
+        // Ưu tiên giá đã giảm
+        if (discountedEl && discountedEl.textContent.trim()) {
+          price = Number(discountedEl.textContent.replace(/[^\d]/g, ''));
+        } else if (originalEl) {
+          price = Number(originalEl.textContent.replace(/[^\d]/g, ''));
+        }
+
+        if (!isNaN(price) && price > 0) {
+          total += price;
+        }
+      });
+
+      const cartTotalEl = document.getElementById('cart-total');
+      if (cartTotalEl) {
+        cartTotalEl.textContent = formatNumberWithCommas(total) + ' đ';
+      }
+    }
+
+    function closeVoucherModal() {
+      const modal = document.getElementById('voucherModal');
+      if (modal) {
+        modal.style.display = 'none';
+      }
+    }
+
+    function formatNumberWithCommas(x) {
+      return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    function initializeCheckoutForm() {
+      const checkoutForm = document.getElementById('checkout-form');
+      if (checkoutForm) {
+        checkoutForm.onsubmit = function(e) {
+          const voucherMappingInput = document.getElementById('voucherMapping');
+          if (voucherMappingInput) {
+            voucherMappingInput.value = JSON.stringify(window.selectedVouchers);
+          }
+
+          console.log('Checkout with vouchers:', window.selectedVouchers); // Debug log
+          return true;
+        };
+      }
+    }
+
+    // Đóng modal khi click outside
+    document.addEventListener('click', function(e) {
+      const modal = document.getElementById('voucherModal');
+      if (e.target === modal) {
+        closeVoucherModal();
+      }
+    });
+
+    // Khi xóa course khỏi cart, cũng xóa khỏi selectedVouchers và localStorage
+    document.querySelectorAll('a[href^="/cart/remove/"]').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const tr = this.closest('tr');
+        if (tr) {
+          const courseId = tr.getAttribute('data-course-id');
+          if (window.selectedVouchers && window.selectedVouchers[courseId]) {
+            delete window.selectedVouchers[courseId];
+            saveSelectedVouchers();
+          }
+        }
       });
     });
-  }, 500);
 
-  function applyVoucher(voucherId, courseId) {
-    fetch('/cart/apply-voucher', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({userId: userId, courseId: courseId, voucherId: voucherId})
-    })
-    .then(res => res.json())
-    .then(data => {
-      window.selectedVouchers[courseId] = voucherId;
-      document.getElementById('original-price-' + courseId).style.textDecoration = 'line-through';
-      document.getElementById('discounted-price-' + courseId).textContent = ' ' + formatNumberWithCommas(Number(data.discountedPrice)) + ' đ';
-      document.getElementById('voucherModal').style.display = 'none';
-      updateCartTotal();
-    });
-  }
-
-  function removeVoucher(voucherId, courseId) {
-    delete window.selectedVouchers[courseId];
-    document.getElementById('original-price-' + courseId).style.textDecoration = 'none';
-    document.getElementById('discounted-price-' + courseId).textContent = '';
-    document.getElementById('voucherModal').style.display = 'none';
-    updateCartTotal();
-  }
-
-  function updateCartTotal() {
-    let total = 0;
-    document.querySelectorAll('.cart-row').forEach(tr => {
-      const courseId = tr.getAttribute('data-course-id');
-      const discounted = document.getElementById('discounted-price-' + courseId);
-      let price = 0;
-      if (discounted && discounted.textContent.trim()) {
-        price = Number(discounted.textContent.replace(/[^\d]/g, ''));
-      } else {
-        const original = document.getElementById('original-price-' + courseId);
-        if (original) price = Number(original.textContent.replace(/[^\d]/g, ''));
+    function restoreVoucherUI() {
+      for (const [courseId, voucherId] of Object.entries(window.selectedVouchers)) {
+        fetch('/cart/apply-voucher', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: JSON.stringify({
+            userId: userId,
+            courseId: courseId,
+            voucherId: voucherId
+          })
+        })
+        .then(res => res.json())
+        .then(data => {
+          const originalPriceEl = document.getElementById('original-price-' + courseId);
+          const discountedPriceEl = document.getElementById('discounted-price-' + courseId);
+          if (originalPriceEl) originalPriceEl.classList.add('original-price-strike');
+          if (discountedPriceEl && data.discountedPrice) {
+            discountedPriceEl.textContent = ' ' + formatNumberWithCommas(Number(data.discountedPrice)) + ' đ';
+          }
+        });
       }
-      if (!isNaN(price)) total += price;
-    });
-    document.getElementById('cart-total').textContent = formatNumberWithCommas(Number(total)) + ' đ';
-  }
-
-  function closeVoucherModal() {
-    document.getElementById('voucherModal').style.display = 'none';
-  }
-
-  function formatNumberWithCommas(x) {
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  }
-
-  document.getElementById('checkout-form').onsubmit = function() {
-    document.getElementById('voucherMapping').value = JSON.stringify(window.selectedVouchers);
-  };
+      setTimeout(() => {
+        updateCartTotal();
+      }, 300);
+    }
   </script>
 </main>
