@@ -20,6 +20,10 @@ public interface CategoryService {
 
     boolean existsById(int id);
 
+    List<Category> findAll();
+
+    Page<Category> findAll(Pageable pageable);
+
     List<CategoryDTO> getAllCategory();
     List<Category> findTop5ByOrderByIdAsc();
 
@@ -39,5 +43,6 @@ public interface CategoryService {
 
     Page<Category> findByNameContaining(String name, Pageable pageable);
 
+    Page<Category> filterCategories(String name, String sort, Pageable pageable);
 
 }

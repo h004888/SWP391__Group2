@@ -13,6 +13,8 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -29,7 +31,6 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oauth2User = new DefaultOAuth2UserService().loadUser(userRequest);
 
-        // Xử lý thông tin người dùng
         String email = oauth2User.getAttribute("email");
         String fullName = oauth2User.getAttribute("name");
         String picture = oauth2User.getAttribute("picture");
@@ -48,25 +49,30 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             user = new User();
             user.setEmail(email);
             user.setFullName(fullName);
-            user.setUsername(email);
+            user.setUsername(email.split("@")[0]);
             user.setStatus(true);
             user.setProfilePicture(picture);
 
-            // Mặc định role là ROLE_USER
+            // Default ROLE_USER
             Role roleUser = roleRepository.findRoleByName("User")
                     .orElseThrow(() -> new RuntimeException("ROLE_USER not found"));
             user.setRole(roleUser);
 
             //Set default when login Oauth2
-            user.setPassword(new BCryptPasswordEncoder().encode("123"));
+            user.setPassword(new BCryptPasswordEncoder().encode("default password"));
 
             userRepository.save(user);
+
+            //Set session
+            var requestAttributes = RequestContextHolder.getRequestAttributes();
+            if (requestAttributes != null) {
+                requestAttributes.setAttribute("OAUTH2_NEW_USER", true, RequestAttributes.SCOPE_SESSION);
+            }
         }
 
         SimpleGrantedAuthority authority =
                 new SimpleGrantedAuthority("ROLE_" + user.getRole().getName().toUpperCase());
 
-        // Trả về CustomOAuth2UserDetails
         return new CustomUserDetails(user,
                 Collections.singleton(authority),
                 oauth2User.getAttributes());

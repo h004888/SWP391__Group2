@@ -20,9 +20,14 @@ public class CourseDetailMapper {
         dto.setCourseImg(course.getCourseImg());
         dto.setCreatedAt(course.getCreatedAt());
         dto.setUpdatedAt(course.getUpdatedAt());
+        dto.setCanResubmit(course.getCanResubmit());
+        dto.setStatus(course.getStatus());
         dto.setInstructor(course.getInstructor());
+        dto.setCategory(course.getCategory());
+        dto.setListOfChapters(course.getListOfChapters());
         dto.setCategory(course.getCategory());
         return dto;
     }
+
 
 }

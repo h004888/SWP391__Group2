@@ -2,7 +2,6 @@ package com.OLearning.controller.homePage;
 
 import com.OLearning.dto.category.CategoryDTO;
 import com.OLearning.dto.course.CourseDTO;
-import com.OLearning.mapper.course.CourseMapper;
 import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.course.CourseService;
 

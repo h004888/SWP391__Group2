@@ -1,8 +1,7 @@
 package com.OLearning.config;
 
-import com.OLearning.security.CustomAuthenticationSuccessHandler;
-import com.OLearning.security.CustomOAuth2UserService;
-import com.OLearning.security.CustomUserDetailsService;
+import com.OLearning.repository.UserRepository;
+import com.OLearning.security.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,12 +12,14 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 
 @Configuration
 @EnableWebSecurity
@@ -26,18 +27,24 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
+
     private final CustomOAuth2UserService customOAuth2UserService;
+
+    private final UserRepository userRepository;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // Use NoOpPasswordEncoder cho password chưa mã hóa
-        //return NoOpPasswordEncoder.getInstance();
-         return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
     public AuthenticationSuccessHandler authenticationSuccessHandler() {
-        return new CustomAuthenticationSuccessHandler();
+        return new CustomAuthenticationSuccessHandler(userRepository, (BCryptPasswordEncoder) passwordEncoder());
+    }
+
+    @Bean
+    public AuthenticationFailureHandler authenticationFailureHandler() {
+        return new CustomAuthenticationFailureHandler();
     }
 
     @Bean
@@ -50,7 +57,6 @@ public class SecurityConfig {
         return new HttpSessionEventPublisher();
     }
 
-    // Config to use customUserDetailsService
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
@@ -61,25 +67,21 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authz -> authz
                         // Cho phép truy cập public resources
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/static/**",
-                                "/assets/**")
-                        .permitAll()
-                        .requestMatchers("/login", "/register", "/select-role", "/assign-role",
-                                "/forgot-password", "/reset-password",
-                                "/otp-verification")
-                        .permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/static/**","/assets/**").permitAll()
+                        .requestMatchers("/login","/dashboard_login", "/register","/forgot-password","/reset-password","/otp-verification").permitAll()
+                        .requestMatchers("/home").permitAll()
                         .requestMatchers("/error", "/403", "/fragments/**", "/myCourses/**")
                         .permitAll()
 
                         // Root path redirect
                         .requestMatchers("/home/**").permitAll()
-                        .requestMatchers("/**").permitAll()
 
                         // Chỉ admin mới được truy cập /admin/**
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
-                        // Chỉ INSTRUCTOR mới được truy cập /instructordashboard/**
-                        .requestMatchers("/instructordashboard/**").hasRole("INSTRUCTOR")
+                        // Cho phép cả ADMIN và INSTRUCTOR truy cập /instructordashboard/**
+                        // Filter sẽ xử lý logic chi tiết
+                        .requestMatchers("/instructordashboard/**").hasAnyRole("ADMIN", "INSTRUCTOR")
 
                         // User có thể truy cập /user/** và /home
                         // .requestMatchers("/home").hasAnyRole("USER","INSTRUCTOR")
@@ -91,35 +93,54 @@ public class SecurityConfig {
                         .usernameParameter("email")
                         .passwordParameter("password")
                         .successHandler(authenticationSuccessHandler())
-                        .failureUrl("/login?error=true")
-                        .permitAll())
+                        .failureHandler(authenticationFailureHandler())
+                        .permitAll()
+                )
                 .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/login") // Dùng chung trang login
+                        .loginPage("/login")
                         .successHandler(authenticationSuccessHandler())
                         .failureUrl("/login?error=true")
                         .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService)))
+                                .userService(customOAuth2UserService)
+                        )
+                )
                 .logout(logout -> logout
                         .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                        .logoutSuccessUrl("/login?logout=true")
+                        .logoutSuccessHandler(customLogoutSuccessHandler())
                         .deleteCookies("JSESSIONID")
                         .invalidateHttpSession(true)
-                        .permitAll())
+                        .permitAll()
+                )
                 .exceptionHandling(ex -> ex
-                        .accessDeniedPage("/403"))
+                        .accessDeniedPage("/403")
+                )
                 .sessionManagement(session -> session
                         .maximumSessions(1)
                         .maxSessionsPreventsLogin(true)
                         .expiredUrl("/login?expired=true")
-                        .sessionRegistry(sessionRegistry()))
+                        .sessionRegistry(sessionRegistry())
+                )
                 .rememberMe(remember -> remember
                         .key("my-unique-key")
                         .rememberMeParameter("remember-me")
                         .tokenValiditySeconds(7 * 24 * 60 * 60) // 7days
                 )
-                .csrf(csrf -> csrf.disable()); // Disable CSRF
+                .csrf(csrf -> csrf.disable());
 
         return http.build();
     }
 
+    @Bean
+    public LogoutSuccessHandler customLogoutSuccessHandler() {
+        return new CustomLogoutSuccessHandler();
+    }
+
+    @Bean
+    public FilterRegistrationBean<AdminAccessFilter> adminAccessFilterRegistration(AdminAccessFilter filter) {
+        FilterRegistrationBean<AdminAccessFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(filter);
+        registration.addUrlPatterns("/*");
+        registration.setOrder(2); // sau security filter
+        return registration;
+    }
 }

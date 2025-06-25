@@ -1,333 +1,370 @@
-<div id="content" th:fragment="contentMain">
-<div  class="container-fluid">
+<div th:fragment="contentMain">
 
-    <!-- Page Heading -->
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Dashboard </h1>
-        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
+    <!-- Title -->
+    <div class="row">
+        <div class="col-12 mb-3">
+            <h1 class="h3 mb-2 mb-sm-0">Dashboard</h1>
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-success" onclick="exportAllToExcel()">
+                    <i class="fas fa-file-excel me-2"></i>Export All To Excel
+                </button>
+            </div>
+        </div>
     </div>
 
-    <!-- Content Row -->
-    <div class="row">
+    <!-- Counter boxes START -->
+    <div class="row g-4 mb-4">
+        <!-- Counter item -->
+        <div class="col-md-6 col-xxl-4">
+            <div class="card card-body bg-warning bg-opacity-15 p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <!-- Digit -->
+                    <div>
+                        <h2 class="mb-0 fw-bold" th:text="${completedEnrollments}">0</h2>
+                        <span class="mb-0 h6 fw-light">Khóa Học Đã Hoàn Thành</span>
+                    </div>
+                    <!-- Icon -->
+                    <div class="icon-lg rounded-circle bg-warning text-white mb-0"><i class="fas fa-tv fa-fw"></i></div>
+                </div>
+            </div>
+        </div>
 
-        <!-- Earnings (Monthly) Card Example -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Earnings (Monthly)
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">$40,000</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
-                        </div>
+        <!-- Counter item -->
+        <div class="col-md-6 col-xxl-4">
+            <div class="card card-body bg-purple bg-opacity-10 p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <!-- Digit -->
+                    <div>
+                        <h2 class="mb-0 fw-bold" th:text="${totalStudents}">0</h2>
+                        <span class="mb-0 h6 fw-light">Tổng Số Học Viên</span>
+                    </div>
+                    <!-- Icon -->
+                    <div class="icon-lg rounded-circle bg-purple text-white mb-0"><i class="fas fa-user-tie fa-fw"></i>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Earnings (Monthly) Card Example -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Earnings (Annual)
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">$215,000</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
-                        </div>
+        <!-- Counter item -->
+        <div class="col-md-6 col-xxl-4">
+            <div class="card card-body bg-primary bg-opacity-10 p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <!-- Digit -->
+                    <div>
+                        <h2 class="mb-0 fw-bold" th:text="${totalEnrollment}">0</h2>
+                        <span class="mb-0 h6 fw-light">Tổng Số Khóa Học Đăng Ký</span>
                     </div>
+                    <!-- Icon -->
+                    <div class="icon-lg rounded-circle bg-primary text-white mb-0"><i
+                            class="fas fa-user-graduate fa-fw"></i></div>
                 </div>
             </div>
         </div>
 
-        <!-- Earnings (Monthly) Card Example -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-info shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Tasks
+        <!-- Counter item -->
+        <!--        <div class="col-md-6 col-xxl-3">-->
+        <!--            <div class="card card-body bg-success bg-opacity-10 p-4 h-100">-->
+        <!--                <div class="d-flex justify-content-between align-items-center">-->
+        <!--                    &lt;!&ndash; Digit &ndash;&gt;-->
+        <!--                    <div>-->
+        <!--                        <div class="d-flex">-->
+        <!--                            <h2 class="mb-0 fw-bold" th:text="${totalWatchTime}">0</h2>-->
+        <!--                            <span class="mb-0 h2 ms-1">hrs</span>-->
+        <!--                        </div>-->
+        <!--                        <span class="mb-0 h6 fw-light">Total Watch Time</span>-->
+        <!--                    </div>-->
+        <!--                    &lt;!&ndash; Icon &ndash;&gt;-->
+        <!--                    <div class="icon-lg rounded-circle bg-success text-white mb-0"><i-->
+        <!--                            class="bi bi-stopwatch-fill fa-fw"></i></div>-->
+        <!--                </div>-->
+        <!--            </div>-->
+        <!--        </div>-->
+    </div>
+    <!-- Counter boxes END -->
+
+    <!-- Chart and Ticket START -->
+    <div class="row g-4 mb-4">
+
+        <!-- Chart START -->
+        <div class="col-xxl-8">
+            <div class="card shadow h-100">
+
+                <!-- Card header -->
+                <div class="card-header">
+                    <div class="d-flex flex-column gap-3">
+                        <h5 class="card-title">Thống Kê</h5>
+                        <div class="d-flex gap-2 align-items-center">
+                            <div class="d-flex gap-2">
+                                <input type="date" id="startDate" class="form-control" style="width: 200px;"/>
+                                <input type="date" id="endDate" class="form-control" style="width: 200px;"/>
                             </div>
-                            <div class="row no-gutters align-items-center">
-                                <div class="col-auto">
-                                    <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">50%</div>
+                            <button class="btn btn-primary" onclick="updateCharts()">Xem</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card body -->
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title">Doanh Thu Khóa Học</h5>
                                 </div>
-                                <div class="col">
-                                    <div class="progress progress-sm mr-2">
-                                        <div class="progress-bar bg-info" role="progressbar"
-                                             style="width: 50%" aria-valuenow="50" aria-valuemin="0"
-                                             aria-valuemax="100"></div>
-                                    </div>
+                                <div class="card-body">
+                                    <div id="ChartPayoutOfYear"></div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-auto">
-                            <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
+        <!-- Chart END -->
 
-        <!-- Pending Requests Card Example -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-warning shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Pending Requests
+        <!-- Ticket START -->
+        <div class="col-xxl-4">
+            <div class="card shadow h-100">
+                <!-- Card header -->
+                <div class="card-header border-bottom d-flex flex-column gap-3 p-4">
+                    <h5 class="card-header-title">Số Lượng Học Viên Theo Danh Mục</h5>
+                    <div class="d-flex gap-2">
+                        <input type="date" id="enrollmentStartDate" class="form-control w-50"
+                               style="min-width: 100px;"/>
+                        <input type="date" id="enrollmentEndDate" class="form-control w-50" style="min-width: 100px;"/>
+                        <button class="btn btn-primary" onclick="updateEnrollmentChart()">Xem</button>
+                    </div>
+                </div>
+
+                <!-- Card body START -->
+                <div class="card-body p-4">
+                    <!-- Apex chart -->
+                    <div id="ChartPayoutEarning"></div>
+                </div>
+                <!-- Card body END -->
+            </div>
+        </div>
+        <!-- Ticket END -->
+    </div>
+    <!-- Chart and Ticket END -->
+
+    <!-- Top listed Cards START -->
+    <div class="row g-4">
+
+        <!-- Traffic sources START -->
+        <div class="col-lg-6 col-xxl-8">
+            <div class="card shadow h-100">
+
+                <!-- Card header -->
+                <div class="card-header border-bottom d-flex justify-content-between align-items-center p-4">
+                    <h5 class="card-header-title">Doanh Thu Bảo Trì Khóa Học</h5>
+                    <div class="d-flex gap-2">
+                        <input type="date" id="maintenanceStartDate" class="form-control" style="width: 150px;"/>
+                        <input type="date" id="maintenanceEndDate" class="form-control" style="width: 150px;"/>
+                        <button class="btn btn-primary" onclick="updateMaintenanceChart()">Xem</button>
+                    </div>
+                </div>
+
+                <!-- Card body START -->
+                <div class="card-body p-4">
+                    <!-- Chart -->
+                    <div id="ChartMaintenanceRevenue"></div>
+                </div>
+                <!-- Card body END -->
+            </div>
+        </div>
+        <!-- Traffic sources END -->
+        <!-- Top instructors START -->
+        <div class="col-lg-6 col-xxl-4">
+            <div class="card shadow h-100">
+
+                <!-- Card header -->
+                <div class="card-header border-bottom d-flex justify-content-between align-items-center p-4">
+                    <h5 class="card-header-title">Top Instructors</h5>
+                    <a th:href="@{/admin/mnInstructors}" class="btn btn-link p-0 mb-0">View all</a>
+                </div>
+
+                <!-- Card body START -->
+                <div class="card-body p-4">
+
+                    <!-- Instructor item START -->
+                    <div th:each="instructor, instructorStat : ${topInstructors}"
+                         class="d-sm-flex justify-content-between align-items-center mb-4">
+                        <!-- Avatar and info -->
+                        <div class="d-sm-flex align-items-center mb-1 mb-sm-0">
+                            <!-- Avatar -->
+                            <div class="avatar avatar-md flex-shrink-0">
+                                <img class="avatar-img rounded-circle" th:src="${instructor.profilePicture}"
+                                     alt="avatar">
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">18</div>
+                            <!-- Info -->
+                            <div class="ms-0 ms-sm-2 mt-2 mt-sm-0">
+                                <h6 class="mb-1" th:text="${instructor.userName}">Instructor Name</h6>
+                                <ul class="list-inline mb-0 small">
+                                    <li class="list-inline-item fw-light me-2 mb-1 mb-sm-0"><i
+                                            class="fas fa-book text-purple me-1"></i>
+                                        <span th:text="${instructor.course.size()}">0</span> Courses
+                                    </li>
+                                    <li class="list-inline-item fw-light me-2 mb-1 mb-sm-0"><i
+                                            class="fas fa-star text-warning me-1"></i>4.5/5.0
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
-                        <div class="col-auto">
-                            <i class="fas fa-comments fa-2x text-gray-300"></i>
-                        </div>
+                        <!-- Button -->
+                        <a th:href="@{/admin/mnInstructors/viewInfo/{userId}(userId=${instructor.userId})}" class="btn btn-sm btn-light mb-0">View</a>
                     </div>
+                    <!-- Instructor item END -->
+
                 </div>
+                <!-- Card body END -->
             </div>
         </div>
+        <!-- Top instructors END -->
     </div>
+    <!-- Top listed Cards END -->
 
-    <!-- Content Row -->
+    <script th:inline="javascript">
+        // Initialize data from controller
+        window.revenuePerMonth = /*[[${revenuePerMonth}]]*/ {};
+        window.enrollmentsByCategory = /*[[${enrollmentsByCategory}]]*/ {};
+        window.maintenanceRevenue = /*[[${maintenanceRevenue}]]*/ {};
 
-    <div class="row">
+        function initializeCharts() {
+            // Set default date range to current year
+            const now = new Date();
+            const firstDay = new Date(now.getFullYear(), 0, 2);//01/01/2025
 
-        <!-- Area Chart -->
-        <div class="col-xl-8 col-lg-7">
-            <div class="card shadow mb-4">
-                <!-- Card Header - Dropdown -->
-                <div
-                        class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Earnings Overview</h6>
-                    <div class="dropdown no-arrow">
-                        <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
-                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
-                             aria-labelledby="dropdownMenuLink">
-                            <div class="dropdown-header">Dropdown Header:</div>
-                            <a class="dropdown-item" href="#">Action</a>
-                            <a class="dropdown-item" href="#">Another action</a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="#">Something else here</a>
-                        </div>
-                    </div>
-                </div>
-                <!-- Card Body -->
-                <div class="card-body">
-                    <div class="chart-area">
-                        <canvas id="myAreaChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
+            document.getElementById('startDate').value = firstDay.toISOString().split('T')[0];
+            document.getElementById('endDate').value = now.toISOString().split('T')[0];
+            document.getElementById('enrollmentStartDate').value = firstDay.toISOString().split('T')[0];
+            document.getElementById('enrollmentEndDate').value = now.toISOString().split('T')[0];
+            document.getElementById('maintenanceStartDate').value = firstDay.toISOString().split('T')[0];
+            document.getElementById('maintenanceEndDate').value = now.toISOString().split('T')[0];
 
-        <!-- Pie Chart -->
-        <div class="col-xl-4 col-lg-5">
-            <div class="card shadow mb-4">
-                <!-- Card Header - Dropdown -->
-                <div
-                        class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Revenue Sources</h6>
-                    <div class="dropdown no-arrow">
-                        <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
-                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
-                             aria-labelledby="dropdownMenuLink">
-                            <div class="dropdown-header">Dropdown Header:</div>
-                            <a class="dropdown-item" href="#">Action</a>
-                            <a class="dropdown-item" href="#">Another action</a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="#">Something else here</a>
-                        </div>
-                    </div>
-                </div>
-                <!-- Card Body -->
-                <div class="card-body">
-                    <div class="chart-pie pt-4 pb-2">
-                        <canvas id="myPieChart"></canvas>
-                    </div>
-                    <div class="mt-4 text-center small">
-                                        <span class="mr-2">
-                                            <i class="fas fa-circle text-primary"></i> Direct
-                                        </span>
-                        <span class="mr-2">
-                                            <i class="fas fa-circle text-success"></i> Social
-                                        </span>
-                        <span class="mr-2">
-                                            <i class="fas fa-circle text-info"></i> Referral
-                                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+            // First render charts with initial data
+            if (typeof e !== 'undefined') {
+                e.dashboardChart();
+                e.earningChart();
+                e.maintenanceChart();
+            }
 
-    <!-- Content Row -->
-    <div class="row">
+            // Then fetch updated data
+            Promise.all([
+                fetch(`/admin/revenue?startDate=${firstDay.toISOString().split('T')[0]}&endDate=${now.toISOString().split('T')[0]}`).then(response => response.json()),
+                fetch(`/admin/enrollments?startDate=${firstDay.toISOString().split('T')[0]}&endDate=${now.toISOString().split('T')[0]}`).then(response => response.json()),
+                fetch(`/admin/maintenance-revenue?startDate=${firstDay.toISOString().split('T')[0]}&endDate=${now.toISOString().split('T')[0]}`).then(response => response.json())
+            ]).then(([revenueData, enrollmentData, maintenanceData]) => {
+                // Only update if we have data
+                if (Object.keys(enrollmentData).length > 0) {
+                    window.enrollmentsByCategory = enrollmentData;
+                }
+                window.revenuePerMonth = revenueData;
+                window.maintenanceRevenue = maintenanceData;
 
-        <!-- Content Column -->
-        <div class="col-lg-6 mb-4">
+                // Update charts with fetched data
+                if (typeof e !== 'undefined') {
+                    e.dashboardChart();
+                    e.earningChart();
+                    e.maintenanceChart();
+                }
+            }).catch(error => {
+                console.error('Error loading data:', error);
+            });
+        }
 
-            <!-- Project Card Example -->
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Projects</h6>
-                </div>
-                <div class="card-body">
-                    <h4 class="small font-weight-bold">Server Migration <span
-                            class="float-right">20%</span></h4>
-                    <div class="progress mb-4">
-                        <div class="progress-bar bg-danger" role="progressbar" style="width: 20%"
-                             aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <h4 class="small font-weight-bold">Sales Tracking <span
-                            class="float-right">40%</span></h4>
-                    <div class="progress mb-4">
-                        <div class="progress-bar bg-warning" role="progressbar" style="width: 40%"
-                             aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <h4 class="small font-weight-bold">Customer Database <span
-                            class="float-right">60%</span></h4>
-                    <div class="progress mb-4">
-                        <div class="progress-bar" role="progressbar" style="width: 60%"
-                             aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <h4 class="small font-weight-bold">Payout Details <span
-                            class="float-right">80%</span></h4>
-                    <div class="progress mb-4">
-                        <div class="progress-bar bg-info" role="progressbar" style="width: 80%"
-                             aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <h4 class="small font-weight-bold">Account Setup <span
-                            class="float-right">Complete!</span></h4>
-                    <div class="progress">
-                        <div class="progress-bar bg-success" role="progressbar" style="width: 100%"
-                             aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                </div>
-            </div>
+        function updateCharts() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
 
-            <!-- Color System -->
-            <div class="row">
-                <div class="col-lg-6 mb-4">
-                    <div class="card bg-primary text-white shadow">
-                        <div class="card-body">
-                            Primary
-                            <div class="text-white-50 small">#4e73df</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6 mb-4">
-                    <div class="card bg-success text-white shadow">
-                        <div class="card-body">
-                            Success
-                            <div class="text-white-50 small">#1cc88a</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6 mb-4">
-                    <div class="card bg-info text-white shadow">
-                        <div class="card-body">
-                            Info
-                            <div class="text-white-50 small">#36b9cc</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6 mb-4">
-                    <div class="card bg-warning text-white shadow">
-                        <div class="card-body">
-                            Warning
-                            <div class="text-white-50 small">#f6c23e</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6 mb-4">
-                    <div class="card bg-danger text-white shadow">
-                        <div class="card-body">
-                            Danger
-                            <div class="text-white-50 small">#e74a3b</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6 mb-4">
-                    <div class="card bg-secondary text-white shadow">
-                        <div class="card-body">
-                            Secondary
-                            <div class="text-white-50 small">#858796</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6 mb-4">
-                    <div class="card bg-light text-black shadow">
-                        <div class="card-body">
-                            Light
-                            <div class="text-black-50 small">#f8f9fc</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6 mb-4">
-                    <div class="card bg-dark text-white shadow">
-                        <div class="card-body">
-                            Dark
-                            <div class="text-white-50 small">#5a5c69</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            if (!startDate || !endDate) {
+                alert('Vui lòng chọn khoảng thời gian');
+                return;
+            }
 
-        </div>
+            // Update revenue chart
+            fetch(`/admin/revenue?startDate=${startDate}&endDate=${endDate}`)
+                .then(response => response.json())
+                .then(data => {
+                    window.revenuePerMonth = data;
+                    if (typeof e !== 'undefined') {
+                        e.dashboardChart();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
 
-        <div class="col-lg-6 mb-4">
+        function updateEnrollmentChart() {
+            const startDate = document.getElementById('enrollmentStartDate').value;
+            const endDate = document.getElementById('enrollmentEndDate').value;
 
-            <!-- Illustrations -->
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Illustrations</h6>
-                </div>
-                <div class="card-body">
-                    <div class="text-center">
-                        <img class="img-fluid px-3 px-sm-4 mt-3 mb-4" style="width: 25rem;"
-                             src="img/undraw_posting_photo.svg" alt="...">
-                    </div>
-                    <p>Add some quality, svg illustrations to your project courtesy of <a
-                            target="_blank" rel="nofollow" href="https://undraw.co/">unDraw</a>, a
-                        constantly updated collection of beautiful svg images that you can use
-                        completely free and without attribution!</p>
-                    <a target="_blank" rel="nofollow" href="https://undraw.co/">Browse Illustrations on
-                        unDraw &rarr;</a>
-                </div>
-            </div>
+            if (!startDate || !endDate) {
+                alert('Vui lòng chọn khoảng thời gian');
+                return;
+            }
 
-            <!-- Approach -->
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Development Approach</h6>
-                </div>
-                <div class="card-body">
-                    <p>SB Admin 2 makes extensive use of Bootstrap 4 utility classes in order to reduce
-                        CSS bloat and poor page performance. Custom CSS classes are used to create
-                        custom components and custom utility classes.</p>
-                    <p class="mb-0">Before working with this theme, you should become familiar with the
-                        Bootstrap framework, especially the utility classes.</p>
-                </div>
-            </div>
+            // Update enrollment chart
+            fetch(`/admin/enrollments?startDate=${startDate}&endDate=${endDate}`)
+                .then(response => response.json())
+                .then(data => {
+                    window.enrollmentsByCategory = data;
+                    if (typeof e !== 'undefined') {
+                        e.earningChart();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
 
-        </div>
-    </div>
+        function updateMaintenanceChart() {
+            const startDate = document.getElementById('maintenanceStartDate').value;
+            const endDate = document.getElementById('maintenanceEndDate').value;
 
-</div>
+            if (!startDate || !endDate) {
+                alert('Vui lòng chọn khoảng thời gian');
+                return;
+            }
+
+            fetch(`/admin/maintenance-revenue?startDate=${startDate}&endDate=${endDate}`)
+                .then(response => response.json())
+                .then(data => {
+                    window.maintenanceRevenue = data;
+                    if (typeof e !== 'undefined') {
+                        e.maintenanceChart();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function exportAllToExcel() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            if (!startDate || !endDate) {
+                alert('Vui lòng chọn khoảng thời gian');
+                return;
+            }
+
+            // Tạo URL để tải file Excel tổng hợp
+            const url = `/admin/export-excel-charts?startDate=${startDate}&endDate=${endDate}`;
+            window.location.href = url;
+        }
+
+        // Khởi tạo biểu đồ ngay khi script được load
+        if (typeof e !== 'undefined') {
+            e.dashboardChart();
+            e.earningChart();
+            e.maintenanceChart();
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeCharts();
+        });
+
+        setTimeout(function () {
+            if (document.readyState === 'complete') {
+                initializeCharts();
+            }
+        }, 100);
+    </script>
+
 </div>

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
 
@@ -30,7 +31,9 @@ public class OrdersController {
                                @RequestParam(value = "orderType", required = false) String orderType,
                                @RequestParam(value = "startDate", required = false) String startDate,
                                @RequestParam(value = "endDate", required = false) String endDate) {
-        Page<OrdersDTO> ordersPage = ordersService.filterAndSortOrders(username, amountDirection, orderType, startDate, endDate, page, size);
+        // Default to PAID status for initial load
+        Page<OrdersDTO> ordersPage = ordersService.filterAndSortOrdersWithStatus(
+            username, amountDirection, orderType, startDate, endDate, "PAID", page, size);
         model.addAttribute("accNamePage", "Management Orders");
         model.addAttribute("orders", ordersPage.getContent());
         model.addAttribute("currentPage", page);
@@ -42,10 +45,11 @@ public class OrdersController {
         model.addAttribute("orderType", orderType);
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
-        model.addAttribute("fragmentContent", "adminDashboard/fragments/ordersContent :: contentOrders");
-        return "adminDashboard/index";
+        model.addAttribute("fragmentContent", "adminDashBoard/fragments/ordersContent :: contentOrders");
+        return "adminDashBoard/index";
     }
 
+    //Filter with ajax for tab functionality
     @GetMapping("/filter")
     public String filterOrders(
             @RequestParam(value = "username", required = false) String username,
@@ -53,21 +57,55 @@ public class OrdersController {
             @RequestParam(value = "orderType", required = false) String orderType,
             @RequestParam(value = "startDate", required = false) String startDate,
             @RequestParam(value = "endDate", required = false) String endDate,
+            @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             Model model) {
-        Page<OrdersDTO> ordersPage = ordersService.filterAndSortOrders(username, amountDirection, orderType, startDate, endDate, page, size);
+        Page<OrdersDTO> ordersPage = ordersService.filterAndSortOrdersWithStatus(
+            username, amountDirection, orderType, startDate, endDate, status, page, size);
+        model.addAttribute("orders", ordersPage.getContent());
+
+        return "adminDashBoard/fragments/ordersTableRowContent :: ordersTableRowContent";
+    }
+
+    // New endpoint for pagination only
+    @GetMapping("/pagination")
+    public String getPagination(
+            @RequestParam(value = "username", required = false) String username,
+            @RequestParam(value = "amountDirection", required = false) String amountDirection,
+            @RequestParam(value = "orderType", required = false) String orderType,
+            @RequestParam(value = "startDate", required = false) String startDate,
+            @RequestParam(value = "endDate", required = false) String endDate,
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            Model model) {
+        Page<OrdersDTO> ordersPage = ordersService.filterAndSortOrdersWithStatus(
+            username, amountDirection, orderType, startDate, endDate, status, page, size);
+        
         model.addAttribute("orders", ordersPage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", ordersPage.getTotalPages());
         model.addAttribute("totalItems", ordersPage.getTotalElements());
         model.addAttribute("pageSize", size);
-        model.addAttribute("username", username);
-        model.addAttribute("amountDirection", amountDirection);
-        model.addAttribute("orderType", orderType);
-        model.addAttribute("startDate", startDate);
-        model.addAttribute("endDate", endDate);
-        return "adminDashboard/fragments/ordersContent :: ordersTableBody";
+
+        return "adminDashBoard/fragments/ordersTableRowContent :: ordersPagination";
+    }
+
+    @GetMapping("/count")
+    @ResponseBody
+    public long getOrderCount(
+            @RequestParam(value = "username", required = false) String username,
+            @RequestParam(value = "amountDirection", required = false) String amountDirection,
+            @RequestParam(value = "orderType", required = false) String orderType,
+            @RequestParam(value = "startDate", required = false) String startDate,
+            @RequestParam(value = "endDate", required = false) String endDate,
+            @RequestParam(value = "status", required = false) String status) {
+        
+        Page<OrdersDTO> ordersPage = ordersService.filterAndSortOrdersWithStatus(
+            username, amountDirection, orderType, startDate, endDate, status, 0, 1); // Get only 1 item to check total
+
+        return ordersPage.getTotalElements();
     }
 
     @GetMapping("/view/{orderId}")
@@ -76,6 +114,7 @@ public class OrdersController {
         List<OrderDetail> orderDetails = ordersService.getOrderDetailsByOrderId(orderId);
         model.addAttribute("orderDetails", orderDetails);
         model.addAttribute("orderId", orderId);
-        model.addAttribute("fragmentContent", "adminDashboard/fragments/orderDetailsContent :: contentOrderDetails");
-        return "adminDashboard/index";
-    }}
+        model.addAttribute("fragmentContent", "adminDashBoard/fragments/orderDetailsContent :: contentOrderDetails");
+        return "adminDashBoard/index";
+    }
+}

@@ -1,21 +1,18 @@
 package com.OLearning.repository;
 
 import com.OLearning.entity.CourseReview;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 @Repository
-public interface CourseReviewRepository extends JpaRepository<CourseReview, Integer> {
-    // Tính trung bình rating cho một course
-    @Query("""
-              SELECT COALESCE(AVG(r.rating), 0)
-              FROM CourseReview r
-              WHERE r.course.courseId = :courseId
-            """)
-    Double findAverageRatingByCourseId(@Param("courseId") Long courseId);
+public interface CourseReviewRepository extends JpaRepository<CourseReview, Long> {
 
-    // Đếm số review cho một course
-    Long countByCourse_CourseId(Long courseId);
+    CourseReview findByReviewId(Long id);
+
+    @Query("SELECT cr FROM CourseReview cr WHERE cr.course.instructor.userId = :instructorId ORDER BY cr.rating DESC")
+    Page<CourseReview> findByInstructorId(@Param("instructorId") Long instructorId, Pageable pageable);
 }

@@ -11,6 +11,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface LessonRepository extends JpaRepository<Lesson, Long> {
 
@@ -75,4 +77,11 @@ public interface LessonRepository extends JpaRepository<Lesson, Long> {
 
     Optional<Lesson> findFirstByChapter_Course_CourseIdOrderByChapter_ChapterIdAscOrderNumberAsc(Long courseId);
 
+    @Query(value = "SELECT * FROM Lessons WHERE chapterId = :chapterId ORDER BY orderNumber ASC", nativeQuery = true)
+    List<Lesson> findByChapterId(Long chapterId);
+
+    @Query(value = "DELETE FROM Lessons WHERE chapterId = :chapterId", nativeQuery = true)
+    void deleteByChapterId(Long chapterId);
+
+    void deleteByLessonId(Long lessonId);
 }

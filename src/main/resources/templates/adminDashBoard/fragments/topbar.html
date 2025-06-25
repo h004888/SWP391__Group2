@@ -193,7 +193,7 @@
                                     <div>
                                         <p class="h6 mt-2 mt-sm-0" th:text="${#authentication.principal.fullName}">Lori
                                             Ferguson</p>
-                                        <p class="small m-0" th:text="${#authentication.getName()}">
+                                        <p class="small m-0" th:text="${#authentication.principal.email}">
                                             example@gmail.com</p>
                                     </div>
                                 </div>
@@ -208,12 +208,11 @@
                             </li>
                             <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle fa-fw me-2"></i>Help</a>
                             </li>
-                            <li><a class="dropdown-item bg-danger-soft-hover" th:href="@{/logout}"><i
+                            <li><a class="dropdown-item bg-danger-soft-hover" data-bs-toggle="modal" data-bs-target="#logoutModal"><i
                                     class="bi bi-power fa-fw me-2"></i>Sign Out</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-
                             <!-- Dark mode options START -->
                             <li>
                                 <div class="bg-light dark-mode-switch theme-icon-active d-flex align-items-center p-1 rounded mt-2">
@@ -256,6 +255,27 @@
                 </ul>
             </div>
             <!-- Top bar right END -->
+        </div>
+    </div>
+
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
+
+                    <form th:action="@{/logout}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-primary">Logout</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </nav>

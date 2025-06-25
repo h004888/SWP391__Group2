@@ -33,21 +33,13 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
         return user.getPhone() != null ? user.getPhone() : "";
     }
 
-    public LocalDate getBirthday() {
-        return user.getBirthday();
-    }
+    public LocalDate getBirthday() {return user.getBirthDay();}
 
     public String getAddress() {
         return user.getAddress() != null ? user.getAddress() : "";
     }
 
-    public String getPersonalSkill() {
-        if (user.getProfilePicture() != null && !user.getProfilePicture().trim().isEmpty()) {
-            return user.getProfilePicture();
-        }
-        // Trả về ảnh mặc định nếu không có
-        return "/assets/images/avatar/01.jpg";
-    }
+    public String getPersonalSkill() {return user.getPersonalSkill() != null ? user.getPersonalSkill() : "";}
 
     public String getEmail() {
         return user.getEmail() != null ? user.getEmail() : "";

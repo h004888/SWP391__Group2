@@ -11,10 +11,10 @@ import org.hibernate.annotations.Formula;
 
 @Entity
 @Table(name = "Courses")
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 public class Course {
 
         @Id
@@ -31,7 +31,7 @@ public class Course {
         @Column(name = "Price")
         private BigDecimal price;
 
-        @Column(name = "Discount")
+        @Column(name = "discount")
         private BigDecimal discount;
 
         @Column(name = "CourseImg")
@@ -46,22 +46,25 @@ public class Course {
         @Column(name = "Status")
         private String status = "pending";
 
-        @Column(name = "CanResubmit")
+        @Column(name = "canResubmit")
         private Boolean canResubmit;
 
         @Column(name = "CourseLevel")
         private String courseLevel;
 
+        @Column(name = "VideoUrlPreview", columnDefinition = "nvarchar(max)")
+        private String videoUrlPreview;
+
         @ManyToOne
-        @JoinColumn(name = "UserID")
+        @JoinColumn(name = "userId")
         private User instructor;
+
+        @OneToMany(mappedBy = "course", cascade = CascadeType.REMOVE, orphanRemoval = true)
+        private List<Chapter> listOfChapters;
 
         @ManyToOne
         @JoinColumn(name = "CategoryID")
         private Category category;
-
-        @OneToMany(mappedBy = "course", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-        private List<Chapter> chapters;
 
         @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
         private List<Enrollment> enrollments;
@@ -71,6 +74,9 @@ public class Course {
 
         @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
         private List<CourseReview> courseReviews;
+
+        @Column(name = "IsFree")
+        private Boolean isFree;
 
         public Double getAverageRating() {
                 return courseReviews.stream().mapToDouble(CourseReview::getRating).average().orElse(0.0);
@@ -85,13 +91,13 @@ public class Course {
         }
 
         public Integer getDuration() {
-                return chapters.stream()
+                return listOfChapters.stream()
                                 .mapToInt(ch -> ch.getLessons().stream().mapToInt(Lesson::getDuration).sum())
                                 .sum();
         }
 
         public Integer getTotalLessons() {
-                return chapters.stream().mapToInt(ch -> ch.getLessons().size()).sum();
+                return listOfChapters.stream().mapToInt(ch -> ch.getLessons().size()).sum();
         }
 
 }

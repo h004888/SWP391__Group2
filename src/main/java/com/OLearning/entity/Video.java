@@ -14,21 +14,20 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
+@Table(name="Video")
 public class Video {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "VideoID")
     private Long id;
-
-    @Column(nullable = false)
+    @Column(name = "videoUrl", nullable = false, length = 1000)
     private String videoUrl;
 
-    private String duration;
-
     private LocalDateTime uploadDate;
+    private Integer duration;
 
-    @ManyToOne
-    @JoinColumn(name = "lessonId")
+    @OneToOne
+    @JoinColumn(name = "lesson_id")
     private Lesson lesson;
 
     @ManyToOne

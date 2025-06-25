@@ -1,5 +1,6 @@
 package com.OLearning.service.email;
 
+import com.OLearning.entity.Course;
 import com.OLearning.entity.User;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -113,7 +114,7 @@ public class EmailService {
         mailSender.send(message);
     }
 
-    public void sendOverdueMaintenanceEmail(String to, String instructorName, String courseTitle,
+    public void sendOverdueMaintenanceEmail(String to, String instructorName, String courseTitle, 
             String monthYear, Long enrollmentCount, Double maintenanceFee, String dueDate) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("olearningwebsite@gmail.com");
@@ -222,5 +223,76 @@ public class EmailService {
         mailMessage.setText(content);
         mailSender.send(mailMessage);
     }
-}
+    public void sendEnrollmentBlockedEmail(User student, Course course) {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+            helper.setTo(student.getEmail());
+            helper.setSubject("Notification: Your course enrollment has been blocked");
+
+            Context context = new Context();
+            context.setVariable("student", student);
+            context.setVariable("course", course);
+            context.setVariable("supportEmail", "support@olearning.com");
+
+            // Render HTML template
+            String htmlContent = templateEngine.process("email/enrollment-blocked", context);
+            helper.setText(htmlContent, true);
+
+            mailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send enrollment blocked email", e);
+        }
+    }
+
+    public void sendEnrollmentUnblockedEmail(User student, Course course) {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+            helper.setTo(student.getEmail());
+            helper.setSubject("Notification: Your course enrollment has been activated");
+
+            Context context = new Context();
+            context.setVariable("student", student);
+            context.setVariable("course", course);
+            context.setVariable("supportEmail", "support@olearning.com");
+
+            // Render HTML template
+            String htmlContent = templateEngine.process("email/enrollment-active", context);
+            helper.setText(htmlContent, true);
+
+            mailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send enrollment activated email", e);
+        }
+    }
+
+    public void sendInstructorMessageEmail(User instructor, User student, Course course, String subject, String messageContent) {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+            helper.setTo(student.getEmail());
+            helper.setSubject("[OLearning] " + subject);
+            helper.setReplyTo(instructor.getEmail());
+
+            Context context = new Context();
+            context.setVariable("student", student);
+            context.setVariable("instructor", instructor);
+            context.setVariable("course", course);
+            context.setVariable("messageContent", messageContent);
+            context.setVariable("subject", subject);
+            context.setVariable("supportEmail", "support@olearning.com");
+
+            // Render HTML template
+            String htmlContent = templateEngine.process("email/instructor-message", context);
+            helper.setText(htmlContent, true);
+
+            mailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send instructor message email", e);
+        }
+}}
 

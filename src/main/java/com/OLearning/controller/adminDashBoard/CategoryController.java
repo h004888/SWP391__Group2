@@ -19,42 +19,43 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 @RequestMapping("/admin")
 public class CategoryController {
-    private static final String adminDashboardPath = "adminDashboard/index";
+    private static final String adminDashBoardPath = "adminDashBoard/index";
     private static final String fragmentContent = "fragmentContent";
-    private static final String categoryList = "adminDashboard/fragments/category :: categoryList";
+    private static final String categoryList = "adminDashBoard/fragments/category :: categoryList";
+    private static final String categoryPagination = "adminDashBoard/fragments/category :: categoryPage";
 
-    private static final String categoryPagination = "adminDashboard/fragments/category :: categoryPage";
     @Autowired
-    private CategoryService categoriesService;
+    private CategoryService categoryService;
     @Autowired
     private CourseService courseService;
 
     private void loadPagedCategories(Model model, String name, String sort, int page, int size) {
+        // Handle null or empty name parameter
+        String searchName = (name != null && !name.trim().isEmpty()) ? name.trim() : "";
+
         Pageable pageable = PageRequest.of(page, size,
-                sort.equals("asc") ? Sort.by("name").ascending()
-                        : sort.equals("desc") ? Sort.by("name").descending()
+                sort != null && sort.equals("asc") ? Sort.by("name").ascending()
+                        : sort != null && sort.equals("desc") ? Sort.by("name").descending()
                                 : Sort.unsorted());
 
-        Page<Category> categoriesPage = categoriesService.findByNameContaining(name, pageable);
+        Page<Category> categoriesPage;
 
-        model.addAttribute("categories", categoriesPage.getContent());
+        if (searchName.isEmpty()) {
+            categoriesPage = categoryService.findAll(pageable);
+        } else {
+            categoriesPage = categoryService.findByNameContaining(searchName, pageable);
+        }
+
+        model.addAttribute("category", categoriesPage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", categoriesPage.getTotalPages());
         model.addAttribute("totalItems", categoriesPage.getTotalElements());
-
+        model.addAttribute("sort", sort != null ? sort : "");
+        model.addAttribute("name", searchName);
+        model.addAttribute("pageSize", size);
     }
 
-    @GetMapping("/categories/showmore")
-    public String showmore(@RequestParam("id") int id, Model model) {
-        Category category = categoriesService.findById(id);
-        model.addAttribute("category", category);
-        model.addAttribute("coursesList", category.getCourses());
-        model.addAttribute(fragmentContent, "adminDashboard/fragments/showMore :: showMore");
-        return "adminDashboard/index";
-
-    }
-
-    @GetMapping("/categories")
+    @GetMapping("/category")
     public String getAllCategories(
             @RequestParam(defaultValue = "") String name,
             @RequestParam(defaultValue = "") String sort,
@@ -62,94 +63,138 @@ public class CategoryController {
             @RequestParam(defaultValue = "5") int size,
             @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
             Model model) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Category> categoryPage = categoryService.filterCategories(name, sort, pageable);
 
-        loadPagedCategories(model, name, sort, page, size);
+        model.addAttribute("category", categoryPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", categoryPage.getTotalPages());
+        model.addAttribute("totalItems", categoryPage.getTotalElements());
+        model.addAttribute("fragmentContent", "adminDashBoard/fragments/category :: categoryList");
+        return "adminDashBoard/index";
 
-        if ("XMLHttpRequest".equals(requestedWith)) {
-            // AJAX request → trả về fragment
+    }
+    @GetMapping("/category/showmore")
+    public String showmore(@RequestParam("id") int id, Model model) {
+        Category category = categoryService.findById(id);
+        model.addAttribute("category", category);
+        model.addAttribute("coursesList", category.getCourses());
+        model.addAttribute(fragmentContent, "adminDashboard/fragments/showMore :: showMore");
+        return "adminDashboard/index";
 
-            return categoryPagination;
-        } else {
-            // Request thường → load layout chính
-            model.addAttribute(fragmentContent, categoryList);
-            return adminDashboardPath;
-        }
     }
 
-    @GetMapping("/categories/delete")
+    @GetMapping("/category/delete")
+    @ResponseBody
     public String deleteCategory(@RequestParam("id") int id, Model model) {
-        if (categoriesService.existsById(id) ) {
-            categoriesService.deleteById(id);
+        try {
+            if (categoryService.existsById(id)) {
+                categoryService.deleteById(id);
+                return "success";
+            }
+            return "error";
+        } catch (Exception e) {
+            return "error";
         }
-        List<Category> categories = categoriesService.getListCategories();
-        model.addAttribute("categories", categories);
-        return categoryPagination;
     }
 
-    @PostMapping("/categories/add")
+    @PostMapping("/category/add")
     public String addCategory(@RequestParam("name") String name,
             @RequestParam(defaultValue = "") String sort,
             @RequestParam(defaultValue = "") String search,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
+            @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
             Model model) {
 
-        if (categoriesService.existsByName(name)) {
+        if (categoryService.existsByName(name)) {
             model.addAttribute("errorMessage", "Category already exists");
         } else {
             Category newCategory = new Category();
             newCategory.setName(name.trim());
-            categoriesService.save(newCategory);
+            categoryService.save(newCategory);
             model.addAttribute("successMessage", "Category added successfully");
         }
 
         loadPagedCategories(model, search, sort, page, size);
-        model.addAttribute(fragmentContent, categoryList);
-        return adminDashboardPath;
+
+        if ("XMLHttpRequest".equals(requestedWith)) {
+            return categoryPagination;
+        } else {
+            model.addAttribute(fragmentContent, categoryList);
+            return adminDashBoardPath;
+        }
     }
 
-    @GetMapping("/categories/edit")
+    @GetMapping("/category/edit")
     public String editCategory(@RequestParam("id") int id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "") String sort,
             @RequestParam(defaultValue = "") String name,
             Model model) {
-        Category category = categoriesService.findById(id);
+        Category category = categoryService.findById(id);
         if (category != null) {
             model.addAttribute("category", category);
             model.addAttribute("currentPage", page);
             model.addAttribute("sort", sort);
             model.addAttribute("name", name);
-            model.addAttribute(fragmentContent, "adminDashboard/fragments/category :: editCategory");
+            model.addAttribute(fragmentContent, "adminDashBoard/fragments/category :: editCategory");
         } else {
             model.addAttribute("errorMessage", "Category not found");
         }
-        return adminDashboardPath;
+        return adminDashBoardPath;
     }
 
-    @PostMapping("/categories/edit")
+    @PostMapping("/category/edit")
     public String editCategory(@RequestParam("id") int id,
             @RequestParam("name") String name,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "") String sort,
             @RequestParam(defaultValue = "") String search,
+            @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
             Model model) {
-        Category category = categoriesService.findById(id);
+        Category category = categoryService.findById(id);
 
         if (category == null) {
             model.addAttribute("errorMessage", "Category not found");
-        } else if (categoriesService.existsByName(name) && !category.getName().equals(name)) {
+        } else if (categoryService.existsByName(name) && !category.getName().equals(name)) {
             model.addAttribute("errorMessage", "Another category with this name already exists");
         } else if (category.getName().equalsIgnoreCase(name.trim())) {
-            model.addAttribute("errorMessage", "Không có thay đổi nào được thực hiện");
+            model.addAttribute("errorMessage", "No changes were made");
         } else {
-            categoriesService.updateCategory(id, name.trim());
+            categoryService.updateCategory(id, name.trim());
             model.addAttribute("successMessage", "Category updated successfully");
         }
 
         loadPagedCategories(model, search, sort, page, 5);
-        model.addAttribute(fragmentContent, categoryList);
-        return adminDashboardPath;
+
+        if ("XMLHttpRequest".equals(requestedWith)) {
+            return categoryPagination;
+        } else {
+            model.addAttribute(fragmentContent, categoryList);
+            return adminDashBoardPath;
+        }
     }
 
+    @GetMapping("/category/filter")
+    public String filterCategories(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String sort,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            Model model) {
+
+        if (page < 0) page = 0;
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Category> categoryPage = categoryService.filterCategories(name, sort, pageable);
+
+        model.addAttribute("category", categoryPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", categoryPage.getTotalPages());
+        model.addAttribute("totalItems", categoryPage.getTotalElements());
+        model.addAttribute("pageSize", size);
+
+        return "adminDashBoard/fragments/category :: categoryTableFragment";
+    }
 }

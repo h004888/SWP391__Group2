@@ -246,7 +246,7 @@ public class CartServiceImpl implements CartService {
             enrollment.setUser(user);
             enrollment.setCourse(course);
             enrollment.setEnrollmentDate(new Date());
-            enrollment.setProgress(BigDecimal.ZERO);
+            enrollment.setProgress(BigDecimal.ZERO.doubleValue());
             enrollment.setStatus("onGoing");
             enrollment.setOrder(order);
             enrollmentRepository.save(enrollment);

@@ -25,8 +25,7 @@ public interface UserService {
 
     Page<UserDTO> searchByNameWithPagination(String keyword, Long roleId, Pageable pageable);
 
-    Page<UserDTO> getInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(String keyword, Long roleId,
-            Pageable pageable);
+    Page<UserDTO> getInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(String keyword, Long roleId, Pageable pageable);
 
     Page<UserDTO> getUsersByRoleAndStatusWithPagination(Long roleId, boolean status, Pageable pageable);
 
@@ -44,7 +43,7 @@ public interface UserService {
 
     boolean changStatus(Long id);
 
-    // List<UserDTO> searchByName(String keyword, Long roleId);
+//    List<UserDTO> searchByName(String keyword, Long roleId);
 
     boolean resetPassword(Long id);
 
@@ -60,7 +59,6 @@ public interface UserService {
 
     Page<UserDTO> filterInstructors(String keyword, Pageable pageable);
 
-    Optional<User> findById(Long userId);
-
     boolean existsById(Long userId);
+    User findById(Long id);
 }

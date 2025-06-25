@@ -8,7 +8,7 @@ public class CategoryMapper {
         if (category == null) {
             return null;
         }
-        return new CategoryDTO(category.getId(), category.getName());
+        return new CategoryDTO(category.getName(),category.getId());
     }
 
     public Category toCategory(CategoryDTO categoryDTO) {

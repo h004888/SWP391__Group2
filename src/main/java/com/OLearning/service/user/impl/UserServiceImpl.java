@@ -105,11 +105,11 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsById(id)) {
             Optional<User> user = userRepository.findById(id);
             try {
-                emailService.sendAccountStatusEmail(user.get(), user.get().isStatus());
+                emailService.sendAccountStatusEmail(user.get(), user.get().getStatus());
             } catch (MessagingException e) {
                 throw new RuntimeException(e);
             }
-            user.get().setStatus(!user.get().isStatus());
+            user.get().setStatus(!user.get().getStatus());
             userRepository.save(user.get());
 
             return true;
@@ -191,9 +191,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean deleteAcc(Long id) {
+    public User findById(Long id) {
         Optional<User> userOptional = userRepository.findById(id);
         if (userOptional.isEmpty()) {
+            return null;
+        }
+        return userOptional.get();
+    }
+
+    @Override
+    public boolean deleteAcc(Long id) {
+        Optional<User> userOptional = userRepository.findById(id);
+        if(userOptional.isEmpty()) {
             return false;
         }
         userRepository.deleteById(id);
@@ -225,7 +234,8 @@ public class UserServiceImpl implements UserService {
         return instructors.stream()
                 .sorted((i1, i2) -> Integer.compare(
                         i2.getCourses().size(),
-                        i1.getCourses().size()))
+                        i1.getCourses().size()
+                ))
                 .limit(limit)
                 .map(userMapper::toDTO)
                 .collect(Collectors.toList());
@@ -235,21 +245,13 @@ public class UserServiceImpl implements UserService {
     public Page<UserDTO> filterInstructors(String keyword, Pageable pageable) {
         Page<User> userPage;
         if (keyword != null && !keyword.trim().isEmpty()) {
-            userPage = userRepository.findInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(2L, keyword.trim(),
-                    pageable);
+            userPage = userRepository.findInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(2L, keyword.trim(), pageable);
         } else {
             userPage = userRepository.findInstructorsByRoleIdOrderByCourseCountDesc(2L, pageable);
         }
         return userPage.map(userMapper::toDTO);
     }
 
-    @Override
-    public Optional<User> findById(Long userId) {
-        return userRepository.findById(userId)
-                .or(() -> {
-                    throw new RuntimeException("User not found with id: " + userId);
-                });
-    }
 
     @Override
     public boolean existsById(Long userId) {

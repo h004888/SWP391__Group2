@@ -17,6 +17,7 @@ public class PasswordResetOTP {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_userId", nullable = false)
     private User user;
 
     private String otp;

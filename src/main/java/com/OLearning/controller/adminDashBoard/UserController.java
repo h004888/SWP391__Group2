@@ -24,12 +24,6 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @GetMapping()
-    public String getAdminDashboardPAge(Model model) {
-        model.addAttribute("fragmentContent", "adminDashBoard/fragments/content :: contentMain");
-        return "adminDashBoard/index";
-    }
-
     @GetMapping("/account")
     public String getAccountPage(
             Model model,
@@ -71,6 +65,7 @@ public class UserController {
             @RequestParam(required = false, name = "role") Long roleId,
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "5") int size,
+            @RequestParam(required = false) Boolean status,
             Model model) {
 
         if (roleId == null) {
@@ -85,9 +80,17 @@ public class UserController {
         Page<UserDTO> userPage;
 
         if (keyword != null && !keyword.trim().isEmpty()) {
-            userPage = userService.searchByNameWithPagination(keyword.trim(), roleId, pageable);
+            if (status != null) {
+                userPage = userService.searchByNameAndStatusWithPagination(keyword.trim(), roleId, status, pageable);
+            } else {
+                userPage = userService.searchByNameWithPagination(keyword.trim(), roleId, pageable);
+            }
         } else {
-            userPage = userService.getUsersByRoleWithPagination(roleId, pageable);
+            if (status != null) {
+                userPage = userService.getUsersByRoleAndStatusWithPagination(roleId, status, pageable);
+            } else {
+                userPage = userService.getUsersByRoleWithPagination(roleId, pageable);
+            }
         }
 
         //Add pagination information to model
@@ -97,48 +100,53 @@ public class UserController {
         model.addAttribute("totalItems", userPage.getTotalElements());
         model.addAttribute("keyword", keyword);
         model.addAttribute("roleId", roleId);
+        model.addAttribute("status", status);
 
         return "adminDashBoard/fragments/userTableRowContent :: userTableRows";
     }
 
-    // FIX: New endpoint to get pagination info separately
-    @GetMapping("/account/pagination-info")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> getPaginationInfo(
+    // New endpoint to get pagination fragment
+    @GetMapping("/account/pagination")
+    public String getPaginationFragment(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false, name = "role") Long roleId,
             @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "5") int size) {
+            @RequestParam(required = false, defaultValue = "5") int size,
+            @RequestParam(required = false) Boolean status,
+            Model model) {
 
         if (roleId == null) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("totalPages", 0);
-            response.put("totalElements", 0);
-            response.put("currentPage", 0);
-            response.put("currentElements", 0);
-            return ResponseEntity.ok(response);
+            model.addAttribute("listU", List.of());
+            model.addAttribute("currentPage", 0);
+            model.addAttribute("totalPages", 0);
+            model.addAttribute("totalItems", 0L);
+            return "adminDashBoard/fragments/userTableRowContent :: accountPagination";
         }
 
         Pageable pageable = PageRequest.of(page, size);
         Page<UserDTO> userPage;
 
         if (keyword != null && !keyword.trim().isEmpty()) {
-            userPage = userService.searchByNameWithPagination(keyword.trim(), roleId, pageable);
+            if (status != null) {
+                userPage = userService.searchByNameAndStatusWithPagination(keyword.trim(), roleId, status, pageable);
+            } else {
+                userPage = userService.searchByNameWithPagination(keyword.trim(), roleId, pageable);
+            }
         } else {
-            userPage = userService.getUsersByRoleWithPagination(roleId, pageable);
+            if (status != null) {
+                userPage = userService.getUsersByRoleAndStatusWithPagination(roleId, status, pageable);
+            } else {
+                userPage = userService.getUsersByRoleWithPagination(roleId, pageable);
+            }
         }
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("totalPages", userPage.getTotalPages());
-        response.put("totalElements", userPage.getTotalElements());
-        response.put("currentPage", page);
-        response.put("currentElements", userPage.getNumberOfElements());
-        response.put("hasNext", userPage.hasNext());
-        response.put("hasPrevious", userPage.hasPrevious());
+        model.addAttribute("listU", userPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", userPage.getTotalPages());
+        model.addAttribute("totalItems", userPage.getTotalElements());
 
-        return ResponseEntity.ok(response);
+        return "adminDashBoard/fragments/userTableRowContent :: accountPagination";
     }
-
 
     @GetMapping("/account/viewInfo/{userId}")
     public String getDetailAccount(Model model, @PathVariable("userId") long id) {

@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString(exclude = "users")
+@ToString(exclude = "users") // ✅ tránh đệ quy vô hạn
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
