@@ -41,6 +41,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -497,8 +498,8 @@ public class ControlllerAddCourse {
 
             // Đảm bảo duration không null
             if (videoDTO.getDuration() == null) {
-                videoDTO.setDuration(0);
-                System.out.println("Duration was null, set to default 0");
+                videoDTO.setDuration(LocalTime.of(0, 0));
+                System.out.println("Duration was null, set to default 00:00");
             }
 
             // Save video and associate with lesson
@@ -507,7 +508,13 @@ public class ControlllerAddCourse {
             // Update lesson
             Lesson lesson = lessonRepository.findById(lessonId).orElseThrow();
             lesson.setContentType("video");
-            lesson.setDuration(videoDTO.getDuration());
+            
+            // Convert LocalTime duration to Integer minutes for lesson
+            if (videoDTO.getDuration() != null) {
+                int totalMinutes = videoDTO.getDuration().getHour() * 60 + videoDTO.getDuration().getMinute();
+                lesson.setDuration(totalMinutes);
+            }
+            
             lesson.setUpdatedAt(LocalDateTime.now());
             lesson.setVideo(video);
             lessonRepository.save(lesson);
@@ -758,7 +765,13 @@ public class ControlllerAddCourse {
                 if (videoFile != null && !videoFile.isEmpty()) {
                     VideoDTO videoDTO = new VideoDTO();
                     videoDTO.setVideoUrl(videoFile);
-                    videoDTO.setDuration(duration);
+                    
+                    // Convert Integer duration to LocalTime
+                    if (duration != null) {
+                        int hours = duration / 60;
+                        int minutes = duration % 60;
+                        videoDTO.setDuration(LocalTime.of(hours, minutes));
+                    }
                     
                     Video video = videoService.saveVideo(videoDTO, lessonId);
                     lesson.setVideo(video);

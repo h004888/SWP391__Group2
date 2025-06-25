@@ -6,13 +6,13 @@ import lombok.*;
 import java.util.List;
 
 @Entity
-@Table(name = "Fees")
+@Table(name = "Fee")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @ToString
-public class Fees {
+public class Fee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long feeId;

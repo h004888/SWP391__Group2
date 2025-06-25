@@ -25,7 +25,7 @@ public class CourseMaintenance {
 
     @ManyToOne
     @JoinColumn(name = "feeId")
-    private Fees fee;
+    private Fee fee;
 
     @ManyToOne
     @JoinColumn(name = "orderId")

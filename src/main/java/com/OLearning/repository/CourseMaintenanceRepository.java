@@ -1,7 +1,7 @@
 package com.OLearning.repository;
 
 import com.OLearning.entity.CourseMaintenance;
-import com.OLearning.entity.Fees;
+import com.OLearning.entity.Fee;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,7 +20,7 @@ public interface CourseMaintenanceRepository extends JpaRepository<CourseMainten
     CourseMaintenance findOverdueByCourseIdAndMonthYear(Long courseId, LocalDate monthYear);
 
     @Query("SELECT cm.fee FROM CourseMaintenance cm WHERE cm.course.courseId = :courseId ORDER BY cm.sentAt DESC")
-    Fees findLatestFeeByCourseId(Long courseId);
+    Fee findLatestFeeByCourseId(Long courseId);
 
     boolean existsByCourseCourseIdAndDueDate(Long courseId, LocalDate dueDate);
 

@@ -20,6 +20,56 @@ $(document).ready(function () {
             saveBtn.show();
         }
     });
+
+    // Set current date to month year filter
+    const today = new Date();
+    const currentMonth = String(today.getMonth() + 1).padStart(2, '0');
+    const currentYear = today.getFullYear();
+    const currentMonthYear = `${currentYear}-${currentMonth}`;
+    $('#monthYearFilter').val(currentMonthYear);
+
+    // Load initial data for all tabs
+    const statuses = ['pending', 'paid', 'overdue'];
+    statuses.forEach(status => {
+        loadMaintenances(status, 0);
+    });
+
+    // Tab change event
+    $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+        const status = $(this).data('status');
+        console.log("Tab changed to:", status);
+        currentStatus = status;
+        // Load current page for this status
+        filterMaintenances(currentStatus, currentPages[currentStatus] || 0);
+    });
+
+    // Filter events
+    $('#monthYearFilter').on('change', function () {
+        console.log("Month year filter changed:", $(this).val());
+        // Reset to first page when filtering
+        currentPages[currentStatus] = 0;
+        filterMaintenances(currentStatus, 0);
+    });
+
+    // Search input with debounce
+    let searchTimer;
+    $('#searchInput').on('input', function () {
+        const searchValue = $(this).val();
+        console.log("Search input triggered - value:", searchValue);
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(function () {
+            // Reset to first page when searching
+            currentPages[currentStatus] = 0;
+            filterMaintenances(currentStatus, 0);
+        }, 500);
+    });
+
+    // Prevent form submission
+    $('#filterForm').on('submit', function (e) {
+        e.preventDefault();
+        currentPages[currentStatus] = 0;
+        filterMaintenances(currentStatus, 0);
+    });
 });
 
 // Function to handle max enrollment input changes
@@ -201,49 +251,4 @@ $(document).on('click', '.pagination .page-link', function (e) {
         console.log("Pagination clicked - page:", page, "for status:", currentStatus);
         filterMaintenances(currentStatus, page);
     }
-});
-
-$(document).ready(function () {
-    // Load initial data for all tabs
-    const statuses = ['pending', 'paid', 'overdue'];
-    statuses.forEach(status => {
-        loadMaintenances(status, 0);
-    });
-
-    // Tab change event
-    $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
-        const status = $(this).data('status');
-        console.log("Tab changed to:", status);
-        currentStatus = status;
-        // Load current page for this status
-        filterMaintenances(currentStatus, currentPages[currentStatus] || 0);
-    });
-
-    // Filter events
-    $('#monthYearFilter').on('change', function () {
-        console.log("Month year filter changed:", $(this).val());
-        // Reset to first page when filtering
-        currentPages[currentStatus] = 0;
-        filterMaintenances(currentStatus, 0);
-    });
-
-    // Search input with debounce
-    let searchTimer;
-    $('#searchInput').on('input', function () {
-        const searchValue = $(this).val();
-        console.log("Search input triggered - value:", searchValue);
-        clearTimeout(searchTimer);
-        searchTimer = setTimeout(function () {
-            // Reset to first page when searching
-            currentPages[currentStatus] = 0;
-            filterMaintenances(currentStatus, 0);
-        }, 500);
-    });
-
-    // Prevent form submission
-    $('#filterForm').on('submit', function (e) {
-        e.preventDefault();
-        currentPages[currentStatus] = 0;
-        filterMaintenances(currentStatus, 0);
-    });
 }); 

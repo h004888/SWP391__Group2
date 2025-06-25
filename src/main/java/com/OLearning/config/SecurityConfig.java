@@ -1,8 +1,6 @@
 package com.OLearning.config;
 
-import com.OLearning.security.CustomAuthenticationSuccessHandler;
-import com.OLearning.security.CustomOAuth2UserService;
-import com.OLearning.security.CustomUserDetailsService;
+import com.OLearning.security.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,8 +18,8 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
-import com.OLearning.security.AdminAccessFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import com.OLearning.repository.UserRepository;
 
 @Configuration
 @EnableWebSecurity
@@ -29,7 +27,10 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
+
     private final CustomOAuth2UserService customOAuth2UserService;
+
+    private final UserRepository userRepository;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -38,12 +39,12 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationSuccessHandler authenticationSuccessHandler() {
-        return new CustomAuthenticationSuccessHandler();
+        return new CustomAuthenticationSuccessHandler(userRepository, (BCryptPasswordEncoder) passwordEncoder());
     }
 
     @Bean
     public AuthenticationFailureHandler authenticationFailureHandler() {
-        return new com.OLearning.security.CustomAuthenticationFailureHandler();
+        return new CustomAuthenticationFailureHandler();
     }
 
     @Bean
@@ -75,7 +76,6 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
                         // Cho phép cả ADMIN và INSTRUCTOR truy cập /instructordashboard/**
-                        // Filter sẽ xử lý logic chi tiết
                         .requestMatchers("/instructordashboard/**").hasAnyRole("ADMIN", "INSTRUCTOR")
 
                         .anyRequest().authenticated()
@@ -125,7 +125,7 @@ public class SecurityConfig {
 
     @Bean
     public LogoutSuccessHandler customLogoutSuccessHandler() {
-        return new com.OLearning.security.CustomLogoutSuccessHandler();
+        return new CustomLogoutSuccessHandler();
     }
 
     @Bean

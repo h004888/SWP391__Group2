@@ -21,7 +21,7 @@
                         (cm.status == 'OVERDUE' ? 'text-danger'  : '')}"
             th:text="${cm.dueDate != null ? #temporals.format(cm.dueDate, 'dd/MM/yyyy') : 'N/A'}"></td>
         <td>
-            <a th:href="@{/admin/courseMaintenance/view/{maintenanceId}(maintenanceId=${cm.maintenanceId})}"
+            <a href="#"
                class="btn btn-success-soft btn-round me-1 mb-1 mb-md-0"
                data-bs-toggle="tooltip" data-bs-placement="top" title="Message">
                 <i class="bi bi-envelope"></i>

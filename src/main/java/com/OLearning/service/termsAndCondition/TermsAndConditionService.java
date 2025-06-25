@@ -42,7 +42,7 @@ public class TermsAndConditionService {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         StringBuilder html = new StringBuilder();
         html.append("<h1 style='text-align:center'>BẢN ĐIỀU KHOẢN SỬ DỤNG</h1>");
-        html.append("<h3 style='text-align:center'>HỆ THỐNG QUẢN LÝ KHÓA HỌC OLearning</h3>");
+        html.append("<h3 style='text-align:center'>HỆ THỐNG QUẢN LÝ KHÓA HỌC OLEARNING</h3>");
         html.append("<h4 style='font-weight:normal;color:gray;font-style:italic'>Hợp đồng Quy tắc Kinh doanh này thiết lập các nguyên tắc cơ bản, " +
                 "quy định và hướng dẫn hoạt động chi phối các quy trình kinh doanh và khuôn khổ ra quyết định trong tổ chức của chúng tôi. " +
                 "Các quy tắc này đảm bảo tính nhất quán, tuân thủ và hiệu suất tối ưu trên tất cả các hoạt động kinh doanh.</h4>");

@@ -2,7 +2,7 @@ package com.OLearning.service.courseMaintance.impl;
 
 import com.OLearning.entity.Course;
 import com.OLearning.entity.CourseMaintenance;
-import com.OLearning.entity.Fees;
+import com.OLearning.entity.Fee;
 import com.OLearning.entity.Notification;
 import com.OLearning.repository.CourseRepository;
 import com.OLearning.repository.EnrollmentRepository;
@@ -70,13 +70,13 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
     }
     
     @Override
-    public List<Fees> getListFees() {
+    public List<Fee> getListFees() {
         return feesRepository.findAll();
     }
 
     @Override
     public void updateFee(Long feeId, Long minEnrollments, Long maxEnrollments, Long maintenanceFee) {
-        Fees fee = feesRepository.findById(feeId)
+        Fee fee = feesRepository.findById(feeId)
                 .orElseThrow(() -> new RuntimeException("Fee not found"));
         
         fee.setMinEnrollments(minEnrollments);
@@ -88,7 +88,7 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
 
     @Override
     public void deleteFee(Long feeId) {
-        Fees fee = feesRepository.findById(feeId)
+        Fee fee = feesRepository.findById(feeId)
                 .orElseThrow(() -> new RuntimeException("Fee not found"));
         
         // Check if fee is being used in any course maintenance
@@ -107,15 +107,15 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
         }
         
         // Check for overlapping ranges
-        List<Fees> existingFees = feesRepository.findAll();
-        for (Fees existingFee : existingFees) {
+        List<Fee> existingFees = feesRepository.findAll();
+        for (Fee existingFee : existingFees) {
             if ((minEnrollments <= existingFee.getMaxEnrollments() && 
                  maxEnrollments >= existingFee.getMinEnrollments())) {
                 throw new RuntimeException("Fee range overlaps with existing fee range");
             }
         }
         
-        Fees newFee = new Fees();
+        Fee newFee = new Fee();
         newFee.setMinEnrollments(minEnrollments);
         newFee.setMaxEnrollments(maxEnrollments);
         newFee.setMaintenanceFee(maintenanceFee);
@@ -142,7 +142,7 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
             Long enrollmentCount = enrollmentRepository.countByCourseIdAndMonth(
                     course.getCourseId(), yearMonth.getYear(), yearMonth.getMonthValue());
 
-            Fees fee = feesRepository.findByMinEnrollmentsLessThanEqualAndMaxEnrollmentsGreaterThanEqual(enrollmentCount, enrollmentCount);
+            Fee fee = feesRepository.findByMinEnrollmentsLessThanEqualAndMaxEnrollmentsGreaterThanEqual(enrollmentCount, enrollmentCount);
             if (fee == null) continue;
 
             CourseMaintenance maintenance = new CourseMaintenance();

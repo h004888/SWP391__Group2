@@ -15,7 +15,8 @@
         <td th:text="${order.username} ?: 'N/A'"></td>
         <td>
             <a th:href="@{/admin/orders/view/{orderId}(orderId=${order.orderId})}"
-               class="btn btn-primary-soft btn-sm" title="View Detail"><i class="fas fa-eye"></i></a>
+               class="btn btn-info-soft btn-round me-1 mb-1 mb-md-0"
+               title="View"><i class="fas fa-eye"></i></a>
         </td>
     </tr>
 </div>

@@ -11,11 +11,9 @@ import java.io.IOException;
 public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
-        // Lấy referer URL để xác định form nào được sử dụng
         String referer = request.getHeader("Referer");
         boolean isAdminLoginForm = referer != null && referer.contains("/dashboard_login");
         
-        // Lấy loginType từ request parameter
         String loginType = request.getParameter("loginType");
         
         if ("admin".equals(loginType) || isAdminLoginForm) {

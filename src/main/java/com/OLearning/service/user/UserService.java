@@ -60,4 +60,6 @@ public interface UserService {
 
     User findById(Long id);
 
+    void updatePasswordByEmail(String email, String newPassword);
+
 }

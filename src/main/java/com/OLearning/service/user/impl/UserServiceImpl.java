@@ -270,4 +270,16 @@ public class UserServiceImpl implements UserService {
         return userPage.map(userMapper::toDTO);
     }
 
+    @Override
+    public void updatePasswordByEmail(String email, String newPassword) {
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            user.setPassword(new BCryptPasswordEncoder().encode(newPassword));
+            userRepository.save(user);
+        } else {
+            throw new RuntimeException("User not found with email: " + email);
+        }
+    }
+
 }
