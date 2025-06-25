@@ -16,6 +16,7 @@ import com.OLearning.repository.VideoRepository;
 import com.OLearning.security.CustomUserDetails;
 import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.chapter.ChapterService;
+import com.OLearning.service.cloudinary.UploadFile;
 import com.OLearning.service.course.CourseService;
 import com.OLearning.service.courseChapterLesson.*;
 import com.OLearning.service.lesson.LessonService;
@@ -28,6 +29,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -35,6 +38,7 @@ import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -77,6 +81,8 @@ public class ControlllerAddCourse {
     private FindAllCourseService FindAllCourseService;
     @Autowired
     private CourseDetailService courseDetailService;
+    @Autowired
+    private UploadFile uploadFile;
     //dashhboard
     @GetMapping()
     public String dashboard(Model model) {
@@ -105,7 +111,6 @@ public class ControlllerAddCourse {
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/coursesContent :: listsCourseContent");
         return "instructorDashboard/indexUpdate";
     }
-    //lay total course cua tung courseId
 
 
     //search course

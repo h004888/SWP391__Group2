@@ -23,6 +23,7 @@ public class CourseDTO {
     private String categoryName;
     private String videoUrlPreview;
     private Integer totalLessons;
+    private Integer totalStudentEnrolled;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String status;

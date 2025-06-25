@@ -3,33 +3,23 @@ package com.OLearning.controller.instructorDashBoard;
 import com.OLearning.repository.CourseRepository;
 import com.OLearning.service.cloudinary.UploadFile;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Map;
 
-@RequestMapping("/testpage")
+@RequestMapping("/api/video")
 @RestController
-@RequiredArgsConstructor
 public class JsonController {
-    private final UploadFile uploadFile;
-    private final CourseRepository courseRepository;
-
-    //lay theo id
-    //dung pathvariable\
-    //dung request param de tim theo s
-    @GetMapping("/{id}")
-    public String getCourseById(@PathVariable Long id) {
-        return courseRepository.findById(id).get().getTitle();
+    @Autowired
+    private UploadFile uploadFile;
+    @GetMapping("/signed-url")
+    public ResponseEntity<?> getSignedVideoUrl(@RequestParam String publicId) {
+        String a = publicId;
+        String signedUrl = uploadFile.generateSignedVideoUrl(publicId, 300, "video"); // 5 phút
+        return ResponseEntity.ok(Map.of("url", signedUrl));
     }
-
-    @PostMapping("/image")
-    public String uploadImageFile(@RequestParam("file") MultipartFile file) throws IOException {
-        return uploadFile.uploadImageFile(file);
-    }
-    @PostMapping("/video")
-    public String uploadVideoFile(@RequestParam("file") MultipartFile file) throws IOException {
-        return uploadFile.uploadVideoFile(file);
-    }
-
 }

@@ -159,9 +159,16 @@
                         <div class="col-lg-4">
                             <div class="card border-0 shadow-sm h-100">
                                 <div class="position-relative">
-                                    <div class="ratio ratio-16x9">
-                                        <video th:src="${course.videoUrlPreview}" controls class="w-100 rounded-top"
-                                            poster="https://via.placeholder.com/400x225?text=Course+Preview">
+                                    <div class="ratio ratio-16x9 position-relative" style="max-width: 600px;">
+                                        <!-- Poster + Play button -->
+                                        <div id="videoPoster" class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background: #000;">
+                                            <img src="https://via.placeholder.com/600x338?text=Course+Preview" alt="Poster" class="w-100 h-100" style="object-fit: cover; opacity: 0.7;">
+                                            <button id="playBtn" th:data-publicid="${course.videoUrlPreview}" class="btn btn-light position-absolute" style="font-size: 3rem; border-radius: 50%; padding: 0.5em 0.7em;">
+                                                ▶
+                                            </button>
+                                        </div>
+                                        <!-- Video player (ẩn ban đầu) -->
+                                        <video id="myVideo" controls class="w-100 rounded-top d-none">
                                             Your browser does not support the video tag.
                                         </video>
                                     </div>
@@ -477,5 +484,28 @@
             video.pause();
             video.currentTime = 0;
         }
+
+        document.getElementById('playBtn').addEventListener('click', function() {
+            const publicId = this.getAttribute('data-publicid');
+            fetch(`/api/video/signed-url?publicId=${publicId}`)
+                .then(res => res.json())
+                .then(data => {
+                    const video = document.getElementById('myVideo');
+                    video.src = data.url;
+                    video.classList.remove('d-none');
+                    video.play();
+                    document.getElementById('videoPoster').style.display = 'none';
+                })
+                .catch(err => {
+                    alert('Không lấy được video!');
+                    console.error(err);
+                });
+        });
+
+        video.addEventListener('ended', function() {
+            video.classList.add('d-none');
+            document.getElementById('videoPoster').style.display = '';
+            video.src = '';
+        });
     </script>
 </div>
