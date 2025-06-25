@@ -3,29 +3,32 @@
     <!-- Breadcrumb -->
 
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <h1 class="h3 mb-0">Create New Course</h1>
+    <div class="content-card sticky-step-indicator">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h1 class="h3 mb-0">Create New Course</h1>
+          <p class="text-muted">Fill in the details below to create your course</p>
+        </div>
+
       </div>
-    </div>
-    <!-- Step Indicator -->
-    <div class="content-card">
-      <div class="step-indicator">
-        <div class="step active" data-step="1">
-          <div class="step-circle">1</div>
-          <div class="step-label">Basic Info</div>
-        </div>
-        <div class="step" data-step="2">
-          <div class="step-circle">2</div>
-          <div class="step-label">Course Preview</div>
-        </div>
-        <div class="step" data-step="3">
-          <div class="step-circle">3</div>
-          <div class="step-label">Course Content</div>
-        </div>
-        <div class="step" data-step="4">
-          <div class="step-circle">4</div>
-          <div class="step-label">Preview & Publish</div>
+      <div>
+        <div class="step-indicator">
+          <div class="step active" data-step="1">
+            <div class="step-circle">1</div>
+            <div class="step-label">Basic Info</div>
+          </div>
+          <div class="step" data-step="2">
+            <div class="step-circle">2</div>
+            <div class="step-label">Course Preview</div>
+          </div>
+          <div class="step" data-step="3">
+            <div class="step-circle">3</div>
+            <div class="step-label">Course Content</div>
+          </div>
+          <div class="step" data-step="4">
+            <div class="step-circle">4</div>
+            <div class="step-label">Preview & Publish</div>
+          </div>
         </div>
       </div>
     </div>
@@ -108,9 +111,9 @@
 
           <!-- Navigation Buttons -->
 
-          <div class="content-card">
+          <div class="content-card sticky-navigation-buttons">
             <div class="d-flex justify-content-between">
-              <button class="btn btn-outline-secondary me-2" name="action" value="draft">
+              <button class="btn btn-outline-secondary me-2" id="saveDraftBtn" name="action" value="draft">
                 <i class="bi bi-save me-1"></i> Save as Draft
               </button>
               <button class="btn btn-primary ms-auto" name="action" value="nextstep">
@@ -281,6 +284,30 @@
     .sticky-sidebar {
       position: sticky;
       top: 20px;
+    }
+    .content-card.sticky-step-indicator {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background-color: #fff;
+      margin-bottom: 1.5rem;
+      padding-top: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #dee2e6;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    /* Style cho sticky navigation buttons */
+    .content-card.sticky-navigation-buttons {
+      position: sticky;
+      bottom: 0;
+      z-index: 1000;
+      background-color: #fff;
+      margin-top: 1.5rem;
+      padding-top: 15px;
+      padding-bottom: 15px;
+      border-top: 1px solid #dee2e6;
+      box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
     }
   </style>
 </div>

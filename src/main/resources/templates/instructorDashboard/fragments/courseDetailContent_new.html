@@ -6,7 +6,7 @@
                 <div class="col-md-8">
                     <h1 class="mb-3 fw-bold" th:utext="${course.title}"></h1>
                     <div class="d-flex align-items-center mb-3">
-                        <span class="badge bg-primary me-2" th:utext="${course.category.name}"></span>
+                        <span class="badge bg-primary me-2" th:utext="${course.categoryName}"></span>
                         <span class="text-muted me-3">
                             <i class="bi bi-calendar3 me-1"></i>
                             <span class="text-dark" th:text="${#temporals.format(course.createdAt, 'dd/MM/yyyy')}"></span>
@@ -174,7 +174,7 @@
                                             class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
                                             <span><i class="bi bi-tag me-2"></i> Category</span>
                                             <span class="badge bg-light text-dark"
-                                                th:utext="${course.category.name}"></span>
+                                                th:utext="${course.categoryName}"></span>
                                         </div>
                                         <div
                                             class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">

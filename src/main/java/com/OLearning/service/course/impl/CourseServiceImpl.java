@@ -5,6 +5,7 @@ import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.course.CourseDetailDTO;
 import com.OLearning.dto.course.CourseMediaDTO;
 import com.OLearning.entity.Category;
+import com.OLearning.entity.Chapter;
 import com.OLearning.entity.Course;
 import com.OLearning.entity.User;
 import com.OLearning.mapper.course.CourseDetailMapper;
@@ -50,22 +51,7 @@ public class CourseServiceImpl implements CourseService {
 
 
     //courses phan trang
-    @Override
-    public Page<CourseDTO> findCourseByUserId(Long userId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Course> coursePage = courseRepository.findByInstructorUserId(userId, pageable);//Page<Course> la doi tuong chua ca danh sach khoa hoc
-        List<CourseDTO> courseDTOList = new ArrayList<>();
-        for (Course course : coursePage.getContent()) {
-            CourseDTO courseDTO = courseMapper.MapCourseDTO(course);
-            if (course.getCategory() != null) {
-                courseDTO.setCategoryName(course.getCategory().getName());
-            } else {
-                courseDTO.setCategoryName("not found");
-            }
-            courseDTOList.add(courseDTO);
-        }
-        return new PageImpl<>(courseDTOList, pageable, coursePage.getTotalElements());
-    }
+
 
     @Override
     public Page<CourseDTO> searchCourse(Long userId, String title, int page, int size) {

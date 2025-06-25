@@ -16,13 +16,9 @@ public class CourseMapper {
         course.setTitle(dto.getTitle());
         course.setDescription(dto.getDescription());
         course.setPrice(dto.getPrice());
-        course.setTotalStudentEnrolled(0);
         course.setDiscount(dto.getDiscount());
-        course.setTotalLessons(0);
-        course.setTotalRatings(0);
         course.setCreatedAt(LocalDateTime.now());
         course.setUpdatedAt(LocalDateTime.now());
-        course.setDuration(0);
         return course;
     }
     //hien thi course
@@ -35,11 +31,10 @@ public class CourseMapper {
         courseDTO.setUpdatedAt(course.getUpdatedAt());
         courseDTO.setPrice(course.getPrice());
         courseDTO.setCourseLevel(course.getCourseLevel());
-        courseDTO.setDuration(course.getDuration());
         courseDTO.setDiscount(course.getDiscount());
-        courseDTO.setTotalLessons(course.getTotalLessons());
         courseDTO.setStatus(course.getStatus());
         courseDTO.setIsFree(course.getIsFree());
+        courseDTO.setVideoUrlPreview(course.getVideoUrlPreview());
         return courseDTO;
     }
     //save course basic

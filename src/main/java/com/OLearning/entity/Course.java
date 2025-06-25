@@ -22,10 +22,10 @@ public class Course {
     private Double price;
     private Double discount;
     private String courseImg;
-    private Integer duration; //step 2 //lay tu o trong
-    private Integer totalLessons;//step 2
-    private Integer totalRatings;
-    private Integer totalStudentEnrolled;
+//    private Integer duration; //step 2 //lay tu o trong
+//    private Integer totalLessons;//step 2
+//    private Integer totalRatings;
+//    private Integer totalStudentEnrolled;
     private String courseLevel; //beginner, intermediate, advanced
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

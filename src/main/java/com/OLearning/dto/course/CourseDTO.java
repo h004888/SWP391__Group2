@@ -21,6 +21,7 @@ public class CourseDTO {
     private Integer duration;
     private Boolean isFree;
     private String categoryName;
+    private String videoUrlPreview;
     private Integer totalLessons;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

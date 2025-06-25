@@ -11,6 +11,9 @@ $(document).ready(function() {
         new bootstrap.Toast(this, { delay: 5000 }).show();
     });
 
+    // Initialize dropdowns
+    initializeDropdowns();
+
     // Filter functionality
     $('#filterCategory, #courseStatus, #filterPrice').on('change', function() {
         filterCourses();
@@ -29,115 +32,162 @@ $(document).ready(function() {
             filterCourses(page);
         }
     });
-
-    // Filter function
-    function filterCourses(page = 0) {
-        // Show loading indicator
-        $('#loadingIndicator').show();
-        $('#courseTableContainer').hide();
-
-        // Get filter values
-        let category = $('#filterCategory').val();
-        let status = $('#courseStatus').val();
-        let price = $('#filterPrice').val();
-
-        // Prepare data
-        let requestData = {
-            page: page
-        };
-
-        if (category) requestData.category = category;
-        if (status) requestData.status = status;
-        if (price) requestData.price = price;
-
-        // AJAX request
-        $.ajax({
-            url: '/instructordashboard/courses/filter',
-            type: 'GET',
-            data: requestData,
-            success: function(response) {
-                // Update content
-                $('#courseContentContainer').html(response);
-
-                // Update URL without page reload
-                updateUrl(requestData);
-
-                // Scroll to top of content
-                $('html, body').animate({
-                    scrollTop: $("#courseContentContainer").offset().top - 100
-                }, 300);
-
-                // Reinitialize tooltips
-                $('[title]').each(function() {
-                    var instance = bootstrap.Tooltip.getInstance(this);
-                    if (instance) {
-                        instance.dispose();
-                    }
-                    new bootstrap.Tooltip(this);
-                });
-
-                // Re-bind action handlers for dynamically loaded content
-                window.upToPublic = upToPublic;
-                window.unpublishCourse = unpublishCourse;
-                window.hideCourse = hideCourse;
-                window.deleteCourse = deleteCourse;
-            },
-            error: function(xhr, status, error) {
-                console.error("Error filtering courses:", error);
-
-                // Hide loading and show error
-                $('#loadingIndicator').hide();
-                $('#courseTableContainer').show();
-
-                // Show error message
-                showToast('An error occurred while filtering courses. Please try again.', 'error');
-            }
-        });
-    }
-
-    // Update URL function
-    function updateUrl(params) {
-        let url = new URL(window.location.href);
-
-        // Clear existing params
-        url.searchParams.delete('category');
-        url.searchParams.delete('status');
-        url.searchParams.delete('price');
-        url.searchParams.delete('page');
-
-        // Add new params
-        Object.keys(params).forEach(key => {
-            if (params[key]) {
-                url.searchParams.set(key, params[key]);
-            }
-        });
-
-        window.history.pushState({}, '', url);
-    }
-
-    // Show toast function
-    function showToast(message, type = 'info') {
-        let bgClass = type === 'error' ? 'bg-danger' : 'bg-success';
-        let toastHtml = `
-            <div class="toast align-items-center text-white ${bgClass} border-0" role="alert">
-                <div class="d-flex">
-                    <div class="toast-body">${message}</div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                </div>
-            </div>
-        `;
-
-        $('.position-fixed.bottom-0.end-0').append(toastHtml);
-        let toast = new bootstrap.Toast($('.toast').last()[0], { delay: 5000 });
-        toast.show();
-    }
 });
 
-// Delete course function
+// Hàm khởi tạo các dropdown
+function initializeDropdowns() {
+    // Khởi tạo tất cả dropdown sử dụng API của Bootstrap
+    var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
+    dropdownElementList.map(function(dropdownToggleEl) {
+        return new bootstrap.Dropdown(dropdownToggleEl);
+    });
+}
+
+// Filter function
+function filterCourses(page = 0) {
+    // Show loading indicator
+    $('#loadingIndicator').show();
+    $('#courseTableContainer').hide();
+
+    // Get filter values
+    let category = $('#filterCategory').val();
+    let status = $('#courseStatus').val();
+    let price = $('#filterPrice').val();
+
+    // Prepare data
+    let requestData = {
+        page: page
+    };
+
+    if (category) requestData.category = category;
+    if (status) requestData.status = status;
+    if (price) requestData.price = price;
+
+    // AJAX request
+    $.ajax({
+        url: '/instructordashboard/courses/filter',
+        type: 'GET',
+        data: requestData,
+        success: function(response) {
+            // Update content
+            $('#courseContentContainer').html(response);
+
+            // Update URL without page reload
+            updateUrl(requestData);
+
+            // Scroll to top of content
+            $('html, body').animate({
+                scrollTop: $("#courseContentContainer").offset().top - 100
+            }, 300);
+
+            // Reinitialize tooltips
+            $('[title]').each(function() {
+                var instance = bootstrap.Tooltip.getInstance(this);
+                if (instance) {
+                    instance.dispose();
+                }
+                new bootstrap.Tooltip(this);
+            });
+
+            // Reinitialize dropdowns
+            initializeDropdowns();
+
+            // Re-bind action handlers for dynamically loaded content
+            window.upToPublic = upToPublic;
+            window.unpublishCourse = unpublishCourse;
+            window.hideCourse = hideCourse;
+            window.deleteCourse = deleteCourse;
+        },
+        error: function(xhr, status, error) {
+            console.error("Error filtering courses:", error);
+
+            // Hide loading and show error
+            $('#loadingIndicator').hide();
+            $('#courseTableContainer').show();
+
+            // Show error message
+            showToast('An error occurred while filtering courses. Please try again.', 'error');
+        }
+    });
+}
+
+// Update URL function
+function updateUrl(params) {
+    let url = new URL(window.location.href);
+
+    // Clear existing params
+    url.searchParams.delete('category');
+    url.searchParams.delete('status');
+    url.searchParams.delete('price');
+    url.searchParams.delete('page');
+
+    // Add new params
+    Object.keys(params).forEach(key => {
+        if (params[key]) {
+            url.searchParams.set(key, params[key]);
+        }
+    });
+
+    window.history.pushState({}, '', url);
+}
+
+// Show toast function
+function showToast(message, type = 'info') {
+    let bgClass = type === 'error' ? 'bg-danger' : 'bg-success';
+    let toastHtml = `
+        <div class="toast align-items-center text-white ${bgClass} border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">${message}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    `;
+
+    $('.position-fixed.bottom-0.end-0').append(toastHtml);
+    let toast = new bootstrap.Toast($('.toast').last()[0], { delay: 5000 });
+    toast.show();
+}
+
+// Các hàm xử lý hành động khóa học
+function upToPublic(courseId) {
+    showConfirmActionModal(
+        'Bạn có chắc chắn muốn công khai khóa học này?',
+        '/instructordashboard/courses/uptopublic',
+        courseId
+    );
+}
+
+function unpublishCourse(courseId) {
+    showConfirmActionModal(
+        'Bạn có chắc chắn muốn hủy công khai khóa học này?',
+        '/instructordashboard/courses/unpublish',
+        courseId
+    );
+}
+
+function hideCourse(courseId) {
+    showConfirmActionModal(
+        'Bạn có chắc chắn muốn ẩn khóa học này?',
+        '/instructordashboard/courses/hide',
+        courseId
+    );
+}
+
+function showConfirmActionModal(message, actionUrl, courseId) {
+    $('#confirmActionMessage').text(message);
+    $('#confirmActionForm').attr('action', actionUrl);
+    $('#confirmActionCourseId').val(courseId);
+    
+    var modal = new bootstrap.Modal(document.getElementById('confirmActionModal'));
+    modal.show();
+}
+
 function deleteCourse(courseId, courseTitle) {
-    $('#deleteCourseId').val(courseId);
     $('#courseTitle').text(courseTitle);
-    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    $('#deleteCourseId').val(courseId);
+    
+    var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    modal.show();
 }
 
 // Handle delete form submission
@@ -243,33 +293,6 @@ $('#confirmActionForm').on('submit', function(e) {
         }
     });
 });
-
-function upToPublic(courseId) {
-    const modal = new bootstrap.Modal(document.getElementById('confirmActionModal'));
-    $('#confirmActionMessage').text('Are you sure you want to make this course public?');
-    $('#confirmActionForm').attr('action', '/instructordashboard/courses/uptopublic');
-    $('#confirmActionCourseId').val(courseId);
-    $('#confirmActionSubmitBtn').text('Up to Public').removeClass('btn-danger').addClass('btn-primary');
-    modal.show();
-}
-
-function unpublishCourse(courseId) {
-    const modal = new bootstrap.Modal(document.getElementById('confirmActionModal'));
-    $('#confirmActionMessage').text('Are you sure you want to unpublish this course?');
-    $('#confirmActionForm').attr('action', '/instructordashboard/courses/unpublish');
-    $('#confirmActionCourseId').val(courseId);
-    $('#confirmActionSubmitBtn').text('Unpublish').removeClass('btn-danger').addClass('btn-primary');
-    modal.show();
-}
-
-function hideCourse(courseId) {
-    const modal = new bootstrap.Modal(document.getElementById('confirmActionModal'));
-    $('#confirmActionMessage').text('Are you sure you want to hide this course?');
-    $('#confirmActionForm').attr('action', '/instructordashboard/courses/hide');
-    $('#confirmActionCourseId').val(courseId);
-    $('#confirmActionSubmitBtn').text('Hide').removeClass('btn-primary').addClass('btn-danger');
-    modal.show();
-}
 
 // Đảm bảo các hàm action luôn được bind lại sau khi AJAX load content
 window.upToPublic = upToPublic;

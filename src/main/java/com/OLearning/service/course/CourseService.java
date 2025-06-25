@@ -33,7 +33,6 @@ public interface CourseService {
     Course createCourseStep1(Long courseId, AddCourseStep1DTO addCourseStep1DTO);
     AddCourseStep1DTO draftCourseStep1(Course course);
     Course submitCourse(Long courseId, String status);
-    Page<CourseDTO> findCourseByUserId(Long userId, int page, int size);
     Page<CourseDTO> searchCourse(Long userId, String title, int page, int size);
     Course createCourseMedia(Long courseId, CourseMediaDTO CourseMediaDTO);
     void saveCourse(Long courseId);
