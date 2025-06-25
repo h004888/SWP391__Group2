@@ -583,17 +583,20 @@ Trending courses START -->
                                             </p>
                                         </div>
                                         <!-- Price -->
-                                        <div>
-
+                                        <div th:if="${topCoursesEnrolledMap[course.courseId] == null or !topCoursesEnrolledMap[course.courseId]}">
                                             <h4 class="text-success mb-0 item-show " style="font-size: 1.2rem;" th:if="${course.price>0}"><span
                                                     th:text="${course.price != null ? #numbers.formatDecimal(course.price, 0, 'COMMA', 0, 'POINT')+' ₫' : 'N/A'}"></span>
                                             </h4>
                                             <h4 class="text-success mb-0 item-show" th:if="${course.price==0}">Free
                                             </h4>
-                                            <form th:action="@{'/cart/add/' + ${course.courseId}}" method="post" class="d-inline">
-                                                <button type="submit" class="btn btn-sm btn-success-soft item-show-hover m-1"><i class="fas fa-shopping-cart me-2"></i>Add to cart</button>
-                                            </form>
+                                            <button type="button" class="btn btn-sm btn-success-soft item-show-hover m-1 add-to-cart-btn"
+                                                    th:attr="data-course-id=${course.courseId}">
+                                                <i class="fas fa-shopping-cart me-2"></i>Add to cart
+                                            </button>
                                         </div>
+                                        <a th:if="${topCoursesEnrolledMap[course.courseId] != null and topCoursesEnrolledMap[course.courseId]}"
+                                           th:href="@{/learning/course/view(courseId=${course.courseId})}"
+                                           class="btn btn-sm btn-primary-soft mb-0">Continue</a>
                                     </div>
                                 </div>
                             </div>
@@ -878,6 +881,6 @@ Reviews START -->
     </section>
     <!-- =======================
 Reviews END -->
-
+    <script src="/js/homePage/addtocart.js"></script>
 </main>
 <!-- **************** MAIN CONTENT END **************** -->

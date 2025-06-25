@@ -13,4 +13,5 @@ public interface VoucherService {
     List<VoucherDTO> getValidVouchersForCourse(Long courseId);
     VoucherDTO useVoucher(Long voucherId, Long userId, Long courseId);
     List<UserVoucherDTO> getValidVouchersForCourseAndUser(Long courseId, Long userId);
+    void useVoucherForUserAndCourse(Long voucherId, Long userId);
 }

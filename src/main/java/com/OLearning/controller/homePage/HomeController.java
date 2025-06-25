@@ -31,6 +31,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import com.OLearning.service.enrollment.EnrollmentService;
 
 @Controller
 @RequestMapping("/home")
@@ -59,17 +60,32 @@ public class HomeController {
     @Autowired
     private CartServiceImpl cartServiceImpl;
 
+    @Autowired
+    private EnrollmentService enrollmentService;
 
         @GetMapping()
-        public String getMethodName(Model model) {
+        public String getMethodName(Model model, @AuthenticationPrincipal UserDetails userDetails) {
                 // chia làm 2 danh sách:
                 List<CategoryDTO> firstFive = categoryService.getAllCategory().stream().limit(5).toList();
                 List<CategoryDTO> nextFive = categoryService.getAllCategory().stream().skip(5).limit(5).toList();
-                model.addAttribute("topCourses",
-                                courseService.getTopCourses().stream().limit(5).collect(Collectors.toList()));
+                List<Course> topCourses = courseService.getTopCourses().stream().limit(5).collect(Collectors.toList());
+                model.addAttribute("topCourses", topCourses);
                 model.addAttribute("topCategories", categoryService.findTop5ByOrderByIdAsc());
                 model.addAttribute("firstFive", firstFive);
                 model.addAttribute("nextFive", nextFive);
+                // Thêm map courseId -> isEnrolled
+                Map<Long, Boolean> topCoursesEnrolledMap = new HashMap<>();
+                if (userDetails != null) {
+                        String email = userDetails.getUsername();
+                        User user = userRepository.findByEmail(email).orElse(null);
+                        if (user != null) {
+                                for (Course c : topCourses) {
+                                        boolean enrolled = enrollmentService.hasEnrolled(user.getUserId(), c.getCourseId());
+                                        topCoursesEnrolledMap.put(c.getCourseId(), enrolled);
+                                }
+                        }
+                }
+                model.addAttribute("topCoursesEnrolledMap", topCoursesEnrolledMap);
                 return "homePage/index";
         }
 
@@ -94,7 +110,7 @@ public class HomeController {
         }
 
         @GetMapping("/course-detail")
-        public String courseDetail(@RequestParam("id") Long id, Model model) {
+        public String courseDetail(@RequestParam("id") Long id, Model model, @AuthenticationPrincipal UserDetails userDetails) {
                 Course course = courseService.getCourseById(id);
 
                 int totalStudents = course.getInstructor().getCourses()
@@ -108,6 +124,16 @@ public class HomeController {
                                 course.getCategory().getCourses().stream().limit(5).collect(Collectors.toList()));
                 model.addAttribute("course", course);
 
+                boolean isEnrolled = false;
+                if (userDetails != null) {
+                        String email = userDetails.getUsername();
+                        User user = userRepository.findByEmail(email).orElse(null);
+                        if (user != null) {
+                                isEnrolled = enrollmentService.hasEnrolled(user.getUserId(), id);
+                        }
+                }
+                model.addAttribute("isEnrolled", isEnrolled);
+
                 return "homePage/course-detail";
         }
 
@@ -120,7 +146,6 @@ public class HomeController {
         if (userDetails == null) {
             return "redirect:/login";
         }
-
         // Check if the course is already in the main cart using the service
         String mainCartEncoded = getCartCookie(request, getUserIdFromUserDetails(userDetails));
         if (cartService.isCourseInCart(mainCartEncoded, courseId, userDetails.getUsername())) {
