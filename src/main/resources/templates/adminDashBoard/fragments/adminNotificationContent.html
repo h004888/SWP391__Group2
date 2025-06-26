@@ -216,13 +216,13 @@
                                        title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a th:if="${n.type == 'REPORT_COURSE'}"
-                                       th:href="@{/admin/course/detail/{courseId}(courseId=${n.course.courseId})}"
+                                    <a th:if="${n.type == 'REPORT_COURSE' or n.type == 'REPORT_COMMENT'}"
+                                       th:href="@{/admin/reports}"
                                        class="btn btn-danger btn-sm"
-                                       title="Review Course">
-                                        <i class="fas fa-gavel"></i>
+                                       title="Manage Reports">
+                                        <i class="fas fa-flag"></i>
                                     </a>
-                                    <a th:if="${n.type != 'COURSE_REJECTION' and n.type != 'REPORT_COURSE'}"
+                                    <a th:if="${n.type != 'REPORT_COURSE' and n.type != 'REPORT_COMMENT'}"
                                        th:href="@{/admin/course/detail/{courseId}(courseId=${n.course.courseId})}"
                                        class="btn btn-success btn-sm"
                                        title="View Course">

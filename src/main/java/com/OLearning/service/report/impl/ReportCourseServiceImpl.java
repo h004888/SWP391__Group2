@@ -3,10 +3,13 @@ package com.OLearning.service.report.impl;
 import com.OLearning.dto.report.ReportCourseDTO;
 import com.OLearning.entity.Course;
 import com.OLearning.entity.Notification;
+import com.OLearning.entity.Report;
 import com.OLearning.entity.User;
 import com.OLearning.mapper.report.ReportCourseMapper;
+import com.OLearning.mapper.report.ReportMapper;
 import com.OLearning.repository.CourseRepository;
 import com.OLearning.repository.NotificationRepository;
+import com.OLearning.repository.ReportRepository;
 import com.OLearning.repository.UserRepository;
 import com.OLearning.service.report.ReportCourseService;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +26,9 @@ public class ReportCourseServiceImpl implements ReportCourseService {
     private final NotificationRepository notiRepo;
     private final UserRepository userRepo;
     private final CourseRepository courseRepo;
-    private final ReportCourseMapper mapper;
+    private final ReportRepository reportRepo;
+    private final ReportCourseMapper courseMapper;
+    private final ReportMapper reportMapper;
 
     public void report(ReportCourseDTO dto) {
         User user = userRepo.findById(dto.getUserId()).orElseThrow();
@@ -34,7 +39,7 @@ public class ReportCourseServiceImpl implements ReportCourseService {
         
         // Gửi thông báo cho tất cả admin
         for (User admin : adminUsers) {
-            Notification noti = mapper.toNotification(dto, user, course);
+            Notification noti = courseMapper.toNotification(dto, user, course);
             noti.setUser(admin);
             noti.setMessage("Course Report: " + course.getTitle() + " - Reported by " + user.getFullName() + " (" + user.getEmail() + ") - Reason: " + dto.getReason());
             noti.setSentAt(LocalDateTime.now());
@@ -42,6 +47,16 @@ public class ReportCourseServiceImpl implements ReportCourseService {
             noti.setType("REPORT_COURSE");
             noti.setCourse(course);// Set admin là người nhận thông báo
             notiRepo.save(noti);
+            
+
+            Report report = reportMapper.toReportFromCourseReport(dto, course, user, noti);
+            report.setReportType("REPORT_COURSE");
+            report.setStatus("pending");
+            report.setCreatedAt(LocalDateTime.now());
+            report.setCourse(course);
+            report.setUser(user);
+            report.setContent(dto.getReason());
+            reportRepo.save(report);
         }
     }
 }

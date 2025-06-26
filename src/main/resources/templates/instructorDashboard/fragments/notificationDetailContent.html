@@ -1,5 +1,3 @@
-
-
 <div th:fragment="notificationDetailContent">
     <style>
         .notification-detail-card {
@@ -211,19 +209,31 @@
                     </button>
                 </form>
 
-                <!-- Edit course for rejections -->
-                <a th:if="${notification.type == 'COURSE_REJECTION'}"
-                   th:href="@{/instructordashboard/courses/edit(rejectionNotificationId=${notification.notificationId})}"
-                   class="btn btn-warning">
-                    <i class="fas fa-edit me-2"></i>Edit Course
-                </a>
-
-                <!-- View course for other types -->
-                <a th:if="${notification.type != 'COURSE_REJECTION'}"
-                   th:href="@{/instructordashboard/courses/view(fromNotification=${notification.notificationId})}"
+                <!-- View course for REPORT_COURSE (block course) notification -->
+                <a th:if="${notification.type == 'COURSE_BLOCKED'}"
+                   th:href="@{/instructordashboard/courses/view/{id}(id=${notification.course.courseId})}"
                    class="btn btn-success">
-                    <i class="fas fa-book-open me-2"></i>View Course
+                    <i class="fas fa-book-open me-2"></i>Xem chi tiết khóa học
                 </a>
+            </div>
+
+            <!-- Reply section for block course notification -->
+            <div th:if="${notification.type == 'COURSE_BLOCKED'}" class="reply-section mt-4">
+                <h6 class="mb-3">
+                    <i class="fas fa-reply me-2"></i>Phản hồi về quyết định khóa khóa học
+                </h6>
+                <form th:action="@{/instructordashboard/courses/reply-block}" method="post">
+                    <input type="hidden" name="courseId" th:value="${notification.course.courseId}" />
+                    <input type="hidden" name="notificationId" th:value="${notification.notificationId}" />
+                    <div class="mb-3">
+                        <textarea name="replyContent" required class="form-control" rows="3" placeholder="Nhập phản hồi của bạn..."></textarea>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-2"></i>Gửi phản hồi
+                        </button>
+                    </div>
+                </form>
             </div>
 
             <!-- Comment Section for Comment Notifications -->

@@ -15,7 +15,7 @@ public class ReportCourseMapper {
         noti.setCourse(course);
         noti.setMessage("Course Report: " + course.getTitle() + " - Reported by " + reporter.getFullName() + " (" + reporter.getEmail() + ") - Reason: " + dto.getReason());
         noti.setType("REPORT_COURSE");
-        noti.setStatus("unread");
+        noti.setStatus("failed");
         noti.setSentAt(LocalDateTime.now());
         return noti;
     }

@@ -184,4 +184,22 @@ public class CourseServiceImpl implements CourseService {
                 })
                 .orElse(false);
     }
+
+    @Override
+    public void blockCourse(Long courseId) {
+        Course course = courseRepository.findById(courseId).orElseThrow();
+        course.setStatus("blocked"); // hoặc trạng thái bạn định nghĩa
+        courseRepository.save(course);
+    }
+
+    @Override
+    public Course findById(Long courseId) {
+        return courseRepository.findById(courseId).orElseThrow();
+    }
+
+    public void setPendingBlock(Long courseId) {
+        Course course = courseRepository.findById(courseId).orElseThrow();
+        course.setStatus("pending_block");
+        courseRepository.save(course);
+    }
 }

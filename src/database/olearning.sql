@@ -176,3 +176,19 @@ CREATE TABLE CourseReviews
     FOREIGN KEY (CourseID) REFERENCES Courses (CourseID)
 );
 GO
+
+CREATE TABLE report (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    report_type VARCHAR(50) NOT NULL,
+    course_id BIGINT,
+    user_id BIGINT,
+    notification_id BIGINT,
+    content TEXT,
+    evidence_link VARCHAR(500),
+    status VARCHAR(30) NOT NULL,
+    created_at DATETIME,
+    processed_at DATETIME,
+    CONSTRAINT fk_report_course FOREIGN KEY (course_id) REFERENCES course(course_id),
+    CONSTRAINT fk_report_user FOREIGN KEY (user_id) REFERENCES user(user_id),
+    CONSTRAINT fk_report_notification FOREIGN KEY (notification_id) REFERENCES notification(notification_id)
+);

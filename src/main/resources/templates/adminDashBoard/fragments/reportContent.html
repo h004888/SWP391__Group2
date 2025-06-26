@@ -1,0 +1,94 @@
+<div th:fragment="reportContent">
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0 text-gray-800">
+                <i class="fas fa-flag me-2"></i>Report Management
+            </h1>
+        </div>
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <i class="fas fa-filter me-2"></i>Filter Reports
+            </div>
+            <div class="card-body">
+                <form method="get" th:action="@{/admin/reports}" class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label">Type</label>
+                        <select class="form-select" name="type">
+                            <option value="">All</option>
+                            <option value="BLOCK_COURSE">Block Course</option>
+                            <option value="COMMENT">Comment</option>
+                            <option value="VIOLATION">Violation</option>
+                            <option value="INSTRUCTOR_RESPONSE">Instructor Response</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" name="status">
+                            <option value="">All</option>
+                            <option value="pending">Pending</option>
+                            <option value="processed">Processed</option>
+                            <option value="rejected">Rejected</option>
+                            <option value="approved">Approved</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Keyword</label>
+                        <input type="text" class="form-control" name="keyword" placeholder="Search...">
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-2"></i>Search
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <i class="fas fa-list me-2"></i>Report List
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Type</th>
+                                <th>Course</th>
+                                <th>User</th>
+                                <th>Status</th>
+                                <th>Created At</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="report : ${reports}">
+                                <td th:text="${report.id}"></td>
+                                <td th:text="${report.reportType}"></td>
+                                <td th:text="${report.course != null ? report.course.title : '-'}"></td>
+                                <td th:text="${report.user != null ? report.user.username : '-'}"></td>
+                                <td>
+                                    <span th:if="${report.status == 'processed'}" class="badge bg-success"><i class="fas fa-check"></i></span>
+                                    <span th:if="${report.status == 'pending'}" class="badge bg-warning"><i class="fas fa-exclamation"></i></span>
+                                    <span th:if="${report.status != 'processed' and report.status != 'pending'}" class="badge bg-secondary"><i class="fas fa-question"></i></span>
+                                </td>
+                                <td th:text="${#temporals.format(report.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
+                                <td>
+                                    <a th:href="@{/admin/reports/view/{id}(id=${report.id})}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <form th:if="${report.status != 'processed'}" th:action="@{/admin/reports/process/{id}(id=${report.id})}" method="post" style="display:inline">
+                                        <button type="submit" class="btn btn-success btn-sm"><i class="fas fa-check"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(reports)}">
+                                <td colspan="7" class="text-center text-muted">No reports found.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

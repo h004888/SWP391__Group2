@@ -43,4 +43,10 @@ public interface CourseService {
             int page,
             int size);
 
+    void blockCourse(Long courseId);
+
+    void setPendingBlock(Long courseId);
+
+    Course findById(Long courseId);
+
 }

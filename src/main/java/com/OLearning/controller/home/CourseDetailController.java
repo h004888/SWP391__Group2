@@ -59,12 +59,12 @@ public class CourseDetailController {
             List<CourseReview> children = reviewRepo.findByParentReviewOrderByCreatedAtDesc(parent);
             parent.setChildren(children);
             CommentDTO parentDTO = commentMapper.toDTO(parent);
-            // Nạp children cho DTO (nếu cần hiển thị dạng cây DTO)
+            // Nạp children cho DTO
             if (children != null && !children.isEmpty()) {
                 java.util.List<CommentDTO> childDTOs = new java.util.ArrayList<>();
                 for (CourseReview child : children) {
                     CommentDTO childDTO = commentMapper.toDTO(child);
-                    // Đệ quy nạp children cho childDTO nếu có
+                    // Đệ quy nạp children cho childDTO
                     List<CourseReview> grandChildren = reviewRepo.findByParentReviewOrderByCreatedAtDesc(child);
                     if (grandChildren != null && !grandChildren.isEmpty()) {
                         List<CommentDTO> grandChildDTOs = new java.util.ArrayList<>();
@@ -138,22 +138,18 @@ public class CourseDetailController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "Please login to report a course"));
         }
-        
         User user = userRepo.findByEmail(principal.getName()).orElse(null);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("error", "User not found"));
         }
-        
         dto.setUserId(user.getUserId());
         dto.setCourseId(courseId);
-        
         // Validate reason
         if (dto.getReason() == null || dto.getReason().trim().isEmpty()) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "Please provide a reason for reporting this course"));
         }
-        
         try {
             reportCourseService.report(dto);
             return ResponseEntity.ok(Map.of("success", "Course report submitted successfully. Admin will review it."));
@@ -407,13 +403,11 @@ public class CourseDetailController {
             if (user != null) {
                 dto.setUserId(user.getUserId());
                 dto.setCourseId(courseId);
-                
                 // Validate reason
                 if (dto.getReason() == null || dto.getReason().trim().isEmpty()) {
                     redirect.addFlashAttribute("error", "Please provide a reason for reporting this course");
                     return "redirect:/course/" + courseId;
                 }
-                
                 try {
                     reportCourseService.report(dto);
                     redirect.addFlashAttribute("success", "Course report submitted successfully. Admin will review it.");

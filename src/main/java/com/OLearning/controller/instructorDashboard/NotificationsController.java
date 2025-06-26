@@ -7,8 +7,11 @@ import com.OLearning.entity.Notification;
 import com.OLearning.mapper.comment.CommentMapper;
 import com.OLearning.mapper.notification.NotificationMapper;
 import com.OLearning.repository.CourseReviewRepository;
+import com.OLearning.repository.NotificationRepository;
+import com.OLearning.repository.UserRepository;
 import com.OLearning.security.CustomUserDetails;
 import com.OLearning.service.notification.NotificationService;
+import com.OLearning.service.course.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -36,6 +39,12 @@ public class NotificationsController {
     private CourseReviewRepository courseReviewRepository;
     @Autowired
     private CommentMapper commentMapper;
+    @Autowired
+    private NotificationRepository notificationRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private CourseService courseService;
 
     @GetMapping("/instructordashboard/notifications")
     public String viewNotifications(Authentication authentication, Model model,
@@ -169,5 +178,42 @@ public class NotificationsController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Error loading comment: " + e.getMessage()));
         }
+    }
+
+    @PostMapping("/instructordashboard/courses/reply-block")
+    public String replyBlockCourse(@RequestParam("courseId") Long courseId,
+                                   @RequestParam("notificationId") Long notificationId,
+                                   @RequestParam("replyContent") String replyContent,
+                                   Model model) {
+        // 1. KHÔNG cập nhật notification gốc
+        // 2. Gửi thông báo cho admin với nội dung phản hồi
+        var notificationOpt = notificationRepository.findById(notificationId);
+        if (notificationOpt.isPresent()) {
+            var notification = notificationOpt.get();
+            var admins = userRepository.findByRole_RoleId(1L); // Giả sử roleId=1 là ADMIN
+            for (var admin : admins) {
+                var adminNoti = new com.OLearning.entity.Notification();
+                adminNoti.setUser(admin);
+                adminNoti.setCourse(notification.getCourse());
+                adminNoti.setType("INSTRUCTOR_REPLY_BLOCK");
+                adminNoti.setMessage(replyContent); // Nội dung instructor nhập
+                adminNoti.setStatus("failed");
+                adminNoti.setSentAt(java.time.LocalDateTime.now());
+                notificationRepository.save(adminNoti);
+            }
+        }
+        model.addAttribute("success", "Phản hồi của bạn đã được gửi thành công!");
+        return "redirect:/instructordashboard/notifications";
+    }
+
+    @GetMapping("/instructordashboard/courses/view/{id}")
+    public String viewCourseDetail(Model model, @PathVariable("id") Long id) {
+        var optionalDetail = courseService.getDetailCourse(id);
+        if (optionalDetail.isEmpty()) {
+            return "redirect:/instructordashboard/notifications";
+        }
+        model.addAttribute("detailCourse", optionalDetail.get());
+        model.addAttribute("fragmentContent", "instructorDashboard/fragments/courseDetailContent :: courseDetailContent");
+        return "instructorDashboard/index";
     }
 }

@@ -1,5 +1,3 @@
-
-
 <div th:fragment="adminNotificationDetailContent">
     <style>
         .notification-detail-card {
@@ -101,7 +99,7 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="d-flex gap-3 justify-content-center">
+        <div class="d-flex gap-3 justify-content-center mt-4">
             <!-- Mark as read if unread -->
             <form th:if="${notification.status != 'sent'}"
                   th:action="@{/admin/notifications/mark-read(id=${notification.notificationId})}"
@@ -110,16 +108,16 @@
                     <i class="fas fa-check me-2"></i>Mark as Read
                 </button>
             </form>
-
-            <!-- Review course for report notifications -->
-            <a th:if="${notification.type == 'REPORT_COURSE'}"
-               th:href="@{/admin/course/detail/{courseId}(courseId=${notification.course.courseId})}"
-               class="btn btn-warning">
-                <i class="fas fa-gavel me-2"></i>Review Course
+            
+            <!-- Manage Reports button for REPORT_COURSE and REPORT_COMMENT -->
+            <a th:if="${notification.type == 'REPORT_COURSE' or notification.type == 'REPORT_COMMENT'}"
+               th:href="@{/admin/reports}"
+               class="btn btn-danger">
+                <i class="fas fa-flag me-2"></i>Manage Reports
             </a>
-
-            <!-- View course for other types -->
-            <a th:if="${notification.type != 'COURSE_REJECTION' and notification.type != 'REPORT_COURSE'}"
+            
+            <!-- View Course button for other types -->
+            <a th:if="${notification.type != 'REPORT_COURSE' and notification.type != 'REPORT_COMMENT'}"
                th:href="@{/admin/course/detail/{courseId}(courseId=${notification.course.courseId})}"
                class="btn btn-success">
                 <i class="fas fa-book-open me-2"></i>View Course

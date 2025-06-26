@@ -14,6 +14,8 @@ import com.OLearning.repository.CourseReviewRepository;
 import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.course.CourseService;
 import com.OLearning.service.notification.NotificationService;
+import com.OLearning.service.email.EmailService;
+import jakarta.mail.MessagingException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -44,6 +46,8 @@ public class CourseController {
     private CourseReviewRepository courseReviewRepository;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private EmailService emailService;
 
     @GetMapping
     public String getCoursePage(Model model) {
@@ -135,29 +139,31 @@ public class CourseController {
         try {
             Course course = courseRepository.findById(courseId)
                     .orElseThrow(() -> new RuntimeException("Course not found"));
-            
-            // Khóa course bằng cách set status = "blocked"
-            course.setStatus("blocked");
-            courseRepository.save(course);
-            
-            // Gửi thông báo cho instructor
+            // KHÔNG block ngay, chỉ gửi email cho instructor
             User instructor = course.getInstructor();
             if (instructor != null) {
+                // Gửi notification như cũ
                 Notification notification = new Notification();
                 notification.setUser(instructor);
                 notification.setCourse(course);
-                notification.setMessage("Your course '" + course.getTitle() + "' has been blocked by admin. Reason: " + reason);
+                notification.setMessage("Your course '" + course.getTitle() + "' is under review for blocking by admin. Reason: " + reason + ". Please log in to the system to respond.");
                 notification.setType("COURSE_BLOCKED");
                 notification.setStatus("failed");
                 notification.setSentAt(LocalDateTime.now());
                 notificationRepository.save(notification);
+                // Gửi email cho instructor
+                String subject = "[OLearning] Your course is under review for blocking";
+                String content = "Xin chào " + instructor.getFullName() + ",\n\n" +
+                        "Khóa học '" + course.getTitle() + "' của bạn đang bị xem xét khóa bởi quản trị viên.\n" +
+                        "Lý do: " + reason + "\n" +
+                        "Vui lòng đăng nhập vào hệ thống OLearning để phản hồi hoặc liên hệ bộ phận hỗ trợ nếu có thắc mắc.\n\n" +
+                        "Trân trọng,\nĐội ngũ OLearning";
+                emailService.sendOTP(instructor.getEmail(), subject, content);
             }
-            
-            redirect.addFlashAttribute("success", "Course has been blocked successfully");
+            redirect.addFlashAttribute("success", "Instructor has been notified to respond before blocking the course.");
         } catch (Exception e) {
-            redirect.addFlashAttribute("error", "Failed to block course: " + e.getMessage());
+            redirect.addFlashAttribute("error", "Failed to notify instructor: " + e.getMessage());
         }
-        
         return "redirect:/admin/course/detail/" + courseId;
     }
 
@@ -191,6 +197,31 @@ public class CourseController {
             redirect.addFlashAttribute("error", "Failed to unblock course: " + e.getMessage());
         }
         
+        return "redirect:/admin/course/detail/" + courseId;
+    }
+
+    @PostMapping("/{courseId}/block-confirm")
+    public String blockCourse(@PathVariable("courseId") Long courseId, RedirectAttributes redirectAttributes) {
+        courseService.blockCourse(courseId);
+        redirectAttributes.addFlashAttribute("message", "Khóa học đã bị block!");
+        return "redirect:/admin/course/detail/" + courseId;
+    }
+
+    @PostMapping("/{courseId}/block-cancel")
+    public String cancelBlockCourse(@PathVariable("courseId") Long courseId, RedirectAttributes redirectAttributes) {
+        Course course = courseRepository.findById(courseId)
+            .orElseThrow(() -> new RuntimeException("Course not found"));
+        course.setStatus("approved");
+        courseRepository.save(course);
+
+        redirectAttributes.addFlashAttribute("message", "Đã hủy thao tác block.");
+        return "redirect:/admin/course/detail/" + courseId;
+    }
+
+    @PostMapping("/{courseId}/pending-block")
+    public String setPendingBlock(@PathVariable("courseId") Long courseId, RedirectAttributes redirectAttributes) {
+        courseService.setPendingBlock(courseId);
+        redirectAttributes.addFlashAttribute("message", "Khóa học đã chuyển sang trạng thái chờ block!");
         return "redirect:/admin/course/detail/" + courseId;
     }
 }

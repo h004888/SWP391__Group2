@@ -3,15 +3,19 @@ package com.OLearning.service.report.impl;
 import com.OLearning.dto.report.ReportCommentDTO;
 import com.OLearning.entity.Course;
 import com.OLearning.entity.Notification;
+import com.OLearning.entity.Report;
 import com.OLearning.entity.User;
 import com.OLearning.mapper.report.ReportCommentMapper;
+import com.OLearning.mapper.report.ReportMapper;
 import com.OLearning.repository.CourseRepository;
 import com.OLearning.repository.NotificationRepository;
+import com.OLearning.repository.ReportRepository;
 import com.OLearning.repository.UserRepository;
 import com.OLearning.service.report.ReportCommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -20,7 +24,9 @@ public class ReportCommentServiceImpl implements ReportCommentService {
     private final NotificationRepository notiRepo;
     private final UserRepository userRepo;
     private final CourseRepository courseRepo;
-    private final ReportCommentMapper mapper;
+    private final ReportRepository reportRepo;
+    private final ReportCommentMapper commentMapper;
+    private final ReportMapper reportMapper;
 
     public void report(ReportCommentDTO dto) {
         User user = userRepo.findById(dto.getUserId()).orElseThrow();
@@ -28,7 +34,7 @@ public class ReportCommentServiceImpl implements ReportCommentService {
         // Lấy tất cả admin users (roleId = 1 là admin)
         List<User> adminUsers = userRepo.findByRoleId(1L);
         for (User admin : adminUsers) {
-            Notification noti = mapper.toNotification(dto, user, course);
+            Notification noti = commentMapper.toNotification(dto, user, course);
             noti.setUser(admin);
             noti.setMessage("Report Comment ID " + dto.getCommentId() + " by " + user.getFullName() + " (" + user.getEmail() + ") - Reason: " + dto.getReason());
             noti.setStatus("failed");
@@ -37,6 +43,16 @@ public class ReportCommentServiceImpl implements ReportCommentService {
             noti.setCommentId(dto.getCommentId());
             noti.setCourse(course);
             notiRepo.save(noti);
+            
+            // Lưu report sử dụng mapper
+            Report report = reportMapper.toReportFromCommentReport(dto, course, user, noti);
+            report.setReportType("REPORT_COMMENT");
+            report.setStatus("pending");
+            report.setCreatedAt(LocalDateTime.now());
+            report.setCourse(course);
+            report.setUser(user);
+            report.setContent(dto.getReason());
+            reportRepo.save(report);
         }
     }
 }

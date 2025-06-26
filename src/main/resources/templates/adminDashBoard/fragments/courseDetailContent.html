@@ -34,15 +34,25 @@ Page intro START -->
                         </div>
                         <!-- Nếu đã approved thì hiện Block -->
                         <div th:if="${detailCourse.status == 'approved'}" class="mb-0">
-                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#blockCourseModal">
-                                <i class="fas fa-ban me-2"></i>block course
-                            </button>
+                            <form th:if="${detailCourse.courseId != null}" th:action="@{'/admin/course/'+ ${detailCourse.courseId} +'/pending-block'}" method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-ban me-2"></i>Block Course
+                                </button>
+                            </form>
                         </div>
                         <div th:if="${detailCourse.status == 'blocked'}" class="mb-0">
                             <form th:if="${detailCourse.courseId != null}" th:action="@{'/admin/course/' + ${detailCourse.courseId} + '/unblock'}" method="post" style="display: inline;">
                                 <button type="submit" class="btn btn-success">
                                     <i class="fas fa-unlock me-2"></i>Mở khóa khóa học
                                 </button>
+                            </form>
+                        </div>
+                        <div th:if="${detailCourse.status == 'pending_block'}" class="mb-0">
+                            <form th:if="${detailCourse.courseId != null}" th:action="@{'/admin/course/'+ ${detailCourse.courseId} +'/block-confirm'}" method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-danger"> Comfirm Block </button>
+                            </form>
+                            <form th:if="${detailCourse.courseId != null}" th:action="@{'/admin/course/'+ ${detailCourse.courseId} +'/block-cancel'}" method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-secondary">Cancel block</button>
                             </form>
                         </div>
                     </div>

@@ -1,0 +1,119 @@
+<main th:fragment="courseDetailContent">
+    <!-- =======================
+    Page intro START -->
+    <section class="bg-light py-0 py-sm-5">
+        <div class="container">
+            <div class="row py-5">
+                <div class="col-lg-8">
+                    <!-- Success/Error Message (nếu có) -->
+                    <div th:if="${success}" class="alert alert-success alert-dismissible fade show mb-4 me-auto" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <span th:text="${success}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show mb-4 me-auto" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <span th:text="${error}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    <!-- Badge -->
+                    <h6 class="mb-3 font-base bg-primary text-white py-2 px-4 rounded-2 d-inline-block">
+                        <span th:text="${detailCourse.category.name}">Category</span>
+                    </h6>
+                    <!-- Title -->
+                    <h1 th:text="${detailCourse.title}">Course Title</h1>
+                    <p th:text="${detailCourse.description}">Course Description</p>
+                    <!-- Content -->
+                    <ul class="list-inline mb-0">
+                        <li class="list-inline-item h6 me-3 mb-1 mb-sm-0">
+                            <i class="fas fa-star text-warning me-2"></i>
+                            <span th:text="${detailCourse.totalRatings + '/5.0'}">Rating</span>
+                        </li>
+                        <li class="list-inline-item h6 me-3 mb-1 mb-sm-0">
+                            <i class="fas fa-user-graduate text-orange me-2"></i>
+                            <span th:text="${detailCourse.totalStudentEnrolled + ' Enrolled'}">Enrolled</span>
+                        </li>
+                        <li class="list-inline-item h6 me-3 mb-1 mb-sm-0">
+                            <i class="bi bi-patch-exclamation-fill text-danger me-2"></i>
+                            <span th:text="'Last updated ' + ${#temporals.format(detailCourse.updatedAt, 'MM/yyyy')}">Last updated</span>
+                        </li>
+                        <li class="list-inline-item h6 mb-0">
+                            <i class="fas fa-globe text-info me-2"></i>English
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- =======================
+    Page intro END -->
+
+    <!-- =======================
+    Page content START -->
+    <section class="pb-0 py-lg-5">
+        <div class="container">
+            <div class="row">
+                <!-- Main content START -->
+                <div class="col-lg-8">
+                    <div class="card shadow rounded-2 p-0">
+                        <!-- Tabs START -->
+                        <div class="card-header border-bottom px-4 py-3">
+                            <ul class="nav nav-pills nav-tabs-line py-0" id="course-pills-tab" role="tablist">
+                                <li class="nav-item me-2 me-sm-4" role="presentation">
+                                    <button class="nav-link mb-2 mb-md-0 active" id="course-pills-tab-1"
+                                            data-bs-toggle="pill" data-bs-target="#course-pills-1" type="button" role="tab"
+                                            aria-controls="course-pills-1" aria-selected="true">Overview</button>
+                                </li>
+                                <li class="nav-item me-2 me-sm-4" role="presentation">
+                                    <button class="nav-link mb-2 mb-md-0" id="course-pills-tab-2" data-bs-toggle="pill"
+                                            data-bs-target="#course-pills-2" type="button" role="tab"
+                                            aria-controls="course-pills-2" aria-selected="false">Curriculum</button>
+                                </li>
+                                <li class="nav-item me-2 me-sm-4" role="presentation">
+                                    <button class="nav-link mb-2 mb-md-0" id="course-pills-tab-3" data-bs-toggle="pill"
+                                            data-bs-target="#course-pills-3" type="button" role="tab"
+                                            aria-controls="course-pills-3" aria-selected="false">Instructor</button>
+                                </li>
+                                <li class="nav-item me-2 me-sm-4" role="presentation">
+                                    <button class="nav-link mb-2 mb-md-0" id="course-pills-tab-4" data-bs-toggle="pill"
+                                            data-bs-target="#course-pills-4" type="button" role="tab"
+                                            aria-controls="course-pills-4" aria-selected="false">Reviews</button>
+                                </li>
+                                <li class="nav-item me-2 me-sm-4" role="presentation">
+                                    <button class="nav-link mb-2 mb-md-0" id="course-pills-tab-5" data-bs-toggle="pill"
+                                            data-bs-target="#course-pills-5" type="button" role="tab"
+                                            aria-controls="course-pills-5" aria-selected="false">Report </button>
+                                </li>
+                                <li class="nav-item me-2 me-sm-4" role="presentation">
+                                    <button class="nav-link mb-2 mb-md-0" id="course-pills-tab-6" data-bs-toggle="pill"
+                                            data-bs-target="#course-pills-6" type="button" role="tab"
+                                            aria-controls="course-pills-6" aria-selected="false">Comment</button>
+                                </li>
+                            </ul>
+                        </div>
+                        <!-- Tabs END -->
+                        <!-- Tab contents START -->
+                        <div class="card-body p-4">
+                            <div class="tab-content pt-2" id="course-pills-tabContent">
+                                <!-- Content START -->
+                                <div class="tab-pane fade show active" id="course-pills-1" role="tabpanel"
+                                     aria-labelledby="course-pills-tab-1">
+                                    <!-- Course detail START -->
+                                    <h5 class="mb-3">Course Description</h5>
+                                    <p th:text="${detailCourse.description}"></p>
+                                    <!-- Có thể bổ sung thêm các thông tin khác nếu muốn -->
+                                </div>
+                                <!-- Content END -->
+                                <!-- Các tab khác có thể bổ sung tương tự như admin nếu cần -->
+                            </div>
+                        </div>
+                        <!-- Tab contents END -->
+                    </div>
+                </div>
+                <!-- Main content END -->
+            </div>
+        </div>
+    </section>
+    <!-- =======================
+    Page content END -->
+</main>

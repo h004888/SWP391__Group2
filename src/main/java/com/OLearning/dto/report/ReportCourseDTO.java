@@ -13,4 +13,5 @@ public class ReportCourseDTO {
     private Long courseId;
     private Long userId;
     private String reason;
+    private String reportType;
 }
