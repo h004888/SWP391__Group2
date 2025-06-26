@@ -3,10 +3,12 @@ package com.OLearning.service.courseChapterLesson;
 import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.entity.Chapter;
 import com.OLearning.entity.Course;
+import com.OLearning.entity.Enrollment;
 import com.OLearning.entity.Lesson;
 import com.OLearning.mapper.course.CourseMapper;
 import com.OLearning.repository.CourseRepository;
 import com.OLearning.service.chapter.ChapterService;
+import com.OLearning.service.enrollment.EnrollmentService;
 import com.OLearning.service.lesson.LessonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,8 @@ public class CourseDetailService {
     private ChapterService chapterService;
     @Autowired
     private LessonService lessonService;
+    @Autowired
+    private EnrollmentService enrollmentService;
 
    public CourseDTO findCourseById(Long courseId) {
             Optional<Course> course = courseRepository.findById(courseId);
@@ -45,6 +49,7 @@ public class CourseDetailService {
                 }
                 courseDTO.setTotalLessons(totalLesson);
                 courseDTO.setDuration(totalDuration);
+                courseDTO.setTotalStudentEnrolled(enrollmentService.getTotalEnrollment(courseId));
                 if (course.get().getCategory() != null) {
                     courseDTO.setCategoryName(course.get().getCategory().getName());
                 } else {

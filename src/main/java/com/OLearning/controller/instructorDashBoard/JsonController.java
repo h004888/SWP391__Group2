@@ -16,10 +16,13 @@ import java.util.Map;
 public class JsonController {
     @Autowired
     private UploadFile uploadFile;
+
     @GetMapping("/signed-url")
-    public ResponseEntity<?> getSignedVideoUrl(@RequestParam String publicId) {
-        String a = publicId;
-        String signedUrl = uploadFile.generateSignedVideoUrl(publicId, 300, "video"); // 5 phút
-        return ResponseEntity.ok(Map.of("url", signedUrl));
+    public ResponseEntity<String> getSignedUrl(
+            @RequestParam String publicId,
+            @RequestParam(defaultValue = "video") String resourceType,
+            @RequestParam(defaultValue = "300") int expireSeconds) {
+        String url = uploadFile.generateSignedVideoUrl(publicId, expireSeconds, resourceType);
+        return ResponseEntity.ok(url);
     }
 }

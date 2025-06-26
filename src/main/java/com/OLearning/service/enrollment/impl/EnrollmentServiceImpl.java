@@ -117,6 +117,28 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     @Override
+    public Integer getTotalEnrollment(Long courseId) {
+
+        Integer count = enrollmentRepository.findByCourseId(courseId).size();
+        if(count == null){
+            return 0;
+        }
+        return count;
+    }
+
+    @Override
+    public Page<EnrollmentDTO> getEnrollmentByCourseId(Long courseId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Enrollment> enrollments = enrollmentRepository.findEnrollmentsByCourseId(courseId, pageable);
+        List<EnrollmentDTO> enrollmentDTOList = new ArrayList<>();
+        for (Enrollment enrollment : enrollments.getContent()) {
+            EnrollmentDTO EnrollmentDTO = mapper.MapEnrollmentDTO(enrollment);
+            enrollmentDTOList.add(EnrollmentDTO);
+        }
+        return new PageImpl<>(enrollmentDTOList, pageable, enrollments.getTotalElements());
+    }
+
+    @Override
     public boolean unblockEnrollment(int enrollmentId) {
         Optional<Enrollment> enrollmentOpt = enrollmentRepository.findById(enrollmentId);
 

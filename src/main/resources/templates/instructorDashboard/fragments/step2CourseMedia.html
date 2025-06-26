@@ -5,41 +5,41 @@
 
         <!-- Page Header -->
         <div class="content-card sticky-step-indicator">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h1 class="h3 mb-0">Create New Course</h1>
-                <p class="text-muted">Fill in the details below to create your course</p>
-            </div>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-0">Create New Course</h1>
+                    <p class="text-muted">Fill in the details below to create your course</p>
+                </div>
 
-        </div>
-        <div>
-            <div class="step-indicator">
-                <div class="step completed" data-step="1">
-                    <div class="step-circle">1</div>
-                    <div class="step-label">Basic Info</div>
-                </div>
-                <div class="step active" data-step="2">
-                    <div class="step-circle">2</div>
-                    <div class="step-label">Course Preview</div>
-                </div>
-                <div class="step" data-step="3">
-                    <div class="step-circle">3</div>
-                    <div class="step-label">Course Content</div>
-                </div>
-                <div class="step" data-step="4">
-                    <div class="step-circle">4</div>
-                    <div class="step-label">Preview & Publish</div>
+            </div>
+            <div>
+                <div class="step-indicator">
+                    <div class="step completed" data-step="1">
+                        <div class="step-circle">1</div>
+                        <div class="step-label">Basic Info</div>
+                    </div>
+                    <div class="step active" data-step="2">
+                        <div class="step-circle">2</div>
+                        <div class="step-label">Course Preview</div>
+                    </div>
+                    <div class="step" data-step="3">
+                        <div class="step-circle">3</div>
+                        <div class="step-label">Course Content</div>
+                    </div>
+                    <div class="step" data-step="4">
+                        <div class="step-circle">4</div>
+                        <div class="step-label">Preview & Publish</div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
         <form th:action="@{/instructordashboard/createcourse/coursecontent}" th:object="${coursestep2}" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="courseId" th:value="${courseId}" />
             <input type="hidden" id="imageUrl" th:value="${imageUrl}">
             <input type="hidden" id="videoUrl" th:value="${videoUrl}">
             <div class="row">
-                 <div class="col-lg-12">
+                <div class="col-lg-12">
                     <!-- Title -->
                     <h4>Course media</h4>
                     <hr>
@@ -52,11 +52,11 @@
                                 <div id="imageContainer">
                                     <!-- Default SVG image (will be hidden when preview is shown) -->
                                     <img id="defaultGalleryIcon" th:src="@{/assets/images/element/gallery.svg}" class="h-100px" alt="">
-                                    
+
                                     <!-- Preview image (initially hidden) -->
                                     <img style="max-height: 200px; display: none;" alt="avatar-preview" id="avatarPreview" class="img-fluid rounded">
                                 </div>
-                                
+
                                 <div>
                                     <h6 style="color: #0a58ca" class="my-2">Upload course image</h6>
                                     <label>
@@ -72,16 +72,17 @@
                         <!-- Upload video START -->
                         <div class="col-md-6">
                             <div class="text-center justify-content-center align-items-center p-4 p-sm-5 border border-2 border-dashed position-relative rounded-3 h-100">
-                                <div id="videoContainer">
+                                <div id="videoContainer"
+                                     th:attr="data-publicid=${course != null and course.videoUrlPreview != null ? course.videoUrlPreview : ''}">
                                     <!-- Default video icon -->
                                     <i class="bi bi-film" style="font-size: 3rem; color: #6c757d;"></i>
-                                    
+
                                     <!-- Video preview (initially hidden) -->
                                     <div id="videoPreviewContainer" style="display: none;" class="mt-3 text-center">
                                         <video id="videoPreview" style="width: 100%; max-width: 400px; height: auto;" controls class="mx-auto"></video>
                                     </div>
                                 </div>
-                                
+
                                 <div>
                                     <h6 style="color: #0a58ca" class="my-2">Upload course video</h6>
                                     <div class="input-group">
@@ -120,33 +121,52 @@
                                 }
                             });
 
-                            // Xử lý preview video
-                            const videoUrl = $("#videoUrl").val();
-                            if (videoUrl) {
-                                $("#videoPreview").attr("src", videoUrl);
-                                $("#videoPreviewContainer").show();
-                                $(".bi-film").hide();
-                            } else if (sessionStorage.getItem("videoPreview")) {
-                                $("#videoPreview").attr("src", sessionStorage.getItem("videoPreview"));
-                                $("#videoPreviewContainer").show();
-                                $(".bi-film").hide();
+                            let videoRefreshInterval = null;
+
+                            function showVideoPreviewFromServer(publicId) {
+                                if (!publicId) return;
+                                function refreshSignedUrl() {
+                                    fetch('/api/video/signed-url?publicId=' + encodeURIComponent(publicId))
+                                        .then(res => res.text())
+                                        .then(url => {
+                                            $("#videoPreview").attr("src", url);
+                                            $("#videoPreviewContainer").show();
+                                            $("#videoContainer .bi-film").hide();
+                                        });
+                                }
+                                refreshSignedUrl();
+                                if (videoRefreshInterval) clearInterval(videoRefreshInterval);
+                                videoRefreshInterval = setInterval(refreshSignedUrl, 4 * 60 * 1000);
                             }
 
+                            function showVideoPreviewFromLocal(file) {
+                                if (videoRefreshInterval) {
+                                    clearInterval(videoRefreshInterval);
+                                    videoRefreshInterval = null;
+                                }
+                                const url = URL.createObjectURL(file);
+                                $("#videoPreview").attr("src", url);
+                                $("#videoPreviewContainer").show();
+                                $("#videoContainer .bi-film").hide();
+                            }
+
+                            // Khi chọn file mới từ máy tính
                             $("#videoFile").change(function (e) {
                                 const file = e.target.files[0];
                                 if (file) {
-                                    const url = URL.createObjectURL(file);
-                                    $("#videoPreview").attr("src", url);
-                                    $("#videoPreviewContainer").show();
-                                    $(".bi-film").hide();
-                                    sessionStorage.setItem("videoPreview", url);
+                                    showVideoPreviewFromLocal(file);
                                 } else {
                                     $("#videoPreviewContainer").hide();
                                     $("#videoPreview").attr("src", "");
-                                    $(".bi-film").show();
-                                    sessionStorage.removeItem("videoPreview");
+                                    $("#videoContainer .bi-film").show();
                                 }
                             });
+
+                            // Khi quay lại step này (next/previous), nếu có publicId thì show preview từ server
+                            var publicId = $("#videoContainer").data("publicid");
+                            if (publicId && publicId !== 'null' && publicId !== '') {
+                                showVideoPreviewFromServer(publicId);
+                            }
                         });
                     </script>
                 </div>
@@ -369,7 +389,7 @@
             border-bottom: 1px solid #dee2e6;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-        
+
         /* Style cho sticky navigation buttons */
         .content-card.sticky-navigation-buttons {
             position: sticky;

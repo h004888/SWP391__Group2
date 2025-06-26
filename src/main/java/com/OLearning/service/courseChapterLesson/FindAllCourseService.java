@@ -7,6 +7,7 @@ import com.OLearning.entity.Lesson;
 import com.OLearning.mapper.course.CourseMapper;
 import com.OLearning.repository.CourseRepository;
 import com.OLearning.service.chapter.ChapterService;
+import com.OLearning.service.enrollment.EnrollmentService;
 import com.OLearning.service.lesson.LessonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -28,6 +29,8 @@ public class FindAllCourseService {
     private ChapterService chapterService;
     @Autowired
     private LessonService lessonService;
+    @Autowired
+    private EnrollmentService enrollmentService;
     public Page<CourseDTO> findCourseByUserId(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Course> coursePage = courseRepository.findByInstructorUserId(userId, pageable);//Page<Course> la doi tuong chua ca danh sach khoa hoc
@@ -50,6 +53,7 @@ public class FindAllCourseService {
             }
             courseDTO.setTotalLessons(totalLesson);
             courseDTO.setDuration(totalDuration);
+            courseDTO.setTotalStudentEnrolled(enrollmentService.getTotalEnrollment(courseDTO.getCourseId()));
             if (course.getCategory() != null) {
                 courseDTO.setCategoryName(course.getCategory().getName());
             } else {

@@ -26,6 +26,9 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
     @Query("SELECT e.course FROM Enrollment e WHERE e.user.userId = :userId")
     List<Course> findCoursesByUserId(Long userId);
 
+    @Query("SELECT e FROM Enrollment e WHERE e.course.courseId = :courseId")
+    List<Enrollment> findByCourseId(@Param("courseId") Long courseId);
+
     @Query(value = "SELECT c.name as category, COUNT(e.enrollmentID) as count " +
             "FROM enrollments e " +
             "JOIN courses co ON e.courseId = co.courseId " +
@@ -47,6 +50,10 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
     //query lấy tất cả enrolled by Id
     @Query("SELECT e FROM Enrollment e WHERE e.course.instructor.userId = :userId")
     Page<Enrollment> findEnrollmentsByInstructorId(@Param("userId") Long userId, Pageable pageable);
+    //query lấy all enrollment by courseId
+    @Query("SELECT e FROM Enrollment e WHERE e.course.courseId = :courseId")
+    Page<Enrollment> findEnrollmentsByCourseId(@Param("courseId") Long courseId, Pageable pageable);
+
     @Query("SELECT e FROM Enrollment e WHERE e.enrollmentId = :enrollmentId")
     Optional<Enrollment> findByEnrollmentId(int enrollmentId);
 

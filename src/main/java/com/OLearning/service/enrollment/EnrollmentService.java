@@ -25,4 +25,7 @@ public interface EnrollmentService {
 
     boolean blockEnrollment(int enrollmentId);
     EnrollmentDTO getRequestById(int enrollmentId);
+
+    Integer getTotalEnrollment(Long courseId);
+    Page<EnrollmentDTO> getEnrollmentByCourseId(Long courseId, int page, int size);
 }

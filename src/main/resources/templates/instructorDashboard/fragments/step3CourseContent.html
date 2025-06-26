@@ -43,9 +43,9 @@
                     <i class="bi bi-plus me-1"></i> Add Chapter
                 </button>
                 <form th:action="@{/instructordashboard/createcourse/autofillchapter}" method="post" id="autoFillChapterForm">
-                <button type="button" class="btn btn-primary mb-3" onclick="confirmAutoFillChapter()">
-                    <i class="bi bi-arrow-repeat me-1"></i> Fill Order Number Of Chapter
-                </button>
+                    <button type="button" class="btn btn-primary mb-3" onclick="confirmAutoFillChapter()">
+                        <i class="bi bi-arrow-repeat me-1"></i> Fill Order Number Of Chapter
+                    </button>
                 </form>
                 <script>
                     function confirmAutoFillChapter() {
@@ -116,18 +116,18 @@
                             <div>
                                 <a th:href="'#collapseChapter' + ${chapter.chapterId}" data-bs-toggle="collapse"
                                    th:attr="aria-controls='collapseChapter' + ${chapter.chapterId}" aria-expanded="false"
-                                   style="text-decoration:none;" onclick="toggleCollapse(this)">
+                                   style="text-decoration:none;">
                                     <h4 class="mb-1" th:text="'Chapter ' + ${chapter.orderNumber} + ': ' + ${chapter.title}"></h4>
                                 </a>
                                 <p class="text-muted mb-0" th:text="${chapter.description}"></p>
                             </div>
                             <div class="d-flex align-items-center gap-2 mb-3">
-<!--                                auto fill-->
+                                <!--                                auto fill-->
                                 <form th:action="@{/instructordashboard/createcourse/autofilllesson}" method="post" th:id="'autoFillLessonForm' + ${chapter.chapterId}">
                                     <input type="hidden" name="chapterId" th:value="${chapter.chapterId}" />
-                                <button type="button" class="btn btn-sm btn-primary" th:onclick="'confirmAutoFillLesson(' + ${chapter.chapterId} + ')'">
-                                    <i class="bi bi-arrow-repeat me-1"></i> Fill Order Number Of Lesson
-                                </button>
+                                    <button type="button" class="btn btn-sm btn-primary" th:onclick="'confirmAutoFillLesson(' + ${chapter.chapterId} + ')'">
+                                        <i class="bi bi-arrow-repeat me-1"></i> Fill Order Number Of Lesson
+                                    </button>
                                 </form>
                                 <script>
                                     function confirmAutoFillLesson(chapterId) {
@@ -202,11 +202,27 @@
                             <div th:id="'lessonsList' + ${chapter.chapterId}" th:if="${chapter.lessons != null}">
                                 <!-- Quiz Form - Initially Hidden -->
                                 <!-- Lesson 1 -->
-                                <div class="lesson-item mb-3" th:each="lesson : ${chapter.lessons}">
+                                <div class="lesson-item mb-3" th:each="lesson : ${chapter.lessons}"
+                                     th:attr="data-videoid=${lesson.video != null ? lesson.video.videoUrl : null},
+                                              data-quizid=${lesson.quiz != null ? lesson.quiz.id : null}"
+                                     style="cursor:pointer;">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <div>
                                             <h6 class="mb-1">
-                                                <span th:text="'Lesson ' + ${lesson.orderNumber} + ': ' + ${lesson.title}"></span>
+                                                <a href="javascript:void(0)"
+                                                   class="lesson-title-link"
+                                                   th:if="${lesson.video != null and lesson.video.videoUrl != null}"
+                                                   th:attr="data-videoid=${lesson.video.videoUrl}"
+                                                   onclick="handleLessonClick(event, this)">
+                                                    <span th:text="'Lesson ' + ${lesson.orderNumber} + ': ' + ${lesson.title}"></span>
+                                                </a>
+                                                <a href="javascript:void(0)"
+                                                   class="lesson-title-link"
+                                                   th:if="${lesson.quiz != null}"
+                                                   th:attr="data-quizid=${lesson.quiz.id}"
+                                                   onclick="handleLessonClick(event, this)">
+                                                    <span th:text="'Lesson ' + ${lesson.orderNumber} + ': ' + ${lesson.title}"></span>
+                                                </a>
                                                 <span th:if="${lesson.isFree}" class="badge bg-success ms-2">Free</span>
                                                 <span th:if="${!lesson.isFree}" class="badge bg-danger ms-2">Premium</span>
                                             </h6>
@@ -415,8 +431,6 @@
                                                     <label class="form-label">Time Limit (minutes)</label>
                                                     <input type="number" name="timeLimit" class="form-control"  min="1" required>
                                                 </div>
-
-                                                <h5 class="mt-4 mb-3">Quiz Questions</h5>
 
                                                 <!-- Quiz List -->
                                                 <div class="quiz-list mb-3">
@@ -874,20 +888,16 @@
         </script>
     </div>
     <!-- Video Modal -->
-    <div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="videoModalLabel" aria-hidden="true">
+    <div class="modal fade" id="videoModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="videoModalLabel">Lesson Video</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="stopVideo()"></button>
+            <div class="modal-content bg-dark border-0 rounded-4">
+                <div class="modal-header border-0 pb-0" style="background: transparent;">
+                    <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
                 </div>
-                <div class="modal-body d-flex justify-content-center">
-                    <div style="width: 100%; max-width: 800px; aspect-ratio: 16/9;">
-                        <video id="lessonVideo" controls class="w-100 rounded">
-                            <source id="videoSource" src="" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                    </div>
+                <div class="modal-body p-0 d-flex justify-content-center align-items-center" style="min-height: 400px;">
+                    <video id="dynamicVideo" controls style="width:100%; border-radius: 0 0 1rem 1rem; background:#000;">
+                        Your browser does not support the video tag.
+                    </video>
                 </div>
             </div>
         </div>
@@ -927,25 +937,25 @@
     </div>
     <script>
         function playVideo(element) {
-            const videoId = element.getAttribute('data-videoid');
-            const videoSource = document.getElementById('videoSource');
-            const video = document.getElementById('lessonVideo');
-
-            // Set the video source
-            videoSource.src = videoId;
-            video.load(); // Reload the video element
-
-            // Show the modal
-            const videoModal = new bootstrap.Modal(document.getElementById('videoModal'));
-            videoModal.show();
+            var publicId = element.getAttribute('data-videoid');
+            if (!publicId) return;
+            fetch('/api/video/signed-url?publicId=' + encodeURIComponent(publicId))
+                .then(response => response.text())
+                .then(url => {
+                    var video = document.getElementById('dynamicVideo');
+                    video.src = url;
+                    var modal = new bootstrap.Modal(document.getElementById('videoModal'));
+                    modal.show();
+                    video.play();
+                });
         }
 
-        function stopVideo() {
-            const video = document.getElementById('lessonVideo');
+        document.getElementById('videoModal').addEventListener('hidden.bs.modal', function () {
+            var video = document.getElementById('dynamicVideo');
             video.pause();
             video.currentTime = 0;
-        }
-        // Show quiz modal
+            video.src = "";
+        });
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -1074,6 +1084,7 @@
                     <form id="updateLessonForm" th:action="@{/instructordashboard/createcourse/updatelesson}" method="post" enctype="multipart/form-data">
                         <input type="hidden" name="lessonId" id="lessonModalId">
                         <input type="hidden" name="contentType" id="lessonModalContentType">
+                        <input type="hidden" id="editVideoUrlHidden" value="">
 
                         <div class="mb-3">
                             <label for="lessonModalTitle" class="form-label">Title</label>
@@ -1297,43 +1308,44 @@
             document.getElementById('lessonModalIsFree').checked = isFree;
             document.getElementById('lessonModalContentType').value = contentType || 'basic';
 
-            // Chọn loại form dựa vào content type
             const editLessonType = document.getElementById('editLessonType');
             if (contentType === 'video') {
                 editLessonType.value = 'video';
-
-                // Hiển thị video hiện tại nếu có
                 if (videoUrl) {
-                    document.getElementById('currentVideoSource').src = videoUrl;
-                    document.getElementById('currentLessonVideo').load();
-                    document.getElementById('currentVideoContainer').classList.remove('d-none');
+                    // --- Hàm lấy signed URL và set vào video preview ---
+                    function refreshSignedUrl() {
+                        fetch('/api/video/signed-url?publicId=' + encodeURIComponent(videoUrl))
+                            .then(response => response.text())
+                            .then(url => {
+                                document.getElementById('currentVideoSource').src = url;
+                                document.getElementById('currentLessonVideo').load();
+                                document.getElementById('currentVideoContainer').classList.remove('d-none');
+                            });
+                    }
+                    // Lấy URL lần đầu
+                    refreshSignedUrl();
+                    // Nếu đã có interval cũ thì clear
+                    if (currentVideoRefreshInterval) clearInterval(currentVideoRefreshInterval);
+                    // Đặt interval refresh mỗi 4 phút
+                    currentVideoRefreshInterval = setInterval(refreshSignedUrl, 4 * 60 * 1000);
                 } else {
                     document.getElementById('currentVideoContainer').classList.add('d-none');
+                    if (currentVideoRefreshInterval) clearInterval(currentVideoRefreshInterval);
                 }
-
-                // Điền duration
                 document.getElementById('editVideoDuration').value = duration || '';
-
             } else if (contentType === 'quiz') {
                 editLessonType.value = 'quiz';
-
-                // Điền thông tin quiz
                 document.getElementById('editQuizId').value = quizId || '';
                 document.getElementById('editQuizTitle').value = quizTitle || '';
                 document.getElementById('editQuizDescription').value = quizDescription || '';
                 document.getElementById('editQuizTimeLimit').value = quizTimeLimit || '';
-
-                // Tải các câu hỏi quiz nếu có
                 loadQuizQuestions(lessonId);
-
+                if (currentVideoRefreshInterval) clearInterval(currentVideoRefreshInterval);
             } else {
                 editLessonType.value = 'basic';
+                if (currentVideoRefreshInterval) clearInterval(currentVideoRefreshInterval);
             }
-
-            // Hiển thị section tương ứng
             changeEditLessonType();
-
-            // Mở modal
             try {
                 const modal = new bootstrap.Modal(document.getElementById('updateLessonModal'));
                 modal.show();
@@ -1341,6 +1353,10 @@
                 console.error("Error showing modal:", e);
                 alert("Could not open edit form. Please check console for errors.");
             }
+
+            // Lưu videoUrl vào input ẩn để dùng lại khi chuyển type
+            let videoUrlInput = document.getElementById('editVideoUrlHidden');
+            if (videoUrlInput) videoUrlInput.value = videoUrl || '';
         }
 
         // Hàm thay đổi loại form khi chọn loại lesson khác
@@ -1353,11 +1369,26 @@
                 section.classList.add('d-none');
             });
 
-            // Hiển thị section tương ứng
+            // Lấy videoUrl từ input ẩn (nếu có)
+            let videoUrl = '';
+            const videoUrlInput = document.getElementById('editVideoUrlHidden');
+            if (videoUrlInput) {
+                videoUrl = videoUrlInput.value;
+            }
+
             if (selectedType === 'video') {
                 document.getElementById('videoEditSection').classList.remove('d-none');
+                // Nếu có videoUrl thì show current video, không thì ẩn
+                if (videoUrl) {
+                    document.getElementById('currentVideoContainer').classList.remove('d-none');
+                } else {
+                    document.getElementById('currentVideoContainer').classList.add('d-none');
+                }
             } else if (selectedType === 'quiz') {
                 document.getElementById('quizEditSection').classList.remove('d-none');
+                document.getElementById('currentVideoContainer').classList.add('d-none');
+            } else {
+                document.getElementById('currentVideoContainer').classList.add('d-none');
             }
         }
 
@@ -1459,6 +1490,120 @@
                     document.body.style.paddingRight = '';
                 });
             });
+        });
+    </script>
+    <script>
+        function handleLessonClick(event, element) {
+            event.stopPropagation();
+            var videoId = element.getAttribute('data-videoid');
+            var quizId = element.getAttribute('data-quizid');
+            if (videoId) {
+                // Phát video
+                fetch('/api/video/signed-url?publicId=' + encodeURIComponent(videoId))
+                    .then(response => response.text())
+                    .then(url => {
+                        var video = document.getElementById('dynamicVideo');
+                        video.src = url;
+                        var modal = new bootstrap.Modal(document.getElementById('videoModal'));
+                        modal.show();
+                        video.play();
+                    });
+            } else if (quizId) {
+                // Mở modal quiz
+                var modal = new bootstrap.Modal(document.getElementById('quizModal' + quizId));
+                modal.show();
+            }
+        }
+    </script>
+    <script>
+        // --- Thêm biến interval cho refresh signed URL ---
+        let currentVideoRefreshInterval = null;
+
+        // --- Sửa trong prepareEditLesson: ---
+        function prepareEditLesson(button) {
+            // ... code cũ ...
+            const lessonId = button.getAttribute('data-lesson-id');
+            const title = button.getAttribute('data-title');
+            const description = button.getAttribute('data-description');
+            const orderNumber = button.getAttribute('data-order-number');
+            const isFree = button.getAttribute('data-is-free') === 'true';
+            const contentType = button.getAttribute('data-content-type');
+            const videoUrl = button.getAttribute('data-video-url');
+            const duration = button.getAttribute('data-duration');
+            const quizId = button.getAttribute('data-quiz-id');
+            const quizTitle = button.getAttribute('data-quiz-title');
+            const quizDescription = button.getAttribute('data-quiz-description');
+            const quizTimeLimit = button.getAttribute('data-quiz-time-limit');
+
+            // ... code cũ ...
+            document.getElementById('lessonModalId').value = lessonId;
+            document.getElementById('lessonModalTitle').value = title;
+            document.getElementById('lessonModalDescription').value = description;
+            document.getElementById('lessonModalOrderNumber').value = orderNumber;
+            document.getElementById('lessonModalIsFree').checked = isFree;
+            document.getElementById('lessonModalContentType').value = contentType || 'basic';
+
+            const editLessonType = document.getElementById('editLessonType');
+            if (contentType === 'video') {
+                editLessonType.value = 'video';
+                if (videoUrl) {
+                    // --- Hàm lấy signed URL và set vào video preview ---
+                    function refreshSignedUrl() {
+                        fetch('/api/video/signed-url?publicId=' + encodeURIComponent(videoUrl))
+                            .then(response => response.text())
+                            .then(url => {
+                                document.getElementById('currentVideoSource').src = url;
+                                document.getElementById('currentLessonVideo').load();
+                                document.getElementById('currentVideoContainer').classList.remove('d-none');
+                            });
+                    }
+                    // Lấy URL lần đầu
+                    refreshSignedUrl();
+                    // Nếu đã có interval cũ thì clear
+                    if (currentVideoRefreshInterval) clearInterval(currentVideoRefreshInterval);
+                    // Đặt interval refresh mỗi 4 phút
+                    currentVideoRefreshInterval = setInterval(refreshSignedUrl, 4 * 60 * 1000);
+                } else {
+                    document.getElementById('currentVideoContainer').classList.add('d-none');
+                    if (currentVideoRefreshInterval) clearInterval(currentVideoRefreshInterval);
+                }
+                document.getElementById('editVideoDuration').value = duration || '';
+            } else if (contentType === 'quiz') {
+                editLessonType.value = 'quiz';
+                document.getElementById('editQuizId').value = quizId || '';
+                document.getElementById('editQuizTitle').value = quizTitle || '';
+                document.getElementById('editQuizDescription').value = quizDescription || '';
+                document.getElementById('editQuizTimeLimit').value = quizTimeLimit || '';
+                loadQuizQuestions(lessonId);
+                if (currentVideoRefreshInterval) clearInterval(currentVideoRefreshInterval);
+            } else {
+                editLessonType.value = 'basic';
+                if (currentVideoRefreshInterval) clearInterval(currentVideoRefreshInterval);
+            }
+            changeEditLessonType();
+            try {
+                const modal = new bootstrap.Modal(document.getElementById('updateLessonModal'));
+                modal.show();
+            } catch (e) {
+                console.error("Error showing modal:", e);
+                alert("Could not open edit form. Please check console for errors.");
+            }
+
+            // Lưu videoUrl vào input ẩn để dùng lại khi chuyển type
+            let videoUrlInput = document.getElementById('editVideoUrlHidden');
+            if (videoUrlInput) videoUrlInput.value = videoUrl || '';
+        }
+        // --- Clear interval khi đóng modal ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const updateLessonModal = document.getElementById('updateLessonModal');
+            if (updateLessonModal) {
+                updateLessonModal.addEventListener('hidden.bs.modal', function() {
+                    if (currentVideoRefreshInterval) {
+                        clearInterval(currentVideoRefreshInterval);
+                        currentVideoRefreshInterval = null;
+                    }
+                });
+            }
         });
     </script>
 </div>

@@ -19,7 +19,7 @@
                     <div class="d-flex align-items-center">
                         <div class="me-4">
                             <i class="bi bi-people-fill me-1"></i>
-                            <span>0 students enrolled</span>
+                            <span th:text="${course.totalStudentEnrolled} + ' student enrolled'"></span>
                         </div>
                         <div>
                             <i class="fas fa-signal text-success me-1"></i>
@@ -29,7 +29,7 @@
                 </div>
                 <div class="col-md-4">
                     <img th:src="@{${course.courseImg}}" width="200" height="160" style="object-fit: contain;"
-                        alt="Course Image" class="course-image">
+                         alt="Course Image" class="course-image">
                 </div>
             </div>
         </div>
@@ -51,9 +51,9 @@
                         <i class="bi bi-clock fs-1"></i>
                     </div>
                     <div class="stat-value fw-bold fs-4 mb-2">
-                        <span th:if="${(course.duration ?: 0) < 60}" th:text="${(course.duration ?: 0) + 'm'}"></span>
-                        <span th:unless="${(course.duration ?: 0) < 60}"
-                            th:text="${((course.duration ?: 0) / 60) + 'h' + ((course.duration ?: 0) % 60) + 'm'}"></span>
+                  <span th:if="${(course.duration ?: 0) < 60}" th:text="${(course.duration ?: 0) + 'm'}"></span>
+                    <span th:unless="${(course.duration ?: 0) < 60}"
+                  th:text="${((course.duration ?: 0) / 60) + 'h' + ((course.duration ?: 0) % 60) + 'm'}"></span>
                     </div>
                     <div class="stat-label text-muted">Total Duration</div>
                 </div>
@@ -63,7 +63,7 @@
                     <div class="stat-icon text-primary mb-3">
                         <i class="bi bi-collection-play fs-1"></i>
                     </div>
-                    <div class="stat-value fw-bold fs-4 mb-2" th:utext="${course.totalLessons}"></div>
+                                        <div class="stat-value fw-bold fs-4 mb-2" th:utext="${course.totalLessons}"></div>
                     <div class="stat-label text-muted">Total Lessons</div>
                 </div>
             </div>
@@ -74,25 +74,25 @@
             <ul class="nav nav-tabs nav-fill border-0" id="courseTab" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active py-3" id="overview-tab" data-bs-toggle="tab"
-                        data-bs-target="#overview" type="button" role="tab">
+                            data-bs-target="#overview" type="button" role="tab">
                         <i class="bi bi-info-circle me-2"></i>Overview
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link py-3" id="lessons-tab" data-bs-toggle="tab" data-bs-target="#lessons"
-                        type="button" role="tab">
+                            type="button" role="tab">
                         <i class="bi bi-collection-play me-2"></i>Lessons
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link py-3" id="enrollments-tab" data-bs-toggle="tab"
-                        data-bs-target="#enrollments" type="button" role="tab">
+                            data-bs-target="#enrollments" type="button" role="tab">
                         <i class="bi bi-people me-2"></i>Enrollments
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link py-3" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews"
-                        type="button" role="tab">
+                            type="button" role="tab">
                         <i class="bi bi-star me-2"></i>Reviews
                     </button>
                 </li>
@@ -105,48 +105,18 @@
                         <div class="col-lg-8">
                             <div class="content-card bg-white rounded-4 shadow-sm p-4 mb-4">
                                 <h3 class="mb-4">Course Description</h3>
-                                <p class="text-muted" th:utext="${course.description}"></p>
-
-                                <h4 class="mt-4 mb-3">What You'll Learn</h4>
-                                <ul class="list-unstyled">
-                                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>React
-                                        fundamentals including JSX, components, and props</li>
-                                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>State
-                                        management with hooks and context API</li>
-                                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Routing
-                                        with React Router</li>
-                                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Form
-                                        handling and validation</li>
-                                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>API
-                                        integration and data fetching</li>
-                                </ul>
-
-                                <h4 class="mt-4 mb-3">Requirements</h4>
-                                <ul class="list-unstyled">
-                                    <li class="mb-2"><i class="bi bi-dot me-2"></i>Basic knowledge of HTML, CSS, and
-                                        JavaScript</li>
-                                    <li class="mb-2"><i class="bi bi-dot me-2"></i>Understanding of ES6+ features</li>
-                                    <li class="mb-2"><i class="bi bi-dot me-2"></i>No prior React experience required
-                                    </li>
-                                </ul>
+                                <p class="text-muted" th:text="${course.description}"></p>
                             </div>
 
                             <div class="content-card bg-white rounded-4 shadow-sm p-4">
                                 <h3 class="mb-4">Instructor</h3>
                                 <div class="d-flex align-items-start">
-                                    <img src="https://via.placeholder.com/100" alt="Instructor"
-                                        class="rounded-circle me-3">
+                                    <img th:src="${instructor.profilePicture != null ? instructor.profilePicture : 'https://res.cloudinary.com/dmwo4yrsq/image/upload/son-tung-m-tp-1_vodsiz.jpg?_a=DAGAACAVZAA0'}" alt="Instructor"
+                                         class="rounded-circle me-3">
                                     <div>
                                         <h5 class="mb-2" th:utext="${instructor.username}"></h5>
-                                        <p class="text-muted mb-3">Senior Frontend Developer & Educator</p>
-                                        <p class="mb-3">John is a seasoned web developer with over 10 years of
-                                            experience in frontend development. He has worked with companies like
-                                            Google, Facebook, and Amazon, and has been teaching web development for the
-                                            past 5 years.</p>
+    
                                         <div class="d-flex">
-                                            <a href="#" class="btn btn-outline-primary me-2">
-                                                <i class="bi bi-envelope me-1"></i> Contact
-                                            </a>
                                             <a href="#" class="btn btn-outline-secondary">
                                                 <i class="bi bi-person me-1"></i> View Profile
                                             </a>
@@ -158,64 +128,63 @@
 
                         <div class="col-lg-4">
                             <div class="card border-0 shadow-sm h-100">
-                                <div class="position-relative">
-                                    <div class="ratio ratio-16x9 position-relative" style="max-width: 600px;">
-                                        <!-- Poster + Play button -->
-                                        <div id="videoPoster" class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background: #000;">
-                                            <img src="https://via.placeholder.com/600x338?text=Course+Preview" alt="Poster" class="w-100 h-100" style="object-fit: cover; opacity: 0.7;">
-                                            <button id="playBtn" th:data-publicid="${course.videoUrlPreview}" class="btn btn-light position-absolute" style="font-size: 3rem; border-radius: 50%; padding: 0.5em 0.7em;">
-                                                ▶
-                                            </button>
-                                        </div>
-                                        <!-- Video player (ẩn ban đầu) -->
-                                        <video id="myVideo" controls class="w-100 rounded-top d-none">
-                                            Your browser does not support the video tag.
-                                        </video>
-                                    </div>
+                                <h5 class="card-title mb-4 ps-3">Video Preview</h5>
+                                <div class="overflow-hidden rounded-3 position-relative" style="width:100%;">
+                                    <video id="previewVideo" class="card-img" style="width:100%; object-fit:cover; background:#000;" muted playsinline></video>
+                                    <!-- Overlay Play button center -->
+                                    <button
+                                        type="button"
+                                        class="btn btn-lg text-danger btn-round btn-white-shadow mb-0 position-absolute top-50 start-50 translate-middle"
+                                        id="playVideoBtn"
+                                        th:attr="data-publicid=${course.videoUrlPreview}"
+                                        style="background:rgba(255,255,255,0.85); border-radius:50%; width:64px; height:64px; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.2); z-index:2;"
+                                    >
+                                        <i class="fas fa-play" style="font-size:2rem;"></i>
+                                    </button>
                                 </div>
 
                                 <div class="card-body">
                                     <h5 class="card-title mb-4">Course Details</h5>
                                     <div class="list-group list-group-flush">
                                         <div
-                                            class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                                                class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
                                             <span><i class="bi bi-tag me-2"></i> Category</span>
                                             <span class="badge bg-light text-dark"
-                                                th:utext="${course.categoryName}"></span>
+                                                  th:utext="${course.categoryName}"></span>
                                         </div>
                                         <div
-                                            class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                                                class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
                                             <span><i class="fas fa-signal me-2"></i> Skill Level</span>
                                             <span class="badge bg-light text-dark"
-                                                th:utext="${course.courseLevel}"></span>
+                                                  th:utext="${course.courseLevel}"></span>
                                         </div>
                                         <div
-                                            class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                                                class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
                                             <span><i class="bi bi-clock me-2"></i> Duration</span>
                                             <span class="badge bg-light text-dark">
                                                 <span th:if="${(course.duration ?: 0) < 60}"
-                                                    th:text="${(course.duration ?: 0) + 'm'}"></span>
-                                                <span th:unless="${(course.duration ?: 0) < 60}"
-                                                    th:text="${((course.duration ?: 0) / 60) + 'h' + ((course.duration ?: 0) % 60) + 'm'}"></span>
+                                                                                                    th:text="${(course.duration ?: 0) + 'm'}"></span>
+                                                                                                <span th:unless="${(course.duration ?: 0) < 60}"
+                                                                                                    th:text="${((course.duration ?: 0) / 60) + 'h' + ((course.duration ?: 0) % 60) + 'm'}"></span>
                                             </span>
                                         </div>
                                         <div
-                                            class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                                                class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
                                             <span><i class="bi bi-collection-play me-2"></i> Lessons</span>
-                                            <span class="badge bg-light text-dark" th:utext="${course.totalLessons ?: 0}"></span>
+                                         <span class="badge bg-light text-dark" th:utext="${course.totalLessons ?: 0}"></span>
                                         </div>
                                         <div
-                                            class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                                                class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
                                             <span><i class="bi bi-star me-2"></i> Rating</span>
-                                            <span class="badge bg-light text-dark">4.5/5</span>
+                                            <span class="badge bg-light text-dark">course not public</span>
                                         </div>
                                         <div
-                                            class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                                                class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
                                             <span><i class="bi bi-people me-2"></i> Students</span>
-                                            <span class="badge bg-light text-dark">256</span>
+                                            <span class="badge bg-light text-dark" th:text="${course.totalStudentEnrolled}"></span>
                                         </div>
                                         <div
-                                            class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                                                class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
                                             <span><i class="bi bi-currency-dollar me-2"></i> Price</span>
                                             <span class="badge bg-light text-dark" th:utext="${course.price}"></span>
                                         </div>
@@ -238,31 +207,25 @@
                                 <div class="accordion-item border-0 mb-3" th:each="chapter : ${chapters}">
                                     <h2 class="accordion-header">
                                         <button class="accordion-button bg-light rounded-3" type="button"
-                                            data-bs-toggle="collapse" th:data-bs-target="${'#section' + chapter.chapterId}">
+                                                data-bs-toggle="collapse" th:data-bs-target="${'#section' + chapter.chapterId}">
                                             <i class="bi bi-collection me-2"></i>
                                             <span th:text="${chapter.title}"></span>
                                         </button>
                                     </h2>
 
                                     <div th:id="${'section' + chapter.chapterId}" class="accordion-collapse collapse show"
-                                        data-bs-parent="#lessonsAccordion">
+                                         data-bs-parent="#lessonsAccordion">
                                         <div class="accordion-body p-0" th:if="${chapter.lessons != null}">
                                             <div class="list-group list-group-flush">
                                                 <div class="list-group-item border-0 p-3"
-                                                    th:each="lesson : ${chapter.lessons}">
+                                                     th:each="lesson : ${chapter.lessons}"
+                                                     th:attr="data-videoid=${lesson.contentType == 'video' && lesson.video != null ? lesson.video.videoUrl : null}"
+                                                     th:attrappend="data-bs-toggle=${lesson.contentType == 'quiz' ? 'modal' : null},data-bs-target=${lesson.contentType == 'quiz' ? '#quizModal' + lesson.quiz.id : null}"
+                                                     style="cursor:pointer;"
+                                                     th:onclick="${lesson.contentType == 'video' && lesson.video != null} ? 'playVideo(this);' : (lesson.contentType == 'quiz' ? null : null)">
                                                     <div class="row align-items-center g-3">
                                                         <div class="col-md-6">
-                                                            <h5 class="mb-1">
-                                                                <a href="#" th:text="${lesson.title}"
-                                                                    th:if="${lesson.contentType == 'video'}"
-                                                                    th:attr="data-videoid=${lesson.video.videoUrl}"
-                                                                    class="lesson-video-link text-decoration-none"
-                                                                    onclick="playVideo(this); return false;"></a>
-                                                                <a href="#" th:text="${lesson.title}"
-                                                                    th:if="${lesson.contentType == 'quiz'}"
-                                                                    th:attr="data-bs-toggle='modal', data-bs-target=${'#quizModal' + lesson.quiz.id}"
-                                                                    class="lesson-quiz-link custom-link"></a>
-                                                            </h5>
+                                                            <h5 class="mb-1" th:text="${lesson.title}"></h5>
                                                             <p class="mb-0 text-muted small" th:text="${lesson.description}"></p>
                                                         </div>
                                                         <div class="col-md-3">
@@ -286,8 +249,6 @@
                                                             </div>
                                                         </div>
                                                     </div>
-
-
 
                                                     <div th:if="${lesson.quiz != null}" class="modal fade" th:id="'quizModal' + ${lesson.quiz.id}" tabindex="-1">
                                                         <div class="modal-dialog modal-lg">
@@ -361,7 +322,151 @@
                     </div>
                 </div>
 
-                <!-- Keep existing Enrollments and Reviews tabs -->
+                <!-- Enrollments Tab -->
+                <div class="tab-pane fade" id="enrollments" role="tabpanel">
+                    <div class="container" th:fragment="enrollment">
+                        <div class="row">
+                            <!-- Main content START -->
+                            <div class="col-12">
+                                <!-- Card START -->
+                                <div class="content-card bg-white rounded-4 shadow-sm p-4 mb-4">
+                                    <h3 class="mb-4">Students List</h3>
+                                    <div class="table-responsive border-0">
+                                        <table class="table align-middle mb-0">
+                                            <thead style="background: #f4f6fa;">
+                                            <tr>
+                                                <th scope="col" class="border-0 rounded-start">Student name</th>
+                                                <th scope="col" class="border-0">Progress</th>
+                                                <th scope="col" class="border-0">Enrolled date</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <!-- Table item -->
+                                            <tr th:each="enroll : ${enrollment}"
+                                                th:data-enrollment-id="${enroll.enrollmentId}"
+                                                th:class="${enroll.status == 'blocked' ? 'opacity-50' : ''}">
+                                                <!-- Table data: Student name -->
+                                                <td>
+                                                    <div class="d-flex align-items-center position-relative">
+                                                        <!-- Image -->
+                                                        <div class="avatar avatar-md mb-2 mb-md-0">
+                                                            <img th:src="${enroll.user.profilePicture != null ? enroll.user.profilePicture : 'https://res.cloudinary.com/dmwo4yrsq/image/upload/son-tung-m-tp-1_vodsiz.jpg?_a=DAGAACAVZAA0'}" class="rounded" alt="">
+                                                        </div>
+                                                        <div class="mb-0 ms-2">
+                                                            <!-- Title -->
+                                                            <h6 class="mb-0"><a href="#"
+                                                                                class="stretched-link"
+                                                                                data-bs-toggle="modal"
+                                                                                data-bs-target="#appDetail"
+                                                                                th:attr="data-enrollment-id=${enroll.enrollmentId},
+                                                    data-fullname=${enroll.user.fullName},
+                                                    data-email=${enroll.user.email},
+                                                    data-phone=${enroll.user.phone},
+                                                    data-picture=${enroll.user.profilePicture},
+                                                    data-address=${enroll.user.address},
+                                                    data-progress=${enroll.progress},
+                                                    data-birthday=${enroll.user.birthday},
+                                                    data-enrollment-date=${#temporals.format(enroll.enrollmentDate, 'dd/MM/yyyy')}"
+                                                                                th:text="${enroll.user.fullName}"></a></h6>
+                                                            <!-- Address -->
+                                                            <span class="text-body small" th:if="${enroll.user.address != null}">
+                                                                <i class="fas fa-fw fa-map-marker-alt me-1 mt-1"></i>
+                                                                <span th:text="${enroll.user.address}"></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+
+                                                <!-- Table data: Progress -->
+                                                <td class="text-center text-sm-start">
+                                                    <div class="overflow-hidden">
+                                                        <h6 class="mb-0" th:text="${enroll.progress + '%'}"></h6>
+                                                        <div class="progress progress-sm bg-primary bg-opacity-10">
+                                                            <div class="progress-bar bg-primary aos" role="progressbar"
+                                                                 data-aos="slide-right" data-aos-delay="200"
+                                                                 data-aos-duration="1000" data-aos-easing="ease-in-out"
+                                                                 th:style="'width: ' + ${enroll.progress} + '%'"
+                                                                 th:aria-valuenow="${enroll.progress}"
+                                                                 aria-valuemin="0" aria-valuemax="100">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+
+                                                <!-- Table data: Enrolled date -->
+                                                <td th:text="${#temporals.format(enroll.enrollmentDate, 'dd/MM/yyyy')}"></td>
+
+                                            </tr>
+
+                                            <!-- Empty state when no enrollments -->
+                                            <tr th:if="${#lists.isEmpty(enrollment)}">
+                                                <td colspan="6" class="text-center py-5">
+                                                    <div class="py-4">
+                                                        <i class="fas fa-user-graduate fs-1 text-muted mb-3"></i>
+                                                        <h6>No students enrolled yet</h6>
+                                                        <p class="mb-0">When students enroll in your courses, they will appear here.</p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <!-- Student list table END -->
+
+                                    <!-- Pagination START -->
+                                    <div class="d-sm-flex justify-content-sm-between align-items-sm-center mt-4 mt-sm-3" th:if="${totalPages > 0}">
+                                        <!-- Content -->
+                                        <p class="mb-0 text-center text-sm-start">
+                                            Showing <span th:text="${currentPage * size + 1}">1</span> to
+                                            <span th:text="${(currentPage * size) + (enrollment != null ? #lists.size(enrollment) : 0) > totalElements ? totalElements : (currentPage * size) + (enrollment != null ? #lists.size(enrollment) : 0)}">8</span> of
+                                            <span th:text="${totalElements}">20</span> entries
+                                        </p>
+                                        <!-- Pagination -->
+                                        <nav class="d-flex justify-content-center mb-0" aria-label="navigation">
+                                            <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
+                                                <!-- Previous page -->
+                                                <li class="page-item mb-0" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                                                    <a class="page-link" th:href="@{'/instructordashboard/courses/detail/' + ${courseId} + '(?page=' + (${currentPage - 1}) + '&size=' + ${size}}" tabindex="-1">
+                                                        <i class="fas fa-angle-left"></i>
+                                                    </a>
+                                                </li>
+
+                                                <!-- Page numbers -->
+                                                <li class="page-item mb-0" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                                    th:if="${i < 5 || i > totalPages - 3 || (i >= currentPage - 1 && i <= currentPage + 1)}"
+                                                    th:classappend="${currentPage == i ? 'active' : ''}">
+                                                    <a class="page-link" th:href="@{'/instructordashboard/courses/detail/' + ${courseId} + '(?page=' + ${i} + '&size=' + ${size}}" th:text="${i + 1}">1</a>
+                                                </li>
+
+                                                <!-- Ellipsis for skipped pages -->
+                                                <li class="page-item mb-0 disabled" th:if="${totalPages > 7 && currentPage > 3}">
+                                                    <span class="page-link">...</span>
+                                                </li>
+                                                <li class="page-item mb-0 disabled" th:if="${totalPages > 7 && currentPage < totalPages - 4}">
+                                                    <span class="page-link">...</span>
+                                                </li>
+
+                                                <!-- Next page -->
+                                                <li class="page-item mb-0" th:classappend="${currentPage + 1 >= totalPages ? 'disabled' : ''}">
+                                                    <a class="page-link" th:href="@{'/instructordashboard/courses/detail/' + ${courseId} + '(?page=' + (${currentPage + 1}) + '&size=' + ${size}}">
+                                                        <i class="fas fa-angle-right"></i>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </nav>
+                                    </div>
+                                    <!-- Pagination END -->
+                                </div>
+                                <!-- Card END -->
+                            </div>
+                            <!-- Main content END -->
+                        </div>
+                        <!-- Back to top button -->
+                        <div class="back-top"><i class="bi bi-arrow-up-short position-absolute top-50 start-50 translate-middle"></i></div>
+                    </div>
+                </div>
+
+                <!-- Keep existing Reviews tab -->
             </div>
         </div>
     </div>
@@ -369,19 +474,12 @@
     <!-- Video Modal -->
     <div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="videoModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="videoModalLabel">Lesson Video</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                        onclick="stopVideo()"></button>
+            <div class="modal-content bg-dark border-0 rounded-4">
+                <div class="modal-header border-0 pb-0" style="background: transparent;">
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body d-flex justify-content-center">
-                    <div style="width: 100%; max-width: 800px; aspect-ratio: 16/9;">
-                        <video id="lessonVideo" controls class="w-100 rounded">
-                            <source id="videoSource" src="" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                    </div>
+                <div class="modal-body p-0">
+                    <video id="modalVideo" style="width:100%;border-radius:0 0 1rem 1rem;" controls></video>
                 </div>
             </div>
         </div>
@@ -464,19 +562,49 @@
         .content-card:hover {
             box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
         }
+
+        /* Remove custom enrollment-card and enrollment-table styles for consistency */
+        .enrollment-card, .enrollment-table { all: unset; }
+
+        .bg-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1;
+        }
+        .card-img-overlay {
+            z-index: 2;
+        }
+
+        /* Đảm bảo modal video đẹp, không bị kéo dài quá */
+        #videoModal .modal-dialog {
+            max-width: 900px;
+        }
+        #videoModal .modal-content {
+            background: #181a1b;
+            border-radius: 1rem;
+        }
+        #videoModal .modal-body {
+            padding: 0;
+        }
+        #dynamicVideo {
+            background: #000;
+            border-radius: 0 0 1rem 1rem;
+        }
     </style>
 
     <script>
         function playVideo(element) {
-            const videoId = element.getAttribute('data-videoid');
-            const videoSource = document.getElementById('videoSource');
-            const video = document.getElementById('lessonVideo');
-
-            videoSource.src = videoId;
-            video.load();
-
-            const videoModal = new bootstrap.Modal(document.getElementById('videoModal'));
-            videoModal.show();
+            var publicId = element.getAttribute('data-videoid');
+            if (!publicId) return;
+            fetch('/api/video/signed-url?publicId=' + encodeURIComponent(publicId))
+                .then(response => response.text())
+                .then(url => {
+                    var video = document.getElementById('dynamicVideo');
+                    video.src = url;
+                    var modal = new bootstrap.Modal(document.getElementById('videoModal'));
+                    modal.show();
+                    video.play();
+                });
         }
 
         function stopVideo() {
@@ -485,27 +613,25 @@
             video.currentTime = 0;
         }
 
-        document.getElementById('playBtn').addEventListener('click', function() {
-            const publicId = this.getAttribute('data-publicid');
-            fetch(`/api/video/signed-url?publicId=${publicId}`)
-                .then(res => res.json())
-                .then(data => {
-                    const video = document.getElementById('myVideo');
-                    video.src = data.url;
-                    video.classList.remove('d-none');
+        document.getElementById('playVideoBtn').addEventListener('click', function() {
+            var publicId = this.getAttribute('data-publicid');
+            if (!publicId) return;
+            fetch('/api/video/signed-url?publicId=' + encodeURIComponent(publicId))
+                .then(res => res.text())
+                .then(url => {
+                    var video = document.getElementById('modalVideo');
+                    video.src = url;
+                    var modal = new bootstrap.Modal(document.getElementById('videoModal'));
+                    modal.show();
                     video.play();
-                    document.getElementById('videoPoster').style.display = 'none';
-                })
-                .catch(err => {
-                    alert('Không lấy được video!');
-                    console.error(err);
                 });
         });
 
-        video.addEventListener('ended', function() {
-            video.classList.add('d-none');
-            document.getElementById('videoPoster').style.display = '';
-            video.src = '';
+        document.getElementById('videoModal').addEventListener('hidden.bs.modal', function () {
+            var video = document.getElementById('modalVideo');
+            video.pause();
+            video.currentTime = 0;
+            video.src = "";
         });
     </script>
 </div>

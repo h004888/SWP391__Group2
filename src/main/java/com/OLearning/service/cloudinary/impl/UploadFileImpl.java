@@ -27,7 +27,7 @@ public class UploadFileImpl implements UploadFile {
     }
     @Override
     public String uploadVideoFile(MultipartFile file) throws IOException {
-        return uploadVideoSeFile(file, "video");
+        return uploadVideoSeFile(file);
     }
 
     private String uploadFile(MultipartFile file, String resourceType) throws IOException {
@@ -49,12 +49,12 @@ public class UploadFileImpl implements UploadFile {
         }
     }
 
-    private String uploadVideoSeFile(MultipartFile file, String resourceType) throws IOException {
+    private String uploadVideoSeFile(MultipartFile file) throws IOException {
         assert file.getOriginalFilename() != null;
         String originalFilename = file.getOriginalFilename();
         String fileNameWithoutExt = getFileName(originalFilename)[0];
         String extension = getFileName(originalFilename)[1];
-        String publicValue = UUID.randomUUID().toString() + "_" + fileNameWithoutExt + "." + extension;
+        String publicValue = UUID.randomUUID().toString() + "_" + fileNameWithoutExt;
 
         File fileUpload = convert(file, publicValue.replace("." + extension, ""), extension);
         try {
@@ -62,7 +62,7 @@ public class UploadFileImpl implements UploadFile {
                     fileUpload,
                     ObjectUtils.asMap(
                             "public_id", publicValue,
-                            "resource_type", resourceType,
+                            "resource_type", "video",
                             "type", "private"
                     )
             );
