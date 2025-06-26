@@ -11,7 +11,6 @@ import lombok.*;
 @Setter
 @ToString
 public class OrderDetail {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "OrderDetailID")

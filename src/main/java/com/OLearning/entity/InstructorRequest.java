@@ -15,19 +15,27 @@ import java.time.LocalDateTime;
 public class InstructorRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "RequestID")
     private Long requestId;
+    
+    @Column(name = "RequestDate")
     private LocalDateTime requestDate;
+    
+    @Column(name = "Status")
     private String status ;
-    @Column(columnDefinition = "NVARCHAR(1000)")
+    
+    @Column(name = "Note", columnDefinition = "NVARCHAR(1000)")
     private String note;
+    
+    @Column(name = "DecisionDate")
     private LocalDateTime decisionDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userId", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "UserID", nullable = false)
     private User user; // Người gửi yêu cầu
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "adminId")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "AdminID")
     private User admin; // Người duyệt yêu cầu
 
 }

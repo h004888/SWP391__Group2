@@ -19,8 +19,8 @@ public class CourseDTO {
     private Long courseId;
     private String title;
     private String description;
-    private BigDecimal price;
-    private BigDecimal discount;
+    private Double price;
+    private Double discount;
     private String courseImg;
     private Integer duration;
     private Boolean isFree;

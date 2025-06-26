@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("/admin/businessRule")
 public class BusinessRuleController {
+
     @Autowired
     private TermsAndConditionService termsAndConditionService;
 

@@ -16,24 +16,27 @@ public class CourseReview {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ReviewID")
     private Long reviewId;
 
-    @OneToOne
-    @JoinColumn(name = "enrollmentID", nullable = false, unique = true)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "EnrollmentID", nullable = false)
     private Enrollment enrollment;
 
-    @ManyToOne
-    @JoinColumn(name = "courseId", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "CourseID", nullable = false)
     private Course course;
 
-    @Column(nullable = false)
+    @Column(name = "Rating", nullable = false)
     private Integer rating;
 
-    @Column(length = 1000)
+    @Column(name = "Comment", length = 1000)
     private String comment;
 
+    @Column(name = "CreatedAt")
     private LocalDateTime createdAt;
 
+    @Column(name = "UpdatedAt")
     private LocalDateTime updatedAt;
 
 

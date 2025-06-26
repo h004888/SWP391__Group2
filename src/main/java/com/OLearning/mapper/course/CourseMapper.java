@@ -16,8 +16,8 @@ public class CourseMapper {
         Course course = new Course();
         course.setTitle(dto.getTitle());
         course.setDescription(dto.getDescription());
-        course.setPrice(dto.getPrice() != null ? BigDecimal.valueOf(dto.getPrice()) : null);
-        course.setDiscount(dto.getDiscount() != null ? BigDecimal.valueOf(dto.getDiscount()) : null);
+        course.setPrice(dto.getPrice() != null ? (dto.getPrice()) : null);
+        course.setDiscount(dto.getDiscount() != null ? (dto.getDiscount()) : null);
         course.setCreatedAt(LocalDateTime.now());
         course.setUpdatedAt(LocalDateTime.now());
         return course;
@@ -86,7 +86,7 @@ public class CourseMapper {
         course.setTitle(dto.getTitle());
         course.setDescription(dto.getDescription());
         course.setCreatedAt(LocalDateTime.now());
-        course.setPrice(dto.getPrice() != null ? BigDecimal.valueOf(dto.getPrice()) : null);
+        course.setPrice(dto.getPrice() != null ? (dto.getPrice()) : null);
         course.setCourseLevel(dto.getCourseLevel());
         // Không set averageRating, reviewCount, duration vì tính tự động
         return course;

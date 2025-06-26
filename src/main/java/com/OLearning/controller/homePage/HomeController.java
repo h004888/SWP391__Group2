@@ -32,15 +32,18 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.OLearning.service.enrollment.EnrollmentService;
+import com.OLearning.repository.VoucherRepository;
+import com.OLearning.service.voucher.VoucherService;
 
 @Controller
 @RequestMapping("/home")
 public class HomeController {
 
-        @Autowired
-        private CategoryService categoryService;
-        @Autowired
-        private CourseService courseService;
+    @Autowired
+    private CategoryService categoryService;
+
+    @Autowired
+    private CourseService courseService;
 
     @Autowired
     private CartService cartService;
@@ -63,83 +66,90 @@ public class HomeController {
     @Autowired
     private EnrollmentService enrollmentService;
 
-        @GetMapping()
-        public String getMethodName(Model model, @AuthenticationPrincipal UserDetails userDetails) {
-                // chia làm 2 danh sách:
-                List<CategoryDTO> firstFive = categoryService.getAllCategory().stream().limit(5).toList();
-                List<CategoryDTO> nextFive = categoryService.getAllCategory().stream().skip(5).limit(5).toList();
-                List<Course> topCourses = courseService.getTopCourses().stream().limit(5).collect(Collectors.toList());
-                model.addAttribute("topCourses", topCourses);
-                model.addAttribute("topCategories", categoryService.findTop5ByOrderByIdAsc());
-                model.addAttribute("firstFive", firstFive);
-                model.addAttribute("nextFive", nextFive);
-                // Thêm map courseId -> isEnrolled
-                Map<Long, Boolean> topCoursesEnrolledMap = new HashMap<>();
-                if (userDetails != null) {
-                        String email = userDetails.getUsername();
-                        User user = userRepository.findByEmail(email).orElse(null);
-                        if (user != null) {
-                                for (Course c : topCourses) {
-                                        boolean enrolled = enrollmentService.hasEnrolled(user.getUserId(), c.getCourseId());
-                                        topCoursesEnrolledMap.put(c.getCourseId(), enrolled);
-                                }
-                        }
+    @Autowired
+    private VoucherRepository voucherRepository;
+
+    @Autowired
+    private VoucherService voucherService;
+
+    @GetMapping()
+    public String getMethodName(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        // chia làm 2 danh sách:
+        List<CategoryDTO> firstFive = categoryService.getAllCategory().stream().limit(5).toList();
+        List<CategoryDTO> nextFive = categoryService.getAllCategory().stream().skip(5).limit(5).toList();
+        List<Course> topCourses = courseService.getTopCourses().stream().limit(5).collect(Collectors.toList());
+        model.addAttribute("topCourses", topCourses);
+        model.addAttribute("topCategories", categoryService.findTop5ByOrderByIdAsc());
+        model.addAttribute("firstFive", firstFive);
+        model.addAttribute("nextFive", nextFive);
+        // Thêm map courseId -> isEnrolled
+        Map<Long, Boolean> topCoursesEnrolledMap = new HashMap<>();
+        if (userDetails != null) {
+            String email = userDetails.getUsername();
+            User user = userRepository.findByEmail(email).orElse(null);
+            if (user != null) {
+                for (Course c : topCourses) {
+                    boolean enrolled = enrollmentService.hasEnrolled(user.getUserId(), c.getCourseId());
+                    topCoursesEnrolledMap.put(c.getCourseId(), enrolled);
                 }
-                model.addAttribute("topCoursesEnrolledMap", topCoursesEnrolledMap);
-                return "homePage/index";
+            }
         }
+        model.addAttribute("topCoursesEnrolledMap", topCoursesEnrolledMap);
+        return "homePage/index";
+    }
 
-        @GetMapping("/coursesGrid")
-        public String coursesGrid(Model model, @RequestParam(defaultValue = "0") int page,
-                        @RequestParam(required = false) String keyword,
-                        @RequestParam(required = false) List<Long> categoryIds,
-                        @RequestParam(required = false) List<String> priceFilters,
-                        @RequestParam(required = false) List<String> levels,
-                        @RequestParam(defaultValue = "Newest") String sortBy,
-                        @RequestParam(defaultValue = "9") int size) {
-                Page<CourseDTO> courses = courseService.searchCoursesGrid(categoryIds, priceFilters, levels, sortBy,
-                                keyword,
-                                page, size); // lưu ý trả về Page<CourseDTO>
-                model.addAttribute("categories", categoryService.getListCategories());
-                model.addAttribute("courses", courses.getContent());
-                model.addAttribute("currentPage", page);
-                model.addAttribute("totalPages", courses.getTotalPages());
-                model.addAttribute("totalItems", courses.getTotalElements());
-                model.addAttribute("categoryIds", categoryIds);
-                return "homePage/course-grid";
+    @GetMapping("/coursesGrid")
+    public String coursesGrid(Model model, @RequestParam(defaultValue = "0") int page,
+                            @RequestParam(required = false) String keyword,
+                            @RequestParam(required = false) List<Long> categoryIds,
+                            @RequestParam(required = false) List<String> priceFilters,
+                            @RequestParam(required = false) List<String> levels,
+                            @RequestParam(defaultValue = "Newest") String sortBy,
+                            @RequestParam(defaultValue = "9") int size) {
+        Page<CourseDTO> courses = courseService.searchCoursesGrid(categoryIds, priceFilters, levels, sortBy,
+                        keyword,
+                        page, size); // lưu ý trả về Page<CourseDTO>
+        model.addAttribute("categories", categoryService.getListCategories());
+        model.addAttribute("courses", courses.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", courses.getTotalPages());
+        model.addAttribute("totalItems", courses.getTotalElements());
+        model.addAttribute("categoryIds", categoryIds);
+        return "homePage/course-grid";
+    }
+
+    @GetMapping("/course-detail")
+    public String courseDetail(@RequestParam("id") Long id, Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        Course course = courseService.getCourseById(id);
+
+        int totalStudents = course.getInstructor().getCourses()
+                        .stream()
+                        .mapToInt(c -> c.getEnrollments().size())
+                        .sum();
+        model.addAttribute("totalStudents", totalStudents);
+        model.addAttribute("courseByInstructor",
+                        course.getInstructor().getCourses().stream().limit(2).collect(Collectors.toList()));
+        model.addAttribute("courseByCategory",
+                        course.getCategory().getCourses().stream().limit(5).collect(Collectors.toList()));
+        model.addAttribute("course", course);
+
+        boolean isEnrolled = false;
+        if (userDetails != null) {
+            String email = userDetails.getUsername();
+            User user = userRepository.findByEmail(email).orElse(null);
+            if (user != null) {
+                isEnrolled = enrollmentService.hasEnrolled(user.getUserId(), id);
+            }
         }
+        model.addAttribute("isEnrolled", isEnrolled);
 
-        @GetMapping("/course-detail")
-        public String courseDetail(@RequestParam("id") Long id, Model model, @AuthenticationPrincipal UserDetails userDetails) {
-                Course course = courseService.getCourseById(id);
-
-                int totalStudents = course.getInstructor().getCourses()
-                                .stream()
-                                .mapToInt(c -> c.getEnrollments().size())
-                                .sum();
-                model.addAttribute("totalStudents", totalStudents);
-                model.addAttribute("courseByInstructor",
-                                course.getInstructor().getCourses().stream().limit(2).collect(Collectors.toList()));
-                model.addAttribute("courseByCategory",
-                                course.getCategory().getCourses().stream().limit(5).collect(Collectors.toList()));
-                model.addAttribute("course", course);
-
-                boolean isEnrolled = false;
-                if (userDetails != null) {
-                        String email = userDetails.getUsername();
-                        User user = userRepository.findByEmail(email).orElse(null);
-                        if (user != null) {
-                                isEnrolled = enrollmentService.hasEnrolled(user.getUserId(), id);
-                        }
-                }
-                model.addAttribute("isEnrolled", isEnrolled);
-
-                return "homePage/course-detail";
-        }
+        return "homePage/course-detail";
+    }
 
     @PostMapping("/buy-now")
     public String buyNow(@AuthenticationPrincipal UserDetails userDetails,
                          @RequestParam("courseId") Long courseId,
+                         @RequestParam(value = "voucherId", required = false) Long voucherId,
                          HttpServletRequest request,
                          HttpServletResponse response,
                          RedirectAttributes redirectAttributes) {
@@ -167,14 +177,23 @@ public class HomeController {
             Map<String, Object> item = new HashMap<>();
             item.put("id", UUID.randomUUID().toString());
             item.put("courseId", courseId);
-            item.put("price", course.getPrice());
             item.put("courseTitle", course.getTitle());
+            double price = course.getPrice().doubleValue();
+            if (voucherId != null) {
+                var voucherOpt = voucherRepository.findById(voucherId);
+                if (voucherOpt.isPresent()) {
+                    double discount = voucherOpt.get().getDiscount() != null ? voucherOpt.get().getDiscount() : 0.0;
+                    price = Math.round(price * (1 - discount / 100.0));
+                    item.put("appliedVoucherId", voucherId);
+                }
+            }
+            item.put("price", price);
             items.add(item);
             cart.put("items", items);
             cart.put("total", 1L);
 
             String cartJson = objectMapper.writeValueAsString(cart);
-            double totalAmount = course.getPrice().doubleValue();
+            double totalAmount = price;
 
             if (user.getCoin() >= totalAmount) {
                 Order order = new Order();
@@ -182,6 +201,10 @@ public class HomeController {
                 order.setAmount(totalAmount);
                 cartService.processCheckout(cartJson, request.getRemoteAddr(), userDetails.getUsername());
                 cartService.completeCheckout(cart, order, true, null);
+                // Update voucher usage if applied
+                if (voucherId != null) {
+                    voucherService.useVoucherForUserAndCourse(voucherId, userId);
+                }
                 redirectAttributes.addFlashAttribute("message", "Purchase completed using wallet!");
                 return "redirect:/home/course-detail?id=" + courseId;
             } else {
@@ -218,68 +241,76 @@ public class HomeController {
 
         Long userId = getUserIdFromUserDetails(userDetails);
         String encodedBuyNowJson = getBuyNowCookie(request);
+        String encodedCartJson = getCartCookie(request, userId);
+        Long courseId = null;
+        Map<String, Object> cart = null;
+        try {
+            if (encodedBuyNowJson != null) {
+                byte[] decodedBytes = Base64.getDecoder().decode(encodedBuyNowJson);
+                String cartJson = new String(decodedBytes, StandardCharsets.UTF_8);
+                cart = objectMapper.readValue(cartJson, Map.class);
+            } else if (encodedCartJson != null && !encodedCartJson.isEmpty()) {
+                cart = cartService.getCartDetails(encodedCartJson, userDetails.getUsername());
+            }
+            if (cart != null) {
+                List<Map<String, Object>> items = (List<Map<String, Object>>) cart.get("items");
+                if (items != null && !items.isEmpty()) {
+                    courseId = Long.valueOf(items.get(0).get("courseId").toString());
+                }
+            }
+        } catch (Exception ignore) {}
+
         int paymentStatus = vnPayService.orderReturn(request);
 
         if (paymentStatus == 1) {
             try {
-                String cartJson;
-                Map<String, Object> cart;
-                boolean isBuyNow = encodedBuyNowJson != null;
-                Long courseId = null;
-
-                if (isBuyNow) {
-                    byte[] decodedBytes = Base64.getDecoder().decode(encodedBuyNowJson);
-                    cartJson = new String(decodedBytes, StandardCharsets.UTF_8);
-                    cart = objectMapper.readValue(cartJson, Map.class);
-                    clearBuyNowCookie(response);
-                    List<Map<String, Object>> items = (List<Map<String, Object>>) cart.get("items");
-                    if (items != null && !items.isEmpty()) {
-                        courseId = Long.valueOf(items.get(0).get("courseId").toString());
-                    }
-                } else {
-                    String encodedCartJson = getCartCookie(request, userId);
-                    cart = cartService.getCartDetails(encodedCartJson, userDetails.getUsername());
-                    cartJson = objectMapper.writeValueAsString(cart);
-                }
-
-                User user = userRepository.findById(userId)
-                        .orElseThrow(() -> new EntityNotFoundException("User not found"));
                 String transactionId = request.getParameter("vnp_TransactionNo");
                 String ipAddr = request.getRemoteAddr();
                 String amount = request.getParameter("vnp_Amount");
                 double totalAmount = Double.parseDouble(amount) / 100;
 
                 Order order = new Order();
-                order.setUser(user);
+                order.setUser(userRepository.findById(userId)
+                        .orElseThrow(() -> new EntityNotFoundException("User not found")));
                 order.setAmount(totalAmount);
                 order.setRefCode(transactionId);
 
-                cartService.processCheckout(cartJson, ipAddr, userDetails.getUsername());
-                cartService.completeCheckout(cart, order, false, transactionId);
-
-                if (!isBuyNow) {
-                    String encodedCartJson = getCartCookie(request, userId);
-                    if (encodedCartJson != null && !encodedCartJson.isEmpty()) {
-                        updateCartCookie(cartService.clearCart(userDetails.getUsername()), response, userId);
-                    }
+                if (encodedBuyNowJson != null) {
+                    clearBuyNowCookie(response);
+                } else if (encodedCartJson != null && !encodedCartJson.isEmpty()) {
+                    cartService.processCheckout(encodedCartJson, ipAddr, userDetails.getUsername());
+                    updateCartCookie(cartService.clearCart(userDetails.getUsername()), response, userId);
                 }
 
+                cartService.completeCheckout(cart, order, false, transactionId);
                 redirectAttributes.addFlashAttribute("message", "VNPay payment successful!");
-                if (isBuyNow && courseId != null) {
+                if (courseId != null) {
                     return "redirect:/home/course-detail?id=" + courseId;
                 } else {
                     return "redirect:/home";
                 }
             } catch (CartServiceImpl.CourseAlreadyPurchasedException e) {
                 redirectAttributes.addFlashAttribute("error", e.getMessage());
-                return "redirect:/home";
+                if (courseId != null) {
+                    return "redirect:/home/course-detail?id=" + courseId;
+                } else {
+                    return "redirect:/home";
+                }
             } catch (Exception e) {
                 redirectAttributes.addFlashAttribute("error", "VNPay success but internal error: " + e.getMessage());
-                return "redirect:/home";
+                if (courseId != null) {
+                    return "redirect:/home/course-detail?id=" + courseId;
+                } else {
+                    return "redirect:/home";
+                }
             }
         } else {
             redirectAttributes.addFlashAttribute("error", "VNPay payment failed.");
-            return "redirect:/home";
+            if (courseId != null) {
+                return "redirect:/home/course-detail?id=" + courseId;
+            } else {
+                return "redirect:/home";
+            }
         }
     }
 

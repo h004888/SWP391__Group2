@@ -22,13 +22,28 @@ public class Voucher {
     @JoinColumn(name = "userId", nullable = false)
     private User instructor;
 
+    @Column(name = "Code")
     private String code;
+
+    @Column(name = "Discount")
     private Double discount;
+
+    @Column(name = "ExpiryDate")
     private LocalDateTime expiryDate;
+
+    @Column(name = "Limitation")
     private Long limitation;
+
+    @Column(name = "UsedCount")
     private Long usedCount;
+
+    @Column(name = "IsActive")
     private Boolean isActive;
+
+    @Column(name = "IsGlobal")
     private Boolean isGlobal;
+
+    @Column(name = "CreatedDate")
     private LocalDateTime createdDate;
 
     @OneToMany(mappedBy = "voucher")

@@ -16,7 +16,6 @@ public class CourseDetailMapper {
         dto.setTitle(course.getTitle());
         dto.setDescription(course.getDescription());
         dto.setPrice(course.getPrice().doubleValue());
-        dto.setDiscount(course.getDiscount().doubleValue());
         dto.setCourseImg(course.getCourseImg());
         dto.setCreatedAt(course.getCreatedAt());
         dto.setUpdatedAt(course.getUpdatedAt());
