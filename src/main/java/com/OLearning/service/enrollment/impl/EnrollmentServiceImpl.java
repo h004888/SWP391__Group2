@@ -1,5 +1,10 @@
 package com.OLearning.service.enrollment.impl;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import com.OLearning.service.course.CourseService;
 import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.enrollment.EnrollmentDTO;
 import com.OLearning.entity.Course;
@@ -13,6 +18,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.OLearning.entity.Course;
+import com.OLearning.entity.Enrollment;
 import com.OLearning.repository.EnrollmentRepository;
 import com.OLearning.service.enrollment.EnrollmentService;
 import com.OLearning.service.email.EmailService;
@@ -31,6 +38,8 @@ import java.util.Optional;
 public class EnrollmentServiceImpl implements EnrollmentService {
     @Autowired
     private EnrollmentRepository enrollmentRepository;
+    @Autowired
+    private CourseService courseService;
     @Autowired
     private EnrollmentMapper mapper;
     @Autowired
@@ -162,4 +171,16 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         return false;
     }
 
+    @Override
+    public List<Course> getCoursesByUserId(Long userId) {
+        return enrollmentRepository.findByUserUserId(userId)
+                .stream()
+                .map(Enrollment::getCourse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean hasEnrolled(Long userId, Long courseId) {
+        return enrollmentRepository.existsByUser_UserIdAndCourse_CourseId(userId, courseId);
+    }
 }

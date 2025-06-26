@@ -1,6 +1,7 @@
 package com.OLearning.repository;
 
 import com.OLearning.entity.Order;
+import com.OLearning.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+
 
 @Repository
 public interface OrdersRepository extends JpaRepository<Order, Long> {
@@ -28,9 +30,6 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
     @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
     List<Order> findByUserUsernameContaining(String username);
 
-    // Tìm đơn hàng theo username với phân trang
-    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
-    Page<Order> findByUserUsernameContaining(String username, Pageable pageable);
 
     // Sắp xếp theo amount tăng dần
     @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
@@ -48,6 +47,7 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
     @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
     List<Order> findAllByOrderByOrderDateDesc();
 
+    List<Order> findByUserAndStatus(User user, String status);
     // Combined username filtering and sorting with pagination
     @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
     Page<Order> findByUserUsernameContainingOrderByAmountAsc(String username, Pageable pageable);
@@ -79,23 +79,27 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
     // Find orders by username and date range with pagination
     @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
     Page<Order> findByUserUsernameContainingAndOrderDateBetween(
-        String username, 
-        LocalDateTime startDate, 
-        LocalDateTime endDate, 
+        String username,
+        LocalDateTime startDate,
+        LocalDateTime endDate,
         Pageable pageable
     );
 
     // Find orders by date range with pagination
     @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
     Page<Order> findByOrderDateBetween(
-        LocalDateTime startDate, 
-        LocalDateTime endDate, 
+        LocalDateTime startDate,
+        LocalDateTime endDate,
         Pageable pageable
     );
 
     // Find orders by username and order type with pagination
     @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
     Page<Order> findByUserUsernameContainingAndOrderType(String username, String orderType, Pageable pageable);
+
+    // Find orders by username with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    Page<Order> findByUserUsernameContaining(String username, Pageable pageable);
 
     // Find orders by order type with pagination
     @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
@@ -104,10 +108,10 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
     // Find orders by username, order type and date range with pagination
     @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
     Page<Order> findByUserUsernameContainingAndOrderTypeAndOrderDateBetween(
-        String username, 
+        String username,
         String orderType,
-        LocalDateTime startDate, 
-        LocalDateTime endDate, 
+        LocalDateTime startDate,
+        LocalDateTime endDate,
         Pageable pageable
     );
 
@@ -115,8 +119,8 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
     @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
     Page<Order> findByOrderTypeAndOrderDateBetween(
         String orderType,
-        LocalDateTime startDate, 
-        LocalDateTime endDate, 
+        LocalDateTime startDate,
+        LocalDateTime endDate,
         Pageable pageable
     );
 
@@ -140,18 +144,18 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
     @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
     Page<Order> findByStatusAndOrderDateBetween(
         String status,
-        LocalDateTime startDate, 
-        LocalDateTime endDate, 
+        LocalDateTime startDate,
+        LocalDateTime endDate,
         Pageable pageable
     );
 
     // Find orders by username, status and date range with pagination
     @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
     Page<Order> findByUserUsernameContainingAndStatusAndOrderDateBetween(
-        String username, 
+        String username,
         String status,
-        LocalDateTime startDate, 
-        LocalDateTime endDate, 
+        LocalDateTime startDate,
+        LocalDateTime endDate,
         Pageable pageable
     );
 
@@ -160,19 +164,19 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
     Page<Order> findByOrderTypeAndStatusAndOrderDateBetween(
         String orderType,
         String status,
-        LocalDateTime startDate, 
-        LocalDateTime endDate, 
+        LocalDateTime startDate,
+        LocalDateTime endDate,
         Pageable pageable
     );
 
     // Find orders by username, order type, status and date range with pagination
     @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
     Page<Order> findByUserUsernameContainingAndOrderTypeAndStatusAndOrderDateBetween(
-        String username, 
+        String username,
         String orderType,
         String status,
-        LocalDateTime startDate, 
-        LocalDateTime endDate, 
+        LocalDateTime startDate,
+        LocalDateTime endDate,
         Pageable pageable
     );
 

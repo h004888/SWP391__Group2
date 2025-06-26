@@ -14,8 +14,9 @@
             <div class="card bg-transparent border rounded-3 h-100">
 
                 <!-- Card header -->
-                <div class="card-header bg-light border-bottom">
+                <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center">
                     <h5 class="card-header-title mb-0">Personal Information</h5>
+                    <span class="badge bg-primary text-uppercase" th:text="${userDetail.roleName}"></span>
                 </div>
 
                 <!-- Card body START -->

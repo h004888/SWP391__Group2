@@ -8,13 +8,14 @@ import com.OLearning.service.category.CategoryService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -22,6 +23,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
 
     public List<Category> getListCategories() {
         return categoryRepository.findAll();
@@ -40,6 +42,13 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public boolean existsById(int id) {
         return categoryRepository.existsById(id);
+    }
+
+    @Override
+    public List<CategoryDTO> getAllCategory() {
+        return categoryRepository.findAll().stream()
+                .map(c -> new CategoryDTO(c.getName(), c.getId()))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -129,5 +138,4 @@ public class CategoryServiceImpl implements CategoryService {
             return categoryRepository.findAll(sortedPageable);
         }
     }
-
 }

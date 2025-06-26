@@ -1,30 +1,96 @@
-<div id="content" class="container-fluid" th:fragment="contentOrderDetails">
-  <div class="table-responsive">
-    <div class="table-wrapper">
-      <div class="table-title">
-        <div class="row">
-          <div class="col-md-6">
-            <h2 th:text="${accNamePage}">Order <b>Details</b></h2>
-          </div>
-          <div class="col-md-6">
-            <a th:href="@{/admin/orders}" class="btn btn-secondary mt-2">Back to Orders</a>
-          </div>
+<div class="container my-4" th:fragment="contentOrderDetails">
+    <div th:if="${#lists.isEmpty(orderDetails)}">
+        <div class="alert alert-warning text-center">
+            No order details found.
         </div>
-      </div>
-      <table class="table table-striped table-hover table-bordered">
-        <thead>
-        <tr>
-          <th>Course Name</th>
-          <th>Unit Price</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="detail : ${orderDetails}">
-          <td th:text="${detail.course.title} ?: 'N/A'"></td>
-          <td th:text="${detail.unitPrice} ?: 'N/A'"></td>
-        </tr>
-        </tbody>
-      </table>
+        <div class="d-flex justify-content-end mt-3">
+            <a th:href="@{/admin/orders}" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-arrow-left"></i> Back to Orders
+            </a>
+        </div>
     </div>
-  </div>
+    <div th:unless="${#lists.isEmpty(orderDetails)}">
+        <div class="card shadow-sm content-card mb-4">
+            <div class="card-header bg-white border-bottom-0">
+                <h3 class="mb-0">Order Details</h3>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6 mb-2">
+                        <span class="fw-bold">Order ID:</span>
+                        <span th:text="${orderDetails[0].orders.orderId} ?: 'N/A'"></span>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <span class="fw-bold">Date:</span>
+                        <span th:text="${#temporals.format(orderDetails[0].orders.orderDate, 'dd/MM/yyyy HH:mm')}"></span>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <span class="fw-bold">Amount:</span>
+                        <span th:text="${orderDetails[0].orders.amount != null ? #numbers.formatDecimal(orderDetails[0].orders.amount, 0, 'COMMA', 0, 'POINT') + ' VND' : 'N/A'}"></span>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <span class="fw-bold">Type:</span>
+                        <span class="text-uppercase" th:text="${orderDetails[0].orders.orderType} ?: 'N/A'"></span>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <span class="fw-bold">Status:</span>
+                        <span th:if="${orderDetails[0].orders.status == 'PAID'}" class="badge bg-success">Paid</span>
+                        <span th:if="${orderDetails[0].orders.status == 'CANCELLED'}" class="badge bg-danger">Cancelled</span>
+                        <span th:if="${orderDetails[0].orders.status != 'PAID' && orderDetails[0].orders.status != 'CANCELLED'}" class="badge bg-secondary" th:text="${orderDetails[0].orders.status} ?: 'N/A'"></span>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <span class="fw-bold">Ref Code:</span>
+                        <span th:text="${orderDetails[0].orders.refCode} ?: 'N/A'"></span>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <span class="fw-bold">Username:</span>
+                        <span th:text="${orderDetails[0].orders.user.username} ?: 'N/A'"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Danh sách các khóa học trong đơn hàng -->
+        <div class="card shadow-sm content-card">
+            <div class="card-header bg-white border-bottom-0">
+                <h5 class="mb-0">Courses in this Order</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive border-0">
+                    <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                        <thead>
+                            <tr>
+                                <th>Course ID</th>
+                                <th>Course Name</th>
+                                <th>Image</th>
+                                <th>Unit Price</th>
+                                <th>Discount</th>
+                                <th>Final Price</th>
+                                <th>Instructor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="detail : ${orderDetails}">
+                                <td th:text="${detail.course.courseId}"></td>
+                                <td th:text="${detail.course.title}"></td>
+                                <td>
+                                    <img th:src="${detail.course.courseImg}" alt="Course Image" style="width:60px;height:40px;object-fit:cover;" class="rounded">
+                                </td>
+                                <td th:text="${detail.unitPrice != null ? #numbers.formatDecimal(detail.unitPrice, 0, 'COMMA', 0, 'POINT') : 'N/A'}"></td>
+                                <td th:text="${detail.course.discount != null ? detail.course.discount + '%' : '0%'}"></td>
+                                <td th:text="${detail.unitPrice != null && detail.course.discount != null ? #numbers.formatDecimal(detail.unitPrice * (1 - detail.course.discount/100), 0, 'COMMA', 0, 'POINT') : detail.unitPrice}"></td>
+                                <td th:text="${detail.course.instructor != null ? detail.course.instructor.fullName : 'N/A'}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end mt-3">
+            <a th:href="@{/admin/orders}" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-arrow-left"></i> Back to Orders
+            </a>
+        </div>
+    </div>
 </div>

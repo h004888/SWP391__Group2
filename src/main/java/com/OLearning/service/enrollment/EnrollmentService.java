@@ -1,17 +1,23 @@
 package com.OLearning.service.enrollment;
 
-import com.OLearning.dto.enrollment.EnrollmentDTO;
-import com.OLearning.entity.Course;
-import com.OLearning.entity.Enrollment;
-import org.springframework.data.domain.Page;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
+import com.OLearning.entity.Course;
+import com.OLearning.entity.Enrollment;
+
+import com.OLearning.dto.enrollment.EnrollmentDTO;
+import org.springframework.data.domain.Page;
+
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Map;
 
 @Service
 public interface EnrollmentService {
+    List<Course> getCoursesByUserId(Long userId);
+    boolean hasEnrolled(Long userId, Long courseId);
+
     boolean unblockEnrollment(int enrollmentId);
     int enrollmentCount();
 

@@ -25,11 +25,11 @@ public class CourseMaintenance {
 
     @ManyToOne
     @JoinColumn(name = "feeId")
-    private Fees fee;
+    private Fee fee;
 
     @ManyToOne
     @JoinColumn(name = "orderId")
-    private Order orders;
+    private Order order;
 
     private LocalDate monthYear;
     private Long enrollmentCount;

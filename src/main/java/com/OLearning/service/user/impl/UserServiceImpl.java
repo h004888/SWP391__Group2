@@ -13,6 +13,7 @@ import com.OLearning.repository.UserRepository;
 import com.OLearning.service.email.EmailService;
 import com.OLearning.service.user.UserService;
 import jakarta.mail.MessagingException;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -61,13 +62,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public Page<UserDTO> searchByNameWithPagination(String keyword, Long roleId, Pageable pageable) {
         // Sử dụng repository method với pagination
-        Page<User> userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleId(keyword, roleId, pageable);
+        Page<User> userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleId(keyword, roleId,
+                pageable);
         return userPage.map(userMapper::toDTO);
     }
 
     @Override
-    public Page<UserDTO> getInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(String keyword, Long roleId, Pageable pageable) {
-        Page<User> userPage = userRepository.findInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(roleId, keyword, pageable);
+    public Page<UserDTO> getInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(String keyword, Long roleId,
+            Pageable pageable) {
+        Page<User> userPage = userRepository.findInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(roleId, keyword,
+                pageable);
         return userPage.map(userMapper::toDTO);
     }
 
@@ -78,8 +82,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<UserDTO> searchByNameAndStatusWithPagination(String keyword, Long roleId, boolean status, Pageable pageable) {
-        Page<User> userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleIdAndStatus(keyword, roleId, status, pageable);
+    public Page<UserDTO> searchByNameAndStatusWithPagination(String keyword, Long roleId, boolean status,
+            Pageable pageable) {
+        Page<User> userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleIdAndStatus(keyword, roleId,
+                status, pageable);
         return userPage.map(userMapper::toDTO);
     }
 
@@ -223,7 +229,7 @@ public class UserServiceImpl implements UserService {
     public List<UserDTO> getTopInstructorsByCourseCount(int limit) {
         // Get all instructors (roleId = 2)
         List<User> instructors = userRepository.findByRoleId(2L);
-        
+
         // Sort instructors by number of courses in descending order
         return instructors.stream()
                 .sorted((i1, i2) -> Integer.compare(
@@ -244,6 +250,13 @@ public class UserServiceImpl implements UserService {
             userPage = userRepository.findInstructorsByRoleIdOrderByCourseCountDesc(2L, pageable);
         }
         return userPage.map(userMapper::toDTO);
+    }
+
+
+    @Override
+    public boolean existsById(Long userId) {
+
+        return userRepository.existsById(userId);
     }
 
 }

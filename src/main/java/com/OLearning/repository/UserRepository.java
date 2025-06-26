@@ -15,14 +15,18 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmail(String email);
-    @Query("SELECT u FROM User u WHERE u.userId = :id")
-    Optional<User> findById(Long id);
+
     boolean existsByUsername(String username);
 
     boolean existsByEmail(String email);
 
     @Query("SELECT u FROM User u JOIN u.role r WHERE r.roleId = :roleId")
     List<User> findByRoleId(@Param("roleId") Long roleId);
+
+
+    @Query("SELECT u FROM User u WHERE u.userId = :id")
+    Optional<User> findById(Long id);
+
 
     @Query("SELECT u FROM User u JOIN u.role r WHERE r.roleId = :roleId")
     Page<User> findByRoleIdWithPagination(@Param("roleId") Long roleId, Pageable pageable);
@@ -39,10 +43,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Page<User> findByUsernameContainingIgnoreCaseAndRole_RoleIdAndStatus(String username, Long roleId, boolean status, Pageable pageable);
 
-    @Query("SELECT u FROM User u JOIN u.role r WHERE r.id = :roleId ORDER BY SIZE(u.courses) DESC")
+    @Query("SELECT u FROM User u JOIN u.role r WHERE r.roleId = :roleId ORDER BY SIZE(u.courses) DESC")
     Page<User> findInstructorsByRoleIdOrderByCourseCountDesc(@Param("roleId") Long roleId, Pageable pageable);
 
-    @Query("SELECT u FROM User u JOIN u.role r WHERE r.id = :roleId AND LOWER(u.username) LIKE LOWER(CONCAT('%', :keyword, '%')) ORDER BY SIZE(u.courses) DESC")
+    @Query("SELECT u FROM User u JOIN u.role r WHERE r.roleId = :roleId AND LOWER(u.username) LIKE LOWER(CONCAT('%', :keyword, '%')) ORDER BY SIZE(u.courses) DESC")
     Page<User> findInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(@Param("roleId") Long roleId, @Param("keyword") String keyword, Pageable pageable);
-
 }

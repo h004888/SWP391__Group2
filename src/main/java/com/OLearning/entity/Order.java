@@ -14,11 +14,12 @@ import java.util.Set;
 @Getter
 @Setter
 @ToString
+
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderId;
-    private double amount;
+    private Double amount;
     private String orderType;
     private String status;
     private LocalDateTime orderDate;
@@ -28,8 +29,12 @@ public class Order {
     @JoinColumn(name = "userId", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "orders", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<OrderDetail> orderDetails;
 
+    @OneToMany(mappedBy = "order")
+    private Set<CourseMaintenance> courseMaintenances;
 
+    @OneToMany(mappedBy = "order")
+    private Set<Enrollment> enrollments;
 }

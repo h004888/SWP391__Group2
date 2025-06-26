@@ -1,8 +1,7 @@
 package com.OLearning.config;
 
-import com.OLearning.security.CustomAuthenticationSuccessHandler;
-import com.OLearning.security.CustomOAuth2UserService;
-import com.OLearning.security.CustomUserDetailsService;
+import com.OLearning.repository.UserRepository;
+import com.OLearning.security.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,7 +19,6 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
-import com.OLearning.security.AdminAccessFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 
 @Configuration
@@ -29,7 +27,10 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
+
     private final CustomOAuth2UserService customOAuth2UserService;
+
+    private final UserRepository userRepository;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -38,12 +39,12 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationSuccessHandler authenticationSuccessHandler() {
-        return new CustomAuthenticationSuccessHandler();
+        return new CustomAuthenticationSuccessHandler(userRepository, (BCryptPasswordEncoder) passwordEncoder());
     }
 
     @Bean
     public AuthenticationFailureHandler authenticationFailureHandler() {
-        return new com.OLearning.security.CustomAuthenticationFailureHandler();
+        return new CustomAuthenticationFailureHandler();
     }
 
     @Bean
@@ -68,8 +69,12 @@ public class SecurityConfig {
                         // Cho phép truy cập public resources
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/static/**","/assets/**").permitAll()
                         .requestMatchers("/login","/dashboard_login", "/register","/forgot-password","/reset-password","/otp-verification").permitAll()
-                        .requestMatchers("/error", "/403").permitAll()
                         .requestMatchers("/home").permitAll()
+                        .requestMatchers("/error", "/403", "/fragments/**", "/myCourses/**")
+                        .permitAll()
+
+                        // Root path redirect
+                        .requestMatchers("/home/**").permitAll()
 
                         // Chỉ admin mới được truy cập /admin/**
                         .requestMatchers("/admin/**").hasRole("ADMIN")
@@ -78,8 +83,10 @@ public class SecurityConfig {
                         // Filter sẽ xử lý logic chi tiết
                         .requestMatchers("/instructordashboard/**").hasAnyRole("ADMIN", "INSTRUCTOR")
 
-                        .anyRequest().authenticated()
-                )
+                        // User có thể truy cập /user/** và /home
+                        // .requestMatchers("/home").hasAnyRole("USER","INSTRUCTOR")
+
+                        .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/perform_login")
@@ -125,7 +132,7 @@ public class SecurityConfig {
 
     @Bean
     public LogoutSuccessHandler customLogoutSuccessHandler() {
-        return new com.OLearning.security.CustomLogoutSuccessHandler();
+        return new CustomLogoutSuccessHandler();
     }
 
     @Bean

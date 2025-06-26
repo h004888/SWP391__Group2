@@ -27,4 +27,3 @@ public class PasswordResetOTP {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
-

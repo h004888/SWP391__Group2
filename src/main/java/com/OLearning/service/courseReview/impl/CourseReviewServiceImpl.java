@@ -1,6 +1,9 @@
 package com.OLearning.service.courseReview.impl;
 
 import com.OLearning.entity.CourseReview;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.OLearning.repository.CourseReviewRepository;
 import com.OLearning.service.courseReview.CourseReviewService;
 import org.springframework.beans.factory.annotation.Autowired;

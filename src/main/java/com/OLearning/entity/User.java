@@ -6,6 +6,9 @@ import lombok.*;
 import java.time.LocalDate;
 import java.util.List;
 
+import net.minidev.json.annotate.JsonIgnore;
+import org.aspectj.weaver.ast.Or;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -37,8 +40,12 @@ public class User {
     @OneToMany(mappedBy = "instructor")
     private List<Course> courses;
 
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
     private List<Order> orders;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<LessonCompletion> completions;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Notification> notifications;
@@ -51,5 +58,14 @@ public class User {
 
 //    @OneToMany(mappedBy = "user")
 //    private List<CoinTransaction> coinTransactions;
-}
 
+
+    @OneToMany(mappedBy = "user")
+    private List<CoinTransaction> coinTransactions;
+
+    @OneToMany(mappedBy = "instructor")
+    private List<Voucher> vouchers;
+
+    @OneToMany(mappedBy = "user")
+    private List<UserVoucher> userVouchers;
+}

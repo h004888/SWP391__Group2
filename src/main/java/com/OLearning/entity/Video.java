@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor
@@ -21,9 +22,15 @@ public class Video {
     private Long id;
     @Column(name = "videoUrl", nullable = false, length = 1000)
     private String videoUrl;
+
     private LocalDateTime uploadDate;
     private Integer duration;
+
     @OneToOne
     @JoinColumn(name = "lesson_id")
     private Lesson lesson;
+
+    @ManyToOne
+    @JoinColumn(name = "LessonID")
+    private Lesson videoLesson;
 }
