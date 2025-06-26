@@ -1,6 +1,7 @@
 <div th:fragment="instructorRequestTableRowContent">
     <tr th:each="request : ${listRequest}">
         <!-- Table data -->
+        <td th:text="${request.user.userId}"> </td>
         <td>
             <div class="d-flex align-items-center position-relative">
                 <!-- Image -->

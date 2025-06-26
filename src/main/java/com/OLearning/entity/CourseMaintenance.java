@@ -17,24 +17,33 @@ import java.time.LocalDateTime;
 public class CourseMaintenance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "MaintenanceID")
     private Long maintenanceId;
 
-    @ManyToOne
-    @JoinColumn(name = "courseId")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CourseID")
     private Course course;
 
-    @ManyToOne
-    @JoinColumn(name = "feeId")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "FeeID")
     private Fee fee;
 
-    @ManyToOne
-    @JoinColumn(name = "orderId")
-    private Order order;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "OrderID")
+    private Order orders;
 
+    @Column(name = "MonthYear")
     private LocalDate monthYear;
+    
+    @Column(name = "EnrollmentCount")
     private Long enrollmentCount;
+    
+    @Column(name = "Status")
     private String status;
 
+    @Column(name = "DueDate")
     private LocalDate dueDate;
+    
+    @Column(name = "SentAt")
     private LocalDateTime sentAt;
 }

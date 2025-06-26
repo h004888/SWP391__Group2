@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import com.OLearning.dto.category.CategoryDTO;
 import com.OLearning.dto.course.CourseDTO;
+import com.OLearning.entity.Category;
 import com.OLearning.entity.Course;
 import com.OLearning.entity.Order;
 import com.OLearning.entity.User;
@@ -66,8 +67,8 @@ public class HomeController {
         @GetMapping()
         public String getMethodName(Model model, @AuthenticationPrincipal UserDetails userDetails) {
                 // chia làm 2 danh sách:
-                List<CategoryDTO> firstFive = categoryService.getAllCategory().stream().limit(5).toList();
-                List<CategoryDTO> nextFive = categoryService.getAllCategory().stream().skip(5).limit(5).toList();
+                List<Category> firstFive = categoryService.findAll().stream().limit(5).toList();
+                List<Category> nextFive = categoryService.findAll().stream().skip(5).limit(5).toList();
                 List<Course> topCourses = courseService.getTopCourses().stream().limit(5).collect(Collectors.toList());
                 model.addAttribute("topCourses", topCourses);
                 model.addAttribute("topCategories", categoryService.findTop5ByOrderByIdAsc());

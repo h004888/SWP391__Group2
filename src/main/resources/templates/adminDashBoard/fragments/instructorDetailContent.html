@@ -163,7 +163,8 @@
                                         <td class="d-flex align-items-center position-relative">
                                             <div class="w-60px"><img th:src="${course.courseImg}" class="rounded" alt=""></div>
                                             <h6 class="table-responsive-title mb-0 ms-2">
-                                                <a href="#" class="stretched-link" th:text="${course.title}">Course Title</a>
+                                                <a th:href="@{/admin/course/detail/{courseId}(courseId=${course.courseId})}"
+                                                   class="stretched-link" th:text="${course.title}">Course Title</a>
                                             </h6>
                                         </td>
                                         <td th:text="${course.categoryName}">Programming</td>

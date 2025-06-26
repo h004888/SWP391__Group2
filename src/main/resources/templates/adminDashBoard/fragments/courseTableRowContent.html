@@ -1,12 +1,17 @@
 <div th:fragment="courseTableRowContent" >
     <tr th:each="course : ${listCourse}">
         <td th:text="${course.courseId}"></td>
-        <td th:text="${course.title}" class="text-bold"></td>
-        <td th:text="${course.duration == null ? 'N/A' : course.duration + ' phút'}"></td>
+        <td class="d-flex align-items-center position-relative">
+            <div class="w-60px"><img th:src="${course.courseImg}" class="rounded" alt=""></div>
+            <h6 class="table-responsive-title mb-0 ms-2">
+                <a href="#" class="stretched-link" th:text="${course.title}">Course Title</a>
+            </h6>
+        </td>
         <td th:text="${course.price != null ? #numbers.formatDecimal(course.price, 0, 'COMMA', 0, 'POINT') : 'N/A'}"></td>
         <td th:text="${course.totalLessons == null ? 'N/A' : course.totalLessons}"></td>
         <td th:text="${#temporals.format(course.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
         <td th:text="${#temporals.format(course.updatedAt, 'dd/MM/yyyy HH:mm')}"></td>
+<!--        <td th:text="${course.instructor.fullName == null ? 'N/A' : course.instructor.fullName}"></td>-->
         <td class="text-uppercase">
                          <span th:switch="${course.status}">
                              <span th:case="null" class="badge bg-secondary">

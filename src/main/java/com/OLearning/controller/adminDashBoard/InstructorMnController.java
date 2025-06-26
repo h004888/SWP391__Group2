@@ -23,11 +23,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.DayOfWeek;
@@ -282,7 +278,37 @@ public class InstructorMnController {
         model.addAttribute("totalPages", listRequest.getTotalPages());
         model.addAttribute("totalItems", listRequest.getTotalElements());
         
-        return "adminDashBoard/fragments/instructorRequestContent :: requestTableFragment";
+        return "adminDashBoard/fragments/instructorRequestTableRowContent :: instructorRequestTableRowContent";
+    }
+
+    @GetMapping("/request/pagination")
+    public String getRequestPagination(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            Model model) {
+        
+        Pageable pageable = PageRequest.of(page, size);
+        Page<InstructorRequest> listRequest = instructorRequestService.filterRequests(keyword, status, pageable);
+        
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", listRequest.getTotalPages());
+        model.addAttribute("totalItems", listRequest.getTotalElements());
+        
+        return "adminDashBoard/fragments/instructorRequestTableRowContent :: instructorRequestPagination";
+    }
+
+    @GetMapping("/request/count")
+    @ResponseBody
+    public ResponseEntity<Long> getRequestCount(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String status) {
+        
+        Pageable pageable = PageRequest.of(0, 1); // Just get count, not data
+        Page<InstructorRequest> listRequest = instructorRequestService.filterRequests(keyword, status, pageable);
+        
+        return ResponseEntity.ok(listRequest.getTotalElements());
     }
     
     @PostMapping("/sendMessage")

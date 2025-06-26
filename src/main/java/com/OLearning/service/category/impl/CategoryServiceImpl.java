@@ -8,14 +8,14 @@ import com.OLearning.service.category.CategoryService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -23,7 +23,6 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Autowired
     private CategoryRepository categoryRepository;
-
 
     public List<Category> getListCategories() {
         return categoryRepository.findAll();
@@ -35,20 +34,13 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public void deleteById(int id) {
+    public void deleteById(Long id) {
         categoryRepository.deleteById(id);
     }
 
     @Override
-    public boolean existsById(int id) {
+    public boolean existsById(Long id) {
         return categoryRepository.existsById(id);
-    }
-
-    @Override
-    public List<CategoryDTO> getAllCategory() {
-        return categoryRepository.findAll().stream()
-                .map(c -> new CategoryDTO(c.getName(), c.getId()))
-                .collect(Collectors.toList());
     }
 
     @Override
@@ -67,7 +59,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Category findById(int id) {
+    public Optional<Category> findById(Long id) {
         return categoryRepository.findById(id);
     }
 
@@ -83,7 +75,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Transactional
     @Override
-    public void updateCategory(int id, String name) {
+    public void updateCategory(Long id, String name) {
         categoryRepository.updateCategory(id, name);
     }
 
@@ -124,18 +116,16 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public Page<Category> findByNameContainingIgnoreCase(String name, Pageable pageable) {
+        return categoryRepository.findByNameContainingIgnoreCase(name, pageable);
+    }
+
+    @Override
     public Page<Category> filterCategories(String name, String sort, Pageable pageable) {
-        Sort sortObj = Sort.unsorted();
-        if ("asc".equalsIgnoreCase(sort)) {
-            sortObj = Sort.by("name").ascending();
-        } else if ("desc".equalsIgnoreCase(sort)) {
-            sortObj = Sort.by("name").descending();
-        }
-        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortObj);
-        if (name != null && !name.trim().isEmpty()) {
-            return categoryRepository.findByNameContainingIgnoreCase(name, sortedPageable);
+        if (name == null || name.isEmpty()) {
+            return categoryRepository.findAll(pageable);
         } else {
-            return categoryRepository.findAll(sortedPageable);
+            return categoryRepository.findByNameContainingIgnoreCase(name, pageable);
         }
     }
 }

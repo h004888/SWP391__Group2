@@ -19,12 +19,15 @@ public interface EnrollmentService {
     boolean hasEnrolled(Long userId, Long courseId);
 
     boolean unblockEnrollment(int enrollmentId);
+
     int enrollmentCount();
 
     Map<String, Long> getEnrollmentsByCategoryAndDateRange(LocalDate startDate, LocalDate endDate);
 
     Long getTotalStudents();
+
     Enrollment getEnrollmentById(int erollmentId);
+
     Long getCompletedEnrollments();
 
     Long getStudentCountByInstructorId(Long instructorId);
@@ -37,5 +40,6 @@ public interface EnrollmentService {
     Page<EnrollmentDTO> getEnrollmentsByInstructorId(Long userId, int page, int size);
 
     boolean blockEnrollment(int enrollmentId);
+
     EnrollmentDTO getRequestById(int enrollmentId);
 }

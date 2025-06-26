@@ -14,27 +14,33 @@ import java.util.Set;
 @Getter
 @Setter
 @ToString
-
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "OrderID")
     private Long orderId;
-    private Double amount;
+    
+    @Column(name = "Amount")
+    private double amount;
+    
+    @Column(name = "OrderType")
     private String orderType;
+    
+    @Column(name = "Status")
     private String status;
+    
+    @Column(name = "OrderDate")
     private LocalDateTime orderDate;
+    
+    @Column(name = "RefCode")
     private String refCode;
 
-    @ManyToOne
-    @JoinColumn(name = "userId", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "UserID", nullable = false)
     private User user;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<OrderDetail> orderDetails;
 
-    @OneToMany(mappedBy = "order")
-    private Set<CourseMaintenance> courseMaintenances;
 
-    @OneToMany(mappedBy = "order")
-    private Set<Enrollment> enrollments;
 }

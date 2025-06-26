@@ -1,6 +1,5 @@
 package com.OLearning.config;
 
-import com.OLearning.repository.UserRepository;
 import com.OLearning.security.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +19,7 @@ import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import com.OLearning.repository.UserRepository;
 
 @Configuration
 @EnableWebSecurity
@@ -80,13 +80,10 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
                         // Cho phép cả ADMIN và INSTRUCTOR truy cập /instructordashboard/**
-                        // Filter sẽ xử lý logic chi tiết
                         .requestMatchers("/instructordashboard/**").hasAnyRole("ADMIN", "INSTRUCTOR")
 
-                        // User có thể truy cập /user/** và /home
-                        // .requestMatchers("/home").hasAnyRole("USER","INSTRUCTOR")
-
-                        .anyRequest().authenticated())
+                        .anyRequest().authenticated()
+                )
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/perform_login")

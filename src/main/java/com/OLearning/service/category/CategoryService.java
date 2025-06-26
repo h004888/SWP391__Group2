@@ -8,32 +8,33 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public interface CategoryService {
 
     Category findByName(String name);
 
-    Category findById(int id);
+    Optional<Category> findById(Long id);
 
     boolean existsByName(String name);
 
-    boolean existsById(int id);
+    boolean existsById(Long id);
 
     List<Category> findAll();
 
     Page<Category> findAll(Pageable pageable);
 
-    List<CategoryDTO> getAllCategory();
+
     List<Category> findTop5ByOrderByIdAsc();
 
     Category save(Category categories);
 
-    void deleteById(int id);
+    void deleteById(Long id);
 
     void delete(Category categories);
 
-    void updateCategory(int id, String name);
+    void updateCategory(Long id, String name);
 
     List<Category> findByNameContaining(String name);
 
@@ -42,6 +43,8 @@ public interface CategoryService {
     List<Category> filterCategories(String name, String select);
 
     Page<Category> findByNameContaining(String name, Pageable pageable);
+
+    Page<Category> findByNameContainingIgnoreCase(String name, Pageable pageable);
 
     Page<Category> filterCategories(String name, String sort, Pageable pageable);
 

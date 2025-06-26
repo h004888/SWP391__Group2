@@ -22,18 +22,26 @@ public class Quiz {
     @Column(name = "QuizID")
     private Long id;
 
+    @Column(name = "Title")
     private String title;
+    
+    @Column(name = "Description")
     private String description;
+    
+    @Column(name = "TimeLimit")
     private Integer timeLimit; // in minutes, cai nay se gan truc tiep vao duration cua thang video
 
-    @OneToOne
-    @JoinColumn(name = "lesson_id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "LessonID")
     private Lesson lesson;
 
-    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<QuizQuestion> questions = new ArrayList<>();
 
+    @Column(name = "CreatedAt")
     private LocalDateTime createdAt;
+    
+    @Column(name = "UpdatedAt")
     private LocalDateTime updatedAt;
 
     @PrePersist

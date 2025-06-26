@@ -247,10 +247,14 @@
                                                         <div class="col-md-6">
                                                             <h5 class="mb-1">
                                                                 <a href="#" th:text="${lesson.title}"
-                                                                    th:if="${lesson.contentType == 'video'}"
+                                                                    th:if="${lesson.contentType == 'video' && lesson.video != null}"
                                                                     th:attr="data-videoid=${lesson.video.videoUrl}"
                                                                     class="lesson-video-link text-decoration-none"
                                                                     onclick="playVideo(this); return false;"></a>
+                                                                <a href="#" th:text="${lesson.title}"
+                                                                    th:if="${lesson.contentType == 'video' && lesson.video == null}"
+                                                                    class="lesson-video-link text-decoration-none"
+                                                                    onclick="alert('Video not available'); return false;"></a>
                                                                 <a href="#" th:text="${lesson.title}"
                                                                     th:if="${lesson.contentType == 'quiz'}"
                                                                     th:attr="data-bs-toggle='modal', data-bs-target=${'#quizModal' + lesson.quiz.id}"

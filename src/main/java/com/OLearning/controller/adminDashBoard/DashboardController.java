@@ -24,6 +24,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 
 @Controller
@@ -100,40 +101,6 @@ public class DashboardController {
         return courseMaintenanceService.getMaintenanceRevenueByDateRange(startDate, endDate);
     }
 
-    @GetMapping("/export-all")
-    public void exportAllToExcel(
-            @RequestParam("startDate") String startDateStr,
-            @RequestParam("endDate") String endDateStr,
-            HttpServletResponse response) throws IOException {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate startDate = LocalDate.parse(startDateStr, formatter);
-        LocalDate endDate = LocalDate.parse(endDateStr, formatter);
-        
-        Map<String, Double> revenueData = ordersService.getRevenueByDateRange(startDate, endDate);
-        Map<String, Long> enrollmentData = enrollmentService.getEnrollmentsByCategoryAndDateRange(startDate, endDate);
-        Map<String, Object> maintenanceRevenueData = courseMaintenanceService.getMaintenanceRevenueByDateRange(startDate, endDate);
-        
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        response.setHeader("Content-Disposition", "attachment; filename=dashboard_report_enhanced.xlsx");
-        
-        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
-            // Tạo styles
-            CellStyle headerStyle = createHeaderStyle(workbook);
-            CellStyle dataStyle = createDataStyle(workbook);
-            CellStyle numberStyle = createNumberStyle(workbook);
-            CellStyle titleStyle = createTitleStyle(workbook);
-
-            // Tạo các sheet
-            createOverviewSheet(workbook, headerStyle, dataStyle, numberStyle, titleStyle);
-            createRevenueSheet(workbook, revenueData, headerStyle, dataStyle, numberStyle, titleStyle);
-            createEnrollmentSheet(workbook, enrollmentData, headerStyle, dataStyle, numberStyle, titleStyle);
-            createMaintenanceSheet(workbook, maintenanceRevenueData, headerStyle, dataStyle, numberStyle, titleStyle);
-            
-            workbook.write(response.getOutputStream());
-        }
-    }
-
-
     @GetMapping("/export-excel-charts")
     public void exportExcelWithCharts(
             @RequestParam("startDate") String startDateStr,
@@ -148,7 +115,8 @@ public class DashboardController {
         Map<String, Object> maintenanceRevenueData = courseMaintenanceService.getMaintenanceRevenueByDateRange(startDate, endDate);
 
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        response.setHeader("Content-Disposition", "attachment; filename=dashboard_report_charts.xlsx");
+        String randomSuffix = UUID.randomUUID().toString().substring(0, 8);
+        response.setHeader("Content-Disposition", "attachment; filename=dashboard_report_charts_" + randomSuffix + ".xlsx");
 
         try (XSSFWorkbook workbook = new XSSFWorkbook()) {
             createRevenueSheetWithChart(workbook, revenueData);

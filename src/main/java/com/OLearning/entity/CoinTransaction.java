@@ -1,28 +1,40 @@
 package com.OLearning.entity;
 
-
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "CoinTransaction")
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
+@ToString
 public class CoinTransaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "TransactionID")
     private Long transactionId;
-    private BigDecimal amount;
-    private String transactionType;
-    private String status;
-    private String note;
-    private LocalDateTime createdAt ;
 
-    @ManyToOne
-    @JoinColumn(name = "userID", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "UserID", nullable = false)
     private User user;
-}
+
+    @Column(name = "Amount")
+    private BigDecimal amount;
+
+    @Column(name = "TransactionType")
+    private String transactionType;
+
+    @Column(name = "Status")
+    private String status;
+
+    @Column(name = "Note")
+    private String note;
+
+    @Column(name = "CreatedAt")
+    private LocalDateTime createdAt;
+} 

@@ -104,29 +104,6 @@ public class LoginController {
         return "redirect:/login";
     }
 
-
-//    @GetMapping("/select-role")
-//    public String selectRolePage(@RequestParam("userId") Long userId, Model model) {
-//        model.addAttribute("userId", userId);
-//        model.addAttribute("roles", userServiceImpl.getListRole());
-//        return "loginPage/selectRole";
-//    }
-//
-//    @PostMapping("/assign-role")
-//    public String assignRole(@RequestParam("role") String role,
-//                             @RequestParam("userId") Long userId,
-//                             RedirectAttributes redirectAttributes) {
-//        try {
-//            userServiceImpl.assignRoleToUser(userId, role);
-//            redirectAttributes.addFlashAttribute("success",
-//                    "Registration successful! Welcome to OLearning, " + userServiceImpl.getInfoUser(userId).get().getFullName() + "!");
-//            return "redirect:/login";
-//        } catch (Exception e) {
-//            redirectAttributes.addFlashAttribute("error", "You need selected role before.");
-//            return "redirect:/select-role?userId=" + userId;
-//        }
-//    }
-
     @GetMapping("/403")
     public String errorPage() {
         return "loginPage/403";
@@ -228,5 +205,25 @@ public class LoginController {
                     "Có lỗi xảy ra khi đổi mật khẩu!");
             return "redirect:/reset-password?email=" + email + "&otp=" + otp;
         }
+    }
+
+    @GetMapping("/change-password-oauth2")
+    public String getResetPasswordOauth2Page() {
+        return "loginPage/normalLogin/changePassword-Oauth2";
+    }
+
+    @PostMapping("/change-password-oauth2")
+    public String handleResetPasswordOauth2(@RequestParam String newPassword,
+                                            @RequestParam String confirmPassword,
+                                            java.security.Principal principal,
+                                            RedirectAttributes redirectAttributes) {
+        if (!newPassword.equals(confirmPassword)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Mật khẩu xác nhận không khớp!");
+            return "redirect:/change-password-oauth2";
+        }
+        String email = principal.getName();
+        userServiceImpl.updatePasswordByEmail(email, newPassword);
+        redirectAttributes.addFlashAttribute("successMessage", "Đổi mật khẩu thành công!");
+        return "redirect:/home";
     }
 }

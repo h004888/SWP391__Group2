@@ -14,6 +14,7 @@ public class UserDetailMapper {
 
     @Autowired
     private CourseMapper courseMapper;
+
     public UserDetailDTO toDetailDTO(User user) {
         UserDetailDTO dto = new UserDetailDTO();
         dto.setUserId(user.getUserId());

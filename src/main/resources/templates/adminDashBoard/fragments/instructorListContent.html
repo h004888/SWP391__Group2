@@ -74,7 +74,7 @@
                                             </div>
                                             <!-- Info -->
                                             <div class="ms-0 ms-sm-2 mt-2 mt-sm-0">
-                                                <h5 class="mb-0" th:text="${u.userName}"><a
+                                                <h5 class="mb-0" th:text="${u.fullName}"><a
                                                         th:href="@{/admin/mnInstructors/viewInfo/{userId}(userId=${u.userId})}">Lori
                                                     Stevens</a></h5>
                                                 <p class="mb-0 small" th:text="${u.email}"></p>
@@ -198,7 +198,8 @@
                                 <!-- Table head -->
                                 <thead>
                                 <tr>
-                                    <th scope="col" class="border-0 rounded-start">Instructor Name</th>
+                                    <th scope="col" class="border-0 rounded-start">ID</th>
+                                    <th scope="col" class="border-0 ">Instructor Name</th>
                                     <th scope="col" class="border-0">PersonalSkill</th>
                                     <th scope="col" class="border-0">Courses</th>
                                     <th scope="col" class="border-0">Total students</th>
@@ -211,6 +212,7 @@
                                 <!-- Table row -->
                                 <tr th:each="u : ${listInstructor}">
                                     <!-- Table data -->
+                                    <td th:text="${u.userId}" class="text-center text-sm-start">1</td>
                                     <td>
                                         <div class="d-flex align-items-center position-relative">
                                             <!-- Image -->
@@ -219,7 +221,7 @@
                                             </div>
                                             <div class="mb-0 ms-2">
                                                 <!-- Title -->
-                                                <h6 class="mb-0" th:text="${u.userName}"><a
+                                                <h6 class="mb-0" th:text="${u.fullName}"><a
                                                         th:href="@{/admin/mnInstructors/viewInfo/{userId}(userId=${u.userId})}"
                                                         class="stretched-link">Lori Stevens</a></h6>
                                             </div>

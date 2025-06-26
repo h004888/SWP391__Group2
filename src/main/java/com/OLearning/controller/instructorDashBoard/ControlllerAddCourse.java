@@ -141,10 +141,10 @@ public class ControlllerAddCourse {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
 
-        Integer categoryId = null;
+        Long categoryId = null;
         if (category != null && !category.isEmpty()) {
             try {
-                categoryId = Integer.parseInt(category);
+                categoryId = Long.parseLong(category);
             } catch (NumberFormatException e) {
             }
         }
@@ -507,9 +507,10 @@ public class ControlllerAddCourse {
             // Update lesson
             Lesson lesson = lessonRepository.findById(lessonId).orElseThrow();
             lesson.setContentType("video");
-            lesson.setDuration(videoDTO.getDuration());
+            
             lesson.setUpdatedAt(LocalDateTime.now());
             lesson.setVideo(video);
+            lesson.setDuration(videoDTO.getDuration());
             lessonRepository.save(lesson);
 
             // Update course totals
@@ -758,15 +759,14 @@ public class ControlllerAddCourse {
                 if (videoFile != null && !videoFile.isEmpty()) {
                     VideoDTO videoDTO = new VideoDTO();
                     videoDTO.setVideoUrl(videoFile);
-                    videoDTO.setDuration(duration);
+                    
+                    // Cập nhật duration nếu có
+                    if (duration != null) {
+                        lesson.setDuration(duration);
+                    }
                     
                     Video video = videoService.saveVideo(videoDTO, lessonId);
                     lesson.setVideo(video);
-                }
-                
-                // Cập nhật duration nếu có
-                if (duration != null) {
-                    lesson.setDuration(duration);
                 }
                 
                 // Xóa quiz nếu có

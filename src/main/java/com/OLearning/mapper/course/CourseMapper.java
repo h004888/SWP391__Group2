@@ -16,8 +16,8 @@ public class CourseMapper {
         Course course = new Course();
         course.setTitle(dto.getTitle());
         course.setDescription(dto.getDescription());
-        course.setPrice(dto.getPrice() != null ? BigDecimal.valueOf(dto.getPrice()) : null);
-        course.setDiscount(dto.getDiscount() != null ? BigDecimal.valueOf(dto.getDiscount()) : null);
+        course.setPrice(dto.getPrice() != null ? dto.getPrice() : null);
+        course.setDiscount(dto.getDiscount() != null ? dto.getDiscount() : null);
         course.setCreatedAt(LocalDateTime.now());
         course.setUpdatedAt(LocalDateTime.now());
         return course;
@@ -29,36 +29,19 @@ public class CourseMapper {
                 course.getCourseId(),
                 course.getTitle(),
                 course.getDescription(),
-                course.getPrice(),
-                course.getDiscount(),
+                course.getPrice() != null ? course.getPrice().doubleValue() : null,
+                course.getDiscount() != null ? course.getDiscount().doubleValue() : null,
                 course.getCourseImg(),
-                course.getDuration(),
                 course.getIsFree(),
-                course.getCategory() != null ? course.getCategory().getName() : null,
-                course.getTotalLessons(),
+                course.getCategory() != null ? course.getCategory().getName() : "N/A",
+                course.getListOfChapters().size(),
                 course.getCreatedAt(),
                 course.getUpdatedAt(),
+                course.getInstructor(),
+                course.getStatus(),
                 course.getCourseLevel(),
-                course.getAverageRating(),
-                course.getReviewCount(),
-                course.totalStudentEnrolled(),
-                course.getStatus()
+                course.getEnrollments() != null ? course.getEnrollments().size() : 0
         );
-    }
-
-    public static Course toEntity(CourseDTO dto) {
-        if (dto == null)
-            return null;
-
-        Course course = new Course();
-        course.setCourseId(dto.getCourseId());
-        course.setTitle(dto.getTitle());
-        course.setDescription(dto.getDescription());
-        course.setPrice(dto.getPrice());
-        course.setDiscount(dto.getDiscount());
-        course.setCreatedAt(LocalDateTime.now());
-        course.setUpdatedAt(LocalDateTime.now());
-        return course;
     }
     //hien thi course
     public CourseDTO MapCourseDTO(Course course) {
@@ -77,7 +60,8 @@ public class CourseMapper {
         } else {
             courseDTO.setCategoryName("N/A");
         }
-        courseDTO.setTotalStudentEnrolled(course.getEnrollments().size());
+        courseDTO.setInstructor(course.getInstructor());
+        courseDTO.setTotalStudentEnrolled(course.getEnrollments() != null ? course.getEnrollments().size() : 0);
         courseDTO.setIsFree(course.getIsFree());
         return courseDTO;
     }
@@ -86,7 +70,7 @@ public class CourseMapper {
         course.setTitle(dto.getTitle());
         course.setDescription(dto.getDescription());
         course.setCreatedAt(LocalDateTime.now());
-        course.setPrice(dto.getPrice() != null ? BigDecimal.valueOf(dto.getPrice()) : null);
+        course.setPrice(dto.getPrice());
         course.setCourseLevel(dto.getCourseLevel());
         // Không set averageRating, reviewCount, duration vì tính tự động
         return course;

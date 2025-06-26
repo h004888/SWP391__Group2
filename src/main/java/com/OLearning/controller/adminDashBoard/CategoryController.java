@@ -75,18 +75,22 @@ public class CategoryController {
 
     }
     @GetMapping("/category/showmore")
-    public String showmore(@RequestParam("id") int id, Model model) {
-        Category category = categoryService.findById(id);
-        model.addAttribute("category", category);
-        model.addAttribute("coursesList", category.getCourses());
-        model.addAttribute(fragmentContent, "adminDashboard/fragments/showMore :: showMore");
+    public String showmore(@RequestParam("id") Long id, Model model) {
+        Category category = categoryService.findById(id).orElse(null);
+        if (category != null) {
+            model.addAttribute("category", category);
+            model.addAttribute("coursesList", category.getCourses());
+            model.addAttribute(fragmentContent, "adminDashboard/fragments/showMore :: showMore");
+        } else {
+            model.addAttribute("errorMessage", "Category not found");
+        }
         return "adminDashboard/index";
 
     }
 
     @GetMapping("/category/delete")
     @ResponseBody
-    public String deleteCategory(@RequestParam("id") int id, Model model) {
+    public String deleteCategory(@RequestParam("id") Long id, Model model) {
         try {
             if (categoryService.existsById(id)) {
                 categoryService.deleteById(id);
@@ -127,12 +131,12 @@ public class CategoryController {
     }
 
     @GetMapping("/category/edit")
-    public String editCategory(@RequestParam("id") int id,
+    public String editCategory(@RequestParam("id") Long id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "") String sort,
             @RequestParam(defaultValue = "") String name,
             Model model) {
-        Category category = categoryService.findById(id);
+        Category category = categoryService.findById(id).orElse(null);
         if (category != null) {
             model.addAttribute("category", category);
             model.addAttribute("currentPage", page);
@@ -146,14 +150,14 @@ public class CategoryController {
     }
 
     @PostMapping("/category/edit")
-    public String editCategory(@RequestParam("id") int id,
+    public String editCategory(@RequestParam("id") Long id,
             @RequestParam("name") String name,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "") String sort,
             @RequestParam(defaultValue = "") String search,
             @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
             Model model) {
-        Category category = categoryService.findById(id);
+        Category category = categoryService.findById(id).orElse(null);
 
         if (category == null) {
             model.addAttribute("errorMessage", "Category not found");

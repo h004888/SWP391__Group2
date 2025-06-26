@@ -402,7 +402,7 @@
                                                                     class="lesson-video-link text-decoration-none"
                                                                     onclick="playVideo(this); return false;"></a>
                                                                 <a href="#" th:text="${lesson.title}"
-                                                                    th:if="${lesson.contentType == 'quiz'}"
+                                                                    th:if="${lesson.contentType == 'quiz' and lesson.quiz != null}"
                                                                     th:attr="data-bs-toggle='modal', data-bs-target=${'#quizModal' + lesson.quiz.id}"
                                                                     class="lesson-quiz-link custom-link"></a>
                                                             </h5>

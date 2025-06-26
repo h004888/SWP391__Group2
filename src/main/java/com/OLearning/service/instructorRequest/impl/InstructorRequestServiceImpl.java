@@ -56,7 +56,7 @@ public class InstructorRequestServiceImpl implements InstructorRequestService {
         
         // Update user role to instructor
         User user = request.getUser();
-        Role instructorRole = roleRepository.findById(3L) // Assuming 3L is the instructor role ID
+        Role instructorRole = roleRepository.findById(2L) // Assuming 2L is the instructor role ID
                 .orElseThrow(() -> new RuntimeException("Instructor role not found"));
         user.setRole(instructorRole);
         userRepository.save(user);

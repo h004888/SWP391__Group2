@@ -19,5 +19,4 @@ public interface LessonCompletionRepository extends JpaRepository<LessonCompleti
 
         boolean existsByUserUserIdAndLessonLessonId(Long userId, Long lessonId);
 
-
 }
