@@ -75,7 +75,7 @@ public class OrdersServiceImpl implements OrdersService {
 
     @Override
     public List<OrderDetail> getOrderDetailsByOrderId(Long orderId) {
-        return orderDetailRepository.findByOrdersOrderId(orderId);
+        return orderDetailRepository.findByOrderOrderId(orderId);
     }
 
     @Override

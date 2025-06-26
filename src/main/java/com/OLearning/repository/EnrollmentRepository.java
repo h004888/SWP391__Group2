@@ -6,20 +6,25 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.OLearning.entity.Enrollment;
 
 import jakarta.transaction.Transactional;
 
+import java.util.List;
+
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+
 @Repository
 @Transactional
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer> {
+    List<Enrollment> findByUserUserId(Long userId);
 
     @Query("SELECT COUNT(e) FROM Enrollment e WHERE e.course.courseId = :courseId AND YEAR(e.enrollmentDate) = :year AND MONTH(e.enrollmentDate) = :month")
     Long countByCourseIdAndMonth(Long courseId, int year, int month);
@@ -63,4 +68,5 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
 
     @Query("SELECT e FROM Enrollment e WHERE e.enrollmentId = :enrollmentId")
     Optional<Enrollment> findByEnrollmentId(int enrollmentId);
+    boolean existsByUser_UserIdAndCourse_CourseId(Long userId, Long courseId);
 }

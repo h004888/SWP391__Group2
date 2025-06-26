@@ -8,14 +8,15 @@ import org.springframework.stereotype.Component;
 public class CourseDetailMapper {
 
     public CourseDetailDTO toDTO(Course course) {
-        if (course == null) return null;
+        if (course == null)
+            return null;
 
         CourseDetailDTO dto = new CourseDetailDTO();
         dto.setCourseId(course.getCourseId());
         dto.setTitle(course.getTitle());
         dto.setDescription(course.getDescription());
-        dto.setPrice(course.getPrice());
-        dto.setDiscount(course.getDiscount());
+        dto.setPrice(course.getPrice() != null ? course.getPrice() : 0.0);
+        dto.setDiscount(course.getDiscount() != null ? course.getDiscount() : 0.0);
         dto.setCourseImg(course.getCourseImg());
         dto.setCreatedAt(course.getCreatedAt());
         dto.setUpdatedAt(course.getUpdatedAt());
@@ -26,6 +27,7 @@ public class CourseDetailMapper {
         dto.setVideoUrlPreview(course.getVideoUrlPreview());
         dto.setCourseLevel(course.getCourseLevel());
         dto.setListOfChapters(course.getListOfChapters());
+        dto.setCategory(course.getCategory());
         return dto;
     }
 

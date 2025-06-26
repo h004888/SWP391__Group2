@@ -1,8 +1,8 @@
 package com.OLearning.mapper.order;
 
 import com.OLearning.dto.order.OrdersDTO;
+
 import com.OLearning.entity.Order;
-import com.OLearning.entity.OrderDetail;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -15,7 +15,7 @@ public class OrdersMapper {
         dto.setOrderId(orders.getOrderId());
         dto.setAmount(orders.getAmount());
         dto.setOrderType(orders.getOrderType());
-        dto.setStatus(orders.getStatus().toUpperCase());//upperCase status
+        dto.setStatus(orders.getStatus());
         dto.setOrderDate(orders.getOrderDate());
         dto.setRefCode(orders.getRefCode());
         dto.setUsername(orders.getUser() != null ? orders.getUser().getUsername() : null);

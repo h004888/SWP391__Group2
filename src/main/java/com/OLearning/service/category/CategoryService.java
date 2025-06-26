@@ -1,11 +1,11 @@
 package com.OLearning.service.category;
 
+import com.OLearning.dto.category.CategoryDTO;
 import com.OLearning.entity.Category;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import com.OLearning.dto.category.CategoryDTO;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +24,7 @@ public interface CategoryService {
     List<Category> findAll();
 
     Page<Category> findAll(Pageable pageable);
+
 
     List<Category> findTop5ByOrderByIdAsc();
 
@@ -46,4 +47,5 @@ public interface CategoryService {
     Page<Category> findByNameContainingIgnoreCase(String name, Pageable pageable);
 
     Page<Category> filterCategories(String name, String sort, Pageable pageable);
+
 }

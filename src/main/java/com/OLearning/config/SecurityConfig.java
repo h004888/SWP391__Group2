@@ -69,8 +69,12 @@ public class SecurityConfig {
                         // Cho phép truy cập public resources
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/static/**","/assets/**").permitAll()
                         .requestMatchers("/login","/dashboard_login", "/register","/forgot-password","/reset-password","/otp-verification").permitAll()
-                        .requestMatchers("/error", "/403").permitAll()
                         .requestMatchers("/home").permitAll()
+                        .requestMatchers("/error", "/403", "/fragments/**", "/myCourses/**")
+                        .permitAll()
+
+                        // Root path redirect
+                        .requestMatchers("/home/**").permitAll()
 
                         // Chỉ admin mới được truy cập /admin/**
                         .requestMatchers("/admin/**").hasRole("ADMIN")

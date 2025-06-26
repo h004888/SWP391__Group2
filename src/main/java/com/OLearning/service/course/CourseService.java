@@ -7,6 +7,8 @@ import com.OLearning.dto.course.CourseMediaDTO;
 import com.OLearning.entity.Course;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import com.OLearning.entity.Chapter;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,7 +17,12 @@ import java.util.Optional;
 @Service
 public interface CourseService {
 
+        Course getCourseById(Long id);
     Page<CourseDTO> getAllCourses(Pageable pageable);
+
+        List<Chapter> getChaptersWithLessons(Long courseId);
+
+        List<Course> getTopCourses();
 
     Optional<CourseDetailDTO> getDetailCourse(Long id);
 
@@ -33,6 +40,15 @@ public interface CourseService {
     Course findCourseById(Long courseId);
 
     Course createCourseStep1(Long courseId, AddCourseStep1DTO addCourseStep1DTO);
+
+        Page<CourseDTO> searchCoursesGrid(
+                        List<Long> categoryIds,
+                        List<String> priceFilters,
+                        List<String> levels,
+                        String sortBy,
+                        String keyword,
+                        int page,
+                        int size);
 
     AddCourseStep1DTO draftCourseStep1(Course course);
 

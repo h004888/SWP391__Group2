@@ -6,6 +6,8 @@ import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.login.RegisterDTO;
 import com.OLearning.entity.Role;
 import com.OLearning.entity.User;
+
+import org.mapstruct.control.MappingControl.Use;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -53,11 +55,12 @@ public interface UserService {
     void assignRoleToUser(Long userId, String roleName);
 
     List<UserDTO> getTopInstructorsByCourseCount(int limit);
-    
+
     UserDTO getUserByEmail(String username);
 
     Page<UserDTO> filterInstructors(String keyword, Pageable pageable);
 
+    boolean existsById(Long userId);
     User findById(Long id);
 
     void updatePasswordByEmail(String email, String newPassword);

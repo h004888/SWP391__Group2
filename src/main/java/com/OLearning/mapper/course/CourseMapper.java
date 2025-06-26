@@ -6,20 +6,42 @@ import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.entity.Course;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Component
+@Component("courseMapper")
 public class CourseMapper {
     // Mapper ve de save course
     public Course MapCourseAdd(CourseAddDTO dto) {
         Course course = new Course();
         course.setTitle(dto.getTitle());
         course.setDescription(dto.getDescription());
-        course.setPrice(dto.getPrice());
-        course.setDiscount(dto.getDiscount());
+        course.setPrice(dto.getPrice() != null ? dto.getPrice() : null);
+        course.setDiscount(dto.getDiscount() != null ? dto.getDiscount() : null);
         course.setCreatedAt(LocalDateTime.now());
         course.setUpdatedAt(LocalDateTime.now());
         return course;
+    }
+    public static CourseDTO toDTO(Course course) {
+        if (course == null)  {return null;}
+
+        return new CourseDTO(
+                course.getCourseId(),
+                course.getTitle(),
+                course.getDescription(),
+                course.getPrice() != null ? course.getPrice().doubleValue() : null,
+                course.getDiscount() != null ? course.getDiscount().doubleValue() : null,
+                course.getCourseImg(),
+                course.getIsFree(),
+                course.getCategory() != null ? course.getCategory().getName() : "N/A",
+                course.getListOfChapters().size(),
+                course.getCreatedAt(),
+                course.getUpdatedAt(),
+                course.getInstructor(),
+                course.getStatus(),
+                course.getCourseLevel(),
+                course.getEnrollments() != null ? course.getEnrollments().size() : 0
+        );
     }
     //hien thi course
     public CourseDTO MapCourseDTO(Course course) {
@@ -50,6 +72,7 @@ public class CourseMapper {
         course.setCreatedAt(LocalDateTime.now());
         course.setPrice(dto.getPrice());
         course.setCourseLevel(dto.getCourseLevel());
+        // Không set averageRating, reviewCount, duration vì tính tự động
         return course;
     }
     //lay ve thong tin course basic khi previous step
@@ -59,7 +82,7 @@ public class CourseMapper {
         dto.setTitle(course.getTitle());
         dto.setDescription(course.getDescription());
         dto.setCategoryName(course.getCategory().getName());
-        dto.setPrice(course.getPrice());
+        dto.setPrice(course.getPrice() != null ? course.getPrice().doubleValue() : null);
         dto.setCourseLevel(course.getCourseLevel());
         return dto;
     }

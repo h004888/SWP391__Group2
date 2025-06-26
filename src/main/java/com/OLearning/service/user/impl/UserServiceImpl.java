@@ -18,6 +18,7 @@ import com.OLearning.repository.UserRepository;
 import com.OLearning.service.email.EmailService;
 import com.OLearning.service.user.UserService;
 import jakarta.mail.MessagingException;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -280,6 +281,13 @@ public class UserServiceImpl implements UserService {
         } else {
             throw new RuntimeException("User not found with email: " + email);
         }
+    }
+
+
+    @Override
+    public boolean existsById(Long userId) {
+
+        return userRepository.existsById(userId);
     }
 
 }
