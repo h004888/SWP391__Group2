@@ -41,7 +41,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -142,10 +141,10 @@ public class ControlllerAddCourse {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
 
-        Integer categoryId = null;
+        Long categoryId = null;
         if (category != null && !category.isEmpty()) {
             try {
-                categoryId = Integer.parseInt(category);
+                categoryId = Long.parseLong(category);
             } catch (NumberFormatException e) {
             }
         }
@@ -498,8 +497,8 @@ public class ControlllerAddCourse {
 
             // Đảm bảo duration không null
             if (videoDTO.getDuration() == null) {
-                videoDTO.setDuration(LocalTime.of(0, 0));
-                System.out.println("Duration was null, set to default 00:00");
+                videoDTO.setDuration(0);
+                System.out.println("Duration was null, set to default 0");
             }
 
             // Save video and associate with lesson
@@ -509,14 +508,9 @@ public class ControlllerAddCourse {
             Lesson lesson = lessonRepository.findById(lessonId).orElseThrow();
             lesson.setContentType("video");
             
-            // Convert LocalTime duration to Integer minutes for lesson
-            if (videoDTO.getDuration() != null) {
-                int totalMinutes = videoDTO.getDuration().getHour() * 60 + videoDTO.getDuration().getMinute();
-                lesson.setDuration(totalMinutes);
-            }
-            
             lesson.setUpdatedAt(LocalDateTime.now());
             lesson.setVideo(video);
+            lesson.setDuration(videoDTO.getDuration());
             lessonRepository.save(lesson);
 
             // Update course totals
@@ -766,20 +760,13 @@ public class ControlllerAddCourse {
                     VideoDTO videoDTO = new VideoDTO();
                     videoDTO.setVideoUrl(videoFile);
                     
-                    // Convert Integer duration to LocalTime
+                    // Cập nhật duration nếu có
                     if (duration != null) {
-                        int hours = duration / 60;
-                        int minutes = duration % 60;
-                        videoDTO.setDuration(LocalTime.of(hours, minutes));
+                        lesson.setDuration(duration);
                     }
                     
                     Video video = videoService.saveVideo(videoDTO, lessonId);
                     lesson.setVideo(video);
-                }
-                
-                // Cập nhật duration nếu có
-                if (duration != null) {
-                    lesson.setDuration(duration);
                 }
                 
                 // Xóa quiz nếu có

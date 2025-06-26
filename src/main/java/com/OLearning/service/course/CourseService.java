@@ -26,9 +26,9 @@ public interface CourseService {
 
 //    List<CourseDTO> filterCourses(String keyword, Integer categoryId, String price, String status);
 
-    Page<CourseDTO> filterCoursesWithPagination(String keyword, Integer category, String price, String status, int page, int size);
+    Page<CourseDTO> filterCoursesWithPagination(String keyword, Long category, String price, String status, int page, int size);
 
-    Page<CourseDTO> filterCoursesInstructorManage(Long userId, Integer categoryId, String status, String price, int page, int size);
+    Page<CourseDTO> filterCoursesInstructorManage(Long userId, Long categoryId, String status, String price, int page, int size);
     void deleteCourse(Long courseId);
     Course findCourseById(Long courseId);
 

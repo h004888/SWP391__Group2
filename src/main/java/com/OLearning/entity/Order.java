@@ -17,15 +17,26 @@ import java.util.Set;
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "OrderID")
     private Long orderId;
+    
+    @Column(name = "Amount")
     private double amount;
+    
+    @Column(name = "OrderType")
     private String orderType;
+    
+    @Column(name = "Status")
     private String status;
+    
+    @Column(name = "OrderDate")
     private LocalDateTime orderDate;
+    
+    @Column(name = "RefCode")
     private String refCode;
 
-    @ManyToOne
-    @JoinColumn(name = "userId", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "UserID", nullable = false)
     private User user;
 
     @OneToMany(mappedBy = "orders", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

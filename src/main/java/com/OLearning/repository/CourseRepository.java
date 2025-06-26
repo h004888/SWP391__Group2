@@ -48,7 +48,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
             "(:status = 'draft' AND c.status IS NULL) OR " +
             "(:status != 'draft' AND :status != '' AND c.status = :status))")
     Page<Course> filterCourses(@Param("keyword") String keyword,
-                               @Param("categoryId") Integer categoryId,
+                               @Param("categoryId") Long categoryId,
                                @Param("price") String price,
                                @Param("status") String status,
                                Pageable pageable);
@@ -71,7 +71,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     """)
     Page<Course> findCoursesByFilters(
             @Param("instructorId") Long instructorId,
-            @Param("categoryId") Integer categoryId,
+            @Param("categoryId") Long categoryId,
             @Param("status") String status,
             @Param("price") String price,
             Pageable pageable);

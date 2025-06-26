@@ -88,6 +88,7 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public void deleteCourse(Long courseId) {
         courseRepository.deleteById(courseId);}
+
     @Override
     public Optional<CourseDetailDTO> getDetailCourse(Long id) {
         return courseRepository.findById(id).map(courseDetailMapper::toDTO);
@@ -162,8 +163,7 @@ public class CourseServiceImpl implements CourseService {
 
 
     @Override
-    public Page<CourseDTO> filterCoursesWithPagination(String keyword, Integer category, String price, String
-            status, int page, int size) {
+    public Page<CourseDTO> filterCoursesWithPagination(String keyword, Long category, String price, String status, int page, int size) {
         String searchKeyword = keyword != null && !keyword.trim().isEmpty() ? keyword.trim() : null;
 
         Pageable pageable = PageRequest.of(page, size);
@@ -175,7 +175,7 @@ public class CourseServiceImpl implements CourseService {
 
 
     @Override
-    public Page<CourseDTO> filterCoursesInstructorManage(Long userId, Integer categoryId, String status, String price, int page, int size) {
+    public Page<CourseDTO> filterCoursesInstructorManage(Long userId, Long categoryId, String status, String price, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Course> coursePage;
 

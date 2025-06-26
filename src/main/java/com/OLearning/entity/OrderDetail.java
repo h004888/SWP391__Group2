@@ -14,14 +14,14 @@ public class OrderDetail {
     @EmbeddedId
     private OrderDetailId Id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("orderId")
-    @JoinColumn(name = "orderId")
+    @JoinColumn(name = "OrderID")
     private Order orders;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("courseId")
-    @JoinColumn(name = "courseId")
+    @JoinColumn(name = "CourseID")
     private Course course;
 
     @Column(name = "UnitPrice")

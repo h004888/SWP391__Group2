@@ -17,6 +17,7 @@ public class UserMapper {
         dto.setStatus(user.getStatus());
         dto.setPersonalSkill(user.getPersonalSkill());
         dto.setCourse(user.getCourses());
+        dto.setFullName(user.getFullName());
         return dto;
     }
 

@@ -38,6 +38,7 @@ public class CourseMapper {
         } else {
             courseDTO.setCategoryName("N/A");
         }
+        courseDTO.setInstructor(course.getInstructor());
         courseDTO.setTotalStudentEnrolled(course.getEnrollments() != null ? course.getEnrollments().size() : 0);
         courseDTO.setIsFree(course.getIsFree());
         return courseDTO;

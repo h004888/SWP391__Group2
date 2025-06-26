@@ -43,7 +43,7 @@ public class CourseController {
                                 @RequestParam(defaultValue = "0") int page,
                                 @RequestParam(defaultValue = "5") int size,
                                 @RequestParam(required = false) String keyword,
-                                @RequestParam(required = false) Integer category,
+                                @RequestParam(required = false) Long category,
                                 @RequestParam(required = false) String price) {
 
         Page<CourseDTO> pendingCourses = courseService.filterCoursesWithPagination(
@@ -73,7 +73,7 @@ public class CourseController {
     //Filter with ajax
     @GetMapping("/filter")
     public String filterCourses(@RequestParam(required = false) String keyword,
-                                @RequestParam(required = false) Integer category,
+                                @RequestParam(required = false) Long category,
                                 @RequestParam(required = false) String price,
                                 @RequestParam(required = false) String status,
                                 @RequestParam(defaultValue = "0") int page,
@@ -91,7 +91,7 @@ public class CourseController {
     // New endpoint for pagination only
     @GetMapping("/pagination")
     public String getPagination(@RequestParam(required = false) String keyword,
-                                @RequestParam(required = false) Integer category,
+                                @RequestParam(required = false) Long category,
                                 @RequestParam(required = false) String price,
                                 @RequestParam(required = false) String status,
                                 @RequestParam(defaultValue = "0") int page,
@@ -114,7 +114,7 @@ public class CourseController {
     @GetMapping("/count")
     @ResponseBody
     public long getCourseCount(@RequestParam(required = false) String keyword,
-                               @RequestParam(required = false) Integer category,
+                               @RequestParam(required = false) Long category,
                                @RequestParam(required = false) String price,
                                @RequestParam(required = false) String status) {
 

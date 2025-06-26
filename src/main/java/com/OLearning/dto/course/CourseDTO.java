@@ -1,5 +1,6 @@
 package com.OLearning.dto.course;
 
+import com.OLearning.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,6 +25,7 @@ public class CourseDTO {
     private Integer totalLessons;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private User instructor;
     private String status;
     private String courseLevel; //beginner, intermediate, advanced
     private int totalStudentEnrolled;
