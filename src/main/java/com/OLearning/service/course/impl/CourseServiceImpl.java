@@ -243,7 +243,6 @@ public class CourseServiceImpl implements CourseService {
         return courseRepository.save(course);
     }
 
-
     @Override
     public Page<CourseDTO> filterCoursesWithPagination(String keyword, Long category, String price, String status, int page, int size) {
         String searchKeyword = keyword != null && !keyword.trim().isEmpty() ? keyword.trim() : null;
