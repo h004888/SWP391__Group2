@@ -18,14 +18,12 @@ public class Course {
     private Long courseId;
     private Boolean isFree = false; //step 1
     private String title;
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String description;
     private Double price;
     private Double discount;
     private String courseImg;
-//    private Integer duration; //step 2 //lay tu o trong
-//    private Integer totalLessons;//step 2
-//    private Integer totalRatings;
-//    private Integer totalStudentEnrolled;
     private String courseLevel; //beginner, intermediate, advanced
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

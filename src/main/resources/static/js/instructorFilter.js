@@ -43,6 +43,22 @@ function initializeDropdowns() {
     });
 }
 
+// Sau khi update content qua AJAX, re-init dropdown, tooltip, và xóa toast cũ trước khi show mới
+function afterAjaxUpdate() {
+    // Reinitialize tooltips
+    $('[title]').each(function() {
+        var instance = bootstrap.Tooltip.getInstance(this);
+        if (instance) {
+            instance.dispose();
+        }
+        new bootstrap.Tooltip(this);
+    });
+    // Reinitialize dropdowns
+    initializeDropdowns();
+    // Xóa toast cũ
+    $('.toast').remove();
+}
+
 // Filter function
 function filterCourses(page = 0) {
     // Show loading indicator
@@ -80,17 +96,7 @@ function filterCourses(page = 0) {
                 scrollTop: $("#courseContentContainer").offset().top - 100
             }, 300);
 
-            // Reinitialize tooltips
-            $('[title]').each(function() {
-                var instance = bootstrap.Tooltip.getInstance(this);
-                if (instance) {
-                    instance.dispose();
-                }
-                new bootstrap.Tooltip(this);
-            });
-
-            // Reinitialize dropdowns
-            initializeDropdowns();
+            afterAjaxUpdate();
 
             // Re-bind action handlers for dynamically loaded content
             window.upToPublic = upToPublic;

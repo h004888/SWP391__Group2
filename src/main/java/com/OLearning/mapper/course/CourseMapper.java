@@ -30,6 +30,7 @@ public class CourseMapper {
         courseDTO.setCreatedAt(course.getCreatedAt());
         courseDTO.setUpdatedAt(course.getUpdatedAt());
         courseDTO.setPrice(course.getPrice());
+        courseDTO.setDescription(course.getDescription());
         courseDTO.setCourseLevel(course.getCourseLevel());
         courseDTO.setDiscount(course.getDiscount());
         courseDTO.setStatus(course.getStatus());

@@ -151,7 +151,7 @@
                                             <!-- Info -->
                                             <small class="text-muted">
                                                 <i class="fas fa-table text-warning me-1"></i>
-                                                <span th:text="${course.totalLessons ?: 0} + ' lesson'"></span>
+                                                <span th:text="${course.totalLessons ?: 0} + ' lesson'" id="totalLessons-[[${course.courseId}]]"></span>
                                             </small>
                                         </div>
                                     </div>
@@ -170,7 +170,7 @@
 
                                 <!-- Enrolled item -->
                                 <td class="text-center">
-                                    <span class="fw-bold" th:text="${course.totalStudentEnrolled}"></span>
+                                    <span class="fw-bold" th:text="${course.totalStudentEnrolled}" id="enrolled-[[${course.courseId}]]"></span>
                                 </td>
 
                                 <!-- Status item -->
@@ -217,7 +217,8 @@
 
                                         <!-- Dropdown actions button -->
                                         <div class="dropdown">
-                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle p-1" type="button" id="dropdownMenuButton-[[${course.courseId}]]" data-bs-toggle="dropdown" aria-expanded="false" title="More actions">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle p-1" type="button"
+                                                    id="dropdownMenuButton-[[${course.courseId}]]" data-bs-toggle="dropdown" aria-expanded="false" title="More actions">
                                                 <i class="bi bi-three-dots-vertical"></i>
                                             </button>
                                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-[[${course.courseId}]]">
@@ -374,5 +375,11 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
     <script th:src="@{/js/instructorFilter.js}"></script>
+    <script>
+        afterAjaxUpdate();
+        setTimeout(() => {
+            afterAjaxUpdate();
+        }, 100);
+    </script>
 </div>
 
