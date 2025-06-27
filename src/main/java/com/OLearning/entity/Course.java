@@ -20,6 +20,9 @@ public class Course {
     @Column(name = "CourseID")
     private Long courseId;
 
+    @Column(name = "IsFree")
+    private Boolean isFree = false;
+
     @Column(name = "Title")
     private String title;
 
@@ -58,27 +61,30 @@ public class Course {
 
     @Column(name = "CanResubmit")
     private Boolean canResubmit;
-    @Column(name = "CourseLevel")
-    private String courseLevel; 
 
-    @ManyToOne
-    @JoinColumn(name = "UserID")
+    @Column(name = "VideoUrlPreview", columnDefinition = "nvarchar(max)")
+    private String videoUrlPreview;
+
+    @Column(name = "CourseLevel")
+    private String courseLevel;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "InstructorID")
     private User instructor;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "CategoryID")
     private Category category;
 
-    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
-    private List<Lesson> listOfLessons;
-
-    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Enrollment> enrollments;
 
-    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
-    private List<Chapters> chapters;
+    @OneToMany(mappedBy = "course", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Chapter> listOfChapters;
 
     @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
     private List<OrderDetail> orderDetails;
 
+    @OneToMany(mappedBy = "course", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<CourseReview> courseReviews;
 }

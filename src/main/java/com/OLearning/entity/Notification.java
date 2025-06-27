@@ -15,20 +15,26 @@ import java.time.LocalDateTime;
 public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "NotificationID")
     private Long notificationId;
 
-    @Column(columnDefinition = "nvarchar(max)")
+    @Column(name = "Message",columnDefinition = "nvarchar(max)")
     private String message;
+    @Column(name = "SentAt")
     private LocalDateTime sentAt;
+    @Column(name = "Type")
     private String type;
+    @Column(name = "Status")
     private String status;
+    @Column(name = "CommentID")
     private Long commentId;
-    @ManyToOne
-    @JoinColumn(name = "userId", nullable = false)
-    private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "courseId")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "UserID", nullable = false)
+    private User user;;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "CourseID")
     private Course course;
 
 }
