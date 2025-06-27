@@ -49,16 +49,23 @@ public class NotificationsController {
     @GetMapping("/instructordashboard/notifications")
     public String viewNotifications(Authentication authentication, Model model,
                                    @RequestParam(value = "page", defaultValue = "0") int page,
-                                   @RequestParam(value = "size", defaultValue = "10") int size) {
+                                   @RequestParam(value = "size", defaultValue = "10") int size,
+                                   @RequestParam(value = "type", required = false) List<String> types,
+                                   @RequestParam(value = "status", required = false) String status) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
         Pageable pageable = PageRequest.of(page, size);
-        Page<NotificationDTO> notificationPage = notificationService.getNotificationsByUserId(userId, pageable);
-        
+        // Nếu không truyền type thì lấy mặc định cho instructor
+        if (types == null || types.isEmpty()) {
+            types = List.of("COURSE_BLOCKED", "comment", "COURSE_UNBLOCKED", "COURSE_REJECTION", "COURSE_APPROVED", "MAINTENANCE_FEE", "COURSE_CREATED", "SUCCESSFULLY");
+        }
+        Page<NotificationDTO> notificationPage = notificationService.getNotificationsByUserId(userId, types, status, pageable);
         model.addAttribute("notifications", notificationPage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", notificationPage.getTotalPages());
         model.addAttribute("pageSize", size);
+        model.addAttribute("selectedTypes", types);
+        model.addAttribute("selectedStatus", status);
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/notificationContent :: notificationContent");
         model.addAttribute("isSearch", false);
         return "instructorDashboard/index";
@@ -215,5 +222,24 @@ public class NotificationsController {
         model.addAttribute("detailCourse", optionalDetail.get());
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/courseDetailContent :: courseDetailContent");
         return "instructorDashboard/index";
+    }
+
+    @PostMapping("/instructordashboard/notifications/{id}/delete")
+    @ResponseBody
+    public ResponseEntity<?> deleteNotification(@PathVariable Long id) {
+        try {
+            notificationService.deleteNotification(id);
+            return ResponseEntity.ok("Notification deleted");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete");
+        }
+    }
+
+    @PostMapping("/instructordashboard/notifications/delete-read")
+    public String deleteAllReadNotifications(Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long userId = userDetails.getUserId();
+        notificationService.deleteAllReadNotifications(userId);
+        return "redirect:/instructordashboard/notifications";
     }
 }

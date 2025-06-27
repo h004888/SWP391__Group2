@@ -32,15 +32,22 @@ public class AdminNotificationsController {
     @GetMapping
     public String viewNotifications(Authentication authentication, Model model,
                                    @RequestParam(value = "page", defaultValue = "0") int page,
-                                   @RequestParam(value = "size", defaultValue = "10") int size) {
+                                   @RequestParam(value = "size", defaultValue = "10") int size,
+                                   @RequestParam(value = "type", required = false) List<String> types,
+                                   @RequestParam(value = "status", required = false) String status) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
         Pageable pageable = PageRequest.of(page, size);
-        Page<NotificationDTO> notificationPage = notificationService.getNotificationsByUserId(userId, pageable);
+        if (types == null || types.isEmpty()) {
+            types = List.of("REPORT_COURSE", "INSTRUCTOR_REPLY_BLOCK", "REPORT_COMMENT");
+        }
+        Page<NotificationDTO> notificationPage = notificationService.getNotificationsByUserId(userId, types, status, pageable);
         model.addAttribute("notifications", notificationPage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", notificationPage.getTotalPages());
         model.addAttribute("pageSize", size);
+        model.addAttribute("selectedTypes", types);
+        model.addAttribute("selectedStatus", status);
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/adminNotificationContent :: adminNotificationContent");
         model.addAttribute("isSearch", false);
         return "adminDashBoard/index";
@@ -112,5 +119,24 @@ public class AdminNotificationsController {
         } else {
             return "redirect:/admindashBoard/notifications";
         }
+    }
+
+    @PostMapping("/{id}/delete")
+    @ResponseBody
+    public ResponseEntity<?> deleteNotification(@PathVariable Long id) {
+        try {
+            notificationService.deleteNotification(id);
+            return ResponseEntity.ok("Notification deleted");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete");
+        }
+    }
+
+    @PostMapping("/delete-read")
+    public String deleteAllReadNotifications(Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long userId = userDetails.getUserId();
+        notificationService.deleteAllReadNotifications(userId);
+        return "redirect:/admin/notifications";
     }
 }

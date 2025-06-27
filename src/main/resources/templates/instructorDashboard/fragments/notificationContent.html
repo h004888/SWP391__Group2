@@ -149,17 +149,24 @@
             <h1 class="h3 mb-0 text-dark">
                 <i class="fas fa-bell me-2"></i>Notifications
             </h1>
-            <form th:action="@{/instructordashboard/notifications/mark-all-read}" method="post" style="display: inline;">
-                <button type="submit" class="btn btn-outline-primary">
-                    <i class="fas fa-check-double me-1"></i>Mark All as Read
-                </button>
-            </form>
+            <div>
+                <form th:action="@{/instructordashboard/notifications/mark-all-read}" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="fas fa-check-double me-1"></i>Mark All as Read
+                    </button>
+                </form>
+                <form th:action="@{/instructordashboard/notifications/delete-read}" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-outline-danger ms-2">
+                        <i class="fas fa-trash-alt me-1"></i>Delete All Read
+                    </button>
+                </form>
+            </div>
         </div>
         <!-- Search Form -->
         <div class="card mb-4">
             <div class="card-body">
-                <form th:action="@{/instructordashboard/notifications/search}" method="get" class="row g-3 align-items-center">
-                    <div class="col-md-8">
+                <form th:action="@{/instructordashboard/notifications/search}" method="get" class="row g-3 align-items-center flex-nowrap" style="flex-wrap:nowrap;">
+                    <div class="col-md-4">
                         <div class="input-group">
                             <span class="input-group-text bg-white border-0">
                                 <i class="fas fa-search text-muted"></i>
@@ -167,10 +174,35 @@
                             <input type="text" name="keyword" class="form-control border-0" placeholder="Search by course title, message, or type..." th:value="${keyword}" />
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-search me-2"></i>Search Notifications
-                        </button>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary fw-bold px-4 py-2 ms-2"><i class="fas fa-search me-1"></i>Search</button>
+                    </div>
+                </form>
+                <form th:action="@{/instructordashboard/notifications}" method="get" class="row g-3 align-items-end mt-2">
+                    <div class="col-md-3 d-flex flex-column justify-content-end h-100">
+                        <label class="form-label mb-1 fw-bold text-primary">Notification type:</label>
+                        <select name="type" class="form-select border-primary bg-light text-dark" style="min-width: 160px;">
+                            <option value="">All</option>
+                            <option value="COURSE_BLOCKED" th:selected="${selectedTypes != null and selectedTypes.contains('COURSE_BLOCKED')}">Course Blocked</option>
+                            <option value="comment" th:selected="${selectedTypes != null and selectedTypes.contains('comment')}">Comment</option>
+                            <option value="COURSE_UNBLOCKED" th:selected="${selectedTypes != null and selectedTypes.contains('COURSE_UNBLOCKED')}">Course Unblocked</option>
+                            <option value="COURSE_REJECTION" th:selected="${selectedTypes != null and selectedTypes.contains('COURSE_REJECTION')}">Course Rejection</option>
+                            <option value="COURSE_APPROVED" th:selected="${selectedTypes != null and selectedTypes.contains('COURSE_APPROVED')}">Course Approved</option>
+                            <option value="MAINTENANCE_FEE" th:selected="${selectedTypes != null and selectedTypes.contains('MAINTENANCE_FEE')}">Maintenance Fee</option>
+                            <option value="COURSE_CREATED" th:selected="${selectedTypes != null and selectedTypes.contains('COURSE_CREATED')}">Course Created</option>
+                            <option value="SUCCESSFULLY" th:selected="${selectedTypes != null and selectedTypes.contains('SUCCESSFULLY')}">Successfully</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex flex-column justify-content-end h-100">
+                        <label class="form-label mb-1 fw-bold text-primary">Status:</label>
+                        <select name="status" class="form-select border-primary bg-light text-dark">
+                            <option value="">All</option>
+                            <option value="failed" th:selected="${selectedStatus == 'failed'}">Unread</option>
+                            <option value="sent" th:selected="${selectedStatus == 'sent'}">Read</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-warning fw-bold px-4 py-2 ms-2 h-100"><i class="fas fa-filter me-1"></i>Filter</button>
                     </div>
                 </form>
             </div>
@@ -247,6 +279,11 @@
                                        title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </a>
+                                    <form th:action="@{/instructordashboard/notifications/{id}/delete(id=${n.notificationId})}" method="post" style="display:inline;">
+                                        <button type="button" class="btn btn-outline-danger btn-sm" title="Delete" onclick="deleteNotification(this.form, event);">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
@@ -286,3 +323,18 @@
         </nav>
     </div>
 </div>
+<script>
+function deleteNotification(form, event) {
+    event.preventDefault();
+    if (confirm('Delete this notification?')) {
+        fetch(form.action, {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        }).then(res => {
+            if (res.ok) window.location.href = '/instructordashboard/notifications';
+            else alert('Delete failed!');
+        });
+    }
+    return false;
+}
+</script>

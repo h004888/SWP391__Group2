@@ -15,6 +15,7 @@ public interface NotificationService {
     void rejectCourseMess(NotificationDTO dto, boolean allowResubmission);
     List<NotificationDTO> getNotificationsByUserId(Long userId);
     Page<NotificationDTO> getNotificationsByUserId(Long userId, Pageable pageable);
+    Page<NotificationDTO> getNotificationsByUserId(Long userId, List<String> types, String status, Pageable pageable);
     public List<NotificationDTO> searchNotificationsByUser(String keyword, Long userId);
     Page<NotificationDTO> searchNotificationsByUser(String keyword, Long userId, Pageable pageable);
 
@@ -22,4 +23,6 @@ public interface NotificationService {
     void markAsRead(Long notificationId);
     Optional<Notification> findById(Long id);
     void markAllAsRead(Long userId);
+    void deleteNotification(Long id);
+    void deleteAllReadNotifications(Long userId);
 }

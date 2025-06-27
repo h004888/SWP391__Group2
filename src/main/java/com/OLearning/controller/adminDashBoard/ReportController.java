@@ -3,6 +3,9 @@ package com.OLearning.controller.adminDashBoard;
 import com.OLearning.entity.Report;
 import com.OLearning.repository.ReportRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,10 +26,27 @@ public class ReportController {
     public String listReports(@RequestParam(required = false) String type,
                              @RequestParam(required = false) String status,
                              @RequestParam(required = false) String keyword,
+                             @RequestParam(value = "page", defaultValue = "0") int page,
+                             @RequestParam(value = "size", defaultValue = "10") int size,
                              Model model) {
-        // Đơn giản: lấy tất cả, có thể mở rộng filter sau
-        List<Report> reports = reportRepository.findAll();
-        model.addAttribute("reports", reports);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Report> reportPage;
+        if (type != null && !type.isEmpty() && status != null && !status.isEmpty()) {
+            reportPage = reportRepository.findByReportTypeAndStatus(type, status, pageable);
+        } else if (type != null && !type.isEmpty()) {
+            reportPage = reportRepository.findByReportType(type, pageable);
+        } else if (status != null && !status.isEmpty()) {
+            reportPage = reportRepository.findByStatus(status, pageable);
+        } else {
+            reportPage = reportRepository.findAll(pageable);
+        }
+        model.addAttribute("reports", reportPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", reportPage.getTotalPages());
+        model.addAttribute("totalItems", reportPage.getTotalElements());
+        model.addAttribute("pageSize", size);
+        model.addAttribute("type", type);
+        model.addAttribute("status", status);
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/reportContent :: reportContent");
         return "adminDashBoard/index";
     }

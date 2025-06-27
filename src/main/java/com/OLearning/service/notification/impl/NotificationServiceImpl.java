@@ -113,4 +113,22 @@ public class NotificationServiceImpl implements NotificationService {
         return notificationRepository.findByUserIdAndKeywordUnreadFirst(userId, keyword, pageable)
                 .map(notificationMapper::toDTO);
     }
+
+    @Override
+    public Page<NotificationDTO> getNotificationsByUserId(Long userId, List<String> types, String status, Pageable pageable) {
+        return notificationRepository.findByUserIdAndTypesAndStatus(userId, types, status, pageable)
+                .map(notificationMapper::toDTO);
+    }
+
+    @Override
+    @Transactional
+    public void deleteNotification(Long id) {
+        notificationRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public void deleteAllReadNotifications(Long userId) {
+        notificationRepository.deleteByUser_UserIdAndStatus(userId, "sent");
+    }
 }

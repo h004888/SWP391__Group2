@@ -13,8 +13,7 @@ import com.OLearning.repository.CourseRepository;
 import com.OLearning.repository.CourseReviewRepository;
 import com.OLearning.repository.UserRepository;
 import com.OLearning.service.comment.CommentService;
-import com.OLearning.service.report.ReportCommentService;
-import com.OLearning.service.report.ReportCourseService;
+import com.OLearning.service.report.ReportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,8 +32,7 @@ import java.util.Map;
 public class CourseDetailController {
 
     private final CommentService commentService;
-    private final ReportCourseService reportCourseService;
-    private final ReportCommentService reportCommentService;
+    private final ReportService reportService;
     private final CourseRepository courseRepo;
     private final CourseReviewRepository reviewRepo;
     private final UserRepository userRepo;
@@ -151,7 +149,7 @@ public class CourseDetailController {
                     .body(Map.of("error", "Please provide a reason for reporting this course"));
         }
         try {
-            reportCourseService.report(dto);
+            reportService.reportCourse(dto);
             return ResponseEntity.ok(Map.of("success", "Course report submitted successfully. Admin will review it."));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest()
@@ -188,7 +186,7 @@ public class CourseDetailController {
                     .body(Map.of("error", "You cannot report your own comment."));
         }
         try {
-            reportCommentService.report(dto);
+            reportService.reportComment(dto);
             return ResponseEntity.ok(Map.of("success", "Comment report submitted successfully. Admin will review it."));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest()
@@ -409,7 +407,7 @@ public class CourseDetailController {
                     return "redirect:/course/" + courseId;
                 }
                 try {
-                    reportCourseService.report(dto);
+                    reportService.reportCourse(dto);
                     redirect.addFlashAttribute("success", "Course report submitted successfully. Admin will review it.");
                 } catch (RuntimeException e) {
                     redirect.addFlashAttribute("error", "Failed to submit report: " + e.getMessage());
@@ -425,7 +423,7 @@ public class CourseDetailController {
 
     @PostMapping("/course/{courseId}/comment/{commentId}/report")
     public String submitCommentReport(@PathVariable Long courseId, @PathVariable Long commentId, @ModelAttribute ReportCommentDTO dto) {
-        reportCommentService.report(dto);
+        reportService.reportComment(dto);
         return "redirect:/course/" + courseId;
     }
 

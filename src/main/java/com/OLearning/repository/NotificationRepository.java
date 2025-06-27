@@ -30,4 +30,12 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     @Modifying
     @Query("UPDATE Notification n SET n.status = 'sent' WHERE n.user.userId = :userId AND n.status = 'failed'")
     int markAllAsReadByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT n FROM Notification n WHERE n.user.userId = :userId AND n.type IN :types AND (:status IS NULL OR n.status = :status) ORDER BY (CASE WHEN n.status <> 'sent' THEN 0 ELSE 1 END), n.sentAt DESC")
+    Page<Notification> findByUserIdAndTypesAndStatus(@Param("userId") Long userId, @Param("types") List<String> types, @Param("status") String status, Pageable pageable);
+
+    void deleteById(Long id);
+    @Modifying
+    @Query(value = "DELETE FROM Notifications WHERE userId = :userId AND status = :status", nativeQuery = true)
+    void deleteByUser_UserIdAndStatus(@Param("userId") Long userId, @Param("status") String status);
 }

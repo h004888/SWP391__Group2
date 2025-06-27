@@ -1,6 +1,8 @@
 package com.OLearning.repository;
 
 import com.OLearning.entity.Report;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -22,4 +24,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     
     // Tìm báo cáo theo loại và trạng thái
     List<Report> findByReportTypeAndStatus(String reportType, String status);
+
+    Page<Report> findByReportTypeAndStatus(String reportType, String status, Pageable pageable);
+    Page<Report> findByReportType(String reportType, Pageable pageable);
+    Page<Report> findByStatus(String status, Pageable pageable);
 } 
