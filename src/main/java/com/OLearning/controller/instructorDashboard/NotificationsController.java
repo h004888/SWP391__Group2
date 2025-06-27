@@ -68,7 +68,7 @@ public class NotificationsController {
         model.addAttribute("selectedStatus", status);
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/notificationContent :: notificationContent");
         model.addAttribute("isSearch", false);
-        return "instructorDashboard/index";
+        return "instructorDashboard/indexUpdate";
     }
 
     @GetMapping("/instructordashboard/notifications/search")
@@ -92,7 +92,7 @@ public class NotificationsController {
         }
         model.addAttribute("keyword", keyword);
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/notificationContent :: notificationContent");
-        return "instructorDashboard/index";
+        return "instructorDashboard/indexUpdate";
     }
 
     @PostMapping("/instructordashboard/notifications/{id}/mark-read")
@@ -151,7 +151,7 @@ public class NotificationsController {
             }
             
             model.addAttribute("fragmentContent", "instructorDashboard/fragments/notificationDetailContent :: notificationDetailContent");
-            return "instructorDashboard/index";
+            return "instructorDashboard/indexUpdate";
         } else {
             return "redirect:/instructordashboard/notifications";
         }
@@ -221,7 +221,7 @@ public class NotificationsController {
         }
         model.addAttribute("detailCourse", optionalDetail.get());
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/courseDetailContent :: courseDetailContent");
-        return "instructorDashboard/index";
+        return "instructorDashboard/indexUpdate";
     }
 
     @PostMapping("/instructordashboard/notifications/{id}/delete")

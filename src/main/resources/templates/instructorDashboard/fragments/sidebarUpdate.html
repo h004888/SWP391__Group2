@@ -1,0 +1,70 @@
+<nav th:fragment="sidebarUpdate" class="navbar sidebar navbar-expand-xl navbar-dark bg-dark">
+
+  <!-- Navbar brand for xl START -->
+  <div class="d-flex align-items-center">
+    <a class="navbar-brand" th:href="@{/instructordashboard}">
+      <img class="navbar-brand-item" th:src="@{/assets/images/logo-light.svg}" alt="">
+    </a>
+  </div>
+  <!-- Navbar brand for xl END -->
+
+  <div class="offcanvas offcanvas-start flex-row custom-scrollbar h-100" data-bs-backdrop="true" tabindex="-1"
+       id="offcanvasSidebar">
+    <div class="offcanvas-body sidebar-content d-flex flex-column bg-dark">
+
+      <!-- Sidebar menu START -->
+      <ul class="navbar-nav flex-column" id="navbar-sidebar">
+
+        <!-- Menu item 1 -->
+        <li class="nav-item"><a th:href="@{/instructordashboard}" class="nav-link active"><i
+                class="bi bi-house fa-fw me-2"></i>Dashboard</a></li>
+
+        <!-- Title -->
+        <li class="nav-item ms-2 my-2">Pages</li>
+
+        <!-- menu item 2 -->
+
+        <!-- Menu item 3 -->
+
+
+        <!-- Menu item 4 -->
+        <li class="nav-item"><a class="nav-link" th:href="@{/instructordashboard/courses}">
+          <i class="fas fa-fw fa-trophy"></i>
+          <span>Courses</span>
+        </a></li>
+
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/instructordashboard/enrolled}">
+            <i class="fas fa-user-graduate fa-fw me-1"></i>
+            <span>Students</span>
+          </a>
+        </li>
+
+        <!-- Menu item 5 -->
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/instructordashboard}">
+            <i class="fas fa-fw fa-credit-card"></i>
+            <span>Orders & Payments</span>
+          </a>
+        </li>
+
+        <!-- Menu item 6 -->
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/instructordashboard}">
+            <i class="fas fa-fw fa-receipt"></i>
+            <span>CourseMaintenance</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/instructordashboard/notifications}">
+            <i class="fas fa-fw fa-comment"></i>
+            <span>notifications</span>
+          </a>
+        </li>
+
+      </ul>
+      <!-- Sidebar menu end -->
+
+    </div>
+  </div>
+</nav>

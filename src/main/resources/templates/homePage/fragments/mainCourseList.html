@@ -1,5 +1,15 @@
 <div th:fragment="mainCourseList">
     <!-- Course list START -->
+
+    <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${message}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
     <div class="row g-4">
         <div class="col-12" th:each="course : ${courses}">
             <div class="card shadow overflow-hidden p-2">
@@ -19,6 +29,11 @@
                                         <i class="fas fa-star text-warning me-1"></i>
                                         <span th:text="${course.totalRatings}">0</span>
                                     </span>
+                                    <a href="#" class="h6 fw-light wishlist-toggle"
+                                       th:attr="data-course-id=${course.courseId}, data-course-title=${course.title}"
+                                       th:classappend="${wishlistCourseIds != null and wishlistCourseIds.contains(course.courseId)} ? 'fas fa-heart text-danger' : 'far fa-heart'">
+                                        <i class="far fa-heart"></i>
+                                    </a>
                                 </div>
                             </div>
 
@@ -54,13 +69,22 @@
                             <div class="d-sm-flex justify-content-sm-between align-items-center mt-3">
                                 <div>
                                     <span class="h5 text-danger me-2"
-                                        th:text="${#numbers.formatDecimal(course.price - course.discount, 0, 'COMMA', 2, 'POINT')} + ' ₫'">0
+                                          th:text="${#numbers.formatDecimal(course.price - course.discount, 0, 'COMMA', 2, 'POINT')} + ' ₫'">0
                                         $</span>
-                                    <span class="text-decoration-line-through text-muted"
-                                        th:if="${course.discount != 0}"
-                                        th:text="${#numbers.formatDecimal(course.price, 0, 'COMMA', 2, 'POINT')} + ' ₫'"></span>
+                                    <span class="text-decoration-line-through text-muted d-block"
+                                          th:if="${course.discount != 0}"
+                                          th:text="${#numbers.formatDecimal(course.price, 0, 'COMMA', 2, 'POINT')} + ' ₫'"></span>
+                                    <div class="d-flex gap-2">
+                                        <button type="button"
+                                                class="btn btn-sm btn-success-soft item-show-hover m-1 add-to-cart-btn"
+                                                th:attr="data-course-id=${course.courseId}">
+                                            <i class="fas fa-shopping-cart me-2"></i>Add to cart
+                                        </button>
+                                        <form th:action="@{'/home/buy-now/' + ${course.courseId}}" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-primary item-show-hover m-1"><i class="fas fa-bolt me-2"></i>Mua ngay</button>
+                                        </form>
+                                    </div>
                                 </div>
-
                                 <!-- View more button -->
                                 <a th:href="@{'/course/course-detail/' + ${course.courseId}}" class="btn btn-dark">View more</a>
                             </div>
@@ -99,4 +123,5 @@
         </nav>
     </div>
     <!-- Pagination END -->
+    <script th:src="@{/js/homePage/addtocart.js}"></script>
 </div>

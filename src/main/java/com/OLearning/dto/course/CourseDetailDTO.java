@@ -34,6 +34,8 @@ public class CourseDetailDTO {
     private Boolean canResubmit;
     private User instructor;
     private Category category;
+    private String videoUrlPreview;
+    private String courseLevel; //beginner, intermediate, advanced
     private List<Chapter> listOfChapters;
 
 }

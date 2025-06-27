@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.List;
+
 
 @Getter
 @Setter
@@ -18,7 +18,7 @@ public class OrdersDTO {
     private String orderType;
     private String status;
     private LocalDateTime orderDate;
-    private String note;
+    private String refCode;
     private String username;
     private String role;
 }

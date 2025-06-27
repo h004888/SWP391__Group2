@@ -1,16 +1,16 @@
 <div class="tiny-slider-inner pb-1" data-autoplay="true" data-arrow="true" data-edge="2" data-dots="false"
-    data-items="3" data-items-lg="2" data-items-sm="1" th:fragment="topCourse">
+     data-items="3" data-items-lg="2" data-items-sm="1" th:fragment="topCourse">
 
     <div th:each="course : ${topCourses}">
         <div class="card action-trigger-hover border bg-transparent">
             <img th:src="@{/assets/images/courses/4by3/14.jpg}" class="card-img-top" alt="course image"
-                th:alt="${course.title}">
+                 th:alt="${course.title}">
 
             <div class="card-body pb-0">
                 <div class="d-flex justify-content-between mb-3">
                     <span class="hstack gap-2">
                         <a href="#" class="badge bg-primary bg-opacity-10 text-primary"
-                            th:text="${course.category.name}">Design</a>
+                           th:text="${course.category.name}">Design</a>
                         <a href="#" class="badge text-bg-dark">All level</a>
                     </span>
                     <a href="#" class="h6 fw-light mb-0"><i class="far fa-bookmark"></i></a>

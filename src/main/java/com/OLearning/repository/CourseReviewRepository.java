@@ -6,13 +6,17 @@ import com.OLearning.entity.CourseReview;
 import com.OLearning.entity.Course;
 import com.OLearning.entity.Enrollment;
 import com.OLearning.entity.User;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public interface CourseReviewRepository extends JpaRepository<CourseReview, Long> {
 
     // Lấy review theo course
@@ -42,6 +46,8 @@ public interface CourseReviewRepository extends JpaRepository<CourseReview, Long
     // Fetch comment with user data for notification
     @Query("SELECT r FROM CourseReview r JOIN FETCH r.enrollment e JOIN FETCH e.user u WHERE r.reviewId = :reviewId")
     Optional<CourseReview> findByIdWithUser(@Param("reviewId") Long reviewId);
+    CourseReview findByReviewId(Long id);
 
+    @Query("SELECT cr FROM CourseReview cr WHERE cr.course.instructor.userId = :instructorId ORDER BY cr.rating DESC")
+    Page<CourseReview> findByInstructorId(@Param("instructorId") Long instructorId, Pageable pageable);
 }
-

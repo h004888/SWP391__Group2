@@ -3,25 +3,23 @@ package com.OLearning.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Table(name = "Courses")
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 public class Course {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "CourseID")
     private Long courseId;
 
     @Column(name = "IsFree")
-    private Boolean isFree = false;
+    private Boolean isFree = false; // step 1
 
     @Column(name = "Title")
     private String title;
@@ -30,25 +28,16 @@ public class Course {
     private String description;
 
     @Column(name = "Price")
-    private BigDecimal price;
+    private Double price;
 
     @Column(name = "Discount")
-    private BigDecimal discount;
+    private Double discount;
 
     @Column(name = "CourseImg")
     private String courseImg;
 
-    @Column(name = "Duration")
-    private Integer duration;
-
-    @Column(name = "TotalLessons")
-    private Integer totalLessons;
-
-    @Column(name = "TotalRatings")
-    private Integer totalRatings;
-
-    @Column(name = "TotalStudentEnrolled")
-    private Integer totalStudentEnrolled;
+    @Column(name = "CourseLevel")
+    private String courseLevel; // beginner, intermediate, advanced
 
     @Column(name = "CreatedAt")
     private LocalDateTime createdAt;
@@ -57,16 +46,13 @@ public class Course {
     private LocalDateTime updatedAt;
 
     @Column(name = "Status")
-    private String status = "pending";
+    private String status; // =draft
 
     @Column(name = "CanResubmit")
     private Boolean canResubmit;
 
     @Column(name = "VideoUrlPreview", columnDefinition = "nvarchar(max)")
     private String videoUrlPreview;
-
-    @Column(name = "CourseLevel")
-    private String courseLevel;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "InstructorID")
@@ -77,14 +63,12 @@ public class Course {
     private Category category;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Chapter> listOfChapters;
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Enrollment> enrollments;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Chapter> listOfChapters;
-
-    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
-    private List<OrderDetail> orderDetails;
-
-    @OneToMany(mappedBy = "course", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<CourseReview> courseReviews;
+
 }

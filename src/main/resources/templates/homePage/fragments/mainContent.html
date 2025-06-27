@@ -1,5 +1,13 @@
 <main th:fragment="mainContent">
+    <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${message}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
     <!-- =======================
 Main Banner START -->
     <section class="position-relative overflow-hidden pt-5 pt-lg-3">
@@ -190,10 +198,9 @@ Main Banner START -->
                     <ul class="list-inline position-relative justify-content-center justify-content-lg-start mb-4">
                         <li class="list-inline-item me-2"> <i class="bi bi-patch-check-fill h6 me-1"></i>Learn with
                             experts</li>
-                        <li class="list-inline-item me-2"> <i class="bi bi-patch-check-fill h6 me-1"></i>Get
-                            certificate</li>
-                        <li class="list-inline-item"> <i class="bi bi-patch-check-fill h6 me-1"></i>Get membership
+                        <li class="list-inline-item me-2"> <i class="bi bi-patch-check-fill h6 me-1"></i>Get certificate
                         </li>
+                        <li class="list-inline-item"> <i class="bi bi-patch-check-fill h6 me-1"></i>Get membership</li>
                     </ul>
 
                     <div class="d-sm-flex align-items-center justify-content-center justify-content-lg-start">
@@ -413,16 +420,15 @@ Popular course START -->
             <!-- Title -->
             <div class="row mb-4">
                 <div class="col-lg-8 mx-auto text-center">
-                    <h2 class="fs-1">Most Popular Courses</h2>
+                    <h2 class="fs-1">Most Popular Categories</h2>
                     <p class="mb-0">Choose from hundreds of courses from specialist organizations</p>
                 </div>
             </div>
 
             <!-- Tabs START -->
-
             <ul class="nav nav-pills nav-pills-bg-soft justify-content-sm-center mb-4 px-3" id="course-pills-tab"
                 role="tablist">
-                <li class="nav-item me-2 me-sm-5" th:each="category, iterStat : ${categories}">
+                <li class="nav-item me-2 me-sm-5" th:each="category, iterStat : ${topCategories}">
                     <button class="nav-link mb-2 mb-md-0" th:id="'course-pills-tab-' + ${iterStat.index}"
                         th:data-bs-toggle="'pill'" th:data-bs-target="'#course-pills-tabs-' + ${iterStat.index}"
                         type="button" role="tab" th:aria-controls="'course-pills-tabs-' + ${iterStat.index}"
@@ -432,7 +438,6 @@ Popular course START -->
                     </button>
                 </li>
             </ul>
-
             <!-- Tabs END -->
 
             <!-- Tabs content START -->
@@ -479,9 +484,9 @@ Action box START -->
                                     <!-- Title -->
                                     <div class="col-lg-7">
                                         <h3 class="text-white">Become an Instructor!</h3>
-                                        <p class="text-white mb-3 mb-lg-0">Speedily say has suitable disposal add
-                                            boy. On forth doubt miles of child. Exercise joy man children rejoiced.
-                                            Yet uncommonly his ten who diminution astonished.</p>
+                                        <p class="text-white mb-3 mb-lg-0">Speedily say has suitable disposal add boy.
+                                            On forth doubt miles of child. Exercise joy man children rejoiced. Yet
+                                            uncommonly his ten who diminution astonished.</p>
                                     </div>
                                     <!-- Content and input -->
                                     <div class="col-lg-5 text-lg-end">
@@ -509,14 +514,106 @@ Trending courses START -->
                     <p class="mb-0">Check out most 🔥 courses in the market</p>
                 </div>
             </div>
-            <div class="row" id="trendingCourses">
+            <div class="row">
                 <!-- Slider START -->
-                <div class="tiny-slider arrow-round arrow-blur arrow-hover"
-                    th:replace="~{homePage/fragments/topCourse :: topCourse}"></div>
+                <div class="tiny-slider arrow-round arrow-blur arrow-hover">
+                    <div class="tiny-slider-inner pb-1" data-autoplay="true" data-arrow="true" data-edge="2"
+                        data-dots="false" data-items="3" data-items-lg="2" data-items-sm="1">
+                        <!-- Card item START -->
+                        <div th:each="course : ${topCourses}">
+                            <div class="card action-trigger-hover border bg-transparent" style="height: 580px;">
+                                <!-- Image -->
+                                <img src="assets/images/courses/4by3/14.jpg" class="card-img-top" alt="course image">
+                                <!-- Ribbon -->
 
+                                <div class="ribbon mt-3" th:if="${course.price == 0}">
+                                    <span>Free</span>
+                                </div>
+
+                                <div class="ribbon mt-3" th:if="${course.price > 0}">
+                                    <span>Paid</span>
+                                </div>
+                                <!-- Card body -->
+                                <div class="card-body pb-0">
+                                    <!-- Badge and favorite -->
+                                    <div class="d-flex justify-content-between mb-3">
+                                        <span class="hstack gap-2">
+                                            <a href="#" class="badge bg-primary bg-opacity-10 text-primary"
+                                                th:text="${course.category.name}">Design</a>
+                                            <a href="#" class="badge text-bg-dark"
+                                                th:text="${course.courseLevel}">Beginner</a>
+                                        </span>
+                                        <a href="#" class="h6 fw-light mb-0"><i class="far fa-bookmark"></i></a>
+                                    </div>
+                                    <!-- Title -->
+                                    <h5 class="card-title"><a th:href="@{'/home/course-detail?id=' + ${course.courseId}}" th:text="${course.title}">The complete Digital
+                                            Marketing Course - 8 Course
+                                            in 1</a></h5>
+                                    <!-- Rating -->
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <div class="hstack gap-2">
+                                            <p class="text-warning m-0">
+<!--                                                <span th:text="${course.averageRating}">4.5</span>-->
+                                                <i class="fas fa-star text-warning ms-1"></i>
+                                            </p>
+                                            <span class="small">(6500)</span>
+                                        </div>
+                                        <div class="hstack gap-2">
+                                            <p class="h6 fw-light mb-0 m-0" th:text="${course.enrollments.size()}">
+                                                6500</p>
+                                            <span class="small">(Student)</span>
+                                        </div>
+                                    </div>
+                                    <!-- Time -->
+                                    <div class="hstack gap-3">
+                                        <span class="h6 fw-light mb-0"><i
+                                                class="far fa-clock text-danger me-2"></i><span
+                                               >12h</span></span>
+                                        <span class="h6 fw-light mb-0"><i
+                                                class="fas fa-table text-orange me-2"></i><span
+                                               >15
+                                                lectures</span></span>
+                                    </div>
+                                </div>
+                                <!-- Card footer -->
+                                <div class="card-footer pt-0 bg-transparent" >
+                                    <hr>
+                                    <!-- Avatar and Price -->
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <!-- Avatar -->
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar avatar-sm">
+                                                <img class="avatar-img rounded-1" src="assets/images/avatar/10.jpg"
+                                                    alt="avatar">
+                                            </div>
+                                            <p class="mb-0 ms-2"><a href="#" class="h6 fw-light mb-0"
+                                                    th:text="${course.instructor.username}">Larry Lawson</a>
+                                            </p>
+                                        </div>
+                                        <!-- Price -->
+                                        <div th:if="${topCoursesEnrolledMap[course.courseId] == null or !topCoursesEnrolledMap[course.courseId]}">
+                                            <h4 class="text-success mb-0 item-show " style="font-size: 1.2rem;" th:if="${course.price>0}"><span
+                                                    th:text="${course.price != null ? #numbers.formatDecimal(course.price, 0, 'COMMA', 0, 'POINT')+' ₫' : 'N/A'}"></span>
+                                            </h4>
+                                            <h4 class="text-success mb-0 item-show" th:if="${course.price==0}">Free
+                                            </h4>
+                                            <button type="button" class="btn btn-sm btn-success-soft item-show-hover m-1 add-to-cart-btn"
+                                                    th:attr="data-course-id=${course.courseId}">
+                                                <i class="fas fa-shopping-cart me-2"></i>Add to cart
+                                            </button>
+                                        </div>
+                                        <a th:if="${topCoursesEnrolledMap[course.courseId] != null and topCoursesEnrolledMap[course.courseId]}"
+                                           th:href="@{/learning/course/view(courseId=${course.courseId})}"
+                                           class="btn btn-sm btn-primary-soft mb-0">Continue</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Card item END -->
+                    </div>
+                </div>
+                <!-- Slider END -->
             </div>
-            <!-- Slider END -->
-        </div>
         </div>
     </section>
     <!-- =======================
@@ -550,8 +647,8 @@ Reviews START -->
                                 <blockquote>
                                     <p>
                                         <span class="me-1 small"><i class="fas fa-quote-left"></i></span>
-                                        Moonlight newspaper up its enjoyment agreeable depending. Timed voice share
-                                        led him to widen noisy young. At weddings believed laughing
+                                        Moonlight newspaper up its enjoyment agreeable depending. Timed voice share led
+                                        him to widen noisy young. At weddings believed laughing
                                         <span class="ms-1 small"><i class="fas fa-quote-right"></i></span>
                                     </p>
                                 </blockquote>
@@ -754,8 +851,8 @@ Reviews START -->
                                 <blockquote>
                                     <p>
                                         <span class="me-1 small"><i class="fas fa-quote-left"></i></span>
-                                        At weddings believed laughing although the Moonlight newspaper up its
-                                        enjoyment agreeable depending.
+                                        At weddings believed laughing although the Moonlight newspaper up its enjoyment
+                                        agreeable depending.
                                         <span class="ms-1 small"><i class="fas fa-quote-right"></i></span>
                                     </p>
                                 </blockquote>
@@ -781,10 +878,10 @@ Reviews START -->
                 <div class="col-xl-5 order-1 text-center text-xl-start">
                     <!-- Title -->
                     <h2 class="fs-1">Some valuable feedback from our students</h2>
-                    <p>Supposing so be resolving breakfast am or perfectly. It drew a hill from me. Valley by oh
-                        twenty direct me so. Departure defective arranging rapturous did believe him all had
-                        supported. Family months lasted simple set nature vulgar him. Picture for attempt joy
-                        excited ten carried manners talking how.</p>
+                    <p>Supposing so be resolving breakfast am or perfectly. It drew a hill from me. Valley by oh twenty
+                        direct me so. Departure defective arranging rapturous did believe him all had supported. Family
+                        months lasted simple set nature vulgar him. Picture for attempt joy excited ten carried manners
+                        talking how.</p>
                     <a href="#" class="btn btn-primary mb-0">View Reviews</a>
                 </div>
             </div> <!-- Row END -->
@@ -792,5 +889,6 @@ Reviews START -->
     </section>
     <!-- =======================
 Reviews END -->
-
+    <script src="/js/homePage/addtocart.js"></script>
 </main>
+<!-- **************** MAIN CONTENT END **************** -->

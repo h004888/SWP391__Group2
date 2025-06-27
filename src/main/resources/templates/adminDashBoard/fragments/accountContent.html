@@ -1,89 +1,247 @@
-<div id="content" th:fragment="accountContent">
+<div th:fragment="accountContent">
+    <style>
+        .stats-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
 
-    <div class="container-fluid" th:fragment="accountContent">
+        .stats-card {
+            flex: 1 1 calc(33.333% - 1rem);
+            background: #fff;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s ease;
+            text-align: center;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .stats-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin: 0 auto 1rem auto;
+        }
+
+        .stats-card h3 {
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .stats-card p {
+            margin: 0;
+            color: #6c757d;
+        }
+
+        @media (max-width: 768px) {
+            .stats-card {
+                flex: 1 1 100%;
+            }
+        }
+    </style>
+
+    <h2 th:text="${accNamePage}">Management <b>Account</b></h2>
+
+    <div class="stats-container">
+        <div class="stats-card">
+            <div class="stats-icon bg-opacity-10 text-primary">
+                <i class="fa fa-desktop"></i>
+            </div>
+            <h3 id="adminCount">0</h3>
+            <p>Admin</p>
+        </div>
+
+        <div class="stats-card">
+            <div class="stats-icon bg-opacity-10 text-success">
+                <i class="fa fa-graduation-cap"></i>
+            </div>
+            <h3 id="instructorCount">0</h3>
+            <p>Instructor</p>
+        </div>
+
+        <div class="stats-card">
+            <div class="stats-icon bg-opacity-10 text-info">
+                <i class="fa fa-user"></i>
+            </div>
+            <h3 id="userCount">0</h3>
+            <p>User</p>
+        </div>
+    </div>
+    <!-- Success Alert -->
+    <div th:if="${successMessage}"
+         class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-4 shadow"
+         role="alert" id="success-alert" style="z-index: 1055; min-width: 300px;">
+        <strong th:text="${successMessage}">Thành công!</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Error Alert -->
+    <div th:if="${errorMessage}"
+         class="alert alert-danger alert-dismissible fade show position-fixed top-0 end-0 m-4 shadow"
+         role="alert" id="error-alert" style="z-index: 1055; min-width: 300px;">
+        <strong th:text="${errorMessage}">Lỗi xảy ra!</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div class="container-fluid">
         <div class="table-responsive">
             <div class="table-wrapper">
                 <div class="table-title">
-                        <div class="row">
-                            <div class="col-md-8">
-                                <h2 th:text="${accNamePage}">Management <b>Account</b></h2>
+                    <div class="row">
+                        <div class="col-md-6 d-flex align-items-center">
+                            <div id="addAccountBtnContainer" style="display: block;">
+                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModal">
+                                    Add New Staff
+                                </button>
                             </div>
-                            <div class="col-md-4">
-                                <div class="search-box">
-                                    <i class="material-icons">&#xE8B6;</i>
-                                    <input type="text" name="keyword" class="form-control" placeholder="Search&hellip;"
-                                           th:value="${keyword}">
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-end align-items-center gap-2">
+                                <!-- Status Filter -->
+                                <select id="statusFilter" class="form-select" style="width: 150px; height: 38px;">
+                                    <option value="true" selected>Active</option>
+                                    <option value="false">Inactive</option>
+                                    <option value="all">All Status</option>
+                                </select>
+
+                                <!-- Search Box -->
+                                <div class="search-box" style="width: 300px; position: relative;">
+                                    <i class="fas fa-search fs-6 text-primary" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%);"></i>
+                                    <input type="text" id="searchInput" name="keyword" class="form-control ps-4"
+                                           placeholder="Search…" th:value="${keyword}">
                                 </div>
                             </div>
                         </div>
+                    </div>
                 </div>
 
                 <div class="table-wrapper">
-                    <div class="table-title">
-                        <div class="row">
-                            <div class="col-sm-10">
-                                <div class="col-md-3 d-flex gap-2 mt-4">
-                                    <select class="form-control ml-2" name="roleId" id="filterRole">
-                                        <option value="">All Role</option>
-                                        <option th:each="r : ${listRole}"
-                                                th:value="${r.roleId}"
-                                                th:text="${r.name}"
-                                                th:selected="${r.roleId == selectedRole}"></option>
-                                    </select>
+                    <div class="custom-tabs">
+                        <ul class="nav nav-tabs" id="accountTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="admin-tab" data-bs-toggle="tab"
+                                        data-bs-target="#admin" type="button" role="tab" data-role="1">
+                                    <i class="bi bi-shield-check me-2"></i>Admin
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="instructor-tab" data-bs-toggle="tab"
+                                        data-bs-target="#instructor" type="button" role="tab" data-role="2">
+                                    <i class="bi bi-person-badge me-2"></i>Instructor
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="user-tab" data-bs-toggle="tab"
+                                        data-bs-target="#user" type="button" role="tab" data-role="3">
+                                    <i class="bi bi-people me-2"></i>User
+                                </button>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content p-0" id="accountTabsContent">
+
+                            <!-- Admin Tab -->
+                            <div class="tab-pane fade show active" id="admin" role="tabpanel">
+                                <div class="table-responsive">
+                                    <table class="table account-table text-center">
+                                        <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>UserName</th>
+                                            <th>Email</th>
+                                            <th>Role</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody id="adminTableBody">
+                                        <!-- Data will be loaded here -->
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
-                            <div class="col-sm-2">
-                                <a href="#addModal" class="btn btn-success" data-toggle="modal">
-                                    <i class="fas fa-plus"></i> <span>Add New User</span>
-                                </a>
+
+                            <!-- Instructor Tab -->
+                            <div class="tab-pane fade" id="instructor" role="tabpanel">
+                                <div class="table-responsive">
+                                    <table class="table account-table text-center">
+                                        <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>UserName</th>
+                                            <th>Email</th>
+                                            <th>Role</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody id="instructorTableBody">
+                                        <!-- Data will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- User Tab -->
+                            <div class="tab-pane fade" id="user" role="tabpanel">
+                                <div class="table-responsive">
+                                    <table class="table account-table text-center">
+                                        <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>UserName</th>
+                                            <th>Email</th>
+                                            <th>Role</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody id="userTableBody">
+                                        <!-- Data will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <table class="table table-striped table-hover table-bordered text-center" id="userTableBody" th:fragment="userTableBody">
-                        <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody >
-                        <tr th:each="u : ${listU}">
-                            <td th:text="${u.userId}"></td>
-                            <td th:text="${u.userName}"></td>
-                            <td th:text="${u.email}"></td>
-                            <td th:text="${u.roleName}"></td>
-                            <td style="white-space: nowrap;">
-                                <a th:href="@{/admin/account/viewInfo/{userId}(userId=${u.userId})}"
-                                   class="btn btn-info btn-sm" title="View">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <a th:href="@{/admin/account/delete/{userId}(userId=${u.userId})}"
-                                   class="btn btn-danger btn-sm"
-                                   onclick="return confirm('Bạn có chắc chắn muốn xóa tài khoản này không?')" title="Delete">
-                                    <i class="fas fa-trash"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
 
-                    <div class="clearfix">
-                        <div class="hint-text">Showing <b>5</b> out of <b>25</b> entries</div>
-                        <ul class="pagination">
-                            <li class="page-item disabled"><a href="#"><i class="fa fa-angle-double-left"></i></a></li>
-                            <li class="page-item"><a href="#" class="page-link">1</a></li>
-                            <li class="page-item"><a href="#" class="page-link">2</a></li>
-                            <li class="page-item active"><a href="#" class="page-link">3</a></li>
-                            <li class="page-item"><a href="#" class="page-link">4</a></li>
-                            <li class="page-item"><a href="#" class="page-link">5</a></li>
-                            <li class="page-item"><a href="#" class="page-link"><i class="fa fa-angle-double-right"></i></a>
-                            </li>
-                        </ul>
+                    <!--Paging-->
+                    <div id="accountPaginationContainer">
+                        <!-- Pagination will be loaded here via AJAX -->
                     </div>
+                    <!--End Paging-->
+                </div>
+            </div>
 
+            <!-- Block Modal HTML -->
+            <div id="deleteModal" class="modal fade">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form>
+                            <div class="modal-header d-flex justify-content-between align-items-center">
+                                <h5 class="modal-title mb-0">Block Account</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <h6>Are you sure you want to block this account?</h6>
+                                <p class="text-warning">This action cannot be undone !!</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <a id="confirmDelete" class="btn btn-danger" href="#">Block</a>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
 
@@ -108,9 +266,8 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Role</label>
-                                    <select th:field="*{roleName}" class="form-select" required>
-                                        <option th:each="role : ${listRole}" th:value="${role.name}"
-                                                th:text="${role.name}"></option>
+                                    <select th:field="*{roleName}" class="form-select">Admin
+                                        <option th:value="Admin">Admin</option>
                                     </select>
                                 </div>
                             </div>
@@ -123,75 +280,16 @@
                 </div>
             </div>
 
-            <!-- Delete Modal HTML -->
-            <div id="deleteModal" class="modal fade">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <form>
-                            <div class="modal-header">
-                                <h4 class="modal-title">Delete Account</h4>
-                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                            </div>
-                            <div class="modal-body">
-                                <h6>Are you sure you want to delete this account?</h6>
-                                <p class="text-warning">This action cannot be undone !!</p>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                <a id="confirmDelete" class="btn btn-danger" href="#">Delete</a>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
         </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script th:src="@{/js/accountJS.js}"></script>
+
     <script>
-        function filterUsers() {
-            let keyword = $('input[name="keyword"]').val().trim();
-            let role = $('#filterRole').val();
-
-            console.log("Filtering with keyword:", keyword, "role:", role); // Debug log
-
-            $.ajax({
-                url: '/admin/account/filter',
-                method: 'GET',
-                data: {
-                    keyword: keyword || null,
-                    role: role || null
-                },
-                success: function (data) {
-                    $('#userTableBody').html(data);
-                    console.log("Filter successful"); // Debug log
-                },
-                error: function (xhr, status, error) {
-                    console.error("AJAX Error:", status, error); // Debug log
-                    alert("Đã xảy ra lỗi khi tải dữ liệu: " + error);
-                }
-            });
-        }
-
-        $(document).ready(function () {
-            $('#filterRole').on('change', function() {
-                console.log("Role changed to:", $(this).val()); // Debug log
-                filterUsers();
-            });
-
-            let timer;
-            $('input[name="keyword"]').on('input', function () {
-                console.log("Keyword input:", $(this).val()); // Debug log
-                clearTimeout(timer);
-                timer = setTimeout(filterUsers, 300);
-            });
-
-            let initialKeyword = $('input[name="keyword"]').val();
-            let initialRole = $('#filterRole').val();
-            if (initialKeyword || initialRole) {
-                filterUsers();
-            }
-        });
+        setTimeout(function () {
+            $('#success-alert').fadeOut('slow');
+            $('#error-alert').fadeOut('slow');
+        }, 3000);
     </script>
 
 </div>

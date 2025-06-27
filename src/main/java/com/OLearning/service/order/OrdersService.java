@@ -16,7 +16,8 @@ public interface OrdersService {
     List<OrdersDTO> sortByAmount(String direction);
     List<OrdersDTO> sortByDate(String direction);
     List<OrderDetail> getOrderDetailsByOrderId(Long orderId);
-    Page<OrdersDTO> filterAndSortOrders(String username, String amountDirection, String dateDirection, int page, int size);
+    Page<OrdersDTO> filterAndSortOrders(String username, String amountDirection, String orderType, String startDate, String endDate, int page, int size);
+    Page<OrdersDTO> filterAndSortOrdersWithStatus(String username, String amountDirection, String orderType, String startDate, String endDate, String status, int page, int size);
     Map<String, Double> getRevenuePerMonth();
     Map<String, Double> getRevenueByDateRange(LocalDate startDate, LocalDate endDate);
 }

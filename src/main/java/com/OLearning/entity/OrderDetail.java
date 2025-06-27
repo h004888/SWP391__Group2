@@ -11,17 +11,17 @@ import lombok.*;
 @Setter
 @ToString
 public class OrderDetail {
-    @EmbeddedId
-    private OrderDetailId Id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "OrderDetailID")
+    private Long id;
 
     @ManyToOne
-    @MapsId("orderId")
-    @JoinColumn(name = "orderId")
-    private Order orders;
+    @JoinColumn(name = "orderID", nullable = false)
+    private Order order;
 
     @ManyToOne
-    @MapsId("courseId")
-    @JoinColumn(name = "courseId")
+    @JoinColumn(name = "courseID", nullable = false)
     private Course course;
 
     @Column(name = "UnitPrice")

@@ -15,27 +15,40 @@ import java.util.List;
 public class Lesson {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "LessonID")
     private Long lessonId;
+    
+    @Column(name = "Title")
     private String title;
+    
+    @Column(name = "Description")
     private String description;
-    private String contentType = "video";
-    private Integer orderNumber;
-    private Boolean isFree;
+    
+    @Column(name = "ContentType")
+    private String contentType;
+    
+    @Column(name = "OrderNumber")
+    private Integer orderNumber= 0;
+    
+    @Column(name = "Duration")
     private Integer duration;
+    
+    @Column(name = "IsFree")
+    private Boolean isFree;
+    
+    @Column(name = "CreatedAt")
     private LocalDateTime createdAt;
+    
+    @Column(name = "UpdatedAt")
     private LocalDateTime updatedAt;
-    @ManyToOne
-    @JoinColumn(name = "ChapterID")
-    private Chapters chapter;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ChapterID", referencedColumnName = "chapterId")
+    private Chapter chapter;
 
-    @OneToMany(mappedBy = "lesson")
-    private List<Video> videos;
-    @OneToMany(mappedBy = "lesson")
-    private List<Quiz> quizzes;
-    @ManyToOne
-    @JoinColumn(name = "CourseID")
-    private Course course;
+    @OneToOne(mappedBy = "lesson", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Video video;
 
-    @OneToMany(mappedBy = "videoLesson")
-    private List<Video> listOfVideos;
+    @OneToOne(mappedBy = "lesson", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Quiz quiz;
 }

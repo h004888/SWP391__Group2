@@ -13,11 +13,11 @@
                     <div class="card-body pb-0">
                         <!-- Badge and favorite -->
                         <div class="d-flex justify-content-between mb-2">
-                            <a href="#" class="badge bg-purple bg-opacity-10 text-purple">All level</a>
+                            <a href="#" class="badge bg-purple bg-opacity-10 text-purple" th:text="${course.courseLevel}">All level</a>
                             <a href="#" class="h6 mb-0"><i class="far fa-heart"></i></a>
                         </div>
                         <!-- Title -->
-                        <h5 class="card-title fw-normal"><a href="#" th:text="${course.title}">Sketch from A to Z: for
+                        <h5 class="card-title fw-normal"><a th:href="@{'/home/course-detail?id=' + ${course.courseId}}" th:text="${course.title}">Sketch from A to Z: for
                                 app
                                 designer</a></h5>
                         <p class="mb-2 text-truncate-2" th:text="${course.description}">Proposal indulged no do sociable
@@ -25,12 +25,12 @@
                             settling.</p>
                         <!-- Rating star -->
                         <ul class="list-inline mb-0">
-                            <li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
-                            <li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
-                            <li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
-                            <li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
-                            <li class="list-inline-item me-0 small"><i class="far fa-star text-warning"></i></li>
-                            <li class="list-inline-item ms-2 h6 fw-light mb-0">4.0/5.0</li>
+                            <li class="list-inline-item me-0 small" th:each="i : ${#numbers.sequence(1, 5)}">
+                                <i th:classappend="${i le course.averageRating ? 'fas fa-star' : 'far fa-star'}"
+                                    class="text-warning"></i>
+                            </li>
+                            <li class="list-inline-item ms-2 h6 fw-light mb-0"
+                                th:text="${course.averageRating} + '/5.0'">4.0/5.0</li>
                         </ul>
                     </div>
                     <!-- Card footer -->
@@ -38,9 +38,9 @@
                         <hr>
                         <div class="d-flex justify-content-between">
                             <span class="h6 fw-light mb-0"><i class="far fa-clock text-danger me-2"></i><span
-                                    th:text="${course.duration + 'h'}">12h 56m</span></span>
+                                    th:text="${course.getDuration()/60 + 'h'}">12h 56m</span></span>
                             <span class="h6 fw-light mb-0"><i class="fas fa-table text-orange me-2"></i><span
-                                    th:text="${course.totalLessons + ' lectures'}">15</span></span>
+                                    th:text="${course.getTotalLessons() + ' lectures'}">15</span></span>
                         </div>
                     </div>
                 </div>

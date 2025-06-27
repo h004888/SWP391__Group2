@@ -18,12 +18,15 @@ public class Notification {
     @Column(name = "NotificationID")
     private Long notificationId;
 
-    @Column(name = "Message",columnDefinition = "nvarchar(max)")
+    @Column(name = "Message", columnDefinition = "nvarchar(max)")
     private String message;
+
     @Column(name = "SentAt")
     private LocalDateTime sentAt;
+
     @Column(name = "Type")
     private String type;
+
     @Column(name = "Status")
     private String status;
     @Column(name = "CommentID")

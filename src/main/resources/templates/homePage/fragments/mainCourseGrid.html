@@ -1,4 +1,5 @@
 <div th:fragment="mainCourseGrid" id="mainCourseGrid">
+
     <!-- Course Grid -->
     <div class="row g-4">
         <div class="col-sm-6 col-xl-4" th:each="course : ${courses}">
@@ -6,16 +7,17 @@
                 <img th:src="@{/assets/images/courses/4by3/01.jpg}" class="card-img-top" alt="course image">
                 <div class="card-body pb-0">
                     <div class="d-flex justify-content-between mb-2">
-                        <a href="#" class="badge bg-purple bg-opacity-10 text-purple">All level</a>
+                        <a href="#" class="badge bg-purple bg-opacity-10 text-purple"
+                           th:text="${course.courseLevel}">All level</a>
                         <a href="#" class="h6 fw-light mb-0"><i class="far fa-heart"></i></a>
                     </div>
                     <h5 class="card-title"><a th:text="${course.title}"
-                            th:href="@{'/course/' + ${course.courseId}}"></a></h5>
+                                              th:href="@{'/home/course-detail?id=' + ${course.courseId}}"></a></h5>
                     <p class="mb-2 text-truncate-2" th:text="${course.description}"></p>
                     <ul class="list-inline mb-0">
                         <li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
-                        <li class="list-inline-item ms-2 h6 fw-light mb-0"
-                            >4.0/5.0</li>
+                        <li class="list-inline-item ms-2 h6 fw-light mb-0">
+                            4.0/5.0</li>
                     </ul>
                 </div>
                 <div class="card-footer pt-0 pb-3">
@@ -23,11 +25,12 @@
                     <div class="d-flex justify-content-between">
                         <span class="h6 fw-light mb-0">
                             <i class="far fa-clock text-danger me-2"></i>
-                            <span th:text="${course.duration} + 'h'">12h</span>
+                            <span >12h</span>
                         </span>
+
                         <span class="h6 fw-light mb-0">
                             <i class="fas fa-table text-orange me-2"></i>
-                            <span th:text="${course.totalLessons} + ' lectures'">15 lectures</span>
+                            <span>15 lectures</span>
                         </span>
                     </div>
                 </div>

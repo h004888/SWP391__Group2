@@ -31,7 +31,7 @@ public class CommentMapper {
         dto.setParentId(review.getParentReview() != null ? review.getParentReview().getReviewId() : null);
         
         // Use the getUser() method from entity
-        dto.setUser(review.getUser());
+        dto.setUser(review.getEnrollment().getUser());
         
         dto.setCreatedAt(review.getCreatedAt());
         dto.setUpdatedAt(review.getUpdatedAt());

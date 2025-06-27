@@ -3,6 +3,7 @@ package com.OLearning.entity;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -22,13 +23,13 @@ public class Enrollment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "EnrollmentID")
-    private int enrollmentID;
+    private int enrollmentId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "UserID", nullable = false)
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "CourseID", nullable = false)
     private Course course;
 
@@ -37,13 +38,16 @@ public class Enrollment {
     private Date enrollmentDate;
 
     @Column(name = "Progress")
-    private BigDecimal progress;
+    private double progress;
 
     @Column(name = "Status", length = 20)
     private String status;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "OrderID")
     private Order order;
+
+    @OneToMany(mappedBy = "enrollment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<CourseReview> courseReviews;
 
 }

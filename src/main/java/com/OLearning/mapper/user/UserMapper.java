@@ -14,9 +14,10 @@ public class UserMapper {
         dto.setEmail(user.getEmail());
         dto.setRoleName(user.getRole().getName());
         dto.setProfilePicture(user.getProfilePicture());
-        dto.setStatus(user.isStatus());
+        dto.setStatus(user.getStatus());
         dto.setPersonalSkill(user.getPersonalSkill());
         dto.setCourse(user.getCourses());
+        dto.setFullName(user.getFullName());
         return dto;
     }
 
@@ -26,6 +27,7 @@ public class UserMapper {
         user.setUsername(dto.getUserName());
         user.setEmail(dto.getEmail());
         user.setRole(role);
+        user.setProfilePicture(dto.getProfilePicture());
         user.setProfilePicture(dto.getProfilePicture());
         user.setCourses(dto.getCourse());
         user.setStatus(true);

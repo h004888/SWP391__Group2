@@ -19,26 +19,23 @@ public class CourseReview {
     @Column(name = "ReviewID")
     private Long reviewId;
 
-    @OneToOne
-    @JoinColumn(name = "EnrollmentID", nullable = false, unique = true)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "EnrollmentID", nullable = false)
     private Enrollment enrollment;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "CourseID", nullable = false)
     private Course course;
-
-
 
     @Column(name = "Rating", nullable = false)
     private Integer rating;
 
-    @Column(length = 1000)
+    @Column(name = "Comment", length = 1000)
     private String comment;
 
-    @Column(name = "Comment", length = 1000)
-    private boolean hidden = false;
     @Column(name = "CreatedAt")
     private LocalDateTime createdAt;
+
     @Column(name = "UpdatedAt")
     private LocalDateTime updatedAt;
 

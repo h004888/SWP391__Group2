@@ -43,7 +43,7 @@ public class CommentServiceImpl implements CommentService {
                                 .user(user)
                                 .course(course)
                                 .enrollmentDate(new java.util.Date())
-                                .progress(new java.math.BigDecimal("100.00"))
+                                .progress(Double.parseDouble("100.00"))
                                 .status("completed")
                                 .build();
                         return enrollmentRepo.save(newEnrollment);

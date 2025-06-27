@@ -3,16 +3,22 @@ package com.OLearning.service.user.impl;
 import com.OLearning.dto.user.UserDTO;
 import com.OLearning.dto.user.UserDetailDTO;
 import com.OLearning.dto.login.RegisterDTO;
+import com.OLearning.dto.course.CourseDTO;
+import com.OLearning.entity.Course;
+import com.OLearning.entity.Enrollment;
 import com.OLearning.entity.Role;
 import com.OLearning.entity.User;
+import com.OLearning.mapper.course.CourseMapper;
 import com.OLearning.mapper.user.UserDetailMapper;
 import com.OLearning.mapper.user.UserMapper;
 import com.OLearning.mapper.login.RegisterMapper;
+import com.OLearning.repository.EnrollmentRepository;
 import com.OLearning.repository.RoleRepository;
 import com.OLearning.repository.UserRepository;
 import com.OLearning.service.email.EmailService;
 import com.OLearning.service.user.UserService;
 import jakarta.mail.MessagingException;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -39,6 +45,10 @@ public class UserServiceImpl implements UserService {
     private RegisterMapper registerMapper;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private EnrollmentRepository enrollmentRepository;
+    @Autowired
+    private CourseMapper courseMapper;
 
     @Override
     public Page<UserDTO> getAllUsers(Pageable page) {
@@ -53,9 +63,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Page<UserDTO> getInstructorsByRoleIdOrderByCourseCountDesc(Long roleId, Pageable pageable) {
+        Page<User> userPage = userRepository.findInstructorsByRoleIdOrderByCourseCountDesc(roleId, pageable);
+        return userPage.map(userMapper::toDTO);
+    }
+
+    @Override
     public Page<UserDTO> searchByNameWithPagination(String keyword, Long roleId, Pageable pageable) {
         // Sử dụng repository method với pagination
         Page<User> userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleId(keyword, roleId, pageable);
+        return userPage.map(userMapper::toDTO);
+    }
+
+    @Override
+    public Page<UserDTO> getInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(String keyword, Long roleId, Pageable pageable) {
+        Page<User> userPage = userRepository.findInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(roleId, keyword, pageable);
         return userPage.map(userMapper::toDTO);
     }
 
@@ -73,8 +95,23 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<UserDetailDTO> getInfoUser(Long id) {
-        return userRepository.findById(id)
-                .map(userDetailMapper::toDetailDTO);
+        Optional<User> userOptional = userRepository.findById(id);
+        if (userOptional.isEmpty()) {
+            return Optional.empty();
+        }
+
+        User user = userOptional.get();
+        UserDetailDTO userDetailDTO = userDetailMapper.toDetailDTO(user);
+
+        List<Enrollment> enrollments = enrollmentRepository.findEnrollmentsByUserId(user.getUserId());
+        List<CourseDTO> enrolledCourses = enrollments.stream()
+                .map(Enrollment::getCourse)
+                .map(courseMapper::MapCourseDTO)
+                .collect(Collectors.toList());
+
+        userDetailDTO.setEnrolledCourses(enrolledCourses);
+
+        return Optional.of(userDetailDTO);
     }
 
     @Override
@@ -87,11 +124,11 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsById(id)) {
             Optional<User> user = userRepository.findById(id);
             try {
-                emailService.sendAccountStatusEmail(user.get(), user.get().isStatus());
+                emailService.sendAccountStatusEmail(user.get(), user.get().getStatus());
             } catch (MessagingException e) {
                 throw new RuntimeException(e);
             }
-            user.get().setStatus(!user.get().isStatus());
+            user.get().setStatus(!user.get().getStatus());
             userRepository.save(user.get());
 
             return true;
@@ -173,6 +210,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User findById(Long id) {
+        Optional<User> userOptional = userRepository.findById(id);
+        if (userOptional.isEmpty()) {
+            return null;
+        }
+        return userOptional.get();
+    }
+
+    @Override
     public boolean deleteAcc(Long id) {
         Optional<User> userOptional = userRepository.findById(id);
         if(userOptional.isEmpty()) {
@@ -200,9 +246,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDTO> getTopInstructorsByCourseCount(int limit) {
-        // Get all instructors (roleId = 3)
-        List<User> instructors = userRepository.findByRoleId(3L);
-
+        // Get all instructors (roleId = 2)
+        List<User> instructors = userRepository.findByRoleId(2L);
+        
         // Sort instructors by number of courses in descending order
         return instructors.stream()
                 .sorted((i1, i2) -> Integer.compare(
@@ -218,11 +264,30 @@ public class UserServiceImpl implements UserService {
     public Page<UserDTO> filterInstructors(String keyword, Pageable pageable) {
         Page<User> userPage;
         if (keyword != null && !keyword.trim().isEmpty()) {
-            userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleId(keyword.trim(), 3L, pageable);
+            userPage = userRepository.findInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(2L, keyword.trim(), pageable);
         } else {
-            userPage = userRepository.findByRole_RoleId(3L, pageable);
+            userPage = userRepository.findInstructorsByRoleIdOrderByCourseCountDesc(2L, pageable);
         }
         return userPage.map(userMapper::toDTO);
+    }
+
+    @Override
+    public void updatePasswordByEmail(String email, String newPassword) {
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            user.setPassword(new BCryptPasswordEncoder().encode(newPassword));
+            userRepository.save(user);
+        } else {
+            throw new RuntimeException("User not found with email: " + email);
+        }
+    }
+
+
+    @Override
+    public boolean existsById(Long userId) {
+
+        return userRepository.existsById(userId);
     }
 
 }
