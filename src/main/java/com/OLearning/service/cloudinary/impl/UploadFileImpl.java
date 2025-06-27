@@ -48,7 +48,7 @@ public class UploadFileImpl implements UploadFile {
             cleanDisk(fileUpload);
         }
     }
-
+//upload return video duoi dang publicId
     private String uploadVideoSeFile(MultipartFile file) throws IOException {
         assert file.getOriginalFilename() != null;
         String originalFilename = file.getOriginalFilename();
@@ -97,6 +97,7 @@ public class UploadFileImpl implements UploadFile {
             log.error("Error deleting file: {}", file.getName(), e);
         }
     }
+    //generate tu publicId sang Signed de co the phat
     @Override
     public String generateSignedVideoUrl(String publicId, int expireSeconds, String ResourceType) {
         long timestamp = System.currentTimeMillis() / 1000L;
