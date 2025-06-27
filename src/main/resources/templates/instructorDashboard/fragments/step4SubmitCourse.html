@@ -1,14 +1,14 @@
 <div class="main-content" th:fragment="step4Content">
     <div class="container-fluid py-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h1 class="h3 mb-0">Create New Course</h1>
-                <p class="text-muted">Fill in the details below to create your course</p>
+        <!-- Page Header & Step Indicator -->
+        <div class="content-card sticky-step-indicator mb-4 rounded-3 border-0 shadow-sm px-4 py-3">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-2">
+                <div>
+                    <h1 class="h3 mb-1 fw-bold text-primary">Create New Course</h1>
+                    <p class="text-muted mb-0">Fill in the details below to create your course</p>
+                </div>
             </div>
-        </div>
-
-        <div class="content-card">
-            <div class="step-indicator">
+            <div class="step-indicator mt-3">
                 <div class="step completed" data-step="1">
                     <div class="step-circle">1</div>
                     <div class="step-label">Basic Info</div>
@@ -27,101 +27,53 @@
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div>
-                <div class="step-content" id="step-4">
-                    <div class="content-card">
-                        <h3 class="mb-4">Preview & Publish</h3>
 
+        <form th:action="@{/instructordashboard/createcourse/savecourse}" method="post">
+            <div class="card border-0 shadow-sm mb-4 rounded-3">
+                <div class="card-body p-4">
+                    <h3 class="mb-4 fw-semibold text-dark">Preview & Publish</h3>
+                    <div id="coursePreview">
+                        <!-- Course preview will be generated here -->
+                    </div>
 
-                        <div id="coursePreview">
-                            <!-- Course preview will be generated here -->
-                        </div>
-                        <div class="form-check mb-3">
-                            <input class="form-check-input" type="checkbox" id="agreeTerms">
-                            <label class="form-check-label" for="agreeTerms">
-                                I have read and agree to the
-                                <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">terms and conditions</a>
-                            </label>
-                        </div>
-
-                        <!-- Terms Modal -->
-                        <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-lg">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="termsModalLabel">Terms and Conditions</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <!-- Replace this with your actual terms -->
-                                        <div class="terms-of-service">
-                                            <h3>📄 Terms of Service for the Course</h3>
-                                            <ol>
-                                                <li>
-                                                    <strong>Account Use</strong><br />
-                                                    You are responsible for maintaining the confidentiality of your account. Sharing your login information with others is strictly prohibited.
-                                                </li>
-                                                <li>
-                                                    <strong>Course Access</strong><br />
-                                                    Access to the course is granted for personal use only. You may not copy, distribute, or share course content without prior written permission.
-                                                </li>
-                                                <li>
-                                                    <strong>Refund Policy</strong><br />
-                                                    All payments are final. Refunds will only be issued under exceptional circumstances as determined by the course provider.
-                                                </li>
-                                                <li>
-                                                    <strong>Content Updates</strong><br />
-                                                    The course provider reserves the right to update, modify, or remove content at any time without prior notice.
-                                                </li>
-                                                <li>
-                                                    <strong>Code of Conduct</strong><br />
-                                                    You agree to interact respectfully with instructors and other students. Any form of harassment or inappropriate behavior may result in removal from the course.
-                                                </li>
-                                            </ol>
-
-                                            <div class="form-check mt-3">
-                                                <input class="form-check-input" type="checkbox" id="acceptTerms" required />
-                                                <label class="form-check-label" for="acceptTerms">
-                                                    I have read and agree to the Terms of Service.
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="d-grid gap-2 mt-4">
-                            <form th:action="@{/instructordashboard/createcourse/savecourse}"  method="post">
-                                <button class="btn btn-success btn-lg" id="finalPublishBtn" name="action" value="up">
-                                    <i class="bi bi-upload me-2"></i> Submit Course for Review
-                                </button>
-                                <button class="btn btn-outline-secondary" id="finalSaveDraftBtn" name="action" value="draft">
-                                    <i class="bi bi-save me-2"></i> Save as Draft
-                                </button>
-                            </form>
+                    <!-- Terms and Conditions (always visible) -->
+                    <div class="content-card mb-3" style="background: #f8fafc; border: 1px solid #e3e6ea;">
+                        <div class="terms-of-service">
+                            <h3 class="mb-3">📄 Terms of Service for the Course</h3>
+                            <ol>
+                                <li><strong>Account Use</strong><br />You are responsible for maintaining the confidentiality of your account. Sharing your login information with others is strictly prohibited.</li>
+                                <li><strong>Course Access</strong><br />Access to the course is granted for personal use only. You may not copy, distribute, or share course content without prior written permission.</li>
+                                <li><strong>Refund Policy</strong><br />All payments are final. Refunds will only be issued under exceptional circumstances as determined by the course provider.</li>
+                                <li><strong>Content Updates</strong><br />The course provider reserves the right to update, modify, or remove content at any time without prior notice.</li>
+                                <li><strong>Code of Conduct</strong><br />You agree to interact respectfully with instructors and other students. Any form of harassment or inappropriate behavior may result in removal from the course.</li>
+                            </ol>
                         </div>
                     </div>
-                </div>
 
-                <div class="content-card">
-                    <div class="d-flex justify-content-between">
-                        <form th:action="@{/instructordashboard/createcourse/savecourse}" method="POST">
-                            <button class="btn btn-outline-secondary" name="action" value="previousstep">
-                                <input type="hidden" name="courseId" th:value="${courseId}"/>
-                                <i class="bi bi-arrow-left me-1"></i> Previous
-                            </button>
-                        </form>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="agreeTerms">
+                        <label class="form-check-label" for="agreeTerms">
+                            I have read and agree to the Terms of Service.
+                        </label>
                     </div>
                 </div>
             </div>
-
-            <!-- Sidebar -->
-
-        </div>
+            <!-- Sticky Navigation Buttons -->
+            <div class="content-card sticky-navigation-buttons rounded-3 border-0 shadow-sm px-4 py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <button class="btn btn-outline-secondary px-4 py-2 rounded-2 me-2" name="action" value="previousstep">
+                        <input type="hidden" name="courseId" th:value="${courseId}"/>
+                        <i class="bi bi-arrow-left me-1"></i> Previous
+                    </button>
+                    <button class="btn btn-outline-secondary px-4 py-2 rounded-2 me-2" id="finalSaveDraftBtn" name="action" value="draft">
+                        <i class="bi bi-save me-1"></i> Save as Draft
+                    </button>
+                    <button class="btn btn-success px-4 py-2 rounded-2 ms-auto" id="finalPublishBtn" name="action" value="up">
+                        <i class="bi bi-upload me-1"></i> Submit Course for Review
+                    </button>
+                </div>
+            </div>
+        </form>
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -135,45 +87,16 @@
             }
         });
     </script>
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <style>
         body {
             min-height: 100vh;
             background-color: #f8f9fa;
         }
-        .main-content {
-            margin-left: var(--sidebar-width);
-            padding-top: 56px;
-            transition: all 0.3s;
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                margin-left: calc(var(--sidebar-width) * -1);
-            }
-
-            .sidebar.show {
-                margin-left: 0;
-            }
-
-            .main-content {
-                margin-left: 0;
-            }
-        }
-
-        .navbar {
-            padding-left: var(--sidebar-width);
-            transition: all 0.3s;
-        }
-
-        @media (max-width: 768px) {
-            .navbar {
-                padding-left: 1rem;
-            }
-        }
-
         .content-card {
             background-color: #fff;
             border-radius: 0.5rem;
@@ -181,19 +104,39 @@
             padding: 1.5rem;
             margin-bottom: 1.5rem;
         }
-
+        .sticky-step-indicator {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background-color: #f0f4fa;
+            margin-bottom: 1.5rem;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #b6c6e3;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .content-card.sticky-navigation-buttons {
+            position: sticky;
+            bottom: 0;
+            z-index: 1000;
+            background-color: #f0f4fa;
+            margin-top: 1.5rem;
+            padding-top: 15px;
+            padding-bottom: 15px;
+            border-top: 2px solid #b6c6e3;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+        }
         .step-indicator {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 2rem;
+            margin-bottom: 0;
+            gap: 0.5rem;
         }
-
         .step {
             flex: 1;
             text-align: center;
             position: relative;
         }
-
         .step:not(:last-child)::after {
             content: '';
             position: absolute;
@@ -204,14 +147,12 @@
             background-color: #dee2e6;
             z-index: 1;
         }
-
         .step.active:not(:last-child)::after {
             background-color: #0d6efd;
         }
-
         .step-circle {
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             background-color: #dee2e6;
             color: #6c757d;
@@ -222,127 +163,31 @@
             margin-bottom: 0.5rem;
             position: relative;
             z-index: 2;
+            font-size: 1.1rem;
         }
-
         .step.active .step-circle {
             background-color: #0d6efd;
             color: white;
         }
-
         .step.completed .step-circle {
             background-color: #198754;
             color: white;
         }
-
-        .image-upload-area {
-            border: 2px dashed #dee2e6;
-            border-radius: 0.5rem;
-            padding: 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
+        .form-label {
+            font-size: 1rem;
         }
-
-        .image-upload-area:hover {
-            border-color: #0d6efd;
-            background-color: rgba(13, 110, 253, 0.05);
+        .form-control-lg, .form-select-lg {
+            font-size: 1.05rem;
+            padding: 0.75rem 1rem;
         }
-
-        .image-upload-area.dragover {
-            border-color: #0d6efd;
-            background-color: rgba(13, 110, 253, 0.1);
+        .btn {
+            font-size: 1.05rem;
         }
-
-        .lesson-item {
-            border: 1px solid #dee2e6;
-            border-radius: 0.5rem;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            background-color: #f8f9fa;
-        }
-
-        .lesson-item.dragging {
-            opacity: 0.5;
-        }
-
-        .drag-handle {
-            cursor: move;
-            color: #6c757d;
-        }
-
-        .video-upload-area {
-            border: 2px dashed #dee2e6;
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .video-upload-area:hover {
-            border-color: #0d6efd;
-            background-color: rgba(13, 110, 253, 0.05);
-        }
-
-        .progress-container {
-            display: none;
-            margin-top: 1rem;
-        }
-
-        .avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .tab-content {
-            padding-top: 1rem;
-        }
-
-        .form-floating textarea {
-            min-height: 120px;
-        }
-
-        .preview-card {
-            border: 1px solid #dee2e6;
-            border-radius: 0.5rem;
-            overflow: hidden;
-        }
-
-        .preview-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-
-        .sticky-sidebar {
-            position: sticky;
-            top: 20px;
-        }
-        .content-card.sticky-step-indicator {
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            background-color: #fff;
-            margin-bottom: 1.5rem;
-            padding-top: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #dee2e6;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-
-        /* Style cho sticky navigation buttons */
-        .content-card.sticky-navigation-buttons {
-            position: sticky;
-            bottom: 0;
-            z-index: 1000;
-            background-color: #fff;
-            margin-top: 1.5rem;
-            padding-top: 15px;
-            padding-bottom: 15px;
-            border-top: 1px solid #dee2e6;
-            box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+        @media (max-width: 768px) {
+            .card-body, .content-card.sticky-step-indicator, .content-card.sticky-navigation-buttons {
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+            }
         }
     </style>
 </div>

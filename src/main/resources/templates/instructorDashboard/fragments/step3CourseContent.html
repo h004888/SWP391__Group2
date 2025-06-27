@@ -1,40 +1,32 @@
 <div class="main-content" th:fragment="step3Content">
     <div class="container-fluid py-4">
-        <!-- Breadcrumb -->
-
-
-        <!-- Page Header -->
-        <div class="content-card sticky-step-indicator">
-            <div class="d-flex justify-content-between align-items-center mb-4">
+        <!-- Page Header & Step Indicator -->
+        <div class="content-card sticky-step-indicator mb-4 rounded-3 border-0 shadow-sm px-4 py-3">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-2">
                 <div>
-                    <h1 class="h3 mb-0">Create New Course</h1>
-                    <p class="text-muted">Fill in the details below to create your course</p>
+                    <h1 class="h3 mb-1 fw-bold text-primary">Create New Course</h1>
+                    <p class="text-muted mb-0">Fill in the details below to create your course</p>
                 </div>
-
             </div>
-            <div>
-                <div class="step-indicator">
-                    <div class="step completed" data-step="1">
-                        <div class="step-circle">1</div>
-                        <div class="step-label">Basic Info</div>
-                    </div>
-                    <div class="step complete" data-step="2">
-                        <div class="step-circle">2</div>
-                        <div class="step-label">Course Preview</div>
-                    </div>
-                    <div class="step active" data-step="3">
-                        <div class="step-circle">3</div>
-                        <div class="step-label">Course Content</div>
-                    </div>
-                    <div class="step" data-step="4">
-                        <div class="step-circle">4</div>
-                        <div class="step-label">Preview & Publish</div>
-                    </div>
+            <div class="step-indicator mt-3">
+                <div class="step completed" data-step="1">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Basic Info</div>
+                </div>
+                <div class="step completed" data-step="2">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Course Preview</div>
+                </div>
+                <div class="step active" data-step="3">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Course Content</div>
+                </div>
+                <div class="step" data-step="4">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">Preview & Publish</div>
                 </div>
             </div>
         </div>
-
-
 
         <div class="row">
             <div class="col-lg-12">
@@ -505,15 +497,15 @@
 
 
                 <form th:action="@{/instructordashboard/createcourse/submitcourse}" method="post">
-                    <div class="content-card sticky-navigation-buttons">
-                        <div class="d-flex justify-content-between">
-                            <button class="btn btn-outline-secondary me-3" name="action" value="previousstep">
+                    <div class="content-card sticky-navigation-buttons rounded-3 border-0 shadow-sm px-4 py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <button class="btn btn-outline-secondary px-4 py-2 rounded-2 me-2" name="action" value="previousstep">
                                 <i class="bi bi-arrow-left me-1"></i> Previous
                             </button>
-                            <button class="btn btn-outline-secondary me-2" id="saveDraftBtn" name="action" value="draft">
+                            <button class="btn btn-outline-secondary px-4 py-2 rounded-2 me-2" id="saveDraftBtn" name="action" value="draft">
                                 <i class="bi bi-save me-1"></i> Save as Draft
                             </button>
-                            <button class="btn btn-primary ms-auto" name="action" value="nextstep">
+                            <button class="btn btn-primary px-4 py-2 rounded-2 ms-auto" name="action" value="nextstep">
                                 Next <i class="bi bi-arrow-right ms-1"></i>
                             </button>
                         </div>
@@ -605,7 +597,8 @@
             .step-indicator {
                 display: flex;
                 justify-content: space-between;
-                margin-bottom: 2rem;
+                margin-bottom: 0;
+                gap: 0.5rem;
             }
 
             .step {
@@ -630,8 +623,8 @@
             }
 
             .step-circle {
-                width: 30px;
-                height: 30px;
+                width: 32px;
+                height: 32px;
                 border-radius: 50%;
                 background-color: #dee2e6;
                 color: #6c757d;
@@ -642,6 +635,7 @@
                 margin-bottom: 0.5rem;
                 position: relative;
                 z-index: 2;
+                font-size: 1.1rem;
             }
 
             .step.active .step-circle {
@@ -744,11 +738,11 @@
                 position: sticky;
                 top: 0;
                 z-index: 1000;
-                background-color: #fff;
+                background-color: #f0f4fa;
                 margin-bottom: 1.5rem;
                 padding-top: 10px;
                 padding-bottom: 10px;
-                border-bottom: 1px solid #dee2e6;
+                border-bottom: 2px solid #b6c6e3;
                 box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             }
 
@@ -757,12 +751,18 @@
                 position: sticky;
                 bottom: 0;
                 z-index: 1000;
-                background-color: #fff;
+                background-color: #f0f4fa;
                 margin-top: 1.5rem;
                 padding-top: 15px;
                 padding-bottom: 15px;
-                border-top: 1px solid #dee2e6;
+                border-top: 2px solid #b6c6e3;
                 box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+            }
+            @media (max-width: 768px) {
+                .card-body, .content-card.sticky-step-indicator, .content-card.sticky-navigation-buttons {
+                    padding-left: 1rem !important;
+                    padding-right: 1rem !important;
+                }
             }
         </style>
         <script>

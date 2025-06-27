@@ -105,7 +105,9 @@
                         <div class="col-lg-8">
                             <div class="content-card bg-white rounded-4 shadow-sm p-4 mb-4">
                                 <h3 class="mb-4">Course Description</h3>
-                                <p class="text-muted" th:text="${course.description}"></p>
+                                <p class="text-muted" th:utext="${course.description ?: 'No description available'}"></p>
+                                <!-- Debug info -->
+                                <p class="small text-danger" th:if="${course == null}">Course object is null</p>
                             </div>
 
                             <div class="content-card bg-white rounded-4 shadow-sm p-4">
