@@ -104,11 +104,11 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsById(id)) {
             Optional<User> user = userRepository.findById(id);
             try {
-                emailService.sendAccountStatusEmail(user.get(), user.get().isStatus());
+                emailService.sendAccountStatusEmail(user.get(), user.get().getStatus());
             } catch (MessagingException e) {
                 throw new RuntimeException(e);
             }
-            user.get().setStatus(!user.get().isStatus());
+            user.get().setStatus(!user.get().getStatus());
             userRepository.save(user.get());
 
             return true;

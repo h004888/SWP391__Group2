@@ -1,13 +1,10 @@
 package com.OLearning.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
-
-import org.aspectj.weaver.ast.Or;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,45 +17,65 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "UserID")
     private Long userId;
-    @Column(name = "Username", unique = true)
+    
+    @Column(name = "Username")
     private String username;
-    @Column(name = "Email", unique = true)
+    
+    @Column(name = "Email")
     private String email;
+    
     @Column(name = "Password")
     private String password;
+    
     @Column(name = "FullName")
     private String fullName;
+    
     @Column(name = "Phone")
     private String phone;
-    @Column(name = "Birthday")
-    private LocalDate birthday;
-    @Column(name = "Address")
-    private String address;
-    @Column(name = "ProfilePicture")
-    private String profilePicture;
-    @Column(name = "PersonalSkill")
-    private String personalSkill;
+    
     @Column(name = "Coin")
     private Double coin = 0.0;
+    
+    @Column(name = "Birthday")
+    private LocalDate birthDay;
+    
+    @Column(name = "Address")
+    private String address;
+    
+    @Column(name = "ProfilePicture")
+    private String profilePicture;
+    
+    @Column(name = "PersonalSkill")
+    private String personalSkill;
+    
     @Column(name = "Status")
-    private boolean status;
+    private Boolean status;//new
 
-    @OneToMany(mappedBy = "user")
-    private List<Enrollment> enrollments;
-
-    @ManyToOne
-    @JoinColumn(name = "roleId")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "RoleID")
     private Role role;
 
-    @OneToMany(mappedBy = "instructor")
+    @OneToMany(mappedBy = "instructor", fetch = FetchType.LAZY)
     private List<Course> courses;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Order> orders;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<LessonCompletion> completions;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Notification> notifications;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<InstructorRequest> instructorRequests;
+
+    @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<InstructorRequest> approvedRequests;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<CoinTransaction> coinTransactions;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Enrollment> enrollments;
 }
+

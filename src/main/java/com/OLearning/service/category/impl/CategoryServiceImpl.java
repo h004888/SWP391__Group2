@@ -42,13 +42,6 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryDTO> getAllCategory() {
-        return categoriesRepository.findAll().stream()
-                .map(c -> new CategoryDTO(c.getId(), c.getName()))
-                .collect(Collectors.toList());
-    }
-
-    @Override
     public boolean existsByName(String name) {
         return categoriesRepository.existsByName(name);
     }
@@ -108,6 +101,17 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<Category> findTop5ByOrderByIdAsc() {
         return categoriesRepository.findTopCategoriesByCourseCount(PageRequest.of(0, 5));
+    }
+
+    @Override
+    public List<CategoryDTO> getAllCategory() {
+        List<Category> categories = categoriesRepository.findAll();
+        return categories.stream().map(category -> {
+            CategoryDTO dto = new CategoryDTO();
+            dto.setId(category.getId().intValue());
+            dto.setName(category.getName());
+            return dto;
+        }).collect(Collectors.toList());
     }
 
 }

@@ -1,7 +1,7 @@
 package com.OLearning.service.course.impl;
 
-import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.course.CourseDetailDTO;
+import com.OLearning.dto.course.CourseViewDTO;
 import com.OLearning.entity.Chapter;
 import com.OLearning.entity.Course;
 import com.OLearning.mapper.course.CourseMapper;
@@ -47,7 +47,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public Page<CourseDTO> searchCoursesGrid(
+    public Page<CourseViewDTO> searchCoursesGrid(
             List<Long> categoryIds,
             List<String> priceFilters,
             List<String> levels,
@@ -89,23 +89,24 @@ public class CourseServiceImpl implements CourseService {
 
         // Sort bằng Java nếu là MostPopular hoặc MostViewed
         if ("MostPopular".equals(sortBy)) {
-            result.sort((a, b) -> Long.compare(b.getReviewCount(), a.getReviewCount()));
+            result.sort((a, b) -> Long.compare(b.getCourseReviews().size(), a.getCourseReviews().size()));
         } else if ("MostViewed".equals(sortBy)) {
-            result.sort((a, b) -> Integer.compare(b.totalStudentEnrolled(), a.totalStudentEnrolled()));
+            result.sort((a, b) -> Integer.compare(b.getEnrollments().size(), a.getEnrollments().size()));
         }
 
         // Trả về lại Page<CourseDTO>
         return new PageImpl<>(
                 result,
                 pageable,
-                coursesPage.getTotalElements()).map(CourseMapper::toDTO);
+                coursesPage.getTotalElements()).map(CourseMapper::toCourseViewDTO);
     }
 
     @Override
-    public List<Course> getTopCourses() {
-        return courseRepository.findAllOrderByStudentCountDesc();
+    public List<CourseViewDTO> getTopCourses() {
+        return courseRepository.findAllOrderByStudentCountDesc().stream()
+                .map(CourseMapper::toCourseViewDTO)
+                .collect(Collectors.toList());
     }
-
 
     @Override
     public Course getCourseById(Long id) {
@@ -115,6 +116,13 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public List<Chapter> getChaptersWithLessons(Long courseId) {
         return chapterRepository.findByCourseIdWithLessons(courseId);
+    }
+
+    @Override
+    public List<CourseViewDTO> getCoursesByCategoryId(int categoryId) {
+        return courseRepository.findByCategoryId(categoryId).stream()
+                .map(CourseMapper::toCourseViewDTO)
+                .collect(Collectors.toList());
     }
 
 }

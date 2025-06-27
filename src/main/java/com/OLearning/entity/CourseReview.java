@@ -1,46 +1,43 @@
-
 package com.OLearning.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
+import jakarta.persistence.*;
+import lombok.*;
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "CourseReviews")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "CourseReviews")
+@Builder
 public class CourseReview {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ReviewID")
-    private int reviewId;
-    @ManyToOne
-    @JoinColumn(name = "EnrollmentID")
-    private Enrollment enrollmentId;
-    @ManyToOne
-    @JoinColumn(name = "CourseID")
+    private Long reviewId;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "EnrollmentID", nullable = false)
+    private Enrollment enrollment;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "CourseID", nullable = false)
     private Course course;
-    @Column(name = "Rating")
-    private int rating;
-    @Column(name = "Comment")
+
+    @Column(name = "Rating", nullable = false)
+    private Integer rating;
+
+    @Column(name = "Comment", length = 1000)
     private String comment;
+
     @Column(name = "CreatedAt")
     private LocalDateTime createdAt;
+
     @Column(name = "UpdatedAt")
     private LocalDateTime updatedAt;
+
 
 }

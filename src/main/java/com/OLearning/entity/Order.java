@@ -1,43 +1,46 @@
 package com.OLearning.entity;
 
-import java.util.List;
+import jakarta.persistence.*;
+import lombok.*;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import java.time.LocalDateTime;
+import java.util.Set;
 
-import lombok.Data;
 
 @Entity
 @Table(name = "Orders")
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Getter
+@Setter
 @ToString
-@Data
 public class Order {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "OrderID")
     private Long orderId;
-    @ManyToOne
-    @JoinColumn(name = "userId")
+    
+    @Column(name = "Amount")
+    private double amount;
+    
+    @Column(name = "OrderType")
+    private String orderType;
+    
+    @Column(name = "Status")
+    private String status;
+    
+    @Column(name = "OrderDate")
+    private LocalDateTime orderDate;
+    
+    @Column(name = "RefCode")
+    private String refCode;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "UserID", nullable = false)
     private User user;
-    @OneToMany(mappedBy = "order")
-    private List<OrderDetail> orderDetails;
-    @OneToMany(mappedBy = "order")
-    private List<Enrollment> enrollments;
+
+    @OneToMany(mappedBy = "orders", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<OrderDetail> orderDetails;
+
+
 }

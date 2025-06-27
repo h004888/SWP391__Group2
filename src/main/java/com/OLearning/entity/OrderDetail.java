@@ -1,40 +1,31 @@
 package com.OLearning.entity;
 
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-import lombok.experimental.SuperBuilder;
-import lombok.Data;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
-@Table(name = "Orders Details")
-@Getter
-@Setter
+@Table(name = "OrderDetail")
 @NoArgsConstructor
 @AllArgsConstructor
-@SuperBuilder
+@Getter
+@Setter
 @ToString
-@Data
-
 public class OrderDetail {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long orderDetailId;
-    @ManyToOne
-    @JoinColumn(name = "orderId")
-    private Order order;
+    @EmbeddedId
+    private OrderDetailId Id;
 
-    @ManyToOne
-    @JoinColumn(name = "courseId")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("orderId")
+    @JoinColumn(name = "OrderID")
+    private Order orders;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("courseId")
+    @JoinColumn(name = "CourseID")
     private Course course;
+
+    @Column(name = "UnitPrice")
+    private Double unitPrice;
+
+
 }

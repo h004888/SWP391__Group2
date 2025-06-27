@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.OLearning.dto.category.CategoryDTO;
-import com.OLearning.dto.course.CourseDTO;
+import com.OLearning.dto.course.CourseViewDTO;
 import com.OLearning.entity.Course;
 import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.course.CourseService;
@@ -44,7 +44,7 @@ public class HomeController {
                         @RequestParam(required = false) List<String> levels,
                         @RequestParam(defaultValue = "Newest") String sortBy,
                         @RequestParam(defaultValue = "9") int size) {
-                Page<CourseDTO> courses = courseService.searchCoursesGrid(categoryIds, priceFilters, levels, sortBy,
+                Page<CourseViewDTO> courses = courseService.searchCoursesGrid(categoryIds, priceFilters, levels, sortBy,
                                 keyword,
                                 page, size); // lưu ý trả về Page<CourseDTO>
                 model.addAttribute("categories", categoryService.getListCategories());

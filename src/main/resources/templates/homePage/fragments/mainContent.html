@@ -539,14 +539,18 @@ Trending courses START -->
                                         <a href="#" class="h6 fw-light mb-0"><i class="far fa-bookmark"></i></a>
                                     </div>
                                     <!-- Title -->
-                                    <h5 class="card-title"><a th:href="@{'/home/course-detail?id=' + ${course.courseId}}" th:text="${course.title}">The complete Digital
+                                    <h5 class="card-title"><a
+                                            th:href="@{'/home/course-detail?id=' + ${course.courseId}}"
+                                            th:text="${course.title}">The complete Digital
                                             Marketing Course - 8 Course
                                             in 1</a></h5>
                                     <!-- Rating -->
                                     <div class="d-flex justify-content-between mb-2">
                                         <div class="hstack gap-2">
                                             <p class="text-warning m-0">
-                                                <span th:text="${course.averageRating}">4.5</span>
+                                                <span
+                                                    th:text="|${#numbers.formatDecimal(course.averageRating, 1, 'POINT', 1, 'POINT')}/5.0|">2.9/5.0</span>
+
                                                 <i class="fas fa-star text-warning ms-1"></i>
                                             </p>
                                             <span class="small">(6500)</span>
@@ -569,7 +573,7 @@ Trending courses START -->
                                     </div>
                                 </div>
                                 <!-- Card footer -->
-                                <div class="card-footer pt-0 bg-transparent" >
+                                <div class="card-footer pt-0 bg-transparent">
                                     <hr>
                                     <!-- Avatar and Price -->
                                     <div class="d-flex justify-content-between align-items-center">
@@ -586,7 +590,8 @@ Trending courses START -->
                                         <!-- Price -->
                                         <div>
 
-                                            <h4 class="text-success mb-0 item-show " style="font-size: 1.2rem;" th:if="${course.price>0}"><span
+                                            <h4 class="text-success mb-0 item-show " style="font-size: 1.2rem;"
+                                                th:if="${course.price>0}"><span
                                                     th:text="${course.price != null ? #numbers.formatDecimal(course.price, 0, 'COMMA', 0, 'POINT')+' ₫' : 'N/A'}"></span>
                                             </h4>
                                             <h4 class="text-success mb-0 item-show" th:if="${course.price==0}">Free

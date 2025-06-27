@@ -15,6 +15,7 @@ public interface CategoryService {
     Category findByName(String name);
 
     Category findById(int id);
+    
 
     boolean existsByName(String name);
 

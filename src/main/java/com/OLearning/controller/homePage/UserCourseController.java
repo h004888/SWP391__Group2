@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-
 import com.OLearning.security.CustomUserDetails;
 import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.course.CourseService;
@@ -124,7 +123,7 @@ public class UserCourseController {
         model.addAttribute("currentLesson", currentLesson);
         Course course = courseService.getCourseById(courseId);
         model.addAttribute("course", course);
-        model.addAttribute("chapters", course.getChapters());
+        model.addAttribute("chapters", course.getListOfChapters());
         return "userPage/course-detail-min";
     }
 
@@ -177,7 +176,7 @@ public class UserCourseController {
         model.addAttribute("currentLesson", currentLesson);
         model.addAttribute("nextLesson", nextLesson);
         model.addAttribute("course", course);
-        model.addAttribute("chapters", course.getChapters());
+        model.addAttribute("chapters", course.getListOfChapters());
         return "userPage/course-detail-min";
     }
 }

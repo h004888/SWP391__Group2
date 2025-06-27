@@ -34,7 +34,7 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
     }
 
     public LocalDate getBirthday() {
-        return user.getBirthday();
+        return user.getBirthDay();
     }
 
     public String getAddress() {
@@ -65,7 +65,7 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
         return this.user;
     }
 
-    //LOGIN OAUTH2
+    // LOGIN OAUTH2
     @Override
     public Map<String, Object> getAttributes() {
         return attributes;

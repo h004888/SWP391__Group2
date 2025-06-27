@@ -44,5 +44,6 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
                @Param("levels") List<String> levels,
                Pageable pageable);
 
-
+     // find course by category id
+     List<Course> findByCategoryId(int categoryId);
 }

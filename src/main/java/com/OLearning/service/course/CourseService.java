@@ -1,7 +1,7 @@
 package com.OLearning.service.course;
 
-import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.course.CourseDetailDTO;
+import com.OLearning.dto.course.CourseViewDTO;
 import com.OLearning.entity.Chapter;
 import com.OLearning.entity.Course;
 
@@ -19,9 +19,11 @@ public interface CourseService {
 
         List<Chapter> getChaptersWithLessons(Long courseId);
 
-        List<Course> getTopCourses();
+        List<CourseViewDTO> getTopCourses();
 
-        Page<CourseDTO> searchCoursesGrid(
+        List<CourseViewDTO> getCoursesByCategoryId(int categoryId);
+
+        Page<CourseViewDTO> searchCoursesGrid(
                         List<Long> categoryIds,
                         List<String> priceFilters,
                         List<String> levels,

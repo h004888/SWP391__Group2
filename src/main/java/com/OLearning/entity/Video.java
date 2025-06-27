@@ -7,31 +7,29 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
+@Table(name="Video")
 public class Video {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "VideoID")
     private Long id;
-
-    @Column(nullable = false)
+    
+    @Column(name = "VideoURL", nullable = false, length = 1000)
     private String videoUrl;
-
-    private String duration;
-
+    
+    @Column(name = "UploadDate")
     private LocalDateTime uploadDate;
-
-    @ManyToOne
-    @JoinColumn(name = "lessonId")
-    private Lesson lesson;
-
-    @ManyToOne
+    
+    @Column(name = "Duration")
+    private Integer duration;
+    
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "LessonID")
-    private Lesson videoLesson;
+    private Lesson lesson;
 }
