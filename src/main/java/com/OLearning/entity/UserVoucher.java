@@ -24,8 +24,9 @@ public class UserVoucher {
     @ManyToOne
     @JoinColumn(name = "voucherId", nullable = false)
     private Voucher voucher;
-
+    @Column(name = "IsUsed")
     private Boolean isUsed;
+    @Column(name = "UsedDate")
     private LocalDateTime usedDate;
 
 }

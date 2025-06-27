@@ -19,6 +19,7 @@ import java.util.UUID;
 @Controller
 @RequestMapping("/admin/businessRule")
 public class BusinessRuleController {
+
     @Autowired
     private TermsAndConditionService termsAndConditionService;
 

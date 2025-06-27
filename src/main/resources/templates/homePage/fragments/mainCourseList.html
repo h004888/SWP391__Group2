@@ -81,7 +81,7 @@
                                                 th:attr="data-course-id=${course.courseId}">
                                             <i class="fas fa-shopping-cart me-2"></i>Add to cart
                                         </button>
-                                        <form th:action="@{'/home/buy-now/' + ${course.courseId}}" method="post" class="d-inline">
+                                        <form th:action="@{'/home/buy-now'}" method="post" class="d-inline">
                                             <button type="submit" class="btn btn-sm btn-primary item-show-hover m-1"><i class="fas fa-bolt me-2"></i>Mua ngay</button>
                                         </form>
                                     </div>

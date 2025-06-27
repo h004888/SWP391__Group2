@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.OLearning.dto.lessonCompletion.LessonCompletionDTO;
 
-import com.OLearning.entity.LessonCompletion;
 import org.springframework.stereotype.Service;
 
 @Service

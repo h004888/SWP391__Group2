@@ -70,7 +70,7 @@ public class CourseMapper {
         course.setTitle(dto.getTitle());
         course.setDescription(dto.getDescription());
         course.setCreatedAt(LocalDateTime.now());
-        course.setPrice(dto.getPrice());
+        course.setPrice(dto.getPrice() != null ? (dto.getPrice()) : null);
         course.setCourseLevel(dto.getCourseLevel());
         // Không set averageRating, reviewCount, duration vì tính tự động
         return course;

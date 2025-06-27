@@ -77,5 +77,12 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Enrollment> enrollments;
+
+    @OneToMany(mappedBy = "instructor")
+    private List<Voucher> vouchers;
+
+    @OneToMany(mappedBy = "user")
+    private List<UserVoucher> userVouchers;
 }
+
 
