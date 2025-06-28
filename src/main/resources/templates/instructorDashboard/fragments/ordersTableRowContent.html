@@ -1,0 +1,81 @@
+<div th:fragment="ordersTableRowContent">
+    <tr th:each="order : ${orders}">
+        <td th:text="${order.orderId} ?: 'N/A'"></td>
+        <td>
+            <span th:text="${order.instructorAmount != null ? #numbers.formatDecimal(order.instructorAmount, 0, 'COMMA', 0, 'POINT') : 'N/A'}"></span>
+        </td>
+        <td th:text="${order.orderType} ?: 'N/A'" class="text-uppercase text-bold "></td>
+        <td>
+            <span th:if="${order.status == 'PAID'}" class="badge bg-success">Paid</span>
+            <span th:if="${order.status == 'CANCELLED'}" class="badge bg-danger">Cancelled</span>
+            <span th:if="${order.status != 'PAID' && order.status != 'CANCELLED'}" 
+                  class="badge bg-secondary" th:text="${order.status} ?: 'N/A'"></span>
+        </td>
+        <td th:with="formatter=${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}"
+            th:text="${formatter}"></td>
+        <td th:text="${order.username} ?: 'N/A'"></td>
+        <td>
+            <a th:href="@{/instructordashboard/orders/view/{orderId}(orderId=${order.orderId})}"
+               class="btn btn-info-soft btn-round me-1 mb-1 mb-md-0"
+               title="View"><i class="fas fa-eye"></i></a>
+        </td>
+    </tr>
+</div>
+
+<div th:fragment="ordersPagination" class="d-sm-flex justify-content-sm-between align-items-sm-center mt-2">
+    <div class="mb-0 text-center text-sm-start">
+        <p class="mb-0 text-center text-sm-start" th:if="${totalItems > 0}">
+            Showing <span th:text="${currentPage * 10 + 1}">1</span> to
+            <span th:text="${(currentPage * 10) + 10 > totalItems ? totalItems : (currentPage * 10) + 10}">10</span> of
+            <span th:text="${totalItems}">20</span> entries
+        </p>
+        <p class="mb-0 text-center text-sm-start" th:if="${totalItems == 0}">
+            No entries found
+        </p>
+    </div>
+    <nav class="d-flex justify-content-center mb-0" aria-label="navigation" th:if="${totalPages > 0}">
+        <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
+            <!-- First Page -->
+            <li class="page-item mb-0" th:classappend="${currentPage == 0} ? 'disabled'">
+                <a class="page-link" th:data-page="0" href="#" tabindex="-1" title="First">
+                    <i class="fas fa-angle-left"></i>
+                </a>
+            </li>
+
+            <!-- Page Numbers -->
+            <th:block th:with="startPage=${currentPage - 2 < 0 ? 0 : currentPage - 2},
+                              endPage=${currentPage + 2 >= totalPages ? totalPages - 1 : currentPage + 2}">
+
+                <!-- Show first page if not in range -->
+                <li class="page-item mb-0" th:if="${startPage > 0}">
+                    <a class="page-link" th:data-page="0" th:text="1" href="#"></a>
+                </li>
+                <li class="page-item disabled mb-0" th:if="${startPage > 1}">
+                    <span class="page-link">..</span>
+                </li>
+
+                <!-- Page range -->
+                <li class="page-item mb-0"
+                    th:each="i : ${#numbers.sequence(startPage, endPage)}"
+                    th:classappend="${currentPage == i} ? 'active'">
+                    <a class="page-link" th:data-page="${i}" th:text="${i + 1}" href="#"></a>
+                </li>
+
+                <!-- Show last page if not in range -->
+                <li class="page-item disabled mb-0" th:if="${endPage < totalPages - 2}">
+                    <span class="page-link">..</span>
+                </li>
+                <li class="page-item mb-0" th:if="${endPage < totalPages - 1}">
+                    <a class="page-link" th:data-page="${totalPages - 1}" th:text="${totalPages}" href="#"></a>
+                </li>
+            </th:block>
+
+            <!-- Last Page -->
+            <li class="page-item mb-0" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                <a class="page-link" th:data-page="${totalPages - 1}" href="#" title="Last">
+                    <i class="fas fa-angle-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>

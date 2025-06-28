@@ -8,19 +8,20 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
-@Component
+@Component("courseMapper")
 public class CourseMapper {
     // Mapper ve de save course
     public Course MapCourseAdd(CourseAddDTO dto) {
         Course course = new Course();
         course.setTitle(dto.getTitle());
         course.setDescription(dto.getDescription());
-        course.setPrice(dto.getPrice());
-        course.setDiscount(dto.getDiscount());
+        course.setPrice(dto.getPrice() != null ? dto.getPrice() : null);
+        course.setDiscount(dto.getDiscount() != null ? dto.getDiscount() : null);
         course.setCreatedAt(LocalDateTime.now());
         course.setUpdatedAt(LocalDateTime.now());
         return course;
     }
+
     //hien thi course
     public CourseDTO MapCourseDTO(Course course) {
         CourseDTO courseDTO = new CourseDTO();
@@ -34,6 +35,13 @@ public class CourseMapper {
         courseDTO.setCourseLevel(course.getCourseLevel());
         courseDTO.setDiscount(course.getDiscount());
         courseDTO.setStatus(course.getStatus());
+        if (course.getCategory() != null) {
+            courseDTO.setCategoryName(course.getCategory().getName());
+        } else {
+            courseDTO.setCategoryName("N/A");
+        }
+        courseDTO.setInstructor(course.getInstructor());
+        courseDTO.setTotalStudentEnrolled(course.getEnrollments() != null ? course.getEnrollments().size() : 0);
         courseDTO.setIsFree(course.getIsFree());
         courseDTO.setVideoUrlPreview(course.getVideoUrlPreview());
         return courseDTO;
@@ -43,7 +51,7 @@ public class CourseMapper {
         course.setTitle(dto.getTitle());
         course.setDescription(dto.getDescription());
         course.setCreatedAt(LocalDateTime.now());
-        course.setPrice(dto.getPrice());
+        course.setPrice(dto.getPrice() != null ? (dto.getPrice()) : null);
         course.setCourseLevel(dto.getCourseLevel());
         return course;
     }
@@ -54,8 +62,24 @@ public class CourseMapper {
         dto.setTitle(course.getTitle());
         dto.setDescription(course.getDescription());
         dto.setCategoryName(course.getCategory().getName());
-        dto.setPrice(course.getPrice());
+        dto.setPrice(course.getPrice() != null ? course.getPrice().doubleValue() : null);
         dto.setCourseLevel(course.getCourseLevel());
         return dto;
+    }
+
+    public static CourseDTO toDTO(Course course) {
+        CourseDTO courseDTO = new CourseDTO();
+        courseDTO.setCourseId(course.getCourseId());
+        courseDTO.setTitle(course.getTitle());
+        courseDTO.setDescription(course.getDescription());
+        courseDTO.setPrice(course.getPrice());
+        courseDTO.setDiscount(course.getDiscount());
+        courseDTO.setCourseImg(course.getCourseImg());
+        courseDTO.setCourseLevel(course.getCourseLevel());
+        courseDTO.setCreatedAt(course.getCreatedAt());
+        courseDTO.setUpdatedAt(course.getUpdatedAt());
+        courseDTO.setStatus(course.getStatus());
+        courseDTO.setVideoUrlPreview(course.getVideoUrlPreview());
+        return courseDTO;
     }
 }

@@ -18,19 +18,30 @@ import java.util.List;
 public class Chapter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="chapterId")
+    @Column(name = "ChapterID")
     private Long chapterId;
-    @Column(nullable = false)
+    
+    @Column(name = "Title", nullable = false)
     private String title;
+    
+    @Column(name = "Description")
     private String description;
-    private Integer orderNumber=0; //stt chuong trong khoa hoc
-    private LocalDateTime createAt;
-    private LocalDateTime updateAt;
+    
+    @Column(name = "OrderNumber")
+    private Integer orderNumber = 0; //stt chuong trong khoa hoc
+    
+    @Column(name = "CreatedAt")
+    private LocalDateTime createdAt;
+    
+    @Column(name = "UpdatedAt")
+    private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "chapter", fetch = FetchType.LAZY)
     private List<Lesson> lessons;
 
-    @ManyToOne
-    @JoinColumn(name = "courseId")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CourseID")
     private Course course;
+
+
 }

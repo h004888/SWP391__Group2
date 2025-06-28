@@ -1,10 +1,12 @@
 package com.OLearning.dto.user;
 
+import com.OLearning.dto.course.CourseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -17,10 +19,11 @@ public class UserDetailDTO {
     private String fullName;
     private String email;
     private String phone;
-    private String birthday;
+    private Double coin;
     private String roleName;
     private String address;
+    private LocalDate birthDay;
     private String profilePicture;
-
-    private List<String> enrolledCourseTitles;
+    private String personalSkill;
+    private List<CourseDTO> enrolledCourses;
 }

@@ -727,7 +727,7 @@ var e = {
             var options = {
                 series: enrollmentValues,
                 chart: {
-                    height: 300,
+                    height: 450,
                     type: 'pie',
                     toolbar: {
                         show: false
@@ -909,28 +909,36 @@ var e = {
     activeChart2: function () {
         var jj = document.querySelector("#activeChartstudent2");
         if (typeof (jj) != 'undefined' && jj != null) {
+            if (window.activeChart2Instance) {
+                window.activeChart2Instance.destroy();
+            }
+
+            var chartData = window.instructorEnrollmentChartData || {};
+            var categories = Object.keys(chartData);
+            var seriesData = categories.map(function (key) { return chartData[key] || 0; });
+
+            // Nếu không có dữ liệu
+            if (categories.length === 0 || seriesData.every(value => value === 0)) {
+                jj.innerHTML = '<div class="text-center p-4"><h5 class="text-muted">Không có học viên nào đăng ký trong thời gian này</h5></div>';
+                return;
+            }
+
             var options = {
                 series: [{
-                    name: 'Conversion',
-                    data: [200, 290, 325, 500, 600, 316, 478, 700]
+                    name: 'Enrollment',
+                    data: seriesData
                 }],
                 chart: {
                     height: 130,
                     type: 'area',
-                    sparkline: {
-                        enabled: !0
-                    }
+                    sparkline: { enabled: !0 }
                 },
-                dataLabels: {
-                    enabled: false
-                },
-                stroke: {
-                    curve: 'smooth'
-                },
-                colors: [ThemeColor.getCssVariableValue('--bs-purple')],
+                dataLabels: { enabled: false },
+                stroke: { curve: 'smooth' },
+                colors: [ThemeColor.getCssVariableValue('--bs-success')],
                 xaxis: {
                     type: 'category',
-                    categories: ['Dec 01', 'Dec 02', 'Dec 03', 'Dec 04', 'Dec 05', 'Dec 06', 'Dec 07', 'Dec 08', 'Dec 09 ', 'Dec 10', 'Dec 11']
+                    categories: categories
                 },
                 grid: {},
                 tooltip: {
@@ -946,8 +954,9 @@ var e = {
                     }
                 }
             };
-            var chart = new ApexCharts(document.querySelector("#activeChartstudent2"), options);
-            chart.render();
+
+            window.activeChart2Instance = new ApexCharts(jj, options);
+            window.activeChart2Instance.render();
         }
     },
     // END: Active student Chart 2

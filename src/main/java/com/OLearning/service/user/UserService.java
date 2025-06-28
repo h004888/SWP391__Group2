@@ -2,9 +2,12 @@ package com.OLearning.service.user;
 
 import com.OLearning.dto.user.UserDTO;
 import com.OLearning.dto.user.UserDetailDTO;
+import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.login.RegisterDTO;
 import com.OLearning.entity.Role;
 import com.OLearning.entity.User;
+
+import org.mapstruct.control.MappingControl.Use;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,7 +22,15 @@ public interface UserService {
 
     Page<UserDTO> getUsersByRoleWithPagination(Long roleId, Pageable pageable);
 
+    Page<UserDTO> getInstructorsByRoleIdOrderByCourseCountDesc(Long roleId, Pageable pageable);
+
     Page<UserDTO> searchByNameWithPagination(String keyword, Long roleId, Pageable pageable);
+
+    Page<UserDTO> getInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(String keyword, Long roleId, Pageable pageable);
+
+    Page<UserDTO> getUsersByRoleAndStatusWithPagination(Long roleId, boolean status, Pageable pageable);
+
+    Page<UserDTO> searchByNameAndStatusWithPagination(String keyword, Long roleId, boolean status, Pageable pageable);
 
     Optional<UserDetailDTO> getInfoUser(Long id);
 
@@ -44,8 +55,14 @@ public interface UserService {
     void assignRoleToUser(Long userId, String roleName);
 
     List<UserDTO> getTopInstructorsByCourseCount(int limit);
-    
+
     UserDTO getUserByEmail(String username);
 
+    Page<UserDTO> filterInstructors(String keyword, Pageable pageable);
+
+    boolean existsById(Long userId);
     User findById(Long id);
+
+    void updatePasswordByEmail(String email, String newPassword);
+
 }

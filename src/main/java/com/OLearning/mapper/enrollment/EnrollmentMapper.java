@@ -32,7 +32,7 @@ public class EnrollmentMapper {
         userDTO.setProfilePicture(enrollment.getUser().getProfilePicture());
         userDTO.setFullName(enrollment.getUser().getFullName());
         userDTO.setAddress(enrollment.getUser().getAddress());
-        userDTO.setBirthday(enrollment.getUser().getBirthday());
+        userDTO.setBirthday(enrollment.getUser().getBirthDay());
         userDTO.setPhone(enrollment.getUser().getPhone());
         enrollmentDTO.setUser(userDTO);
 

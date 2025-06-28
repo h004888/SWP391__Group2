@@ -96,24 +96,32 @@
             <div class="table-wrapper">
                 <div class="table-title">
                     <div class="row">
-                        <div class="col-md-8">
-                            <div id="addAccountBtnContainer"  style="display: none;">
+                        <div class="col-md-6 d-flex align-items-center">
+                            <div id="addAccountBtnContainer" style="display: block;">
                                 <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModal">
                                     Add New Staff
                                 </button>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="search-box">
-                                <i class="fas fa-search fs-6 text-primary"></i>
-                                <input type="text" id="searchInput" name="keyword" class="form-control"
-                                       placeholder="Search…" th:value="${keyword}">
+
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-end align-items-center gap-2">
+                                <!-- Status Filter -->
+                                <select id="statusFilter" class="form-select" style="width: 150px; height: 38px;">
+                                    <option value="true" selected>Active</option>
+                                    <option value="false">Inactive</option>
+                                    <option value="all">All Status</option>
+                                </select>
+
+                                <!-- Search Box -->
+                                <div class="search-box" style="width: 300px; position: relative;">
+                                    <i class="fas fa-search fs-6 text-primary" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%);"></i>
+                                    <input type="text" id="searchInput" name="keyword" class="form-control ps-4"
+                                           placeholder="Search…" th:value="${keyword}">
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-10"></div>
-
                     </div>
-
                 </div>
 
                 <div class="table-wrapper">
@@ -127,13 +135,13 @@
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="instructor-tab" data-bs-toggle="tab"
-                                        data-bs-target="#instructor" type="button" role="tab" data-role="3">
+                                        data-bs-target="#instructor" type="button" role="tab" data-role="2">
                                     <i class="bi bi-person-badge me-2"></i>Instructor
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="user-tab" data-bs-toggle="tab"
-                                        data-bs-target="#user" type="button" role="tab" data-role="2">
+                                        data-bs-target="#user" type="button" role="tab" data-role="3">
                                     <i class="bi bi-people me-2"></i>User
                                 </button>
                             </li>
@@ -144,16 +152,15 @@
                             <!-- Admin Tab -->
                             <div class="tab-pane fade show active" id="admin" role="tabpanel">
                                 <div class="table-responsive">
-                                    <table class="table account-table">
+                                    <table class="table account-table text-center">
                                         <thead>
                                         <tr>
                                             <th>ID</th>
-                                            <th>Tên</th>
+                                            <th>UserName</th>
                                             <th>Email</th>
                                             <th>Role</th>
                                             <th>Status</th>
-                                            <th>Thao tác</th>
-                                            <th>Reset Password</th>
+                                            <th>Action</th>
                                         </tr>
                                         </thead>
                                         <tbody id="adminTableBody">
@@ -166,16 +173,15 @@
                             <!-- Instructor Tab -->
                             <div class="tab-pane fade" id="instructor" role="tabpanel">
                                 <div class="table-responsive">
-                                    <table class="table account-table">
+                                    <table class="table account-table text-center">
                                         <thead>
                                         <tr>
                                             <th>ID</th>
-                                            <th>Tên</th>
+                                            <th>UserName</th>
                                             <th>Email</th>
                                             <th>Role</th>
                                             <th>Status</th>
-                                            <th>Thao tác</th>
-                                            <th>Reset Password</th>
+                                            <th>Action</th>
                                         </tr>
                                         </thead>
                                         <tbody id="instructorTableBody">
@@ -188,16 +194,15 @@
                             <!-- User Tab -->
                             <div class="tab-pane fade" id="user" role="tabpanel">
                                 <div class="table-responsive">
-                                    <table class="table account-table">
+                                    <table class="table account-table text-center">
                                         <thead>
                                         <tr>
                                             <th>ID</th>
-                                            <th>Tên</th>
+                                            <th>UserName</th>
                                             <th>Email</th>
                                             <th>Role</th>
                                             <th>Status</th>
-                                            <th>Thao tác</th>
-                                            <th>Reset Password</th>
+                                            <th>Action</th>
                                         </tr>
                                         </thead>
                                         <tbody id="userTableBody">
@@ -210,34 +215,8 @@
                     </div>
 
                     <!--Paging-->
-
-                    <div class="d-sm-flex justify-content-sm-between align-items-sm-center mt-2" th:if="${totalPages > 0}">
-                        <div class="mb-0 text-center text-sm-start">
-                            Showing <b th:text="${listU.size()}"></b> out of <b th:text="${totalItems}"></b> entries
-                        </div>
-                        <p class="mb-0 text-center text-sm-start" th:if="${totalItems == 0}">
-                            No entries found
-                        </p>
-                        <nav class="d-flex justify-content-center mb-0" aria-label="navigation" th:if="${totalPages > 1}">
-                            <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
-                            <!-- Nút Previous -->
-                            <li class="page-item mb-0" th:classappend="${currentPage == 0} ? 'disabled'">
-                                <a class="page-link" th:data-page="${currentPage - 1}" href="#"> <i class="fas fa-angle-left"></i></a>
-                            </li>
-
-                            <!-- Các nút số trang -->
-                            <li class="page-item mb-0" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                                th:classappend="${currentPage == i} ? 'active'">
-                                <a class="page-link" th:data-page="${i}" th:text="${i + 1}" href="#"></a>
-                            </li>
-
-                            <!-- Nút Next -->
-                            <li class="page-item mb-0" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
-                                <a class="page-link" th:data-page="${currentPage + 1}" href="#"><i
-                                        class="fa fa-angle-double-right"></i></a>
-                            </li>
-                        </ul>
-                        </nav>
+                    <div id="accountPaginationContainer">
+                        <!-- Pagination will be loaded here via AJAX -->
                     </div>
                     <!--End Paging-->
                 </div>
@@ -250,7 +229,8 @@
                         <form>
                             <div class="modal-header d-flex justify-content-between align-items-center">
                                 <h5 class="modal-title mb-0">Block Account</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
                                 <h6>Are you sure you want to block this account?</h6>

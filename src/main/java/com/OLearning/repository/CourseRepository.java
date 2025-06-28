@@ -1,21 +1,23 @@
 package com.OLearning.repository;
 
 import com.OLearning.entity.Course;
-import com.OLearning.entity.User;
+
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
-import java.time.LocalDateTime;
+import org.springframework.stereotype.Repository;
 import java.util.List;
+import org.springframework.data.domain.Pageable;
 
+@Repository
 public interface CourseRepository extends JpaRepository<Course, Long> {
     //tao the nay la xong roi no lay ve mot dong ham roi
     List<Course> findByInstructorUserId(Long userId);
 
     List<Course> findByStatus(String status);
+     @Query("SELECT c FROM Course c LEFT JOIN c.enrollments e GROUP BY c ORDER BY COUNT(e) DESC")
+     List<Course> findAllOrderByStudentCountDesc();
 
     Page<Course> findByInstructorUserId(Long userId, Pageable pageable);
 
@@ -35,7 +37,6 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     );
     //phan trang theo status
 
-
     @Query("SELECT c FROM Course c WHERE " +
             "(:keyword IS NULL OR :keyword = '' OR LOWER(c.title) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
             "(:categoryId IS NULL OR c.category.id = :categoryId) AND " +
@@ -49,7 +50,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
             "(:status = 'draft' AND c.status IS NULL) OR " +
             "(:status != 'draft' AND :status != '' AND c.status = :status))")
     Page<Course> filterCourses(@Param("keyword") String keyword,
-                               @Param("categoryId") Integer categoryId,
+                               @Param("categoryId") Long categoryId,
                                @Param("price") String price,
                                @Param("status") String status,
                                Pageable pageable);
@@ -72,9 +73,35 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     """)
     Page<Course> findCoursesByFilters(
             @Param("instructorId") Long instructorId,
-            @Param("categoryId") Integer categoryId,
+            @Param("categoryId") Long categoryId,
             @Param("status") String status,
             @Param("price") String price,
             Pageable pageable);
+     // function search + filter + sort
+     @Query("""
+                   SELECT c FROM Course c
+                   WHERE (:keyword       IS NULL
+                          OR LOWER(c.title)       LIKE LOWER(CONCAT('%', :keyword, '%'))
+                          OR LOWER(c.description) LIKE LOWER(CONCAT('%', :keyword, '%')))
+                     AND (:categoryIds  IS NULL OR c.category.id    IN :categoryIds)
+                     AND (
+                          :priceFilters IS NULL
+                          OR (
+                              ('Free' IN (:priceFilters)  AND c.price = 0)
+                           OR ('Paid' IN (:priceFilters)  AND c.price > 0)
+                          )
+                     )
+                     AND (
+                          :levels IS NULL
+                       OR c.courseLevel IN :levels
+                     )
+               """)
+     Page<Course> searchCourses(
+               @Param("keyword") String keyword,
+               @Param("categoryIds") List<Long> categoryIds,
+               @Param("priceFilters") List<String> priceFilters,
+               @Param("levels") List<String> levels,
+               Pageable pageable);
+
 
 }

@@ -1,0 +1,107 @@
+<div th:fragment="instructorRequestTableRowContent">
+    <tr th:each="request : ${listRequest}">
+        <!-- Table data -->
+        <td th:text="${request.user.userId}"> </td>
+        <td>
+            <div class="d-flex align-items-center position-relative">
+                <!-- Image -->
+                <div class="avatar avatar-md">
+                    <img th:src="${request.user.profilePicture != null ? request.user.profilePicture : 'assets/images/avatar/default.jpg'}" class="rounded-circle" alt="">
+                </div>
+                <div class="mb-0 ms-2">
+                    <!-- Title -->
+                    <h6 class="mb-0"><a href="#" class="stretched-link" th:text="${request.user.fullName}">Instructor Name</a></h6>
+                </div>
+            </div>
+        </td>
+
+        <!-- Table data -->
+        <td th:text="${#temporals.format(request.requestDate, 'dd MMM yyyy')}">Request Date</td>
+
+        <!-- Table data -->
+        <td class="text-center text-sm-start">
+            <h6 class="mb-0" th:text="${request.user.personalSkill}">Subject</h6>
+        </td>
+
+        <!-- Status -->
+        <td class="text-center text-uppercase">
+            <span th:switch="${request.status}">
+                <span th:case="'PENDING'" class="badge bg-secondary">
+                    <i class="fas fa-clock"></i> Pending
+                </span>
+                <span th:case="'APPROVED'" class="badge bg-success">
+                    <i class="fas fa-check"></i> Approved
+                </span>
+                <span th:case="'REJECTED'" class="badge bg-danger">
+                    <i class="fas fa-times"></i> Rejected
+                </span>
+                <span th:case="null" class="badge bg-secondary">
+                    <i class="fas fa-question"></i> Unknown
+                </span>
+            </span>
+        </td>
+
+        <!-- Table data -->
+        <td>
+            <a href="#" class="btn btn-primary-soft me-1 mb-0" data-bs-toggle="modal" data-bs-target="#appDetail" th:onclick="'loadRequestDetails(' + ${request.requestId} + ')'">View Detail</a>
+        </td>
+    </tr>
+</div>
+
+<div th:fragment="instructorRequestPagination" class="d-sm-flex justify-content-sm-between align-items-sm-center mt-2">
+    <div class="mb-0 text-center text-sm-start">
+        <p class="mb-0 text-center text-sm-start" th:if="${totalItems > 0}">
+            Showing <span th:text="${currentPage * 5 + 1}">1</span> to 
+            <span th:text="${(currentPage * 5) + 5 > totalItems ? totalItems : (currentPage * 5) + 5}">5</span> of 
+            <span th:text="${totalItems}">20</span> entries
+        </p>
+        <p class="mb-0 text-center text-sm-start" th:if="${totalItems == 0}">
+            No entries found
+        </p>
+    </div>
+    <nav class="d-flex justify-content-center mb-0" aria-label="navigation" th:if="${totalPages > 0}">
+        <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
+            <!-- First Page -->
+            <li class="page-item mb-0" th:classappend="${currentPage == 0} ? 'disabled'">
+                <a class="page-link" th:data-page="0" href="#" tabindex="-1" title="First">
+                    <i class="fas fa-angle-left"></i>
+                </a>
+            </li>
+
+            <!-- Page Numbers -->
+            <th:block th:with="startPage=${currentPage - 2 < 0 ? 0 : currentPage - 2},
+                              endPage=${currentPage + 2 >= totalPages ? totalPages - 1 : currentPage + 2}">
+
+                <!-- Show first page if not in range -->
+                <li class="page-item mb-0" th:if="${startPage > 0}">
+                    <a class="page-link" th:data-page="0" th:text="1" href="#"></a>
+                </li>
+                <li class="page-item disabled mb-0" th:if="${startPage > 1}">
+                    <span class="page-link">..</span>
+                </li>
+
+                <!-- Page range -->
+                <li class="page-item mb-0"
+                    th:each="i : ${#numbers.sequence(startPage, endPage)}"
+                    th:classappend="${currentPage == i} ? 'active'">
+                    <a class="page-link" th:data-page="${i}" th:text="${i + 1}" href="#"></a>
+                </li>
+
+                <!-- Show last page if not in range -->
+                <li class="page-item disabled mb-0" th:if="${endPage < totalPages - 2}">
+                    <span class="page-link">..</span>
+                </li>
+                <li class="page-item mb-0" th:if="${endPage < totalPages - 1}">
+                    <a class="page-link" th:data-page="${totalPages - 1}" th:text="${totalPages}" href="#"></a>
+                </li>
+            </th:block>
+
+            <!-- Last Page -->
+            <li class="page-item mb-0" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                <a class="page-link" th:data-page="${totalPages - 1}" href="#" title="Last">
+                    <i class="fas fa-angle-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div> 

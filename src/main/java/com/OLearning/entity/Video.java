@@ -17,12 +17,19 @@ import java.time.LocalDateTime;
 public class Video {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "VideoID")
     private Long id;
-    @Column(name = "videoUrl", nullable = false, length = 1000)
+    
+    @Column(name = "VideoURL", nullable = false, length = 1000)
     private String videoUrl;
+    
+    @Column(name = "UploadDate")
     private LocalDateTime uploadDate;
+    
+    @Column(name = "Duration")
     private Integer duration;
-    @OneToOne
-    @JoinColumn(name = "lesson_id")
+    
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "LessonID")
     private Lesson lesson;
 }

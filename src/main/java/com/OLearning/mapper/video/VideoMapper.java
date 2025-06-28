@@ -5,6 +5,7 @@ import com.OLearning.entity.Video;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+
 @Component
 public class VideoMapper {
     public Video VideoMapper(VideoDTO videoDTO) {
@@ -12,6 +13,7 @@ public class VideoMapper {
         if (videoDTO.getId() != null) {
             video.setId(videoDTO.getId());
         }
+        video.setVideoUrl(videoDTO.getVideoUrl().getOriginalFilename());
         video.setDuration(videoDTO.getDuration());
         video.setUploadDate(LocalDateTime.now());
         return video;

@@ -1,6 +1,4 @@
 <div th:fragment="courseDetail">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         :root {
             --sidebar-width: 250px;
@@ -11,22 +9,22 @@
             background-color: #f8f9fa;
         }
 
-        .sidebar .nav-link {
+        .course-detail-sidebar .nav-link {
             color: rgba(255, 255, 255, 0.75);
             padding: 0.75rem 1rem;
             font-size: 0.9rem;
         }
 
-        .sidebar .nav-link:hover {
+        .course-detail-sidebar .nav-link:hover {
             color: rgba(255, 255, 255, 1);
         }
 
-        .sidebar .nav-link.active {
+        .course-detail-sidebar .nav-link.active {
             color: #fff;
             background-color: rgba(255, 255, 255, 0.1);
         }
 
-        .sidebar .nav-link i {
+        .course-detail-sidebar .nav-link i {
             margin-right: 10px;
         }
 
@@ -114,11 +112,68 @@
         .note-card.success {
             border-left-color: #198754;
         }
+        .nav-tabs .nav-link {
+            color: #6c757d;
+            border: none;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: #0d6efd;
+            border-bottom-color: #dee2e6;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: #0d6efd;
+            border-bottom: 2px solid #0d6efd;
+            background: none;
+        }
+
+        .lesson-video-link,
+        .lesson-quiz-link {
+            color: #0d6efd;
+            transition: color 0.2s ease;
+        }
+
+        .lesson-video-link:hover,
+        .lesson-quiz-link:hover {
+            color: #0a58ca;
+        }
+
+        .accordion-button:not(.collapsed) {
+            background-color: #e7f1ff;
+            color: #0d6efd;
+        }
+
+        .accordion-button:focus {
+            box-shadow: none;
+            border-color: rgba(0, 0, 0, .125);
+        }
+
+        .list-group-item {
+            transition: background-color 0.2s ease;
+        }
+
+        .list-group-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .badge {
+            font-weight: 500;
+            padding: 0.5em 0.75em;
+        }
+
+        .content-card {
+            transition: box-shadow 0.3s ease;
+        }
+
+        .content-card:hover {
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        }
     </style>
 
-
     <!-- Main Content -->
-    <div class="">
 
         <!-- Course Header -->
         <div class="course-header">
@@ -127,19 +182,19 @@
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h1 class="mb-0" th:text="${detailCourse.title}">Course Title</h1>
                         <span th:switch="${detailCourse.status}">
-                    <span th:case="null" class="badge badge-secondary">
+                    <span th:case="null" class="badge bg-secondary">
                         <i class="fas fa-save "></i> Save Draft
                     </span>
-                    <span th:case="'pending'" class="badge badge-secondary">
+                    <span th:case="'pending'" class="badge bg-secondary">
                         <i class="fas fa-clock"></i> Pending
                     </span>
-                    <span th:case="'approved'" class="badge badge-success">
+                    <span th:case="'approved'" class="badge bg-success">
                         <i class="fas fa-check"></i> Approved
                     </span>
-                    <span th:case="'rejected'" class="badge badge-danger">
+                    <span th:case="'rejected'" class="badge bg-danger">
                         <i class="fas fa-times"></i> Rejected
                     </span>
-                    <span th:case="'resubmit'" class="badge badge-warning text-dark">
+                    <span th:case="'resubmit'" class="badge bg-warning text-dark">
                              <i class="fas fa-exclamation-triangle"></i> ReSubmit
                     </span>
                 </span>
@@ -153,7 +208,7 @@
                 </span>
                         <span class="text-muted">
                     <i class="bi bi-clock me-1"></i>
-                    Review Due: <span th:text="${#temporals.format(detailCourse.updatedAt, 'MMM dd, yyyy')}">Date</span>
+<!--                    Review Due: <span th:text="${#temporals.format(detailCourse.updatedAt, 'MMM dd, yyyy')}">Date</span>-->
                 </span>
                     </div>
 
@@ -201,72 +256,95 @@
             </div>
         </div>
 
-        <!-- Course Content Tabs -->
-        <ul class="nav nav-tabs" id="courseTab" role="tablist">
+        <!-- Course Content Tabs (NEW DESIGN) -->
+        <div class="bg-white rounded-4 shadow-sm">
+            <ul class="nav nav-tabs nav-fill border-0" id="courseTab" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview"
-                        type="button" role="tab">Overview
+                    <button class="nav-link active py-3" id="overview-tab" data-bs-toggle="tab"
+                        data-bs-target="#overview" type="button" role="tab">
+                        <i class="bi bi-info-circle me-2"></i>Overview
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="lessons-tab" data-bs-toggle="tab" data-bs-target="#lessons" type="button"
-                        role="tab">Lessons
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="instructor-tab" data-bs-toggle="tab" data-bs-target="#instructor"
-                        type="button" role="tab">Instructor
+                    <button class="nav-link py-3" id="lessons-tab" data-bs-toggle="tab" data-bs-target="#lessons"
+                        type="button" role="tab">
+                        <i class="bi bi-collection-play me-2"></i>Lessons
                 </button>
             </li>
         </ul>
-        <div class="tab-content" id="courseTabContent">
-            <!-- Overview Tab -->
+
+            <div class="tab-content p-4" id="courseTabContent">
+                <!-- Overview Tab (NEW DESIGN) -->
             <div class="tab-pane fade show active" id="overview" role="tabpanel">
                 <div class="row">
                     <div class="col-lg-8">
-                        <div class="content-card">
-                            <h3>Course Description</h3>
-                            <p th:text="${detailCourse.description}">Course Description</p>
+                            <div class="content-card bg-white rounded-4 shadow-sm p-4 mb-4">
+                                <h3 class="mb-4">Course Description</h3>
+                                <p class="text-muted" th:utext="${detailCourse.description}"></p>
+                            </div>
+                            <div class="content-card bg-white rounded-4 shadow-sm p-4">
+                                <h3 class="mb-4">Instructor</h3>
+                                <div class="d-flex align-items-start">
+                                    <img th:src="${detailCourse.instructor.profilePicture}" alt="Instructor"
+                                        class="rounded-circle me-3" style="width:100px;height:100px;object-fit:cover;">
+                                    <div>
+                                        <h5 class="mb-2" th:text="${detailCourse.instructor.fullName}"></h5>
+                                        <p class="text-muted mb-3">Senior Frontend Developer & Educator</p>
+                                        <p class="mb-3" th:text="${detailCourse.instructor.personalSkill}"></p>
+                                        <div class="d-flex">
+                                            <a  th:href="@{/admin/mnInstructors/viewInfo/{userId}(userId=${detailCourse.instructor.userId})}" class="btn btn-outline-success me-2">
+                                                <i class="bi bg-info-subtle me-1"></i> View Profile
+                                            </a>
+                                            <a th:href="'mailto:' + ${detailCourse.instructor.email}" class="btn btn-outline-primary me-2">
+                                                <i class="bi bi-envelope me-1"></i> Contact
+                                            </a>
+                                        </div>
+                                    </div>
                         </div>
-
-                        <div class="content-card">
-                            <h3>Course Preview Video</h3>
-                            <div class="ratio ratio-16x9">
-                                <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Course Preview"
-                                        allowfullscreen></iframe>
                             </div>
                         </div>
+                        <div class="col-lg-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="position-relative">
+                                    <div class="ratio ratio-16x9">
+                                        <video th:src="${detailCourse.videoUrlPreview}" controls class="w-100 rounded-top"
+                                            poster="https://via.placeholder.com/400x225?text=Course+Preview">
+                                            Your browser does not support the video tag.
+                                        </video>
+                        </div>
                     </div>
-
-                    <div class="col-lg-4">
-                        <div class="content-card">
-                            <h3>Course Details</h3>
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-4">Course Details</h5>
+                                    <div class="list-group list-group-flush">
+                                        <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
                                     <span><i class="bi bi-tag me-2"></i> Category</span>
-                                    <span th:text="${detailCourse.category.name}">Programming</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <span class="badge bg-light text-dark" th:text="${detailCourse.category.name}"></span>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                                            <span><i class="fas fa-signal me-2"></i> Skill Level</span>
+                                            <span class="badge bg-light text-dark" th:text="${detailCourse.courseLevel}"></span>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
                                     <span><i class="bi bi-clock me-2"></i> Duration</span>
-                                    <span th:text="${detailCourse.duration + ' hours'}">24h 30m</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <span class="badge bg-light text-dark" th:text="${detailCourse.duration}"></span>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
                                     <span><i class="bi bi-collection-play me-2"></i> Lessons</span>
-                                    <span th:text="${detailCourse.totalLessons}">42</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <span class="badge bg-light text-dark" th:text="${detailCourse.totalLessons}"></span>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
                                     <span><i class="bi bi-currency-dollar me-2"></i> Price</span>
-                                    <span th:text="'$' + ${detailCourse.price}">$99.99</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <span class="badge bg-light text-dark" th:text="${detailCourse.price}"></span>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
                                     <span><i class="bi bi-percent me-2"></i> Discount</span>
-                                    <span th:text="${detailCourse.discount + '%'}">20%</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <span class="badge bg-light text-dark" th:text="${detailCourse.discount}"></span>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
                                     <span><i class="bi bi-calendar3 me-2"></i> Submitted</span>
-                                    <span th:text="${#temporals.format(detailCourse.createdAt, 'MMM dd, yyyy')}">May 15, 2023</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <span class="badge bg-light text-dark" th:text="${#temporals.format(detailCourse.createdAt, 'MMM dd, yyyy')}"></span>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
                                     <span><i class="bi bi-shield me-2"></i> Status</span>
                                     <span th:switch="${detailCourse.status}">
                                     <span th:case="null" class="badge badge-secondary">
@@ -285,124 +363,146 @@
                                             <i class="fas fa-exclamation-triangle"></i> ReSubmit
                                      </span>
                                     </span>
-                                </li>
-
-                            </ul>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-            <!-- Lessons Tab -->
-            <div class="tab-pane fade" id="lessons" role="tabpanel">
-                <div class="content-card">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h3 class="mb-0">Course Lessons</h3>
-                        <button class="btn btn-outline-primary"><i class="bi bi-play-circle me-1"></i> Preview All
-                            Lessons
-                        </button>
-                    </div>
-
-                    <div class="accordion" id="lessonsAccordion">
-
-                        <!-- Chapter -->
-                        <div class="accordion-item" th:each="chapter:${detailCourse.listOfChapters}">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                        th:data-bs-target="'#section' + ${chapter.orderNumber}"
-                                        th:text="'Chapter '+${chapter.orderNumber}+': '+${chapter.title}">
-                                    Section 1: Introduction to React
-                                </button>
-                            </h2>
-                            <div th:id="'section' + ${chapter.orderNumber}" class="accordion-collapse collapse show"
-                                 data-bs-parent="#lessonsAccordion">
-                                <div class="accordion-body">
-                                    <div class="lesson-item" th:each="lesson:${chapter.lessons}">
-                                        <div class="row align-items-center">
-                                            <div class="col-md-6">
-                                                <h5 class="mb-1" th:text="${lesson.title}">1.1 What is React?</h5>
-                                                <p class="mb-0 text-muted small" th:text="${lesson.description}">
-                                                    Introduction to React and its core
-                                                    concepts</p>
-                                            </div>
-                                            <div class="col-md-2 text-md-center">
-                                                <span class="badge bg-info" th:text="${lesson.contentType}">Video</span>
-                                                <span class="text-muted ms-2" th:text="${lesson.duration}">15:30</span>
-                                            </div>
-                                            <div class="col-md-2 text-md-center">
-                                                <span class="badge bg-success" th:text="${lesson.isFree} ? 'Free' : ''">Free</span>
-                                            </div>
-                                            <div class="col-md-2 text-md-end">
-                                                <button class="btn btn-sm btn-outline-primary"><i
-                                                        class="bi bi-play-circle"></i> Preview
-                                                </button>
-                                            </div>
                                         </div>
                                     </div>
-
                                 </div>
                             </div>
                         </div>
-                        <!--End Chapter -->
-
                     </div>
                 </div>
-            </div>
 
-            <!-- Instructor Tab -->
-            <div class="tab-pane fade" id="instructor" role="tabpanel">
-                <div class="content-card">
-                    <h3>Instructor Information</h3>
-                    <div class="d-flex align-items-start">
-                        <img th:src="${detailCourse.instructor.profilePicture}" alt="Instructor" class="rounded me-3">
-                        <div>
-                            <h5 th:text="${detailCourse.instructor.fullName}">John Doe</h5>
-                            <!--                            <p class="text-muted">Senior Frontend Developer & Educator</p>-->
-                            <p th:text="${detailCourse.instructor.personalSkill}">I'm a seasoned web developer with over
-                                10 years of experience in frontend
-                                development. I has worked with companies like Google, Facebook, and Amazon, and has
-                                been teaching web development for the past 5 years.</p>
-                        </div>
+                <!-- Lessons Tab  -->
+            <div class="tab-pane fade" id="lessons" role="tabpanel">
+                    <div class="content-card bg-white rounded-4 shadow-sm p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="mb-0">Course Lessons</h3>
                     </div>
-
-                    <div class="row mt-4">
-                        <div class="col-md-6">
-                            <h5>Other Courses by Instructor</h5>
-                            <ul class="list-group list-group-flush">
-                                <li th:each="course : ${detailCourse.instructor.courses}"
-                                    class="list-group-item d-flex justify-content-between align-items-center">
-                                    <span th:text="${course.title}">JavaScript Fundamentals</span>
-                                    <span th:switch="${course.status}">
-                                        <span th:case="null" class="badge badge-secondary">
-                                        <i class="fas fa-save"></i> Save Draft
-                                    </span>
-                                    <span th:case="'pending'" class="badge bg-secondary">
-                                        <i class="fas fa-clock"></i> Pending
-                                    </span>
-                                    <span th:case="'approved'" class="badge bg-success">
-                                        <i class="fas fa-check"></i> Approved
-                                    </span>
-                                    <span th:case="'rejected'" class="badge bg-danger">
-                                        <i class="fas fa-times"></i> Rejected
-                                    </span>
-                                    <span th:case="'resubmit'" class="badge bg-warning text-dark">
-                                        <i class="fas fa-exclamation-triangle"></i> ReSubmit
-                                    </span>
-                                    <span th:case="*"
-                                          class="badge bg-dark">
-                                        <i class="fas fa-question-circle"></i> Unknow
-                                    </span>
-                                </span>
-
-                                </li>
-                            </ul>
+                    <div class="accordion" id="lessonsAccordion">
+                            <div th:if="${!#lists.isEmpty(chapters)}">
+                                <div class="accordion-item border-0 mb-3" th:each="chapter : ${chapters}">
+                            <h2 class="accordion-header">
+                                        <button class="accordion-button bg-light rounded-3" type="button"
+                                            data-bs-toggle="collapse" th:data-bs-target="${'#section' + chapter.chapterId}">
+                                            <i class="bi bi-collection me-2"></i>
+                                            <span th:text="${chapter.title}"></span>
+                                </button>
+                            </h2>
+                                    <div th:id="${'section' + chapter.chapterId}" class="accordion-collapse collapse show"
+                                 data-bs-parent="#lessonsAccordion">
+                                        <div class="accordion-body p-0" th:if="${chapter.lessons != null}">
+                                            <div class="list-group list-group-flush">
+                                                <div class="list-group-item border-0 p-3"
+                                                    th:each="lesson : ${chapter.lessons}">
+                                                    <div class="row align-items-center g-3">
+                                            <div class="col-md-6">
+                                                            <h5 class="mb-1">
+                                                                <a href="#" th:text="${lesson.title}"
+                                                                    th:if="${lesson.contentType == 'video'}"
+                                                                    th:attr="data-videoid=${lesson.video.videoUrl}"
+                                                                    class="lesson-video-link text-decoration-none"
+                                                                    onclick="playVideo(this); return false;"></a>
+                                                                <a href="#" th:text="${lesson.title}"
+                                                                    th:if="${lesson.contentType == 'quiz' and lesson.quiz != null}"
+                                                                    th:attr="data-bs-toggle='modal', data-bs-target=${'#quizModal' + lesson.quiz.id}"
+                                                                    class="lesson-quiz-link custom-link"></a>
+                                                            </h5>
+                                                            <p class="mb-0 text-muted small" th:text="${lesson.description}"></p>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="d-flex align-items-center justify-content-center">
+                                                                <span class="badge bg-info me-2 d-inline-flex align-items-center" style="min-width: 80px;">
+                                                                    <span th:switch="${lesson.contentType}">
+                                                                        <i class="bi bi-play-circle me-1" th:case="'video'"></i>
+                                                                        <i class="bi bi-question-circle me-1" th:case="'quiz'"></i>
+                                                                    </span>
+                                                                    <span th:text="${lesson.contentType}"></span>
+                                                                </span>
+<!--                                                                <span class="text-muted">-->
+<!--                                                                    <span th:if="${(lesson.duration ?: 0) < 60}" th:text="${(lesson.duration ?: 0) + 'm'}"></span>-->
+<!--                                                                    <span th:unless="${(lesson.duration ?: 0) < 60}" th:text="${((lesson.duration ?: 0) / 60) + 'h' + ((lesson.duration ?: 0) % 60) + 'm'}"></span>-->
+<!--                                                                </span>-->
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="d-flex justify-content-end">
+                                                                <span class="badge" th:classappend="${lesson.isFree} ? 'bg-success' : 'bg-danger'" th:text="${lesson.isFree} ? 'Free' : 'Premium'"></span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div th:if="${lesson.quiz != null}" class="modal fade" th:id="'quizModal' + ${lesson.quiz.id}" tabindex="-1">
+                                                        <div class="modal-dialog modal-lg">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title">
+                                                                        <span th:text="${lesson.quiz.title}"></span>
+                                                                        <span class="badge bg-info ms-2">
+                                                                            <i class="bi bi-clock me-1"></i>
+                                                                            <span th:if="${(lesson.quiz.timeLimit ?: 0) < 60}"
+                                                                                  th:text="${(lesson.quiz.timeLimit ?: 0) + 'm'}"></span>
+                                                                            <span th:unless="${(lesson.quiz.timeLimit ?: 0) < 60}"
+                                                                                  th:text="${((lesson.quiz.timeLimit ?: 0) / 60) + 'h' + ((lesson.quiz.timeLimit ?: 0) % 60) + 'm'}"></span>
+                                                                        </span>
+                                                                    </h5>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <p class="text-muted mb-4" th:text="${lesson.quiz.description}"></p>
+                                                                    <div class="questions-list">
+                                                                        <div th:each="question, stat : ${lesson.quiz.questions}" class="question-item mb-4">
+                                                                            <div class="card">
+                                                                                <div class="card-body">
+                                                                                    <h6 class="mb-3" th:text="'Question ' + ${stat.count} + ': ' + ${question.question}"></h6>
+                                                                                    <div class="answers-list">
+                                                                                        <div class="answer-item mb-2">
+                                                                                            <div class="d-flex align-items-center">
+                                                                                                <span class="badge bg-primary me-2">A</span>
+                                                                                                <span th:text="${question.optionA}"></span>
+                                                                                                <span th:if="${question.correctAnswer == 'A'}" class="badge bg-success ms-2">Correct</span>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="answer-item mb-2">
+                                                                                            <div class="d-flex align-items-center">
+                                                                                                <span class="badge bg-primary me-2">B</span>
+                                                                                                <span th:text="${question.optionB}"></span>
+                                                                                                <span th:if="${question.correctAnswer == 'B'}" class="badge bg-success ms-2">Correct</span>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="answer-item mb-2">
+                                                                                            <div class="d-flex align-items-center">
+                                                                                                <span class="badge bg-primary me-2">C</span>
+                                                                                                <span th:text="${question.optionC}"></span>
+                                                                                                <span th:if="${question.correctAnswer == 'C'}" class="badge bg-success ms-2">Correct</span>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="answer-item mb-2">
+                                                                                            <div class="d-flex align-items-center">
+                                                                                                <span class="badge bg-primary me-2">D</span>
+                                                                                                <span th:text="${question.optionD}"></span>
+                                                                                                <span th:if="${question.correctAnswer == 'D'}" class="badge bg-success ms-2">Correct</span>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                     </div>
+                                            </div>
+                                            </div>
+                                            </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+                <!-- End Lessons Tab (NEW DESIGN) -->
+
         </div>
-    </div>
+
 
     <!-- Approve Modal -->
     <div class="modal fade" id="approveModal" tabindex="-1" aria-hidden="true">
@@ -469,6 +569,28 @@
     </div>
 
 
+    <!-- Video Modal -->
+    <div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="videoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="videoModalLabel">Lesson Video</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        onclick="stopVideo()"></button>
+                </div>
+                <div class="modal-body d-flex justify-content-center">
+                    <div style="width: 100%; max-width: 800px; aspect-ratio: 16/9;">
+                        <video id="lessonVideo" controls class="w-100 rounded">
+                            <source id="videoSource" src="" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -507,7 +629,7 @@
         // Toggle sidebar on mobile
         document.addEventListener('DOMContentLoaded', function () {
             const sidebarToggle = document.getElementById('sidebar-toggle');
-            const sidebar = document.querySelector('.sidebar');
+            const sidebar = document.querySelector('.course-detail-sidebar');
             const mainContent = document.querySelector('.main-content');
             const navbar = document.querySelector('.navbar');
 
@@ -577,4 +699,26 @@
             });
         });
     </script>
+
+    <script>
+        function playVideo(element) {
+            const videoId = element.getAttribute('data-videoid');
+            const videoSource = document.getElementById('videoSource');
+            const video = document.getElementById('lessonVideo');
+
+            videoSource.src = videoId;
+            video.load();
+
+            const videoModal = new bootstrap.Modal(document.getElementById('videoModal'));
+            videoModal.show();
+        }
+
+        function stopVideo() {
+            const video = document.getElementById('lessonVideo');
+            video.pause();
+            video.currentTime = 0;
+        }
+    </script>
+
+
 </div>

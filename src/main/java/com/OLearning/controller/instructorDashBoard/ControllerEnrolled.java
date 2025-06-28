@@ -1,10 +1,8 @@
 package com.OLearning.controller.instructorDashBoard;
 
-import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.enrollment.EnrollmentDTO;
 import com.OLearning.entity.Enrollment;
 import com.OLearning.entity.User;
-import com.OLearning.repository.UserRepository;
 import com.OLearning.security.CustomUserDetails;
 import com.OLearning.service.email.EmailService;
 import com.OLearning.service.enrollment.EnrollmentService;

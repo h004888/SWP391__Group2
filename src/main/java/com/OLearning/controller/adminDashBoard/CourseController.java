@@ -4,8 +4,12 @@ import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.course.CourseDetailDTO;
 import com.OLearning.dto.notification.NotificationDTO;
 import com.OLearning.entity.Category;
+import com.OLearning.entity.Chapter;
+import com.OLearning.entity.Lesson;
 import com.OLearning.service.category.CategoryService;
+import com.OLearning.service.chapter.ChapterService;
 import com.OLearning.service.course.CourseService;
+import com.OLearning.service.lesson.LessonService;
 import com.OLearning.service.notification.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -27,6 +31,10 @@ public class CourseController {
     @Autowired
     private NotificationService notificationService;
     @Autowired
+    private ChapterService chapterService;
+    @Autowired
+    private LessonService lessonService;
+    @Autowired
     private SpringTemplateEngine templateEngine;
 
 
@@ -35,7 +43,7 @@ public class CourseController {
                                 @RequestParam(defaultValue = "0") int page,
                                 @RequestParam(defaultValue = "5") int size,
                                 @RequestParam(required = false) String keyword,
-                                @RequestParam(required = false) Integer category,
+                                @RequestParam(required = false) Long category,
                                 @RequestParam(required = false) String price) {
 
         Page<CourseDTO> pendingCourses = courseService.filterCoursesWithPagination(
@@ -65,7 +73,7 @@ public class CourseController {
     //Filter with ajax
     @GetMapping("/filter")
     public String filterCourses(@RequestParam(required = false) String keyword,
-                                @RequestParam(required = false) Integer category,
+                                @RequestParam(required = false) Long category,
                                 @RequestParam(required = false) String price,
                                 @RequestParam(required = false) String status,
                                 @RequestParam(defaultValue = "0") int page,
@@ -83,7 +91,7 @@ public class CourseController {
     // New endpoint for pagination only
     @GetMapping("/pagination")
     public String getPagination(@RequestParam(required = false) String keyword,
-                                @RequestParam(required = false) Integer category,
+                                @RequestParam(required = false) Long category,
                                 @RequestParam(required = false) String price,
                                 @RequestParam(required = false) String status,
                                 @RequestParam(defaultValue = "0") int page,
@@ -106,7 +114,7 @@ public class CourseController {
     @GetMapping("/count")
     @ResponseBody
     public long getCourseCount(@RequestParam(required = false) String keyword,
-                               @RequestParam(required = false) Integer category,
+                               @RequestParam(required = false) Long category,
                                @RequestParam(required = false) String price,
                                @RequestParam(required = false) String status) {
 
@@ -122,8 +130,20 @@ public class CourseController {
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/courseDetailContent :: courseDetail");
         Optional<CourseDetailDTO> optionalDetail = courseService.getDetailCourse(id);
         if (optionalDetail.isPresent()) {
-            CourseDetailDTO course = optionalDetail.get();
-            model.addAttribute("detailCourse", optionalDetail.get());
+            CourseDetailDTO courseDetail = optionalDetail.get();
+            model.addAttribute("detailCourse", courseDetail);
+
+            List<Chapter> chapters = chapterService.chapterListByCourse(id);//tim list chapter theo courseID
+            for (Chapter chapter : chapters) {
+                List<Lesson> lessons = lessonService.findLessonsByChapterId(chapter.getChapterId());
+                if (lessons != null && lessons.size() > 0) {
+                    chapter.setLessons(lessons);
+                }
+            }
+            if (chapters != null && !chapters.isEmpty()) {
+                model.addAttribute("chapters", chapters);
+            }
+            
             return "adminDashBoard/index";
         } else {
             return "redirect:/admin/course";

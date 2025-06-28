@@ -154,11 +154,12 @@ public class ControlllerAddCourse {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
 
-        Integer categoryId = null;
+        Long categoryId = null;
         if (category != null && !category.isEmpty()) {
             try {
-                categoryId = Integer.parseInt(category);
+                categoryId = Long.parseLong(category);
             } catch (NumberFormatException e) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid category ID");
             }
         }
 
@@ -453,7 +454,7 @@ public class ControlllerAddCourse {
         chapter.setTitle(title);
         chapter.setDescription(description);
         chapter.setOrderNumber(orderNumber);
-        chapter.setUpdateAt(java.time.LocalDateTime.now());
+        chapter.setUpdatedAt(LocalDateTime.now());
         chapterService.updateChapter(chapter);
         // Lưu lại ID để đảm bảo update đúng chapter
         chapter.setChapterId(chapterId);
