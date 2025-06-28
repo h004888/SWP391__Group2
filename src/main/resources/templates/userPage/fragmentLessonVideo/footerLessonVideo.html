@@ -1,4 +1,4 @@
-<footer class="pt-5 bg-light" th:fragment="footerLessonVideo">
+<footer class="mt-5 bg-light" th:fragment="footerLessonVideo">
     <div class="container">
         <!-- Row START -->
         <div class="row g-4">
@@ -6,22 +6,22 @@
             <!-- Widget 1 START -->
             <div class="col-lg-3">
                 <!-- logo -->
-                <a class="me-0" href="index.html">
-                    <img class="light-mode-item h-40px" src="assets/images/logo.svg" alt="logo">
-                    <img class="dark-mode-item h-40px" src="assets/images/logo-light.svg" alt="logo">
+                <a class="me-0" th:href="@{/home}">
+                    <img class="light-mode-item h-40px" src="/assets/images/logo.svg" alt="logo">
+                    <img class="dark-mode-item h-40px" src="/assets/images/logo-light.svg" alt="logo">
                 </a>
-                <p class="my-3">Eduport education theme, built specifically for the education centers which is
-                    dedicated to teaching and involve learners. </p>
+                <p class="my-3">Eduport education theme, built specifically for the education centers which is dedicated
+                    to teaching and involve learners. </p>
                 <!-- Social media icon -->
                 <ul class="list-inline mb-0 mt-3">
-                    <li class="list-inline-item"> <a class="btn btn-white btn-sm shadow px-2 text-facebook" href="#"><i
-                                class="fab fa-fw fa-facebook-f"></i></a> </li>
-                    <li class="list-inline-item"> <a class="btn btn-white btn-sm shadow px-2 text-instagram" href="#"><i
-                                class="fab fa-fw fa-instagram"></i></a> </li>
-                    <li class="list-inline-item"> <a class="btn btn-white btn-sm shadow px-2 text-twitter" href="#"><i
-                                class="fab fa-fw fa-twitter"></i></a> </li>
-                    <li class="list-inline-item"> <a class="btn btn-white btn-sm shadow px-2 text-linkedin" href="#"><i
-                                class="fab fa-fw fa-linkedin-in"></i></a> </li>
+                    <li class="list-inline-item"><a class="btn btn-white btn-sm shadow px-2 text-facebook" href="#"><i
+                            class="fab fa-fw fa-facebook-f"></i></a></li>
+                    <li class="list-inline-item"><a class="btn btn-white btn-sm shadow px-2 text-instagram" href="#"><i
+                            class="fab fa-fw fa-instagram"></i></a></li>
+                    <li class="list-inline-item"><a class="btn btn-white btn-sm shadow px-2 text-twitter" href="#"><i
+                            class="fab fa-fw fa-twitter"></i></a></li>
+                    <li class="list-inline-item"><a class="btn btn-white btn-sm shadow px-2 text-linkedin" href="#"><i
+                            class="fab fa-fw fa-linkedin-in"></i></a></li>
                 </ul>
             </div>
             <!-- Widget 1 END -->
@@ -79,11 +79,11 @@
                 <div class="row g-2 mt-2">
                     <!-- Google play store button -->
                     <div class="col-6 col-sm-4 col-md-3 col-lg-6">
-                        <a href="#"> <img src="assets/images/client/google-play.svg" alt=""> </a>
+                        <a href="#"> <img src="/assets/images/client/google-play.svg" alt=""> </a>
                     </div>
                     <!-- App store button -->
                     <div class="col-6 col-sm-4 col-md-3 col-lg-6">
-                        <a href="#"> <img src="assets/images/client/app-store.svg" alt="app-store"> </a>
+                        <a href="#"> <img src="/assets/images/client/app-store.svg" alt="app-store"> </a>
                     </div>
                 </div> <!-- Row END -->
             </div>
@@ -107,16 +107,19 @@
                                 <!-- Language selector -->
                                 <div class="dropup mt-0 text-center text-sm-end">
                                     <a class="dropdown-toggle nav-link" href="#" role="button" id="languageSwitcher"
-                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                       data-bs-toggle="dropdown" aria-expanded="false">
                                         <i class="fas fa-globe me-2"></i>Language
                                     </a>
                                     <ul class="dropdown-menu min-w-auto" aria-labelledby="languageSwitcher">
                                         <li><a class="dropdown-item me-4" href="#"><img class="fa-fw me-2"
-                                                    src="assets/images/flags/uk.svg" alt="">English</a></li>
+                                                                                        src="/assets/images/flags/uk.svg"
+                                                                                        alt="">English</a></li>
                                         <li><a class="dropdown-item me-4" href="#"><img class="fa-fw me-2"
-                                                    src="assets/images/flags/gr.svg" alt="">German </a></li>
+                                                                                        src="/assets/images/flags/gr.svg"
+                                                                                        alt="">German </a></li>
                                         <li><a class="dropdown-item me-4" href="#"><img class="fa-fw me-2"
-                                                    src="assets/images/flags/sp.svg" alt="">French</a></li>
+                                                                                        src="/assets/images/flags/sp.svg"
+                                                                                        alt="">French</a></li>
                                     </ul>
                                 </div>
                             </li>

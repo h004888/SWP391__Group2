@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.OLearning.dto.course.CourseViewDTO;
 import com.OLearning.dto.lessonCompletion.LessonCompletionDTO;
 import com.OLearning.entity.*;
 import com.OLearning.service.enrollment.EnrollmentService;
@@ -121,7 +122,7 @@ public class UserCourseController {
         model.addAttribute("accessibleLessonIds", accessibleLessonIds);
         model.addAttribute("currentLessonId", currentLesson.getLessonId());
         model.addAttribute("currentLesson", currentLesson);
-        Course course = courseService.getCourseById(courseId);
+        CourseViewDTO course = courseService.getCourseById(courseId);
         model.addAttribute("course", course);
         model.addAttribute("chapters", course.getListOfChapters());
         return "userPage/course-detail-min";
@@ -161,7 +162,7 @@ public class UserCourseController {
         }
 
         Lesson nextLesson = lessonService.getNextLesson(courseId, lessonId);
-        Course course = courseService.getCourseById(courseId);
+        CourseViewDTO course = courseService.getCourseById(courseId);
 
         // Xác định các bài có thể truy cập
         Set<Long> accessibleLessonIds = new HashSet<>(completedLessonIds);

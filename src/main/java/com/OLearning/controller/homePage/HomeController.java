@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import com.OLearning.dto.category.CategoryDTO;
 import com.OLearning.dto.course.CourseViewDTO;
 import com.OLearning.entity.Course;
+import com.OLearning.mapper.course.CourseMapper;
 import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.course.CourseService;
 
@@ -53,22 +54,19 @@ public class HomeController {
                 model.addAttribute("totalPages", courses.getTotalPages());
                 model.addAttribute("totalItems", courses.getTotalElements());
                 model.addAttribute("categoryIds", categoryIds);
+
                 return "homePage/course-grid";
         }
 
         @GetMapping("/course-detail")
         public String courseDetail(@RequestParam("id") Long id, Model model) {
-                Course course = courseService.getCourseById(id);
+                CourseViewDTO course = courseService.getCourseById(id);
 
-                int totalStudents = course.getInstructor().getCourses()
-                                .stream()
-                                .mapToInt(c -> c.getEnrollments().size())
-                                .sum();
-                model.addAttribute("totalStudents", totalStudents);
+                model.addAttribute("totalStudents", course.getEnrollments().size());
                 model.addAttribute("courseByInstructor",
-                                course.getInstructor().getCourses().stream().limit(2).collect(Collectors.toList()));
+                                course.getInstructor().getCourses().stream().map(CourseMapper::toCourseViewDTO).collect(Collectors.toList()));
                 model.addAttribute("courseByCategory",
-                                course.getCategory().getCourses().stream().limit(5).collect(Collectors.toList()));
+                                course.getCategory().getCourses().stream().map(CourseMapper::toCourseViewDTO).collect(Collectors.toList()));
                 model.addAttribute("course", course);
                         
                 return "homePage/course-detail";

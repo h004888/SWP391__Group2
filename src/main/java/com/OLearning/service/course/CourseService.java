@@ -15,7 +15,9 @@ import java.util.Optional;
 @Service
 public interface CourseService {
 
-        Course getCourseById(Long id);
+        CourseViewDTO getCourseById(Long id);
+
+
 
         List<Chapter> getChaptersWithLessons(Long courseId);
 

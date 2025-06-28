@@ -109,8 +109,10 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public Course getCourseById(Long id) {
-        return courseRepository.findById(id).orElse(null);
+    public CourseViewDTO getCourseById(Long id) {
+        return courseRepository.findById(id)
+                .map(CourseMapper::toCourseViewDTO)
+                .orElseThrow(() -> new IllegalArgumentException("Course not found with id: " + id));
     }
 
     @Override
