@@ -46,7 +46,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/instructordashboard")
@@ -99,7 +101,7 @@ public class ControlllerAddCourse {
     //viewAllCourses
     @GetMapping("/courses")
     public String viewCourse(@RequestParam(name = "page", defaultValue = "0") int page,
-                             @RequestParam(name = "size", defaultValue = "7") int size,
+                             @RequestParam(name = "size", defaultValue = "10") int size,
                              Model model, ModelMap modelMap) {
         //lay ra course tu userId dang nhap
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -123,7 +125,7 @@ public class ControlllerAddCourse {
     public String searchCourse(
             @RequestParam(required = false) String title,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "7") int size,
+            @RequestParam(defaultValue = "10") int size,
             Model model, ModelMap modelMap) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
@@ -139,47 +141,53 @@ public class ControlllerAddCourse {
         return "instructorDashboard/indexUpdate";
     }
 
-    //filter Course
-    @GetMapping("courses/filter")
+    // AJAX filter courses for instructor dashboard (tabbed table)
+    @GetMapping("/courses/filter")
     public String filterCourses(
-            @RequestParam(required = false) String category,
-            @RequestParam(required = false) String status,
-            @RequestParam(required = false) String price,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "7") int size,
+            @RequestParam(name = "status", required = false) String status,
+            @RequestParam(name = "category", required = false) Long categoryId,
+            @RequestParam(name = "price", required = false) String price,
+            @RequestParam(name = "title", required = false) String title,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
             Model model) {
-
-        // Lấy ID của người dùng hiện tại
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
 
-        Long categoryId = null;
-        if (category != null && !category.isEmpty()) {
-            try {
-                categoryId = Long.parseLong(category);
-            } catch (NumberFormatException e) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid category ID");
-            }
-        }
-
-        Page<CourseDTO> coursePage = courseService.filterCoursesInstructorManage(
-                userId, categoryId, status, price, page, size);
-
-        List<Category> categories = categoryService.findAll();
-
+        Page<CourseDTO> coursePage = courseService.filterCoursesInstructorManage(userId, categoryId, status, price, title, page, size);
         model.addAttribute("courses", coursePage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", coursePage.getTotalPages());
         model.addAttribute("totalElements", coursePage.getTotalElements());
         model.addAttribute("size", size);
-        model.addAttribute("categories", categories);
-        model.addAttribute("selectedCategory", categoryId);
         model.addAttribute("status", status);
-        model.addAttribute("selectedPrice", price);
-
-        return "instructorDashboard/fragments/coursesContent :: listsCourseContent";
+        // Trả về fragment table row cho tbody
+        return "instructorDashboard/fragments/courseTableRowContent :: courseTableRowContent";
     }
+
+    // AJAX get pagination fragment
+    @GetMapping("/courses/pagination")
+    public String getPaginationFragment(
+            @RequestParam(name = "status", required = false) String status,
+            @RequestParam(name = "category", required = false) Long categoryId,
+            @RequestParam(name = "price", required = false) String price,
+            @RequestParam(name = "title", required = false) String title,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long userId = userDetails.getUserId();
+
+        Page<CourseDTO> coursePage = courseService.filterCoursesInstructorManage(userId, categoryId, status, price, title, page, size);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", coursePage.getTotalPages());
+        model.addAttribute("status", status);
+        // Trả về fragment phân trang
+        return "instructorDashboard/fragments/pagination :: pagination";
+    }
+
     //delete course
     @PostMapping("/createcourse/deletecourse")
     public String deletecourse(@RequestParam(name = "courseId") Long courseId
@@ -208,12 +216,47 @@ public class ControlllerAddCourse {
     }
 
     //hidden course
-
     @PostMapping("/courses/hide")
-    public String hide(@RequestParam(name = "courseId") Long courseId
-            , RedirectAttributes redirectAttributes, HttpServletRequest request) {
-        courseService.submitCourse(courseId, "hidden");
+    public String hide(@RequestParam(name = "courseId") Long courseId, RedirectAttributes redirectAttributes) {
+        Course course = courseService.findCourseById(courseId);
+        if (course != null && !"hidden".equals(course.getStatus())) {
+            course.setPreviousStatus(course.getStatus());
+            course.setStatus("hidden");
+            courseService.saveCourse(course.getCourseId());
+        }
         redirectAttributes.addFlashAttribute("successMessage", "course hidden successfully.");
+        return "redirect:../courses";
+    }
+
+    //unhide course
+    @PostMapping("/courses/unhide")
+    public String unhide(@RequestParam(name = "courseId") Long courseId, RedirectAttributes redirectAttributes) {
+        Course course = courseService.findCourseById(courseId);
+        if (course != null && "hidden".equals(course.getStatus())) {
+            String prev = course.getPreviousStatus();
+            course.setStatus(prev != null ? prev : "draft");
+            course.setPreviousStatus(null);
+            courseService.saveCourse(course.getCourseId());
+        }
+        redirectAttributes.addFlashAttribute("successMessage", "course unhidden successfully.");
+        return "redirect:../courses";
+    }
+
+    //block course
+    @PostMapping("/courses/block")
+    public String block(@RequestParam(name = "courseId") Long courseId
+            , RedirectAttributes redirectAttributes, HttpServletRequest request) {
+        courseService.submitCourse(courseId, "blocked");
+        redirectAttributes.addFlashAttribute("successMessage", "course blocked successfully.");
+        return "redirect:../courses";
+    }
+
+    //unblock course
+    @PostMapping("/courses/unblock")
+    public String unblock(@RequestParam(name = "courseId") Long courseId
+            , RedirectAttributes redirectAttributes, HttpServletRequest request) {
+        courseService.submitCourse(courseId, "approved");
+        redirectAttributes.addFlashAttribute("successMessage", "course unblocked successfully.");
         return "redirect:../courses";
     }
 
@@ -221,9 +264,9 @@ public class ControlllerAddCourse {
     @GetMapping("/courses/detail/{courseId}")
     public String viewCourseDetail(@PathVariable("courseId") Long courseId, Model model, ModelMap modelMap,
                                    @RequestParam(defaultValue = "0") int page,
-                                   @RequestParam(defaultValue = "7") int size) {
+                                   @RequestParam(defaultValue = "7") int size,
+                                   @RequestHeader(value = "X-Requested-With", required = false) String requestedWith) {
         Course course = courseService.findCourseById(courseId);
-        //viet theo DTO
         if (course == null) {
             return "redirect:/courses";
         }
@@ -247,6 +290,11 @@ public class ControlllerAddCourse {
         modelMap.put("totalElements", enrollmentPage.getTotalElements());
         modelMap.put("size", size);
         model.addAttribute("courseId", courseId);
+
+        if ("XMLHttpRequest".equals(requestedWith)) {
+            // Nếu là AJAX, chỉ trả về fragment nhỏ
+            return "instructorDashboard/fragments/courseDetailEnrollmentTable :: course-detail-table";
+        }
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/courseDetailContent_new :: courseDetailContent");
         return "instructorDashboard/indexUpdate";
     }
@@ -872,5 +920,20 @@ public class ControlllerAddCourse {
         lessonService.autoFillOrderNumbers(chapterId);
         redirectAttributes.addFlashAttribute("successMessage", "Lesson order numbers auto-filled successfully.");
         return "redirect:../createcourse/coursecontent";
+    }
+
+    @GetMapping("/courses/count-by-status")
+    @ResponseBody
+    public Map<String, Integer> countCoursesByStatus() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long userId = userDetails.getUserId();
+        Map<String, Integer> result = new HashMap<>();
+        String[] statuses = {"pending", "approved", "lived", "rejected", "resubmit", "hidden", "blocked", "draft"};
+        for (String status : statuses) {
+            int count = courseService.countByInstructorAndStatus(userId, status);
+            result.put(status, count);
+        }
+        return result;
     }
 }

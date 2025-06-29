@@ -1,0 +1,20 @@
+<div th:fragment="pagination">
+<ul class="pagination pagination-sm mb-0" th:if="${totalPages > 1}">
+    <!-- Previous button -->
+    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+        <a class="page-link" href="#" th:data-page="${currentPage > 0 ? currentPage - 1 : 0}" th:data-status="${status}" tabindex="-1">
+            <i class="fas fa-angle-left"></i>
+        </a>
+    </li>
+    <!-- Page numbers -->
+    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${i == currentPage} ? 'active' : ''">
+        <a class="page-link" href="#" th:data-page="${i}" th:data-status="${status}" th:text="${i + 1}"></a>
+    </li>
+    <!-- Next button -->
+    <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+        <a class="page-link" href="#" th:data-page="${currentPage + 1 < totalPages ? currentPage + 1 : currentPage}" th:data-status="${status}">
+            <i class="fas fa-angle-right"></i>
+        </a>
+    </li>
+</ul> 
+</div>

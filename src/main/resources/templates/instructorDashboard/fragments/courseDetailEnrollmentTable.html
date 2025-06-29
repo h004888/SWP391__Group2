@@ -1,0 +1,104 @@
+<div id="course-detail-table" th:fragment="course-detail-table">
+    <div class="table-responsive border-0">
+        <table class="table align-middle mb-0">
+            <thead style="background: #f4f6fa;">
+            <tr>
+                <th scope="col" class="border-0 rounded-start">Student name</th>
+                <th scope="col" class="border-0">Progress</th>
+                <th scope="col" class="border-0">Enrolled date</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="enroll : ${enrollment}"
+                th:data-enrollment-id="${enroll.enrollmentId}"
+                th:class="${enroll.status == 'blocked' ? 'opacity-50' : ''}">
+                <td>
+                    <div class="d-flex align-items-center position-relative">
+                        <div class="avatar avatar-md mb-2 mb-md-0">
+                            <img th:src="${enroll.user.profilePicture != null ? enroll.user.profilePicture : 'https://res.cloudinary.com/dmwo4yrsq/image/upload/son-tung-m-tp-1_vodsiz.jpg?_a=DAGAACAVZAA0'}" class="rounded" alt="">
+                        </div>
+                        <div class="mb-0 ms-2">
+                            <h6 class="mb-0"><a href="#"
+                                                class="stretched-link"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#appDetail"
+                                                th:attr="data-enrollment-id=${enroll.enrollmentId},
+                                data-fullname=${enroll.user.fullName},
+                                data-email=${enroll.user.email},
+                                data-phone=${enroll.user.phone},
+                                data-picture=${enroll.user.profilePicture},
+                                data-address=${enroll.user.address},
+                                data-progress=${enroll.progress},
+                                data-birthday=${enroll.user.birthday},
+                                data-enrollment-date=${#temporals.format(enroll.enrollmentDate, 'dd/MM/yyyy')}"
+                                                th:text="${enroll.user.fullName}"></a></h6>
+                            <span class="text-body small" th:if="${enroll.user.address != null}">
+                                <i class="fas fa-fw fa-map-marker-alt me-1 mt-1"></i>
+                                <span th:text="${enroll.user.address}"></span>
+                            </span>
+                        </div>
+                    </div>
+                </td>
+                <td class="text-center text-sm-start">
+                    <div class="overflow-hidden">
+                        <h6 class="mb-0" th:text="${enroll.progress + '%'}"></h6>
+                        <div class="progress progress-sm bg-primary bg-opacity-10">
+                            <div class="progress-bar bg-primary aos" role="progressbar"
+                                 data-aos="slide-right" data-aos-delay="200"
+                                 data-aos-duration="1000" data-aos-easing="ease-in-out"
+                                 th:style="'width: ' + ${enroll.progress} + '%'"
+                                 th:aria-valuenow="${enroll.progress}"
+                                 aria-valuemin="0" aria-valuemax="100">
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <td th:text="${#temporals.format(enroll.enrollmentDate, 'dd/MM/yyyy')}"></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(enrollment)}">
+                <td colspan="6" class="text-center py-5">
+                    <div class="py-4">
+                        <i class="fas fa-user-graduate fs-1 text-muted mb-3"></i>
+                        <h6>No students enrolled yet</h6>
+                        <p class="mb-0">When students enroll in your courses, they will appear here.</p>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <!-- Pagination START -->
+    <div class="d-sm-flex justify-content-sm-between align-items-sm-center mt-4 mt-sm-3" th:if="${totalPages > 0}">
+        <p class="mb-0 text-center text-sm-start">
+            Showing <span th:text="${currentPage * size + 1}">1</span> to
+            <span th:text="${(currentPage * size) + (enrollment != null ? #lists.size(enrollment) : 0) > totalElements ? totalElements : (currentPage * size) + (enrollment != null ? #lists.size(enrollment) : 0)}">8</span> of
+            <span th:text="${totalElements}">20</span> entries
+        </p>
+        <nav class="d-flex justify-content-center mb-0" aria-label="navigation">
+            <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
+                <li class="page-item mb-0" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                    <a class="page-link" th:href="@{'/instructordashboard/courses/detail/' + ${courseId} + '?page=' + (${currentPage - 1}) + '&size=' + ${size}}" tabindex="-1">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </li>
+                <li class="page-item mb-0" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                    th:if="${i < 5 || i > totalPages - 3 || (i >= currentPage - 1 && i <= currentPage + 1)}"
+                    th:classappend="${currentPage == i ? 'active' : ''}">
+                    <a class="page-link" th:href="@{'/instructordashboard/courses/detail/' + ${courseId} + '?page=' + ${i} + '&size=' + ${size}}" th:text="${i + 1}">1</a>
+                </li>
+                <li class="page-item mb-0 disabled" th:if="${totalPages > 7 && currentPage > 3}">
+                    <span class="page-link">...</span>
+                </li>
+                <li class="page-item mb-0 disabled" th:if="${totalPages > 7 && currentPage < totalPages - 4}">
+                    <span class="page-link">...</span>
+                </li>
+                <li class="page-item mb-0" th:classappend="${currentPage + 1 >= totalPages ? 'disabled' : ''}">
+                    <a class="page-link" th:href="@{'/instructordashboard/courses/detail/' + ${courseId} + '?page=' + (${currentPage + 1}) + '&size=' + ${size}}">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <!-- Pagination END -->
+</div> 

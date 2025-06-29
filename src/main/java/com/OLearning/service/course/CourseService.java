@@ -29,13 +29,13 @@ public interface CourseService {
     boolean approveCourse(Long id);
 
     boolean rejectCourse(Long id);
-
+    void saveCourse(Long courseId);
 
 //    List<CourseDTO> filterCourses(String keyword, Integer categoryId, String price, String status);
 
     Page<CourseDTO> filterCoursesWithPagination(String keyword, Long category, String price, String status, int page, int size);
 
-    Page<CourseDTO> filterCoursesInstructorManage(Long userId, Long categoryId, String status, String price, int page, int size);
+    Page<CourseDTO> filterCoursesInstructorManage(Long userId, Long categoryId, String status, String price, String title, int page, int size);
     void deleteCourse(Long courseId);
     Course findCourseById(Long courseId);
 
@@ -59,5 +59,6 @@ public interface CourseService {
     Page<CourseDTO> searchCourse(Long userId, String title, int page, int size);
     Course createCourseMedia(Long courseId, CourseMediaDTO CourseMediaDTO);
 
-    void saveCourse(Long courseId);
+
+    int countByInstructorAndStatus(Long userId, String status);
 }

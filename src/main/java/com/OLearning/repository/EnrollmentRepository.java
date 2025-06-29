@@ -76,5 +76,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
     @Query("SELECT e FROM Enrollment e WHERE e.enrollmentId = :enrollmentId")
     Optional<Enrollment> findByEnrollmentId(int enrollmentId);
     boolean existsByUser_UserIdAndCourse_CourseId(Long userId, Long courseId);
-
+    //lay all enrollment theo InstructorId
+    @Query("SELECT e FROM Enrollment e JOIN e.course c WHERE c.instructor.userId = :instructorId")
+    List<Enrollment> calculateSumEnrollment(@Param("instructorId") Long instructorId);
 }

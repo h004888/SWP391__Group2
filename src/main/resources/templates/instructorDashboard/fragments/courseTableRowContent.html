@@ -1,0 +1,116 @@
+<div th:fragment="courseTableRowContent">
+<tr th:each="course : ${courses}" style="vertical-align: middle;">
+    <td th:text="${course.courseId}" style="width: 60px;"></td>
+    <td style="min-width: 220px; max-width: 320px;">
+        <div class="d-flex align-items-center">
+            <div class="flex-shrink-0 me-2">
+                <img th:if="${course.courseImg != null and course.courseImg != ''}" 
+                     th:src="@{${course.courseImg}}" 
+                     alt="Course Image"
+                     style="width: 60px; height: 50px; object-fit: cover;">
+                <div th:if="${course.courseImg == null or course.courseImg == ''}" 
+                     class="bg-secondary rounded d-flex align-items-center justify-content-center border"
+                     style="width: 40px; height: 40px;">
+                    <i class="fas fa-image text-white"></i>
+                </div>
+            </div>
+            <div class="flex-grow-1 text-truncate">
+                <h6 class="mb-0 text-truncate">
+                    <a th:href="@{|/instructordashboard/courses/detail/${course.courseId}|}" 
+                       th:text="${course.title}" 
+                       class="text-decoration-none text-dark"></a>
+                </h6>
+            </div>
+        </div>
+    </td>
+    <td style="width: 90px;">
+        <span class="fw-bold" th:if="${course.price == 0}">Free</span>
+        <span class="fw-bold" th:if="${course.price != 0}" th:text="${#numbers.formatDecimal(course.price, 0, 'COMMA', 0, 'POINT')}"></span>
+    </td>
+    <td style="width: 110px;"><span class="badge bg-info" th:text="${course.totalLessons != null ? course.totalLessons : 0} + ' lessons'"></span></td>
+    <td style="width: 90px;">
+        <span th:switch="${course.status}">
+            <span th:case="'draft'" class="badge bg-secondary">Draft</span>
+            <span th:case="'pending'" class="badge bg-warning text-dark">Pending</span>
+            <span th:case="'approved'" class="badge bg-info">Approved</span>
+            <span th:case="'rejected'" class="badge bg-danger">Rejected</span>
+            <span th:case="'resubmit'" class="badge bg-warning">Resubmit</span>
+            <span th:case="'lived'" class="badge bg-success">Live</span>
+            <span th:case="'blocked'" class="badge bg-danger">Blocked</span>
+            <span th:case="'hidden'" class="badge bg-secondary">Hidden</span>
+            <span th:case="null" class="badge bg-secondary">Draft</span>
+            <span th:case="*" class="badge bg-secondary">Unknown</span>
+        </span>
+    </td>
+    <td style="width: 140px;">
+        <div class="d-flex justify-content-center align-items-center gap-2" style="min-width: 120px;">
+            <!-- Edit button -->
+            <a th:href="@{/instructordashboard/createcourse/coursebasic(courseId=${course.courseId})}"
+               class="btn btn-icon btn-sm btn-light border shadow-sm rounded-circle text-primary d-flex align-items-center justify-content-center"
+               title="Edit Course"
+               th:if="${course.status != 'pending' and course.status != 'lived'}"
+               style="width: 36px; height: 36px;">
+                <i class="fas fa-pen"></i>
+            </a>
+            <!-- Delete button -->
+            <button type="button"
+                    class="btn btn-icon btn-sm btn-light border shadow-sm rounded-circle text-danger d-flex align-items-center justify-content-center"
+                    title="Delete Course"
+                    th:data-id="${course.courseId}" 
+                    th:data-title="${course.title}" 
+                    onclick="deleteCourse(this.getAttribute('data-id'), this.getAttribute('data-title'))"
+                    style="width: 36px; height: 36px;">
+                <i class="fas fa-trash"></i>
+            </button>
+            <!-- Dropdown actions button -->
+            <div class="dropdown">
+                <button class="btn btn-icon btn-sm btn-light border shadow-sm rounded-circle d-flex align-items-center justify-content-center" type="button"
+                        th:id="'dropdownMenuButton-' + ${course.courseId}" 
+                        data-bs-toggle="dropdown" 
+                        aria-expanded="false" 
+                        title="More actions"
+                        style="width: 36px; height: 36px;">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+                <ul class="dropdown-menu" th:aria-labelledby="'dropdownMenuButton-' + ${course.courseId}">
+                    <!-- Up to Public: only for approved -->
+                    <li th:if="${course.status == 'approved'}">
+                        <a class="dropdown-item" href="#" th:onclick="|upToPublic('${course.courseId}')|">
+                            <i class="bi bi-upload me-2"></i>Up to Public
+                        </a>
+                    </li>
+                    <!-- Unpublish: only for live -->
+                    <li th:if="${course.status == 'lived'}">
+                        <a class="dropdown-item" href="#" th:onclick="|unpublishCourse('${course.courseId}')|">
+                            <i class="bi bi-eye-slash me-2"></i>Unpublish
+                        </a>
+                    </li>
+                    <!-- Hide: for all courses except already hidden -->
+                    <li th:if="${course.status != 'hidden'}">
+                        <a class="dropdown-item" href="#" th:onclick="|hideCourse('${course.courseId}')|">
+                            <i class="bi bi-eye me-2"></i>Hide
+                        </a>
+                    </li>
+                    <!-- Unhide: only for hidden courses -->
+                    <li th:if="${course.status == 'hidden'}">
+                        <a class="dropdown-item" href="#" th:onclick="|unhideCourse('${course.courseId}')|">
+                            <i class="bi bi-eye-slash me-2"></i>Unhide
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </td>
+</tr>
+
+<!-- Empty state -->
+<tr th:if="${#lists.isEmpty(courses)}">
+    <td colspan="6" class="text-center py-4">
+        <div class="text-muted">
+            <i class="fas fa-book fa-3x mb-3 opacity-50"></i>
+            <h5>No courses found</h5>
+            <p>Try adjusting your filters or create a new course.</p>
+        </div>
+    </td>
+</tr>
+</div>

@@ -47,6 +47,9 @@ public class User {
     @Column(name = "ProfilePicture")
     private String profilePicture;
     
+    @Column(name = "IsGooglePicture")
+    private Boolean isGooglePicture = false;
+    
     @Column(name = "PersonalSkill")
     private String personalSkill;
     

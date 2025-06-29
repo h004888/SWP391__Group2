@@ -15,8 +15,21 @@ $(document).ready(function() {
     initializeDropdowns();
 
     // Filter functionality
-    $('#filterCategory, #courseStatus, #filterPrice').on('change', function() {
-        filterCourses();
+    $('#filterCategory, #filterPrice').on('change', function() {
+        let currentStatus = $('.nav-link.active').data('status');
+        filterCourses(currentStatus, 0);
+    });
+
+    // Search functionality
+    $('#searchInput').on('input', function() {
+        let currentStatus = $('.nav-link.active').data('status');
+        filterCourses(currentStatus, 0);
+    });
+
+    // Tab change functionality
+    $('.nav-link[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) {
+        let status = $(this).data('status');
+        filterCourses(status, 0);
     });
 
     // Pagination functionality
@@ -28,10 +41,20 @@ $(document).ready(function() {
         }
 
         let page = $(this).data('page');
-        if (page !== undefined) {
-            filterCourses(page);
+        let status = $(this).data('status');
+        if (page !== undefined && status !== undefined) {
+            filterCourses(status, page);
         }
     });
+
+    // Load initial data for active tab
+    let initialStatus = $('.nav-link.active').data('status');
+    if (initialStatus) {
+        filterCourses(initialStatus, 0);
+    }
+
+    // Update status badges
+    updateStatusBadges();
 });
 
 // Hàm khởi tạo các dropdown
@@ -60,81 +83,70 @@ function afterAjaxUpdate() {
 }
 
 // Filter function
-function filterCourses(page = 0) {
+function filterCourses(status, page = 0) {
     // Show loading indicator
-    $('#loadingIndicator').show();
-    $('#courseTableContainer').hide();
+    showLoading(status);
 
     // Get filter values
     let category = $('#filterCategory').val();
-    let status = $('#courseStatus').val();
+    if (!category) category = null;
+
     let price = $('#filterPrice').val();
+    let keyword = $('#searchInput').val();
 
     // Prepare data
     let requestData = {
-        page: page
+        status: status,
+        page: page,
+        size: 10
     };
 
     if (category) requestData.category = category;
-    if (status) requestData.status = status;
     if (price) requestData.price = price;
+    if (keyword) requestData.title = keyword;
 
-    // AJAX request
+    // AJAX request for table body
     $.ajax({
         url: '/instructordashboard/courses/filter',
         type: 'GET',
         data: requestData,
         success: function(response) {
-            // Update content
-            $('#courseContentContainer').html(response);
-
-            // Update URL without page reload
-            updateUrl(requestData);
-
-            // Scroll to top of content
-            $('html, body').animate({
-                scrollTop: $("#courseContentContainer").offset().top - 100
-            }, 300);
-
+            // Update table body
+            $('#' + status + 'TableBody').html(response);
+            hideLoading(status);
             afterAjaxUpdate();
-
-            // Re-bind action handlers for dynamically loaded content
-            window.upToPublic = upToPublic;
-            window.unpublishCourse = unpublishCourse;
-            window.hideCourse = hideCourse;
-            window.deleteCourse = deleteCourse;
+            updateStatusBadges();
         },
         error: function(xhr, status, error) {
             console.error("Error filtering courses:", error);
-
-            // Hide loading and show error
-            $('#loadingIndicator').hide();
-            $('#courseTableContainer').show();
-
-            // Show error message
+            hideLoading(status);
             showToast('An error occurred while filtering courses. Please try again.', 'error');
+        }
+    });
+
+    // AJAX request for pagination
+    $.ajax({
+        url: '/instructordashboard/courses/pagination',
+        type: 'GET',
+        data: requestData,
+        success: function(response) {
+            // Update pagination
+            $('#' + status + 'Pagination').html(response);
+        },
+        error: function(xhr, status, error) {
+            console.error("Error loading pagination:", error);
         }
     });
 }
 
-// Update URL function
-function updateUrl(params) {
-    let url = new URL(window.location.href);
+// Show loading indicator
+function showLoading(status) {
+    $('#' + status + 'TableBody').html('<tr><td colspan="6" class="text-center py-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>');
+}
 
-    // Clear existing params
-    url.searchParams.delete('category');
-    url.searchParams.delete('status');
-    url.searchParams.delete('price');
-    url.searchParams.delete('page');
-
-    // Add new params
-    Object.keys(params).forEach(key => {
-        if (params[key]) {
-            url.searchParams.set(key, params[key]);
-        }
-    });
-
-    window.history.pushState({}, '', url);
+// Hide loading indicator
+function hideLoading(status) {
+    // Loading will be replaced by actual content
 }
 
 // Show toast function
@@ -179,6 +191,30 @@ function hideCourse(courseId) {
     );
 }
 
+function unhideCourse(courseId) {
+    showConfirmActionModal(
+        'Bạn có chắc chắn muốn hiển thị lại khóa học này?',
+        '/instructordashboard/courses/unhide',
+        courseId
+    );
+}
+
+function blockCourse(courseId) {
+    showConfirmActionModal(
+        'Bạn có chắc chắn muốn chặn khóa học này?',
+        '/instructordashboard/courses/block',
+        courseId
+    );
+}
+
+function unblockCourse(courseId) {
+    showConfirmActionModal(
+        'Bạn có chắc chắn muốn bỏ chặn khóa học này?',
+        '/instructordashboard/courses/unblock',
+        courseId
+    );
+}
+
 function showConfirmActionModal(message, actionUrl, courseId) {
     $('#confirmActionMessage').text(message);
     $('#confirmActionForm').attr('action', actionUrl);
@@ -202,7 +238,7 @@ $('#deleteForm').on('submit', function(e) {
 
     // Lưu lại các giá trị filter hiện tại để tải lại sau khi xóa
     let category = $('#filterCategory').val();
-    let status = $('#courseStatus').val();
+    let status = $('.nav-link.active').data('status');
     let price = $('#filterPrice').val();
 
     $.ajax({
@@ -214,59 +250,19 @@ $('#deleteForm').on('submit', function(e) {
             bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
 
             // Tải lại danh sách khóa học với filter hiện tại
-            $.ajax({
-                url: '/instructordashboard/courses/filter',
-                type: 'GET',
-                data: {
-                    category: category,
-                    status: status,
-                    price: price,
-                    page: 0
-                },
-                success: function(response) {
-                    // Cập nhật nội dung
-                    $('#courseContentContainer').html(response);
+            filterCourses(status, 0);
 
-                    // Hiển thị thông báo thành công
-                    let toastHtml = `
-                        <div class="toast align-items-center text-white bg-success border-0" role="alert">
-                            <div class="d-flex">
-                                <div class="toast-body">Course deleted successfully!</div>
-                                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                            </div>
-                        </div>
-                    `;
-
-                    $('.position-fixed.bottom-0.end-0').append(toastHtml);
-                    let toast = new bootstrap.Toast($('.toast').last()[0], { delay: 5000 });
-                    toast.show();
-                },
-                error: function(xhr, status, error) {
-                    console.error("Error refreshing courses:", error);
-                }
-            });
+            // Hiển thị thông báo thành công
+            showToast('Course deleted successfully!', 'success');
         },
         error: function(xhr, status, error) {
             console.error("Error deleting course:", error);
-
-            // Hiển thị thông báo lỗi
-            let toastHtml = `
-                <div class="toast align-items-center text-white bg-danger border-0" role="alert">
-                    <div class="d-flex">
-                        <div class="toast-body">An error occurred while deleting the course. Please try again.</div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                    </div>
-                </div>
-            `;
-
-            $('.position-fixed.bottom-0.end-0').append(toastHtml);
-            let toast = new bootstrap.Toast($('.toast').last()[0], { delay: 5000 });
-            toast.show();
+            showToast('An error occurred while deleting the course.', 'error');
         }
     });
 });
 
-// Xử lý submit form xác nhận action (Up to Public, Unpublish, Hide) bằng AJAX
+// Xử lý submit form xác nhận action (Up to Public, Unpublish, Hide, etc.) bằng AJAX
 $('#confirmActionForm').on('submit', function(e) {
     e.preventDefault();
     var $form = $(this);
@@ -274,9 +270,7 @@ $('#confirmActionForm').on('submit', function(e) {
     var formData = $form.serialize();
 
     // Lưu lại các giá trị filter hiện tại để tải lại sau khi xử lý
-    let category = $('#filterCategory').val();
-    let status = $('#courseStatus').val();
-    let price = $('#filterPrice').val();
+    let status = $('.nav-link.active').data('status');
     let page = 0;
 
     $.ajax({
@@ -287,7 +281,7 @@ $('#confirmActionForm').on('submit', function(e) {
             // Đóng modal
             bootstrap.Modal.getInstance(document.getElementById('confirmActionModal')).hide();
             // Tải lại danh sách khoá học với filter hiện tại
-            filterCourses(page);
+            filterCourses(status, page);
             // Hiển thị toast thành công
             showToast('Action completed successfully!', 'success');
         },
@@ -304,4 +298,15 @@ $('#confirmActionForm').on('submit', function(e) {
 window.upToPublic = upToPublic;
 window.unpublishCourse = unpublishCourse;
 window.hideCourse = hideCourse;
+window.unhideCourse = unhideCourse;
+window.blockCourse = blockCourse;
+window.unblockCourse = unblockCourse;
 window.deleteCourse = deleteCourse;
+
+function updateStatusBadges() {
+    $.get('/instructordashboard/courses/count-by-status', function(data) {
+        for (let status in data) {
+            $('#' + status + 'Count').text(data[status]);
+        }
+    });
+}

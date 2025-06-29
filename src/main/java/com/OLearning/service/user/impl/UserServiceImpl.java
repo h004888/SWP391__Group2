@@ -2,6 +2,7 @@ package com.OLearning.service.user.impl;
 
 import com.OLearning.dto.user.UserDTO;
 import com.OLearning.dto.user.UserDetailDTO;
+import com.OLearning.dto.user.UserProfileUpdateDTO;
 import com.OLearning.dto.login.RegisterDTO;
 import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.entity.Course;
@@ -288,6 +289,69 @@ public class UserServiceImpl implements UserService {
     public boolean existsById(Long userId) {
 
         return userRepository.existsById(userId);
+    }
+
+    @Override
+    public User updateProfile(Long userId, UserProfileUpdateDTO profileUpdateDTO) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+        
+        // Validate that user can only update their own profile
+        if (!userId.equals(profileUpdateDTO.getUserId())) {
+            throw new IllegalArgumentException("You can only update your own profile");
+        }
+        
+        // Update profile information with validation
+        if (profileUpdateDTO.getFullName() != null && !profileUpdateDTO.getFullName().trim().isEmpty()) {
+            user.setFullName(profileUpdateDTO.getFullName().trim());
+        }
+        
+        if (profileUpdateDTO.getPhone() != null && !profileUpdateDTO.getPhone().trim().isEmpty()) {
+            // Validate phone format
+            if (!profileUpdateDTO.getPhone().matches("^[0-9]{10,15}$")) {
+                throw new IllegalArgumentException("Invalid phone number format");
+            }
+            user.setPhone(profileUpdateDTO.getPhone().trim());
+        }
+        
+        if (profileUpdateDTO.getBirthDay() != null) {
+            // Validate birthday is in the past
+            if (profileUpdateDTO.getBirthDay().isAfter(java.time.LocalDate.now())) {
+                throw new IllegalArgumentException("Birthday must be in the past");
+            }
+            user.setBirthDay(profileUpdateDTO.getBirthDay());
+        }
+        
+        if (profileUpdateDTO.getAddress() != null) {
+            user.setAddress(profileUpdateDTO.getAddress().trim());
+        }
+        
+        if (profileUpdateDTO.getPersonalSkill() != null) {
+            user.setPersonalSkill(profileUpdateDTO.getPersonalSkill().trim());
+        }
+        
+        if (profileUpdateDTO.getProfilePicture() != null) {
+            user.setProfilePicture(profileUpdateDTO.getProfilePicture());
+            // Đánh dấu đây là ảnh custom, không phải từ Google
+            user.setIsGooglePicture(false);
+        }
+        
+        try {
+            return userRepository.save(user);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update profile: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public User updateProfilePicture(Long userId, String newProfilePictureUrl) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+        
+        user.setProfilePicture(newProfilePictureUrl);
+        // Đánh dấu đây là ảnh custom, không phải từ Google
+        user.setIsGooglePicture(false);
+        return userRepository.save(user);
     }
 
 }

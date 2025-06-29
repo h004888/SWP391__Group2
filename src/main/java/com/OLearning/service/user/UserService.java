@@ -2,6 +2,7 @@ package com.OLearning.service.user;
 
 import com.OLearning.dto.user.UserDTO;
 import com.OLearning.dto.user.UserDetailDTO;
+import com.OLearning.dto.user.UserProfileUpdateDTO;
 import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.login.RegisterDTO;
 import com.OLearning.entity.Role;
@@ -64,5 +65,10 @@ public interface UserService {
     User findById(Long id);
 
     void updatePasswordByEmail(String email, String newPassword);
+
+    // Profile management methods
+    User updateProfile(Long userId, UserProfileUpdateDTO profileUpdateDTO);
+    
+    User updateProfilePicture(Long userId, String newProfilePictureUrl);
 
 }
