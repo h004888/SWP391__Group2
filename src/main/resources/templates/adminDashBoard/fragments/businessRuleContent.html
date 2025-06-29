@@ -2,7 +2,7 @@
 
     <style>
         :root {
-            --sidebar-bg: #6397d3;
+            --sidebar-bg: #1c2223;
             --sidebar-hover: #34495e;
             --primary-color: #3498db;
             --document-bg: #ffffff;
@@ -525,7 +525,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Add New Rule</h5>
+                    <h5 class="modal-title text-white" id="modalTitle">Add New Rule</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form th:action="@{/admin/businessRule/add}" method="post">
@@ -564,7 +564,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit Rule</h5>
+                    <h5 class="modal-title text-white">Edit Rule</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form th:action="@{/admin/businessRule/edit}" method="post">

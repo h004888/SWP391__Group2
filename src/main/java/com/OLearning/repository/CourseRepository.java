@@ -103,5 +103,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
                @Param("levels") List<String> levels,
                Pageable pageable);
 
+    @Query("SELECT c FROM Course c WHERE c.category.id = :categoryId")
+    List<Course> findByCategoryId(@Param("categoryId") Long categoryId);
 
 }

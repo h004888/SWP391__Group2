@@ -180,6 +180,40 @@ public class UserController {
         return "adminDashBoard/fragments/accountDetailContent :: enrolledCourseListFragment";
     }
 
+    @GetMapping("/account/counts")
+    @ResponseBody
+    public Map<String, Long> getAccountCounts(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Boolean status) {
+        
+        Map<String, Long> counts = new HashMap<>();
+        
+        // Get counts for each role (1=Admin, 2=Instructor, 3=User)
+        for (long roleId = 1; roleId <= 3; roleId++) {
+            Pageable pageable = PageRequest.of(0, 1); // Just get 1 item to check total
+            Page<UserDTO> userPage;
+            
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                if (status != null) {
+                    userPage = userService.searchByNameAndStatusWithPagination(keyword.trim(), roleId, status, pageable);
+                } else {
+                    userPage = userService.searchByNameWithPagination(keyword.trim(), roleId, pageable);
+                }
+            } else {
+                if (status != null) {
+                    userPage = userService.getUsersByRoleAndStatusWithPagination(roleId, status, pageable);
+                } else {
+                    userPage = userService.getUsersByRoleWithPagination(roleId, pageable);
+                }
+            }
+            
+            String roleKey = roleId == 1 ? "admin" : roleId == 2 ? "instructor" : "user";
+            counts.put(roleKey, userPage.getTotalElements());
+        }
+        
+        return counts;
+    }
+
     @GetMapping("/account/block/{userId}")
     public String blockAccount(Model model, @PathVariable("userId") long id) {
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/accountContent :: accountContent");

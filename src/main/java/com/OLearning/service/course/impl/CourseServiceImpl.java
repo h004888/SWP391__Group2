@@ -310,4 +310,12 @@ public class CourseServiceImpl implements CourseService {
         courseRepository.save(course);
     }
 
+    @Override
+    public List<CourseDTO> getCourseDTOsByCategoryId(Long categoryId) {
+        List<Course> courses = courseRepository.findByCategoryId(categoryId);
+        return courses.stream()
+                .map(courseMapper::MapCourseDTO)
+                .toList();
+    }
+
 }

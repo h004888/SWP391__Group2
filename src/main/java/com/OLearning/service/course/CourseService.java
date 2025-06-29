@@ -60,4 +60,6 @@ public interface CourseService {
     Course createCourseMedia(Long courseId, CourseMediaDTO CourseMediaDTO);
 
     void saveCourse(Long courseId);
+
+    List<CourseDTO> getCourseDTOsByCategoryId(Long categoryId);
 }
