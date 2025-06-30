@@ -14,6 +14,7 @@ import com.OLearning.repository.*;
 import com.OLearning.security.CustomUserDetails;
 import com.OLearning.service.cloudinary.UploadFile;
 import com.OLearning.service.course.CourseService;
+import com.OLearning.service.email.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -48,6 +49,8 @@ public class CourseServiceImpl implements CourseService {
     private CourseDetailMapper courseDetailMapper;
     @Autowired
     private NotificationRepository notificationRepository;
+    @Autowired
+    private EmailService emailService;
 
     @Override
     public Page<CourseDTO> getAllCourses(Pageable pageable) {
@@ -337,5 +340,24 @@ public class CourseServiceImpl implements CourseService {
         Course course = courseRepository.findById(courseId).orElseThrow();
         course.setStatus("pending_block");
         courseRepository.save(course);
+        // Gửi notification và email cho instructor
+        User instructor = course.getInstructor();
+        if (instructor != null) {
+            com.OLearning.entity.Notification notification = new com.OLearning.entity.Notification();
+            notification.setUser(instructor);
+            notification.setCourse(course);
+            notification.setMessage("Your course '" + course.getTitle() + "' is pending block review by admin. Please check your email and respond if needed.");
+            notification.setType("COURSE_BLOCKED");
+            notification.setStatus("failed");
+            notification.setSentAt(LocalDateTime.now());
+            notificationRepository.save(notification);
+            // Gửi email cho instructor
+            String subject = "[OLearning] Your course is pending block review";
+            String content = "Xin chào " + instructor.getFullName() + ",\n\n" +
+                    "Khóa học '" + course.getTitle() + "' của bạn đang được xem xét để block bởi quản trị viên.\n" +
+                    "Vui lòng đăng nhập vào hệ thống OLearning để phản hồi hoặc liên hệ bộ phận hỗ trợ nếu có thắc mắc.\n\n" +
+                    "Trân trọng,\nĐội ngũ OLearning";
+            emailService.sendOTP(instructor.getEmail(), subject, content);
+        }
     }
 }

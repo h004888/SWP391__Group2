@@ -1,0 +1,80 @@
+package com.OLearning.controller.user;
+
+import com.OLearning.dto.user.UserProfileEditDTO;
+import com.OLearning.service.cloudinary.UploadFile;
+import com.OLearning.service.user.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.Optional;
+
+@Controller
+@RequestMapping("/profile")
+public class UserProfileController {
+    @Autowired
+    private UserService userService;
+    
+    @Autowired
+    private UploadFile uploadFile;
+
+    @GetMapping("/edit")
+    public String showEditProfile(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+        Optional<UserProfileEditDTO> profileOpt = userService.getProfileByUsername(userDetails.getUsername());
+        model.addAttribute("profile", profileOpt.orElse(new UserProfileEditDTO()));
+
+        // Kiểm tra role để trả về đúng fragment/index
+        boolean isAdmin = userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        if (isAdmin) {
+            model.addAttribute("fragmentContent", "adminDashBoard/fragments/editProfileContent :: editProfileContent");
+            return "adminDashBoard/index";
+        } else {
+            model.addAttribute("fragmentContent", "instructorDashboard/fragments/editProfileContent :: editProfileContent");
+            return "instructorDashboard/indexUpdate";
+        }
+    }
+
+    @PostMapping("/edit")
+    public String updateProfile(@AuthenticationPrincipal UserDetails userDetails,
+                                @ModelAttribute("profile") UserProfileEditDTO profileEditDTO,
+                                @RequestParam(value = "avatarFile", required = false) MultipartFile avatarFile,
+                                Model model) {
+        try {
+            if (avatarFile != null && !avatarFile.isEmpty()) {
+                String imageUrl = uploadFile.uploadImageFile(avatarFile);
+                profileEditDTO.setAvatarUrl(imageUrl);
+            } else {
+                // Nếu không chọn ảnh mới, giữ lại link cũ
+                Optional<UserProfileEditDTO> oldProfile = userService.getProfileByUsername(userDetails.getUsername());
+                oldProfile.ifPresent(old -> profileEditDTO.setAvatarUrl(old.getAvatarUrl()));
+            }
+            
+            userService.updateProfileByUsername(userDetails.getUsername(), profileEditDTO);
+            model.addAttribute("profile", profileEditDTO);
+            model.addAttribute("success", true);
+            
+            boolean isAdmin = userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+            if (isAdmin) {
+                model.addAttribute("fragmentContent", "adminDashBoard/fragments/editProfileContent :: editProfileContent");
+                return "adminDashBoard/index";
+            } else {
+                model.addAttribute("fragmentContent", "instructorDashboard/fragments/editProfileContent :: editProfileContent");
+                return "instructorDashboard/indexUpdate";
+            }
+        } catch (IOException e) {
+            model.addAttribute("error", "Không thể tải lên ảnh. Vui lòng thử lại.");
+            return showEditProfile(userDetails, model);
+        }
+    }
+}

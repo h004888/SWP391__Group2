@@ -1,0 +1,99 @@
+<div th:fragment="editProfileContent">
+    <form th:action="@{/profile/edit}" th:object="${profile}" method="post" enctype="multipart/form-data" class="p-4 rounded shadow bg-white" style="max-width: 500px; margin: auto;">
+        <h4 class="mb-4 text-center">Chỉnh sửa thông tin cá nhân</h4>
+        
+        <!-- Success message -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            Cập nhật thông tin thành công!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <!-- Error message -->
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="mb-3 text-center">
+            <img id="avatarPreview"
+                 th:if="*{avatarUrl} != null and *{avatarUrl} != ''"
+                 th:src="*{avatarUrl}"
+                 alt="Avatar" class="rounded-circle shadow"
+                 style="width: 120px; height: 120px; object-fit: cover;">
+            <img id="avatarPreview"
+                 th:unless="*{avatarUrl} != null and *{avatarUrl} != ''"
+                 th:src="@{/assets/images/avatar/01.jpg}"
+                 alt="Avatar" class="rounded-circle shadow"
+                 style="width: 120px; height: 120px; object-fit: cover;">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Chọn ảnh đại diện mới</label>
+            <input type="file" class="form-control" id="avatarInput" name="avatarFile" accept="image/*">
+        </div>
+        <div class="row">
+            <div class="mb-3 col-6">
+                <label class="form-label">Họ và tên</label>
+                <input type="text" class="form-control" th:field="*{fullName}" required />
+            </div>
+            <div class="mb-3 col-6">
+                <label class="form-label">Tên đăng nhập</label>
+                <input type="text" class="form-control" th:field="*{username}" required />
+            </div>
+        </div>
+        <div class="row">
+            <div class="mb-3 col-6">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" th:field="*{email}" readonly />
+            </div>
+            <div class="mb-3 col-6">
+                <label class="form-label">Số điện thoại</label>
+                <input type="tel" class="form-control" th:field="*{phone}" />
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Địa chỉ</label>
+            <input type="text" class="form-control" th:field="*{address}" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Kỹ năng cá nhân</label>
+            <textarea class="form-control" th:field="*{personalSkill}" rows="3"></textarea>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Ngày sinh</label>
+            <input type="date" class="form-control" th:field="*{birthDay}" />
+        </div>
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+        </div>
+    </form>
+
+    <script>
+        // Preview avatar image before upload
+        document.addEventListener('DOMContentLoaded', function() {
+            const input = document.getElementById('avatarInput');
+            const preview = document.getElementById('avatarPreview');
+            
+            if(input) {
+                input.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if(file) {
+                        const reader = new FileReader();
+                        reader.onload = function(evt) {
+                            preview.src = evt.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+            
+            // Auto-hide alerts after 5 seconds
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        });
+    </script>
+</div>
