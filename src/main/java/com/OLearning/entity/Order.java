@@ -40,8 +40,11 @@ public class Order {
     @JoinColumn(name = "UserID", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderDetail> orderDetails;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<CoinTransaction> coinTransactions;
 
 
 }

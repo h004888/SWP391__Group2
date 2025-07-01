@@ -34,6 +34,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.OLearning.service.enrollment.EnrollmentService;
 import com.OLearning.repository.VoucherRepository;
 import com.OLearning.service.voucher.VoucherService;
+import com.OLearning.service.wishlist.WishlistService;
 
 @Controller
 @RequestMapping("/home")
@@ -72,8 +73,11 @@ public class HomeController {
     @Autowired
     private VoucherService voucherService;
 
+    @Autowired
+    private WishlistService wishlistService;
+
     @GetMapping()
-    public String getMethodName(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+    public String getMethodName(Model model, @AuthenticationPrincipal UserDetails userDetails, HttpServletRequest request) {
         // chia làm 2 danh sách:
         List<CategoryDTO> firstFive = categoryService.getAllCategory().stream().limit(5).toList();
         List<CategoryDTO> nextFive = categoryService.getAllCategory().stream().skip(5).limit(5).toList();
@@ -82,6 +86,17 @@ public class HomeController {
         model.addAttribute("topCategories", categoryService.findTop5ByOrderByIdAsc());
         model.addAttribute("firstFive", firstFive);
         model.addAttribute("nextFive", nextFive);
+        
+        // Add wishlist total
+        if (userDetails != null) {
+            Long userId = getUserIdFromUserDetails(userDetails);
+            String encodedWishlistJson = getWishlistCookie(request, userId);
+            Map<String, Object> wishlist = wishlistService.getWishlistDetails(encodedWishlistJson, userDetails.getUsername());
+            model.addAttribute("wishlistTotal", getLongValue(wishlist.getOrDefault("total", 0L)));
+        } else {
+            model.addAttribute("wishlistTotal", 0L);
+        }
+        
         // Thêm map courseId -> isEnrolled
         Map<Long, Boolean> topCoursesEnrolledMap = new HashMap<>();
         if (userDetails != null) {
@@ -105,7 +120,9 @@ public class HomeController {
                             @RequestParam(required = false) List<String> priceFilters,
                             @RequestParam(required = false) List<String> levels,
                             @RequestParam(defaultValue = "Newest") String sortBy,
-                            @RequestParam(defaultValue = "9") int size) {
+                            @RequestParam(defaultValue = "9") int size,
+                            @AuthenticationPrincipal UserDetails userDetails,
+                            HttpServletRequest request) {
         Page<CourseDTO> courses = courseService.searchCoursesGrid(categoryIds, priceFilters, levels, sortBy,
                         keyword,
                         page, size); // lưu ý trả về Page<CourseDTO>
@@ -115,11 +132,22 @@ public class HomeController {
         model.addAttribute("totalPages", courses.getTotalPages());
         model.addAttribute("totalItems", courses.getTotalElements());
         model.addAttribute("categoryIds", categoryIds);
+        
+        // Add wishlist total
+        if (userDetails != null) {
+            Long userId = getUserIdFromUserDetails(userDetails);
+            String encodedWishlistJson = getWishlistCookie(request, userId);
+            Map<String, Object> wishlist = wishlistService.getWishlistDetails(encodedWishlistJson, userDetails.getUsername());
+            model.addAttribute("wishlistTotal", getLongValue(wishlist.getOrDefault("total", 0L)));
+        } else {
+            model.addAttribute("wishlistTotal", 0L);
+        }
+        
         return "homePage/course-grid";
     }
 
     @GetMapping("/course-detail")
-    public String courseDetail(@RequestParam("id") Long id, Model model, @AuthenticationPrincipal UserDetails userDetails) {
+    public String courseDetail(@RequestParam("id") Long id, Model model, @AuthenticationPrincipal UserDetails userDetails, HttpServletRequest request) {
         Course course = courseService.getCourseById(id);
 
         int totalStudents = course.getInstructor().getCourses()
@@ -132,6 +160,16 @@ public class HomeController {
         model.addAttribute("courseByCategory",
                         course.getCategory().getCourses().stream().limit(5).collect(Collectors.toList()));
         model.addAttribute("course", course);
+
+        // Add wishlist total
+        if (userDetails != null) {
+            Long userId = getUserIdFromUserDetails(userDetails);
+            String encodedWishlistJson = getWishlistCookie(request, userId);
+            Map<String, Object> wishlist = wishlistService.getWishlistDetails(encodedWishlistJson, userDetails.getUsername());
+            model.addAttribute("wishlistTotal", getLongValue(wishlist.getOrDefault("total", 0L)));
+        } else {
+            model.addAttribute("wishlistTotal", 0L);
+        }
 
         boolean isEnrolled = false;
         if (userDetails != null) {
@@ -283,6 +321,19 @@ public class HomeController {
                 }
 
                 cartService.completeCheckout(cart, order, false, transactionId);
+
+                // Update voucher usage if applied (for buy now)
+                if (cart != null) {
+                    List<Map<String, Object>> items = (List<Map<String, Object>>) cart.get("items");
+                    if (items != null && !items.isEmpty()) {
+                        Object vId = items.get(0).get("appliedVoucherId");
+                        if (vId != null) {
+                            Long voucherId = Long.valueOf(vId.toString());
+                            voucherService.useVoucherForUserAndCourse(voucherId, userId);
+                        }
+                    }
+                }
+
                 redirectAttributes.addFlashAttribute("message", "VNPay payment successful!");
                 if (courseId != null) {
                     return "redirect:/home/course-detail?id=" + courseId;
@@ -359,5 +410,23 @@ public class HomeController {
         cookie.setMaxAge(0);
         cookie.setHttpOnly(true);
         response.addCookie(cookie);
+    }
+
+    private String getWishlistCookie(HttpServletRequest request, Long userId) {
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if (cookie.getName().equals("wishlist_" + userId)) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return "";
+    }
+
+    private Long getLongValue(Object value) {
+        if (value instanceof Number) {
+            return ((Number) value).longValue();
+        }
+        throw new IllegalStateException("Value is not a number: " + (value != null ? value.getClass().getName() : "null"));
     }
 }

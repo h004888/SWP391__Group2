@@ -88,10 +88,8 @@ public class CourseMapper {
         course.setCreatedAt(LocalDateTime.now());
         course.setPrice(dto.getPrice() != null ? (dto.getPrice()) : null);
         course.setCourseLevel(dto.getCourseLevel());
-        // Không set averageRating, reviewCount, duration vì tính tự động
         return course;
     }
-    //lay ve thong tin course basic khi previous step
     public AddCourseStep1DTO DraftStep1(Course course) {
         AddCourseStep1DTO dto = new AddCourseStep1DTO();
         dto.setId(course.getCourseId());

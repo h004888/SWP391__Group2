@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en" xmlns:sec="http://www.w3.org/1999/xhtml">
 
 <!-- Mirrored from stackbros.in/eduport/landing/course-grid.html by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 06 Jun 2025 07:32:05 GMT -->
@@ -677,6 +678,7 @@ Footer END -->
 
 	<!-- Template Functions -->
 	<script src="assets/js/functions.js"></script>
+	<script src="/js/homePage/wishlist.js"></script>
 	<script>
 		$(document).ready(function () {
 
@@ -726,6 +728,8 @@ Footer END -->
 					traditional: true,
 					success: function (data) {
 						$('#mainCourseGrid').html(data);
+						// Trigger custom event to update wishlist status
+						document.dispatchEvent(new CustomEvent('courses-loaded'));
 					},
 					error: function (err) {
 						console.error("Lỗi khi gọi AJAX:", err);

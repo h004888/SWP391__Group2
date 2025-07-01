@@ -237,29 +237,32 @@ public class CoinTransactionController {
             @RequestParam(required = false) Integer predefinedWithdrawAmount,
             @RequestParam(required = false) Integer customWithdrawAmount,
             RedirectAttributes redirectAttributes) {
+
+
         if (userDetails == null) {
             redirectAttributes.addFlashAttribute("error", "User is not logged in");
             return "redirect:/login";
         }
-        
+
         try {
-            // Validate amount - either predefined or custom, but not both
-            if ((predefinedWithdrawAmount == null && customWithdrawAmount == null) ||
-                    (predefinedWithdrawAmount != null && customWithdrawAmount != null)) {
-                redirectAttributes.addFlashAttribute("error", "Please select or enter the amount you want to withdraw!");
+            Integer amount = null;
+            if (predefinedWithdrawAmount != null) {
+                amount = predefinedWithdrawAmount;
+            } else if (customWithdrawAmount != null) {
+                amount = customWithdrawAmount;
+            }
+
+            if (amount == null) {
+                redirectAttributes.addFlashAttribute("error", "Please enter withdrawal amount!");
                 return "redirect:/history";
             }
 
-            int amount = predefinedWithdrawAmount != null ? predefinedWithdrawAmount : customWithdrawAmount;
-            
-            // Validate minimum amount
             if (amount < 10000) {
                 redirectAttributes.addFlashAttribute("error", "Minimum withdrawal amount is 10,000 VND");
                 return "redirect:/history";
             }
 
-            // Validate maximum amount (optional - add if needed)
-            if (amount > 10000000) { // 10 million VND
+            if (amount > 10000000) {
                 redirectAttributes.addFlashAttribute("error", "Maximum withdrawal amount is 10,000,000 VND");
                 return "redirect:/history";
             }
@@ -267,34 +270,25 @@ public class CoinTransactionController {
             CustomUserDetails customUserDetails = (CustomUserDetails) userDetails;
             Long userId = customUserDetails.getUserId();
 
-            // Check current balance
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
             if (user.getCoin() < amount) {
-                redirectAttributes.addFlashAttribute("error", "Insufficient balance to make transaction. Current balance: " + 
-                    String.format("%,.0f", user.getCoin()) + " VND");
+                redirectAttributes.addFlashAttribute("error",
+                        "Insufficient balance to make transaction. Current balance: " +
+                                String.format("%,d", user.getCoin()) + " VND");
                 return "redirect:/history";
             }
 
-            // Process withdrawal
             coinTransactionService.processWithdrawal(userId, BigDecimal.valueOf(amount));
+            redirectAttributes.addFlashAttribute("message",
+                    "Withdrawal successful!");
 
-            redirectAttributes.addFlashAttribute("message", "Withdrawal successful! Amount: " + 
-                String.format("%,.0f", amount) + " VND");
             return "redirect:/history";
 
-        } catch (ClassCastException e) {
-            redirectAttributes.addFlashAttribute("error", "Authentication error");
-            return "redirect:/history";
-        } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/history";
-        } catch (EntityNotFoundException e) {
-            redirectAttributes.addFlashAttribute("error", "User not found");
-            return "redirect:/history";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "An error occurred while withdrawing funds: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error",
+                    "An error occurred while withdrawing funds: " + e.getMessage());
             return "redirect:/history";
         }
     }

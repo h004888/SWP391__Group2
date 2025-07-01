@@ -543,7 +543,13 @@ Trending courses START -->
                                             <a href="#" class="badge text-bg-dark"
                                                 th:text="${course.courseLevel}">Beginner</a>
                                         </span>
-                                        <a href="#" class="h6 fw-light mb-0"><i class="far fa-bookmark"></i></a>
+                                        <button type="button"
+                                                class="btn btn-link text-muted p-0 wishlist-toggle"
+                                                th:data-course-id="${course.courseId}"
+                                                th:onclick="'toggleWishlist(this, ' + ${course.courseId} + ')'"
+                                                style="font-size: 1.2rem;">
+                                            <i class="far fa-heart"></i>
+                                        </button>
                                     </div>
                                     <!-- Title -->
                                     <h5 class="card-title"><a th:href="@{'/home/course-detail?id=' + ${course.courseId}}" th:text="${course.title}">The complete Digital
@@ -890,5 +896,6 @@ Reviews START -->
     <!-- =======================
 Reviews END -->
     <script src="/js/homePage/addtocart.js"></script>
+
 </main>
 <!-- **************** MAIN CONTENT END **************** -->

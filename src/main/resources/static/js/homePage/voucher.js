@@ -103,7 +103,26 @@ window.voucherJS = (function() {
             })
                 .then(res => res.json())
                 .then(data => {
-                    if (typeof options.updatePriceUI === 'function') options.updatePriceUI(courseId, data);
+                    if (data.error) {
+                        // Nếu voucher không hợp lệ, xóa khỏi selectedVouchers và hiển thị thông báo
+                        console.log('Voucher error:', data.error);
+                        delete window.selectedVouchers[courseId];
+                        saveSelectedVouchers();
+                        if (typeof options.updatePriceUI === 'function') options.updatePriceUI(courseId, {});
+                        alert('Voucher không hợp lệ: ' + data.error);
+                    } else {
+                        if (typeof options.updatePriceUI === 'function') options.updatePriceUI(courseId, data);
+                    }
+                    closeVoucherModal();
+                    if (typeof options.updateCartTotal === 'function') options.updateCartTotal();
+                })
+                .catch(error => {
+                    console.error('Error applying voucher:', error);
+                    // Nếu có lỗi, xóa voucher khỏi selectedVouchers
+                    delete window.selectedVouchers[courseId];
+                    saveSelectedVouchers();
+                    if (typeof options.updatePriceUI === 'function') options.updatePriceUI(courseId, {});
+                    alert('Có lỗi xảy ra khi áp dụng voucher');
                     closeVoucherModal();
                     if (typeof options.updateCartTotal === 'function') options.updateCartTotal();
                 });
@@ -131,7 +150,22 @@ window.voucherJS = (function() {
                 })
                     .then(res => res.json())
                     .then(data => {
-                        if (typeof options.updatePriceUI === 'function') options.updatePriceUI(courseId, data);
+                        if (data.error) {
+                            // Nếu voucher không hợp lệ, xóa khỏi selectedVouchers và cập nhật UI
+                            console.log('Voucher error:', data.error);
+                            delete window.selectedVouchers[courseId];
+                            saveSelectedVouchers();
+                            if (typeof options.updatePriceUI === 'function') options.updatePriceUI(courseId, {});
+                        } else {
+                            if (typeof options.updatePriceUI === 'function') options.updatePriceUI(courseId, data);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error restoring voucher:', error);
+                        // Nếu có lỗi, xóa voucher khỏi selectedVouchers
+                        delete window.selectedVouchers[courseId];
+                        saveSelectedVouchers();
+                        if (typeof options.updatePriceUI === 'function') options.updatePriceUI(courseId, {});
                     });
             }
             setTimeout(() => {
@@ -241,7 +275,27 @@ window.voucherJS = (function() {
             })
                 .then(res => res.json())
                 .then(data => {
-                    if (typeof options.updatePriceUI === 'function') options.updatePriceUI(data);
+                    if (data.error) {
+                        // Nếu voucher không hợp lệ, xóa khỏi selectedVoucher và hiển thị thông báo
+                        console.log('Voucher error:', data.error);
+                        window.selectedVoucher = null;
+                        saveSelectedVoucher();
+                        if (typeof options.syncVoucherToBuyNowForm === 'function') options.syncVoucherToBuyNowForm();
+                        if (typeof options.updatePriceUI === 'function') options.updatePriceUI({});
+                        alert('Voucher không hợp lệ: ' + data.error);
+                    } else {
+                        if (typeof options.updatePriceUI === 'function') options.updatePriceUI(data);
+                    }
+                    closeVoucherModal();
+                })
+                .catch(error => {
+                    console.error('Error applying voucher:', error);
+                    // Nếu có lỗi, xóa voucher khỏi selectedVoucher
+                    window.selectedVoucher = null;
+                    saveSelectedVoucher();
+                    if (typeof options.syncVoucherToBuyNowForm === 'function') options.syncVoucherToBuyNowForm();
+                    if (typeof options.updatePriceUI === 'function') options.updatePriceUI({});
+                    alert('Có lỗi xảy ra khi áp dụng voucher');
                     closeVoucherModal();
                 });
         };
@@ -267,10 +321,39 @@ window.voucherJS = (function() {
         });
     }
 
+    // Xóa voucher khỏi giao diện khi đã sử dụng
+    function removeVoucherFromList(voucherId) {
+        // Tìm card voucher theo data-voucher-id
+        const voucherCard = document.querySelector(`[data-voucher-id="${voucherId}"]`);
+        if (voucherCard) {
+            const col = voucherCard.closest('.col-md-6, .col-lg-4');
+            if (col) {
+                col.remove();
+                
+                // Cập nhật tổng số voucher
+                const totalItemsSpan = document.querySelector('h5 span');
+                if (totalItemsSpan) {
+                    const currentTotal = parseInt(totalItemsSpan.textContent) || 0;
+                    totalItemsSpan.textContent = Math.max(0, currentTotal - 1);
+                }
+                
+                // Kiểm tra nếu không còn voucher nào trên trang hiện tại
+                const remainingVouchers = document.querySelectorAll('#voucher-list .voucher-card');
+                if (remainingVouchers.length === 0) {
+                    // Reload trang để lấy voucher từ trang tiếp theo hoặc hiển thị empty message
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 300);
+                }
+            }
+        }
+    }
+
     return {
         formatNumberWithCommas,
         closeVoucherModal,
         initCartVoucher,
-        initDetailVoucher
+        initDetailVoucher,
+        removeVoucherFromList
     };
 })();

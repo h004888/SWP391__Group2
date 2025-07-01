@@ -3,7 +3,7 @@ package com.OLearning.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -29,7 +29,7 @@ public class Voucher {
     private Double discount;
 
     @Column(name = "ExpiryDate")
-    private LocalDateTime expiryDate;
+    private LocalDate expiryDate;
 
     @Column(name = "Limitation")
     private Long limitation;
@@ -44,7 +44,7 @@ public class Voucher {
     private Boolean isGlobal;
 
     @Column(name = "CreatedDate")
-    private LocalDateTime createdDate;
+    private LocalDate createdDate;
 
     @OneToMany(mappedBy = "voucher")
     private List<VoucherCourse> voucherCourses;

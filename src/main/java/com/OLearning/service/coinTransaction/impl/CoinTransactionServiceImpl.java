@@ -72,6 +72,7 @@ public class CoinTransactionServiceImpl implements CoinTransactionService {
         transaction.setStatus("completed");
         transaction.setNote("VNPay TransactionId: " + transactionId);
         transaction.setCreatedAt(LocalDateTime.now());
+        transaction.setOrder(null);
 
         user.setCoin(user.getCoin() + amount.doubleValue());
         userRepository.save(user);
@@ -100,6 +101,7 @@ public class CoinTransactionServiceImpl implements CoinTransactionService {
         transaction.setStatus("completed");
         transaction.setNote("Withdrawal processed");
         transaction.setCreatedAt(LocalDateTime.now());
+        transaction.setOrder(null);
 
         // Update user's coin balance
         user.setCoin(user.getCoin() - amount.doubleValue());
@@ -107,6 +109,7 @@ public class CoinTransactionServiceImpl implements CoinTransactionService {
 
         return coinTransactionRepository.save(transaction);
     }
+
     @Override
     @Transactional
     public Page<CoinTransactionDTO> filterAndSortTransactions(Long userId, String transactionType, String startDate, String endDate, int page, int size) {

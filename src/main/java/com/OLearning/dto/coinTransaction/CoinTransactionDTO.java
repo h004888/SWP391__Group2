@@ -20,4 +20,6 @@ public class CoinTransactionDTO {
     private String status;
     private String note;
     private LocalDateTime createdAt;
+    private String refCode;
+    private String courseName;
 }

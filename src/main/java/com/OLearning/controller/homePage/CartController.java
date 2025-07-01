@@ -3,6 +3,7 @@ package com.OLearning.controller.homePage;
 import com.OLearning.config.VNPayConfig;
 import com.OLearning.entity.Order;
 import com.OLearning.entity.User;
+import com.OLearning.entity.UserVoucher;
 import com.OLearning.repository.CourseRepository;
 import com.OLearning.repository.OrdersRepository;
 import com.OLearning.repository.UserRepository;
@@ -12,6 +13,7 @@ import com.OLearning.service.cart.CartService;
 import com.OLearning.service.cart.impl.CartServiceImpl;
 import com.OLearning.service.vnpay.VNPayService;
 import com.OLearning.service.voucher.VoucherService;
+import com.OLearning.service.wishlist.WishlistService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
@@ -49,6 +51,8 @@ public class CartController {
     private UserVoucherRepository userVoucherRepository;
     @Autowired
     private VoucherService voucherService;
+    @Autowired
+    private WishlistService wishlistService;
 
     @GetMapping
     public String getCart(@AuthenticationPrincipal UserDetails userDetails,
@@ -64,6 +68,12 @@ public class CartController {
         model.addAttribute("totalPrice", calculateTotalPrice(cart));
         model.addAttribute("cartTotal", getLongValue(cart.getOrDefault("total", 0L)));
         model.addAttribute("currentUserId", userId);
+        
+        // Add wishlist total
+        String encodedWishlistJson = getWishlistCookie(request, userId);
+        Map<String, Object> wishlist = wishlistService.getWishlistDetails(encodedWishlistJson, userDetails.getUsername());
+        model.addAttribute("wishlistTotal", getLongValue(wishlist.getOrDefault("total", 0L)));
+        
         return "homePage/cart";
     }
 
@@ -215,12 +225,7 @@ public class CartController {
             }
             cart.put("items", items);
             updateCartCookie(cart, response, userId);
-            for (Map<String, Object> item : items) {
-                if (item.containsKey("appliedVoucherId")) {
-                    Long voucherId = Long.valueOf(item.get("appliedVoucherId").toString());
-                    voucherService.useVoucherForUserAndCourse(voucherId, userId);
-                }
-            }
+            
             String ipAddr = request.getRemoteAddr();
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new EntityNotFoundException("User not found"));
@@ -230,6 +235,14 @@ public class CartController {
                 order.setAmount(totalAmount);
                 cartService.processCheckout(encodedCartJson, ipAddr, userDetails.getUsername());
                 cartService.completeCheckout(cart, order, true, null);
+                
+                for (Map<String, Object> item : items) {
+                    if (item.containsKey("appliedVoucherId")) {
+                        Long voucherId = Long.valueOf(item.get("appliedVoucherId").toString());
+                        voucherService.useVoucherForUserAndCourse(voucherId, userId);
+                    }
+                }
+                
                 updateCartCookie(cartService.clearCart(userDetails.getUsername()), response, userId);
                 model.addAttribute("message", "Checkout completed using wallet!");
                 return "redirect:/cart";
@@ -276,6 +289,16 @@ public class CartController {
                 order.setRefCode(transactionId);
                 cartService.processCheckout(encodedCartJson, ipAddr, userDetails.getUsername());
                 cartService.completeCheckout(cart, order, false, transactionId);
+                
+                // Xử lý voucher sau khi thanh toán thành công
+                List<Map<String, Object>> items = (List<Map<String, Object>>) cart.getOrDefault("items", List.of());
+                for (Map<String, Object> item : items) {
+                    if (item.containsKey("appliedVoucherId")) {
+                        Long voucherId = Long.valueOf(item.get("appliedVoucherId").toString());
+                        voucherService.useVoucherForUserAndCourse(voucherId, userId);
+                    }
+                }
+                
                 updateCartCookie(cartService.clearCart(userDetails.getUsername()), response, userId);
                 model.addAttribute("message", "VNPay payment successful!");
                 return "redirect:/cart";
@@ -296,20 +319,39 @@ public class CartController {
         Long courseId = Long.valueOf(req.get("courseId").toString());
         Long voucherId = Long.valueOf(req.get("voucherId").toString());
         
-        double originalPrice = courseRepository.findById(courseId)
-            .map(course -> course.getPrice().doubleValue())
-            .orElse(0.0);
-        double discount = voucherRepository.findById(voucherId)
-            .map(voucher -> voucher.getDiscount())
-            .orElse(0.0);
-        String voucherCode = voucherRepository.findById(voucherId)
-            .map(voucher -> voucher.getCode())
-            .orElse("");
-        double discountedPrice = Math.round(originalPrice * (1 - discount / 100.0));
         Map<String, Object> result = new HashMap<>();
-        result.put("voucherId", voucherId);
-        result.put("voucherCode", voucherCode);
-        result.put("discountedPrice", (long) discountedPrice);
+        
+        try {
+            var userVoucherOpt = userVoucherRepository.findByUser_UserIdAndVoucher_VoucherId(userId, voucherId);
+            if (userVoucherOpt.isEmpty()) {
+                result.put("error", "User does not have this voucher");
+                return result;
+            }
+            
+            var userVoucher = userVoucherOpt.get();
+            if (Boolean.TRUE.equals(userVoucher.getIsUsed())) {
+                return result;
+            }
+
+            double originalPrice = courseRepository.findById(courseId)
+                .map(course -> course.getPrice().doubleValue())
+                .orElse(0.0);
+            double discount = voucherRepository.findById(voucherId)
+                .map(voucher -> voucher.getDiscount())
+                .orElse(0.0);
+            String voucherCode = voucherRepository.findById(voucherId)
+                .map(voucher -> voucher.getCode())
+                .orElse("");
+            double discountedPrice = Math.round(originalPrice * (1 - discount / 100.0));
+            
+            result.put("voucherId", voucherId);
+            result.put("voucherCode", voucherCode);
+            result.put("discountedPrice", (long) discountedPrice);
+            
+        } catch (Exception e) {
+            result.put("error", e.getMessage());
+        }
+        
         return result;
     }
 
@@ -357,5 +399,16 @@ public class CartController {
             return ((Number) value).longValue();
         }
         throw new IllegalStateException("Value is not a number: " + (value != null ? value.getClass().getName() : "null"));
+    }
+
+    private String getWishlistCookie(HttpServletRequest request, Long userId) {
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if (cookie.getName().equals("wishlist_" + userId)) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return "";
     }
 }

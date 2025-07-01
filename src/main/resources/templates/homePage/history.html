@@ -1,7 +1,83 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 
-<head th:replace="~{homePage/fragments/header :: header}"></head>
+<head th:replace="~{homePage/fragments/header :: header}">
+    <style>
+        .balance-section {
+            margin: 32px 0 24px 0;
+            padding: 32px 24px;
+            background: linear-gradient(90deg, #4e73df 0%, #1cc88a 100%);
+            border-radius: 16px;
+            color: #fff;
+            box-shadow: 0 4px 24px rgba(78,115,223,0.12);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .balance-section h4 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .action-buttons .btn {
+            font-size: 1.1rem;
+            padding: 10px 28px;
+            border-radius: 30px;
+            box-shadow: 0 2px 8px #e3e6f0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card {
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+        }
+        .table {
+            border-radius: 12px;
+            overflow: hidden;
+            background: #fff;
+        }
+        .table thead {
+            background: linear-gradient(90deg, #4e73df 0%, #1cc88a 100%);
+            color: #fff;
+        }
+        .table tbody tr:hover {
+            background: #f8f9fc;
+        }
+        .badge.bg-success, .badge.bg-warning, .badge.bg-secondary {
+            font-size: 1em;
+            padding: 0.5em 1em;
+            border-radius: 12px;
+        }
+        .filter-card {
+            border-radius: 12px;
+            box-shadow: 0 2px 8px #e3e6f0;
+            margin-bottom: 24px;
+        }
+        .amount-options .amount-option, .amount-options .withdraw-amount-option {
+            transition: background 0.2s, color 0.2s;
+        }
+        .amount-options .amount-option:hover, .amount-options .withdraw-amount-option:hover {
+            background: #4e73df;
+            color: #fff;
+        }
+        .form-group label {
+            font-weight: 600;
+        }
+        .form-control {
+            border-radius: 8px;
+        }
+        @media (max-width: 768px) {
+            .balance-section { flex-direction: column; text-align: center; }
+            .action-buttons { flex-direction: column; gap: 10px; }
+        }
+    </style>
+</head>
 
 <body>
 
@@ -13,83 +89,67 @@
 <main>
     <section class="pt-0">
         <div class="container">
-            <div class="card bg-transparent border">
-                <!-- Card header START -->
-                <div class="card-header bg-light border-bottom">
-                    <h3 class="mb-0">History</h3>
+            <div class="card bg-white border-0 p-4">
+                <div class="balance-section">
+                    <h4><i class="fas fa-wallet me-2"></i>Current Balance: <span th:text="${#numbers.formatDecimal(currentBalance, 0, 'COMMA', 0, 'POINT')} + ' VND'"></span></h4>
+                    <input type="hidden" id="currentBalance" th:value="${currentBalance}">
                 </div>
-                <!-- Card header END -->
-
-                <!-- Card body START -->
-                <div class="card-body">
-
-                    <div class="balance-section" style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
-                        <h4>Current Balance: <span th:text="${#numbers.formatDecimal(currentBalance, 0, 'COMMA', 0, 'POINT')} + ' VND'"></span></h4>
-                        <input type="hidden" id="currentBalance" th:value="${currentBalance}">
-                    </div>
-
                     <div th:if="${message}" class="alert alert-success" role="alert">
                         <span th:text="${message}"></span>
                     </div>
                     <div th:if="${error}" class="alert alert-danger" role="alert">
                         <span th:text="${error}"></span>
                     </div>
-
-                    <div class="action-buttons" style="position:relative; z-index:20; margin-bottom: 20px;">
-                        <button class="btn btn-primary" id="depositBtn" onclick="toggleDepositForm()">Deposit</button>
-                        <button class="btn btn-danger" id="withdrawBtn" onclick="toggleWithdrawForm()">Withdraw</button>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="depositBtn" onclick="toggleDepositForm()"><i class="fas fa-arrow-down"></i> Deposit</button>
+                    <button class="btn btn-danger" id="withdrawBtn" onclick="toggleWithdrawForm()"><i class="fas fa-arrow-up"></i> Withdraw</button>
                     </div>
-
-                    <!-- Overlay to catch clicks outside the form -->
-                    <div id="formOverlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:transparent; z-index:5;"></div>
-
+                <div id="formOverlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.1); z-index:5;"></div>
                     <!-- Deposit Form -->
-                    <form id="depositForm" th:action="@{/history/deposit}" method="post" onsubmit="return validateDepositForm()" style="display:none; margin: 20px 0; width: 100%; max-width: 600px; box-shadow: 0 2px 8px #eee; background: #f8f9fa; padding: 24px; border-radius: 8px; position:relative; z-index:10;">
-                        <div class="form-group mb-3">
-                            <label for="depositAmount">Amount to deposit (minimum 10,000 VND):</label>
-                            <div class="amount-options" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 15px 0;">
-                                <div th:each="amount : ${predefinedAmounts}"
-                                     th:text="${#numbers.formatDecimal(amount, 0, 'COMMA', 0, 'POINT')} + ' VND'"
-                                     th:data-amount="${amount}"
-                                     class="amount-option"
-                                     onclick="selectDepositAmount(this)"
-                                     style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; text-align: center; cursor: pointer;"></div>
-                            </div>
-                            <input type="number" id="depositAmount" name="customAmount" placeholder="Nhập số tiền..." oninput="handleCustomDepositInput()" class="form-control">
-                            <input type="hidden" id="predefinedAmount" name="predefinedAmount">
-                            <div id="depositAmountError" class="text-danger mt-2" style="display: none;"></div>
+                <form id="depositForm" th:action="@{/history/deposit}" method="post" onsubmit="return validateDepositForm()" style="display:none; margin: 20px auto; width: 100%; max-width: 500px; box-shadow: 0 2px 8px #e3e6f0; background: #fff; padding: 28px; border-radius: 16px; position:relative; z-index:10;">
+                    <div class="form-group mb-3">
+                        <label for="depositAmount"><i class="fas fa-arrow-down"></i> Amount to deposit (min 10,000 VND):</label>
+                        <div class="amount-options" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 15px 0;">
+                            <div th:each="amount : ${predefinedAmounts}"
+                                 th:text="${#numbers.formatDecimal(amount, 0, 'COMMA', 0, 'POINT')} + ' VND'"
+                                 th:data-amount="${amount}"
+                                 class="amount-option btn btn-outline-primary"
+                                 style="cursor: pointer; padding: 8px 12px; border-radius: 8px; text-align: center;"
+                                 onclick="selectDepositAmount(this)"></div>
                         </div>
-                        <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Deposit</button>
-                    </form>
+                        <input type="number" id="depositAmount" name="customAmount" placeholder="Enter custom amount..." oninput="handleCustomDepositInput()" class="form-control" min="10000" max="10000000">
+                        <input type="hidden" id="predefinedAmount" name="predefinedAmount">
+                        <div id="depositAmountError" class="text-danger mt-2" style="display: none;"></div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 mt-3"><i class="fas fa-arrow-down"></i> Deposit</button>
+                </form>
 
-                    <!-- Withdraw Form -->
-                    <form id="withdrawForm" th:action="@{/history/withdraw}" method="post" onsubmit="return validateWithdrawForm()" style="display:none; margin: 20px 0; width: 100%; max-width: 600px; box-shadow: 0 2px 8px #eee; background: #f8f9fa; padding: 24px; border-radius: 8px; position:relative; z-index:10;">
-                        <div class="form-group mb-3">
-                            <label for="withdrawAmount">Amount to withdraw (minimum 10,000 VND):</label>
-                            <div class="amount-options" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 15px 0;">
-                                <div th:each="amount : ${predefinedAmounts}"
-                                     th:text="${#numbers.formatDecimal(amount, 0, 'COMMA', 0, 'POINT')} + ' VND'"
-                                     th:data-amount="${amount}"
-                                     class="withdraw-amount-option"
-                                     onclick="selectWithdrawAmount(this)"
-                                     style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; text-align: center; cursor: pointer;"></div>
-                            </div>
-                            <input type="number" id="withdrawAmount" name="customWithdrawAmount" placeholder="Nhập số tiền..." class="form-control" oninput="handleCustomWithdrawInput()">
-                            <input type="hidden" id="predefinedWithdrawAmount" name="predefinedWithdrawAmount">
-                            <small>Current balance: <span th:text="${#numbers.formatDecimal(currentBalance, 0, 'COMMA', 0, 'POINT')} + ' VND'"></span></small>
-                            <div id="withdrawAmountError" class="text-danger mt-2" style="display: none;"></div>
+                <!-- Withdraw Form -->
+                <form id="withdrawForm" th:action="@{/history/withdraw}" method="post" onsubmit="return validateWithdrawForm()" style="display:none; margin: 20px auto; width: 100%; max-width: 500px; box-shadow: 0 2px 8px #e3e6f0; background: #fff; padding: 28px; border-radius: 16px; position:relative; z-index:10;">
+                    <div class="form-group mb-3">
+                        <label for="withdrawAmount"><i class="fas fa-arrow-up"></i> Amount to withdraw (min 10,000 VND):</label>
+                        <div class="amount-options" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 15px 0;">
+                            <div th:each="amount : ${predefinedAmounts}"
+                                 th:text="${#numbers.formatDecimal(amount, 0, 'COMMA', 0, 'POINT')} + ' VND'"
+                                 th:data-amount="${amount}"
+                                 class="withdraw-amount-option btn btn-outline-danger"
+                                 style="cursor: pointer; padding: 8px 12px; border-radius: 8px; text-align: center;"
+                                 onclick="selectWithdrawAmount(this)"></div>
                         </div>
-                        <button type="submit" class="btn btn-danger" style="margin-top: 15px;">Withdraw</button>
-                    </form>
-
+                        <input type="number" id="withdrawAmount" name="customWithdrawAmount" placeholder="Enter custom amount..." class="form-control" oninput="handleCustomWithdrawInput()" min="10000" max="10000000">
+                        <input type="hidden" id="predefinedWithdrawAmount" name="predefinedWithdrawAmount">
+                        <small class="form-text text-muted">Current balance: <span th:text="${#numbers.formatDecimal(currentBalance, 0, 'COMMA', 0, 'POINT')} + ' VND'"></span></small>
+                        <div id="withdrawAmountError" class="text-danger mt-2" style="display: none;"></div>
+                    </div>
+                    <button type="submit" class="btn btn-danger w-100 mt-3"><i class="fas fa-arrow-up"></i> Withdraw</button>
+                </form>
                     <!-- Filter Section START -->
-                    <div class="card bg-transparent border mb-4">
-                        <div class="card-header bg-light border-bottom">
-                            <h5 class="mb-0">Filter Transactions</h5>
+                <div class="card filter-card p-3 mb-4">
+                    <div class="card-header bg-white border-bottom-0 pb-1">
+                        <h5 class="mb-0"><i class="fas fa-filter"></i> Filter Transactions</h5>
                         </div>
-                        <div class="card-body">
+                    <div class="card-body pt-2">
                             <div class="row g-3 align-items-center">
-                                <!-- Transaction Type Filter -->
                                 <div class="col-md-3">
                                     <label for="filterTransactionType" class="form-label">Transaction Type</label>
                                     <select class="form-select" name="transactionType" id="filterTransactionType">
@@ -99,32 +159,29 @@
                                         <option value="course_purchase" th:selected="${transactionType == 'course_purchase'}">Purchase</option>
                                     </select>
                                 </div>
-
-                                <!-- Date Range Filter -->
                                 <div class="col-md-4">
                                     <label class="form-label">Date Range</label>
                                     <div class="d-flex align-items-center gap-2">
-                                        <input class="form-control" type="date" id="filterStartDate" name="startDate"
-                                               th:value="${startDate != null ? startDate : ''}">
+                                    <input class="form-control" type="date" id="filterStartDate" name="startDate" th:value="${startDate != null ? startDate : ''}">
                                         <span>To</span>
-                                        <input class="form-control" type="date" id="filterEndDate" name="endDate"
-                                               th:value="${endDate != null ? endDate : ''}">
+                                    <input class="form-control" type="date" id="filterEndDate" name="endDate" th:value="${endDate != null ? endDate : ''}">
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <!-- Filter Section END -->
-
                     <!-- Transactions table START -->
                     <div th:fragment="transactionsTableBody" id="transactionsTableBody" class="table-responsive border-0">
-                        <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                    <table class="table align-middle mb-0 table-hover shadow-sm">
                             <thead>
                             <tr>
                                 <th>#</th>
                                 <th>Amount</th>
                                 <th>Type</th>
                                 <th>Status</th>
+                            <th>Ref Code</th>
+                            <th>Course Name</th>
                                 <th>Note</th>
                                 <th>Created At</th>
                             </tr>
@@ -133,18 +190,24 @@
                             <tr th:each="transaction, loop : ${transactions}">
                                 <td th:text="${loop.index + 1}"></td>
                                 <td th:text="${#numbers.formatDecimal(transaction.amount, 0, 'COMMA', 0, 'POINT')} + ' VND'"></td>
-                                <td th:text="${transaction.transactionType}"></td>
+                            <td>
+                                <span th:if="${transaction.transactionType == 'top_up'}"><i class="fas fa-arrow-down text-primary"></i> Top Up</span>
+                                <span th:if="${transaction.transactionType == 'withdraw'}"><i class="fas fa-arrow-up text-danger"></i> Withdraw</span>
+                                <span th:if="${transaction.transactionType == 'course_purchase'}"><i class="fas fa-book text-success"></i> Purchase</span>
+                                <span th:if="${transaction.transactionType != 'top_up' && transaction.transactionType != 'withdraw' && transaction.transactionType != 'course_purchase'}" th:text="${transaction.transactionType}"></span>
+                            </td>
                                 <td>
                                     <span th:if="${transaction.status == 'completed'}" class="badge bg-success" th:text="${transaction.status}"></span>
                                     <span th:if="${transaction.status == 'pending'}" class="badge bg-warning" th:text="${transaction.status}"></span>
                                     <span th:if="${transaction.status != 'completed' && transaction.status != 'pending'}" class="badge bg-secondary" th:text="${transaction.status}"></span>
                                 </td>
+                            <td th:text="${transaction.refCode}"></td>
+                            <td th:text="${transaction.courseName}"></td>
                                 <td th:text="${transaction.note}"></td>
                                 <td th:text="${#temporals.format(transaction.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
                             </tr>
                             </tbody>
                         </table>
-
                         <!-- Pagination & info -->
                         <div class="d-sm-flex justify-content-sm-between align-items-sm-center mt-4">
                             <p class="mb-0 text-center text-sm-start" th:if="${totalItems > 0}">
@@ -176,8 +239,6 @@
                         </div>
                     </div>
                     <!-- Transactions table END -->
-                </div>
-                <!-- Card body END -->
             </div>
         </div>
     </section>
