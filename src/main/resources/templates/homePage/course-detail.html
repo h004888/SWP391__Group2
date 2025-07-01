@@ -125,28 +125,25 @@
 					<ul class="navbar-nav navbar-nav-scroll mx-auto">
 						<!-- Nav item 1 Demos -->
 						<li class="nav-item dropdown">
-							<a class="nav-link " th:href="@{/home/coursesGrid}" id="demoMenu"
-							   aria-haspopup="true" aria-expanded="false">Courses</a>
+							<a class="nav-link " th:href="@{/home/coursesGrid}" id="demoMenu" aria-haspopup="true"
+								aria-expanded="false">Courses</a>
 
 						</li>
 						<li class="nav-item dropdown">
-							<a class="nav-link " th:href="@{/learning}"
-							   aria-haspopup="true" aria-expanded="false">Education</a>
+							<a class="nav-link " th:href="@{/learning}" aria-haspopup="true"
+								aria-expanded="false">Education</a>
 
 						</li>
 						<li class="nav-item dropdown">
-							<a class="nav-link " href="#"
-							   aria-haspopup="true" aria-expanded="false">About</a>
+							<a class="nav-link " href="#" aria-haspopup="true" aria-expanded="false">About</a>
 
 						</li>
 						<li class="nav-item dropdown">
-							<a class="nav-link " href="#"
-							   aria-haspopup="true" aria-expanded="false">Contact</a>
+							<a class="nav-link " href="#" aria-haspopup="true" aria-expanded="false">Contact</a>
 
 						</li>
 						<li class="nav-item dropdown">
-							<a class="nav-link " href="#"
-							   aria-haspopup="true" aria-expanded="false">Wishlist</a>
+							<a class="nav-link " href="#" aria-haspopup="true" aria-expanded="false">Wishlist</a>
 
 						</li>
 					</ul>
@@ -277,7 +274,8 @@ Page intro START -->
 						<ul class="list-inline mb-0">
 							<li class="list-inline-item h6 me-3 mb-1 mb-sm-0"><i
 									class="fas fa-star text-warning me-2"></i><span
-									th:text="|${#numbers.formatDecimal(course.averageRating, 1, 'POINT', 1, 'POINT')}/5.0|">4.5</span></span></li>
+									th:text="|${#numbers.formatDecimal(course.averageRating, 1, 'POINT', 1, 'POINT')}/5.0|">4.5</span></span>
+							</li>
 							<li class="list-inline-item h6 me-3 mb-1 mb-sm-0"><i
 									class="fas fa-user-graduate text-orange me-2"></i><span
 									th:text="${course.getEnrollments().size() + ' Enrolled'}"></span></li>
@@ -1292,7 +1290,8 @@ Page content START -->
 											<!-- Price and time -->
 											<div>
 												<div class="d-flex align-items-center">
-													<h3 class="fw-bold mb-0 me-2" style="font-size: 1.5rem;" th:text="${course.price} + ' ₫'">$150
+													<h3 class="fw-bold mb-0 me-2" style="font-size: 1.5rem;"
+														th:text="${course.price} + ' ₫'">$150
 													</h3>
 													<span class="text-decoration-line-through mb-0 me-2"
 														th:text="${course.price + course.price*0.6} + ' ₫'">$350</span>
@@ -1398,7 +1397,7 @@ Page content START -->
 													<span class="text-success"
 														th:text="${course.price} + ' ₫'">$130</span>
 													<span class="h6 fw-light"><span
-															th:text="${course.averageRating}"></span><i
+															th:text="|${#numbers.formatDecimal(course.averageRating, 1, 'POINT', 1, 'POINT')}/5.0|"></span><i
 															class="fas fa-star text-warning ms-1"></i></span>
 												</li>
 											</ul>
@@ -1501,7 +1500,7 @@ Listed courses START -->
 														<i class="fas fa-star"></i>
 													</div>
 													<span class="h6 fw-light ms-2 mb-0"
-														th:text="${course.averageRating}"></span>
+														th:text="|${#numbers.formatDecimal(course.averageRating, 1, 'POINT', 1, 'POINT')}/5.0|"></span>
 												</li>
 											</ul>
 											<!-- Avatar -->

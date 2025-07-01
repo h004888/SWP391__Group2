@@ -11,5 +11,5 @@ import com.OLearning.entity.Enrollment;
 public interface EnrollmentService {
     List<Course> getCoursesByUserId(Long userId);
     boolean hasEnrolled(Long userId, Long courseId);
-    
+    Integer getWeeksEnrolled(Long userId, Long courseId);
 }

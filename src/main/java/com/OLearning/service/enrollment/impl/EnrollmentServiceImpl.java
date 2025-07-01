@@ -32,4 +32,9 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     public boolean hasEnrolled(Long userId, Long courseId) {
         return enrollmentRepository.existsByUser_UserIdAndCourse_CourseId(userId, courseId);
     }
+
+    @Override
+    public Integer getWeeksEnrolled(Long userId, Long courseId) {
+        return enrollmentRepository.getWeeksEnrolled(userId, courseId);
+    }
 }

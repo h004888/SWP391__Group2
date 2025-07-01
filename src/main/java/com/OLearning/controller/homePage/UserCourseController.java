@@ -8,10 +8,13 @@ import java.util.stream.Collectors;
 
 import com.OLearning.dto.course.CourseViewDTO;
 import com.OLearning.dto.lessonCompletion.LessonCompletionDTO;
+import com.OLearning.dto.quiz.QuizSubmissionForm;
 import com.OLearning.entity.*;
 import com.OLearning.service.enrollment.EnrollmentService;
 import com.OLearning.service.lesson.LessonService;
 import com.OLearning.service.lessonCompletion.LessonCompletionService;
+import com.OLearning.service.quizQuestion.QuizQuestionService;
+import com.OLearning.service.quizTest.QuizTestService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -43,6 +46,11 @@ public class UserCourseController {
     private LessonCompletionService lessonCompletionService;
 
     @Autowired
+    private QuizTestService quizTestService;
+    @Autowired
+    private QuizQuestionService quizQuestionService;
+
+    @Autowired
     private LessonService lessonService;
 
     @GetMapping
@@ -64,6 +72,13 @@ public class UserCourseController {
 
         if (!courses.isEmpty()) {
             model.addAttribute("course", courses.get(0)); // hoặc getFirst() nếu bạn dùng ListDeque
+            model.addAttribute("progress",
+                    lessonCompletionService.getOverallProgressOfUser(currentUser.getUserId(),
+                            courses.get(0).getCourseId()));
+            model.addAttribute("weeksEnrolled", enrollmentService.getWeeksEnrolled(currentUser.getUserId(),
+                    courses.get(0).getCourseId()));
+            model.addAttribute("numberOfCompletedLessons", lessonCompletionService.getNumberOfCompletedLessons(currentUser.getUserId(),
+                    courses.get(0).getCourseId()));
         } else {
             model.addAttribute("course", null); // hoặc ẩn phần này trên giao diện
         }
@@ -117,6 +132,23 @@ public class UserCourseController {
         // Thêm logic để xác định bài có thể học được
         Set<Long> accessibleLessonIds = new HashSet<>(completedLessonIds);
         accessibleLessonIds.add(currentLesson.getLessonId()); // Bài hiện tại cũng có thể học
+        if ("quiz".equalsIgnoreCase(currentLesson.getContentType())) {
+            Quiz quiz = quizTestService.getQuizByLessonId(currentLesson.getLessonId());
+            System.out.println("Quiz for quizID" + quiz.getId());
+            List<QuizQuestion> questions = quizQuestionService.getQuestionsByQuizId(quiz.getId());
+
+            model.addAttribute("quiz", quiz);
+            model.addAttribute("currentLesson", currentLesson);
+            model.addAttribute("course", courseService.getCourseById(courseId));
+
+            model.addAttribute("questions", questions);
+            QuizSubmissionForm submissionForm = new QuizSubmissionForm();
+            submissionForm.setQuizId(quiz.getId());
+            submissionForm.setCourseId(courseId);
+            submissionForm.setLessonId(currentLesson.getLessonId());
+            model.addAttribute("submissionForm", submissionForm);
+            return "userPage/doQuiz";
+        }
 
         model.addAttribute("completedLessonIds", completedLessonIds);
         model.addAttribute("accessibleLessonIds", accessibleLessonIds);
@@ -168,6 +200,23 @@ public class UserCourseController {
         Set<Long> accessibleLessonIds = new HashSet<>(completedLessonIds);
         if (nextAvailableLesson != null) {
             accessibleLessonIds.add(nextAvailableLesson.getLessonId());
+        }
+        if ("quiz".equalsIgnoreCase(currentLesson.getContentType())) {
+            Quiz quiz = quizTestService.getQuizByLessonId(currentLesson.getLessonId());
+            System.out.println("Quiz for quizID" + quiz.getId());
+            List<QuizQuestion> questions = quizQuestionService.getQuestionsByQuizId(quiz.getId());
+
+            model.addAttribute("quiz", quiz);
+            model.addAttribute("currentLesson", currentLesson);
+            model.addAttribute("course", course);
+
+            model.addAttribute("questions", questions);
+            QuizSubmissionForm submissionForm = new QuizSubmissionForm();
+            submissionForm.setQuizId(quiz.getId());
+            submissionForm.setCourseId(courseId);
+            submissionForm.setLessonId(currentLesson.getLessonId());
+            model.addAttribute("submissionForm", submissionForm);
+            return "userPage/doQuiz";
         }
 
         model.addAttribute("completedLessonIds", completedLessonIds);
