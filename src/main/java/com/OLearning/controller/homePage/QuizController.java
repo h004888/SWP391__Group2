@@ -4,6 +4,7 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
+import com.OLearning.service.lesson.LessonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -30,6 +31,8 @@ public class QuizController {
     private QuizQuestionService quizQuestionService;
     @Autowired
     private LessonCompletionService lessonCompletionService;
+    @Autowired
+    private LessonService lessonService;
 
     @PostMapping("quiz/submit")
     public String handleQuizSubmit(@ModelAttribute("submissionForm") QuizSubmissionForm form, Model model,
@@ -69,12 +72,17 @@ public class QuizController {
         }
 
 
+
         model.addAttribute("courseId", form.getCourseId());
         model.addAttribute("score", correct);
+        model.addAttribute("nextLessonId", lessonService.getNextLessonAfterCurrent(form.getLessonId(),form.getCourseId()).getLessonId());
         model.addAttribute("total", total);
         model.addAttribute("passed", isPassed); // true nếu >= 75%
         model.addAttribute("lessonId", form.getLessonId());
-        return "userPage/quizResult"; // tạo trang quizResult.html để hiển thị kết quả
+        model.addAttribute("result", true);
+
+        return "userPage/doQuiz";
+
     }
 
     private User extractCurrentUser(Principal principal) {

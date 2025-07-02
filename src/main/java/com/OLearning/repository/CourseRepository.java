@@ -47,6 +47,4 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
      // find course by category id
      List<Course> findByCategoryId(int categoryId);
 
-     // find course trending filter by enrollment and course review
-     List<Course> findByEnrollmentsSizeGreaterThanEqualOrderByEnrollmentsSizeDesc(int enrollmentsSize);
 }

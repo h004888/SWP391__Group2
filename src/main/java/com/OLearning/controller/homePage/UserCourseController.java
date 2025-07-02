@@ -86,9 +86,6 @@ public class UserCourseController {
         return "userPage/LearningDashboard";
     }
 
-    /**
-     * Trích xuất đối tượng User từ Principal nếu có xác thực.
-     */
     private User extractCurrentUser(Principal principal) {
         if (principal instanceof Authentication authentication) {
             Object principalObj = authentication.getPrincipal();

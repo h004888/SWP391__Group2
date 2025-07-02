@@ -19,7 +19,7 @@
 
         <div th:if="${passed}">
             <p class="text-success">Bạn đã đạt yêu cầu! Tiếp tục học thôi!</p>
-            <a th:href="@{/learning/course/view(courseId=${courseId})}" class="btn btn-primary mt-3">Tiếp tục học</a>
+            <a th:href="@{/learning/course/{courseId}/lesson/{lessonId}(courseId=${courseId}, lessonId=${nextLessonId})}"class="btn btn-primary mt-3">Tiếp tục học</a>
         </div>
 
         <div th:unless="${passed}">
