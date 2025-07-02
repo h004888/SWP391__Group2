@@ -1,9 +1,7 @@
 package com.OLearning.repository;
 
-
-
-import com.OLearning.entity.CourseReview;
 import com.OLearning.entity.Course;
+import com.OLearning.entity.CourseReview;
 import com.OLearning.entity.Enrollment;
 import com.OLearning.entity.User;
 import org.springframework.data.domain.Page;
@@ -24,14 +22,9 @@ public interface CourseReviewRepository extends JpaRepository<CourseReview, Long
 
     Optional<CourseReview> findByEnrollment(Enrollment enrollment);
 
-    // Query để fetch reviews với user data
+    // Lấy reviews theo course và sắp xếp theo thời gian tạo mới nhất
     @Query("SELECT r FROM CourseReview r JOIN FETCH r.enrollment e JOIN FETCH e.user WHERE r.course = :course ORDER BY r.createdAt DESC")
-    List<CourseReview> findByCourseWithUser(@Param("course") Course course);
-
-    // Tìm review theo enrollmentID (đã sửa)
-//    Optional<CourseReview> findByEnrollment_EnrollmentID(Long enrollmentID);
-//    @Query("SELECT r FROM CourseReview r JOIN FETCH r.enrollment e JOIN FETCH e.user WHERE r.course.courseId = :courseId ORDER BY r.createdAt DESC")
-//    List<CourseReview> findByCourseIdWithUser(@Param("courseId") Long courseId);
+    List<CourseReview> findByCourseWithUserOrderByCreatedAtDesc(@Param("course") Course course);
 
     // Lấy tất cả comment cha (không phải reply)
     List<CourseReview> findByCourseAndParentReviewIsNull(Course course);
@@ -43,11 +36,17 @@ public interface CourseReviewRepository extends JpaRepository<CourseReview, Long
     @Query("SELECT r FROM CourseReview r JOIN FETCH r.enrollment e JOIN FETCH e.user WHERE r.parentReview = :parent ORDER BY r.createdAt DESC")
     List<CourseReview> findByParentReviewOrderByCreatedAtDesc(@Param("parent") CourseReview parent);
 
-    // Fetch comment with user data for notification
-    @Query("SELECT r FROM CourseReview r JOIN FETCH r.enrollment e JOIN FETCH e.user u WHERE r.reviewId = :reviewId")
-    Optional<CourseReview> findByIdWithUser(@Param("reviewId") Long reviewId);
-    CourseReview findByReviewId(Long id);
+    // Fetch comment with user data for notification, bao gồm cả những review chưa có user (LEFT JOIN)
+    @Query("SELECT r FROM CourseReview r LEFT JOIN FETCH r.enrollment e LEFT JOIN FETCH e.user WHERE r.enrollment.course = :course")
+    List<CourseReview> findByCourseWithUserForNotification(@Param("course") Course course);
+    
+    void deleteByParentReview(CourseReview parentReview);
 
-    @Query("SELECT cr FROM CourseReview cr WHERE cr.course.instructor.userId = :instructorId ORDER BY cr.rating DESC")
+    @Query("SELECT cr FROM CourseReview cr WHERE cr.enrollment.course.instructor.userId = :instructorId ORDER BY cr.rating DESC")
     Page<CourseReview> findByInstructorId(@Param("instructorId") Long instructorId, Pageable pageable);
+
+    @Query("SELECT cr FROM CourseReview cr LEFT JOIN FETCH cr.enrollment e LEFT JOIN FETCH e.user WHERE cr.reviewId = :reviewId")
+    Optional<CourseReview> findByIdWithUser(@Param("reviewId") Long reviewId);
+    
+    CourseReview findByReviewId(Long id);
 }

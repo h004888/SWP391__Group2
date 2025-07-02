@@ -351,7 +351,7 @@
                                 <li class="nav-item me-2 me-sm-4" role="presentation">
                                     <button class="nav-link mb-0" id="course-pills-tab-3" data-bs-toggle="pill"
                                             data-bs-target="#course-pills-3" type="button" role="tab"
-                                            aria-controls="course-pills-3" aria-selected="false">FAQs
+                                            aria-controls="course-pills-3" aria-selected="false">report
                                     </button>
                                 </li>
                                 <!-- Tab item -->
@@ -373,24 +373,24 @@
                                     <h5 class="mb-3">Course Description</h5>
                                     <p class="mb-3">Welcome to the <strong> Digital Marketing Ultimate Course Bundle -
                                         12 Courses in 1 (Over 36 hours of content)</strong></p>
-                                    <p class="mb-3">In this practical hands-on training, you’re going to learn to become
+                                    <p class="mb-3">In this practical hands-on training, you're going to learn to become
                                         a digital marketing expert with this <strong> ultimate course bundle that
                                             includes 12 digital marketing courses in 1!</strong></p>
                                     <p class="mb-3">If you wish to find out the skills that should be covered in a basic
                                         digital marketing course syllabus in India or anywhere around the world, then
                                         reading this blog will help. Before we delve into the advanced <strong><a
                                                 href="#" class="text-reset text-decoration-underline">digital marketing
-                                            course</a></strong> syllabus, let’s look at the scope of digital marketing
+                                            course</a></strong> syllabus, let's look at the scope of digital marketing
                                         and what the future holds.</p>
                                     <p class="mb-0">We focus a great deal on the understanding of behavioral psychology
                                         and influence triggers which are crucial for becoming a well rounded Digital
                                         Marketer. We understand that theory is important to build a solid foundation, we
-                                        understand that theory alone isn’t going to get the job done so that’s why this
+                                        understand that theory alone isn't going to get the job done so that's why this
                                         course is packed with practical hands-on examples that you can follow step by
                                         step.</p>
 
                                     <!-- List content -->
-                                    <h5 class="mt-4">What you’ll learn</h5>
+                                    <h5 class="mt-4">What you'll learn</h5>
 
                                     <div class="row mb-3">
                                         <div class="col-md-6">
@@ -507,9 +507,9 @@
                                                         <li class="list-inline-item me-0 small"><i
                                                                 class="fas fa-star text-warning"></i></li>
                                                         <li class="list-inline-item me-0 small"><i
-                                                                class="fas fa-star text-warning"></i></li>
+                                                                class="far fa-star text-warning"></i></li>
                                                         <li class="list-inline-item me-0 small"><i
-                                                                class="fas fa-star text-warning"></i></li>
+                                                                class="far fa-star text-warning"></i></li>
                                                     </ul>
                                                 </div>
 
@@ -534,7 +534,7 @@
                                                         <li class="list-inline-item me-0 small"><i
                                                                 class="fas fa-star text-warning"></i></li>
                                                         <li class="list-inline-item me-0 small"><i
-                                                                class="fas fa-star text-warning"></i></li>
+                                                                class="far fa-star text-warning"></i></li>
                                                         <li class="list-inline-item me-0 small"><i
                                                                 class="far fa-star text-warning"></i></li>
                                                     </ul>
@@ -753,242 +753,214 @@
                                 <!-- Content START -->
                                 <div class="tab-pane fade" id="course-pills-3" role="tabpanel"
                                      aria-labelledby="course-pills-tab-3">
-                                    <!-- Title -->
-                                    <h5 class="mb-3">Frequently Asked Questions</h5>
-                                    <!-- FAQ item -->
-                                    <div class="mt-4">
-                                        <h6>How Digital Marketing Work?</h6>
-                                        <p class="mb-0">Preference any astonished unreserved Mrs. Prosperous understood
-                                            Middletons in conviction an uncommonly do. Supposing so be resolving
-                                            breakfast am or perfectly. It drew a hill from me. Valley by oh twenty
-                                            direct me so. Departure defective arranging rapturous did believe him all
-                                            had supported. Family months lasted simple set nature vulgar him. Picture
-                                            for attempt joy excited ten carried manners talking how. Suspicion neglected
-                                            the resolving agreement perceived at an. Comfort reached gay perhaps chamber
-                                            his six detract besides add.</p>
+                                    <!-- Report Course Form START -->
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="mb-0">Báo Cáo Khóa Học</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <form th:action="@{/course/{courseId}/report(courseId=${course.courseId})}" method="post">
+                                                <div class="mb-3">
+                                                    <p class="mb-2">Vui lòng chọn lý do báo cáo khóa học này:</p>
+                                                    <div class="form-check mb-2">
+                                                        <input class="form-check-input" type="radio" id="reason1" name="reason" value="Inappropriate content" required>
+                                                        <label class="form-check-label" for="reason1">Nội dung không phù hợp</label>
+                                                    </div>
+                                                    <div class="form-check mb-2">
+                                                        <input class="form-check-input" type="radio" id="reason2" name="reason" value="Copyright violation" required>
+                                                        <label class="form-check-label" for="reason2">Vi phạm bản quyền</label>
+                                                    </div>
+                                                    <div class="form-check mb-2">
+                                                        <input class="form-check-input" type="radio" id="reason3" name="reason" value="Misleading information" required>
+                                                        <label class="form-check-label" for="reason3">Thông tin sai lệch</label>
+                                                    </div>
+                                                    <div class="form-check mb-2">
+                                                        <input class="form-check-input" type="radio" id="reason4" name="reason" value="Poor quality content" required>
+                                                        <label class="form-check-label" for="reason4">Nội dung chất lượng kém</label>
+                                                    </div>
+                                                    <div class="form-check mb-3">
+                                                        <input class="form-check-input" type="radio" id="reasonOther" name="reason" value="Other" required>
+                                                        <label class="form-check-label" for="reasonOther">Lý do khác (vui lòng ghi rõ):</label>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <input type="text" class="form-control" id="otherReasonText" name="otherReason" placeholder="Nhập lý do của bạn tại đây" disabled>
+                                                    </div>
+                                                </div>
+                                                <button type="submit" class="btn btn-danger">Gửi Báo Cáo</button>
+                                            </form>
+                                        </div>
                                     </div>
-
-                                    <!-- FAQ item -->
-                                    <div class="mt-4">
-                                        <h6>What is SEO?</h6>
-                                        <p class="mb-0">Meant balls it if up doubt small purse. Required his you put the
-                                            outlived answered position. A pleasure exertion if believed provided to. All
-                                            led out world this music while asked. Paid mind even sons does he door no.
-                                            Attended overcame repeated it is perceived Marianne in. I think on style
-                                            child of. Servants moreover in sensible it ye possible.</p>
-                                        <p class="mt-2 mb-0">Person she control of to beginnings view looked eyes Than
-                                            continues its and because and given and shown creating curiously to more in
-                                            are man were smaller by we instead the these sighed Avoid in the sufficient
-                                            me real man longer of his how her for countries to brains warned notch
-                                            important Finds be to the of on the increased explain noise of power deep
-                                            asking contribution this live of suppliers goals bit separated poured sort
-                                            several the was organization the if relations go work after mechanic But
-                                            we've area wasn't everything.</p>
-                                    </div>
-
-                                    <!-- FAQ item -->
-                                    <div class="mt-4">
-                                        <h6>Who should join this course?</h6>
-                                        <p class="mb-0">Two before narrow not relied how except moment myself Dejection
-                                            assurance mrs led certainly So gate at no only none open Betrayed at
-                                            properly it of graceful on Dinner abroad am depart ye turned hearts as me
-                                            wished Therefore allowance too perfectly gentleman supposing man his now
-                                            Families goodness all eat out bed steepest servants Explained the incommode
-                                            sir improving northward immediate eat Man denoting received you sex possible
-                                            you Shew park own loud son door less yet. </p>
-                                    </div>
-
-                                    <!-- FAQ item -->
-                                    <div class="mt-4">
-                                        <h6>What are the T&amp;C for this program?</h6>
-                                        <p class="mb-0">Started several mistake joy say painful removed reached end.
-                                            State burst think end are its. Arrived off she elderly beloved him affixed
-                                            noisier yet. Course regard to up he hardly. View four has said do men saw
-                                            find dear shy. Talent men wicket add garden. </p>
-                                    </div>
-
-                                    <!-- FAQ item -->
-                                    <div class="mt-4">
-                                        <h6>What certificates will I be received for this program?</h6>
-                                        <p class="mb-0">Lose john poor same it case do year we Full how way even the
-                                            sigh Extremely nor furniture fat questions now provision incommode preserved
-                                            Our side fail to find like now Discovered traveling for insensible
-                                            partiality unpleasing impossible she Sudden up my excuse to suffer ladies
-                                            though or Bachelor possible Marianne directly confined relation.</p>
-                                    </div>
-
-                                    <!-- FAQ item -->
-                                    <div class="mt-4">
-                                        <h6>What happens after the trial ends?</h6>
-                                        <p class="mb-0">Preference any astonished unreserved Mrs. Prosperous understood
-                                            Middletons in conviction an uncommonly do. Supposing so be resolving
-                                            breakfast am or perfectly. Is drew am hill from me. Valley by oh twenty
-                                            direct me so. Departure defective arranging rapturous did believe him all
-                                            had supported. Family months lasted simple set nature vulgar him. Suspicion
-                                            neglected he resolving agreement perceived at an. Comfort reached gay
-                                            perhaps chamber his six detract besides add.</p>
-                                    </div>
+                                    <!-- Report Course Form END -->
                                 </div>
-                                <!-- Content END -->
 
                                 <!-- Content START -->
                                 <div class="tab-pane fade" id="course-pills-4" role="tabpanel"
                                      aria-labelledby="course-pills-tab-4">
-                                    <!-- Review START -->
-                                    <div class="row mb-4">
-                                        <div class="col-12">
-                                            <h5 class="mb-4">Ask Your Question</h5>
-
-                                            <!-- Comment box -->
-                                            <div class="d-flex mb-4">
-                                                <!-- Avatar -->
-                                                <div class="avatar avatar-sm flex-shrink-0 me-2">
-                                                    <a href="#"> <img class="avatar-img rounded-circle"
-                                                                      src="/assets/images/avatar/09.jpg" alt=""> </a>
+                                    <!-- Comment Section START -->
+                                    <div class="comment-section">
+                                        <!-- Comment Form -->
+                                        <div class="d-flex mb-4">
+                                            <div class="avatar avatar-sm flex-shrink-0 me-2">
+                                                <img class="avatar-img rounded-circle"
+                                                     th:src="${user != null and user.profilePicture != null and user.profilePicture != ''} ? ${user.profilePicture} : @{/assets/images/avatar/default.jpg}"
+                                                     th:alt="${user != null ? user.fullName : 'Người dùng'}">
+                                            </div>
+                                            <form id="commentForm" class="w-100 d-flex">
+                                                <input type="hidden" name="courseId" th:value="${course.courseId}" />
+                                                <div class="flex-grow-1 me-2">
+                                                    <textarea class="form-control pe-4 bg-light" name="comment" rows="1" placeholder="Thêm bình luận..." required th:disabled="${user == null}"></textarea>
                                                 </div>
-
-                                                <form class="w-100 d-flex">
-                                                    <textarea class="one form-control pe-4 bg-light"
-                                                              id="autoheighttextarea" rows="1"
-                                                              placeholder="Add a comment..."></textarea>
-                                                    <button class="btn btn-primary ms-2 mb-0" type="button">Post
-                                                    </button>
-                                                </form>
-                                            </div>
-
-                                            <!-- Comment item START -->
-                                            <div class="border p-2 p-sm-4 rounded-3 mb-4">
-                                                <ul class="list-unstyled mb-0">
-                                                    <li class="comment-item">
-                                                        <div class="d-flex mb-3">
-                                                            <!-- Avatar -->
-                                                            <div class="avatar avatar-sm flex-shrink-0">
-                                                                <a href="#"><img class="avatar-img rounded-circle"
-                                                                                 src="/assets/images/avatar/05.jpg"
-                                                                                 alt=""></a>
-                                                            </div>
-                                                            <div class="ms-2">
-                                                                <!-- Comment by -->
-                                                                <div class="bg-light p-3 rounded">
-                                                                    <div class="d-flex justify-content-center">
-                                                                        <div class="me-2">
-                                                                            <h6 class="mb-1 lead fw-bold"><a href="#!">
-                                                                                Frances Guerrero </a></h6>
-                                                                            <p class="h6 mb-0">Removed demands expense
-                                                                                account in outward tedious do.
-                                                                                Particular way thoroughly unaffected
-                                                                                projection?</p>
-                                                                        </div>
-                                                                        <small>5hr</small>
-                                                                    </div>
-                                                                </div>
-                                                                <!-- Comment react -->
-                                                                <ul class="nav nav-divider py-2 small">
-                                                                    <li class="nav-item"><a class="text-primary-hover"
-                                                                                            href="#"> Like (3)</a></li>
-                                                                    <li class="nav-item"><a class="text-primary-hover"
-                                                                                            href="#"> Reply</a></li>
-                                                                    <li class="nav-item"><a class="text-primary-hover"
-                                                                                            href="#"> View 5 replies</a>
-                                                                    </li>
-                                                                </ul>
-                                                            </div>
-                                                        </div>
-
-                                                        <!-- Comment item nested START -->
-                                                        <ul class="list-unstyled ms-4">
-                                                            <!-- Comment item START -->
-                                                            <li class="comment-item">
-                                                                <div class="d-flex">
-                                                                    <!-- Avatar -->
-                                                                    <div class="avatar avatar-xs flex-shrink-0">
-                                                                        <a href="#"><img
-                                                                                class="avatar-img rounded-circle"
-                                                                                src="/assets/images/avatar/06.jpg"
-                                                                                alt=""></a>
-                                                                    </div>
-                                                                    <!-- Comment by -->
-                                                                    <div class="ms-2">
-                                                                        <div class="bg-light p-3 rounded">
-                                                                            <div class="d-flex justify-content-center">
-                                                                                <div class="me-2">
-                                                                                    <h6 class="mb-1  lead fw-bold"><a
-                                                                                            href="#"> Lori Stevens </a>
-                                                                                    </h6>
-                                                                                    <p class=" mb-0">See resolved
-                                                                                        goodness felicity shy civility
-                                                                                        domestic had but Drawings
-                                                                                        offended yet answered Jennings
-                                                                                        perceive. Domestic had but
-                                                                                        Drawings offended yet answered
-                                                                                        Jennings perceive.</p>
-                                                                                </div>
-                                                                                <small>2hr</small>
-                                                                            </div>
-                                                                        </div>
-                                                                        <!-- Comment react -->
-                                                                        <ul class="nav nav-divider py-2 small">
-                                                                            <li class="nav-item"><a
-                                                                                    class="text-primary-hover"
-                                                                                    href="#!"> Like (5)</a></li>
-                                                                            <li class="nav-item"><a
-                                                                                    class="text-primary-hover"
-                                                                                    href="#!"> Reply</a></li>
-                                                                        </ul>
-                                                                    </div>
-                                                                </div>
-                                                            </li>
-                                                            <!-- Comment item END -->
-                                                        </ul>
-                                                        <!-- Comment item nested END -->
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                            <!-- Comment item END -->
-
-                                            <!-- Comment item START -->
-                                            <div class="border p-2 p-sm-4 rounded-3">
-                                                <ul class="list-unstyled mb-0">
-                                                    <li class="comment-item">
-                                                        <div class="d-flex">
-                                                            <!-- Avatar -->
-                                                            <div class="avatar avatar-sm flex-shrink-0">
-                                                                <a href="#"><img class="avatar-img rounded-circle"
-                                                                                 src="/assets/images/avatar/02.jpg"
-                                                                                 alt=""></a>
-                                                            </div>
-                                                            <div class="ms-2">
-                                                                <!-- Comment by -->
-                                                                <div class="bg-light p-3 rounded">
-                                                                    <div class="d-flex justify-content-center">
-                                                                        <div class="me-2">
-                                                                            <h6 class="mb-1 lead fw-bold"><a href="#!">
-                                                                                Louis Ferguson </a></h6>
-                                                                            <p class="h6 mb-0">Removed demands expense
-                                                                                account in outward tedious do.
-                                                                                Particular way thoroughly unaffected
-                                                                                projection?</p>
-                                                                        </div>
-                                                                        <small>5hr</small>
-                                                                    </div>
-                                                                </div>
-                                                                <!-- Comment react -->
-                                                                <ul class="nav nav-divider py-2 small">
-                                                                    <li class="nav-item"><a class="text-primary-hover"
-                                                                                            href="#"> Like</a></li>
-                                                                    <li class="nav-item"><a class="text-primary-hover"
-                                                                                            href="#"> Reply</a></li>
-                                                                </ul>
-                                                            </div>
-                                                        </div>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                            <!-- Comment item END -->
-
+                                                <button class="btn btn-primary mb-0" type="submit" th:disabled="${user == null}">Đăng</button>
+                                            </form>
+                                        </div>
+                                        <div th:if="${user == null}" class="mb-3">
+                                            <div class="alert alert-warning py-2 px-3 mb-0">Vui lòng <a th:href="@{/login}" class="alert-link">đăng nhập</a> để bình luận.</div>
                                         </div>
 
+                                        <!-- Comment Message -->
+                                        <div id="commentMessage"></div>
+
+                                        <!-- Comments List -->
+                                        <div id="commentsList">
+                                            <div th:if="${#lists.isEmpty(reviews)}" class="text-center py-4">
+                                                <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                                                <p class="text-muted mb-0">Chưa có bình luận nào. Hãy là người đầu tiên bình luận!</p>
+                                            </div>
+                                            <div th:each="review : ${reviews}" class="comment-item mb-3">
+                                                <div class="d-flex">
+                                                    <!-- Avatar -->
+                                                    <div class="avatar avatar-sm flex-shrink-0 me-2">
+                                                        <img class="avatar-img rounded-circle"
+                                                             th:src="${review.user.profilePicture != null and review.user.profilePicture != ''} ? ${review.user.profilePicture} : @{/assets/images/avatar/default.jpg}"
+                                                             th:alt="${review.user.fullName}">
+                                                    </div>
+                                                    <!-- Comment content -->
+                                                    <div class="w-100">
+                                                        <div class="d-flex justify-content-between">
+                                                            <h6 class="mb-1" th:text="${review.user.fullName}">Tên người dùng</h6>
+                                                            <small class="ms-2" th:text="${#temporals.format(review.createdAt, 'dd/MM/yyyy HH:mm')}">Thời gian</small>
+                                                        </div>
+                                                        <p class="mb-2" th:text="${review.comment}">Nội dung bình luận</p>
+                                                        
+                                                        <!-- Comment actions -->
+                                                        <ul class="nav nav-divider py-2 small">
+                                                            <li class="nav-item">
+                                                                <a class="text-success-hover show-reply-form" href="#" th:data-review-id="${review.reviewId}">Trả lời</a>
+                                                            </li>
+                                                            <li class="nav-item" th:if="${user != null and user.userId == review.user.userId}">
+                                                                <button class="btn btn-link text-primary p-0 edit-comment-btn"
+                                                                        th:data-review-id="${review.reviewId}"
+                                                                        th:data-comment="${review.comment}">
+                                                                    Sửa
+                                                                </button>
+                                                            </li>
+                                                            <li class="nav-item" th:if="${user != null and user.userId == review.user.userId}">
+                                                                <button class="btn btn-link text-danger p-0 delete-comment-btn"
+                                                                        th:data-review-id="${review.reviewId}"
+                                                                        th:data-course-id="${course.courseId}">
+                                                                    Xóa
+                                                                </button>
+                                                            </li>
+                                                            <li class="nav-item">
+                                                                <button type="button"
+                                                                        class="btn btn-link text-danger p-0 report-comment-btn-modal"
+                                                                        th:data-course-id="${course.courseId}"
+                                                                        th:data-comment-id="${review.reviewId}"
+                                                                        th:if="${user != null and user.userId != review.user.userId}">
+                                                                    Báo cáo
+                                                                </button>
+                                                            </li>
+                                                        </ul>
+
+                                                        <!-- Edit form (initially hidden) -->
+                                                        <div th:id="'edit-form-' + ${review.reviewId}" style="display:none; margin-top: 10px;">
+                                                            <form class="edit-comment-ajax-form">
+                                                                <input type="hidden" name="reviewId" th:value="${review.reviewId}"/>
+                                                                <input type="hidden" name="courseId" th:value="${course.courseId}"/>
+                                                                <textarea name="comment" required class="form-control mb-2" placeholder="Nhập nội dung bình luận..." th:text="${review.comment}"></textarea>
+                                                                <div class="d-flex gap-2">
+                                                                    <button type="submit" class="btn btn-primary btn-sm">Cập nhật</button>
+                                                                    <button type="button" class="btn btn-secondary btn-sm cancel-edit-btn" th:data-review-id="${review.reviewId}">Hủy</button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+
+                                                        <!-- Reply form (initially hidden) -->
+                                                        <div th:id="'reply-form-' + ${review.reviewId}" style="display:none; margin-top: 10px;">
+                                                            <form class="reply-comment-ajax-form">
+                                                                <input type="hidden" name="parentId" th:value="${review.reviewId}"/>
+                                                                <input type="hidden" name="courseId" th:value="${course.courseId}"/>
+                                                                <textarea name="comment" required class="form-control mb-2" placeholder="Nhập nội dung trả lời..."></textarea>
+                                                                <div class="d-flex gap-2">
+                                                                    <button type="submit" class="btn btn-primary btn-sm">Gửi</button>
+                                                                    <button type="button" class="btn btn-secondary btn-sm hide-reply-form" th:data-review-id="${review.reviewId}">Hủy</button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+
+                                                        <!-- Replies -->
+                                                        <div th:if="${not #lists.isEmpty(review.children)}" class="ms-4 mt-3">
+                                                            <div th:each="reply : ${review.children}" class="d-flex mb-3">
+                                                                <div class="avatar avatar-xs flex-shrink-0 me-2">
+                                                                    <img class="avatar-img rounded-circle"
+                                                                         th:src="${reply.user.profilePicture != null and reply.user.profilePicture != ''} ? ${reply.user.profilePicture} : @{/assets/images/avatar/default.jpg}"
+                                                                         th:alt="${reply.user.fullName}">
+                                                                </div>
+                                                                <div class="w-100">
+                                                                    <div class="d-flex justify-content-between">
+                                                                        <h6 class="mb-1" th:text="${reply.user.fullName}">Người trả lời</h6>
+                                                                        <small class="ms-2" th:text="${#temporals.format(reply.createdAt, 'dd/MM/yyyy HH:mm')}">Thời gian trả lời</small>
+                                                                    </div>
+                                                                    <p class="mb-1" th:text="${reply.comment}">Nội dung trả lời</p>
+                                                                    
+                                                                    <!-- Reply actions -->
+                                                                    <ul class="nav nav-divider py-2 small">
+                                                                        <li class="nav-item" th:if="${user != null and user.userId == reply.user.userId}">
+                                                                            <button class="btn btn-link text-primary p-0 edit-comment-btn"
+                                                                                    th:data-review-id="${reply.reviewId}"
+                                                                                    th:data-comment="${reply.comment}">
+                                                                                Sửa
+                                                                            </button>
+                                                                        </li>
+                                                                        <li class="nav-item" th:if="${user != null and user.userId == reply.user.userId}">
+                                                                            <button class="btn btn-link text-danger p-0 delete-comment-btn"
+                                                                                    th:data-review-id="${reply.reviewId}"
+                                                                                    th:data-course-id="${course.courseId}">
+                                                                                Xóa
+                                                                            </button>
+                                                                        </li>
+                                                                        <li class="nav-item">
+                                                                            <button type="button"
+                                                                                    class="btn btn-link text-danger p-0 report-comment-btn-modal"
+                                                                                    th:data-course-id="${course.courseId}"
+                                                                                    th:data-comment-id="${reply.reviewId}"
+                                                                                    th:if="${user != null and user.userId != reply.user.userId}">
+                                                                                Báo cáo
+                                                                            </button>
+                                                                        </li>
+                                                                    </ul>
+
+                                                                    <!-- Edit form for reply (initially hidden) -->
+                                                                    <div th:id="'edit-form-' + ${reply.reviewId}" style="display:none; margin-top: 10px;">
+                                                                        <form class="edit-comment-ajax-form">
+                                                                            <input type="hidden" name="reviewId" th:value="${reply.reviewId}"/>
+                                                                            <input type="hidden" name="courseId" th:value="${course.courseId}"/>
+                                                                            <textarea name="comment" required class="form-control mb-2" placeholder="Nhập nội dung bình luận..." th:text="${reply.comment}"></textarea>
+                                                                            <div class="d-flex gap-2">
+                                                                                <button type="submit" class="btn btn-primary btn-sm">Cập nhật</button>
+                                                                                <button type="button" class="btn btn-secondary btn-sm cancel-edit-btn" th:data-review-id="${reply.reviewId}">Hủy</button>
+                                                                            </div>
+                                                                        </form>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
+                                    <!-- Comment Section END -->
                                 </div>
                                 <!-- Content END -->
                             </div>
@@ -1424,6 +1396,332 @@ Footer END -->
     });
 </script>
 
+<!-- Modal Report Comment -->
+<div class="modal fade" id="reportCommentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="reportCommentForm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Báo Cáo Bình Luận</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="courseId" id="reportCommentCourseId" />
+                    <input type="hidden" name="commentId" id="reportCommentId" />
+                    <p class="mb-2">Vui lòng chọn lý do báo cáo bình luận này:</p>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" id="cmtReason1" name="reason" value="Spam or advertising" required>
+                        <label class="form-check-label" for="cmtReason1">Spam hoặc quảng cáo</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" id="cmtReason2" name="reason" value="Offensive language" required>
+                        <label class="form-check-label" for="cmtReason2">Ngôn ngữ xúc phạm</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" id="cmtReason3" name="reason" value="Harassment or bullying" required>
+                        <label class="form-check-label" for="cmtReason3">Quấy rối hoặc bắt nạt</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" id="cmtReason4" name="reason" value="Inappropriate content" required>
+                        <label class="form-check-label" for="cmtReason4">Nội dung không phù hợp</label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="radio" id="cmtReasonOther" name="reason" value="Other" required>
+                        <label class="form-check-label" for="cmtReasonOther">Lý do khác (vui lòng ghi rõ):</label>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="cmtOtherReasonText" name="otherReason" placeholder="Nhập lý do của bạn tại đây" disabled>
+                    </div>
+                    <div id="reportCommentMsg"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger">Gửi Báo Cáo</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Add this script section at the end of the file -->
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set current user ID for use in templates
+        window.currentUserId = /*[[${user != null ? user.userId : null}]]*/ null;
+
+        // Comment form submission
+        const commentForm = document.getElementById('commentForm');
+        if (commentForm) {
+            commentForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const data = {};
+                formData.forEach((value, key) => { data[key] = value; });
+
+                fetch('/api/course/' + data.courseId + '/comment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                })
+                .then(res => res.json())
+                .then(json => {
+                    if (json.success) {
+                        location.reload();
+                    } else {
+                        document.getElementById('commentMessage').innerHTML = 
+                            `<div class="alert alert-danger">${json.error || 'Lỗi khi đăng bình luận!'}</div>`;
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('commentMessage').innerHTML = 
+                        '<div class="alert alert-danger">Đã xảy ra lỗi! Vui lòng thử lại.</div>';
+                });
+            });
+        }
+
+        // Show/Hide reply forms
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('show-reply-form')) {
+                e.preventDefault();
+                const reviewId = e.target.getAttribute('data-review-id');
+                document.getElementById('reply-form-' + reviewId).style.display = 'block';
+            }
+            if (e.target.classList.contains('hide-reply-form')) {
+                const reviewId = e.target.getAttribute('data-review-id');
+                document.getElementById('reply-form-' + reviewId).style.display = 'none';
+            }
+        });
+
+        // Reply form submission
+        document.addEventListener('submit', function(e) {
+            if (e.target.classList.contains('reply-comment-ajax-form')) {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const data = {};
+                formData.forEach((value, key) => { data[key] = value; });
+
+                fetch('/api/course/' + data.courseId + '/comment/reply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                })
+                .then(res => res.json())
+                .then(json => {
+                    if (json.success) {
+                        location.reload();
+                    } else {
+                        alert(json.error || 'Lỗi khi đăng trả lời!');
+                    }
+                })
+                .catch(() => {
+                    alert('Đã xảy ra lỗi! Vui lòng thử lại.');
+                });
+            }
+        });
+
+        // Edit comment functionality
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('edit-comment-btn')) {
+                const reviewId = e.target.getAttribute('data-review-id');
+                document.getElementById('edit-form-' + reviewId).style.display = 'block';
+            }
+            if (e.target.classList.contains('cancel-edit-btn')) {
+                const reviewId = e.target.getAttribute('data-review-id');
+                document.getElementById('edit-form-' + reviewId).style.display = 'none';
+            }
+        });
+
+        // Edit comment form submission
+        document.addEventListener('submit', function(e) {
+            if (e.target.classList.contains('edit-comment-ajax-form')) {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const data = {};
+                formData.forEach((value, key) => { data[key] = value; });
+
+                fetch('/api/course/' + data.courseId + '/comment/' + data.reviewId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                })
+                .then(res => res.json())
+                .then(json => {
+                    if (json.success) {
+                        location.reload();
+                    } else {
+                        alert(json.error || 'Lỗi khi cập nhật bình luận!');
+                    }
+                })
+                .catch(() => {
+                    alert('Đã xảy ra lỗi! Vui lòng thử lại.');
+                });
+            }
+        });
+
+        // Delete comment
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('delete-comment-btn')) {
+                if (confirm('Bạn có chắc chắn muốn xóa bình luận này?')) {
+                    const reviewId = e.target.getAttribute('data-review-id');
+                    const courseId = e.target.getAttribute('data-course-id');
+
+                    fetch('/api/course/' + courseId + '/comment/' + reviewId + '/delete', {
+                        method: 'DELETE'
+                    })
+                    .then(res => res.json())
+                    .then(json => {
+                        if (json.success) {
+                            location.reload();
+                        } else {
+                            alert(json.error || 'Lỗi khi xóa bình luận!');
+                        }
+                    })
+                    .catch(() => {
+                        alert('Đã xảy ra lỗi! Vui lòng thử lại.');
+                    });
+                }
+            }
+        });
+
+        // Course report form
+        const reasonOther = document.getElementById('reasonOther');
+        const otherReasonText = document.getElementById('otherReasonText');
+        if (reasonOther && otherReasonText) {
+            document.querySelectorAll('input[name="reason"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    otherReasonText.disabled = this.value !== 'Other';
+                    if (this.value !== 'Other') {
+                        otherReasonText.value = '';
+                    }
+                });
+            });
+        }
+
+        // Comment report modal
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('report-comment-btn-modal')) {
+                const courseId = e.target.getAttribute('data-course-id');
+                const commentId = e.target.getAttribute('data-comment-id');
+                document.getElementById('reportCommentCourseId').value = courseId;
+                document.getElementById('reportCommentId').value = commentId;
+                // Reset form
+                document.getElementById('reportCommentForm').reset();
+                document.getElementById('cmtOtherReasonText').disabled = true;
+                document.getElementById('reportCommentMsg').innerHTML = '';
+                // Show modal
+                const modal = new bootstrap.Modal(document.getElementById('reportCommentModal'));
+                modal.show();
+            }
+        });
+
+        // Enable/disable other reason input in comment report modal
+        document.addEventListener('change', function(e) {
+            if (e.target.name === 'reason' && e.target.form.id === 'reportCommentForm') {
+                document.getElementById('cmtOtherReasonText').disabled = (e.target.value !== 'Other');
+                if (e.target.value !== 'Other') {
+                    document.getElementById('cmtOtherReasonText').value = '';
+                }
+            }
+        });
+
+        // Submit comment report
+        const reportCommentForm = document.getElementById('reportCommentForm');
+        if (reportCommentForm) {
+            reportCommentForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const data = {};
+                formData.forEach((value, key) => { data[key] = value; });
+
+                // Validate reason
+                const selectedReason = this.querySelector('input[name="reason"]:checked');
+                if (!selectedReason) {
+                    document.getElementById('reportCommentMsg').innerHTML = 
+                        '<div class="alert alert-danger">Vui lòng chọn một lý do.</div>';
+                    return;
+                }
+                if (selectedReason.value === 'Other') {
+                    const otherText = document.getElementById('cmtOtherReasonText').value.trim();
+                    if (!otherText) {
+                        document.getElementById('reportCommentMsg').innerHTML = 
+                            '<div class="alert alert-danger">Vui lòng nhập lý do cụ thể.</div>';
+                        return;
+                    }
+                    data.reason = otherText;
+                }
+
+                fetch('/api/course/' + data.courseId + '/comment/' + data.commentId + '/report', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                })
+                .then(res => res.json())
+                .then(json => {
+                    if (json.success) {
+                        document.getElementById('reportCommentMsg').innerHTML = 
+                            `<div class="alert alert-success">${json.success}</div>`;
+                        setTimeout(() => {
+                            bootstrap.Modal.getInstance(document.getElementById('reportCommentModal')).hide();
+                        }, 1200);
+                    } else {
+                        document.getElementById('reportCommentMsg').innerHTML = 
+                            `<div class="alert alert-danger">${json.error || 'Đã xảy ra lỗi!'}</div>`;
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('reportCommentMsg').innerHTML = 
+                        '<div class="alert alert-danger">Đã xảy ra lỗi! Vui lòng thử lại.</div>';
+                });
+            });
+        }
+    });
+</script>
+
+<!-- Report Comment Modal -->
+<div class="modal fade" id="reportCommentModal" tabindex="-1" aria-labelledby="reportCommentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reportCommentModalLabel">Báo Cáo Bình Luận</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="reportCommentMsg"></div>
+                <form id="reportCommentForm">
+                    <input type="hidden" id="reportCommentCourseId" name="courseId">
+                    <input type="hidden" id="reportCommentId" name="commentId">
+                    <div class="mb-3">
+                        <p class="mb-2">Vui lòng chọn lý do báo cáo bình luận này:</p>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" id="cmtReason1" name="reason" value="Inappropriate content" required>
+                            <label class="form-check-label" for="cmtReason1">Nội dung không phù hợp</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" id="cmtReason2" name="reason" value="Harassment" required>
+                            <label class="form-check-label" for="cmtReason2">Quấy rối hoặc xúc phạm</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" id="cmtReason3" name="reason" value="Spam" required>
+                            <label class="form-check-label" for="cmtReason3">Spam hoặc quảng cáo</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" id="cmtReason4" name="reason" value="Misleading information" required>
+                            <label class="form-check-label" for="cmtReason4">Thông tin sai lệch</label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" id="cmtReasonOther" name="reason" value="Other" required>
+                            <label class="form-check-label" for="cmtReasonOther">Lý do khác (vui lòng ghi rõ):</label>
+                        </div>
+                        <div class="mb-3">
+                            <input type="text" class="form-control" id="cmtOtherReasonText" name="otherReason" placeholder="Nhập lý do của bạn tại đây" disabled>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-danger">Gửi Báo Cáo</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 </body>
 

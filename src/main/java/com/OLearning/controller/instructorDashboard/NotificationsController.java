@@ -68,6 +68,8 @@ public class NotificationsController {
         model.addAttribute("selectedStatus", status);
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/notificationContent :: notificationContent");
         model.addAttribute("isSearch", false);
+        long unreadCount = notificationService.countUnreadByUserId(userId);
+        model.addAttribute("unreadCount", unreadCount);
         return "instructorDashboard/indexUpdate";
     }
 

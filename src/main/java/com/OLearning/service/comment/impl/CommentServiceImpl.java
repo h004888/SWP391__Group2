@@ -1,9 +1,14 @@
 package com.OLearning.service.comment.impl;
 
 import com.OLearning.dto.comment.CommentDTO;
-import com.OLearning.entity.*;
-import com.OLearning.mapper.comment.CommentMapper;
-import com.OLearning.repository.*;
+import com.OLearning.entity.Course;
+import com.OLearning.entity.CourseReview;
+import com.OLearning.entity.Enrollment;
+import com.OLearning.entity.User;
+import com.OLearning.repository.CourseRepository;
+import com.OLearning.repository.CourseReviewRepository;
+import com.OLearning.repository.EnrollmentRepository;
+import com.OLearning.repository.UserRepository;
 import com.OLearning.service.comment.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,101 +21,88 @@ import java.time.LocalDateTime;
 @Transactional
 public class CommentServiceImpl implements CommentService {
 
+    private final CourseRepository courseRepo;
+    private final UserRepository userRepo;
     private final CourseReviewRepository reviewRepo;
     private final EnrollmentRepository enrollmentRepo;
-    private final CourseRepository courseRepo;
-    private final NotificationRepository notificationRepo;
-    private final CommentMapper mapper;
-    private final UserRepository userRepo;
 
     @Override
-    public void postComment(CommentDTO dto) {
-        Course course = courseRepo.findById(dto.getCourseId())
-                .orElseThrow(() -> new RuntimeException("Course not found"));
+    public void addComment(CommentDTO dto, Long userId, Long courseId) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+        Course course = courseRepo.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy khóa học"));
 
-        // Kiểm tra xem user có phải là instructor không
-        User user = userRepo.findById(dto.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        
-        Enrollment enrollment;
-        
-        // Nếu là instructor, tạo enrollment nếu chưa có
-        if (course.getInstructor().getUserId().equals(user.getUserId())) {
-            enrollment = enrollmentRepo.findByUser_UserIdAndCourse_CourseId(user.getUserId(), course.getCourseId())
-                    .orElseGet(() -> {
-                        // Tạo enrollment cho instructor nếu chưa có
-                        Enrollment newEnrollment = Enrollment.builder()
-                                .user(user)
-                                .course(course)
-                                .enrollmentDate(new java.util.Date())
-                                .progress(Double.parseDouble("100.00"))
-                                .status("completed")
-                                .build();
-                        return enrollmentRepo.save(newEnrollment);
-                    });
-        } else {
-            // Nếu không phải instructor, kiểm tra enrollment bình thường
-            enrollment = enrollmentRepo.findByUser_UserIdAndCourse_CourseId(dto.getUserId(), dto.getCourseId())
-                    .orElseThrow(() -> new RuntimeException("Bạn chưa tham gia khóa học này."));
-        }
+        // Kiểm tra xem user đã đăng ký khóa học chưa
+        Enrollment enrollment = enrollmentRepo.findByUserAndCourse(user, course)
+                .orElseThrow(() -> new RuntimeException("Bạn cần đăng ký khóa học để có thể bình luận"));
 
-        CourseReview parent = null;
-        if (dto.getParentId() != null) {
-            parent = reviewRepo.findById(dto.getParentId()).orElse(null);
-        }
-
-        CourseReview review = mapper.toEntity(dto, enrollment, course, parent);
+        CourseReview review = new CourseReview();
+        review.setEnrollment(enrollment);
+        review.setComment(dto.getComment());
+        review.setCreatedAt(LocalDateTime.now());
         reviewRepo.save(review);
-
-        // Gửi notification đến instructor (chỉ khi không phải instructor comment)
-        if (!course.getInstructor().getUserId().equals(user.getUserId())) {
-            Notification notification = new Notification();
-            
-            // Tạo message với comment preview
-            String commentPreview = dto.getComment();
-            if (commentPreview != null && commentPreview.length() > 50) {
-                commentPreview = commentPreview.substring(0, 50) + "...";
-            }
-            
-            notification.setMessage("You have a new comment in the course: " + course.getTitle() + " - Comment: " + commentPreview);
-            notification.setSentAt(LocalDateTime.now());
-            notification.setStatus("failed");
-            notification.setType("comment");
-            notification.setCourse(course);
-            notification.setUser(course.getInstructor());
-            notification.setCommentId(review.getReviewId()); // Set comment ID for reply functionality
-            notificationRepo.save(notification);
-        }
     }
 
     @Override
-    public void updateComment(CommentDTO dto) {
+    public void replyComment(CommentDTO dto, Long userId, Long courseId) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+        Course course = courseRepo.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy khóa học"));
+
+        // Kiểm tra xem user đã đăng ký khóa học chưa
+        Enrollment enrollment = enrollmentRepo.findByUserAndCourse(user, course)
+                .orElseThrow(() -> new RuntimeException("Bạn cần đăng ký khóa học để có thể trả lời bình luận"));
+
+        // Kiểm tra comment cha tồn tại
+        CourseReview parentReview = reviewRepo.findById(dto.getParentId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy bình luận gốc"));
+
+        CourseReview reply = new CourseReview();
+        reply.setEnrollment(enrollment);
+        reply.setComment(dto.getComment());
+        reply.setCreatedAt(LocalDateTime.now());
+        reply.setParentReview(parentReview);
+        reviewRepo.save(reply);
+    }
+
+    @Override
+    public void editComment(CommentDTO dto, Long userId, Long courseId) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+
         CourseReview review = reviewRepo.findById(dto.getReviewId())
-                .orElseThrow(() -> new RuntimeException("Comment not found"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy bình luận"));
 
-        // Kiểm tra xem user có quyền chỉnh sửa comment này không
-        if (!review.getEnrollment().getUser().getUserId().equals(dto.getUserId())) {
-            throw new RuntimeException("Bạn không có quyền chỉnh sửa comment này.");
+        // Kiểm tra quyền sửa comment
+        if (!review.getEnrollment().getUser().getUserId().equals(userId)) {
+            throw new RuntimeException("Bạn không có quyền sửa bình luận này");
         }
 
-        CourseReview parent = null;
-        if (dto.getParentId() != null) {
-            parent = reviewRepo.findById(dto.getParentId()).orElse(null);
-        }
-
-        mapper.updateEntity(review, dto, parent);
+        review.setComment(dto.getComment());
+        review.setUpdatedAt(LocalDateTime.now());
         reviewRepo.save(review);
     }
 
     @Override
-    public CommentDTO getComment(Long reviewId) {
-        CourseReview review = reviewRepo.findById(reviewId)
-                .orElseThrow(() -> new RuntimeException("Comment not found"));
+    public void deleteComment(Long commentId, Long userId, Long courseId) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
 
-        return mapper.toDTO(review);
+        CourseReview review = reviewRepo.findById(commentId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy bình luận"));
+
+        // Kiểm tra quyền xóa comment
+        if (!review.getEnrollment().getUser().getUserId().equals(userId)) {
+            throw new RuntimeException("Bạn không có quyền xóa bình luận này");
+        }
+
+        // Xóa tất cả các reply của comment này
+        reviewRepo.deleteByParentReview(review);
+        // Xóa comment
+        reviewRepo.delete(review);
     }
-
-
 }
 
 

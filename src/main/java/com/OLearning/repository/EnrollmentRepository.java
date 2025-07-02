@@ -1,25 +1,22 @@
 package com.OLearning.repository;
 
 import com.OLearning.entity.Course;
+import com.OLearning.entity.Enrollment;
+import com.OLearning.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-
-import com.OLearning.entity.Enrollment;
 
 import jakarta.transaction.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 import java.time.LocalDate;
 import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
 
 @Repository
 @Transactional
@@ -32,6 +29,8 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
     @Query("SELECT e.course FROM Enrollment e WHERE e.user.userId = :userId")
     List<Course> findCoursesByUserId(Long userId);
     Optional<Enrollment> findByUser_UserIdAndCourse_CourseId(Long userId, Long courseId);
+    Optional<Enrollment> findByUserAndCourse(User user, Course course);
+    List<Enrollment> findByCourse_CourseId(Long courseId);
     @Query(value = "SELECT c.name as category, COUNT(e.enrollmentID) as count " +
             "FROM enrollments e " +
             "JOIN courses co ON e.courseId = co.courseId " +
@@ -69,5 +68,4 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
     @Query("SELECT e FROM Enrollment e WHERE e.enrollmentId = :enrollmentId")
     Optional<Enrollment> findByEnrollmentId(int enrollmentId);
     boolean existsByUser_UserIdAndCourse_CourseId(Long userId, Long courseId);
-
 }

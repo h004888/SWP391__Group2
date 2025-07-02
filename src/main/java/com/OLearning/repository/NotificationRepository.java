@@ -38,4 +38,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     @Modifying
     @Query(value = "DELETE FROM Notifications WHERE userId = :userId AND status = :status", nativeQuery = true)
     void deleteByUser_UserIdAndStatus(@Param("userId") Long userId, @Param("status") String status);
+
+    @Query("SELECT COUNT(n) FROM Notification n WHERE n.user.userId = :userId AND n.status <> 'sent'")
+    long countUnreadByUserId(@Param("userId") Long userId);
 }

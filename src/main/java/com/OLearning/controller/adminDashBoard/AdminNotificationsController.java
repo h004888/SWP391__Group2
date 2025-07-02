@@ -50,6 +50,8 @@ public class AdminNotificationsController {
         model.addAttribute("selectedStatus", status);
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/adminNotificationContent :: adminNotificationContent");
         model.addAttribute("isSearch", false);
+        long unreadCount = notificationService.countUnreadByUserId(userId);
+        model.addAttribute("unreadCount", unreadCount);
         return "adminDashBoard/index";
     }
 

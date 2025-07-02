@@ -131,4 +131,9 @@ public class NotificationServiceImpl implements NotificationService {
     public void deleteAllReadNotifications(Long userId) {
         notificationRepository.deleteByUser_UserIdAndStatus(userId, "sent");
     }
+
+    @Override
+    public long countUnreadByUserId(Long userId) {
+        return notificationRepository.countUnreadByUserId(userId);
+    }
 }
