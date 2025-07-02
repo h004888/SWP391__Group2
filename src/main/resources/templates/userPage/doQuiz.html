@@ -1,56 +1,43 @@
-<!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<div class="container py-5 quiz-container" th:fragment="doQuiz">
+    <div class="bg-white p-5 shadow rounded">
+        <h2 class="mb-4 text-primary" th:text="${quiz.title}"></h2>
 
-<head>
-    <meta charset="UTF-8">
-    <title>Làm Quiz</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
+        <form method="post" th:action="@{/quiz/submit}" th:object="${submissionForm}">
 
-<body>
-    <div class="container py-5 quiz-container">
-        <div class="bg-white p-5 shadow rounded">
-            <h2 class="mb-4 text-primary" th:text="${quiz.title}"></h2>
+            <!-- Hidden inputs để giữ thông tin cần thiết -->
+            <input type="hidden" th:field="*{quizId}"/>
+            <input type="hidden" th:field="*{courseId}"/>
+            <input type="hidden" th:field="*{lessonId}"/>
 
-            <form method="post" th:action="@{/quiz/submit}" th:object="${submissionForm}">
+            <div th:each="q, iterStat : ${questions}" class="mb-4">
+                <p class="fw-bold" th:text="${iterStat.index + 1} + '. ' + ${q.question}"></p>
 
-                <!-- Hidden inputs để giữ thông tin cần thiết -->
-                <input type="hidden" th:field="*{quizId}" />
-                <input type="hidden" th:field="*{courseId}" />
-                <input type="hidden" th:field="*{lessonId}" />
-
-                <div th:each="q, iterStat : ${questions}" class="mb-4">
-                    <p class="fw-bold" th:text="${iterStat.index + 1} + '. ' + ${q.question}"></p>
-
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" th:id="'optA' + ${q.id}"
-                            th:field="*{answers[__${q.id}__]}" value="A" />
-                        <label class="form-check-label" th:for="'optA' + ${q.id}" th:text="${q.optionA}"></label>
-                    </div>
-
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" th:id="'optB' + ${q.id}"
-                            th:field="*{answers[__${q.id}__]}" value="B" />
-                        <label class="form-check-label" th:for="'optB' + ${q.id}" th:text="${q.optionB}"></label>
-                    </div>
-
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" th:id="'optC' + ${q.id}"
-                            th:field="*{answers[__${q.id}__]}" value="C" />
-                        <label class="form-check-label" th:for="'optC' + ${q.id}" th:text="${q.optionC}"></label>
-                    </div>
-
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" th:id="'optD' + ${q.id}"
-                            th:field="*{answers[__${q.id}__]}" value="D" />
-                        <label class="form-check-label" th:for="'optD' + ${q.id}" th:text="${q.optionD}"></label>
-                    </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" th:id="'optA' + ${q.id}"
+                           th:field="*{answers[__${q.id}__]}" value="A"/>
+                    <label class="form-check-label" th:for="'optA' + ${q.id}" th:text="${q.optionA}"></label>
                 </div>
 
-                <button class="btn btn-primary mt-3" type="submit">Nộp bài</button>
-            </form>
-        </div>
-    </div>
-</body>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" th:id="'optB' + ${q.id}"
+                           th:field="*{answers[__${q.id}__]}" value="B"/>
+                    <label class="form-check-label" th:for="'optB' + ${q.id}" th:text="${q.optionB}"></label>
+                </div>
 
-</html>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" th:id="'optC' + ${q.id}"
+                           th:field="*{answers[__${q.id}__]}" value="C"/>
+                    <label class="form-check-label" th:for="'optC' + ${q.id}" th:text="${q.optionC}"></label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" th:id="'optD' + ${q.id}"
+                           th:field="*{answers[__${q.id}__]}" value="D"/>
+                    <label class="form-check-label" th:for="'optD' + ${q.id}" th:text="${q.optionD}"></label>
+                </div>
+            </div>
+
+            <button class="btn btn-primary mt-3" type="submit">Nộp bài</button>
+        </form>
+    </div>
+</div>
