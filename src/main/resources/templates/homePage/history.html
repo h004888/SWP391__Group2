@@ -1,255 +1,213 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{homePage/fragments/header :: header}">
-    <style>
-        .balance-section {
-            margin: 32px 0 24px 0;
-            padding: 32px 24px;
-            background: linear-gradient(90deg, #4e73df 0%, #1cc88a 100%);
-            border-radius: 16px;
-            color: #fff;
-            box-shadow: 0 4px 24px rgba(78,115,223,0.12);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .balance-section h4 {
-            font-size: 2rem;
-            font-weight: 700;
-            margin: 0;
-        }
-        .action-buttons {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-        .action-buttons .btn {
-            font-size: 1.1rem;
-            padding: 10px 28px;
-            border-radius: 30px;
-            box-shadow: 0 2px 8px #e3e6f0;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .card {
-            border-radius: 18px;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.07);
-        }
-        .table {
-            border-radius: 12px;
-            overflow: hidden;
-            background: #fff;
-        }
-        .table thead {
-            background: linear-gradient(90deg, #4e73df 0%, #1cc88a 100%);
-            color: #fff;
-        }
-        .table tbody tr:hover {
-            background: #f8f9fc;
-        }
-        .badge.bg-success, .badge.bg-warning, .badge.bg-secondary {
-            font-size: 1em;
-            padding: 0.5em 1em;
-            border-radius: 12px;
-        }
-        .filter-card {
-            border-radius: 12px;
-            box-shadow: 0 2px 8px #e3e6f0;
-            margin-bottom: 24px;
-        }
-        .amount-options .amount-option, .amount-options .withdraw-amount-option {
-            transition: background 0.2s, color 0.2s;
-        }
-        .amount-options .amount-option:hover, .amount-options .withdraw-amount-option:hover {
-            background: #4e73df;
-            color: #fff;
-        }
-        .form-group label {
-            font-weight: 600;
-        }
-        .form-control {
-            border-radius: 8px;
-        }
-        @media (max-width: 768px) {
-            .balance-section { flex-direction: column; text-align: center; }
-            .action-buttons { flex-direction: column; gap: 10px; }
-        }
-    </style>
-</head>
+<th:block th:replace="homePage/fragments/header :: header"></th:block>
 
 <body>
-
 <!-- Header START -->
 <header th:replace="~{homePage/fragments/navHeader :: navHeader}"></header>
 <!-- Header END -->
-
-<!-- **************** MAIN CONTENT START **************** -->
 <main>
-    <section class="pt-0">
-        <div class="container">
-            <div class="card bg-white border-0 p-4">
-                <div class="balance-section">
-                    <h4><i class="fas fa-wallet me-2"></i>Current Balance: <span th:text="${#numbers.formatDecimal(currentBalance, 0, 'COMMA', 0, 'POINT')} + ' VND'"></span></h4>
-                    <input type="hidden" id="currentBalance" th:value="${currentBalance}">
+    <div class="container mt-4">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/home">Trang chủ</a></li>
+                <li class="breadcrumb-item active" >Lịch sử mua hàng</li>
+            </ol>
+        </nav>
+        <!-- Title -->
+        <h2 class="mb-4 text-center">Lịch sử <b>mua hàng</b></h2>
+        <!-- Statistics Cards -->
+        <div class="row mb-4 justify-content-center">
+            <div class="col-md-4 mb-3">
+                <div class="card text-center shadow-sm">
+                    <div class="card-body">
+                        <div class="mb-2">
+                            <i class="fa fa-money-bill-wave fa-2x text-success"></i>
+                        </div>
+                        <h5 class="card-title">Tổng chi tiêu</h5>
+                        <p class="card-text h4" th:text="${#numbers.formatDecimal(totalSpent, 0, 'COMMA', 0, 'POINT')} + ' VND'"></p>
+                    </div>
                 </div>
-                    <div th:if="${message}" class="alert alert-success" role="alert">
-                        <span th:text="${message}"></span>
-                    </div>
-                    <div th:if="${error}" class="alert alert-danger" role="alert">
-                        <span th:text="${error}"></span>
-                    </div>
-                <div class="action-buttons">
-                    <button class="btn btn-primary" id="depositBtn" onclick="toggleDepositForm()"><i class="fas fa-arrow-down"></i> Deposit</button>
-                    <button class="btn btn-danger" id="withdrawBtn" onclick="toggleWithdrawForm()"><i class="fas fa-arrow-up"></i> Withdraw</button>
-                    </div>
-                <div id="formOverlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.1); z-index:5;"></div>
-                    <!-- Deposit Form -->
-                <form id="depositForm" th:action="@{/history/deposit}" method="post" onsubmit="return validateDepositForm()" style="display:none; margin: 20px auto; width: 100%; max-width: 500px; box-shadow: 0 2px 8px #e3e6f0; background: #fff; padding: 28px; border-radius: 16px; position:relative; z-index:10;">
-                    <div class="form-group mb-3">
-                        <label for="depositAmount"><i class="fas fa-arrow-down"></i> Amount to deposit (min 10,000 VND):</label>
-                        <div class="amount-options" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 15px 0;">
-                            <div th:each="amount : ${predefinedAmounts}"
-                                 th:text="${#numbers.formatDecimal(amount, 0, 'COMMA', 0, 'POINT')} + ' VND'"
-                                 th:data-amount="${amount}"
-                                 class="amount-option btn btn-outline-primary"
-                                 style="cursor: pointer; padding: 8px 12px; border-radius: 8px; text-align: center;"
-                                 onclick="selectDepositAmount(this)"></div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card text-center shadow-sm">
+                    <div class="card-body">
+                        <div class="mb-2">
+                            <i class="fa fa-graduation-cap fa-2x text-primary"></i>
                         </div>
-                        <input type="number" id="depositAmount" name="customAmount" placeholder="Enter custom amount..." oninput="handleCustomDepositInput()" class="form-control" min="10000" max="10000000">
-                        <input type="hidden" id="predefinedAmount" name="predefinedAmount">
-                        <div id="depositAmountError" class="text-danger mt-2" style="display: none;"></div>
+                        <h5 class="card-title">Khóa học đã mua</h5>
+                        <p class="card-text h4" th:text="${totalCoursesPurchased}"></p>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100 mt-3"><i class="fas fa-arrow-down"></i> Deposit</button>
+                </div>
+            </div>
+        </div>
+        <!-- Filter/Search Bar -->
+        <div class="row mb-3">
+            <div class="col-md-6"></div>
+            <div class="col-md-6 d-flex justify-content-end align-items-center">
+                <form class="d-flex" id="filterForm" method="get" th:action="@{/history}">
+                    <input type="text" name="courseName" th:value="${courseName}" class="form-control me-2" placeholder="Tìm kiếm khóa học...">
+                    <input type="date" name="startDate" th:value="${startDate}" class="form-control me-2">
+                    <input type="date" name="endDate" th:value="${endDate}" class="form-control me-2">
+                    <button type="submit" class="btn btn-primary">Lọc</button>
                 </form>
-
-                <!-- Withdraw Form -->
-                <form id="withdrawForm" th:action="@{/history/withdraw}" method="post" onsubmit="return validateWithdrawForm()" style="display:none; margin: 20px auto; width: 100%; max-width: 500px; box-shadow: 0 2px 8px #e3e6f0; background: #fff; padding: 28px; border-radius: 16px; position:relative; z-index:10;">
-                    <div class="form-group mb-3">
-                        <label for="withdrawAmount"><i class="fas fa-arrow-up"></i> Amount to withdraw (min 10,000 VND):</label>
-                        <div class="amount-options" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 15px 0;">
-                            <div th:each="amount : ${predefinedAmounts}"
-                                 th:text="${#numbers.formatDecimal(amount, 0, 'COMMA', 0, 'POINT')} + ' VND'"
-                                 th:data-amount="${amount}"
-                                 class="withdraw-amount-option btn btn-outline-danger"
-                                 style="cursor: pointer; padding: 8px 12px; border-radius: 8px; text-align: center;"
-                                 onclick="selectWithdrawAmount(this)"></div>
-                        </div>
-                        <input type="number" id="withdrawAmount" name="customWithdrawAmount" placeholder="Enter custom amount..." class="form-control" oninput="handleCustomWithdrawInput()" min="10000" max="10000000">
-                        <input type="hidden" id="predefinedWithdrawAmount" name="predefinedWithdrawAmount">
-                        <small class="form-text text-muted">Current balance: <span th:text="${#numbers.formatDecimal(currentBalance, 0, 'COMMA', 0, 'POINT')} + ' VND'"></span></small>
-                        <div id="withdrawAmountError" class="text-danger mt-2" style="display: none;"></div>
+            </div>
+        </div>
+        <!-- Transaction Table -->
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover text-center align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th class="text-center">#</th>
+                            <th class="text-center">Ngày mua</th>
+                            <th class="text-center">Khóa học</th>
+                            <th class="text-center">Giá tiền</th>
+                            <th class="text-center">Trạng thái</th>
+                            <th class="text-center">Hành động</th>
+                        </tr>
+                        </thead>
+                        <tbody id="transactionTable">
+                            <tr th:each="transaction, loop : ${transactions}">
+                                <td th:text="${loop.index + 1}"></td>
+                                <td th:text="${#temporals.format(transaction.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
+                                <td>
+                                    <div th:text="${transaction.courseName}" class="fw-bold text-center"></div>
+                                    <div class="text-muted small text-center" th:text="'Instructor: ' + ${transaction.instructorName}"></div>
+                                </td>
+                                <td th:text="${#numbers.formatDecimal(transaction.discountedPrice, 0, 'COMMA', 0, 'POINT')} + ' VND'" class="fw-bold text-center"></td>
+                                <td class="text-center">
+                                    <span th:if="${transaction.status == 'completed'}" class="badge bg-success">Đã thanh toán</span>
+                                    <span th:if="${transaction.status == 'pending'}" class="badge bg-warning text-dark">Chờ thanh toán</span>
+                                    <span th:if="${transaction.status == 'cancelled'}" class="badge bg-danger">Đã hủy</span>
+                                </td>
+                                <td class="text-center">
+                                    <button class="btn btn-link text-primary transaction-detail-btn" th:attr="data-id=${transaction.transactionId}">Xem chi tiết</button>
+                                </td>
+                            </tr>
+                            <tr th:if="${transactions.size() == 0}"><td colspan="6" class="text-center text-muted">Không có giao dịch nào</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- Pagination -->
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <div th:if="${totalItems > 0}">
+                <span class="text-muted">Hiển thị <span th:text="${currentPage * pageSize + 1}"></span> đến <span th:text="${(currentPage * pageSize) + pageSize > totalItems ? totalItems : (currentPage * pageSize) + pageSize}"></span> trong tổng số <span th:text="${totalItems}"></span> kết quả</span>
+            </div>
+            <nav th:if="${totalPages > 1}">
+                <ul class="pagination mb-0">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{/history(page=${currentPage - 1}, size=${pageSize}, courseName=${courseName}, status=${status}, startDate=${startDate}, endDate=${endDate})}"><i class="fa fa-angle-left"></i></a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${currentPage == i} ? 'active'">
+                        <a class="page-link" th:href="@{/history(page=${i}, size=${pageSize}, courseName=${courseName}, status=${status}, startDate=${startDate}, endDate=${endDate})}" th:text="${i + 1}"></a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{/history(page=${currentPage + 1}, size=${pageSize}, courseName=${courseName}, status=${status}, startDate=${startDate}, endDate=${endDate})}"><i class="fa fa-angle-right"></i></a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <!-- Transaction Detail Modal -->
+        <div class="modal fade" id="transactionModal" tabindex="-1" aria-labelledby="transactionModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content shadow rounded-4">
+                    <div class="modal-header border-bottom-0 pb-0">
+                        <h3 class="modal-title fs-5 fw-bold text-primary" id="transactionModalLabel">Chi tiết giao dịch</h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <button type="submit" class="btn btn-danger w-100 mt-3"><i class="fas fa-arrow-up"></i> Withdraw</button>
-                </form>
-                    <!-- Filter Section START -->
-                <div class="card filter-card p-3 mb-4">
-                    <div class="card-header bg-white border-bottom-0 pb-1">
-                        <h5 class="mb-0"><i class="fas fa-filter"></i> Filter Transactions</h5>
-                        </div>
-                    <div class="card-body pt-2">
-                            <div class="row g-3 align-items-center">
-                                <div class="col-md-3">
-                                    <label for="filterTransactionType" class="form-label">Transaction Type</label>
-                                    <select class="form-select" name="transactionType" id="filterTransactionType">
-                                        <option value="" th:selected="${transactionType == null or transactionType == ''}">All Types</option>
-                                        <option value="top_up" th:selected="${transactionType == 'top_up'}">Top Up</option>
-                                        <option value="withdraw" th:selected="${transactionType == 'withdraw'}">Withdraw</option>
-                                        <option value="course_purchase" th:selected="${transactionType == 'course_purchase'}">Purchase</option>
-                                    </select>
+                    <div class="modal-body p-4">
+                        <div class="mb-4">
+                            <h4 class="fs-6 fw-semibold text-dark mb-3">Thông tin giao dịch</h4>
+                            <div class="bg-light rounded-3 p-3 mb-3">
+                                <div class="row mb-2">
+                                    <div class="col-6 text-secondary">Mã giao dịch:</div>
+                                    <div class="col-6 fw-semibold text-dark" id="modal-refCode"></div>
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Date Range</label>
-                                    <div class="d-flex align-items-center gap-2">
-                                    <input class="form-control" type="date" id="filterStartDate" name="startDate" th:value="${startDate != null ? startDate : ''}">
-                                        <span>To</span>
-                                    <input class="form-control" type="date" id="filterEndDate" name="endDate" th:value="${endDate != null ? endDate : ''}">
-                                    </div>
+                                <div class="row mb-2">
+                                    <div class="col-6 text-secondary">Ngày tạo:</div>
+                                    <div class="col-6 fw-semibold text-dark" id="modal-createdAt"></div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-6 text-secondary">Phương thức thanh toán:</div>
+                                    <div class="col-6 fw-semibold text-dark" id="modal-paymentMethod"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="fs-6 fw-semibold text-dark mb-3">Thông tin khóa học</h4>
+                            <div class="bg-light rounded-3 p-3">
+                                <div class="row mb-2">
+                                    <span class="text-secondary">Tên khóa học:</span>
+                                    <div class="fw-semibold text-dark mt-1" id="modal-courseName"></div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-6 text-secondary">Giảng viên:</div>
+                                    <div class="col-6 fw-semibold text-dark" id="modal-instructorName"></div>
+                                </div>
+<!--                                <div class="row mb-2">-->
+<!--                                    <div class="col-6 text-secondary">Thời lượng:</div>-->
+<!--                                    <div class="col-6 fw-semibold text-dark" id="modal-courseDuration"></div>-->
+<!--                                </div>-->
+                                <div class="row mb-2">
+                                    <div class="col-6 text-secondary">Giá gốc:</div>
+                                    <div class="col-6 text-decoration-line-through text-secondary" id="modal-originalPrice"></div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-6 text-secondary">Giá sau giảm:</div>
+                                    <div class="col-6 fw-semibold text-dark" id="modal-discountedPrice"></div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-6 text-secondary">Trạng thái:</div>
+                                    <div class="col-6 fw-semibold text-dark" id="modal-status"></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6 text-secondary">Ghi chú:</div>
+                                    <div class="col-6 text-dark" id="modal-note"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <!-- Filter Section END -->
-                    <!-- Transactions table START -->
-                    <div th:fragment="transactionsTableBody" id="transactionsTableBody" class="table-responsive border-0">
-                    <table class="table align-middle mb-0 table-hover shadow-sm">
-                            <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Amount</th>
-                                <th>Type</th>
-                                <th>Status</th>
-                            <th>Ref Code</th>
-                            <th>Course Name</th>
-                                <th>Note</th>
-                                <th>Created At</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="transaction, loop : ${transactions}">
-                                <td th:text="${loop.index + 1}"></td>
-                                <td th:text="${#numbers.formatDecimal(transaction.amount, 0, 'COMMA', 0, 'POINT')} + ' VND'"></td>
-                            <td>
-                                <span th:if="${transaction.transactionType == 'top_up'}"><i class="fas fa-arrow-down text-primary"></i> Top Up</span>
-                                <span th:if="${transaction.transactionType == 'withdraw'}"><i class="fas fa-arrow-up text-danger"></i> Withdraw</span>
-                                <span th:if="${transaction.transactionType == 'course_purchase'}"><i class="fas fa-book text-success"></i> Purchase</span>
-                                <span th:if="${transaction.transactionType != 'top_up' && transaction.transactionType != 'withdraw' && transaction.transactionType != 'course_purchase'}" th:text="${transaction.transactionType}"></span>
-                            </td>
-                                <td>
-                                    <span th:if="${transaction.status == 'completed'}" class="badge bg-success" th:text="${transaction.status}"></span>
-                                    <span th:if="${transaction.status == 'pending'}" class="badge bg-warning" th:text="${transaction.status}"></span>
-                                    <span th:if="${transaction.status != 'completed' && transaction.status != 'pending'}" class="badge bg-secondary" th:text="${transaction.status}"></span>
-                                </td>
-                            <td th:text="${transaction.refCode}"></td>
-                            <td th:text="${transaction.courseName}"></td>
-                                <td th:text="${transaction.note}"></td>
-                                <td th:text="${#temporals.format(transaction.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
-                            </tr>
-                            </tbody>
-                        </table>
-                        <!-- Pagination & info -->
-                        <div class="d-sm-flex justify-content-sm-between align-items-sm-center mt-4">
-                            <p class="mb-0 text-center text-sm-start" th:if="${totalItems > 0}">
-                                Showing <span th:text="${currentPage * pageSize + 1}">1</span> to
-                                <span th:text="${(currentPage * pageSize) + pageSize > totalItems ? totalItems : (currentPage * pageSize) + pageSize}">10</span>
-                                of
-                                <span th:text="${totalItems}">20</span> entries
-                            </p>
-                            <p class="mb-0 text-center text-sm-start" th:if="${totalItems == 0}">
-                                No transactions found
-                            </p>
-                            <nav class="d-flex justify-content-center mb-0" aria-label="navigation" th:if="${totalPages > 1}">
-                                <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
-                                    <li class="page-item mb-0" th:classappend="${currentPage == 0} ? 'disabled'">
-                                        <a class="page-link" th:href="@{/history(page=${currentPage - 1}, size=${pageSize}, transactionType=${transactionType}, startDate=${startDate}, endDate=${endDate})}"
-                                           th:if="${currentPage > 0}"><i class="fas fa-angle-left"></i></a>
-                                    </li>
-                                    <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                                        class="page-item mb-0" th:classappend="${currentPage == i} ? 'active'">
-                                        <a th:href="@{/history(page=${i}, size=${pageSize}, transactionType=${transactionType}, startDate=${startDate}, endDate=${endDate})}"
-                                           th:text="${i + 1}" class="page-link"></a>
-                                    </li>
-                                    <li class="page-item mb-0" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
-                                        <a class="page-link" th:href="@{/history(page=${currentPage + 1}, size=${pageSize}, transactionType=${transactionType}, startDate=${startDate}, endDate=${endDate})}"
-                                           th:if="${currentPage < totalPages - 1}"><i class="fas fa-angle-right"></i></a>
-                                    </li>
-                                </ul>
-                            </nav>
-                        </div>
+                    <div class="modal-footer border-top-0 pt-0 d-flex justify-content-end">
+                        <button type="button" class="btn btn-primary px-4" data-bs-dismiss="modal">Đóng</button>
                     </div>
-                    <!-- Transactions table END -->
+                </div>
             </div>
         </div>
-    </section>
+    </div>
 </main>
-<!-- **************** MAIN CONTENT END **************** -->
-
-<!-- Footer START -->
-<footer th:replace="~{homePage/fragments/footer :: footer}"></footer>
-<!-- Footer END -->
-
+<th:block th:replace="homePage/fragments/footer :: footer"></th:block>
+<!-- Bootstrap JS and dependencies -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script th:src="@{/js/history.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Modal logic đẹp như mẫu
+    $(document).ready(function () {
+        $(document).on('click', '.transaction-detail-btn', function () {
+            var id = $(this).data('id');
+            $.get('/history/detail/' + id, function(data) {
+                if (data) {
+                    $('#modal-refCode').text('#' + (data.refCode || ''));
+                    $('#modal-createdAt').text(data.createdAt ? new Date(data.createdAt).toLocaleString('vi-VN') : '');
+                    $('#modal-paymentMethod').text(data.paymentMethod || '');
+                    $('#modal-courseName').text(data.courseName || '');
+                    $('#modal-instructorName').text(data.instructorName || '');
+                    // $('#modal-courseDuration').text(data.courseDuration || '');
+                    $('#modal-originalPrice').text(data.originalPrice ? data.originalPrice.toLocaleString('vi-VN') + ' VND' : '');
+                    $('#modal-discountedPrice').text(data.discountedPrice ? data.discountedPrice.toLocaleString('vi-VN') + ' VND' : '');
+                    $('#modal-status').text(data.status === 'completed' ? 'Đã thanh toán' : (data.status === 'pending' ? 'Chờ thanh toán' : 'Đã hủy'));
+                    $('#modal-note').text(data.note || '');
+                    var modal = new bootstrap.Modal(document.getElementById('transactionModal'));
+                    modal.show();
+                }
+            });
+        });
+    });
+</script>
 </body>
 </html>

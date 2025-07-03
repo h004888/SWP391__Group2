@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class CoinTransactionDTO {
     private Long transactionId;
-    @NotBlank
     private BigDecimal amount;
     private String transactionType;
     private String status;
@@ -22,4 +21,9 @@ public class CoinTransactionDTO {
     private LocalDateTime createdAt;
     private String refCode;
     private String courseName;
+    private String instructorName;
+    private String courseDuration;
+    private BigDecimal originalPrice;
+    private BigDecimal discountedPrice;
+    private String paymentMethod;
 }
