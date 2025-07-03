@@ -22,6 +22,17 @@ import java.time.format.DateTimeFormatter;
 @Controller
 @RequestMapping("/admin/courseMaintenance")
 public class CourseMaintenanceController {
+    private static final String ACC_NAME_PAGE_MANAGEMENT_FEE = "Management Maintenance Fee";
+    private static final String ACC_NAME_PAGE_MANAGEMENT = "Management Maintenance";
+    private static final String SUCCESS_FEE_UPDATED = "Fee rule updated successfully";
+    private static final String ERROR_FEE_UPDATE = "Error updating fee rule: ";
+    private static final String SUCCESS_FEE_DELETED = "Fee rule deleted successfully";
+    private static final String ERROR_FEE_DELETE = "Error deleting fee rule: ";
+    private static final String SUCCESS_FEE_ADDED = "New fee rule added successfully";
+    private static final String ERROR_FEE_ADD = "Error adding new fee rule: ";
+    private static final String SUCCESS_MONTHLY_PROCESS = "Monthly maintenance process completed successfully";
+    private static final String SUCCESS_OVERDUE_CHECK = "Overdue maintenance check completed successfully";
+
     @Autowired
     private CourseMaintenanceService courseMaintenanceService;
 
@@ -35,7 +46,7 @@ public class CourseMaintenanceController {
         Page<CourseMaintenance> courseMaintenances = courseMaintenanceService.filterMaintenances(
             null, "pending", null, pageable);
         
-        model.addAttribute("accNamePage", "Management Maintenance Fee");
+        model.addAttribute("accNamePage", ACC_NAME_PAGE_MANAGEMENT_FEE);
         model.addAttribute("courseMaintenances", courseMaintenances.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", courseMaintenances.getTotalPages());
@@ -55,7 +66,7 @@ public class CourseMaintenanceController {
         Pageable pageable = PageRequest.of(page, size);
         Page<CourseMaintenance> courseMaintenances = courseMaintenanceService.filterMaintenances(username, "pending", null, pageable);
         
-        model.addAttribute("accNamePage", "Management Maintenance");
+        model.addAttribute("accNamePage", ACC_NAME_PAGE_MANAGEMENT);
         model.addAttribute("courseMaintenances", courseMaintenances.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", courseMaintenances.getTotalPages());
@@ -167,9 +178,9 @@ public class CourseMaintenanceController {
             RedirectAttributes redirectAttributes) {
         try {
             courseMaintenanceService.updateFee(feeId, minEnrollments, maxEnrollments, maintenanceFee);
-            redirectAttributes.addFlashAttribute("successMessage", "Fee rule updated successfully");
+            redirectAttributes.addFlashAttribute("successMessage", SUCCESS_FEE_UPDATED);
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error updating fee rule: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", ERROR_FEE_UPDATE + e.getMessage());
         }
         return "redirect:/admin/courseMaintenance";
     }
@@ -180,9 +191,9 @@ public class CourseMaintenanceController {
             RedirectAttributes redirectAttributes) {
         try {
             courseMaintenanceService.deleteFee(feeId);
-            redirectAttributes.addFlashAttribute("successMessage", "Fee rule deleted successfully");
+            redirectAttributes.addFlashAttribute("successMessage", SUCCESS_FEE_DELETED);
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error deleting fee rule: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", ERROR_FEE_DELETE + e.getMessage());
         }
         return "redirect:/admin/courseMaintenance";
     }
@@ -195,9 +206,9 @@ public class CourseMaintenanceController {
             RedirectAttributes redirectAttributes) {
         try {
             courseMaintenanceService.addFee(minEnrollments, maxEnrollments, maintenanceFee);
-            redirectAttributes.addFlashAttribute("successMessage", "New fee rule added successfully");
+            redirectAttributes.addFlashAttribute("successMessage", SUCCESS_FEE_ADDED);
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error adding new fee rule: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", ERROR_FEE_ADD + e.getMessage());
         }
         return "redirect:/admin/courseMaintenance";
     }
@@ -205,14 +216,14 @@ public class CourseMaintenanceController {
     @GetMapping("/process-monthly")
     public String processMonthlyMaintenance(Model model, RedirectAttributes redirectAttributes) {
         courseMaintenanceService.processMonthlyMaintenance();
-        redirectAttributes.addFlashAttribute("successMessage", "Monthly maintenance process completed successfully");
+        redirectAttributes.addFlashAttribute("successMessage", SUCCESS_MONTHLY_PROCESS);
         return "redirect:/admin/courseMaintenance";
     }
 
     @GetMapping("/check-overdue")
     public String checkOverdueMaintenance(Model model, RedirectAttributes redirectAttributes) {
         courseMaintenanceService.checkOverdueMaintenance();
-        redirectAttributes.addFlashAttribute("successMessage", "Overdue maintenance check completed successfully");
+        redirectAttributes.addFlashAttribute("successMessage", SUCCESS_OVERDUE_CHECK);
         return "redirect:/admin/courseMaintenance";
     }
 }

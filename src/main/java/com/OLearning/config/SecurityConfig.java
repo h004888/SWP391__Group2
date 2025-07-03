@@ -82,6 +82,8 @@ public class SecurityConfig {
                         // Cho phép cả ADMIN và INSTRUCTOR truy cập /instructordashboard/**
                         .requestMatchers("/instructordashboard/**").hasAnyRole("ADMIN", "INSTRUCTOR")
 
+                        .requestMatchers("/terms/user").permitAll()
+
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

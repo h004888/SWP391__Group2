@@ -5,8 +5,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface TermsAndConditionRepository extends JpaRepository<TermsAndCondition, Long> {
     @Query("SELECT COALESCE(MAX(t.displayOrder), 0) FROM TermsAndCondition t")
     int findMaxDisplayOrder();
+
+    List<TermsAndCondition> findByRoleTargetInIgnoreCaseOrderByDisplayOrderAsc(List<String> roles);
 }

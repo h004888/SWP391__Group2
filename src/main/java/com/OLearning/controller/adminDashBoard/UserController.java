@@ -25,6 +25,14 @@ import java.util.Optional;
 @Controller
 @RequestMapping("/admin")
 public class UserController {
+    // Các biến constant dùng cho model attribute (gán giá trị thực tế)
+    private static final String ACC_NAME_PAGE_MANAGEMENT = "Management Account";
+    private static final String ACC_NAME_PAGE_DETAIL = "Detail Account";
+    private static final String ERROR_MESSAGE_USER_ADD = "User added successfully";
+    private static final String ERROR_MESSAGE_UNEXPECTED = "Unexpected error: ";
+    private static final String SUCCESS_MESSAGE_RESET_PASS = "Reset password successfully";
+    private static final String SUCCESS_MESSAGE_DELETE_STAFF = "Delete staff successfully";
+
     @Autowired
     private UserService userService;
 
@@ -232,7 +240,7 @@ public class UserController {
     @GetMapping("/account/delete/{userId}")
     public String deleteAccount(Model model, @PathVariable("userId") long id,RedirectAttributes redirectAttributes) {
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/accountContent :: accountContent");
-        redirectAttributes.addFlashAttribute("successMessage", "Delete staff successfully");
+        redirectAttributes.addFlashAttribute("successMessage", SUCCESS_MESSAGE_DELETE_STAFF);
         userService.deleteAcc(id);
         return "redirect:/admin/account";
     }

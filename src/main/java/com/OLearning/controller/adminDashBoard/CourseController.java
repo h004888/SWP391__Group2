@@ -24,6 +24,10 @@ import java.util.*;
 @Controller
 @RequestMapping("/admin/course")
 public class CourseController {
+    private static final String ACC_NAME_PAGE_MANAGEMENT = "Management Course";
+    private static final String SUCCESS_COURSE_REJECTED = "Course rejected and notification sent successfully.";
+    private static final String ERROR_COURSE_REJECT = "Error rejecting course: ";
+
     @Autowired
     private CourseService courseService;
     @Autowired
@@ -51,7 +55,7 @@ public class CourseController {
 
         List<Category> listCategories = categoryService.getListCategories();
 
-        model.addAttribute("accNamePage", "Management Course");
+        model.addAttribute("accNamePage", ACC_NAME_PAGE_MANAGEMENT);
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/courseContent :: courseContent");
         model.addAttribute("listCategories", listCategories);
 
@@ -162,9 +166,9 @@ public class CourseController {
                                RedirectAttributes redirectAttributes) {
         try {
             notificationService.rejectCourseMess(notificationDTO, allowResubmission);
-            redirectAttributes.addFlashAttribute("successMessage", "Course rejected and notification sent successfully.");
+            redirectAttributes.addFlashAttribute("successMessage", SUCCESS_COURSE_REJECTED);
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error rejecting course: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", ERROR_COURSE_REJECT + e.getMessage());
         }
         return "redirect:/admin/course";
     }

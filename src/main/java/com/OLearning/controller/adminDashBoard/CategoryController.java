@@ -22,6 +22,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/admin")
 public class CategoryController {
+    private static final String ERROR_CATEGORY_NOT_FOUND = "Category not found";
+    private static final String ERROR_CATEGORY_NAME_EXISTS = "Category name already exists";
+    private static final String SUCCESS_CATEGORY_UPDATED = "Category updated successfully";
+    private static final String ERROR_CATEGORY_UPDATE = "Error updating category: ";
+    private static final String SUCCESS_CATEGORY_ADDED = "Category added successfully";
+    private static final String ERROR_CATEGORY_ADD = "Error adding category: ";
+
     @Autowired
     private CategoryService categoryService;
     
@@ -144,22 +151,22 @@ public class CategoryController {
         try {
             Category category = categoryService.findById(id).orElse(null);
             if (category == null) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Category not found");
+                redirectAttributes.addFlashAttribute("errorMessage", ERROR_CATEGORY_NOT_FOUND);
                 return "redirect:/admin/category";
             }
             
             // Check if name already exists for other categories
             if (categoryService.existsByNameAndIdNot(name, id)) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Category name already exists");
+                redirectAttributes.addFlashAttribute("errorMessage", ERROR_CATEGORY_NAME_EXISTS);
                 return "redirect:/admin/category/edit/" + id + "?page=" + page + "&sort=" + sort + "&name=" + search;
             }
             
             category.setName(name);
             categoryService.save(category);
-            redirectAttributes.addFlashAttribute("successMessage", "Category updated successfully");
+            redirectAttributes.addFlashAttribute("successMessage", SUCCESS_CATEGORY_UPDATED);
             
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error updating category: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", ERROR_CATEGORY_UPDATE + e.getMessage());
         }
         
         return "redirect:/admin/category?page=" + page + "&sort=" + sort + "&name=" + search;
@@ -174,17 +181,17 @@ public class CategoryController {
                              RedirectAttributes redirectAttributes) {
         try {
             if (categoryService.existsByName(name)) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Category name already exists");
+                redirectAttributes.addFlashAttribute("errorMessage", ERROR_CATEGORY_NAME_EXISTS);
                 return "redirect:/admin/category?page=" + page + "&sort=" + sort + "&name=" + search;
             }
             
             Category category = new Category();
             category.setName(name);
             categoryService.save(category);
-            redirectAttributes.addFlashAttribute("successMessage", "Category added successfully");
+            redirectAttributes.addFlashAttribute("successMessage", SUCCESS_CATEGORY_ADDED);
             
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error adding category: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", ERROR_CATEGORY_ADD + e.getMessage());
         }
         
         return "redirect:/admin/category?page=" + page + "&sort=" + sort + "&name=" + search;

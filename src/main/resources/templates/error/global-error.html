@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lỗi hệ thống</title>
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}" />
+</head>
+<body>
+    <div style="text-align:center; margin-top: 100px;">
+        <h1>Đã xảy ra lỗi!</h1>
+        <p th:text="${errorMessage}">Lỗi không xác định.</p>
+        <a href="/" style="color: #007bff; text-decoration: underline;">Quay về trang chủ</a>
+    </div>
+</body>
+</html> 
