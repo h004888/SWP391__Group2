@@ -37,4 +37,9 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     public Integer getWeeksEnrolled(Long userId, Long courseId) {
         return enrollmentRepository.getWeeksEnrolled(userId, courseId);
     }
+
+    @Override
+    public void updateProgressByUser(Long userId, Long courseId) {
+       enrollmentRepository.updateProgressByUser(userId, courseId);
+    }
 }

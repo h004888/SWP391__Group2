@@ -2,6 +2,7 @@ package com.OLearning.service.enrollment;
 
 import java.util.List;
 
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import com.OLearning.entity.Course;
@@ -12,4 +13,5 @@ public interface EnrollmentService {
     List<Course> getCoursesByUserId(Long userId);
     boolean hasEnrolled(Long userId, Long courseId);
     Integer getWeeksEnrolled(Long userId, Long courseId);
+    void updateProgressByUser( Long userId,  Long courseId);
 }

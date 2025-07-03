@@ -4,6 +4,8 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
+import com.OLearning.entity.Lesson;
+import com.OLearning.service.enrollment.EnrollmentService;
 import com.OLearning.service.lesson.LessonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -33,7 +35,8 @@ public class QuizController {
     private LessonCompletionService lessonCompletionService;
     @Autowired
     private LessonService lessonService;
-
+    @Autowired
+    private EnrollmentService enrollmentService;
     @PostMapping("quiz/submit")
     public String handleQuizSubmit(@ModelAttribute("submissionForm") QuizSubmissionForm form, Model model,
             Principal principal) {
@@ -67,15 +70,20 @@ public class QuizController {
         if (isPassed) {
           if (!lessonCompletionService.checkLessonCompletion(user.getUserId(), form.getLessonId())) {
               lessonCompletionService.markLessonAsCompleted(user.getUserId(), form.getLessonId());
-            
+              enrollmentService.updateProgressByUser(user.getUserId(), form.getCourseId());
           }
         }
+
+        Lesson nextLesson = lessonService.getNextLessonAfterCurrent(form.getLessonId(), form.getCourseId());
+        Lesson lessonToShow = nextLesson != null ? nextLesson : lessonService.findFirstLesson(form.getCourseId());
+        model.addAttribute("nextLessonId", lessonToShow != null ? lessonToShow.getLessonId() : null);
+
 
 
 
         model.addAttribute("courseId", form.getCourseId());
         model.addAttribute("score", correct);
-        model.addAttribute("nextLessonId", lessonService.getNextLessonAfterCurrent(form.getLessonId(),form.getCourseId()).getLessonId());
+
         model.addAttribute("total", total);
         model.addAttribute("passed", isPassed); // true nếu >= 75%
         model.addAttribute("lessonId", form.getLessonId());
