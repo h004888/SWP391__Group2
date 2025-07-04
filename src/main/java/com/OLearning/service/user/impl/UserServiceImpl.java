@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.OLearning.dto.user.UserProfileEditDTO;
+
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -288,6 +290,50 @@ public class UserServiceImpl implements UserService {
     public boolean existsById(Long userId) {
 
         return userRepository.existsById(userId);
+    }
+
+    @Override
+    public Optional<UserProfileEditDTO> getProfileByUsername(String username) {
+        return userRepository.findByEmail(username).map(user -> {
+            UserProfileEditDTO dto = new UserProfileEditDTO();
+            dto.setFullName(user.getFullName());
+            dto.setEmail(user.getEmail());
+            dto.setPhone(user.getPhone());
+            dto.setAvatarUrl(user.getProfilePicture());
+            dto.setUsername(user.getUsername());
+            dto.setBirthDay(user.getBirthDay());
+            dto.setAddress(user.getAddress());
+            dto.setPersonalSkill(user.getPersonalSkill());
+            return dto;
+        });
+    }
+
+    @Override
+    public void updateProfileByUsername(String username, UserProfileEditDTO profileEditDTO) {
+        User user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + username));
+        user.setFullName(profileEditDTO.getFullName());
+        user.setPhone(profileEditDTO.getPhone());
+        user.setProfilePicture(profileEditDTO.getAvatarUrl());
+        user.setUsername(profileEditDTO.getUsername());
+        user.setBirthDay(profileEditDTO.getBirthDay());
+        user.setAddress(profileEditDTO.getAddress());
+        user.setPersonalSkill(profileEditDTO.getPersonalSkill());
+        userRepository.save(user);
+    }
+
+    @Override
+    public void updateProfile(Long userId, UserProfileEditDTO profileEditDTO) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+        user.setFullName(profileEditDTO.getFullName());
+        user.setPhone(profileEditDTO.getPhone());
+        user.setProfilePicture(profileEditDTO.getAvatarUrl());
+        user.setUsername(profileEditDTO.getUsername());
+        user.setBirthDay(profileEditDTO.getBirthDay());
+        user.setAddress(profileEditDTO.getAddress());
+        user.setPersonalSkill(profileEditDTO.getPersonalSkill());
+        userRepository.save(user);
     }
 
 }

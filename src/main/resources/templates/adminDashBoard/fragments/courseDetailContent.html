@@ -1,4 +1,107 @@
 <div th:fragment="courseDetail">
+    <style>
+        .main-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        .nav-tabs .nav-link {
+            color: #6c757d;
+            border: none;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: #0d6efd;
+            border-bottom-color: #dee2e6;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: #0d6efd;
+            border-bottom: 2px solid #0d6efd;
+            background: none;
+        }
+
+        .lesson-video-link,
+        .lesson-quiz-link {
+            color: #0d6efd;
+            transition: color 0.2s ease;
+        }
+
+        .lesson-video-link:hover,
+        .lesson-quiz-link:hover {
+            color: #0a58ca;
+        }
+
+        .accordion-button:not(.collapsed) {
+            background-color: #e7f1ff;
+            color: #0d6efd;
+        }
+
+        .accordion-button:focus {
+            box-shadow: none;
+            border-color: rgba(0, 0, 0, .125);
+        }
+
+        .list-group-item {
+            transition: background-color 0.2s ease;
+        }
+
+        .list-group-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .badge {
+            font-weight: 500;
+            padding: 0.5em 0.75em;
+        }
+
+        .stat-card {
+            transition: transform 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .course-header {
+            background: linear-gradient(to right, #ffffff, #f8f9fa);
+        }
+
+        .content-card {
+            transition: box-shadow 0.3s ease;
+        }
+
+        .content-card:hover {
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        }
+
+        .bg-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1;
+        }
+        .card-img-overlay {
+            z-index: 2;
+        }
+
+        /* Đảm bảo modal video đẹp, không bị kéo dài quá */
+        #videoModal .modal-dialog {
+            max-width: 900px;
+        }
+        #videoModal .modal-content {
+            background: #181a1b;
+            border-radius: 1rem;
+        }
+        #videoModal .modal-body {
+            padding: 0;
+        }
+        #dynamicVideo {
+            background: #000;
+            border-radius: 0 0 1rem 1rem;
+        }
+    </style>
     <div class="main-content">
         <div class="container-fluid py-4">
             <!-- Course Header -->
@@ -73,9 +176,30 @@
                                     data-bs-toggle="modal"
                                     data-bs-target="#rejectModal"
                                     th:data-course-id="${detailCourse.courseId}"
-                                    th:if="${detailCourse.status == 'pending' or detailCourse.status == 'approved' or detailCourse.status == 'resubmit'}">
+                                    th:if="${detailCourse.status == 'pending' or detailCourse.status == 'resubmit'}">
                                 <i class="bi bi-x-circle me-1"></i> Reject Course
                             </button>
+                            <!-- Nếu đã approved thì hiện Block -->
+                            <div th:if="${detailCourse.status == 'approved'}" class="mb-0">
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#blockCourseReasonModal">
+                                    <i class="fas fa-ban me-2"></i>Block Course
+                                </button>
+                            </div>
+                            <div th:if="${detailCourse.status == 'blocked'}" class="mb-0">
+                                <form th:if="${detailCourse.courseId != null}" th:action="@{'/admin/course/' + ${detailCourse.courseId} + '/unblock'}" method="post" style="display: inline;">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-unlock me-2"></i>Mở khóa khóa học
+                                    </button>
+                                </form>
+                            </div>
+                            <div th:if="${detailCourse.status == 'pending_block'}" class="mb-0">
+                                <form th:if="${detailCourse.courseId != null}" th:action="@{'/admin/course/'+ ${detailCourse.courseId} +'/block-confirm'}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn btn-danger"> Comfirm Block </button>
+                                </form>
+                                <form th:if="${detailCourse.courseId != null}" th:action="@{'/admin/course/'+ ${detailCourse.courseId} +'/block-cancel'}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn btn-secondary">Cancel block</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -415,116 +539,39 @@
         </div>
     </div>
 
-    <style>
-        .main-content {
-            background-color: #f8f9fa;
-            min-height: 100vh;
-        }
+    <!-- Modal nhập lý do block course -->
+    <div class="modal fade" id="blockCourseReasonModal" tabindex="-1" aria-labelledby="blockCourseReasonModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{'/admin/course/' + ${detailCourse.courseId} + '/block'}" method="post">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="blockCourseReasonModalLabel">Block Course - Nhập lý do</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="blockReason" class="form-label">Lý do block khóa học</label>
+                            <textarea class="form-control" id="blockReason" name="reason" rows="4" required placeholder="Nhập lý do block..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-danger">Gửi lý do & Block</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
-        .nav-tabs .nav-link {
-            color: #6c757d;
-            border: none;
-            border-bottom: 2px solid transparent;
-            transition: all 0.3s ease;
-        }
-
-        .nav-tabs .nav-link:hover {
-            color: #0d6efd;
-            border-bottom-color: #dee2e6;
-        }
-
-        .nav-tabs .nav-link.active {
-            color: #0d6efd;
-            border-bottom: 2px solid #0d6efd;
-            background: none;
-        }
-
-        .lesson-video-link,
-        .lesson-quiz-link {
-            color: #0d6efd;
-            transition: color 0.2s ease;
-        }
-
-        .lesson-video-link:hover,
-        .lesson-quiz-link:hover {
-            color: #0a58ca;
-        }
-
-        .accordion-button:not(.collapsed) {
-            background-color: #e7f1ff;
-            color: #0d6efd;
-        }
-
-        .accordion-button:focus {
-            box-shadow: none;
-            border-color: rgba(0, 0, 0, .125);
-        }
-
-        .list-group-item {
-            transition: background-color 0.2s ease;
-        }
-
-        .list-group-item:hover {
-            background-color: #f8f9fa;
-        }
-
-        .badge {
-            font-weight: 500;
-            padding: 0.5em 0.75em;
-        }
-
-        .stat-card {
-            transition: transform 0.2s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .course-header {
-            background: linear-gradient(to right, #ffffff, #f8f9fa);
-        }
-
-        .content-card {
-            transition: box-shadow 0.3s ease;
-        }
-
-        .content-card:hover {
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-        }
-
-        .bg-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 1;
-        }
-        .card-img-overlay {
-            z-index: 2;
-        }
-
-        /* Đảm bảo modal video đẹp, không bị kéo dài quá */
-        #videoModal .modal-dialog {
-            max-width: 900px;
-        }
-        #videoModal .modal-content {
-            background: #181a1b;
-            border-radius: 1rem;
-        }
-        #videoModal .modal-body {
-            padding: 0;
-        }
-        #dynamicVideo {
-            background: #000;
-            border-radius: 0 0 1rem 1rem;
-        }
-    </style>
-
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const approveModal = document.getElementById('approveModal');
             const approveForm = document.getElementById('approveForm');
             const rejectModal = document.getElementById('rejectModal');
             const rejectForm = document.getElementById('rejectForm');
+
 
             if (approveModal && approveForm) {
                 approveModal.addEventListener('show.bs.modal', function (event) {
@@ -545,20 +592,97 @@
                     }
                 });
             }
-        });
 
-        function playVideo(element) {
-            var publicId = element.getAttribute('data-videoid');
-            if (!publicId) return;
-            fetch('/api/video/signed-url?publicId=' + encodeURIComponent(publicId))
-                .then(response => response.text())
-                .then(url => {
-                    var video = document.getElementById('modalVideo');
-                    video.src = url;
-                    var modal = new bootstrap.Modal(document.getElementById('videoModal'));
-                    modal.show();
-                    video.play();
+        });
+    </script>
+
+
+    <script>
+        // Toggle sidebar on mobile
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const sidebar = document.querySelector('.course-detail-sidebar');
+            const mainContent = document.querySelector('.main-content');
+            const navbar = document.querySelector('.navbar');
+
+            sidebarToggle.addEventListener('click', function () {
+                sidebar.classList.toggle('show');
+
+                if (window.innerWidth > 768) {
+                    if (sidebar.classList.contains('show')) {
+                        mainContent.style.marginLeft = '0';
+                        navbar.style.paddingLeft = '1rem';
+                    } else {
+                        mainContent.style.marginLeft = 'var(--sidebar-width)';
+                        navbar.style.paddingLeft = 'var(--sidebar-width)';
+                    }
+                }
+            });
+
+            // Handle window resize
+            window.addEventListener('resize', function () {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.remove('show');
+                    mainContent.style.marginLeft = 'var(--sidebar-width)';
+                    navbar.style.paddingLeft = 'var(--sidebar-width)';
+                } else {
+                    mainContent.style.marginLeft = '0';
+                    navbar.style.paddingLeft = '1rem';
+                }
+            });
+
+            // Handle approve button click
+            const approveButton = document.querySelector('#approveModal .btn-success');
+            approveButton.addEventListener('click', function () {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('approveModal'));
+                modal.hide();
+
+                // Update status badge
+                const statusBadges = document.querySelectorAll('.status-badge');
+                statusBadges.forEach(badge => {
+                    badge.textContent = 'Approved';
+                    badge.classList.remove('bg-warning');
+                    badge.classList.add('bg-success');
                 });
+            });
+
+            // Handle reject button click
+            const rejectButton = document.querySelector('#rejectModal .btn-danger');
+            rejectButton.addEventListener('click', function () {
+                const reason = document.getElementById('rejectionReason').value;
+                const details = document.getElementById('rejectionDetails').value;
+
+                if (reason === 'Please select a reason' || !details.trim()) {
+                    alert('Please select a rejection reason and provide detailed feedback.');
+                    return;
+                }
+
+                alert('Course has been rejected. The instructor will be notified.');
+                const modal = bootstrap.Modal.getInstance(document.getElementById('rejectModal'));
+                modal.hide();
+
+                // Update status badge
+                const statusBadges = document.querySelectorAll('.status-badge');
+                statusBadges.forEach(badge => {
+                    badge.textContent = 'Rejected';
+                    badge.classList.remove('bg-warning');
+                    badge.classList.add('bg-danger');
+                });
+            });
+        });
+    </script>
+
+    <script>
+        function playVideo(element) {
+            const videoId = element.getAttribute('data-videoid');
+            const videoSource = document.getElementById('videoSource');
+            const video = document.getElementById('lessonVideo');
+
+            videoSource.src = videoId;
+            video.load();
+
+            const videoModal = new bootstrap.Modal(document.getElementById('videoModal'));
+            videoModal.show();
         }
 
         function stopVideo() {
@@ -566,26 +690,6 @@
             video.pause();
             video.currentTime = 0;
         }
-
-        document.getElementById('playVideoBtn').addEventListener('click', function() {
-            var publicId = this.getAttribute('data-publicid');
-            if (!publicId) return;
-            fetch('/api/video/signed-url?publicId=' + encodeURIComponent(publicId))
-                .then(res => res.text())
-                .then(url => {
-                    var video = document.getElementById('modalVideo');
-                    video.src = url;
-                    var modal = new bootstrap.Modal(document.getElementById('videoModal'));
-                    modal.show();
-                    video.play();
-                });
-        });
-
-        document.getElementById('videoModal').addEventListener('hidden.bs.modal', function () {
-            var video = document.getElementById('modalVideo');
-            video.pause();
-            video.currentTime = 0;
-            video.src = "";
-        });
     </script>
+
 </div>

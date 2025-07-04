@@ -1,6 +1,7 @@
 package com.OLearning.repository;
 
 import com.OLearning.entity.Course;
+import com.OLearning.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -108,4 +109,5 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
             """, nativeQuery = true)
     void updateProgressByUser(@Param("userId") Long userId, @Param("courseId") Long courseId);
 
+    Optional<Enrollment> findByUserAndCourse(User user, Course course);
 }

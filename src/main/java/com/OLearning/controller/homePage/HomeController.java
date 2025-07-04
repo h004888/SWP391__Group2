@@ -4,10 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 import com.OLearning.dto.course.CourseViewDTO;
-import com.OLearning.entity.Category;
-import com.OLearning.entity.Course;
-import com.OLearning.entity.Order;
-import com.OLearning.entity.User;
+import com.OLearning.entity.*;
 import com.OLearning.mapper.course.CourseMapper;
 import com.OLearning.repository.CourseRepository;
 import com.OLearning.repository.UserRepository;
@@ -16,6 +13,7 @@ import com.OLearning.service.cart.CartService;
 import com.OLearning.service.cart.impl.CartServiceImpl;
 import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.course.CourseService;
+import com.OLearning.service.courseReview.CourseReviewService;
 import com.OLearning.service.vnpay.VNPayService;
 import com.OLearning.service.voucher.VoucherService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -70,6 +68,9 @@ public class HomeController {
     @Autowired
     private VoucherService voucherService;
 
+    @Autowired
+    private CourseReviewService courseReviewService;
+
     @GetMapping()
         public String getMethodName(Model model, @AuthenticationPrincipal UserDetails userDetails) {
                 // chia làm 2 danh sách:
@@ -104,8 +105,13 @@ public class HomeController {
                 return "homePage/course-grid";
         }
 
-        @GetMapping("/course-detail")
-        public String courseDetail(@RequestParam("id") Long id, Model model) {
+
+    @GetMapping("/course-detail")
+    public String courseDetail(
+            @RequestParam("id") Long id,
+            @RequestParam(value = "star", required = false, defaultValue = "0") Integer star,
+            Model model,
+            @AuthenticationPrincipal UserDetails userDetails) {
                 CourseViewDTO course = courseService.getCourseById(id);
 
                 model.addAttribute("totalStudents", course.getEnrollments().size());

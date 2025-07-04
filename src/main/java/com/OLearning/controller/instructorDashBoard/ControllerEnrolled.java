@@ -1,4 +1,4 @@
-package com.OLearning.controller.instructorDashBoard;
+package com.OLearning.controller.instructorDashboard;
 
 import com.OLearning.dto.enrollment.EnrollmentDTO;
 import com.OLearning.entity.Enrollment;

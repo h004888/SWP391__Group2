@@ -1,4 +1,4 @@
-package com.OLearning.controller.instructorDashBoard;
+package com.OLearning.controller.instructorDashboard;
 
 import com.OLearning.dto.chapter.ChapterDTO;
 import com.OLearning.dto.course.AddCourseStep1DTO;

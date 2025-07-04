@@ -1,10 +1,17 @@
 package com.OLearning.dto.notification;
 
+import com.OLearning.entity.Course;
+import com.OLearning.entity.User;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class NotificationDTO {
@@ -12,7 +19,10 @@ public class NotificationDTO {
     private String message;
     private LocalDateTime sentAt;
     private String type;
-    private boolean status;
+    private String status;
+    private User user;
+    private Course course;
     private Long userId;
     private Long courseId;
+    private Long commentId; // Add commentId field for comment notifications
 }

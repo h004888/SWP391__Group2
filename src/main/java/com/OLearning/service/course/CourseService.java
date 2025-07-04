@@ -18,20 +18,20 @@ public interface CourseService {
 
     Page<CourseDTO> getAllCourses(Pageable pageable);
 
-
     Optional<CourseDetailDTO> getDetailCourse(Long id);
 
     boolean approveCourse(Long id);
 
     boolean rejectCourse(Long id);
 
-
 //    List<CourseDTO> filterCourses(String keyword, Integer categoryId, String price, String status);
 
     Page<CourseDTO> filterCoursesWithPagination(String keyword, Long category, String price, String status, int page, int size);
 
     Page<CourseDTO> filterCoursesInstructorManage(Long userId, Long categoryId, String status, String price, int page, int size);
+
     void deleteCourse(Long courseId);
+
     Course findCourseById(Long courseId);
 
     Course createCourseStep1(Long courseId, AddCourseStep1DTO addCourseStep1DTO);
@@ -67,5 +67,11 @@ public interface CourseService {
             String keyword,
             int page,
             int size);
+
+    void blockCourse(Long courseId);
+
+    void setPendingBlock(Long courseId);
+
+    Course findById(Long courseId);
 
 }

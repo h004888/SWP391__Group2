@@ -3,9 +3,7 @@ package com.OLearning.service.enrollment.impl;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import com.OLearning.service.course.CourseService;
-import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.enrollment.EnrollmentDTO;
 import com.OLearning.entity.Course;
 import com.OLearning.entity.Enrollment;
@@ -17,9 +15,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import com.OLearning.entity.Course;
-import com.OLearning.entity.Enrollment;
 import com.OLearning.repository.EnrollmentRepository;
 import com.OLearning.service.enrollment.EnrollmentService;
 import com.OLearning.service.email.EmailService;
@@ -30,9 +25,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class EnrollmentServiceImpl implements EnrollmentService {
@@ -214,5 +207,10 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Override
     public void updateProgressByUser(Long userId, Long courseId) {
        enrollmentRepository.updateProgressByUser(userId, courseId);
+    }
+
+    @Override
+    public Optional<Enrollment> findByUserAndCourse(User user, Course course) {
+        return enrollmentRepository.findByUserAndCourse(user, course);
     }
 }

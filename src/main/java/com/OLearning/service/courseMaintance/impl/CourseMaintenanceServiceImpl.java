@@ -181,7 +181,7 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
                 notification.setSentAt(LocalDateTime.now());
                 notification.setCourse(course);
                 notification.setUser(course.getInstructor());
-                notification.setStatus(false);
+                notification.setStatus("failed");
                 notificationRepository.save(notification);
             } catch (Exception e) {
                 System.err.println("Error sending maintenance invoice email: " + e.getMessage());
@@ -246,7 +246,7 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
                     notification.setType("ACCOUNT_LOCKED");
                     notification.setSentAt(LocalDateTime.now());
                     notification.setCourse(course);
-                    notification.setStatus(false);
+                    notification.setStatus("failed");
                     notificationRepository.save(notification);
 
                 } else if (daysOverdue >= 7) {
@@ -275,7 +275,7 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
                     notification.setType("COURSE_HIDDEN");
                     notification.setSentAt(LocalDateTime.now());
                     notification.setCourse(course);
-                    notification.setStatus(false);
+                    notification.setStatus("failed");
                     notificationRepository.save(notification);
 
                 } else if (daysOverdue >= 3) {
@@ -300,7 +300,7 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
                     notification.setType("SECOND_REMINDER");
                     notification.setSentAt(LocalDateTime.now());
                     notification.setCourse(course);
-                    notification.setStatus(false);
+                    notification.setStatus("failed");
                     notificationRepository.save(notification);
                 }
 

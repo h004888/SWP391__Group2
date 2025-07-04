@@ -15,6 +15,7 @@ import com.OLearning.repository.*;
 import com.OLearning.security.CustomUserDetails;
 import com.OLearning.service.cloudinary.UploadFile;
 import com.OLearning.service.course.CourseService;
+import com.OLearning.service.email.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -48,6 +49,10 @@ public class CourseServiceImpl implements CourseService {
 
     @Autowired
     private CourseDetailMapper courseDetailMapper;
+    @Autowired
+    private NotificationRepository notificationRepository;
+    @Autowired
+    private EmailService emailService;
 
     @Override
     public Page<CourseDTO> getAllCourses(Pageable pageable) {
@@ -171,22 +176,6 @@ public class CourseServiceImpl implements CourseService {
         return courseRepository.findById(id).map(courseDetailMapper::toDTO);
     }
 
-
-    @Override
-    public boolean approveCourse(Long id) {
-        return courseRepository.findById(id)
-                .map(course -> {
-                    if (!"approved".equalsIgnoreCase(course.getStatus())) {
-                        course.setStatus("approved");
-                        course.setUpdatedAt(LocalDateTime.now());
-                        courseRepository.save(course);
-                        return true;
-                    }
-                    return false;
-                })
-                .orElse(false);
-    }
-
     @Override
     public Course findCourseById(Long courseId) {
         Optional<Course> course = courseRepository.findById(courseId);
@@ -207,20 +196,6 @@ public class CourseServiceImpl implements CourseService {
     public List<Chapter> getChaptersWithLessons(Long courseId) {
         return chapterRepository.findByCourseIdWithLessons(courseId);
 
-    }
-    @Override
-    public boolean rejectCourse(Long id) {
-        return courseRepository.findById(id)
-                .map(course -> {
-                    if (!"rejected".equalsIgnoreCase(course.getStatus())) {
-                        course.setStatus("rejected");
-                        course.setUpdatedAt(LocalDateTime.now());
-                        courseRepository.save(course);
-                        return true;
-                    }
-                    return false;
-                })
-                .orElse(false);
     }
 
     @Override
@@ -289,6 +264,45 @@ public class CourseServiceImpl implements CourseService {
         AddCourseStep1DTO courseDTO = courseMapper.DraftStep1(course);
         return courseDTO;
     }
+    @Override
+    public boolean approveCourse(Long id) {
+        return courseRepository.findById(id)
+                .map(course -> {
+                    if (!"approved".equalsIgnoreCase(course.getStatus())) {
+                        course.setStatus("approved");
+                        course.setUpdatedAt(LocalDateTime.now());
+                        courseRepository.save(course);
+                        // Gửi notification cho instructor
+                        if (course.getInstructor() != null) {
+                            com.OLearning.entity.Notification notification = new com.OLearning.entity.Notification();
+                            notification.setUser(course.getInstructor());
+                            notification.setCourse(course);
+                            notification.setMessage("Khóa học '" + course.getTitle() + "' của bạn đã được admin phê duyệt.");
+                            notification.setType("COURSE_APPROVED");
+                            notification.setStatus("failed");
+                            notification.setSentAt(LocalDateTime.now());
+                            notificationRepository.save(notification);
+                        }
+                        return true;
+                    }
+                    return false;
+                })
+                .orElse(false);
+    }
+    @Override
+    public boolean rejectCourse(Long id) {
+        return courseRepository.findById(id)
+                .map(course -> {
+                    if (!"rejected".equalsIgnoreCase(course.getStatus())) {
+                        course.setStatus("rejected");
+                        course.setUpdatedAt(LocalDateTime.now());
+                        courseRepository.save(course);
+                        return true;
+                    }
+                    return false;
+                })
+                .orElse(false);
+    }
 
     @Override
     public Course createCourseMedia(Long courseId, CourseMediaDTO CourseMediaDTO) {
@@ -316,6 +330,12 @@ public class CourseServiceImpl implements CourseService {
         course.setUpdatedAt(LocalDateTime.now());
         courseRepository.save(course);
     }
+    @Override
+    public void blockCourse(Long courseId) {
+        Course course = courseRepository.findById(courseId).orElseThrow();
+        course.setStatus("blocked"); // hoặc trạng thái bạn định nghĩa
+        courseRepository.save(course);
+    }
 
     @Override
     public List<CourseDTO> getCourseDTOsByCategoryId(Long categoryId) {
@@ -332,4 +352,33 @@ public class CourseServiceImpl implements CourseService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public Course findById(Long courseId) {
+        return courseRepository.findById(courseId).orElseThrow();
+    }
+
+    public void setPendingBlock(Long courseId) {
+        Course course = courseRepository.findById(courseId).orElseThrow();
+        course.setStatus("pending_block");
+        courseRepository.save(course);
+        // Gửi notification và email cho instructor
+        User instructor = course.getInstructor();
+        if (instructor != null) {
+            com.OLearning.entity.Notification notification = new com.OLearning.entity.Notification();
+            notification.setUser(instructor);
+            notification.setCourse(course);
+            notification.setMessage("Your course '" + course.getTitle() + "' is pending block review by admin. Please check your email and respond if needed.");
+            notification.setType("COURSE_BLOCKED");
+            notification.setStatus("failed");
+            notification.setSentAt(LocalDateTime.now());
+            notificationRepository.save(notification);
+            // Gửi email cho instructor
+            String subject = "[OLearning] Your course is pending block review";
+            String content = "Xin chào " + instructor.getFullName() + ",\n\n" +
+                    "Khóa học '" + course.getTitle() + "' của bạn đang được xem xét để block bởi quản trị viên.\n" +
+                    "Vui lòng đăng nhập vào hệ thống OLearning để phản hồi hoặc liên hệ bộ phận hỗ trợ nếu có thắc mắc.\n\n" +
+                    "Trân trọng,\nĐội ngũ OLearning";
+            emailService.sendOTP(instructor.getEmail(), subject, content);
+        }
+    }
 }

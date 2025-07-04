@@ -1,0 +1,51 @@
+<div th:fragment="reportDetailContent">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h5 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-flag me-2"></i>Chi tiết báo cáo
+            </h5>
+            <a th:href="@{/admin/course/detail/{courseId}(courseId=${report.course.courseId})}"
+               class="btn btn-success btn-sm">
+                <i class="fas fa-book-open me-1"></i>Xem chi tiết khóa học
+            </a>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Loại báo cáo</dt>
+                <dd class="col-sm-9">
+                    <span th:text="${report.reportType == 'REPORT_COURSE' ? 'Báo cáo khóa học' : 'Báo cáo bình luận'}"></span>
+                </dd>
+
+                <dt class="col-sm-3">Người báo cáo</dt>
+                <dd class="col-sm-9">
+                    <span th:text="${report.user.fullName}"></span>
+                    (<span th:text="${report.user.email}"></span>)
+                </dd>
+
+                <dt class="col-sm-3">Thời gian tạo</dt>
+                <dd class="col-sm-9">
+                    <span th:text="${#temporals.format(report.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+                </dd>
+
+                <dt class="col-sm-3">Nội dung báo cáo</dt>
+                <dd class="col-sm-9">
+                    <span th:text="${report.content}"></span>
+                </dd>
+
+                <dt class="col-sm-3">Link/chứng cứ</dt>
+                <dd class="col-sm-9">
+                    <a th:if="${report.evidenceLink != null}" th:href="${report.evidenceLink}" target="_blank" th:text="${report.evidenceLink}"></a>
+                    <span th:if="${report.evidenceLink == null}">Không có</span>
+                </dd>
+
+                <dt class="col-sm-3">Trạng thái</dt>
+                <dd class="col-sm-9">
+                    <span th:text="${report.status}"></span>
+                </dd>
+            </dl>
+            <form th:if="${report.status != 'processed'}" th:action="@{/admin/reports/process/{id}(id=${report.id})}" method="post">
+                <button type="submit" class="btn btn-success">Processed</button>
+            </form>
+        </div>
+    </div>
+</div>

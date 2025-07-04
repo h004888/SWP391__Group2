@@ -39,8 +39,7 @@
 
                             <!-- Title -->
                             <h5 class="card-title">
-                                <a th:href="@{'/course-detail/' + ${course.courseId}}" th:text="${course.title}">Course
-                                    Title</a>
+                                <a th:href="@{'/course/course-detail/' + ${course.courseId}}" th:text="${course.title}">Course Title</a>
                             </h5>
 
                             <!-- Description -->
@@ -87,10 +86,8 @@
                                     </div>
                                 </div>
                                 <!-- View more button -->
-                                <a th:href="@{'/course-detail/' + ${course.courseId}}" class="btn btn-dark">View
-                                    more</a>
+                                <a th:href="@{'/course/course-detail/' + ${course.courseId}}" class="btn btn-dark">View more</a>
                             </div>
-
                         </div>
                     </div>
                 </div>
