@@ -379,9 +379,9 @@
                     <i class="fas fa-book me-2"></i>Courses in Category: <span th:text="${category != null ? category.name : 'Unknown Category'}"></span>
                 </h1>
                 <div class="d-flex">
-                    <button type="button" class="btn btn-secondary" id="backToCategories">
+                    <a th:href="@{/admin/category}" class="btn btn-secondary" id="backToCategories">
                         <i class="fas fa-arrow-left me-2"></i>Back to Categories
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>

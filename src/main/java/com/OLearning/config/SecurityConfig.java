@@ -32,10 +32,12 @@ public class SecurityConfig {
 
     private final UserRepository userRepository;
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                // Use NoOpPasswordEncoder cho password chưa mã hóa
+//                return NoOpPasswordEncoder.getInstance();
+                 return new BCryptPasswordEncoder();
+        }
 
     @Bean
     public AuthenticationSuccessHandler authenticationSuccessHandler() {

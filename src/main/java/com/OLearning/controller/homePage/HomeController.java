@@ -3,13 +3,12 @@ package com.OLearning.controller.homePage;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import com.OLearning.dto.category.CategoryDTO;
-import com.OLearning.dto.course.CourseDTO;
+import com.OLearning.dto.course.CourseViewDTO;
 import com.OLearning.entity.Category;
 import com.OLearning.entity.Course;
 import com.OLearning.entity.Order;
 import com.OLearning.entity.User;
+import com.OLearning.mapper.course.CourseMapper;
 import com.OLearning.repository.CourseRepository;
 import com.OLearning.repository.UserRepository;
 import com.OLearning.repository.VoucherRepository;
@@ -17,7 +16,6 @@ import com.OLearning.service.cart.CartService;
 import com.OLearning.service.cart.impl.CartServiceImpl;
 import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.course.CourseService;
-
 import com.OLearning.service.vnpay.VNPayService;
 import com.OLearning.service.voucher.VoucherService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,7 +24,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -40,7 +37,6 @@ import com.OLearning.service.enrollment.EnrollmentService;
 @Controller
 @RequestMapping("/home")
 public class HomeController {
-
         @Autowired
         private CategoryService categoryService;
 
@@ -79,72 +75,46 @@ public class HomeController {
                 // chia làm 2 danh sách:
                 List<Category> firstFive = categoryService.findAll().stream().limit(5).toList();
                 List<Category> nextFive = categoryService.findAll().stream().skip(5).limit(5).toList();
-                List<Course> topCourses = courseService.getTopCourses().stream().limit(5).collect(Collectors.toList());
+                List<CourseViewDTO> topCourses = courseService.getTopCourses().stream().limit(5).collect(Collectors.toList());
                 model.addAttribute("topCourses", topCourses);
                 model.addAttribute("topCategories", categoryService.findTop5ByOrderByIdAsc());
                 model.addAttribute("firstFive", firstFive);
                 model.addAttribute("nextFive", nextFive);
-                // Thêm map courseId -> isEnrolled
-                Map<Long, Boolean> topCoursesEnrolledMap = new HashMap<>();
-                if (userDetails != null) {
-                        String email = userDetails.getUsername();
-                        User user = userRepository.findByEmail(email).orElse(null);
-                        if (user != null) {
-                                for (Course c : topCourses) {
-                                        boolean enrolled = enrollmentService.hasEnrolled(user.getUserId(), c.getCourseId());
-                                        topCoursesEnrolledMap.put(c.getCourseId(), enrolled);
-                                }
-                        }
-                }
-                model.addAttribute("topCoursesEnrolledMap", topCoursesEnrolledMap);
                 return "homePage/index";
         }
 
-    @GetMapping("/coursesGrid")
-    public String coursesGrid(Model model, @RequestParam(defaultValue = "0") int page,
-                            @RequestParam(required = false) String keyword,
-                            @RequestParam(required = false) List<Long> categoryIds,
-                            @RequestParam(required = false) List<String> priceFilters,
-                            @RequestParam(required = false) List<String> levels,
-                            @RequestParam(defaultValue = "Newest") String sortBy,
-                            @RequestParam(defaultValue = "9") int size) {
-        Page<CourseDTO> courses = courseService.searchCoursesGrid(categoryIds, priceFilters, levels, sortBy,
-                        keyword,
-                        page, size); // lưu ý trả về Page<CourseDTO>
-        model.addAttribute("categories", categoryService.getListCategories());
-        model.addAttribute("courses", courses.getContent());
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", courses.getTotalPages());
-        model.addAttribute("totalItems", courses.getTotalElements());
-        model.addAttribute("categoryIds", categoryIds);
-        return "homePage/course-grid";
-    }
+        @GetMapping("/coursesGrid")
+        public String coursesGrid(Model model, @RequestParam(defaultValue = "0") int page,
+                        @RequestParam(required = false) String keyword,
+                        @RequestParam(required = false) List<Long> categoryIds,
+                        @RequestParam(required = false) List<String> priceFilters,
+                        @RequestParam(required = false) List<String> levels,
+                        @RequestParam(defaultValue = "Newest") String sortBy,
+                        @RequestParam(defaultValue = "9") int size) {
+                Page<CourseViewDTO> courses = courseService.searchCoursesGrid(categoryIds, priceFilters, levels, sortBy,
+                                keyword,
+                                page, size); // lưu ý trả về Page<CourseDTO>
+                model.addAttribute("categories", categoryService.getListCategories());
+                model.addAttribute("courses", courses.getContent());
+                model.addAttribute("currentPage", page);
+                model.addAttribute("totalPages", courses.getTotalPages());
+                model.addAttribute("totalItems", courses.getTotalElements());
+                model.addAttribute("categoryIds", categoryIds);
+
+                return "homePage/course-grid";
+        }
 
         @GetMapping("/course-detail")
-        public String courseDetail(@RequestParam("id") Long id, Model model, @AuthenticationPrincipal UserDetails userDetails) {
-                Course course = courseService.getCourseById(id);
+        public String courseDetail(@RequestParam("id") Long id, Model model) {
+                CourseViewDTO course = courseService.getCourseById(id);
 
-                int totalStudents = course.getInstructor().getCourses()
-                                .stream()
-                                .mapToInt(c -> c.getEnrollments().size())
-                                .sum();
-                model.addAttribute("totalStudents", totalStudents);
+                model.addAttribute("totalStudents", course.getEnrollments().size());
                 model.addAttribute("courseByInstructor",
-                                course.getInstructor().getCourses().stream().limit(2).collect(Collectors.toList()));
+                                course.getInstructor().getCourses().stream().map(CourseMapper::toCourseViewDTO).collect(Collectors.toList()));
                 model.addAttribute("courseByCategory",
-                                course.getCategory().getCourses().stream().limit(5).collect(Collectors.toList()));
+                                course.getCategory().getCourses().stream().map(CourseMapper::toCourseViewDTO).collect(Collectors.toList()));
                 model.addAttribute("course", course);
-
-                boolean isEnrolled = false;
-                if (userDetails != null) {
-                        String email = userDetails.getUsername();
-                        User user = userRepository.findByEmail(email).orElse(null);
-                        if (user != null) {
-                                isEnrolled = enrollmentService.hasEnrolled(user.getUserId(), id);
-                        }
-                }
-                model.addAttribute("isEnrolled", isEnrolled);
-
+                        
                 return "homePage/course-detail";
         }
 
@@ -180,7 +150,7 @@ public class HomeController {
             item.put("id", UUID.randomUUID().toString());
             item.put("courseId", courseId);
             item.put("courseTitle", course.getTitle());
-            double price = course.getPrice().doubleValue();
+            double price = course.getPrice() != null ? course.getPrice() : 0.0;
             if (voucherId != null) {
                 var voucherOpt = voucherRepository.findById(voucherId);
                 if (voucherOpt.isPresent()) {

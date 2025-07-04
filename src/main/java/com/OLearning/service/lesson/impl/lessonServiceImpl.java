@@ -147,4 +147,9 @@ public class lessonServiceImpl implements LessonService {
                 .findFirst();
     }
 
+    @Override
+    public Lesson getNextLessonAfterCurrent(Long currentLessonId, Long courseId) {
+        return lessonRepository.findNextLessonAfterCurrent(currentLessonId,courseId);
+    }
+
 }

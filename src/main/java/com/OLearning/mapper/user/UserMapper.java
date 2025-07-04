@@ -21,6 +21,10 @@ public class UserMapper {
         return dto;
     }
 
+    /*
+     * 
+     */
+
     public User toUser(UserDTO dto, Role role) {
         User user = new User();
         user.setUserId(dto.getUserId());

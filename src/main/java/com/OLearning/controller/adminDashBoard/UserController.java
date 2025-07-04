@@ -191,34 +191,28 @@ public class UserController {
     @GetMapping("/account/counts")
     @ResponseBody
     public Map<String, Long> getAccountCounts(
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Boolean status) {
-        
+            @RequestParam(required = false) String keyword) {
         Map<String, Long> counts = new HashMap<>();
-        
-        // Get counts for each role (1=Admin, 2=Instructor, 3=User)
         for (long roleId = 1; roleId <= 3; roleId++) {
-            Pageable pageable = PageRequest.of(0, 1); // Just get 1 item to check total
-            Page<UserDTO> userPage;
-            
+            Pageable pageable = PageRequest.of(0, 1);
+            // Active
+            Page<UserDTO> activePage;
             if (keyword != null && !keyword.trim().isEmpty()) {
-                if (status != null) {
-                    userPage = userService.searchByNameAndStatusWithPagination(keyword.trim(), roleId, status, pageable);
-                } else {
-                    userPage = userService.searchByNameWithPagination(keyword.trim(), roleId, pageable);
-                }
+                activePage = userService.searchByNameAndStatusWithPagination(keyword.trim(), roleId, true, pageable);
             } else {
-                if (status != null) {
-                    userPage = userService.getUsersByRoleAndStatusWithPagination(roleId, status, pageable);
-                } else {
-                    userPage = userService.getUsersByRoleWithPagination(roleId, pageable);
-                }
+                activePage = userService.getUsersByRoleAndStatusWithPagination(roleId, true, pageable);
             }
-            
+            // Inactive
+            Page<UserDTO> inactivePage;
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                inactivePage = userService.searchByNameAndStatusWithPagination(keyword.trim(), roleId, false, pageable);
+            } else {
+                inactivePage = userService.getUsersByRoleAndStatusWithPagination(roleId, false, pageable);
+            }
             String roleKey = roleId == 1 ? "admin" : roleId == 2 ? "instructor" : "user";
-            counts.put(roleKey, userPage.getTotalElements());
+            counts.put(roleKey + "Active", activePage.getTotalElements());
+            counts.put(roleKey + "Inactive", inactivePage.getTotalElements());
         }
-        
         return counts;
     }
 

@@ -318,31 +318,18 @@ function updateCountBadge(roleId, data) {
 
 function updateAllCounts() {
     const keyword = $('#searchInput').val().trim();
-    
-    // Convert status string to boolean or null
-    let statusParam = null;
-    if (currentStatus !== 'all') {
-        statusParam = currentStatus === 'true';
-    }
-    
+
     $.ajax({
         url: '/admin/account/counts',
         method: 'GET',
         data: {
-            keyword: keyword || null,
-            status: statusParam
+            keyword: keyword || null
         },
         success: function (counts) {
-            // Update each count badge with the correct total
-            if (counts.admin !== undefined) {
-                $('#adminCount').text(counts.admin);
-            }
-            if (counts.instructor !== undefined) {
-                $('#instructorCount').text(counts.instructor);
-            }
-            if (counts.user !== undefined) {
-                $('#userCount').text(counts.user);
-            }
+            // Cộng cả active và inactive cho mỗi role
+            $('#adminCount').text((counts.adminActive ?? 0) + (counts.adminInactive ?? 0));
+            $('#instructorCount').text((counts.instructorActive ?? 0) + (counts.instructorInactive ?? 0));
+            $('#userCount').text((counts.userActive ?? 0) + (counts.userInactive ?? 0));
         },
         error: function (xhr, status, error) {
             console.error("Error getting counts:", error);

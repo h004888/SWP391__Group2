@@ -28,6 +28,11 @@
             </a>
         </td>
     </tr>
+    <tr th:if="${#lists.isEmpty(courseMaintenances)}">
+        <td colspan="9" class="text-center text-muted">
+            <i class="fas fa-search me-2"></i>No maintenance records found
+        </td>
+    </tr>
 </div>
 
 <div th:fragment="maintenancePagination" class="d-sm-flex justify-content-sm-between align-items-sm-center mt-2">

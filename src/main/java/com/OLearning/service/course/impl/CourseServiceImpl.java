@@ -5,6 +5,7 @@ import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.course.CourseDetailDTO;
 import com.OLearning.dto.course.CourseMediaDTO;
 import com.OLearning.entity.Category;
+import com.OLearning.dto.course.CourseViewDTO;
 import com.OLearning.entity.Chapter;
 import com.OLearning.entity.Course;
 import com.OLearning.entity.User;
@@ -28,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CourseServiceImpl implements CourseService {
@@ -100,7 +102,7 @@ public class CourseServiceImpl implements CourseService {
 
 
     @Override
-    public Page<CourseDTO> searchCoursesGrid(
+    public Page<CourseViewDTO> searchCoursesGrid(
             List<Long> categoryIds,
             List<String> priceFilters,
             List<String> levels,
@@ -140,18 +142,18 @@ public class CourseServiceImpl implements CourseService {
 
         List<Course> result = new ArrayList<>(coursesPage.getContent());
 
-//        // Sort bằng Java nếu là MostPopular hoặc MostViewed
-//        if ("MostPopular".equals(sortBy)) {
-//            result.sort((a, b) -> Long.compare(b.getReviewCount(), a.getReviewCount()));
-//        } else if ("MostViewed".equals(sortBy)) {
-//            result.sort((a, b) -> Integer.compare(b.totalStudentEnrolled(), a.totalStudentEnrolled()));
-//        }
+        // Sort bằng Java nếu là MostPopular hoặc MostViewed
+        if ("MostPopular".equals(sortBy)) {
+            result.sort((a, b) -> Long.compare(b.getCourseReviews().size(), a.getCourseReviews().size()));
+        } else if ("MostViewed".equals(sortBy)) {
+            result.sort((a, b) -> Integer.compare(b.getEnrollments().size(), a.getEnrollments().size()));
+        }
 
         // Trả về lại Page<CourseDTO>
         return new PageImpl<>(
                 result,
                 pageable,
-                coursesPage.getTotalElements()).map(CourseMapper::toDTO);
+                coursesPage.getTotalElements()).map(CourseMapper::toCourseViewDTO);
     }
 
     @Override
@@ -159,8 +161,10 @@ public class CourseServiceImpl implements CourseService {
         courseRepository.deleteById(courseId);}
 
     @Override
-    public List<Course> getTopCourses() {
-        return courseRepository.findAllOrderByStudentCountDesc();
+    public List<CourseViewDTO> getTopCourses() {
+        return courseRepository.findAllOrderByStudentCountDesc().stream()
+                .map(CourseMapper::toCourseViewDTO)
+                .collect(Collectors.toList());
     }
     @Override
     public Optional<CourseDetailDTO> getDetailCourse(Long id) {
@@ -191,9 +195,12 @@ public class CourseServiceImpl implements CourseService {
         }
         return null;
     }
+
     @Override
-    public Course getCourseById(Long id) {
-        return courseRepository.findById(id).orElse(null);
+    public CourseViewDTO getCourseById(Long id) {
+        return courseRepository.findById(id)
+                .map(CourseMapper::toCourseViewDTO)
+                .orElseThrow(() -> new IllegalArgumentException("Course not found with id: " + id));
     }
 
     @Override
@@ -291,7 +298,7 @@ public class CourseServiceImpl implements CourseService {
             String imageUrl = uploadFile.uploadImageFile(CourseMediaDTO.getImage());
             course.setCourseImg(imageUrl);
         }
-        
+
         if (CourseMediaDTO.getVideo() != null && !CourseMediaDTO.getVideo().isEmpty()) {
             String videoUrl = uploadFile.uploadVideoFile(CourseMediaDTO.getVideo());
             course.setVideoUrlPreview(videoUrl);
@@ -316,6 +323,13 @@ public class CourseServiceImpl implements CourseService {
         return courses.stream()
                 .map(courseMapper::MapCourseDTO)
                 .toList();
+    }
+
+    @Override
+    public List<CourseViewDTO> getCoursesByCategoryId(int categoryId) {
+        return courseRepository.findByCategoryId(categoryId).stream()
+                .map(CourseMapper::toCourseViewDTO)
+                .collect(Collectors.toList());
     }
 
 }

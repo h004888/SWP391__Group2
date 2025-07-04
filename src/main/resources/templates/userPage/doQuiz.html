@@ -1,7 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
-<!-- Mirrored from stackbros.in/eduport/landing/course-detail-min.html by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 06 Jun 2025 07:32:06 GMT -->
 <head>
     <title>Eduport - LMS, Education and Course Theme</title>
 
@@ -92,19 +91,84 @@
 
 </head>
 
-<body>
 
+<body>
 <!-- Header START -->
 <div th:replace="userPage/fragmentLessonVideo/navHeaderLessonVideo :: navHeaderLessonVideo"></div>
 <!-- Header END -->
+<div th:unless="${result}">
+    <div class="container py-3 quiz-container">
+        <div class="bg-white p-5 shadow rounded">
+            <h2 class="mb-4 text-primary" th:text="${quiz.title}"></h2>
 
-<!-- **************** MAIN CONTENT START **************** -->
-<div th:replace="userPage/fragmentLessonVideo/mainContentLessonVideo :: mainContentLessonVideo"></div>
-<!-- **************** MAIN CONTENT END **************** -->
+            <form method="post" th:action="@{/quiz/submit}" th:object="${submissionForm}">
+
+                <!-- Hidden inputs để giữ thông tin cần thiết -->
+                <input type="hidden" th:field="*{quizId}"/>
+                <input type="hidden" th:field="*{courseId}"/>
+                <input type="hidden" th:field="*{lessonId}"/>
+
+                <div th:each="q, iterStat : ${questions}" class="mb-4">
+                    <p class="fw-bold" th:text="${iterStat.index + 1} + '. ' + ${q.question}"></p>
+
+                    <div class="form-check ms-3">
+                        <input class="form-check-input" type="radio" th:id="'optA' + ${q.id}"
+                               th:field="*{answers[__${q.id}__]}" value="A"/>
+                        <label class="form-check-label" th:for="'optA' + ${q.id}" th:text="${q.optionA}"></label>
+                    </div>
+
+                    <div class="form-check ms-3">
+                        <input class="form-check-input" type="radio" th:id="'optB' + ${q.id}"
+                               th:field="*{answers[__${q.id}__]}" value="B"/>
+                        <label class="form-check-label" th:for="'optB' + ${q.id}" th:text="${q.optionB}"></label>
+                    </div>
+
+                    <div class="form-check ms-3">
+                        <input class="form-check-input" type="radio" th:id="'optC' + ${q.id}"
+                               th:field="*{answers[__${q.id}__]}" value="C"/>
+                        <label class="form-check-label" th:for="'optC' + ${q.id}" th:text="${q.optionC}"></label>
+                    </div>
+
+                    <div class="form-check ms-3">
+                        <input class="form-check-input" type="radio" th:id="'optD' + ${q.id}"
+                               th:field="*{answers[__${q.id}__]}" value="D"/>
+                        <label class="form-check-label" th:for="'optD' + ${q.id}" th:text="${q.optionD}"></label>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary mt-3" type="submit">Nộp bài</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<div th:if="${result}">
+    <div class="container text-center py-5">
+        <h2 class="text-success">Bạn đã hoàn thành bài quiz!</h2>
+
+        <p class="mt-3">
+            Số câu đúng:
+            <strong th:text="${score}"></strong> /
+            <strong th:text="${total}"></strong>
+        </p>
+
+        <div th:if="${passed}">
+            <p class="text-success">Bạn đã đạt yêu cầu! Tiếp tục học thôi!</p>
+            <a th:href="@{/learning/course/{courseId}/lesson/{lessonId}(courseId=${courseId}, lessonId=${nextLessonId})}"class="btn btn-primary mt-3">Tiếp tục học</a>
+        </div>
+
+        <div th:unless="${passed}">
+            <p class="text-danger">Bạn chưa đạt yêu cầu. Hãy làm lại bài quiz.</p>
+            <a th:href="@{/learning/course/{courseId}/lesson/{lessonId}(courseId=${courseId}, lessonId=${lessonId})}"
+               class="btn btn-warning mt-3">Làm lại Quiz</a>
+        </div>
+    </div>
+</div>
 
 <!-- =======================
 Footer START -->
-<div th:replace="userPage/fragmentLessonVideo/footerLessonVideo :: footerLessonVideo"> </div>
+<div th:replace="userPage/fragmentLessonVideo/footerLessonVideo :: footerLessonVideo"></div>
 <!-- =======================
 Footer END -->
 
@@ -206,42 +270,10 @@ Footer END -->
 <script src="/assets/js/functions.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-
-
 <script>
-    $(document).ready(function () {
-        const video = $("video")[0];
-        const lessonId = [[${currentLesson.lessonId}]];
-        const courseId = [[${course.courseId}]];
 
-        video.addEventListener("ended", function () {
-            $.ajax({
-                url: '/api/lesson/complete',
-                type: 'POST',
-                data: {
-                    lessonId: lessonId,
-                    courseId: courseId
-                },
-                success: function (response) {
-                    if (response.status === 'success') {
-                        window.location.href = response.nextLessonUrl;
-                    } else if (response.status === 'completed_all') {
-                        alert("🎉 Bạn đã hoàn thành toàn bộ khóa học!");
-                        window.location.href = "/learning";
-                    } else {
-                        alert("❌ Không thể chuyển bài học. Vui lòng thử lại.");
-                    }
-                },
-                error: function () {
-                    alert("⚠️ Đã xảy ra lỗi khi gửi yêu cầu đánh dấu hoàn thành bài học.");
-                }
-            });
-        });
-    });
 </script>
-
 
 </body>
 
-<!-- Mirrored from stackbros.in/eduport/landing/course-detail-min.html by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 06 Jun 2025 07:32:10 GMT -->
 </html>

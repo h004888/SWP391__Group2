@@ -14,5 +14,7 @@ public interface LessonCompletionService {
 
     void markLessonAsCompleted(Long userId, Long lessonId);
 
-}
+    Double getOverallProgressOfUser(Long userId, Long courseId);
 
+    Integer getNumberOfCompletedLessons(Long userId, Long courseId);
+}

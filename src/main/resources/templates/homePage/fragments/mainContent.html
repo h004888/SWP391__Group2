@@ -1,3 +1,4 @@
+<!-- **************** MAIN CONTENT START **************** -->
 <main th:fragment="mainContent">
     <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
         <span th:text="${message}"></span>
@@ -546,17 +547,22 @@ Trending courses START -->
                                         <a href="#" class="h6 fw-light mb-0"><i class="far fa-bookmark"></i></a>
                                     </div>
                                     <!-- Title -->
-                                    <h5 class="card-title"><a th:href="@{'/home/course-detail?id=' + ${course.courseId}}" th:text="${course.title}">The complete Digital
+                                    <h5 class="card-title"><a
+                                            th:href="@{'/home/course-detail?id=' + ${course.courseId}}"
+                                            th:text="${course.title}">The complete Digital
                                             Marketing Course - 8 Course
                                             in 1</a></h5>
                                     <!-- Rating -->
                                     <div class="d-flex justify-content-between mb-2">
                                         <div class="hstack gap-2">
                                             <p class="text-warning m-0">
-<!--                                                <span th:text="${course.averageRating}">4.5</span>-->
+                                                <span
+                                                    th:text="|${#numbers.formatDecimal(course.averageRating, 1, 'POINT', 1, 'POINT')}/5.0|">2.9/5.0</span>
+
                                                 <i class="fas fa-star text-warning ms-1"></i>
                                             </p>
-                                            <span class="small">(6500)</span>
+
+                                            <span class="small" th:text="${'(' + course.courseReviews.size()+')'}">(6500)</span>
                                         </div>
                                         <div class="hstack gap-2">
                                             <p class="h6 fw-light mb-0 m-0" th:text="${course.enrollments.size()}">
@@ -568,15 +574,15 @@ Trending courses START -->
                                     <div class="hstack gap-3">
                                         <span class="h6 fw-light mb-0"><i
                                                 class="far fa-clock text-danger me-2"></i><span
-                                               >12h</span></span>
+                                                th:text="${course.duration} + 'h'">12h</span></span>
                                         <span class="h6 fw-light mb-0"><i
                                                 class="fas fa-table text-orange me-2"></i><span
-                                               >15
+                                                th:text="${course.getTotalLessons()} + ' lectures'">15
                                                 lectures</span></span>
                                     </div>
                                 </div>
                                 <!-- Card footer -->
-                                <div class="card-footer pt-0 bg-transparent" >
+                                <div class="card-footer pt-0 bg-transparent">
                                     <hr>
                                     <!-- Avatar and Price -->
                                     <div class="d-flex justify-content-between align-items-center">
@@ -591,8 +597,10 @@ Trending courses START -->
                                             </p>
                                         </div>
                                         <!-- Price -->
-                                        <div th:if="${topCoursesEnrolledMap[course.courseId] == null or !topCoursesEnrolledMap[course.courseId]}">
-                                            <h4 class="text-success mb-0 item-show " style="font-size: 1.2rem;" th:if="${course.price>0}"><span
+                                        <div>
+
+                                            <h4 class="text-success mb-0 item-show " style="font-size: 1.2rem;"
+                                                th:if="${course.price>0}"><span
                                                     th:text="${course.price != null ? #numbers.formatDecimal(course.price, 0, 'COMMA', 0, 'POINT')+' ₫' : 'N/A'}"></span>
                                             </h4>
                                             <h4 class="text-success mb-0 item-show" th:if="${course.price==0}">Free
@@ -602,9 +610,6 @@ Trending courses START -->
                                                 <i class="fas fa-shopping-cart me-2"></i>Add to cart
                                             </button>
                                         </div>
-                                        <a th:if="${topCoursesEnrolledMap[course.courseId] != null and topCoursesEnrolledMap[course.courseId]}"
-                                           th:href="@{/learning/course/view(courseId=${course.courseId})}"
-                                           class="btn btn-sm btn-primary-soft mb-0">Continue</a>
                                     </div>
                                 </div>
                             </div>
@@ -889,10 +894,10 @@ Reviews START -->
     </section>
     <!-- =======================
 Reviews END -->
-    
+
     <!-- Chatbot Widget -->
     <div th:replace="~{homePage/fragments/chatbotWidget.html}"></div>
-    
+
     <script src="/js/homePage/addtocart.js"></script>
 </main>
 <!-- **************** MAIN CONTENT END **************** -->
