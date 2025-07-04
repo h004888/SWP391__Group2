@@ -33,6 +33,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.OLearning.service.enrollment.EnrollmentService;
+import com.OLearning.service.courseReview.CourseReviewService;
+import com.OLearning.entity.CourseReview;
 
 @Controller
 @RequestMapping("/home")
@@ -63,6 +65,9 @@ public class HomeController {
 
     @Autowired
     private EnrollmentService enrollmentService;
+
+    @Autowired
+    private CourseReviewService courseReviewService;
 
         @GetMapping()
         public String getMethodName(Model model, @AuthenticationPrincipal UserDetails userDetails) {
@@ -111,19 +116,43 @@ public class HomeController {
         }
 
         @GetMapping("/course-detail")
-        public String courseDetail(@RequestParam("id") Long id, Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        public String courseDetail(
+                @RequestParam("id") Long id,
+                @RequestParam(value = "star", required = false, defaultValue = "0") Integer star,
+                Model model,
+                @AuthenticationPrincipal UserDetails userDetails) {
                 Course course = courseService.getCourseById(id);
-
                 int totalStudents = course.getInstructor().getCourses()
-                                .stream()
-                                .mapToInt(c -> c.getEnrollments().size())
-                                .sum();
+                        .stream()
+                        .mapToInt(c -> c.getEnrollments().size())
+                        .sum();
                 model.addAttribute("totalStudents", totalStudents);
                 model.addAttribute("courseByInstructor",
-                                course.getInstructor().getCourses().stream().limit(2).collect(Collectors.toList()));
+                        course.getInstructor().getCourses().stream().limit(2).collect(Collectors.toList()));
                 model.addAttribute("courseByCategory",
-                                course.getCategory().getCourses().stream().limit(5).collect(Collectors.toList()));
+                        course.getCategory().getCourses().stream().limit(5).collect(Collectors.toList()));
                 model.addAttribute("course", course);
+
+                // Lấy toàn bộ review
+                java.util.List<CourseReview> allReviews = courseReviewService.getCourseReviewsByCourse(course);
+                // Review có rating
+                java.util.List<CourseReview> reviews;
+                if (star != null && star > 0) {
+                        reviews = allReviews.stream()
+                                .filter(r -> r.getRating() != null && r.getRating().intValue() == star)
+                                .collect(Collectors.toList());
+                } else {
+                        reviews = allReviews.stream()
+                                .filter(r -> r.getRating() != null)
+                                .collect(Collectors.toList());
+                }
+                // Comment không có rating
+                java.util.List<CourseReview> comments = allReviews.stream()
+                        .filter(r -> r.getRating() == null)
+                        .collect(Collectors.toList());
+                model.addAttribute("reviews", reviews);
+                model.addAttribute("comments", comments);
+                model.addAttribute("star", star);
 
                 boolean isEnrolled = false;
                 if (userDetails != null) {

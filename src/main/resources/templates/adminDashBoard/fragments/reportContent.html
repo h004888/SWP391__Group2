@@ -6,7 +6,7 @@
             </h1>
         </div>
         <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
+            <div class="card-header bg-primary-soft text-primary">
                 <i class="fas fa-filter me-2"></i>Filter Reports
             </div>
             <div class="card-body">
@@ -18,7 +18,7 @@
                             <option value="BLOCK_COURSE" th:selected="${type == 'REPORT_COURSE'}"> Course</option>
                             <option value="COMMENT" th:selected="${type == 'REPORT_COMMENT'}">Comment</option>
          
-                        </select>
+                    </select>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Status</label>
@@ -34,7 +34,7 @@
                         <input type="text" class="form-control" name="keyword" placeholder="Search...">
                     </div>
                     <div class="col-md-3">
-                        <button type="submit" class="btn btn-primary w-100">
+                        <button type="submit" class="btn btn-primary-soft w-100 text-primary">
                             <i class="fas fa-search me-2"></i>Search
                         </button>
                     </div>
@@ -42,13 +42,13 @@
             </div>
         </div>
         <div class="card">
-            <div class="card-header bg-info text-white">
+            <div class="card-header bg-info-soft text-info">
                 <i class="fas fa-list me-2"></i>Report List
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
-                        <thead class="table-light">
+                        <thead class="table-dark text-white">
                             <tr>
                                 <th>ID</th>
                                 <th>Type</th>
@@ -66,17 +66,17 @@
                                 <td th:text="${report.course != null ? report.course.title : '-'}"></td>
                                 <td th:text="${report.user != null ? report.user.username : '-'}"></td>
                                 <td>
-                                    <span th:if="${report.status == 'processed'}" class="badge bg-success"><i ></i>processed</span>
-                                    <span th:if="${report.status == 'pending'}" class="badge bg-warning"><i ></i>pending</span>
-                                    <span th:if="${report.status != 'processed' and report.status != 'pending'}" class="badge bg-secondary"><i class="fas fa-question"></i></span>
+                                    <span th:if="${report.status == 'processed'}" class="badge bg-success-soft text-success"><i ></i>processed</span>
+                                    <span th:if="${report.status == 'pending'}" class="badge bg-warning-soft text-warning"><i ></i>pending</span>
+                                    <span th:if="${report.status != 'processed' and report.status != 'pending'}" class="badge bg-secondary-soft text-secondary"><i class="fas fa-question"></i></span>
                                 </td>
                                 <td th:text="${#temporals.format(report.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
                                 <td>
-                                    <a th:href="@{/admin/reports/view/{id}(id=${report.id})}" class="btn btn-sm btn-info">
+                                    <a th:href="@{/admin/reports/view/{id}(id=${report.id})}" class="btn btn-sm btn-info-soft text-info">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                     <form th:if="${report.status != 'processed'}" th:action="@{/admin/reports/process/{id}(id=${report.id})}" method="post" style="display:inline">
-                                        <button type="submit" class="btn btn-success btn-sm"><i class="fas fa-check"></i></button>
+                                        <button type="submit" class="btn btn-success-soft btn-sm text-success"><i class="fas fa-check"></i></button>
                                     </form>
                                 </td>
                             </tr>

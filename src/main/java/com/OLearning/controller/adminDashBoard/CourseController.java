@@ -185,6 +185,9 @@ public class CourseController {
         try {
             Course course = courseRepository.findById(courseId)
                     .orElseThrow(() -> new RuntimeException("Course not found"));
+            // Chuyển trạng thái sang pending_block
+            course.setStatus("pending_block");
+            courseRepository.save(course);
             // KHÔNG block ngay, chỉ gửi email cho instructor
             User instructor = course.getInstructor();
             if (instructor != null) {
@@ -206,7 +209,7 @@ public class CourseController {
                         "Trân trọng,\nĐội ngũ OLearning";
                 emailService.sendOTP(instructor.getEmail(), subject, content);
             }
-            redirect.addFlashAttribute("success", "Instructor has been notified to respond before blocking the course.");
+            redirect.addFlashAttribute("success", "Instructor has been notified to respond before blocking the course. Course status set to pending_block.");
         } catch (Exception e) {
             redirect.addFlashAttribute("error", "Failed to notify instructor: " + e.getMessage());
         }

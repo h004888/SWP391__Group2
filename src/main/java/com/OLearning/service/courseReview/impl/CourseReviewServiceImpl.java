@@ -1,6 +1,7 @@
 package com.OLearning.service.courseReview.impl;
 
 import com.OLearning.entity.CourseReview;
+import com.OLearning.entity.Course;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import java.util.List;
 
 @Service
 public class CourseReviewServiceImpl implements CourseReviewService {
@@ -28,5 +30,15 @@ public class CourseReviewServiceImpl implements CourseReviewService {
     public Page<CourseReview> getCourseReviewsByInstructorId(Long instructorId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return courseReviewRepository.findByInstructorId(instructorId, pageable);
+    }
+
+    @Override
+    public List<CourseReview> getCourseReviewsByCourse(Course course) {
+        return courseReviewRepository.findByCourseWithUserOrderByCreatedAtDesc(course);
+    }
+
+    @Override
+    public CourseReview save(CourseReview review) {
+        return courseReviewRepository.save(review);
     }
 }

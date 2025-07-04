@@ -801,9 +801,8 @@
                                         <!-- Comment Form -->
                                         <div class="d-flex mb-4">
                                             <div class="avatar avatar-sm flex-shrink-0 me-2">
-                                                <img class="avatar-img rounded-circle"
-                                                     th:src="${user != null and user.profilePicture != null and user.profilePicture != ''} ? ${user.profilePicture} : @{/assets/images/avatar/default.jpg}"
-                                                     th:alt="${user != null ? user.fullName : 'Người dùng'}">
+                                                <img class="avatar-img rounded-circle" th:if="${user != null and !#strings.isEmpty(user.profilePicture)}" th:src="${user.profilePicture}" th:alt="${user.fullName}" />
+                                                <img class="avatar-img rounded-circle" th:if="${user == null or #strings.isEmpty(user.profilePicture)}" th:src="@{/assets/images/avatar/default.jpg}" alt="Người dùng" />
                                             </div>
                                             <form id="commentForm" class="w-100 d-flex">
                                                 <input type="hidden" name="courseId" th:value="${course.courseId}" />
@@ -826,18 +825,15 @@
                                                 <i class="fas fa-comments fa-3x text-muted mb-3"></i>
                                                 <p class="text-muted mb-0">Chưa có bình luận nào. Hãy là người đầu tiên bình luận!</p>
                                             </div>
-                                            <div th:each="review : ${reviews}" class="comment-item mb-3">
-                                                <div class="d-flex">
-                                                    <!-- Avatar -->
-                                                    <div class="avatar avatar-sm flex-shrink-0 me-2">
-                                                        <img class="avatar-img rounded-circle"
-                                                             th:src="${review.user.profilePicture != null and review.user.profilePicture != ''} ? ${review.user.profilePicture} : @{/assets/images/avatar/default.jpg}"
-                                                             th:alt="${review.user.fullName}">
+                                            <div th:each="review : ${reviews}">
+                                                <div class="d-md-flex my-4">
+                                                    <div class="avatar avatar-xl me-4 flex-shrink-0">
+                                                        <img class="avatar-img rounded-circle" th:if="${review.user != null and !#strings.isEmpty(review.user.profilePicture)}" th:src="${review.user.profilePicture}" th:alt="${review.user.fullName}" />
+                                                        <img class="avatar-img rounded-circle" th:if="${review.user == null or #strings.isEmpty(review.user.profilePicture)}" th:src="@{/assets/images/avatar/default.jpg}" alt="Người dùng" />
                                                     </div>
-                                                    <!-- Comment content -->
-                                                    <div class="w-100">
-                                                        <div class="d-flex justify-content-between">
-                                                            <h6 class="mb-1" th:text="${review.user.fullName}">Tên người dùng</h6>
+                                                    <div>
+                                                        <div class="d-sm-flex mt-1 mt-md-0 align-items-center">
+                                                            <h5 class="me-3 mb-0" th:text="${review.user.fullName}">User Name</h5>
                                                             <small class="ms-2" th:text="${#temporals.format(review.createdAt, 'dd/MM/yyyy HH:mm')}">Thời gian</small>
                                                         </div>
                                                         <p class="mb-2" th:text="${review.comment}">Nội dung bình luận</p>
@@ -1722,6 +1718,52 @@ Footer END -->
         </div>
     </div>
 </div>
+
+<!-- Comment Section START -->
+<section class="mt-5">
+    <h4 class="mb-4">Bình luận về khóa học</h4>
+    <!-- Form nhập comment -->
+    <div class="d-flex mb-4">
+        <div class="avatar avatar-sm flex-shrink-0 me-2">
+            <img class="avatar-img rounded-circle" th:if="${user != null and !#strings.isEmpty(user.profilePicture)}" th:src="${user.profilePicture}" th:alt="${user.fullName}" />
+            <img class="avatar-img rounded-circle" th:if="${user == null or #strings.isEmpty(user.profilePicture)}" th:src="@{/assets/images/avatar/default.jpg}" alt="Người dùng" />
+        </div>
+        <form th:action="@{'/course/' + ${course.courseId} + '/comment'}" method="post" class="w-100 d-flex">
+            <input type="hidden" name="courseId" th:value="${course.courseId}" />
+            <div class="flex-grow-1 me-2">
+                <textarea class="form-control pe-4 bg-light" name="comment" rows="1" placeholder="Thêm bình luận..." required th:disabled="${user == null}"></textarea>
+            </div>
+            <button class="btn btn-primary mb-0" type="submit" th:disabled="${user == null}">Đăng</button>
+        </form>
+    </div>
+    <div th:if="${user == null}" class="mb-3">
+        <div class="alert alert-warning py-2 px-3 mb-0">Vui lòng <a th:href="@{/login}" class="alert-link">đăng nhập</a> để bình luận.</div>
+    </div>
+    <!-- Danh sách comment -->
+    <div class="mt-4">
+        <div th:if="${#lists.isEmpty(reviews)}" class="text-center py-4">
+            <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+            <p class="text-muted mb-0">Chưa có bình luận nào. Hãy là người đầu tiên bình luận!</p>
+        </div>
+        <div th:each="review : ${reviews}">
+            <div class="d-md-flex my-4">
+                <div class="avatar avatar-xl me-4 flex-shrink-0">
+                    <img class="avatar-img rounded-circle" th:if="${review.user != null and !#strings.isEmpty(review.user.profilePicture)}" th:src="${review.user.profilePicture}" th:alt="${review.user.fullName}" />
+                    <img class="avatar-img rounded-circle" th:if="${review.user == null or #strings.isEmpty(review.user.profilePicture)}" th:src="@{/assets/images/avatar/default.jpg}" alt="Người dùng" />
+                </div>
+                <div>
+                    <div class="d-sm-flex mt-1 mt-md-0 align-items-center">
+                        <h5 class="me-3 mb-0" th:text="${review.user.fullName}">User Name</h5>
+                        <small class="ms-2" th:text="${#temporals.format(review.createdAt, 'dd/MM/yyyy HH:mm')}">Thời gian</small>
+                    </div>
+                    <p class="mb-2" th:text="${review.comment}">Nội dung bình luận</p>
+                </div>
+            </div>
+            <hr>
+        </div>
+    </div>
+</section>
+<!-- Comment Section END -->
 
 </body>
 

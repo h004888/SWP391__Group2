@@ -262,7 +262,7 @@
 Page intro START -->
 		<section class="bg-light py-0 py-sm-5">
 			<div class="container">
-				<div class="row py-5">
+				<div class="row py-5 align-items-center">
 					<div class="col-lg-8">
 						<!-- Badge -->
 						<h6 class="mb-3 font-base bg-primary text-white py-2 px-4 rounded-2 d-inline-block"
@@ -291,6 +291,12 @@ Page intro START -->
 							</li>
 							<li class="list-inline-item h6 mb-0"><i class="fas fa-globe text-info me-2"></i>English</li>
 						</ul>
+					</div>
+					<div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+						<!-- Report Button -->
+						<button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#reportModal">
+							<i class="bi bi-flag"></i> Báo cáo khóa học
+						</button>
 					</div>
 				</div>
 			</div>
@@ -335,22 +341,10 @@ Page content START -->
 										<button class="nav-link mb-2 mb-md-0" id="course-pills-tab-4"
 											data-bs-toggle="pill" data-bs-target="#course-pills-4" type="button"
 											role="tab" aria-controls="course-pills-4"
-											aria-selected="false">Reviews</button>
+											aria-selected="true">Reviews</button>
 									</li>
 									<!-- Tab item -->
-									<li class="nav-item me-2 me-sm-4" role="presentation">
-										<button class="nav-link mb-2 mb-md-0" id="course-pills-tab-5"
-											data-bs-toggle="pill" data-bs-target="#course-pills-5" type="button"
-											role="tab" aria-controls="course-pills-5" aria-selected="false">FAQs
-										</button>
-									</li>
-									<!-- Tab item -->
-									<li class="nav-item me-2 me-sm-4" role="presentation">
-										<button class="nav-link mb-2 mb-md-0" id="course-pills-tab-6"
-											data-bs-toggle="pill" data-bs-target="#course-pills-6" type="button"
-											role="tab" aria-controls="course-pills-6"
-											aria-selected="false">Comment</button>
-									</li>
+
 								</ul>
 							</div>
 							<!-- Tabs END -->
@@ -592,667 +586,78 @@ Page content START -->
 									<!-- Content START -->
 									<div class="tab-pane fade" id="course-pills-4" role="tabpanel"
 										aria-labelledby="course-pills-tab-4">
-										<!-- Review START -->
-										<div class="row mb-4">
-											<h5 class="mb-4">Our Student Reviews</h5>
-
-											<!-- Rating info -->
-											<div class="col-md-4 mb-3 mb-md-0">
-												<div class="text-center">
-													<!-- Info -->
-													<h2 class="mb-0">4.5</h2>
-													<!-- Star -->
-													<ul class="list-inline mb-0">
-														<li class="list-inline-item me-0"><i
-																class="fas fa-star text-warning"></i></li>
-														<li class="list-inline-item me-0"><i
-																class="fas fa-star text-warning"></i></li>
-														<li class="list-inline-item me-0"><i
-																class="fas fa-star text-warning"></i></li>
-														<li class="list-inline-item me-0"><i
-																class="fas fa-star text-warning"></i></li>
-														<li class="list-inline-item me-0"><i
-																class="fas fa-star-half-alt text-warning"></i></li>
-													</ul>
-													<p class="mb-0">(Based on todays review)</p>
-												</div>
-											</div>
-
-											<!-- Progress-bar and star -->
-											<div class="col-md-8">
-												<div class="row align-items-center">
-													<!-- Progress bar and Rating -->
-													<div class="col-6 col-sm-8">
-														<!-- Progress item -->
-														<div class="progress progress-sm bg-warning bg-opacity-15">
-															<div class="progress-bar bg-warning" role="progressbar"
-																style="width: 100%" aria-valuenow="100"
-																aria-valuemin="0" aria-valuemax="100"></div>
-														</div>
-													</div>
-
-													<div class="col-6 col-sm-4">
-														<!-- Star item -->
-														<ul class="list-inline mb-0">
-															<li class="list-inline-item me-0 small"><i
-																	class="fas fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0 small"><i
-																	class="fas fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0 small"><i
-																	class="fas fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0 small"><i
-																	class="fas fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0 small"><i
-																	class="fas fa-star text-warning"></i></li>
-														</ul>
-													</div>
-
-													<!-- Progress bar and Rating -->
-													<div class="col-6 col-sm-8">
-														<!-- Progress item -->
-														<div class="progress progress-sm bg-warning bg-opacity-15">
-															<div class="progress-bar bg-warning" role="progressbar"
-																style="width: 80%" aria-valuenow="80" aria-valuemin="0"
-																aria-valuemax="100"></div>
-														</div>
-													</div>
-
-													<div class="col-6 col-sm-4">
-														<!-- Star item -->
-														<ul class="list-inline mb-0">
-															<li class="list-inline-item me-0 small"><i
-																	class="fas fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0 small"><i
-																	class="fas fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0 small"><i
-																	class="fas fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0 small"><i
-																	class="fas fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0 small"><i
-																	class="far fa-star text-warning"></i></li>
-														</ul>
-													</div>
-
-													<!-- Progress bar and Rating -->
-													<div class="col-6 col-sm-8">
-														<!-- Progress item -->
-														<div class="progress progress-sm bg-warning bg-opacity-15">
-															<div class="progress-bar bg-warning" role="progressbar"
-																style="width: 60%" aria-valuenow="60" aria-valuemin="0"
-																aria-valuemax="100"></div>
-														</div>
-													</div>
-
-													<div class="col-6 col-sm-4">
-														<!-- Star item -->
-														<ul class="list-inline mb-0">
-															<li class="list-inline-item me-0 small"><i
-																	class="fas fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0 small"><i
-																	class="fas fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0 small"><i
-																	class="fas fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0 small"><i
-																	class="far fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0 small"><i
-																	class="far fa-star text-warning"></i></li>
-														</ul>
-													</div>
-
-													<!-- Progress bar and Rating -->
-													<div class="col-6 col-sm-8">
-														<!-- Progress item -->
-														<div class="progress progress-sm bg-warning bg-opacity-15">
-															<div class="progress-bar bg-warning" role="progressbar"
-																style="width: 40%" aria-valuenow="40" aria-valuemin="0"
-																aria-valuemax="100"></div>
-														</div>
-													</div>
-
-													<div class="col-6 col-sm-4">
-														<!-- Star item -->
-														<ul class="list-inline mb-0">
-															<li class="list-inline-item me-0 small"><i
-																	class="fas fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0 small"><i
-																	class="fas fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0 small"><i
-																	class="far fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0 small"><i
-																	class="far fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0 small"><i
-																	class="far fa-star text-warning"></i></li>
-														</ul>
-													</div>
-
-													<!-- Progress bar and Rating -->
-													<div class="col-6 col-sm-8">
-														<!-- Progress item -->
-														<div class="progress progress-sm bg-warning bg-opacity-15">
-															<div class="progress-bar bg-warning" role="progressbar"
-																style="width: 20%" aria-valuenow="20" aria-valuemin="0"
-																aria-valuemax="100"></div>
-														</div>
-													</div>
-
-													<div class="col-6 col-sm-4">
-														<!-- Star item -->
-														<ul class="list-inline mb-0">
-															<li class="list-inline-item me-0 small"><i
-																	class="fas fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0 small"><i
-																	class="far fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0 small"><i
-																	class="far fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0 small"><i
-																	class="far fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0 small"><i
-																	class="far fa-star text-warning"></i></li>
-														</ul>
-													</div>
-												</div>
-											</div>
-										</div>
-										<!-- Review END -->
-
-										<!-- Student review START -->
-										<div class="row">
-											<!-- Review item START -->
-											<div class="d-md-flex my-4">
-												<!-- Avatar -->
-												<div class="avatar avatar-xl me-4 flex-shrink-0">
-													<img class="avatar-img rounded-circle"
-														src="assets/images/avatar/09.jpg" alt="avatar">
-												</div>
-												<!-- Text -->
-												<div>
-													<div class="d-sm-flex mt-1 mt-md-0 align-items-center">
-														<h5 class="me-3 mb-0">Jacqueline Miller</h5>
-														<!-- Review star -->
-														<ul class="list-inline mb-0">
-															<li class="list-inline-item me-0"><i
-																	class="fas fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0"><i
-																	class="fas fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0"><i
-																	class="fas fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0"><i
-																	class="fas fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0"><i
-																	class="far fa-star text-warning"></i></li>
-														</ul>
-													</div>
-													<!-- Info -->
-													<p class="small mb-2">2 days ago</p>
-													<p class="mb-2">Perceived end knowledge certainly day sweetness why
-														cordially. Ask a quick six seven offer see among. Handsome met
-														debating sir dwelling age material. As style lived he worse
-														dried. Offered related so visitors we private removed. Moderate
-														do subjects to distance. </p>
-													<!-- Like and dislike button -->
-													<div class="btn-group" role="group"
-														aria-label="Basic radio toggle button group">
-														<!-- Like button -->
-														<input type="radio" class="btn-check" name="btnradio"
-															id="btnradio1">
-														<label class="btn btn-outline-light btn-sm mb-0"
-															for="btnradio1"><i
-																class="far fa-thumbs-up me-1"></i>25</label>
-														<!-- Dislike button -->
-														<input type="radio" class="btn-check" name="btnradio"
-															id="btnradio2">
-														<label class="btn btn-outline-light btn-sm mb-0"
-															for="btnradio2"> <i
-																class="far fa-thumbs-down me-1"></i>2</label>
-													</div>
-												</div>
-											</div>
-
-											<!-- Comment children level 1 -->
-											<div class="d-md-flex mb-4 ps-4 ps-md-5">
-												<!-- Avatar -->
-												<div class="avatar avatar-lg me-4 flex-shrink-0">
-													<img class="avatar-img rounded-circle"
-														src="assets/images/avatar/02.jpg" alt="avatar">
-												</div>
-												<!-- Text -->
-												<div>
-													<div class="d-sm-flex mt-1 mt-md-0 align-items-center">
-														<h5 class="me-3 mb-0">Louis Ferguson</h5>
-													</div>
-													<!-- Info -->
-													<p class="small mb-2">1 days ago</p>
-													<p class="mb-2">Water timed folly right aware if oh truth.
-														Imprudence attachment him for sympathize. Large above be to
-														means. Dashwood does provide stronger is. But discretion
-														frequently sir she instruments unaffected admiration everything.
-													</p>
-												</div>
-											</div>
-
-											<!-- Divider -->
-											<hr>
-											<!-- Review item END -->
-
-											<!-- Review item START -->
-											<div class="d-md-flex my-4">
-												<!-- Avatar -->
-												<div class="avatar avatar-xl me-4 flex-shrink-0">
-													<img class="avatar-img rounded-circle"
-														src="assets/images/avatar/07.jpg" alt="avatar">
-												</div>
-												<!-- Text -->
-												<div>
-													<div class="d-sm-flex mt-1 mt-md-0 align-items-center">
-														<h5 class="me-3 mb-0">Dennis Barrett</h5>
-														<!-- Review star -->
-														<ul class="list-inline mb-0">
-															<li class="list-inline-item me-0"><i
-																	class="fas fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0"><i
-																	class="fas fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0"><i
-																	class="fas fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0"><i
-																	class="fas fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0"><i
-																	class="far fa-star text-warning"></i></li>
-														</ul>
-													</div>
-													<!-- Info -->
-													<p class="small mb-2">2 days ago</p>
-													<p class="mb-2">Handsome met debating sir dwelling age material. As
-														style lived he worse dried. Offered related so visitors we
-														private removed. Moderate do subjects to distance. </p>
-													<!-- Like and dislike button -->
-													<div class="btn-group" role="group"
-														aria-label="Basic radio toggle button group">
-														<!-- Like button -->
-														<input type="radio" class="btn-check" name="btnradio"
-															id="btnradio3">
-														<label class="btn btn-outline-light btn-sm mb-0"
-															for="btnradio3"><i
-																class="far fa-thumbs-up me-1"></i>25</label>
-														<!-- Dislike button -->
-														<input type="radio" class="btn-check" name="btnradio"
-															id="btnradio4">
-														<label class="btn btn-outline-light btn-sm mb-0"
-															for="btnradio4"> <i
-																class="far fa-thumbs-down me-1"></i>2</label>
-													</div>
-												</div>
-											</div>
-											<!-- Review item END -->
-											<!-- Divider -->
-											<hr>
-										</div>
-										<!-- Student review END -->
-
 										<!-- Leave Review START -->
 										<div class="mt-2">
-											<h5 class="mb-4">Leave a Review</h5>
-											<form class="row g-3">
-												<!-- Name -->
-												<div class="col-md-6 bg-light-input">
-													<input type="text" class="form-control" id="inputtext"
-														placeholder="Name" aria-label="First name">
-												</div>
-												<!-- Email -->
-												<div class="col-md-6 bg-light-input">
-													<input type="email" class="form-control" placeholder="Email"
-														id="inputEmail4">
-												</div>
-												<!-- Rating -->
+											<h5 class="mb-4">Đánh giá khóa học</h5>
+											<form class="row g-3" th:action="@{/home/course-review/add}" method="post">
+												<input type="hidden" name="courseId" th:value="${course.courseId}" />
 												<div class="col-12 bg-light-input">
-													<select id="inputState2" class="form-select js-choice">
-														<option selected="">★★★★★ (5/5)</option>
-														<option>★★★★☆ (4/5)</option>
-														<option>★★★☆☆ (3/5)</option>
-														<option>★★☆☆☆ (2/5)</option>
-														<option>★☆☆☆☆ (1/5)</option>
+													<select name="rating" class="form-select js-choice" required>
+														<option value="" disabled selected>Chọn số sao</option>
+														<option value="5">★★★★★ (5/5)</option>
+														<option value="4">★★★★☆ (4/5)</option>
+														<option value="3">★★★☆☆ (3/5)</option>
+														<option value="2">★★☆☆☆ (2/5)</option>
+														<option value="1">★☆☆☆☆ (1/5)</option>
 													</select>
 												</div>
-												<!-- Message -->
 												<div class="col-12 bg-light-input">
-													<textarea class="form-control" id="exampleFormControlTextarea1"
-														placeholder="Your review" rows="3"></textarea>
+													<textarea class="form-control" name="comment" placeholder="Nhận xét của bạn" rows="3" required></textarea>
 												</div>
-												<!-- Button -->
 												<div class="col-12">
-													<button type="submit" class="btn btn-primary mb-0">Post
-														Review</button>
+													<button type="submit" class="btn btn-primary mb-0">Gửi đánh giá</button>
 												</div>
 											</form>
 										</div>
 										<!-- Leave Review END -->
-
-									</div>
-									<!-- Content END -->
-
-									<!-- Content START -->
-									<div class="tab-pane fade" id="course-pills-5" role="tabpanel"
-										aria-labelledby="course-pills-tab-5">
-										<!-- Title -->
-										<h5 class="mb-3">Frequently Asked Questions</h5>
-										<!-- Accordion START -->
-										<div class="accordion accordion-flush" id="accordionExample">
-											<!-- Item -->
-											<div class="accordion-item">
-												<h2 class="accordion-header" id="headingOne">
-													<button class="accordion-button collapsed" type="button"
-														data-bs-toggle="collapse" data-bs-target="#collapseOne"
-														aria-expanded="true" aria-controls="collapseOne">
-														<span class="text-secondary fw-bold me-3">01</span>
-														<span class="h6 mb-0">How Digital Marketing Work?</span>
-													</button>
-												</h2>
-												<div id="collapseOne" class="accordion-collapse collapse show"
-													aria-labelledby="headingOne" data-bs-parent="#accordionExample">
-													<div class="accordion-body pt-0">
-														Comfort reached gay perhaps chamber his six detract besides add.
-														Moonlight newspaper up its enjoyment agreeable depending. Timed
-														voice share led him to widen noisy young. At weddings believed
-														laughing although the material does the exercise of. Up attempt
-														offered ye civilly so sitting to. She new course gets living
-														within Elinor joy. She rapturous suffering concealed.
-													</div>
-												</div>
-											</div>
-											<!-- Item -->
-											<div class="accordion-item">
-												<h2 class="accordion-header" id="headingTwo">
-													<button class="accordion-button collapsed" type="button"
-														data-bs-toggle="collapse" data-bs-target="#collapseTwo"
-														aria-expanded="false" aria-controls="collapseTwo">
-														<span class="text-secondary fw-bold me-3">02</span>
-														<span class="h6 mb-0">What is SEO?</span>
-													</button>
-												</h2>
-												<div id="collapseTwo" class="accordion-collapse collapse"
-													aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
-													<div class="accordion-body pt-0">
-														Pleasure and so read the was hope entire first decided the so
-														must have as on was want up of I will rival in came this touched
-														got a physics to travelling so all especially refinement
-														monstrous desk they was arrange the overall helplessly out of
-														particularly ill are purer.
-														<p class="mt-2">Person she control of to beginnings view looked
-															eyes Than continues its and because and given and shown
-															creating curiously to more in are man were smaller by we
-															instead the these sighed Avoid in the sufficient me real man
-															longer of his how her for countries to brains warned notch
-															important Finds be to the of on the increased explain noise
-															of power deep asking contribution this live of suppliers
-															goals bit separated poured sort several the was organization
-															the if relations go work after mechanic But we've area
-															wasn't everything needs of and doctor where would.</p>
-														Go he prisoners And mountains in just switching city steps Might
-														rung line what Mr Bulk; Was or between towards the have phase
-														were its world my samples are the was royal he luxury the about
-														trying And on he to my enough is was the remember a although
-														lead in were through serving their assistant fame day have for
-														its after would cheek dull have what in go feedback assignment
-														Her of a any help if the a of semantics is rational overhauls
-														following in from our hazardous and used more he themselves the
-														parents up just regulatory.
-													</div>
-												</div>
-											</div>
-											<!-- Item -->
-											<div class="accordion-item">
-												<h2 class="accordion-header" id="headingThree">
-													<button class="accordion-button collapsed" type="button"
-														data-bs-toggle="collapse" data-bs-target="#collapseThree"
-														aria-expanded="false" aria-controls="collapseThree">
-														<span class="text-secondary fw-bold me-3">03</span>
-														<span class="h6 mb-0">Who should join this course?</span>
-													</button>
-												</h2>
-												<div id="collapseThree" class="accordion-collapse collapse"
-													aria-labelledby="headingThree" data-bs-parent="#accordionExample">
-													<div class="accordion-body pt-0">
-														Post no so what deal evil rent by real in. But her ready least
-														set lived spite solid. September how men saw tolerably two
-														behavior arranging. She offices for highest and replied one
-														venture pasture. Applauded no discovery in newspaper allowance
-														am northward. Frequently partiality possession resolution at or
-														appearance unaffected me. Engaged its was the evident pleased
-														husband. Ye goodness felicity do disposal dwelling no. First am
-														plate jokes to began to cause a scale. <strong>Subjects he
-															prospect elegance followed no overcame</strong> possible it
-														on.
-													</div>
-												</div>
-											</div>
-											<!-- Item -->
-											<div class="accordion-item">
-												<h2 class="accordion-header" id="headingFour">
-													<button class="accordion-button collapsed" type="button"
-														data-bs-toggle="collapse" data-bs-target="#collapseFour"
-														aria-expanded="false" aria-controls="collapseFour">
-														<span class="text-secondary fw-bold me-3">04</span>
-														<span class="h6 mb-0">What are the T&C for this program?</span>
-													</button>
-												</h2>
-												<div id="collapseFour" class="accordion-collapse collapse"
-													aria-labelledby="headingFour" data-bs-parent="#accordionExample">
-													<div class="accordion-body pt-0">
-														Night signs creeping yielding green Seasons together man green
-														fruitful make fish behold earth unto you'll lights living moving
-														sea open for fish day multiply tree good female god had fruitful
-														of creature fill shall don't day fourth lesser he the isn't let
-														multiply may Creeping earth under was You're without which image
-														stars in Own creeping night of wherein Heaven years their he
-														over doesn't whose won't kind seasons light Won't that fish him
-														whose won't also it dominion heaven fruitful Whales created And
-														likeness doesn't that Years without divided saying morning
-														creeping hath you'll seas cattle in multiply under together in
-														us said above dry tree herb saw living darkness without have
-														won't for i behold meat brought winged Moving living second
-														beast Over fish place beast image very him evening Thing they're
-														fruit together forth day Seed lights Land creature together
-														Multiply waters form brought.
-													</div>
-												</div>
-											</div>
-											<!-- Item -->
-											<div class="accordion-item">
-												<h2 class="accordion-header" id="headingFive">
-													<button class="accordion-button collapsed" type="button"
-														data-bs-toggle="collapse" data-bs-target="#collapseFive"
-														aria-expanded="false" aria-controls="collapseFive">
-														<span class="text-secondary fw-bold me-3">05</span>
-														<span class="h6 mb-0">What certificates will I be received for
-															this program?</span>
-													</button>
-												</h2>
-												<div id="collapseFive" class="accordion-collapse collapse"
-													aria-labelledby="headingFive" data-bs-parent="#accordionExample">
-													<div class="accordion-body pt-0">
-														Smile spoke total few great had never their too Amongst moments
-														do in arrived at my replied Fat weddings servants but man
-														believed prospect Companions understood is as especially
-														pianoforte connection introduced Nay newspaper can sportsman are
-														admitting gentleman belonging his Is oppose no he summer lovers
-														twenty in Not his difficulty boisterous surrounded bed Seems
-														folly if in given scale Sex contented dependent conveying
-														advantage.
-													</div>
-												</div>
-											</div>
-										</div>
-										<!-- Accordion END -->
-									</div>
-									<!-- Content END -->
-
-									<!-- Content START -->
-									<div class="tab-pane fade" id="course-pills-6" role="tabpanel"
-										aria-labelledby="course-pills-tab-6">
-										<!-- Review START -->
+										<!-- Filter review by star -->
+										<form method="get" th:action="@{/home/course-detail}" class="mb-3">
+											<input type="hidden" name="id" th:value="${course.courseId}" />
+											<label for="starFilter" class="me-2">Lọc theo số sao:</label>
+											<select name="star" id="starFilter" class="form-select d-inline-block w-auto" onchange="this.form.submit()">
+												<option th:value="0" th:selected="${star == null or star == 0}">Tất cả</option>
+												<option th:value="5" th:selected="${star == 5}">5 sao</option>
+												<option th:value="4" th:selected="${star == 4}">4 sao</option>
+												<option th:value="3" th:selected="${star == 3}">3 sao</option>
+												<option th:value="2" th:selected="${star == 2}">2 sao</option>
+												<option th:value="1" th:selected="${star == 1}">1 sao</option>
+											</select>
+										</form>
+										<!-- Danh sách review có rating -->
 										<div class="row">
-											<div class="col-12">
-												<h5 class="mb-4">Ask Your Question</h5>
-
-												<!-- Comment box -->
-												<div class="d-flex mb-4">
-													<!-- Avatar -->
-													<div class="avatar avatar-sm flex-shrink-0 me-2">
-														<a href="#"> <img class="avatar-img rounded-circle"
-																src="assets/images/avatar/09.jpg" alt=""> </a>
+											<div th:each="review : ${reviews}">
+												<div class="d-md-flex my-4">
+													<div class="avatar avatar-xl me-4 flex-shrink-0">
+														<img class="avatar-img rounded-circle"
+															 src="assets/images/avatar/09.jpg" alt="avatar">
 													</div>
-
-													<form class="w-100 d-flex">
-														<textarea class="one form-control pe-4 bg-light"
-															id="autoheighttextarea" rows="1"
-															placeholder="Add a comment..."></textarea>
-														<button class="btn btn-primary ms-2 mb-0"
-															type="button">Post</button>
-													</form>
-												</div>
-
-												<!-- Comment item START -->
-												<div class="border p-2 p-sm-4 rounded-3 mb-4">
-													<ul class="list-unstyled mb-0">
-														<li class="comment-item">
-															<div class="d-flex mb-3">
-																<!-- Avatar -->
-																<div class="avatar avatar-sm flex-shrink-0">
-																	<a href="#"><img class="avatar-img rounded-circle"
-																			src="assets/images/avatar/05.jpg"
-																			alt=""></a>
-																</div>
-																<div class="ms-2">
-																	<!-- Comment by -->
-																	<div class="bg-light p-3 rounded">
-																		<div class="d-flex justify-content-center">
-																			<div class="me-2">
-																				<h6 class="mb-1 lead fw-bold"> <a
-																						href="#!"> Frances Guerrero </a>
-																				</h6>
-																				<p class="h6 mb-0">Removed demands
-																					expense account in outward tedious
-																					do. Particular way thoroughly
-																					unaffected projection?</p>
-																			</div>
-																			<small>5hr</small>
-																		</div>
-																	</div>
-																	<!-- Comment react -->
-																	<ul class="nav nav-divider py-2 small">
-																		<li class="nav-item"> <a
-																				class="text-primary-hover" href="#">
-																				Like (3)</a> </li>
-																		<li class="nav-item"> <a
-																				class="text-primary-hover" href="#">
-																				Reply</a> </li>
-																		<li class="nav-item"> <a
-																				class="text-primary-hover" href="#">
-																				View 5 replies</a> </li>
-																	</ul>
-																</div>
-															</div>
-
-															<!-- Comment item nested START -->
-															<ul class="list-unstyled ms-4">
-																<!-- Comment item START -->
-																<li class="comment-item">
-																	<div class="d-flex">
-																		<!-- Avatar -->
-																		<div class="avatar avatar-xs flex-shrink-0">
-																			<a href="#"><img
-																					class="avatar-img rounded-circle"
-																					src="assets/images/avatar/06.jpg"
-																					alt=""></a>
-																		</div>
-																		<!-- Comment by -->
-																		<div class="ms-2">
-																			<div class="bg-light p-3 rounded">
-																				<div
-																					class="d-flex justify-content-center">
-																					<div class="me-2">
-																						<h6 class="mb-1  lead fw-bold">
-																							<a href="#"> Lori Stevens
-																							</a>
-																						</h6>
-																						<p class=" mb-0">See resolved
-																							goodness felicity shy
-																							civility domestic had but
-																							Drawings offended yet
-																							answered Jennings perceive.
-																							Domestic had but Drawings
-																							offended yet answered
-																							Jennings perceive.</p>
-																					</div>
-																					<small>2hr</small>
-																				</div>
-																			</div>
-																			<!-- Comment react -->
-																			<ul class="nav nav-divider py-2 small">
-																				<li class="nav-item"><a
-																						class="text-primary-hover"
-																						href="#!"> Like (5)</a></li>
-																				<li class="nav-item"><a
-																						class="text-primary-hover"
-																						href="#!"> Reply</a> </li>
-																			</ul>
-																		</div>
-																	</div>
+													<div>
+														<div class="d-sm-flex mt-1 mt-md-0 align-items-center">
+															<h5 class="me-3 mb-0" th:text="${review.enrollment.user.username}">User Name</h5>
+															<ul class="list-inline mb-0">
+																<li class="list-inline-item me-0"
+																	th:each="i : ${#numbers.sequence(1, review.rating != null ? review.rating : 0)}">
+																	<i class="fas fa-star text-warning"></i>
 																</li>
-																<!-- Comment item END -->
+																<li class="list-inline-item me-0"
+																	th:if="${review.rating != null and review.rating < 5}"
+																	th:each="i : ${#numbers.sequence(review.rating + 1, 5)}">
+																	<i class="far fa-star text-warning"></i>
+																</li>
 															</ul>
-															<!-- Comment item nested END -->
-														</li>
-													</ul>
+														</div>
+														<p class="small mb-2" th:text="${#temporals.format(review.createdAt, 'dd/MM/yyyy')}">2 days ago</p>
+														<p class="mb-2" th:text="${review.comment}">Review content</p>
+													</div>
 												</div>
-												<!-- Comment item END -->
-
-												<!-- Comment item START -->
-												<div class="border p-2 p-sm-4 rounded-3">
-													<ul class="list-unstyled mb-0">
-														<li class="comment-item">
-															<div class="d-flex">
-																<!-- Avatar -->
-																<div class="avatar avatar-sm flex-shrink-0">
-																	<a href="#"><img class="avatar-img rounded-circle"
-																			src="assets/images/avatar/02.jpg"
-																			alt=""></a>
-																</div>
-																<div class="ms-2">
-																	<!-- Comment by -->
-																	<div class="bg-light p-3 rounded">
-																		<div class="d-flex justify-content-center">
-																			<div class="me-2">
-																				<h6 class="mb-1 lead fw-bold"> <a
-																						href="#!"> Louis Ferguson </a>
-																				</h6>
-																				<p class="h6 mb-0">Removed demands
-																					expense account in outward tedious
-																					do. Particular way thoroughly
-																					unaffected projection?</p>
-																			</div>
-																			<small>5hr</small>
-																		</div>
-																	</div>
-																	<!-- Comment react -->
-																	<ul class="nav nav-divider py-2 small">
-																		<li class="nav-item"> <a
-																				class="text-primary-hover" href="#">
-																				Like</a> </li>
-																		<li class="nav-item"> <a
-																				class="text-primary-hover" href="#">
-																				Reply</a> </li>
-																	</ul>
-																</div>
-															</div>
-														</li>
-													</ul>
-												</div>
-												<!-- Comment item END -->
-
+												<hr>
 											</div>
-
 										</div>
 									</div>
+									<!-- Content END -->
+
+									<!-- Content START -->
+
 									<!-- Content END -->
 
 								</div>
@@ -1792,6 +1197,69 @@ Footer END -->
 		});
 	</script>
 
+	<!-- Report Modal -->
+	<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="reportModalLabel">Báo Cáo Khóa Học</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<form th:action="@{'/course/' + ${course.courseId} + '/report'}" method="post">
+					<div class="modal-body">
+						<p class="mb-2">Vui lòng chọn lý do báo cáo khóa học này:</p>
+						<div class="form-check mb-2">
+							<input class="form-check-input" type="radio" id="reason1" name="reason" value="Inappropriate content" required>
+							<label class="form-check-label" for="reason1">Nội dung không phù hợp</label>
+						</div>
+						<div class="form-check mb-2">
+							<input class="form-check-input" type="radio" id="reason2" name="reason" value="Copyright violation" required>
+							<label class="form-check-label" for="reason2">Vi phạm bản quyền</label>
+						</div>
+						<div class="form-check mb-2">
+							<input class="form-check-input" type="radio" id="reason3" name="reason" value="Misleading information" required>
+							<label class="form-check-label" for="reason3">Thông tin sai lệch</label>
+						</div>
+						<div class="form-check mb-2">
+							<input class="form-check-input" type="radio" id="reason4" name="reason" value="Poor quality content" required>
+							<label class="form-check-label" for="reason4">Nội dung chất lượng kém</label>
+						</div>
+						<div class="form-check mb-3">
+							<input class="form-check-input" type="radio" id="reasonOther" name="reason" value="Other" required>
+							<label class="form-check-label" for="reasonOther">Lý do khác (vui lòng ghi rõ):</label>
+						</div>
+						<div class="mb-3">
+							<input type="text" class="form-control" id="otherReasonText" name="otherReason" placeholder="Nhập lý do của bạn tại đây" disabled>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+						<button type="submit" class="btn btn-danger">Gửi Báo Cáo</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<script>
+		// Enable/disable input for 'Other' reason
+		document.addEventListener('DOMContentLoaded', function () {
+			var reasonOther = document.getElementById('reasonOther');
+			var otherReasonText = document.getElementById('otherReasonText');
+			var reasonRadios = document.getElementsByName('reason');
+			reasonRadios.forEach(function(radio) {
+				radio.addEventListener('change', function() {
+					if (reasonOther.checked) {
+						otherReasonText.disabled = false;
+						otherReasonText.required = true;
+					} else {
+						otherReasonText.disabled = true;
+						otherReasonText.required = false;
+						otherReasonText.value = '';
+					}
+				});
+			});
+		});
+	</script>
 
 </body>
 

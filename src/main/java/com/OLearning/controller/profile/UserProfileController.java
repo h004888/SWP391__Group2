@@ -1,4 +1,4 @@
-package com.OLearning.controller.user;
+package com.OLearning.controller.profile;
 
 import com.OLearning.dto.user.UserProfileEditDTO;
 import com.OLearning.service.cloudinary.UploadFile;
@@ -27,20 +27,34 @@ public class UserProfileController {
     @Autowired
     private UploadFile uploadFile;
 
+    @GetMapping()
+    public String showProfile(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+        Optional<UserProfileEditDTO> profileOpt = userService.getProfileByUsername(userDetails.getUsername());
+        model.addAttribute("profile", profileOpt.orElse(new UserProfileEditDTO()));
+        return "homePage/profile";
+    }
+
     @GetMapping("/edit")
     public String showEditProfile(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         Optional<UserProfileEditDTO> profileOpt = userService.getProfileByUsername(userDetails.getUsername());
         model.addAttribute("profile", profileOpt.orElse(new UserProfileEditDTO()));
 
-        // Kiểm tra role để trả về đúng fragment/index
         boolean isAdmin = userDetails.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        boolean isInstructor = userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_INSTRUCTOR"));
+        boolean isStudent = userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_STUDENT"));
         if (isAdmin) {
             model.addAttribute("fragmentContent", "adminDashBoard/fragments/editProfileContent :: editProfileContent");
             return "adminDashBoard/index";
-        } else {
+        } else if (isInstructor) {
             model.addAttribute("fragmentContent", "instructorDashboard/fragments/editProfileContent :: editProfileContent");
             return "instructorDashboard/indexUpdate";
+        } else if (isStudent) {
+            return "homePage/editProfile";
+        } else {
+            return "homePage/editProfile";
         }
     }
 
