@@ -18,6 +18,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Controller
@@ -140,5 +141,30 @@ public class AdminNotificationsController {
         Long userId = userDetails.getUserId();
         notificationService.deleteAllReadNotifications(userId);
         return "redirect:/admin/notifications";
+    }
+
+    // API endpoint để lấy 5 thông báo chưa đọc cho dropdown
+    @GetMapping("/api/latest")
+    @ResponseBody
+    public ResponseEntity<?> getLatestNotifications(Authentication authentication) {
+        try {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            Long userId = userDetails.getUserId();
+            
+            // Lấy 5 thông báo chưa đọc
+            Pageable pageable = PageRequest.of(0, 5);
+            List<String> types = List.of("REPORT_COURSE", "INSTRUCTOR_REPLY_BLOCK", "REPORT_COMMENT");
+            Page<NotificationDTO> notificationPage = notificationService.getUnreadNotificationsByUserId(userId, types, pageable);
+            
+            long unreadCount = notificationService.countUnreadByUserId(userId);
+            
+            return ResponseEntity.ok(Map.of(
+                "notifications", notificationPage.getContent(),
+                "unreadCount", unreadCount
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error loading notifications: " + e.getMessage()));
+        }
     }
 }

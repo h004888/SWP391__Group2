@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Notifications - OLearning</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    
+    <style>
+        .notification-card {
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .notification-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+        
+        .notification-unread {
+            border-left: 4px solid #0d6efd;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+        
+        .notification-read {
+            border-left: 4px solid #6c757d;
+            opacity: 0.8;
+        }
+        
+        .notification-type-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        
+        .type-report-course { background: #fff3cd; color: #856404; }
+        .type-instructor-reply { background: #d1ecf1; color: #0c5460; }
+        .type-report-comment { background: #f8d7da; color: #721c24; }
+        
+        .search-container {
+            background: #fff;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .filter-buttons .btn {
+            border-radius: 25px;
+            margin: 0.25rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <!-- Include Admin Header -->
+    <div th:replace="adminDashBoard/fragments/header :: header"></div>
+    
+    <!-- Include Admin Sidebar -->
+    <div th:replace="adminDashBoard/fragments/sidebar :: sidebar"></div>
+    
+    <!-- Main Content -->
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3 col-xl-2 d-none d-lg-block">
+                <!-- Sidebar content will be included here -->
+            </div>
+            
+            <!-- Main Content Area -->
+            <div class="col-lg-9 col-xl-10 ms-sm-auto">
+                <!-- Topbar -->
+                <div th:replace="adminDashBoard/fragments/topbar :: topbar"></div>
+                
+                <!-- Page Content -->
+                <div class="container-fluid px-4">
+                    <!-- Page Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h1 class="h3 mb-0 text-gray-800">
+                                <i class="fas fa-bell me-2"></i>Notifications
+                            </h1>
+                            <p class="text-muted">Manage and view all your notifications</p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-primary" onclick="markAllAsRead()">
+                                <i class="fas fa-check-double me-1"></i>Mark All as Read
+                            </button>
+                            <button class="btn btn-outline-danger" onclick="deleteReadNotifications()">
+                                <i class="fas fa-trash me-1"></i>Delete Read
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Stats Cards -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 class="mb-0" th:text="${unreadCount}">0</h4>
+                                        <small>Unread</small>
+                                    </div>
+                                    <i class="fas fa-envelope fa-2x opacity-75"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 class="mb-0" th:text="${#lists.size(notifications)}">0</h4>
+                                        <small>Total</small>
+                                    </div>
+                                    <i class="fas fa-bell fa-2x opacity-75"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Search and Filters -->
+                    <div class="search-container">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <form th:action="@{/admin/notifications/search}" method="get" class="d-flex">
+                                    <input type="text" name="keyword" class="form-control me-2" 
+                                           placeholder="Search notifications..." 
+                                           th:value="${keyword != null ? keyword : ''}">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="filter-buttons text-end">
+                                    <a th:href="@{/admin/notifications}" class="btn btn-sm btn-outline-secondary">All</a>
+                                    <a th:href="@{/admin/notifications(status='failed')}" class="btn btn-sm btn-outline-primary">Unread</a>
+                                    <a th:href="@{/admin/notifications(status='sent')}" class="btn btn-sm btn-outline-success">Read</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Notifications List -->
+                    <div id="notificationsContainer">
+                        <div th:if="${#lists.isEmpty(notifications)}" class="empty-state">
+                            <i class="fas fa-bell-slash"></i>
+                            <h4>No notifications found</h4>
+                            <p>You're all caught up! Check back later for new notifications.</p>
+                        </div>
+                        
+                        <div th:each="notification : ${notifications}" 
+                             th:class="'notification-card ' + (${notification.status == 'sent'} ? 'notification-read' : 'notification-unread')"
+                             th:onclick="'viewNotification(' + ${notification.notificationId} + ')'"
+                             style="cursor: pointer;">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <span th:class="'notification-type-badge ' + (${notification.type == 'REPORT_COURSE'} ? 'type-report-course' : (${notification.type == 'INSTRUCTOR_REPLY_BLOCK'} ? 'type-instructor-reply' : 'type-report-comment'))"
+                                                  th:text="${notification.type.replace('_', ' ')}">Type</span>
+                                            <small class="text-muted ms-3" th:text="${#temporals.format(notification.sentAt, 'dd/MM/yyyy HH:mm')}">Date</small>
+                                        </div>
+                                        <h6 class="mb-1" th:text="${notification.message}">Message</h6>
+                                        <p class="text-muted mb-0" th:if="${notification.course != null}" 
+                                           th:text="'Course: ' + ${notification.course.title}">Course</p>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-outline-primary" 
+                                                    th:onclick="'markAsRead(' + ${notification.notificationId} + '); event.stopPropagation();'"
+                                                    th:if="${notification.status != 'sent'}">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" 
+                                                    th:onclick="'deleteNotification(' + ${notification.notificationId} + '); event.stopPropagation();'">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <div th:if="${totalPages > 1}" class="d-flex justify-content-center mt-4">
+                        <nav>
+                            <ul class="pagination">
+                                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/notifications(page=${currentPage - 1})}">Previous</a>
+                                </li>
+                                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                    th:classappend="${i == currentPage} ? 'active'">
+                                    <a class="page-link" th:href="@{/admin/notifications(page=${i})}" th:text="${i + 1}">1</a>
+                                </li>
+                                <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/notifications(page=${currentPage + 1})}">Next</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        function viewNotification(notificationId) {
+            window.location.href = `/admin/notifications/view/${notificationId}`;
+        }
+        
+        function markAsRead(notificationId) {
+            fetch(`/admin/notifications/${notificationId}/mark-read`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error marking as read:', error);
+            });
+        }
+        
+        function markAllAsRead() {
+            if (confirm('Mark all notifications as read?')) {
+                fetch('/admin/notifications/mark-all-read', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error marking all as read:', error);
+                });
+            }
+        }
+        
+        function deleteNotification(notificationId) {
+            if (confirm('Delete this notification?')) {
+                fetch(`/admin/notifications/${notificationId}/delete`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting notification:', error);
+                });
+            }
+        }
+        
+        function deleteReadNotifications() {
+            if (confirm('Delete all read notifications?')) {
+                fetch('/admin/notifications/delete-read', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting read notifications:', error);
+                });
+            }
+        }
+    </script>
+</body>
+</html> 

@@ -244,4 +244,29 @@ public class NotificationsController {
         notificationService.deleteAllReadNotifications(userId);
         return "redirect:/instructordashboard/notifications";
     }
+
+    // API endpoint để lấy 5 thông báo chưa đọc cho dropdown
+    @GetMapping("/api/instructor/latest")
+    @ResponseBody
+    public ResponseEntity<?> getLatestNotifications(Authentication authentication) {
+        try {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            Long userId = userDetails.getUserId();
+            
+            // Lấy 5 thông báo chưa đọc
+            Pageable pageable = PageRequest.of(0, 5);
+            List<String> types = List.of("COURSE_BLOCKED", "comment", "COURSE_UNBLOCKED", "COURSE_REJECTION", "COURSE_APPROVED", "MAINTENANCE_FEE", "COURSE_CREATED", "SUCCESSFULLY");
+            Page<NotificationDTO> notificationPage = notificationService.getUnreadNotificationsByUserId(userId, types, pageable);
+            
+            long unreadCount = notificationService.countUnreadByUserId(userId);
+            
+            return ResponseEntity.ok(Map.of(
+                "notifications", notificationPage.getContent(),
+                "unreadCount", unreadCount
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error loading notifications: " + e.getMessage()));
+        }
+    }
 }

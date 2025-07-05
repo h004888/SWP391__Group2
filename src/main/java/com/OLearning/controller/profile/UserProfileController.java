@@ -31,7 +31,21 @@ public class UserProfileController {
     public String showProfile(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         Optional<UserProfileEditDTO> profileOpt = userService.getProfileByUsername(userDetails.getUsername());
         model.addAttribute("profile", profileOpt.orElse(new UserProfileEditDTO()));
-        return "homePage/profile";
+
+        boolean isAdmin = userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        boolean isInstructor = userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_INSTRUCTOR"));
+        
+        if (isAdmin) {
+            model.addAttribute("fragmentContent", "adminDashBoard/fragments/profileContent :: profileContent");
+            return "adminDashBoard/index";
+        } else if (isInstructor) {
+            model.addAttribute("fragmentContent", "instructorDashboard/fragments/profileContent :: profileContent");
+            return "instructorDashboard/index";
+        } else {
+            return "homePage/profile";
+        }
     }
 
     @GetMapping("/edit")
@@ -79,12 +93,21 @@ public class UserProfileController {
             
             boolean isAdmin = userDetails.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+            boolean isInstructor = userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_INSTRUCTOR"));
+            boolean isStudent = userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_STUDENT"));
+            
             if (isAdmin) {
                 model.addAttribute("fragmentContent", "adminDashBoard/fragments/editProfileContent :: editProfileContent");
                 return "adminDashBoard/index";
-            } else {
+            } else if (isInstructor) {
                 model.addAttribute("fragmentContent", "instructorDashboard/fragments/editProfileContent :: editProfileContent");
                 return "instructorDashboard/indexUpdate";
+            } else if (isStudent) {
+                return "homePage/editProfile";
+            } else {
+                return "homePage/editProfile";
             }
         } catch (IOException e) {
             model.addAttribute("error", "Không thể tải lên ảnh. Vui lòng thử lại.");

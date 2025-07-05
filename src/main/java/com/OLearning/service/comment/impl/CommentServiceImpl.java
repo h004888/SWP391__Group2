@@ -4,10 +4,12 @@ import com.OLearning.dto.comment.CommentDTO;
 import com.OLearning.entity.Course;
 import com.OLearning.entity.CourseReview;
 import com.OLearning.entity.Enrollment;
+import com.OLearning.entity.Report;
 import com.OLearning.entity.User;
 import com.OLearning.repository.CourseRepository;
 import com.OLearning.repository.CourseReviewRepository;
 import com.OLearning.repository.EnrollmentRepository;
+import com.OLearning.repository.ReportRepository;
 import com.OLearning.repository.UserRepository;
 import com.OLearning.service.comment.CommentService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +28,7 @@ public class CommentServiceImpl implements CommentService {
     private final UserRepository userRepo;
     private final CourseReviewRepository reviewRepo;
     private final EnrollmentRepository enrollmentRepo;
+    private final ReportRepository reportRepo;
 
     @Override
     public void addComment(CommentDTO dto, Long userId, Long courseId) {
@@ -39,9 +43,13 @@ public class CommentServiceImpl implements CommentService {
 
         CourseReview review = new CourseReview();
         review.setEnrollment(enrollment);
+        review.setCourse(course);
         review.setComment(dto.getComment());
+        review.setRating(0); // Set default rating for comments
         review.setCreatedAt(LocalDateTime.now());
         reviewRepo.save(review);
+        
+        System.out.println("Comment added successfully: " + review.getReviewId());
     }
 
     @Override
@@ -61,7 +69,9 @@ public class CommentServiceImpl implements CommentService {
 
         CourseReview reply = new CourseReview();
         reply.setEnrollment(enrollment);
+        reply.setCourse(course);
         reply.setComment(dto.getComment());
+        reply.setRating(0); // Set default rating for replies
         reply.setCreatedAt(LocalDateTime.now());
         reply.setParentReview(parentReview);
         reviewRepo.save(reply);
@@ -102,6 +112,37 @@ public class CommentServiceImpl implements CommentService {
         reviewRepo.deleteByParentReview(review);
         // Xóa comment
         reviewRepo.delete(review);
+    }
+
+    @Override
+    public void reportComment(Long commentId, Long userId, Long courseId, String reason) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+        Course course = courseRepo.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy khóa học"));
+        CourseReview review = reviewRepo.findById(commentId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy bình luận"));
+
+        // Kiểm tra xem user đã báo cáo comment này chưa (dựa trên content)
+        List<Report> existingReports = reportRepo.findByUser_UserId(userId);
+        boolean alreadyReported = existingReports.stream()
+                .anyMatch(report -> "COMMENT".equals(report.getReportType()) && 
+                        reason.equals(report.getContent()) && 
+                        courseId.equals(report.getCourse().getCourseId()));
+
+        if (alreadyReported) {
+            throw new RuntimeException("Bạn đã báo cáo bình luận này rồi");
+        }
+
+        // Tạo report mới
+        Report report = new Report();
+        report.setReportType("COMMENT");
+        report.setCourse(course);
+        report.setUser(user);
+        report.setContent(reason);
+        report.setCreatedAt(LocalDateTime.now());
+        report.setStatus("PENDING");
+        reportRepo.save(report);
     }
 }
 

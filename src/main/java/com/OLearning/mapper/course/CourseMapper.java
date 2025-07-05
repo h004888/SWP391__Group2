@@ -84,6 +84,7 @@ public class CourseMapper {
         dtoView.setCourseReviews(course.getCourseReviews());
         // Calculate average rating
         dtoView.setAverageRating(course.getCourseReviews().stream()
+                .filter(review -> review.getRating() != null)
                 .mapToDouble(review -> review.getRating())
                 .average()
                 .orElse(0.0));

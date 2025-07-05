@@ -121,6 +121,12 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    public Page<NotificationDTO> getUnreadNotificationsByUserId(Long userId, List<String> types, Pageable pageable) {
+        return notificationRepository.findUnreadByUserIdAndTypes(userId, types, pageable)
+                .map(notificationMapper::toDTO);
+    }
+
+    @Override
     @Transactional
     public void deleteNotification(Long id) {
         notificationRepository.deleteById(id);

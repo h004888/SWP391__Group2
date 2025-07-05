@@ -113,6 +113,22 @@ public class HomeController {
             Model model,
             @AuthenticationPrincipal UserDetails userDetails) {
                 CourseViewDTO course = courseService.getCourseById(id);
+                Course courseEntity = courseRepository.findById(id).orElse(null);
+                
+                // Lấy danh sách review của course
+                List<CourseReview> reviews = new ArrayList<>();
+                if (courseEntity != null) {
+                    reviews = courseReviewService.getCourseReviewsByCourse(courseEntity);
+                }
+                
+                // Kiểm tra user đã đăng ký course chưa
+                boolean isEnrolled = false;
+                if (userDetails != null) {
+                    User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
+                    if (user != null && courseEntity != null) {
+                        isEnrolled = enrollmentService.findByUserAndCourse(user, courseEntity).isPresent();
+                    }
+                }
 
                 model.addAttribute("totalStudents", course.getEnrollments().size());
                 model.addAttribute("courseByInstructor",
@@ -120,6 +136,16 @@ public class HomeController {
                 model.addAttribute("courseByCategory",
                                 course.getCategory().getCourses().stream().map(CourseMapper::toCourseViewDTO).collect(Collectors.toList()));
                 model.addAttribute("course", course);
+                model.addAttribute("reviews", reviews);
+                model.addAttribute("isEnrolled", isEnrolled);
+                
+                // Thêm thông tin user nếu đã đăng nhập
+                if (userDetails != null) {
+                    User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
+                    if (user != null) {
+                        model.addAttribute("currentUser", user);
+                    }
+                }
                         
                 return "homePage/course-detail";
         }
