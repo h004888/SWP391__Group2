@@ -1,8 +1,9 @@
 package com.OLearning.controller.homePage;
 
 import com.OLearning.dto.category.CategoryDTO;
-import com.OLearning.dto.course.CourseDTO;
+import com.OLearning.dto.course.CourseViewDTO;
 import com.OLearning.entity.Category;
+import com.OLearning.mapper.course.CourseMapper;
 import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.course.CourseService;
 
@@ -27,7 +28,7 @@ public class FragmentController {
 
     @GetMapping("/category")
     public List<Category> getAllCategories() {
-        return categoryService.findAll();
+        return categoryService.getListCategories();
     }
 
     @GetMapping("/topCourse")
@@ -38,8 +39,10 @@ public class FragmentController {
     }
 
     @GetMapping("/courseByCategory")
-    public String getAllCoursesByCategory(@RequestParam("categoryId") long categoryId, Model model) {
-        model.addAttribute("courses", categoryService.findById(categoryId).get().getCourses().stream().limit(8));
+    public String getAllCoursesByCategory(@RequestParam("categoryId") int categoryId, Model model) {
+
+        // Convert List<Course> to List<CourseViewDTO>
+        model.addAttribute("courses", courseService.getCoursesByCategoryId(categoryId));
 
         return "homePage/fragments/cardCourse :: cardCourse";
     }
@@ -55,7 +58,7 @@ public class FragmentController {
             @RequestParam(defaultValue = "9") int size,
             Model model) {
 
-        Page<CourseDTO> courses = courseService.searchCoursesGrid(
+        Page<CourseViewDTO> courses = courseService.searchCoursesGrid(
                 categoryIds, priceFilters, levels, sortBy, keyword, page, size);
 
         model.addAttribute("courses", courses.getContent());

@@ -71,4 +71,7 @@ public class Course {
     @OneToMany(mappedBy = "course", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<CourseReview> courseReviews;
 
+    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
+    private List<VoucherCourse> voucherCourses;
+
 }

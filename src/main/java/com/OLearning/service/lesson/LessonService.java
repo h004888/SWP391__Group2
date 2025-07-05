@@ -33,4 +33,6 @@ public interface LessonService {
     Lesson findFirstLesson(Long courseId);
 
     Optional<Lesson> getNextLessonAfterCompleted(Long userId, Long courseId);
+
+    Lesson getNextLessonAfterCurrent(Long currentLessonId, Long courseId);
 }

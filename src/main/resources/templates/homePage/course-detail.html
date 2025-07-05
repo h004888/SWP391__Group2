@@ -125,23 +125,21 @@
 					<ul class="navbar-nav navbar-nav-scroll mx-auto">
 						<!-- Nav item 1 Demos -->
 						<li class="nav-item dropdown">
-							<a class="nav-link " th:href="@{/home/coursesGrid}" id="demoMenu"
-							   aria-haspopup="true" aria-expanded="false">Courses</a>
+							<a class="nav-link " th:href="@{/home/coursesGrid}" id="demoMenu" aria-haspopup="true"
+								aria-expanded="false">Courses</a>
 
 						</li>
 						<li class="nav-item dropdown">
-							<a class="nav-link " th:href="@{/learning}"
-							   aria-haspopup="true" aria-expanded="false">Education</a>
+							<a class="nav-link " th:href="@{/learning}" aria-haspopup="true"
+								aria-expanded="false">Education</a>
 
 						</li>
 						<li class="nav-item dropdown">
-							<a class="nav-link " href="#"
-							   aria-haspopup="true" aria-expanded="false">About</a>
+							<a class="nav-link " href="#" aria-haspopup="true" aria-expanded="false">About</a>
 
 						</li>
 						<li class="nav-item dropdown">
-							<a class="nav-link " href="#"
-							   aria-haspopup="true" aria-expanded="false">Contact</a>
+							<a class="nav-link " href="#" aria-haspopup="true" aria-expanded="false">Contact</a>
 
 						</li>
 						<li class="nav-item dropdown">
@@ -258,6 +256,22 @@
 	<!-- **************** MAIN CONTENT START **************** -->
 	<main>
 
+		<!-- Flash Messages -->
+		<div class="container mt-3">
+			<div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+				<span th:text="${message}"></span>
+				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+			</div>
+			<div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+				<span th:text="${error}"></span>
+				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+			</div>
+			<div th:if="${info}" class="alert alert-info alert-dismissible fade show" role="alert">
+				<span th:text="${info}"></span>
+				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+			</div>
+		</div>
+
 		<!-- =======================
 Page intro START -->
 		<section class="bg-light py-0 py-sm-5">
@@ -277,10 +291,11 @@ Page intro START -->
 						<ul class="list-inline mb-0">
 							<li class="list-inline-item h6 me-3 mb-1 mb-sm-0"><i
 									class="fas fa-star text-warning me-2"></i><span
-									th:text="${course.averageRating + '/5.0'}">4.5</span></span></li>
+									th:text="|${#numbers.formatDecimal(course.averageRating, 1, 'POINT', 1, 'POINT')}/5.0|">4.5</span></span>
+							</li>
 							<li class="list-inline-item h6 me-3 mb-1 mb-sm-0"><i
 									class="fas fa-user-graduate text-orange me-2"></i><span
-									th:text="${course.totalStudentEnrolled() + ' Enrolled'}"></span></li>
+									th:text="${course.getEnrollments().size() + ' Enrolled'}"></span></li>
 							<li class="list-inline-item h6 me-3 mb-1 mb-sm-0"><i
 									class="fas fa-signal text-success me-2"></i> <span
 									th:text="${course.courseLevel}">All levels</span></li>
@@ -365,25 +380,25 @@ Page content START -->
 										<h5 class="mb-3">Course Description</h5>
 										<p class="mb-3">Welcome to the <strong> Digital Marketing Ultimate Course Bundle
 												- 12 Courses in 1 (Over 36 hours of content)</strong></p>
-										<p class="mb-3">In this practical hands-on training, you're going to learn to
+										<p class="mb-3">In this practical hands-on training, you’re going to learn to
 											become a digital marketing expert with this <strong> ultimate course bundle
 												that includes 12 digital marketing courses in 1!</strong></p>
 										<p class="mb-3">If you wish to find out the skills that should be covered in a
 											basic digital marketing course syllabus in India or anywhere around the
 											world, then reading this blog will help. Before we delve into the advanced
 											<strong><a href="#" class="text-reset text-decoration-underline">digital
-													marketing course</a></strong> syllabus, let's look at the scope of
+													marketing course</a></strong> syllabus, let’s look at the scope of
 											digital marketing and what the future holds.
 										</p>
 										<p class="mb-0">We focus a great deal on the understanding of behavioral
 											psychology and influence triggers which are crucial for becoming a well
 											rounded Digital Marketer. We understand that theory is important to build a
-											solid foundation, we understand that theory alone isn't going to get the job
-											done so that's why this course is packed with practical hands-on examples
+											solid foundation, we understand that theory alone isn’t going to get the job
+											done so that’s why this course is packed with practical hands-on examples
 											that you can follow step by step.</p>
 
 										<!-- List content -->
-										<h5 class="mt-4">What you'll learn</h5>
+										<h5 class="mt-4">What you’ll learn</h5>
 										<ul class="list-group list-group-borderless mb-3">
 											<li class="list-group-item h6 fw-light d-flex mb-0"><i
 													class="fas fa-check-circle text-success me-2"></i>Digital marketing
@@ -433,7 +448,7 @@ Page content START -->
 										<!-- Accordion START -->
 										<div class="accordion accordion-icon accordion-bg-light" id="accordionExample2">
 
-											<div th:each="chapter, chapterStat : ${course.chapters}"
+											<div th:each="chapter, chapterStat : ${course.listOfChapters}"
 												class="accordion-item mb-3">
 												<h6 class="accordion-header font-base"
 													th:id="'heading-' + ${chapterStat.index}">
@@ -554,7 +569,7 @@ Page content START -->
 																		class="icon-md bg-info bg-opacity-10 text-info rounded-circle"><i
 																			class="fas fa-comment-dots"></i></span>
 																	<span class="h6 fw-light mb-0 ms-2"
-																		th:text="${course.getReviewCount()}">205</span>
+																		th:text="${course.courseReviews.size()}">205</span>
 																</div>
 															</li>
 														</ul>
@@ -1293,9 +1308,17 @@ Page content START -->
 											<th:block th:unless="${isEnrolled}">
 											<div>
 												<div class="d-flex align-items-center">
-													<h3 class="fw-bold mb-0 me-2" th:text="${course.price} + ' ₫'">$150
-													</h3>
+													<h3 class="fw-bold mb-0 me-2" id="original-price" th:text="${course.price} + ' ₫'">$150</h3>
+													<span class="discounted-price text-danger fw-bold" id="discounted-price"></span>
 												</div>
+												<button type="button" class="btn voucher-btn mt-1" th:attr="data-course-id=${course.courseId}">
+													<i class="fas fa-ticket-alt"></i>
+												</button>
+												<div class="mt-1">
+													<span class="applied-voucher" id="applied-voucher"></span>
+												</div>
+												<p class="mb-0 text-danger"><i class="fas fa-stopwatch me-2"></i>5 days
+													left at this price</p>
 											</div>
 											</th:block>
 											<!-- Share button with dropdown -->
@@ -1336,8 +1359,9 @@ Page content START -->
 														th:attr="data-course-id=${course.courseId}">
 													<i class="fas fa-shopping-cart me-2"></i>Add to cart
 												</button>
-												<form th:action="@{'/home/buy-now'}" method="post" class="d-inline">
+												<form th:action="@{'/home/buy-now'}" method="post" class="d-inline" id="buy-now-form">
 													<input type="hidden" name="courseId" th:value="${course.courseId}"/>
+													<input type="hidden" name="voucherId" id="buy-now-voucherId" />
 													<button type="submit" class="btn btn-success mb-0"><i class="fas fa-bolt me-2"></i>Buy now</button>
 												</form>
 											</th:block>
@@ -1406,7 +1430,7 @@ Page content START -->
 													<span class="text-success"
 														th:text="${course.price} + ' ₫'">$130</span>
 													<span class="h6 fw-light"><span
-															th:text="${course.averageRating}"></span><i
+															th:text="|${#numbers.formatDecimal(course.averageRating, 1, 'POINT', 1, 'POINT')}/5.0|"></span><i
 															class="fas fa-star text-warning ms-1"></i></span>
 												</li>
 											</ul>
@@ -1497,7 +1521,7 @@ Listed courses START -->
 														<i class="fas fa-user-graduate"></i>
 													</div>
 													<span class="h6 fw-light ms-2 mb-0"
-														th:text="${course.totalStudentEnrolled}">
+														th:text="${course.getEnrollments().size()}">
 
 													</span>
 												</li>
@@ -1509,7 +1533,7 @@ Listed courses START -->
 														<i class="fas fa-star"></i>
 													</div>
 													<span class="h6 fw-light ms-2 mb-0"
-														th:text="${course.averageRating}"></span>
+														th:text="|${#numbers.formatDecimal(course.averageRating, 1, 'POINT', 1, 'POINT')}/5.0|"></span>
 												</li>
 											</ul>
 											<!-- Avatar -->
@@ -1791,9 +1815,51 @@ Footer END -->
 		});
 	</script>
 
+	<!-- Modal chọn voucher -->
+	<div class="modal" id="voucherModal" tabindex="-1" style="display:none; background:rgba(0,0,0,0.3); position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:9999;">
+	  <div class="modal-dialog" style="margin:10vh auto; max-width:400px;">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<h5 class="modal-title">Chọn voucher cho khóa học</h5>
+			<button type="button" class="btn-close" onclick="voucherJS.closeVoucherModal()"></button>
+		  </div>
+		  <div class="modal-body" id="voucher-list"></div>
+		</div>
+	  </div>
+	</div>
+
+	<script src="/js/homePage/voucher.js"></script>
+	<script th:inline="javascript">
+	  voucherJS.initDetailVoucher({
+		userId: /*[[${#authentication.principal.userEntity.userId}]]*/ 1,
+		courseId: /*[[${course.courseId}]]*/ 1,
+		updatePriceUI: function(data) {
+		  const originalPriceEl = document.getElementById('original-price');
+		  const discountedPriceEl = document.getElementById('discounted-price');
+		  const appliedVoucherEl = document.getElementById('applied-voucher');
+		  if (originalPriceEl) {
+			if (data && data.discountedPrice) {
+			  originalPriceEl.style.textDecoration = 'line-through';
+			  originalPriceEl.style.color = '#888';
+			} else {
+			  originalPriceEl.style.textDecoration = 'none';
+			  originalPriceEl.style.color = '';
+			}
+		  }
+		  if (discountedPriceEl) {
+			discountedPriceEl.textContent = data && data.discountedPrice ? ' ' + voucherJS.formatNumberWithCommas(Number(data.discountedPrice)) + ' đ' : '';
+		  }
+		},
+		syncVoucherToBuyNowForm: function() {
+		  const buyNowVoucherInput = document.getElementById('buy-now-voucherId');
+		  if (buyNowVoucherInput) {
+			buyNowVoucherInput.value = window.selectedVoucher || '';
+		  }
+		}
+	  });
+	</script>
 
 </body>
 
-<!-- Mirrored from stackbros.in/eduport/landing/course-detail.html by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 06 Jun 2025 07:32:06 GMT -->
 
 </html>

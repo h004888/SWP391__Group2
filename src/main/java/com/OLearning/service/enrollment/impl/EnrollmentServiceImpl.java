@@ -3,9 +3,7 @@ package com.OLearning.service.enrollment.impl;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import com.OLearning.service.course.CourseService;
-import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.enrollment.EnrollmentDTO;
 import com.OLearning.entity.Course;
 import com.OLearning.entity.Enrollment;
@@ -17,9 +15,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import com.OLearning.entity.Course;
-import com.OLearning.entity.Enrollment;
 import com.OLearning.repository.EnrollmentRepository;
 import com.OLearning.service.enrollment.EnrollmentService;
 import com.OLearning.service.email.EmailService;
@@ -30,9 +25,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class EnrollmentServiceImpl implements EnrollmentService {
@@ -147,6 +140,28 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     @Override
+    public Integer getTotalEnrollment(Long courseId) {
+
+        Integer count = enrollmentRepository.findByCourseId(courseId).size();
+        if(count == null){
+            return 0;
+        }
+        return count;
+    }
+
+    @Override
+    public Page<EnrollmentDTO> getEnrollmentByCourseId(Long courseId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Enrollment> enrollments = enrollmentRepository.findEnrollmentsByCourseId(courseId, pageable);
+        List<EnrollmentDTO> enrollmentDTOList = new ArrayList<>();
+        for (Enrollment enrollment : enrollments.getContent()) {
+            EnrollmentDTO EnrollmentDTO = mapper.MapEnrollmentDTO(enrollment);
+            enrollmentDTOList.add(EnrollmentDTO);
+        }
+        return new PageImpl<>(enrollmentDTOList, pageable, enrollments.getTotalElements());
+    }
+
+    @Override
     public boolean unblockEnrollment(int enrollmentId) {
         Optional<Enrollment> enrollmentOpt = enrollmentRepository.findById(enrollmentId);
 
@@ -182,5 +197,20 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Override
     public boolean hasEnrolled(Long userId, Long courseId) {
         return enrollmentRepository.existsByUser_UserIdAndCourse_CourseId(userId, courseId);
+    }
+
+    @Override
+    public Integer getWeeksEnrolled(Long userId, Long courseId) {
+        return enrollmentRepository.getWeeksEnrolled(userId, courseId);
+    }
+
+    @Override
+    public void updateProgressByUser(Long userId, Long courseId) {
+       enrollmentRepository.updateProgressByUser(userId, courseId);
+    }
+
+    @Override
+    public Optional<Enrollment> findByUserAndCourse(User user, Course course) {
+        return enrollmentRepository.findByUserAndCourse(user, course);
     }
 }

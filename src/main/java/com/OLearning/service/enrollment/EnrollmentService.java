@@ -1,11 +1,14 @@
 package com.OLearning.service.enrollment;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import com.OLearning.entity.Course;
 import com.OLearning.entity.Enrollment;
+import com.OLearning.entity.User;
 
 import com.OLearning.dto.enrollment.EnrollmentDTO;
 import org.springframework.data.domain.Page;
@@ -16,6 +19,7 @@ import java.util.Map;
 @Service
 public interface EnrollmentService {
     List<Course> getCoursesByUserId(Long userId);
+
     boolean hasEnrolled(Long userId, Long courseId);
 
     boolean unblockEnrollment(int enrollmentId);
@@ -42,4 +46,14 @@ public interface EnrollmentService {
     boolean blockEnrollment(int enrollmentId);
 
     EnrollmentDTO getRequestById(int enrollmentId);
+
+    Integer getTotalEnrollment(Long courseId);
+
+    Page<EnrollmentDTO> getEnrollmentByCourseId(Long courseId, int page, int size);
+
+    Integer getWeeksEnrolled(Long userId, Long courseId);
+
+    void updateProgressByUser( Long userId,  Long courseId);
+
+    Optional<Enrollment> findByUserAndCourse(User user, Course course);
 }

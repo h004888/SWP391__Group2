@@ -75,8 +75,8 @@ public class VideoServiceImpl implements VideoService {
         
         try {
             if (videoDTO.getVideoUrl() != null && !videoDTO.getVideoUrl().isEmpty()) {
-                String videoUUID = uploadFile.uploadVideoFile(videoDTO.getVideoUrl());
-                video.setVideoUrl(videoUUID);
+                String videoSecurity = uploadFile.uploadVideoFile(videoDTO.getVideoUrl());
+                video.setVideoUrl(videoSecurity);
             }
             return videoRepository.save(video);
         } catch (IOException e) {

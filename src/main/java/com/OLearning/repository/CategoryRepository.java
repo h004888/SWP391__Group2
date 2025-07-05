@@ -45,4 +45,11 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     @Query("SELECT c FROM Category c LEFT JOIN c.courses cs GROUP BY c.id, c.name ORDER BY COUNT(cs) DESC")
     List<Category> findTopCategoriesByCourseCount(Pageable pageable);
 
+    boolean existsByNameAndIdNot(String name, Long id);
+
+    @Query("SELECT c, COUNT(cs) as courseCount FROM Category c LEFT JOIN c.courses cs GROUP BY c.id, c.name")
+    List<Object[]> findAllWithCourseCount();
+
+    @Query("SELECT c FROM Category c LEFT JOIN FETCH c.courses")
+    List<Category> findAllWithCourses();
 }

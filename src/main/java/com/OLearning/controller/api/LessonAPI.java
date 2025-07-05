@@ -3,6 +3,7 @@ package com.OLearning.controller.api;
 import com.OLearning.entity.Lesson;
 import com.OLearning.entity.User;
 import com.OLearning.security.CustomUserDetails;
+import com.OLearning.service.enrollment.EnrollmentService;
 import com.OLearning.service.lesson.LessonService;
 import com.OLearning.service.lessonCompletion.LessonCompletionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,8 @@ public class LessonAPI {
     private LessonService lessonService;
     @Autowired
     private LessonCompletionService lessonCompletionService;
+    @Autowired
+    private EnrollmentService enrollmentService;
 //
 //    @GetMapping("/next")
 //    public ResponseEntity<Lesson> getNextLesson(
@@ -65,6 +68,7 @@ public class LessonAPI {
 
         if (!lessonCompletionService.checkLessonCompletion(user.getUserId(), lessonId)) {
             lessonCompletionService.markLessonAsCompleted(user.getUserId(), lessonId);
+            enrollmentService.updateProgressByUser(user.getUserId(), courseId);
         }
 
        Lesson nextLesson = lessonService.getNextLesson(courseId, lessonId);

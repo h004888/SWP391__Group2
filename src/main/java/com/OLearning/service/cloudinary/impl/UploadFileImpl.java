@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -26,7 +27,7 @@ public class UploadFileImpl implements UploadFile {
     }
     @Override
     public String uploadVideoFile(MultipartFile file) throws IOException {
-        return uploadFile(file, "video");
+        return uploadVideoSeFile(file);
     }
 
     private String uploadFile(MultipartFile file, String resourceType) throws IOException {
@@ -43,6 +44,29 @@ public class UploadFileImpl implements UploadFile {
                     )
             );
             return cloudinary.url().resourceType(resourceType).generate(publicValue + "." + extension);
+        } finally {
+            cleanDisk(fileUpload);
+        }
+    }
+
+    private String uploadVideoSeFile(MultipartFile file) throws IOException {
+        assert file.getOriginalFilename() != null;
+        String originalFilename = file.getOriginalFilename();
+        String fileNameWithoutExt = getFileName(originalFilename)[0];
+        String extension = getFileName(originalFilename)[1];
+        String publicValue = UUID.randomUUID().toString() + "_" + fileNameWithoutExt;
+
+        File fileUpload = convert(file, publicValue.replace("." + extension, ""), extension);
+        try {
+            cloudinary.uploader().upload(
+                    fileUpload,
+                    ObjectUtils.asMap(
+                            "public_id", publicValue,
+                            "resource_type", "video",
+                            "type", "private"
+                    )
+            );
+            return publicValue;
         } finally {
             cleanDisk(fileUpload);
         }
@@ -72,5 +96,22 @@ public class UploadFileImpl implements UploadFile {
         } catch (IOException e) {
             log.error("Error deleting file: {}", file.getName(), e);
         }
+    }
+
+    @Override
+    public String generateSignedVideoUrl(String publicId, int expireSeconds, String ResourceType) {
+        long timestamp = System.currentTimeMillis() / 1000L;
+        long expireAt = timestamp + expireSeconds;
+        Map options = ObjectUtils.asMap(
+                "resource_type", ResourceType,
+                "type", "private",
+                "sign_url", true,
+                "expires_at", expireAt
+        );
+        return cloudinary.url()
+                .resourceType(ResourceType)
+                .type("private")
+                .signed(true)
+                .generate(publicId);
     }
 }

@@ -5,6 +5,7 @@ import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.course.CourseDetailDTO;
 import com.OLearning.dto.course.CourseMediaDTO;
 import com.OLearning.entity.Category;
+import com.OLearning.dto.course.CourseViewDTO;
 import com.OLearning.entity.Chapter;
 import com.OLearning.entity.Course;
 import com.OLearning.entity.User;
@@ -14,6 +15,7 @@ import com.OLearning.repository.*;
 import com.OLearning.security.CustomUserDetails;
 import com.OLearning.service.cloudinary.UploadFile;
 import com.OLearning.service.course.CourseService;
+import com.OLearning.service.email.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -28,6 +30,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CourseServiceImpl implements CourseService {
@@ -46,6 +49,10 @@ public class CourseServiceImpl implements CourseService {
 
     @Autowired
     private CourseDetailMapper courseDetailMapper;
+    @Autowired
+    private NotificationRepository notificationRepository;
+    @Autowired
+    private EmailService emailService;
 
     @Override
     public Page<CourseDTO> getAllCourses(Pageable pageable) {
@@ -100,7 +107,7 @@ public class CourseServiceImpl implements CourseService {
 
 
     @Override
-    public Page<CourseDTO> searchCoursesGrid(
+    public Page<CourseViewDTO> searchCoursesGrid(
             List<Long> categoryIds,
             List<String> priceFilters,
             List<String> levels,
@@ -140,18 +147,18 @@ public class CourseServiceImpl implements CourseService {
 
         List<Course> result = new ArrayList<>(coursesPage.getContent());
 
-//        // Sort bằng Java nếu là MostPopular hoặc MostViewed
-//        if ("MostPopular".equals(sortBy)) {
-//            result.sort((a, b) -> Long.compare(b.getReviewCount(), a.getReviewCount()));
-//        } else if ("MostViewed".equals(sortBy)) {
-//            result.sort((a, b) -> Integer.compare(b.totalStudentEnrolled(), a.totalStudentEnrolled()));
-//        }
+        // Sort bằng Java nếu là MostPopular hoặc MostViewed
+        if ("MostPopular".equals(sortBy)) {
+            result.sort((a, b) -> Long.compare(b.getCourseReviews().size(), a.getCourseReviews().size()));
+        } else if ("MostViewed".equals(sortBy)) {
+            result.sort((a, b) -> Integer.compare(b.getEnrollments().size(), a.getEnrollments().size()));
+        }
 
         // Trả về lại Page<CourseDTO>
         return new PageImpl<>(
                 result,
                 pageable,
-                coursesPage.getTotalElements()).map(CourseMapper::toDTO);
+                coursesPage.getTotalElements()).map(CourseMapper::toCourseViewDTO);
     }
 
     @Override
@@ -159,28 +166,14 @@ public class CourseServiceImpl implements CourseService {
         courseRepository.deleteById(courseId);}
 
     @Override
-    public List<Course> getTopCourses() {
-        return courseRepository.findAllOrderByStudentCountDesc();
+    public List<CourseViewDTO> getTopCourses() {
+        return courseRepository.findAllOrderByStudentCountDesc().stream()
+                .map(CourseMapper::toCourseViewDTO)
+                .collect(Collectors.toList());
     }
     @Override
     public Optional<CourseDetailDTO> getDetailCourse(Long id) {
         return courseRepository.findById(id).map(courseDetailMapper::toDTO);
-    }
-
-
-    @Override
-    public boolean approveCourse(Long id) {
-        return courseRepository.findById(id)
-                .map(course -> {
-                    if (!"approved".equalsIgnoreCase(course.getStatus())) {
-                        course.setStatus("approved");
-                        course.setUpdatedAt(LocalDateTime.now());
-                        courseRepository.save(course);
-                        return true;
-                    }
-                    return false;
-                })
-                .orElse(false);
     }
 
     @Override
@@ -191,29 +184,18 @@ public class CourseServiceImpl implements CourseService {
         }
         return null;
     }
+
     @Override
-    public Course getCourseById(Long id) {
-        return courseRepository.findById(id).orElse(null);
+    public CourseViewDTO getCourseById(Long id) {
+        return courseRepository.findById(id)
+                .map(CourseMapper::toCourseViewDTO)
+                .orElseThrow(() -> new IllegalArgumentException("Course not found with id: " + id));
     }
 
     @Override
     public List<Chapter> getChaptersWithLessons(Long courseId) {
         return chapterRepository.findByCourseIdWithLessons(courseId);
 
-    }
-    @Override
-    public boolean rejectCourse(Long id) {
-        return courseRepository.findById(id)
-                .map(course -> {
-                    if (!"rejected".equalsIgnoreCase(course.getStatus())) {
-                        course.setStatus("rejected");
-                        course.setUpdatedAt(LocalDateTime.now());
-                        courseRepository.save(course);
-                        return true;
-                    }
-                    return false;
-                })
-                .orElse(false);
     }
 
     @Override
@@ -242,7 +224,6 @@ public class CourseServiceImpl implements CourseService {
         course.setStatus(status);
         return courseRepository.save(course);
     }
-
 
     @Override
     public Page<CourseDTO> filterCoursesWithPagination(String keyword, Long category, String price, String status, int page, int size) {
@@ -283,6 +264,45 @@ public class CourseServiceImpl implements CourseService {
         AddCourseStep1DTO courseDTO = courseMapper.DraftStep1(course);
         return courseDTO;
     }
+    @Override
+    public boolean approveCourse(Long id) {
+        return courseRepository.findById(id)
+                .map(course -> {
+                    if (!"approved".equalsIgnoreCase(course.getStatus())) {
+                        course.setStatus("approved");
+                        course.setUpdatedAt(LocalDateTime.now());
+                        courseRepository.save(course);
+                        // Gửi notification cho instructor
+                        if (course.getInstructor() != null) {
+                            com.OLearning.entity.Notification notification = new com.OLearning.entity.Notification();
+                            notification.setUser(course.getInstructor());
+                            notification.setCourse(course);
+                            notification.setMessage("Khóa học '" + course.getTitle() + "' của bạn đã được admin phê duyệt.");
+                            notification.setType("COURSE_APPROVED");
+                            notification.setStatus("failed");
+                            notification.setSentAt(LocalDateTime.now());
+                            notificationRepository.save(notification);
+                        }
+                        return true;
+                    }
+                    return false;
+                })
+                .orElse(false);
+    }
+    @Override
+    public boolean rejectCourse(Long id) {
+        return courseRepository.findById(id)
+                .map(course -> {
+                    if (!"rejected".equalsIgnoreCase(course.getStatus())) {
+                        course.setStatus("rejected");
+                        course.setUpdatedAt(LocalDateTime.now());
+                        courseRepository.save(course);
+                        return true;
+                    }
+                    return false;
+                })
+                .orElse(false);
+    }
 
     @Override
     public Course createCourseMedia(Long courseId, CourseMediaDTO CourseMediaDTO) {
@@ -292,7 +312,7 @@ public class CourseServiceImpl implements CourseService {
             String imageUrl = uploadFile.uploadImageFile(CourseMediaDTO.getImage());
             course.setCourseImg(imageUrl);
         }
-        
+
         if (CourseMediaDTO.getVideo() != null && !CourseMediaDTO.getVideo().isEmpty()) {
             String videoUrl = uploadFile.uploadVideoFile(CourseMediaDTO.getVideo());
             course.setVideoUrlPreview(videoUrl);
@@ -310,5 +330,55 @@ public class CourseServiceImpl implements CourseService {
         course.setUpdatedAt(LocalDateTime.now());
         courseRepository.save(course);
     }
+    @Override
+    public void blockCourse(Long courseId) {
+        Course course = courseRepository.findById(courseId).orElseThrow();
+        course.setStatus("blocked"); // hoặc trạng thái bạn định nghĩa
+        courseRepository.save(course);
+    }
 
+    @Override
+    public List<CourseDTO> getCourseDTOsByCategoryId(Long categoryId) {
+        List<Course> courses = courseRepository.findByCategoryId(categoryId);
+        return courses.stream()
+                .map(courseMapper::MapCourseDTO)
+                .toList();
+    }
+
+    @Override
+    public List<CourseViewDTO> getCoursesByCategoryId(int categoryId) {
+        return courseRepository.findByCategoryId(categoryId).stream()
+                .map(CourseMapper::toCourseViewDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Course findById(Long courseId) {
+        return courseRepository.findById(courseId).orElseThrow();
+    }
+
+    public void setPendingBlock(Long courseId) {
+        Course course = courseRepository.findById(courseId).orElseThrow();
+        course.setStatus("pending_block");
+        courseRepository.save(course);
+        // Gửi notification và email cho instructor
+        User instructor = course.getInstructor();
+        if (instructor != null) {
+            com.OLearning.entity.Notification notification = new com.OLearning.entity.Notification();
+            notification.setUser(instructor);
+            notification.setCourse(course);
+            notification.setMessage("Your course '" + course.getTitle() + "' is pending block review by admin. Please check your email and respond if needed.");
+            notification.setType("COURSE_BLOCKED");
+            notification.setStatus("failed");
+            notification.setSentAt(LocalDateTime.now());
+            notificationRepository.save(notification);
+            // Gửi email cho instructor
+            String subject = "[OLearning] Your course is pending block review";
+            String content = "Xin chào " + instructor.getFullName() + ",\n\n" +
+                    "Khóa học '" + course.getTitle() + "' của bạn đang được xem xét để block bởi quản trị viên.\n" +
+                    "Vui lòng đăng nhập vào hệ thống OLearning để phản hồi hoặc liên hệ bộ phận hỗ trợ nếu có thắc mắc.\n\n" +
+                    "Trân trọng,\nĐội ngũ OLearning";
+            emailService.sendOTP(instructor.getEmail(), subject, content);
+        }
+    }
 }

@@ -12,6 +12,7 @@ import com.OLearning.service.cart.CartService;
 import com.OLearning.service.cart.impl.CartServiceImpl;
 import com.OLearning.service.vnpay.VNPayService;
 import com.OLearning.service.voucher.VoucherService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.Cookie;
@@ -197,7 +198,7 @@ public class CartController {
             List<Map<String, Object>> items = (List<Map<String, Object>>) cart.getOrDefault("items", List.of());
             Map<Long, Long> voucherMapping = new HashMap<>();
             if (voucherMappingJson != null && !voucherMappingJson.isEmpty()) {
-                voucherMapping = objectMapper.readValue(voucherMappingJson, new com.fasterxml.jackson.core.type.TypeReference<Map<Long, Long>>() {});
+                voucherMapping = objectMapper.readValue(voucherMappingJson, new TypeReference<Map<Long, Long>>() {});
             }
             double totalAmount = 0;
             for (Map<String, Object> item : items) {
