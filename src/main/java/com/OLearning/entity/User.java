@@ -2,6 +2,7 @@ package com.OLearning.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.validator.constraints.Normalized;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -21,6 +22,7 @@ public class User {
     private Long userId;
     
     @Column(name = "Username")
+    @Normalized
     private String username;
     
     @Column(name = "Email")
