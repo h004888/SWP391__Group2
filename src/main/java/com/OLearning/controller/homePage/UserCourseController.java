@@ -166,21 +166,19 @@ public class UserCourseController {
         model.addAttribute("course", course);
         model.addAttribute("chapters", course.getListOfChapters());
         
-        // Load comments for the course
+        // Load comments for the specific lesson only (Rating = null)
         Course courseEntity = courseService.findCourseById(courseId);
-        List<CourseReview> parentComments = courseReviewRepository.findByCourseAndParentReviewIsNull(courseEntity);
+        // Since we only support lesson-specific comments now, load comments for current lesson
+        List<CourseReview> parentComments = courseReviewRepository.findByLessonAndRatingIsNullAndParentReviewIsNull(currentLesson);
         List<CommentDTO> comments = new ArrayList<>();
         
         for (CourseReview parentComment : parentComments) {
             CommentDTO commentDTO = commentMapper.toDTO(parentComment);
-            
-            // Load replies for this comment
             List<CourseReview> replies = courseReviewRepository.findByParentReviewOrderByCreatedAtDesc(parentComment);
             List<CommentDTO> replyDTOs = replies.stream()
                     .map(reply -> commentMapper.toDTO(reply))
                     .collect(Collectors.toList());
             commentDTO.setChildren(replyDTOs);
-            
             comments.add(commentDTO);
         }
         
@@ -257,21 +255,19 @@ public class UserCourseController {
         model.addAttribute("course", course);
         model.addAttribute("chapters", course.getListOfChapters());
         
-        // Load comments for the course
+        // Load comments for the specific lesson only (Rating = null)
         Course courseEntity = courseService.findCourseById(courseId);
-        List<CourseReview> parentComments = courseReviewRepository.findByCourseAndParentReviewIsNull(courseEntity);
+        // Since we only support lesson-specific comments now, load comments for current lesson
+        List<CourseReview> parentComments = courseReviewRepository.findByLessonAndRatingIsNullAndParentReviewIsNull(currentLesson);
         List<CommentDTO> comments = new ArrayList<>();
         
         for (CourseReview parentComment : parentComments) {
             CommentDTO commentDTO = commentMapper.toDTO(parentComment);
-            
-            // Load replies for this comment
             List<CourseReview> replies = courseReviewRepository.findByParentReviewOrderByCreatedAtDesc(parentComment);
             List<CommentDTO> replyDTOs = replies.stream()
                     .map(reply -> commentMapper.toDTO(reply))
                     .collect(Collectors.toList());
             commentDTO.setChildren(replyDTOs);
-            
             comments.add(commentDTO);
         }
         
@@ -292,19 +288,8 @@ public class UserCourseController {
             return "redirect:/learning";
         }
 
-        // Load comments for the course
-        List<CourseReview> parentComments = courseReviewRepository.findByCourseAndParentReviewIsNull(course);
+        // Since we only support lesson-specific comments now, no comments to load for course-level
         List<CommentDTO> comments = new ArrayList<>();
-        
-        for (CourseReview parentComment : parentComments) {
-            CommentDTO commentDTO = commentMapper.toDTO(parentComment);
-            List<CourseReview> replies = courseReviewRepository.findByParentReviewOrderByCreatedAtDesc(parentComment);
-            List<CommentDTO> replyDTOs = replies.stream()
-                    .map(reply -> commentMapper.toDTO(reply))
-                    .collect(Collectors.toList());
-            commentDTO.setChildren(replyDTOs);
-            comments.add(commentDTO);
-        }
         model.addAttribute("comments", comments);
         model.addAttribute("course", course);
         model.addAttribute("user", currentUser);

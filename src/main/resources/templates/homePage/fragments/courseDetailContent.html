@@ -1518,6 +1518,7 @@ Page content START -->
                                                 </div>
                                                 <form id="commentForm" class="w-100 d-flex">
                                                     <input type="hidden" name="courseId" th:value="${course.courseId}" />
+                                                    <input type="hidden" name="lessonId" value="" />
                                                     <div class="flex-grow-1 me-2">
                                                         <textarea class="form-control pe-4 bg-light" name="comment" rows="1"
                                                                   placeholder="Add a comment..." required></textarea>
@@ -2152,7 +2153,13 @@ Listed courses END -->
                     e.preventDefault();
                     const formData = new FormData(commentForm);
                     const data = {};
-                    formData.forEach((value, key) => { data[key] = value; });
+                    formData.forEach((value, key) => { 
+                        if (key === 'lessonId') {
+                            data[key] = value ? parseInt(value) : null;
+                        } else {
+                            data[key] = value; 
+                        }
+                    });
 
                     fetch('/api/course/' + data.courseId + '/comment', {
                         method: 'POST',

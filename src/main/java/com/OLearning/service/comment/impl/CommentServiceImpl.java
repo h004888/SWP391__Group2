@@ -6,11 +6,13 @@ import com.OLearning.entity.CourseReview;
 import com.OLearning.entity.Enrollment;
 import com.OLearning.entity.Report;
 import com.OLearning.entity.User;
+import com.OLearning.entity.Lesson;
 import com.OLearning.repository.CourseRepository;
 import com.OLearning.repository.CourseReviewRepository;
 import com.OLearning.repository.EnrollmentRepository;
 import com.OLearning.repository.ReportRepository;
 import com.OLearning.repository.UserRepository;
+import com.OLearning.repository.LessonRepository;
 import com.OLearning.service.comment.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,7 @@ public class CommentServiceImpl implements CommentService {
     private final CourseReviewRepository reviewRepo;
     private final EnrollmentRepository enrollmentRepo;
     private final ReportRepository reportRepo;
+    private final LessonRepository lessonRepo;
 
     @Override
     public void addComment(CommentDTO dto, Long userId, Long courseId) {
@@ -38,18 +41,32 @@ public class CommentServiceImpl implements CommentService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy khóa học"));
 
         // Kiểm tra xem user đã đăng ký khóa học chưa
-        Enrollment enrollment = enrollmentRepo.findByUserAndCourse(user, course)
+        Enrollment enrollment = enrollmentRepo.findFirstByUserAndCourseOrderByEnrollmentDateDesc(user, course)
                 .orElseThrow(() -> new RuntimeException("Bạn cần đăng ký khóa học để có thể bình luận"));
+
+        // LessonId là bắt buộc cho comment
+        if (dto.getLessonId() == null) {
+            throw new RuntimeException("Comment phải thuộc về một bài học cụ thể");
+        }
+        
+        Lesson lesson = lessonRepo.findById(dto.getLessonId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy bài học"));
+        
+        // Verify lesson belongs to the course
+        if (!lesson.getChapter().getCourse().getCourseId().equals(courseId)) {
+            throw new RuntimeException("Bài học không thuộc khóa học này");
+        }
 
         CourseReview review = new CourseReview();
         review.setEnrollment(enrollment);
         review.setCourse(course);
+        review.setLesson(lesson);
         review.setComment(dto.getComment());
-        review.setRating(0); // Set default rating for comments
+        review.setRating(null); // Set rating = null for comments
         review.setCreatedAt(LocalDateTime.now());
         reviewRepo.save(review);
         
-        System.out.println("Comment added successfully: " + review.getReviewId());
+        System.out.println("Comment added successfully: " + review.getReviewId() + " for lesson: " + lesson.getLessonId());
     }
 
     @Override
@@ -60,34 +77,42 @@ public class CommentServiceImpl implements CommentService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy khóa học"));
 
         // Kiểm tra xem user đã đăng ký khóa học chưa
-        Enrollment enrollment = enrollmentRepo.findByUserAndCourse(user, course)
+        Enrollment enrollment = enrollmentRepo.findFirstByUserAndCourseOrderByEnrollmentDateDesc(user, course)
                 .orElseThrow(() -> new RuntimeException("Bạn cần đăng ký khóa học để có thể trả lời bình luận"));
 
         // Kiểm tra comment cha tồn tại
         CourseReview parentReview = reviewRepo.findById(dto.getParentId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy bình luận gốc"));
 
+        // Get lesson from parent comment
+        Lesson lesson = parentReview.getLesson();
+
         CourseReview reply = new CourseReview();
         reply.setEnrollment(enrollment);
         reply.setCourse(course);
+        reply.setLesson(lesson); // Reply sẽ có cùng lesson với parent comment
         reply.setComment(dto.getComment());
-        reply.setRating(0); // Set default rating for replies
+        reply.setRating(null); // Set rating = null for replies
         reply.setCreatedAt(LocalDateTime.now());
         reply.setParentReview(parentReview);
         reviewRepo.save(reply);
+        
+        System.out.println("Reply added successfully: " + reply.getReviewId() + " for lesson: " + (lesson != null ? lesson.getLessonId() : "course-level"));
     }
 
     @Override
     public void editComment(CommentDTO dto, Long userId, Long courseId) {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+        Course course = courseRepo.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy khóa học"));
 
+        // Kiểm tra comment tồn tại và thuộc về user
         CourseReview review = reviewRepo.findById(dto.getReviewId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy bình luận"));
 
-        // Kiểm tra quyền sửa comment
         if (!review.getEnrollment().getUser().getUserId().equals(userId)) {
-            throw new RuntimeException("Bạn không có quyền sửa bình luận này");
+            throw new RuntimeException("Bạn không có quyền chỉnh sửa bình luận này");
         }
 
         review.setComment(dto.getComment());
@@ -96,52 +121,47 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public void deleteComment(Long commentId, Long userId, Long courseId) {
+    public void deleteComment(Long reviewId, Long userId) {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
 
-        CourseReview review = reviewRepo.findById(commentId)
+        // Kiểm tra comment tồn tại và thuộc về user
+        CourseReview review = reviewRepo.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy bình luận"));
 
-        // Kiểm tra quyền xóa comment
         if (!review.getEnrollment().getUser().getUserId().equals(userId)) {
             throw new RuntimeException("Bạn không có quyền xóa bình luận này");
         }
 
-        // Xóa tất cả các reply của comment này
-        reviewRepo.deleteByParentReview(review);
-        // Xóa comment
+        // Delete all replies first
+        List<CourseReview> replies = reviewRepo.findByParentReviewOrderByCreatedAtDesc(review);
+        for (CourseReview reply : replies) {
+            reviewRepo.delete(reply);
+        }
+
         reviewRepo.delete(review);
     }
 
     @Override
-    public void reportComment(Long commentId, Long userId, Long courseId, String reason) {
+    public void reportComment(Long reviewId, Long userId, String reason) {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
-        Course course = courseRepo.findById(courseId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy khóa học"));
-        CourseReview review = reviewRepo.findById(commentId)
+
+        CourseReview review = reviewRepo.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy bình luận"));
 
-        // Kiểm tra xem user đã báo cáo comment này chưa (dựa trên content)
-        List<Report> existingReports = reportRepo.findByUser_UserId(userId);
-        boolean alreadyReported = existingReports.stream()
-                .anyMatch(report -> "COMMENT".equals(report.getReportType()) && 
-                        reason.equals(report.getContent()) && 
-                        courseId.equals(report.getCourse().getCourseId()));
-
-        if (alreadyReported) {
-            throw new RuntimeException("Bạn đã báo cáo bình luận này rồi");
+        // Check if user is not reporting their own comment
+        if (review.getEnrollment().getUser().getUserId().equals(userId)) {
+            throw new RuntimeException("Bạn không thể báo cáo bình luận của chính mình");
         }
 
-        // Tạo report mới
         Report report = new Report();
         report.setReportType("COMMENT");
-        report.setCourse(course);
         report.setUser(user);
+        report.setCourse(review.getCourse());
         report.setContent(reason);
         report.setCreatedAt(LocalDateTime.now());
-        report.setStatus("PENDING");
+        report.setStatus("pending");
         reportRepo.save(report);
     }
 }

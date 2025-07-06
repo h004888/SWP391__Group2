@@ -115,10 +115,31 @@ public class HomeController {
                 CourseViewDTO course = courseService.getCourseById(id);
                 Course courseEntity = courseRepository.findById(id).orElse(null);
                 
-                // Lấy danh sách review của course
+                // Lấy danh sách review của course (chỉ những review có rating)
                 List<CourseReview> reviews = new ArrayList<>();
+                double averageRating = 0.0;
+                Map<Integer, Long> ratingDistribution = new HashMap<>();
                 if (courseEntity != null) {
-                    reviews = courseReviewService.getCourseReviewsByCourse(courseEntity);
+                    reviews = courseReviewService.getReviewsByCourseWithUser(courseEntity);
+                    
+                    // Filter theo sao nếu có
+                    if (star > 0 && star <= 5) {
+                        reviews = reviews.stream()
+                                .filter(review -> review.getRating() == star)
+                                .collect(Collectors.toList());
+                    }
+                    
+                    if (!reviews.isEmpty()) {
+                        averageRating = reviews.stream()
+                                .mapToInt(CourseReview::getRating)
+                                .average()
+                                .orElse(0.0);
+                        
+                        // Tính phân bố rating (từ tất cả reviews, không chỉ filtered)
+                        List<CourseReview> allReviews = courseReviewService.getReviewsByCourseWithUser(courseEntity);
+                        ratingDistribution = allReviews.stream()
+                                .collect(Collectors.groupingBy(CourseReview::getRating, Collectors.counting()));
+                    }
                 }
                 
                 // Kiểm tra user đã đăng ký course chưa
@@ -126,7 +147,7 @@ public class HomeController {
                 if (userDetails != null) {
                     User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
                     if (user != null && courseEntity != null) {
-                        isEnrolled = enrollmentService.findByUserAndCourse(user, courseEntity).isPresent();
+                        isEnrolled = enrollmentService.findFirstByUserAndCourseOrderByEnrollmentDateDesc(user, courseEntity).isPresent();
                     }
                 }
 
@@ -137,7 +158,19 @@ public class HomeController {
                                 course.getCategory().getCourses().stream().map(CourseMapper::toCourseViewDTO).collect(Collectors.toList()));
                 model.addAttribute("course", course);
                 model.addAttribute("reviews", reviews);
+                model.addAttribute("averageRating", averageRating);
+                model.addAttribute("ratingDistribution", ratingDistribution);
+                model.addAttribute("selectedStar", star);
                 model.addAttribute("isEnrolled", isEnrolled);
+                
+                // Thêm thông tin số review của user hiện tại
+                if (userDetails != null) {
+                    User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
+                    if (user != null) {
+                        Long userReviewCount = courseReviewService.countByUserIdAndCourseId(user.getUserId(), id);
+                        model.addAttribute("userReviewCount", userReviewCount);
+                    }
+                }
                 
                 // Thêm thông tin user nếu đã đăng nhập
                 if (userDetails != null) {

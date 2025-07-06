@@ -570,7 +570,7 @@ Page content START -->
 																		class="icon-md bg-info bg-opacity-10 text-info rounded-circle"><i
 																			class="fas fa-comment-dots"></i></span>
 																	<span class="h6 fw-light mb-0 ms-2"
-																		th:text="${course.courseReviews.size()}">205</span>
+																		th:text="${reviews.size()}">205</span>
 																</div>
 															</li>
 														</ul>
@@ -610,27 +610,46 @@ Page content START -->
 										aria-labelledby="course-pills-tab-4">
 										<!-- Review START -->
 										<div class="row mb-4">
-											<h5 class="mb-4">Our Student Reviews</h5>
+											<div class="d-flex justify-content-between align-items-center mb-4">
+												<div>
+													<h5 class="mb-0">Our Student Reviews</h5>
+													<small class="text-muted" th:if="${selectedStar > 0}">
+														Hiển thị <span th:text="${reviews.size()}"></span> đánh giá với <span th:text="${selectedStar} + ' sao'"></span>
+													</small>
+													<small class="text-muted" th:unless="${selectedStar > 0}">
+														Tổng cộng <span th:text="${reviews.size()}"></span> đánh giá
+													</small>
+												</div>
+												<!-- Filter by stars -->
+												<div class="dropdown">
+													<button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+														<i class="fas fa-filter me-1"></i>
+														<span th:if="${selectedStar > 0}" th:text="${selectedStar} + ' sao'">Filter</span>
+														<span th:unless="${selectedStar > 0}">Tất cả sao</span>
+													</button>
+													<ul class="dropdown-menu">
+														<li><a class="dropdown-item" th:href="@{/home/course-detail(id=${course.courseId})}">Tất cả sao</a></li>
+														<li><a class="dropdown-item" th:href="@{/home/course-detail(id=${course.courseId}, star=5)}">5 sao</a></li>
+														<li><a class="dropdown-item" th:href="@{/home/course-detail(id=${course.courseId}, star=4)}">4 sao</a></li>
+														<li><a class="dropdown-item" th:href="@{/home/course-detail(id=${course.courseId}, star=3)}">3 sao</a></li>
+														<li><a class="dropdown-item" th:href="@{/home/course-detail(id=${course.courseId}, star=2)}">2 sao</a></li>
+														<li><a class="dropdown-item" th:href="@{/home/course-detail(id=${course.courseId}, star=1)}">1 sao</a></li>
+													</ul>
+												</div>
+											</div>
 
 											<!-- Rating info -->
 											<div class="col-md-4 mb-3 mb-md-0">
 												<div class="text-center">
 													<!-- Info -->
-													<h2 class="mb-0">4.5</h2>
+													<h2 class="mb-0" th:text="${#numbers.formatDecimal(averageRating, 1, 1)}">4.5</h2>
 													<!-- Star -->
 													<ul class="list-inline mb-0">
-														<li class="list-inline-item me-0"><i
-																class="fas fa-star text-warning"></i></li>
-														<li class="list-inline-item me-0"><i
-																class="fas fa-star text-warning"></i></li>
-														<li class="list-inline-item me-0"><i
-																class="fas fa-star text-warning"></i></li>
-														<li class="list-inline-item me-0"><i
-																class="fas fa-star text-warning"></i></li>
-														<li class="list-inline-item me-0"><i
-																class="fas fa-star-half-alt text-warning"></i></li>
+														<li class="list-inline-item me-0" th:each="i : ${#numbers.sequence(1, 5)}">
+															<i th:class="${i <= averageRating ? 'fas fa-star text-warning' : (i - 0.5 <= averageRating ? 'fas fa-star-half-alt text-warning' : 'far fa-star text-warning')}"></i>
+														</li>
 													</ul>
-													<p class="mb-0">(Based on todays review)</p>
+													<p class="mb-0" th:text="'(Based on ' + ${reviews.size()} + ' reviews)'">(Based on todays review)</p>
 												</div>
 											</div>
 
@@ -639,10 +658,38 @@ Page content START -->
 												<div class="row align-items-center">
 													<!-- Progress bar and Rating -->
 													<div class="col-6 col-sm-8">
+																											<!-- Progress item -->
+													<div class="progress progress-sm bg-warning bg-opacity-15">
+														<div class="progress-bar bg-warning" role="progressbar"
+															th:style="'width: ' + ${reviews.size() > 0 ? (ratingDistribution.get(5) != null ? (ratingDistribution.get(5) * 100 / reviews.size()) : 0) : 0} + '%'"
+															th:aria-valuenow="${reviews.size() > 0 ? (ratingDistribution.get(5) != null ? (ratingDistribution.get(5) * 100 / reviews.size()) : 0) : 0}"
+															aria-valuemin="0" aria-valuemax="100"></div>
+													</div>
+													</div>
+
+													<div class="col-6 col-sm-4">
+														<!-- Star item -->
+														<ul class="list-inline mb-0">
+															<li class="list-inline-item me-0 small"><i
+																	class="fas fa-star text-warning"></i></li>
+															<li class="list-inline-item me-0 small"><i
+																	class="fas fa-star text-warning"></i></li>
+															<li class="list-inline-item me-0 small"><i
+																	class="fas fa-star text-warning"></i></li>
+															<li class="list-inline-item me-0 small"><i
+																	class="fas fa-star text-warning"></i></li>
+															<li class="list-inline-item me-0 small"><i
+																	class="fas fa-star text-warning"></i></li>
+														</ul>
+													</div>
+
+													<!-- Progress bar and Rating -->
+													<div class="col-6 col-sm-8">
 														<!-- Progress item -->
 														<div class="progress progress-sm bg-warning bg-opacity-15">
 															<div class="progress-bar bg-warning" role="progressbar"
-																style="width: 100%" aria-valuenow="100"
+																th:style="'width: ' + ${reviews.size() > 0 ? (ratingDistribution.get(4) != null ? (ratingDistribution.get(4) * 100 / reviews.size()) : 0) : 0} + '%'"
+																th:aria-valuenow="${reviews.size() > 0 ? (ratingDistribution.get(4) != null ? (ratingDistribution.get(4) * 100 / reviews.size()) : 0) : 0}"
 																aria-valuemin="0" aria-valuemax="100"></div>
 														</div>
 													</div>
@@ -659,32 +706,6 @@ Page content START -->
 															<li class="list-inline-item me-0 small"><i
 																	class="fas fa-star text-warning"></i></li>
 															<li class="list-inline-item me-0 small"><i
-																	class="fas fa-star text-warning"></i></li>
-														</ul>
-													</div>
-
-													<!-- Progress bar and Rating -->
-													<div class="col-6 col-sm-8">
-														<!-- Progress item -->
-														<div class="progress progress-sm bg-warning bg-opacity-15">
-															<div class="progress-bar bg-warning" role="progressbar"
-																style="width: 80%" aria-valuenow="80" aria-valuemin="0"
-																aria-valuemax="100"></div>
-														</div>
-													</div>
-
-													<div class="col-6 col-sm-4">
-														<!-- Star item -->
-														<ul class="list-inline mb-0">
-															<li class="list-inline-item me-0 small"><i
-																	class="fas fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0 small"><i
-																	class="fas fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0 small"><i
-																	class="fas fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0 small"><i
-																	class="fas fa-star text-warning"></i></li>
-															<li class="list-inline-item me-0 small"><i
 																	class="far fa-star text-warning"></i></li>
 														</ul>
 													</div>
@@ -694,8 +715,9 @@ Page content START -->
 														<!-- Progress item -->
 														<div class="progress progress-sm bg-warning bg-opacity-15">
 															<div class="progress-bar bg-warning" role="progressbar"
-																style="width: 60%" aria-valuenow="60" aria-valuemin="0"
-																aria-valuemax="100"></div>
+																th:style="'width: ' + ${reviews.size() > 0 ? (ratingDistribution.get(3) != null ? (ratingDistribution.get(3) * 100 / reviews.size()) : 0) : 0} + '%'"
+																th:aria-valuenow="${reviews.size() > 0 ? (ratingDistribution.get(3) != null ? (ratingDistribution.get(3) * 100 / reviews.size()) : 0) : 0}"
+																aria-valuemin="0" aria-valuemax="100"></div>
 														</div>
 													</div>
 
@@ -720,8 +742,9 @@ Page content START -->
 														<!-- Progress item -->
 														<div class="progress progress-sm bg-warning bg-opacity-15">
 															<div class="progress-bar bg-warning" role="progressbar"
-																style="width: 40%" aria-valuenow="40" aria-valuemin="0"
-																aria-valuemax="100"></div>
+																th:style="'width: ' + ${reviews.size() > 0 ? (ratingDistribution.get(2) != null ? (ratingDistribution.get(2) * 100 / reviews.size()) : 0) : 0} + '%'"
+																th:aria-valuenow="${reviews.size() > 0 ? (ratingDistribution.get(2) != null ? (ratingDistribution.get(2) * 100 / reviews.size()) : 0) : 0}"
+																aria-valuemin="0" aria-valuemax="100"></div>
 														</div>
 													</div>
 
@@ -746,8 +769,9 @@ Page content START -->
 														<!-- Progress item -->
 														<div class="progress progress-sm bg-warning bg-opacity-15">
 															<div class="progress-bar bg-warning" role="progressbar"
-																style="width: 20%" aria-valuenow="20" aria-valuemin="0"
-																aria-valuemax="100"></div>
+																th:style="'width: ' + ${reviews.size() > 0 ? (ratingDistribution.get(1) != null ? (ratingDistribution.get(1) * 100 / reviews.size()) : 0) : 0} + '%'"
+																th:aria-valuenow="${reviews.size() > 0 ? (ratingDistribution.get(1) != null ? (ratingDistribution.get(1) * 100 / reviews.size()) : 0) : 0}"
+																aria-valuemin="0" aria-valuemax="100"></div>
 														</div>
 													</div>
 
@@ -778,12 +802,13 @@ Page content START -->
 												<!-- Avatar -->
 												<div class="avatar avatar-xl me-4 flex-shrink-0">
 													<img class="avatar-img rounded-circle"
-														src="assets/images/avatar/09.jpg" alt="avatar">
+														th:src="${review.enrollment.user.profilePicture != null and review.enrollment.user.profilePicture != ''} ? ${review.enrollment.user.profilePicture} : @{/assets/images/avatar/default.jpg}"
+														th:alt="${review.enrollment.user.fullName}">
 												</div>
 												<!-- Text -->
 												<div>
 													<div class="d-sm-flex mt-1 mt-md-0 align-items-center">
-														<h5 class="me-3 mb-0" th:text="${review.enrollment.user.username}">User Name</h5>
+														<h5 class="me-3 mb-0" th:text="${review.enrollment.user.fullName}">User Name</h5>
 														<!-- Review star -->
 														<ul class="list-inline mb-0">
 															<li class="list-inline-item me-0" th:each="i : ${#numbers.sequence(1, 5)}">
@@ -794,6 +819,21 @@ Page content START -->
 													<!-- Info -->
 													<p class="small mb-2" th:text="${#temporals.format(review.createdAt, 'dd MMM yyyy')}">Date</p>
 													<p class="mb-2" th:text="${review.comment}">Review comment</p>
+													
+													<!-- Delete button for user's own review -->
+													<div th:if="${currentUser != null and review.enrollment.user.userId == currentUser.userId}" class="mt-2">
+														<form th:action="@{/home/course-review/delete}" method="post" style="display: inline;">
+															<input type="hidden" name="courseId" th:value="${course.courseId}" />
+															<input type="hidden" name="reviewId" th:value="${review.reviewId}" />
+															<button type="submit" class="btn btn-danger btn-sm" 
+																	onclick="return confirm('Bạn có chắc chắn muốn xóa đánh giá này?')">
+																<i class="fas fa-trash me-1"></i>Xóa đánh giá
+															</button>
+														</form>
+														<small class="text-muted d-block mt-1">
+															Đánh giá của bạn - <span th:text="${#temporals.format(review.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+														</small>
+													</div>
 												</div>
 											</div>
 											<!-- Review item END -->
@@ -805,13 +845,30 @@ Page content START -->
 										<!-- No reviews message -->
 										<div class="row" th:if="${reviews.isEmpty()}">
 											<div class="col-12">
-												<p class="text-muted text-center">Chưa có đánh giá nào cho khóa học này.</p>
+												<p class="text-muted text-center" th:if="${selectedStar > 0}">
+													Không có đánh giá nào với <span th:text="${selectedStar} + ' sao'"></span> cho khóa học này.
+													<a th:href="@{/home/course-detail(id=${course.courseId})}" class="text-primary">Xem tất cả đánh giá</a>
+												</p>
+												<p class="text-muted text-center" th:unless="${selectedStar > 0}">
+													Chưa có đánh giá nào cho khóa học này.
+												</p>
 											</div>
 										</div>
 
 										<!-- Leave Review START -->
 										<div class="mt-2" th:if="${isEnrolled}">
-											<h5 class="mb-4">Leave a Review</h5>
+											<div class="d-flex justify-content-between align-items-center mb-4">
+												<h5 class="mb-0">Leave a Review</h5>
+												<div th:if="${currentUser != null and userReviewCount != null}">
+													<small class="text-muted">
+														Bạn đã đánh giá <span th:text="${userReviewCount}"></span> lần cho khóa học này
+													</small>
+												</div>
+											</div>
+											<div th:if="${currentUser != null and userReviewCount != null and userReviewCount > 0}" class="alert alert-info mb-3">
+												<i class="fas fa-info-circle me-2"></i>
+												Bạn có thể đánh giá nhiều lần để chia sẻ trải nghiệm học tập của mình!
+											</div>
 											<form class="row g-3" th:action="@{/home/course-review/add}" method="post">
 												<input type="hidden" name="courseId" th:value="${course.courseId}"/>
 												<!-- Rating -->

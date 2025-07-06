@@ -6,7 +6,7 @@ public interface CommentService {
     void addComment(CommentDTO dto, Long userId, Long courseId);
     void replyComment(CommentDTO dto, Long userId, Long courseId);
     void editComment(CommentDTO dto, Long userId, Long courseId);
-    void deleteComment(Long commentId, Long userId, Long courseId);
-    void reportComment(Long commentId, Long userId, Long courseId, String reason);
+    void deleteComment(Long reviewId, Long userId);
+    void reportComment(Long reviewId, Long userId, String reason);
 }
 

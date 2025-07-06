@@ -1,22 +1,20 @@
 package com.OLearning.dto.comment;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import com.OLearning.entity.User;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class CommentDTO {
     private Long reviewId;
     private Long courseId;
+    private Long lessonId;
     private Long userId;
     private String comment;
     private Integer rating;

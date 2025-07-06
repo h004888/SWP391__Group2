@@ -5,11 +5,13 @@ import com.OLearning.entity.Course;
 import com.OLearning.entity.CourseReview;
 import com.OLearning.entity.Report;
 import com.OLearning.entity.User;
+import com.OLearning.entity.Lesson;
 import com.OLearning.mapper.comment.CommentMapper;
 import com.OLearning.repository.CourseRepository;
 import com.OLearning.repository.CourseReviewRepository;
 import com.OLearning.repository.ReportRepository;
 import com.OLearning.repository.UserRepository;
+import com.OLearning.repository.LessonRepository;
 import com.OLearning.service.comment.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -33,6 +35,7 @@ public class CommentController {
     private final CourseReviewRepository reviewRepo;
     private final ReportRepository reportRepo;
     private final CommentMapper commentMapper;
+    private final LessonRepository lessonRepo;
 
     @PostMapping("/{courseId}/comment")
     @ResponseBody
@@ -92,13 +95,20 @@ public class CommentController {
         // Validate comment
         if (dto.getComment() == null || dto.getComment().trim().isEmpty()) {
             return ResponseEntity.badRequest()
-                    .body(Map.of("error", "Nội dung trả lời không được để trống"));
+                    .body(Map.of("error", "Bình luận không được để trống"));
+        }
+
+        if (dto.getParentId() == null) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Thiếu thông tin bình luận gốc"));
         }
 
         try {
             commentService.replyComment(dto, user.getUserId(), courseId);
             return ResponseEntity.ok(Map.of("success", "Đã trả lời bình luận thành công"));
         } catch (RuntimeException e) {
+            System.err.println("Error replying comment: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "Lỗi khi trả lời bình luận: " + e.getMessage()));
         }
@@ -149,7 +159,7 @@ public class CommentController {
                                        Principal principal) {
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", "Vui lòng đăng nhập để sửa bình luận"));
+                    .body(Map.of("error", "Vui lòng đăng nhập để chỉnh sửa bình luận"));
         }
 
         User user = userRepo.findByEmail(principal.getName()).orElse(null);
@@ -162,10 +172,18 @@ public class CommentController {
         dto.setUserId(user.getUserId());
         dto.setCourseId(courseId);
 
+        // Validate comment
+        if (dto.getComment() == null || dto.getComment().trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Bình luận không được để trống"));
+        }
+
         try {
             commentService.editComment(dto, user.getUserId(), courseId);
             return ResponseEntity.ok(Map.of("success", "Đã cập nhật bình luận thành công"));
         } catch (RuntimeException e) {
+            System.err.println("Error editing comment: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "Lỗi khi cập nhật bình luận: " + e.getMessage()));
         }
@@ -198,40 +216,13 @@ public class CommentController {
         }
 
         try {
-            commentService.deleteComment(commentId, user.getUserId(), courseId);
+            commentService.deleteComment(commentId, user.getUserId());
             return ResponseEntity.ok(Map.of("success", "Đã xóa bình luận thành công"));
         } catch (RuntimeException e) {
+            System.err.println("Error deleting comment: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "Lỗi khi xóa bình luận: " + e.getMessage()));
-        }
-    }
-
-    @GetMapping("/{courseId}/comments")
-    public ResponseEntity<List<CommentDTO>> getCommentsForCourse(@PathVariable Long courseId) {
-        try {
-            Course course = courseRepo.findById(courseId)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy khóa học"));
-
-            // Lấy danh sách parent comments
-            List<CourseReview> parentComments = reviewRepo.findByCourseAndParentReviewIsNull(course);
-            List<CommentDTO> comments = new ArrayList<>();
-
-            for (CourseReview parentComment : parentComments) {
-                CommentDTO commentDTO = commentMapper.toDTO(parentComment);
-
-                // Load replies for this comment
-                List<CourseReview> replies = reviewRepo.findByParentReviewOrderByCreatedAtDesc(parentComment);
-                List<CommentDTO> replyDTOs = replies.stream()
-                        .map(reply -> commentMapper.toDTO(reply))
-                        .collect(Collectors.toList());
-                commentDTO.setChildren(replyDTOs);
-
-                comments.add(commentDTO);
-            }
-
-            return ResponseEntity.ok(comments);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
         }
     }
 
@@ -259,9 +250,11 @@ public class CommentController {
         }
 
         try {
-            commentService.reportComment(commentId, user.getUserId(), courseId, reason.trim());
+            commentService.reportComment(commentId, user.getUserId(), reason.trim());
             return ResponseEntity.ok(Map.of("success", "Đã báo cáo bình luận thành công"));
         } catch (RuntimeException e) {
+            System.err.println("Error reporting comment: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "Lỗi khi báo cáo bình luận: " + e.getMessage()));
         }
@@ -304,6 +297,44 @@ public class CommentController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "Lỗi khi báo cáo khóa học: " + e.getMessage()));
+        }
+    }
+
+    // New endpoint to get comments for a specific lesson
+    @GetMapping("/{courseId}/lesson/{lessonId}/comments")
+    @ResponseBody
+    public ResponseEntity<?> getLessonComments(@PathVariable Long courseId,
+                                             @PathVariable Long lessonId) {
+        try {
+            Course course = courseRepo.findById(courseId)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy khóa học"));
+            
+            Lesson lesson = lessonRepo.findById(lessonId)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy bài học"));
+            
+            // Load comments (Rating = null) for the specific lesson only
+            List<CourseReview> parentComments = reviewRepo.findByLessonAndRatingIsNullAndParentReviewIsNull(lesson);
+            List<CommentDTO> comments = new ArrayList<>();
+            
+            for (CourseReview parentComment : parentComments) {
+                CommentDTO commentDTO = commentMapper.toDTO(parentComment);
+                
+                // Load replies for this comment
+                List<CourseReview> replies = reviewRepo.findByParentReviewOrderByCreatedAtDesc(parentComment);
+                List<CommentDTO> replyDTOs = replies.stream()
+                        .map(reply -> commentMapper.toDTO(reply))
+                        .collect(Collectors.toList());
+                commentDTO.setChildren(replyDTOs);
+                
+                comments.add(commentDTO);
+            }
+            
+            return ResponseEntity.ok(comments);
+        } catch (RuntimeException e) {
+            System.err.println("Error getting lesson comments: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Lỗi khi lấy bình luận: " + e.getMessage()));
         }
     }
 } 

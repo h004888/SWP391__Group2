@@ -45,4 +45,14 @@ BEGIN
     ALTER TABLE CourseReviews ADD CONSTRAINT FK_CourseReviews_Parent FOREIGN KEY (parentId) REFERENCES CourseReviews(ReviewID);
 END
 
+-- Add lessonId column to CourseReviews table for lesson-specific comments
+ALTER TABLE CourseReviews ADD COLUMN lessonId BIGINT NULL;
+ALTER TABLE CourseReviews ADD CONSTRAINT fk_course_review_lesson FOREIGN KEY (lessonId) REFERENCES Lessons(LessonID);
+
+-- Update existing comments to have lessonId = NULL (course-level comments)
+-- This maintains backward compatibility
+
+-- Allow Rating column to be NULL for comments
+ALTER TABLE CourseReviews ALTER COLUMN Rating INT NULL;
+
 PRINT 'Database updated successfully!'; 
