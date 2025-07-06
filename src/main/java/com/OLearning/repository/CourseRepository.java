@@ -61,24 +61,43 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     SELECT c FROM Course c
     WHERE (:instructorId IS NULL OR c.instructor.userId = :instructorId)
       AND (:categoryId IS NULL OR c.category.id = :categoryId)
-      AND (:status IS NULL OR :status = '' OR c.status = :status OR (c.status IS NULL AND :status = 'unknown'))
+      AND (
+        (:status IS NULL OR :status = '') OR
+        (:status = 'draft' AND c.status = 'draft') OR
+        (:status = 'unknown' AND c.status IS NULL) OR
+        (:status != 'draft' AND :status != 'unknown' AND c.status = :status)
+      )
       AND (
            :price IS NULL OR :price = '' OR
            (:price = 'free' AND c.price = 0) OR
            (:price = 'paid' AND c.price > 0) OR
-           (:price = 'low' AND c.price > 0 AND c.price < 50) OR
-           (:price = 'mid' AND c.price >= 50 AND c.price <= 100) OR
-           (:price = 'high' AND c.price > 100)
+           (:price = 'low' AND c.price > 0 AND c.price < 50000) OR
+           (:price = 'mid' AND c.price >= 50000 AND c.price <= 100000) OR
+           (:price = 'high' AND c.price > 100000)
       )
+      AND (
+           :title IS NULL OR :title = '' OR LOWER(c.title) LIKE LOWER(CONCAT('%', :title, '%'))
+      )
+    ORDER BY c.updatedAt DESC
     """)
     Page<Course> findCoursesByFilters(
             @Param("instructorId") Long instructorId,
             @Param("categoryId") Long categoryId,
             @Param("status") String status,
             @Param("price") String price,
+            @Param("title") String title,
             Pageable pageable);
-     // function search + filter + sort
-     @Query("""
+
+    // Query để đếm số lượng enrollment cho một course
+    @Query("SELECT COUNT(e) FROM Enrollment e WHERE e.course.courseId = :courseId")
+    Long countEnrollmentsByCourseId(@Param("courseId") Long courseId);
+
+    // Query để đếm số lượng lesson cho một course
+    @Query("SELECT COUNT(l) FROM Lesson l JOIN l.chapter c WHERE c.course.courseId = :courseId")
+    Long countLessonsByCourseId(@Param("courseId") Long courseId);
+
+    // function search + filter + sort
+    @Query("""
                    SELECT c FROM Course c
                    WHERE (:keyword       IS NULL
                           OR LOWER(c.title)       LIKE LOWER(CONCAT('%', :keyword, '%'))
@@ -108,4 +127,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
      // find course by category id
      List<Course> findByCategoryId(int categoryId);
 
+    @Query("SELECT COUNT(c) FROM Course c WHERE c.instructor.userId = :userId AND c.status = :status")
+    int countByInstructorUserIdAndStatus(@Param("userId") Long userId, @Param("status") String status);
+    //tinh tong course cua instructor do
 }

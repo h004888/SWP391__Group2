@@ -25,6 +25,7 @@ public class UserDetailMapper {
         dto.setCoin(user.getCoin());
         dto.setAddress(user.getAddress());
         dto.setProfilePicture(user.getProfilePicture());
+        dto.setIsGooglePicture(user.getIsGooglePicture());
         dto.setRoleName(user.getRole().getName());
         dto.setBirthDay(user.getBirthDay());
         dto.setPersonalSkill(user.getPersonalSkill());

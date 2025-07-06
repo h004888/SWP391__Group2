@@ -110,4 +110,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
     void updateProgressByUser(@Param("userId") Long userId, @Param("courseId") Long courseId);
 
     Optional<Enrollment> findByUserAndCourse(User user, Course course);
+    //lay all enrollment theo InstructorId
+    @Query("SELECT e FROM Enrollment e JOIN e.course c WHERE c.instructor.userId = :instructorId")
+    List<Enrollment> calculateSumEnrollment(@Param("instructorId") Long instructorId);
 }

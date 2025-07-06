@@ -74,4 +74,7 @@ public class Course {
     @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
     private List<VoucherCourse> voucherCourses;
 
+    @Column(name = "PreviousStatus")
+    private String previousStatus;
+
 }

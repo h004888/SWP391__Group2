@@ -1,323 +1,253 @@
-<div class="container" th:fragment="listsCourseContent" id="courseContentContainer">
-    <div class="row">
-        <!-- Main content START -->
-        <div class="col-xl-12">
-            <!-- Toast notifications -->
-            <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
-                <div th:if="${successMessage}" class="toast align-items-center text-white bg-success border-0 show"
-                     role="alert">
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            <span th:text="${successMessage}"></span>
-                        </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                                aria-label="Close"></button>
-                    </div>
+<div id="courseContentContainer" class="container-fluid" th:fragment="listsCourseContent">
+    <div class="table-wrapper">
+        <div class="table-title d-flex justify-content-between align-items-center flex-wrap">
+            <div class="d-flex align-items-center ms-auto" style="gap: 12px;">
+                <div class="search-box" style="min-width: 240px;">
+                    <input id="searchInput" type="text" name="title" class="form-control"
+                           placeholder="Search…"
+                           th:value="${title}">
                 </div>
-                <div th:if="${errorMessage}" class="toast align-items-center text-white bg-danger border-0 show"
-                     role="alert">
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            <span th:text="${errorMessage}"></span>
-                        </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                                aria-label="Close"></button>
-                    </div>
-                </div>
+                <a href="/instructordashboard/createcourse/coursebasic" class="btn btn-primary d-flex align-items-center" style="height: 40px; min-width: 150px;">
+                    <i class="fas fa-plus me-2"></i> Create Course
+                </a>
             </div>
-
-            <div class="card border bg-transparent rounded-3">
-                <!-- Card header START -->
-                <div class="card-header bg-transparent border-bottom">
-                    <div class="row align-items-center">
-                        <div class="col-md-4">
-                            <h3 class="mb-0">My Courses List</h3>
-                        </div>
-                        <div class="col-md-4">
-                            <form class="rounded position-relative" method="get"
-                                  action="/instructordashboard/courses/searchcourse">
-                                <input class="form-control pe-5 bg-transparent" type="search" name="title"
-                                       placeholder="Search courses..." aria-label="Search">
-                                <button class="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset"
-                                        type="submit">
-                                    <i class="fas fa-search fs-6"></i>
-                                </button>
-                            </form>
-                        </div>
-                        <div class="col-md-4 text-end">
-                            <a href="/instructordashboard/createcourse/coursebasic" class="btn btn-success">
-                                <i class="bi bi-plus-circle me-1"></i> Create Course
-                            </a>
-                        </div>
+            <form id="filterForm" method="get" class="w-100 mt-3">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h2>My <b>Courses</b></h2>
                     </div>
                 </div>
-                <!-- Card header END -->
-
-                <!-- Card body START -->
-                <div class="card-body">
-                    <!-- Filter Form START -->
-                    <div class="row g-3 align-items-center justify-content-between mb-4">
-                        <div class="col-12">
-                            <form id="filterForm" class="row g-3">
-                                <!-- Category filter -->
-                                <div class="col-md-4">
-                                    <label for="filterCategory" class="form-label">Category</label>
-                                    <select class="form-select" name="category" id="filterCategory">
-                                        <option value="">All Categories</option>
-                                        <option th:each="cate : ${categories}"
-                                                th:value="${cate.id}"
-                                                th:text="${cate.name}"
-                                                th:selected="${cate.id == selectedCategory}"></option>
-                                    </select>
-                                </div>
-
-                                <!-- Status filter -->
-                                <div class="col-md-4">
-                                    <label for="courseStatus" class="form-label">Status</label>
-                                    <select class="form-select" id="courseStatus" name="status">
-                                        <option value="">All Status</option>
-                                        <option value="draft" th:selected="${status == 'draft'}">Draft</option>
-                                        <option value="approved" th:selected="${status == 'approved'}">Approved</option>
-                                        <option value="pending" th:selected="${status == 'pending'}">Pending</option>
-                                        <option value="resubmit" th:selected="${status == 'resubmit'}">Resubmit</option>
-                                        <option value="blocked" th:selected="${status == 'blocked'}">Blocked</option>
-                                        <option value="lived" th:selected="${status == 'lived'}">Live</option>
-                                        <option value="rejected" th:selected="${status == 'rejected'}">Rejected</option>
-                                        <option value="hidden" th:selected="${status == 'hidden'}">Hidden</option>
-                                        <option value="unknown" th:selected="${status == 'unknown'}">Unknown</option>
-                                    </select>
-                                </div>
-
-                                <!-- Price filter -->
-                                <div class="col-md-4">
-                                    <label for="filterPrice" class="form-label">Price Range</label>
-                                    <select class="form-select" name="price" id="filterPrice">
-                                        <option value="">All Prices</option>
-                                        <option value="free" th:selected="${selectedPrice == 'free'}">Free</option>
-                                        <option value="paid" th:selected="${selectedPrice == 'paid'}">Paid</option>
-                                        <option value="low" th:selected="${selectedPrice == 'low'}">Below $50</option>
-                                        <option value="mid" th:selected="${selectedPrice == 'mid'}">$50 - $100</option>
-                                        <option value="high" th:selected="${selectedPrice == 'high'}">Above $100
-                                        </option>
-                                    </select>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                    <!-- Filter Form END -->
-
-                    <!-- Loading indicator -->
-                    <div id="loadingIndicator" class="text-center py-4" style="display: none;">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p class="mt-2 mb-0">Loading courses...</p>
-                    </div>
-
-                    <!-- Course list table START -->
-                    <div class="table-responsive border-0" id="courseTableContainer">
-                        <table class="table table-hover align-middle p-4 mb-0">
-                            <!-- Table head -->
-                            <thead class="table-dark">
-                            <tr>
-                                <th scope="col" class="border-0 rounded-start">Course Title</th>
-                                <th scope="col" class="border-0">Category</th>
-                                <th scope="col" class="border-0">Level</th>
-                                <th scope="col" class="border-0">Enrolled</th>
-                                <th scope="col" class="border-0">Status</th>
-                                <th scope="col" class="border-0">Price</th>
-                                <th scope="col" class="border-0 rounded-end">Actions</th>
-                            </tr>
-                            </thead>
-
-                            <!-- Table body START -->
-                            <tbody id="courseTableBody">
-                            <!-- Table item -->
-                            <tr th:each="course : ${courses}">
-                                <!-- Course item -->
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <!-- Image -->
-                                        <div class="flex-shrink-0">
-                                            <img th:src="@{${course.courseImg}}" class="rounded" alt="Course Image"
-                                                 style="width: 80px; height: 60px; object-fit: contain;">
-                                        </div>
-                                        <div class="ms-3">
-                                            <!-- Title -->
-                                            <h6 class="mb-1">
-                                                <a th:href="@{|/instructordashboard/courses/detail/${course.courseId}|}"
-                                                   th:text="${course.title}" class="text-decoration-none"></a>
-                                            </h6>
-                                            <!-- Info -->
-                                            <small class="text-muted">
-                                                <i class="fas fa-table text-warning me-1"></i>
-                                                <span th:text="${course.totalLessons ?: 0} + ' lesson'" id="totalLessons-[[${course.courseId}]]"></span>
-                                            </small>
-                                        </div>
-                                    </div>
-                                </td>
-
-                                <!-- Category Name item -->
-                                <td>
-                                    <span class="badge bg-primary rounded-pill" th:text="${course.categoryName}"></span>
-                                </td>
-
-                                <!-- Course Level -->
-                                <td>
-                                    <span class="badge bg-success bg-opacity-10 text-success"
-                                          th:text="${course.courseLevel}"></span>
-                                </td>
-
-                                <!-- Enrolled item -->
-                                <td class="text-center">
-                                    <span class="fw-bold" th:text="${course.totalStudentEnrolled}" id="enrolled-[[${course.courseId}]]"></span>
-                                </td>
-
-                                <!-- Status item -->
-                                <td>
-                                    <div th:switch="${course.status}">
-                                        <span th:case="'draft'" class="badge bg-secondary">Draft</span>
-                                        <span th:case="'published'" class="badge bg-success">Published</span>
-                                        <span th:case="'pending'" class="badge bg-warning text-dark">Pending</span>
-                                        <span th:case="'rejected'" class="badge bg-danger">Rejected</span>
-                                        <span th:case="'approved'" class="badge bg-info">Approved</span>
-                                        <span th:case="'lived'" class="badge bg-success">Live</span>
-                                        <span th:case="'blocked'" class="badge bg-danger">Blocked</span>
-                                        <span th:case="'resubmit'" class="badge bg-warning">Resubmit</span>
-                                        <span th:case="'hidden'" class="badge bg-secondary">Hidden</span>
-                                        <span th:case="null" class="badge bg-secondary">Unknown</span>
-                                        <span th:case="*" class="badge bg-secondary">Unknown</span>
-                                    </div>
-                                </td>
-
-                                <!-- Price item -->
-                                <td>
-                                    <span class="fw-bold text-success"
-                                          th:text="${course.price == 0 ? 'Free' : course.price}"></span>
-                                </td>
-
-                                <!-- Action item -->
-                                <td>
-                                    <div class="d-flex gap-1">
-                                        <!-- Edit button -->
-                                        <a th:href="@{/instructordashboard/createcourse/coursebasic(courseId=${course.courseId})}"
-                                           class="btn btn-sm btn-outline-primary"
-                                           title="Edit Course"
-                                           th:if="${course.status != 'pending'}">
-                                            <i class="far fa-edit"></i>
-                                        </a>
-
-                                        <!-- Delete button -->
-                                        <button type="button"
-                                                class="btn btn-sm btn-outline-danger"
-                                                title="Delete Course"
-                                                th:data-id="${course.courseId}" th:data-title="${course.title}" onclick="deleteCourse(this.getAttribute('data-id'), this.getAttribute('data-title'))">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-
-                                        <!-- Dropdown actions button -->
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle p-1" type="button"
-                                                    id="dropdownMenuButton-[[${course.courseId}]]" data-bs-toggle="dropdown" aria-expanded="false" title="More actions">
-                                                <i class="bi bi-three-dots-vertical"></i>
-                                            </button>
-                                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-[[${course.courseId}]]">
-                                                <!-- Up to Public: only for approved -->
-                                                <li th:if="${course.status == 'approved'}">
-                                                    <a class="dropdown-item" href="#" th:onclick="|upToPublic('${course.courseId}')|">
-                                                        <i class="bi bi-upload me-2"></i>Up to Public
-                                                    </a>
-                                                </li>
-                                                <!-- Unpublish: only for live -->
-                                                <li th:if="${course.status == 'lived'}">
-                                                    <a class="dropdown-item" href="#" th:onclick="|unpublishCourse('${course.courseId}')|">
-                                                        <i class="bi bi-eye-slash me-2"></i>Unpublish
-                                                    </a>
-                                                </li>
-                                                <!-- Hide: for all courses -->
-                                                <li>
-                                                    <a class="dropdown-item" href="#" th:onclick="|hideCourse('${course.courseId}')|">
-                                                        <i class="bi bi-eye me-2"></i>Hidden
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-
-                            <!-- Empty state -->
-                            <tr th:if="${#lists.isEmpty(courses)}">
-                                <td colspan="7" class="text-center py-4">
-                                    <div class="text-muted">
-                                        <i class="fas fa-book fa-3x mb-3 opacity-50"></i>
-                                        <h5>No courses found</h5>
-                                        <p>Try adjusting your filters or create a new course.</p>
-                                    </div>
-                                </td>
-                            </tr>
-                            </tbody>
-                            <!-- Table body END -->
-                        </table>
-                    </div>
-                    <!-- Course list table END -->
-
-                    <!-- Pagination START -->
-                    <div class="d-flex justify-content-between align-items-center mt-4" th:if="${totalElements > 0}">
-                        <!-- Results info -->
-                        <div class="text-muted">
-                            Showing
-                            <span class="fw-bold" th:text="${currentPage * size + 1}"></span>
-                            to
-                            <span class="fw-bold"
-                                  th:text="${(currentPage + 1) * size > totalElements ? totalElements : (currentPage + 1) * size}"></span>
-                            of
-                            <span class="fw-bold" th:text="${totalElements}"></span>
-                            entries
-                        </div>
-
-                        <!-- Pagination -->
-                        <nav aria-label="Course pagination" th:if="${totalPages > 1}">
-                            <ul class="pagination pagination-sm mb-0">
-                                <!-- Previous button -->
-                                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                                    <a class="page-link"
-                                       href="#"
-                                       th:data-page="${currentPage > 0 ? currentPage - 1 : 0}"
-                                       tabindex="-1">
-                                        <i class="fas fa-angle-left"></i>
-                                    </a>
-                                </li>
-
-                                <!-- Page numbers -->
-                                <li class="page-item"
-                                    th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                                    th:classappend="${i == currentPage} ? 'active' : ''">
-                                    <a class="page-link"
-                                       href="#"
-                                       th:data-page="${i}"
-                                       th:text="${i + 1}"></a>
-                                </li>
-
-                                <!-- Next button -->
-                                <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
-                                    <a class="page-link"
-                                       href="#"
-                                       th:data-page="${currentPage + 1 < totalPages ? currentPage + 1 : currentPage}">
-                                        <i class="fas fa-angle-right"></i>
-                                    </a>
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
-                    <!-- Pagination END -->
+                <div class="col-md-6 d-flex gap-2 mt-4">
+                    <select class="form-control ml-2" name="category" id="filterCategory">
+                        <option value="">All Categories</option>
+                        <option th:each="cate : ${categories}"
+                                th:value="${cate.id}"
+                                th:text="${cate.name}"
+                                th:selected="${cate.id == selectedCategory}"></option>
+                    </select>
+                    <select class="form-control ml-2" name="price" id="filterPrice">
+                        <option value="">All Prices</option>
+                        <option value="free" th:selected="${selectedPrice == 'free'}">Free</option>
+                        <option value="paid" th:selected="${selectedPrice == 'paid'}">Paid</option>
+                        <option value="low" th:selected="${selectedPrice == 'low'}">Below 50000000</option>
+                        <option value="mid" th:selected="${selectedPrice == 'mid'}">$50000 - $100000000</option>
+                        <option value="high" th:selected="${selectedPrice == 'high'}">Above $100000000</option>
+                    </select>
                 </div>
-                <!-- Card body END -->
-            </div>
-            <!-- Card END -->
+            </form>
         </div>
-        <!-- Main content END -->
+
+        <!-- Status Tabs -->
+        <div class="custom-tabs mt-4">
+            <ul class="nav nav-tabs" id="courseTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="pending-tab" data-bs-toggle="tab"
+                            data-bs-target="#pending" type="button" role="tab" data-status="pending">
+                        Pending<span class="badge bg-light text-dark ms-2" id="pendingCount">0</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="approved-tab" data-bs-toggle="tab"
+                            data-bs-target="#approved" type="button" role="tab" data-status="approved">
+                        Approved<span class="badge bg-light text-dark ms-2" id="approveCount">0</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="lived-tab" data-bs-toggle="tab"
+                            data-bs-target="#lived" type="button" role="tab" data-status="lived">
+                        Live<span class="badge bg-light text-dark ms-2" id="livedCount">0</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="rejected-tab" data-bs-toggle="tab"
+                            data-bs-target="#rejected" type="button" role="tab" data-status="rejected">
+                        Rejected<span class="badge bg-light text-dark ms-2" id="rejectCount">0</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="resubmit-tab" data-bs-toggle="tab"
+                            data-bs-target="#resubmit" type="button" role="tab" data-status="resubmit">
+                        Resubmit<span class="badge bg-light text-dark ms-2" id="resubmitCount">0</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="hidden-tab" data-bs-toggle="tab"
+                            data-bs-target="#hidden" type="button" role="tab" data-status="hidden">
+                        Hidden<span class="badge bg-light text-dark ms-2" id="hiddenCount">0</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="blocked-tab" data-bs-toggle="tab"
+                            data-bs-target="#blocked" type="button" role="tab" data-status="blocked">
+                        Blocked<span class="badge bg-light text-dark ms-2" id="blockedCount">0</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="draft-tab" data-bs-toggle="tab"
+                            data-bs-target="#draft" type="button" role="tab" data-status="draft">
+                        Draft<span class="badge bg-light text-dark ms-2" id="draftCount">0</span>
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content p-0" id="courseTabsContent">
+                <!-- Draft Tab -->
+                <div class="tab-pane fade" id="draft" role="tabpanel">
+                    <table class="table course-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Total Lessons</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="draftTableBody">
+                        <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                    <div id="draftPagination" class="pagination-container"></div>
+                </div>
+                <!-- Pending Tab -->
+                <div class="tab-pane fade show active" id="pending" role="tabpanel">
+                    <table class="table course-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Total Lessons</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="pendingTableBody">
+                        <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                    <div id="pendingPagination" class="pagination-container"></div>
+                </div>
+                <!-- Approved Tab -->
+                <div class="tab-pane fade" id="approved" role="tabpanel">
+                    <table class="table course-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Total Lessons</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="approvedTableBody">
+                        <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                    <div id="approvedPagination" class="pagination-container"></div>
+                </div>
+                <!-- Live Tab -->
+                <div class="tab-pane fade" id="lived" role="tabpanel">
+                    <table class="table course-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Total Lessons</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="livedTableBody">
+                        <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                    <div id="livedPagination" class="pagination-container"></div>
+                </div>
+                <!-- Rejected Tab -->
+                <div class="tab-pane fade" id="rejected" role="tabpanel">
+                    <table class="table course-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Total Lessons</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="rejectedTableBody">
+                        <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                    <div id="rejectedPagination" class="pagination-container"></div>
+                </div>
+                <!-- Resubmit Tab -->
+                <div class="tab-pane fade" id="resubmit" role="tabpanel">
+                    <table class="table course-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Total Lessons</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="resubmitTableBody">
+                        <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                    <div id="resubmitPagination" class="pagination-container"></div>
+                </div>
+                <!-- Hidden Tab -->
+                <div class="tab-pane fade" id="hidden" role="tabpanel">
+                    <table class="table course-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Total Lessons</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="hiddenTableBody">
+                        <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                    <div id="hiddenPagination" class="pagination-container"></div>
+                </div>
+                <!-- Blocked Tab -->
+                <div class="tab-pane fade" id="blocked" role="tabpanel">
+                    <table class="table course-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Total Lessons</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="blockedTableBody">
+                        <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                    <div id="blockedPagination" class="pagination-container"></div>
+                </div>
+            </div>
+        </div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script th:src="@{/js/instructorFilter.js}"></script>
 
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
@@ -344,7 +274,7 @@
         </div>
     </div>
 
-    <!-- Confirm Action Modal (dùng chung cho Up to Public, Unpublish, Hidden) -->
+    <!-- Confirm Action Modal (dùng chung cho Up to Public, Unpublish, Hidden, etc.) -->
     <div class="modal fade" id="confirmActionModal" tabindex="-1" aria-labelledby="confirmActionModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -365,21 +295,29 @@
             </div>
         </div>
     </div>
-
-    <!-- Scripts -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
-    <script th:src="@{/js/instructorFilter.js}"></script>
-    <script>
-        afterAjaxUpdate();
-        setTimeout(() => {
-            afterAjaxUpdate();
-        }, 100);
-    </script>
 </div>
+
+<style>
+.course-table th, .course-table td {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.course-table td:nth-child(2) { /* Tên khoá học */
+  max-width: 220px;
+  min-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.course-table td a {
+  display: inline-block;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.course-table td .d-flex {
+  flex-wrap: nowrap;
+}
+</style>
 

@@ -6,8 +6,6 @@ import com.OLearning.dto.course.CourseViewDTO;
 import com.OLearning.entity.Chapter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import com.OLearning.entity.Chapter;
-
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,14 +26,13 @@ public interface CourseService {
 
     Page<CourseDTO> filterCoursesWithPagination(String keyword, Long category, String price, String status, int page, int size);
 
-    Page<CourseDTO> filterCoursesInstructorManage(Long userId, Long categoryId, String status, String price, int page, int size);
+    Page<CourseDTO> filterCoursesInstructorManage(Long userId, Long categoryId, String status, String price, String title, int page, int size);
 
     void deleteCourse(Long courseId);
 
     Course findCourseById(Long courseId);
 
     Course createCourseStep1(Long courseId, AddCourseStep1DTO addCourseStep1DTO);
-
 
     AddCourseStep1DTO draftCourseStep1(Course course);
 
@@ -74,4 +71,5 @@ public interface CourseService {
 
     Course findById(Long courseId);
 
+    int countByInstructorAndStatus(Long userId, String status);
 }

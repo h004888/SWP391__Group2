@@ -180,4 +180,93 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
         Pageable pageable
     );
 
+    // Find orders by instructor ID (through course relationship) with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    @Query("SELECT DISTINCT o FROM Order o JOIN o.orderDetails od WHERE od.course.instructor.userId = :instructorId")
+    Page<Order> findByInstructorId(@Param("instructorId") Long instructorId, Pageable pageable);
+
+    // Find orders by instructor ID and status with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    @Query("SELECT DISTINCT o FROM Order o JOIN o.orderDetails od WHERE od.course.instructor.userId = :instructorId AND o.status = :status")
+    Page<Order> findByInstructorIdAndStatus(@Param("instructorId") Long instructorId, @Param("status") String status, Pageable pageable);
+
+    // Find orders by instructor ID and username with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    @Query("SELECT DISTINCT o FROM Order o JOIN o.orderDetails od WHERE od.course.instructor.userId = :instructorId AND o.user.username LIKE %:username%")
+    Page<Order> findByInstructorIdAndUserUsernameContaining(@Param("instructorId") Long instructorId, @Param("username") String username, Pageable pageable);
+
+    // Find orders by instructor ID and order type with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    @Query("SELECT DISTINCT o FROM Order o JOIN o.orderDetails od WHERE od.course.instructor.userId = :instructorId AND o.orderType = :orderType")
+    Page<Order> findByInstructorIdAndOrderType(@Param("instructorId") Long instructorId, @Param("orderType") String orderType, Pageable pageable);
+
+    // Find orders by instructor ID, username and status with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    @Query("SELECT DISTINCT o FROM Order o JOIN o.orderDetails od WHERE od.course.instructor.userId = :instructorId AND o.user.username LIKE %:username% AND o.status = :status")
+    Page<Order> findByInstructorIdAndUserUsernameContainingAndStatus(@Param("instructorId") Long instructorId, @Param("username") String username, @Param("status") String status, Pageable pageable);
+
+    // Find orders by instructor ID, order type and status with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    @Query("SELECT DISTINCT o FROM Order o JOIN o.orderDetails od WHERE od.course.instructor.userId = :instructorId AND o.orderType = :orderType AND o.status = :status")
+    Page<Order> findByInstructorIdAndOrderTypeAndStatus(@Param("instructorId") Long instructorId, @Param("orderType") String orderType, @Param("status") String status, Pageable pageable);
+
+    // Find orders by instructor ID, username and order type with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    @Query("SELECT DISTINCT o FROM Order o JOIN o.orderDetails od WHERE od.course.instructor.userId = :instructorId AND o.user.username LIKE %:username% AND o.orderType = :orderType")
+    Page<Order> findByInstructorIdAndUserUsernameContainingAndOrderType(@Param("instructorId") Long instructorId, @Param("username") String username, @Param("orderType") String orderType, Pageable pageable);
+
+    // Find orders by instructor ID, username, order type and status with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    @Query("SELECT DISTINCT o FROM Order o JOIN o.orderDetails od WHERE od.course.instructor.userId = :instructorId AND o.user.username LIKE %:username% AND o.orderType = :orderType AND o.status = :status")
+    Page<Order> findByInstructorIdAndUserUsernameContainingAndOrderTypeAndStatus(@Param("instructorId") Long instructorId, @Param("username") String username, @Param("orderType") String orderType, @Param("status") String status, Pageable pageable);
+
+    // Find orders by instructor ID and date range with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    @Query("SELECT DISTINCT o FROM Order o JOIN o.orderDetails od WHERE od.course.instructor.userId = :instructorId AND o.orderDate BETWEEN :startDate AND :endDate")
+    Page<Order> findByInstructorIdAndOrderDateBetween(@Param("instructorId") Long instructorId, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate, Pageable pageable);
+
+    // Find orders by instructor ID, status and date range with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    @Query("SELECT DISTINCT o FROM Order o JOIN o.orderDetails od WHERE od.course.instructor.userId = :instructorId AND o.status = :status AND o.orderDate BETWEEN :startDate AND :endDate")
+    Page<Order> findByInstructorIdAndStatusAndOrderDateBetween(@Param("instructorId") Long instructorId, @Param("status") String status, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate, Pageable pageable);
+
+    // Find orders by instructor ID, username and date range with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    @Query("SELECT DISTINCT o FROM Order o JOIN o.orderDetails od WHERE od.course.instructor.userId = :instructorId AND o.user.username LIKE %:username% AND o.orderDate BETWEEN :startDate AND :endDate")
+    Page<Order> findByInstructorIdAndUserUsernameContainingAndOrderDateBetween(@Param("instructorId") Long instructorId, @Param("username") String username, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate, Pageable pageable);
+
+    // Find orders by instructor ID, order type and date range with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    @Query("SELECT DISTINCT o FROM Order o JOIN o.orderDetails od WHERE od.course.instructor.userId = :instructorId AND o.orderType = :orderType AND o.orderDate BETWEEN :startDate AND :endDate")
+    Page<Order> findByInstructorIdAndOrderTypeAndOrderDateBetween(@Param("instructorId") Long instructorId, @Param("orderType") String orderType, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate, Pageable pageable);
+
+    // Find orders by instructor ID, username, status and date range with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    @Query("SELECT DISTINCT o FROM Order o JOIN o.orderDetails od WHERE od.course.instructor.userId = :instructorId AND o.user.username LIKE %:username% AND o.status = :status AND o.orderDate BETWEEN :startDate AND :endDate")
+    Page<Order> findByInstructorIdAndUserUsernameContainingAndStatusAndOrderDateBetween(@Param("instructorId") Long instructorId, @Param("username") String username, @Param("status") String status, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate, Pageable pageable);
+
+    // Find orders by instructor ID, order type, status and date range with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    @Query("SELECT DISTINCT o FROM Order o JOIN o.orderDetails od WHERE od.course.instructor.userId = :instructorId AND o.orderType = :orderType AND o.status = :status AND o.orderDate BETWEEN :startDate AND :endDate")
+    Page<Order> findByInstructorIdAndOrderTypeAndStatusAndOrderDateBetween(@Param("instructorId") Long instructorId, @Param("orderType") String orderType, @Param("status") String status, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate, Pageable pageable);
+
+    // Find orders by instructor ID, username, order type and date range with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    @Query("SELECT DISTINCT o FROM Order o JOIN o.orderDetails od WHERE od.course.instructor.userId = :instructorId AND o.user.username LIKE %:username% AND o.orderType = :orderType AND o.orderDate BETWEEN :startDate AND :endDate")
+    Page<Order> findByInstructorIdAndUserUsernameContainingAndOrderTypeAndOrderDateBetween(@Param("instructorId") Long instructorId, @Param("username") String username, @Param("orderType") String orderType, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate, Pageable pageable);
+
+    // Find orders by instructor ID, username, order type, status and date range with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    @Query("SELECT DISTINCT o FROM Order o JOIN o.orderDetails od WHERE od.course.instructor.userId = :instructorId AND o.user.username LIKE %:username% AND o.orderType = :orderType AND o.status = :status AND o.orderDate BETWEEN :startDate AND :endDate")
+    Page<Order> findByInstructorIdAndUserUsernameContainingAndOrderTypeAndStatusAndOrderDateBetween(@Param("instructorId") Long instructorId, @Param("username") String username, @Param("orderType") String orderType, @Param("status") String status, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate, Pageable pageable);
+
+    // Find orders by instructor ID with amount sorting (ascending)
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    @Query("SELECT DISTINCT o FROM Order o JOIN o.orderDetails od WHERE od.course.instructor.userId = :instructorId ORDER BY o.amount ASC")
+    Page<Order> findByInstructorIdOrderByAmountAsc(@Param("instructorId") Long instructorId, Pageable pageable);
+
+    // Find orders by instructor ID with amount sorting (descending)
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    @Query("SELECT DISTINCT o FROM Order o JOIN o.orderDetails od WHERE od.course.instructor.userId = :instructorId ORDER BY o.amount DESC")
+    Page<Order> findByInstructorIdOrderByAmountDesc(@Param("instructorId") Long instructorId, Pageable pageable);
 }

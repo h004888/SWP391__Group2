@@ -33,7 +33,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class CourseServiceImpl implements CourseService {
+public class CourseServiceImpl  implements CourseService {
     @Autowired
     private UploadFile uploadFile;
     @Autowired
@@ -233,31 +233,59 @@ public class CourseServiceImpl implements CourseService {
         Page<Course> coursePage = courseRepository.filterCourses(
                 searchKeyword, category, price, status, pageable
         );
-        return coursePage.map(courseMapper::MapCourseDTO);
+        return coursePage.map(course -> mapCourseToDTO(course));
     }
-
 
     @Override
-    public Page<CourseDTO> filterCoursesInstructorManage(Long userId, Long categoryId, String status, String price, int page, int size) {
+    public Page<CourseDTO> filterCoursesInstructorManage(Long userId, Long categoryId, String status, String price, String title, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Course> coursePage;
-
-        if (categoryId != null || (status != null && !status.isEmpty()) || (price != null && !price.isEmpty())) {
-            coursePage = courseRepository.findCoursesByFilters(userId, categoryId, status, price, pageable);
-        } else {
-            coursePage = courseRepository.findByInstructorUserId(userId, pageable);
-        }
-
-        return coursePage.map(course -> {
-            CourseDTO dto = courseMapper.MapCourseDTO(course);
-
-            if (course.getCategory() != null) {
-                dto.setCategoryName(course.getCategory().getName());
-            }
-            return dto;
-        });
+        Page<Course> coursePage = courseRepository.findCoursesByFilters(userId, categoryId, status, price, title, pageable);
+        return coursePage.map(course -> mapCourseToDTO(course));
     }
 
+    // Helper method để map Course sang CourseDTO với đầy đủ thông tin
+    private CourseDTO mapCourseToDTO(Course course) {
+        CourseDTO dto = courseMapper.MapCourseDTO(course);
+
+        // Map category name
+        if (course.getCategory() != null) {
+            dto.setCategoryName(course.getCategory().getName());
+        } else {
+            dto.setCategoryName("Not Found");
+        }
+
+        // Map course level
+        dto.setCourseLevel(course.getCourseLevel());
+
+        // Map course image
+        dto.setCourseImg(course.getCourseImg());
+
+        // Map price
+        dto.setPrice(course.getPrice());
+
+        // Map status
+        dto.setStatus(course.getStatus());
+
+        // Đếm số lượng học viên enrollment
+        Long enrollmentCount = courseRepository.countEnrollmentsByCourseId(course.getCourseId());
+        dto.setTotalStudentEnrolled(enrollmentCount != null ? enrollmentCount.intValue() : 0);
+
+        // Đếm số lượng lesson
+        Long lessonCount = courseRepository.countLessonsByCourseId(course.getCourseId());
+        dto.setTotalLessons(lessonCount != null ? lessonCount.intValue() : 0);
+
+        // Map isFree
+        dto.setIsFree(course.getPrice() != null && course.getPrice() == 0);
+
+        // Map instructor
+        dto.setInstructor(course.getInstructor());
+
+        // Map timestamps
+        dto.setCreatedAt(course.getCreatedAt());
+        dto.setUpdatedAt(course.getUpdatedAt());
+
+        return dto;
+    }
 
     @Override
     public AddCourseStep1DTO draftCourseStep1(Course course) {
@@ -324,6 +352,7 @@ public class CourseServiceImpl implements CourseService {
     }
     }
 
+
     @Override
     public void saveCourse(Long courseId) {
         Course course = (courseId == null) ? new Course() : findCourseById(courseId);
@@ -356,7 +385,12 @@ public class CourseServiceImpl implements CourseService {
     public Course findById(Long courseId) {
         return courseRepository.findById(courseId).orElseThrow();
     }
+    @Override
+    public int countByInstructorAndStatus(Long userId, String status) {
+        return courseRepository.countByInstructorUserIdAndStatus(userId, status);
+    }
 
+    // Lưu course entity
     public void setPendingBlock(Long courseId) {
         Course course = courseRepository.findById(courseId).orElseThrow();
         course.setStatus("pending_block");
