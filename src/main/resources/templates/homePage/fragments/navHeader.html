@@ -86,8 +86,8 @@
 
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link " href="#"
-                           aria-haspopup="true" aria-expanded="false">Wishlist</a>
+                        <a class="nav-link " th:href="@{/vouchers}"
+                           aria-haspopup="true" aria-expanded="false">Voucher</a>
 
                     </li>
 
@@ -111,6 +111,16 @@
                 <!-- Nav Search END -->
             </div>
             <!-- Main navbar END -->
+            <div class="me-2 me-md-3 dropdown">
+                <!-- Wishlist button -->
+                <a class="btn btn-light btn-round mb-0" th:href="@{/wishlist}">
+                    <i class="bi bi-heart fa-fw"></i>
+                </a>
+                <!-- badge -->
+                <span id="wishlistTotalBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-danger mt-xl-2 ms-n1" th:text="${wishlistTotal != null ? wishlistTotal : 0}">
+                <span class="visually-hidden">items in wishlist</span>
+                </span>
+            </div>
             <div class="me-2 me-md-3 dropdown">
                 <!-- Cart button -->
                 <a class="btn btn-light btn-round mb-0" th:href="@{/cart}">
@@ -160,6 +170,7 @@
                     <!-- Links -->
                     <li><a class="dropdown-item" th:href="@{/profile}"><i class="bi bi-person fa-fw me-2"></i>Profile</a></li>
                     <li><a class="dropdown-item" href="#"><i class="bi bi-gear fa-fw me-2"></i>Account Settings</a></li>
+                    <li><a class="dropdown-item" th:href="@{/history}"><i class="fas fa-history me-2"></i>History</a></li>
                     <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle fa-fw me-2"></i>Help</a></li>
                     <li>
                         <a class="dropdown-item bg-danger-soft-hover" th:href="@{/logout}">
@@ -211,6 +222,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const cartTotalBadge = document.getElementById('cartTotalBadge');
+            const wishlistTotalBadge = document.getElementById('wishlistTotalBadge');
 
             // Function to fetch and update cart total
             const updateCartTotal = async () => {
@@ -230,11 +242,31 @@
                 }
             };
 
+            // Function to fetch and update wishlist total
+            const updateWishlistTotal = async () => {
+                try {
+                    const response = await fetch('/wishlist/total', {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    if (!response.ok) throw new Error('Failed to fetch wishlist total');
+                    const data = await response.json();
+                    wishlistTotalBadge.textContent = data.total || 0;
+                } catch (error) {
+                    console.error('Error updating wishlist total:', error);
+                    wishlistTotalBadge.textContent = '0';
+                }
+            };
+
             // Lắng nghe sự kiện custom để cập nhật cartTotal từ bất kỳ nơi nào
             document.addEventListener('cart-updated', updateCartTotal);
+            document.addEventListener('wishlist-updated', updateWishlistTotal);
 
-            // Initial cart total update
+            // Initial updates
             updateCartTotal();
+            updateWishlistTotal();
         });
     </script>
 

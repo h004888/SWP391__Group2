@@ -1,19 +1,22 @@
 package com.OLearning.controller.homePage;
 
-import com.OLearning.config.VNPayConfig;
 import com.OLearning.entity.Order;
 import com.OLearning.entity.User;
 import com.OLearning.repository.CourseRepository;
-import com.OLearning.repository.OrdersRepository;
 import com.OLearning.repository.UserRepository;
 import com.OLearning.repository.VoucherRepository;
 import com.OLearning.repository.UserVoucherRepository;
 import com.OLearning.service.cart.CartService;
 import com.OLearning.service.cart.impl.CartServiceImpl;
-import com.OLearning.service.vnpay.VNPayService;
+import com.OLearning.service.order.OrdersService;
+import com.OLearning.service.payment.VNPayService;
+import com.OLearning.service.payment.VietQRService;
 import com.OLearning.service.voucher.VoucherService;
+import com.OLearning.service.wishlist.WishlistService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,8 +27,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -33,6 +35,8 @@ import java.util.*;
 @Controller
 @RequestMapping("/cart")
 public class CartController {
+    private static final Logger logger = LoggerFactory.getLogger(CartController.class);
+
     @Autowired
     private VNPayService vnPayService;
     @Autowired
@@ -49,11 +53,25 @@ public class CartController {
     private UserVoucherRepository userVoucherRepository;
     @Autowired
     private VoucherService voucherService;
+    @Autowired
+    private WishlistService wishlistService;
+    @Autowired
+    private OrdersService ordersService;
+    @Autowired
+    private VietQRService vietQRService;
+
+    @Value("${sepay.account_number}")
+    private String sepayAccountNumber;
+
+    @Value("${sepay.bank_code}")
+    private String sepayBankCode;
+
 
     @GetMapping
     public String getCart(@AuthenticationPrincipal UserDetails userDetails,
                           HttpServletRequest request,
-                          Model model) {
+                          Model model,
+                          @RequestParam(value = "message", required = false) String message) {
         if (userDetails == null) {
             return "redirect:/login";
         }
@@ -64,6 +82,14 @@ public class CartController {
         model.addAttribute("totalPrice", calculateTotalPrice(cart));
         model.addAttribute("cartTotal", getLongValue(cart.getOrDefault("total", 0L)));
         model.addAttribute("currentUserId", userId);
+
+        // Add wishlist total
+        String encodedWishlistJson = getWishlistCookie(request, userId);
+        Map<String, Object> wishlist = wishlistService.getWishlistDetails(encodedWishlistJson, userDetails.getUsername());
+        model.addAttribute("wishlistTotal", getLongValue(wishlist.getOrDefault("total", 0L)));
+        if ("qr_success".equals(message)) {
+            model.addAttribute("message", "Thanh toán thành công bằng QR!");
+        }
         return "homePage/cart";
     }
 
@@ -184,6 +210,7 @@ public class CartController {
 
     @PostMapping("/checkout")
     public String checkout(@RequestParam(value = "voucherMapping", required = false) String voucherMappingJson,
+                           @RequestParam(value = "paymentMethod", required = false) String paymentMethod,
                            @AuthenticationPrincipal UserDetails userDetails,
                            HttpServletRequest request,
                            HttpServletResponse response,
@@ -215,12 +242,6 @@ public class CartController {
             }
             cart.put("items", items);
             updateCartCookie(cart, response, userId);
-            for (Map<String, Object> item : items) {
-                if (item.containsKey("appliedVoucherId")) {
-                    Long voucherId = Long.valueOf(item.get("appliedVoucherId").toString());
-                    voucherService.useVoucherForUserAndCourse(voucherId, userId);
-                }
-            }
             String ipAddr = request.getRemoteAddr();
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new EntityNotFoundException("User not found"));
@@ -230,20 +251,53 @@ public class CartController {
                 order.setAmount(totalAmount);
                 cartService.processCheckout(encodedCartJson, ipAddr, userDetails.getUsername());
                 cartService.completeCheckout(cart, order, true, null);
+                for (Map<String, Object> item : items) {
+                    if (item.containsKey("appliedVoucherId")) {
+                        Long voucherId = Long.valueOf(item.get("appliedVoucherId").toString());
+                        voucherService.useVoucherForUserAndCourse(voucherId, userId);
+                    }
+                }
                 updateCartCookie(cartService.clearCart(userDetails.getUsername()), response, userId);
                 model.addAttribute("message", "Checkout completed using wallet!");
                 return "redirect:/cart";
-            } else {
+            } else if ("qr".equalsIgnoreCase(paymentMethod)) {
+                Order order = ordersService.createOrder(user, totalAmount, "course_purchase", "temp_description");
+                String description = "Mua khóa học OLearning - ORDER" + order.getOrderId();
+                order.setDescription(description);
+                ordersService.saveOrder(order);
+
+                for (Map<String, Object> item : items) {
+                    Long courseId = Long.valueOf(item.get("courseId").toString());
+                    double price = Double.valueOf(item.get("price").toString());
+                    com.OLearning.entity.Course course = courseRepository.findById(courseId)
+                        .orElseThrow(() -> new EntityNotFoundException("Course not found: " + courseId));
+                    com.OLearning.entity.OrderDetail orderDetail = new com.OLearning.entity.OrderDetail();
+                    orderDetail.setOrder(order);
+                    orderDetail.setCourse(course);
+                    orderDetail.setUnitPrice(price);
+                    ordersService.saveOrderDetail(orderDetail);
+                }
+
+                String qrUrl = vietQRService.generateSePayQRUrl(order.getAmount(), order.getDescription());
+                model.addAttribute("orderId", order.getOrderId());
+                model.addAttribute("amount", order.getAmount());
+                model.addAttribute("description", order.getDescription());
+                model.addAttribute("qrUrl", qrUrl);
+                return "homePage/qr_checkout";
+            } else if ("vnpay".equalsIgnoreCase(paymentMethod)) {
                 request.setAttribute("amount", (int) (totalAmount)*100);
                 request.setAttribute("cart", encodedCartJson);
                 String currentPath = request.getRequestURI();
                 String basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
-                String returnUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                String returnUrl = org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath()
                         .path(basePath)
                         .build()
                         .toUriString();
                 request.setAttribute("urlReturn", returnUrl);
                 return "redirect:" + vnPayService.createOrder(request);
+            } else {
+                model.addAttribute("error", "Vui lòng chọn phương thức thanh toán!");
+                return "redirect:/cart";
             }
         } catch (Exception e) {
             model.addAttribute("error", "Checkout error: " + e.getMessage());
@@ -276,6 +330,15 @@ public class CartController {
                 order.setRefCode(transactionId);
                 cartService.processCheckout(encodedCartJson, ipAddr, userDetails.getUsername());
                 cartService.completeCheckout(cart, order, false, transactionId);
+                
+                // Xử lý voucher sau khi thanh toán thành công
+                List<Map<String, Object>> items = (List<Map<String, Object>>) cart.getOrDefault("items", List.of());
+                for (Map<String, Object> item : items) {
+                    if (item.containsKey("appliedVoucherId")) {
+                        Long voucherId = Long.valueOf(item.get("appliedVoucherId").toString());
+                        voucherService.useVoucherForUserAndCourse(voucherId, userId);
+                    }
+                }
                 updateCartCookie(cartService.clearCart(userDetails.getUsername()), response, userId);
                 model.addAttribute("message", "VNPay payment successful!");
                 return "redirect:/cart";
@@ -296,21 +359,53 @@ public class CartController {
         Long courseId = Long.valueOf(req.get("courseId").toString());
         Long voucherId = Long.valueOf(req.get("voucherId").toString());
         
-        double originalPrice = courseRepository.findById(courseId)
-            .map(course -> course.getPrice().doubleValue())
-            .orElse(0.0);
-        double discount = voucherRepository.findById(voucherId)
-            .map(voucher -> voucher.getDiscount())
-            .orElse(0.0);
-        String voucherCode = voucherRepository.findById(voucherId)
-            .map(voucher -> voucher.getCode())
-            .orElse("");
-        double discountedPrice = Math.round(originalPrice * (1 - discount / 100.0));
         Map<String, Object> result = new HashMap<>();
-        result.put("voucherId", voucherId);
-        result.put("voucherCode", voucherCode);
-        result.put("discountedPrice", (long) discountedPrice);
+        
+        try {
+            var userVoucherOpt = userVoucherRepository.findByUser_UserIdAndVoucher_VoucherId(userId, voucherId);
+            if (userVoucherOpt.isEmpty()) {
+                result.put("error", "User does not have this voucher");
+                return result;
+            }
+            
+            var userVoucher = userVoucherOpt.get();
+            if (Boolean.TRUE.equals(userVoucher.getIsUsed())) {
+                return result;
+            }
+
+            double originalPrice = courseRepository.findById(courseId)
+                .map(course -> course.getPrice().doubleValue())
+                .orElse(0.0);
+            double discount = voucherRepository.findById(voucherId)
+                .map(voucher -> voucher.getDiscount())
+                .orElse(0.0);
+            String voucherCode = voucherRepository.findById(voucherId)
+                .map(voucher -> voucher.getCode())
+                .orElse("");
+            double discountedPrice = Math.round(originalPrice * (1 - discount / 100.0));
+            
+            result.put("voucherId", voucherId);
+            result.put("voucherCode", voucherCode);
+            result.put("discountedPrice", (long) discountedPrice);
+            
+        } catch (Exception e) {
+            result.put("error", e.getMessage());
+        }
+        
         return result;
+    }
+
+    @GetMapping("/clear-cookie")
+    @ResponseBody
+    public String clearCartCookie(@AuthenticationPrincipal UserDetails userDetails, HttpServletResponse response) {
+        if (userDetails == null) return "not_logged_in";
+        Long userId = getUserIdFromUserDetails(userDetails);
+        Cookie cartCookie = new Cookie("cart_" + userId, null);
+        cartCookie.setPath("/");
+        cartCookie.setMaxAge(0);
+        cartCookie.setHttpOnly(true);
+        response.addCookie(cartCookie);
+        return "cleared";
     }
 
     private double calculateTotalPrice(Map<String, Object> cart) {
@@ -353,9 +448,24 @@ public class CartController {
     }
 
     private Long getLongValue(Object value) {
-        if (value instanceof Number) {
-            return ((Number) value).longValue();
+        if (value instanceof Integer) {
+            return ((Integer) value).longValue();
+        } else if (value instanceof Long) {
+            return (Long) value;
+        } else {
+            return 0L;
         }
-        throw new IllegalStateException("Value is not a number: " + (value != null ? value.getClass().getName() : "null"));
+    }
+
+    private String getWishlistCookie(HttpServletRequest request, Long userId) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("wishlist_" + userId)) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
     }
 }

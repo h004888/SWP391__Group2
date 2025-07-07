@@ -5,13 +5,11 @@ import com.OLearning.entity.User;
 import com.OLearning.repository.UserRepository;
 import com.OLearning.security.CustomUserDetails;
 import com.OLearning.service.coinTransaction.CoinTransactionService;
-import com.OLearning.service.vnpay.VNPayService;
+import com.OLearning.service.payment.VNPayService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -36,110 +34,35 @@ public class CoinTransactionController {
     private UserRepository userRepository;
 
     @GetMapping
-    public String getMyCoinTransactions(
+    public String getMyCoursePurchaseHistory(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(value = "transactionType", required = false) String transactionType,
+            @RequestParam(defaultValue = "3") int size,
+            @RequestParam(value = "courseName", required = false) String courseName,
+            @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "startDate", required = false) String startDate,
             @RequestParam(value = "endDate", required = false) String endDate,
             Model model) {
-
-        if (userDetails == null) {
-            return "redirect:/login";
-        }
-
-        if (!(userDetails instanceof CustomUserDetails)) {
-            model.addAttribute("error", "Invalid authentication");
-            return "redirect:/login";
-        }
-
-        try {
-            CustomUserDetails customUserDetails = (CustomUserDetails) userDetails;
-
-            Page<CoinTransactionDTO> transactionPage;
-            // Use filter method if any filter is applied
-            if ((transactionType != null && !transactionType.trim().isEmpty()) ||
-                    (startDate != null && !startDate.trim().isEmpty()) ||
-                    (endDate != null && !endDate.trim().isEmpty())) {
-                transactionPage = coinTransactionService.filterAndSortTransactions(
-                        customUserDetails.getUserId(), transactionType, startDate, endDate, page, size);
-            } else {
-                Pageable pageable = PageRequest.of(page, size);
-                transactionPage = coinTransactionService.getUserCoinTransactions(customUserDetails.getUserId(), pageable);
-            }
-
-            User user = userRepository.findById(customUserDetails.getUserId())
-                    .orElseThrow(() -> new EntityNotFoundException("User not found"));
-
-            model.addAttribute("transactions", transactionPage.getContent());
-            model.addAttribute("currentPage", transactionPage.getNumber());
-            model.addAttribute("totalPages", transactionPage.getTotalPages());
-            model.addAttribute("totalItems", transactionPage.getTotalElements());
-            model.addAttribute("pageSize", size);
-            model.addAttribute("currentBalance", user.getCoin());
-            model.addAttribute("predefinedAmounts", new int[]{10000, 20000, 50000, 100000, 200000, 500000});
-
-            // Add filter parameters to model
-            model.addAttribute("transactionType", transactionType);
-            model.addAttribute("startDate", startDate);
-            model.addAttribute("endDate", endDate);
-
-            return "homePage/history";
-        } catch (Exception e) {
-            model.addAttribute("error", "An error occurred while fetching transactions");
-            return "homePage/history";
-        }
-    }
-
-    @GetMapping("/filter")
-    public String filterTransactions(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam(value = "transactionType", required = false) String transactionType,
-            @RequestParam(value = "startDate", required = false) String startDate,
-            @RequestParam(value = "endDate", required = false) String endDate,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size,
-            Model model) {
-
         if (userDetails == null || !(userDetails instanceof CustomUserDetails)) {
             return "redirect:/login";
         }
-
-        try {
-            CustomUserDetails customUserDetails = (CustomUserDetails) userDetails;
-            Page<CoinTransactionDTO> transactionPage;
-            
-            // Check if any filter is applied
-            if ((transactionType != null && !transactionType.trim().isEmpty()) ||
-                    (startDate != null && !startDate.trim().isEmpty()) ||
-                    (endDate != null && !endDate.trim().isEmpty())) {
-                transactionPage = coinTransactionService.filterAndSortTransactions(
-                        customUserDetails.getUserId(), transactionType, startDate, endDate, page, size);
-            } else {
-                // If no filters are applied, get all transactions
-                Pageable pageable = PageRequest.of(page, size);
-                transactionPage = coinTransactionService.getUserCoinTransactions(customUserDetails.getUserId(), pageable);
-            }
-
-            User user = userRepository.findById(customUserDetails.getUserId())
-                    .orElseThrow(() -> new EntityNotFoundException("User not found"));
-
-            model.addAttribute("transactions", transactionPage.getContent());
-            model.addAttribute("currentPage", transactionPage.getNumber());
-            model.addAttribute("totalPages", transactionPage.getTotalPages());
-            model.addAttribute("totalItems", transactionPage.getTotalElements());
-            model.addAttribute("pageSize", size);
-            model.addAttribute("currentBalance", user.getCoin());
-            model.addAttribute("transactionType", transactionType);
-            model.addAttribute("startDate", startDate);
-            model.addAttribute("endDate", endDate);
-
-            return "homePage/history :: transactionsTableBody";
-        } catch (Exception e) {
-            model.addAttribute("error", "An error occurred while filtering transactions");
-            return "homePage/history";
-        }
+        CustomUserDetails customUserDetails = (CustomUserDetails) userDetails;
+        Long userId = customUserDetails.getUserId();
+        Page<CoinTransactionDTO> transactionPage = coinTransactionService.getUserCoursePurchaseTransactions(userId, courseName, status, startDate, endDate, page, size);
+        User user = userRepository.findById(userId).orElse(null);
+        model.addAttribute("transactions", transactionPage.getContent());
+        model.addAttribute("currentPage", transactionPage.getNumber());
+        model.addAttribute("totalPages", transactionPage.getTotalPages());
+        model.addAttribute("totalItems", transactionPage.getTotalElements());
+        model.addAttribute("pageSize", size);
+        model.addAttribute("currentBalance", user != null ? user.getCoin() : 0);
+        model.addAttribute("totalSpent", coinTransactionService.getTotalSpent(userId));
+        model.addAttribute("totalCoursesPurchased", coinTransactionService.getTotalCoursesPurchased(userId));
+        model.addAttribute("courseName", courseName);
+        model.addAttribute("status", status);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
+        return "homePage/history";
     }
 
     @PostMapping("/deposit")
@@ -237,29 +160,32 @@ public class CoinTransactionController {
             @RequestParam(required = false) Integer predefinedWithdrawAmount,
             @RequestParam(required = false) Integer customWithdrawAmount,
             RedirectAttributes redirectAttributes) {
+
+
         if (userDetails == null) {
             redirectAttributes.addFlashAttribute("error", "User is not logged in");
             return "redirect:/login";
         }
-        
+
         try {
-            // Validate amount - either predefined or custom, but not both
-            if ((predefinedWithdrawAmount == null && customWithdrawAmount == null) ||
-                    (predefinedWithdrawAmount != null && customWithdrawAmount != null)) {
-                redirectAttributes.addFlashAttribute("error", "Please select or enter the amount you want to withdraw!");
+            Integer amount = null;
+            if (predefinedWithdrawAmount != null) {
+                amount = predefinedWithdrawAmount;
+            } else if (customWithdrawAmount != null) {
+                amount = customWithdrawAmount;
+            }
+
+            if (amount == null) {
+                redirectAttributes.addFlashAttribute("error", "Please enter withdrawal amount!");
                 return "redirect:/history";
             }
 
-            int amount = predefinedWithdrawAmount != null ? predefinedWithdrawAmount : customWithdrawAmount;
-            
-            // Validate minimum amount
             if (amount < 10000) {
                 redirectAttributes.addFlashAttribute("error", "Minimum withdrawal amount is 10,000 VND");
                 return "redirect:/history";
             }
 
-            // Validate maximum amount (optional - add if needed)
-            if (amount > 10000000) { // 10 million VND
+            if (amount > 10000000) {
                 redirectAttributes.addFlashAttribute("error", "Maximum withdrawal amount is 10,000,000 VND");
                 return "redirect:/history";
             }
@@ -267,35 +193,33 @@ public class CoinTransactionController {
             CustomUserDetails customUserDetails = (CustomUserDetails) userDetails;
             Long userId = customUserDetails.getUserId();
 
-            // Check current balance
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
             if (user.getCoin() < amount) {
-                redirectAttributes.addFlashAttribute("error", "Insufficient balance to make transaction. Current balance: " + 
-                    String.format("%,.0f", user.getCoin()) + " VND");
+                redirectAttributes.addFlashAttribute("error",
+                        "Insufficient balance to make transaction. Current balance: " +
+                                String.format("%,d", user.getCoin()) + " VND");
                 return "redirect:/history";
             }
 
-            // Process withdrawal
             coinTransactionService.processWithdrawal(userId, BigDecimal.valueOf(amount));
+            redirectAttributes.addFlashAttribute("message",
+                    "Withdrawal successful!");
 
-            redirectAttributes.addFlashAttribute("message", "Withdrawal successful! Amount: " + 
-                String.format("%,.0f", amount) + " VND");
             return "redirect:/history";
 
-        } catch (ClassCastException e) {
-            redirectAttributes.addFlashAttribute("error", "Authentication error");
-            return "redirect:/history";
-        } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/history";
-        } catch (EntityNotFoundException e) {
-            redirectAttributes.addFlashAttribute("error", "User not found");
-            return "redirect:/history";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "An error occurred while withdrawing funds: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error",
+                    "An error occurred while withdrawing funds: " + e.getMessage());
             return "redirect:/history";
         }
+    }
+
+    // API lấy chi tiết giao dịch cho modal (AJAX)
+    @GetMapping("/detail/{id}")
+    @ResponseBody
+    public CoinTransactionDTO getTransactionDetail(@PathVariable("id") Long transactionId) {
+        return coinTransactionService.getTransactionDetail(transactionId);
     }
 }

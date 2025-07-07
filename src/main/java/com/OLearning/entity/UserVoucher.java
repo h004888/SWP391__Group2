@@ -3,6 +3,7 @@ package com.OLearning.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -27,6 +28,6 @@ public class UserVoucher {
     @Column(name = "IsUsed")
     private Boolean isUsed;
     @Column(name = "UsedDate")
-    private LocalDateTime usedDate;
+    private LocalDate usedDate;
 
 }

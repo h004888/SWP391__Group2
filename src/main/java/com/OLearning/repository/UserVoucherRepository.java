@@ -10,5 +10,6 @@ import java.util.Optional;
 @Repository
 public interface UserVoucherRepository extends JpaRepository<UserVoucher, Long> {
     List<UserVoucher> findByUser_UserIdAndIsUsedFalse(Long userId);
+    List<UserVoucher> findByUser_UserIdAndIsUsedFalseOrderByIdDesc(Long userId);
     Optional<UserVoucher> findByUser_UserIdAndVoucher_VoucherId(Long userId, Long voucherId);
 }

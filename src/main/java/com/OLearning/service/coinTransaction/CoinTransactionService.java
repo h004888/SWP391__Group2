@@ -15,4 +15,12 @@ public interface CoinTransactionService {
     CoinTransaction processWithdrawal(Long userId, BigDecimal amount);
 
     Page<CoinTransactionDTO> filterAndSortTransactions(Long userId, String transactionType, String startDate, String endDate, int page, int size);
+
+    Page<CoinTransactionDTO> getUserCoursePurchaseTransactions(Long userId, String courseName, String status, String startDate, String endDate, int page, int size);
+
+    BigDecimal getTotalSpent(Long userId);
+
+    long getTotalCoursesPurchased(Long userId);
+
+    CoinTransactionDTO getTransactionDetail(Long transactionId);
 }

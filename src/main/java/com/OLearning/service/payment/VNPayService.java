@@ -1,12 +1,10 @@
-package com.OLearning.service.vnpay;
+package com.OLearning.service.payment;
 
 import com.OLearning.config.VNPayConfig;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;

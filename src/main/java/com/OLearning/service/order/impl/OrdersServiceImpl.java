@@ -22,9 +22,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import com.OLearning.entity.User;
+import java.util.Optional;
+import com.OLearning.service.cart.CartService;
+import jakarta.servlet.http.Cookie;
+import org.springframework.beans.factory.annotation.Value;
+import java.util.ArrayList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.OLearning.entity.Enrollment;
+import com.OLearning.repository.EnrollmentRepository;
+import com.OLearning.entity.CoinTransaction;
+import com.OLearning.repository.CoinTransactionRepository;
+import com.OLearning.repository.UserRepository;
+import com.OLearning.service.voucher.VoucherService;
+import com.OLearning.repository.UserVoucherRepository;
+import com.OLearning.repository.VoucherRepository;
 
 @Service
 public class OrdersServiceImpl implements OrdersService {
+
+    private static final Logger logger = LoggerFactory.getLogger(OrdersServiceImpl.class);
 
     @Autowired
     private OrdersRepository ordersRepository;
@@ -37,6 +55,27 @@ public class OrdersServiceImpl implements OrdersService {
 
     @Autowired
     private InstructorOrderMapper instructorOrderMapper;
+
+    @Autowired
+    private CartService cartService;
+
+    @Autowired
+    private EnrollmentRepository enrollmentRepository;
+
+    @Autowired
+    private CoinTransactionRepository coinTransactionRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private VoucherService voucherService;
+
+    @Autowired
+    private UserVoucherRepository userVoucherRepository;
+
+    @Autowired
+    private VoucherRepository voucherRepository;
 
     @Override
     public List<OrdersDTO> getAllOrders() {
@@ -471,5 +510,130 @@ public class OrdersServiceImpl implements OrdersService {
     private Page<InstructorOrderDTO> filterWithoutDateRangeInstructorNew(String username, String orderType, String status, Pageable pageable, Long instructorId) {
         Page<Order> ordersPage = getOrdersWithoutDateRangeInstructor(username, orderType, status, pageable, instructorId);
         return ordersPage.map(order -> instructorOrderMapper.toInstructorDTO(order, instructorId));
+    }
+
+    @Override
+    public void markOrderAsPaid(Long orderId, String refCode) {
+        Optional<Order> optionalOrder = ordersRepository.findById(orderId);
+        if (optionalOrder.isPresent()) {
+            Order order = optionalOrder.get();
+            if (!"completed".equals(order.getStatus())) {
+                order.setStatus("completed");
+                if (refCode != null) order.setRefCode(refCode);
+                ordersRepository.save(order);
+                processOrderCompletion(order);
+            }
+        }
+    }
+
+    // Hàm xử lý hoàn tất đơn hàng cho SePay và VNPay
+    private void processOrderCompletion(Order order) {
+        User user = order.getUser();
+        Long userId = user.getUserId();
+        List<OrderDetail> orderDetails = orderDetailRepository.findByOrder(order);
+        if (orderDetails == null || orderDetails.isEmpty()) return;
+
+        // 1. Enroll user vào các khóa học
+        for (OrderDetail orderDetail : orderDetails) {
+            boolean alreadyEnrolled = enrollmentRepository.existsByUser_UserIdAndCourse_CourseId(user.getUserId(), orderDetail.getCourse().getCourseId());
+            if (!alreadyEnrolled) {
+                Enrollment enrollment = new Enrollment();
+                enrollment.setUser(user);
+                enrollment.setCourse(orderDetail.getCourse());
+                enrollment.setEnrollmentDate(new java.util.Date());
+                enrollment.setProgress(0.0);
+                enrollment.setStatus("onGoing");
+                enrollment.setOrder(order);
+                enrollmentRepository.save(enrollment);
+            }
+        }
+
+        // 2. Cộng/trừ coin cho user và instructor
+        Pageable pageable = PageRequest.of(0, 1);
+        boolean hasStudentTransaction = coinTransactionRepository.findByUserUserIdAndTransactionTypeAndStatus(user.getUserId(), "course_purchase", "completed", pageable).hasContent();
+        if (!hasStudentTransaction) {
+            for (OrderDetail orderDetail : orderDetails) {
+                double coursePrice = orderDetail.getUnitPrice();
+                CoinTransaction studentTransaction = new CoinTransaction();
+                studentTransaction.setUser(user);
+                studentTransaction.setAmount(java.math.BigDecimal.valueOf(-coursePrice));
+                studentTransaction.setStatus("completed");
+                studentTransaction.setCreatedAt(java.time.LocalDateTime.now());
+                studentTransaction.setOrder(order);
+                studentTransaction.setTransactionType("course_purchase");
+                studentTransaction.setNote("Purchase course via SePay");
+                coinTransactionRepository.save(studentTransaction);
+                user.setCoin(user.getCoin() - (long) coursePrice);
+
+                User instructor = orderDetail.getCourse().getInstructor();
+                if (instructor != null) {
+                    CoinTransaction instructorTransaction = new CoinTransaction();
+                    instructorTransaction.setUser(instructor);
+                    instructorTransaction.setAmount(java.math.BigDecimal.valueOf(coursePrice));
+                    instructorTransaction.setStatus("completed");
+                    instructorTransaction.setCreatedAt(java.time.LocalDateTime.now());
+                    instructorTransaction.setOrder(null);
+                    instructorTransaction.setTransactionType("course_purchase");
+                    instructorTransaction.setNote("students buy courses");
+                    coinTransactionRepository.save(instructorTransaction);
+                    instructor.setCoin(instructor.getCoin() + (long) coursePrice);
+                    userRepository.save(instructor);
+                }
+            }
+            userRepository.save(user);
+        }
+
+        // 3. Xóa giỏ hàng (clearCart)
+        cartService.clearCart(user.getEmail());
+
+        // 4. Đánh dấu voucher đã dùng (nếu có)
+        for (OrderDetail orderDetail : orderDetails) {
+            // Nếu có logic lưu voucherId vào OrderDetail thì lấy ra, ở đây giả sử có field voucherId
+            try {
+                java.lang.reflect.Field voucherField = orderDetail.getClass().getDeclaredField("voucherId");
+                voucherField.setAccessible(true);
+                Object voucherIdObj = voucherField.get(orderDetail);
+                if (voucherIdObj != null) {
+                    Long voucherId = (Long) voucherIdObj;
+                    if (voucherId != null) {
+                        voucherService.useVoucherForUserAndCourse(voucherId, userId);
+                    }
+                }
+            } catch (NoSuchFieldException | IllegalAccessException ignored) {}
+        }
+    }
+
+    @Override
+    public String getOrderStatusById(Long orderId) {
+        Optional<Order> optionalOrder = ordersRepository.findById(orderId);
+        return optionalOrder.map(Order::getStatus).orElse("NOT_FOUND");
+    }
+
+    @Override
+    public Order createOrder(User user, double amount, String orderType, String description) {
+        Order order = new Order();
+        order.setUser(user);
+        order.setAmount(amount);
+        order.setOrderType(orderType);
+        order.setDescription(description);
+        order.setStatus("pending");
+        order.setOrderDate(java.time.LocalDateTime.now());
+        Order savedOrder = ordersRepository.save(order);
+        return savedOrder;
+    }
+
+    @Override
+    public Order getOrderById(Long orderId) {
+        return ordersRepository.findById(orderId).orElse(null);
+    }
+
+    @Override
+    public void saveOrder(Order order) {
+        ordersRepository.save(order);
+    }
+
+    @Override
+    public void saveOrderDetail(OrderDetail orderDetail) {
+        orderDetailRepository.save(orderDetail);
     }
 }

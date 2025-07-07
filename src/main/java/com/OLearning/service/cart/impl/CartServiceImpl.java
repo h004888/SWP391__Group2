@@ -225,7 +225,8 @@ public class CartServiceImpl implements CartService {
             transaction.setStatus("completed");
             transaction.setTransactionType("top_up");
             transaction.setCreatedAt(LocalDateTime.now());
-            transaction.setNote("VNPay payment received - Order: " + order.getRefCode());
+            transaction.setNote("VNPay payment"+ refCode);
+            transaction.setOrder(null);
             coinTransactionRepository.save(transaction);
             user.setCoin(user.getCoin() + totalPrice.longValue());
         }
@@ -258,13 +259,14 @@ public class CartServiceImpl implements CartService {
             studentTransaction.setAmount(coursePrice.negate());
             studentTransaction.setStatus("completed");
             studentTransaction.setCreatedAt(LocalDateTime.now());
+            studentTransaction.setOrder(order);
 
             if (useCoins) {
                 studentTransaction.setTransactionType("course_purchase");
-                studentTransaction.setNote("Purchase course with coins: " + course.getTitle());
+                studentTransaction.setNote("Purchase course with coins");
             } else {
                 studentTransaction.setTransactionType("course_purchase");
-                studentTransaction.setNote("Purchase course via VNPay: " + course.getTitle() + " - Order: " + order.getRefCode());
+                studentTransaction.setNote("Purchase course via VNPay");
             }
 
             coinTransactionRepository.save(studentTransaction);
@@ -278,17 +280,10 @@ public class CartServiceImpl implements CartService {
                 instructorTransaction.setAmount(coursePrice);
                 instructorTransaction.setStatus("completed");
                 instructorTransaction.setCreatedAt(LocalDateTime.now());
-
-                if (useCoins) {
-                    instructorTransaction.setTransactionType("course_purchase");
-                    instructorTransaction.setNote("Earned from coin purchase: " + course.getTitle());
-                } else {
-                    instructorTransaction.setTransactionType("course_purchase");
-                    instructorTransaction.setNote("Earned from VNPay purchase: " + course.getTitle() + " - Order: " + order.getRefCode());
-                }
-
+                instructorTransaction.setOrder(null);
+                instructorTransaction.setTransactionType("course_purchase");
+                instructorTransaction.setNote("students buy courses");
                 coinTransactionRepository.save(instructorTransaction);
-
                 instructor.setCoin(instructor.getCoin() + coursePrice.longValue());
                 userRepository.save(instructor);
             }

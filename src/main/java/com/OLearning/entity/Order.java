@@ -2,9 +2,8 @@ package com.OLearning.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.List;
 
 
 @Entity
@@ -35,11 +34,17 @@ public class Order {
     @Column(name = "RefCode")
     private String refCode;
 
+    @Column(name = "Description")
+    private String description;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "UserID", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<OrderDetail> orderDetails;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<OrderDetail> orderDetails;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<CoinTransaction> coinTransactions;
 
 }

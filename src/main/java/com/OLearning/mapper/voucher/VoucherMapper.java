@@ -4,6 +4,7 @@ import com.OLearning.dto.voucher.VoucherDTO;
 import com.OLearning.entity.Voucher;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 @Component
@@ -19,9 +20,15 @@ public class VoucherMapper {
         dto.setIsActive(voucher.getIsActive());
         dto.setIsGlobal(voucher.getIsGlobal());
         dto.setCreatedDate(voucher.getCreatedDate());
-        dto.setCourseName(voucher.getVoucherCourses().stream()
-                .map(voucherCourse -> voucherCourse.getCourse().getCourseId())
-                .collect(Collectors.toList()));
+        
+        if (voucher.getVoucherCourses() != null && !voucher.getVoucherCourses().isEmpty()) {
+            dto.setCourseName(voucher.getVoucherCourses().stream()
+                    .map(voucherCourse -> voucherCourse.getCourse().getCourseId())
+                    .collect(Collectors.toList()));
+        } else {
+            dto.setCourseName(new ArrayList<>());
+        }
+        
         return dto;
     }
 }

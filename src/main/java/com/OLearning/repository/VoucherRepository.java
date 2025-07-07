@@ -3,6 +3,8 @@ package com.OLearning.repository;
 
 
 import com.OLearning.entity.Voucher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -18,4 +20,6 @@ public interface VoucherRepository extends JpaRepository<Voucher, Long> {
             "AND v.isActive = true AND v.expiryDate > CURRENT_TIMESTAMP " +
             "AND (v.limitation > v.usedCount OR v.limitation IS NULL)")
     List<Voucher> findValidVouchersForCourse(Long courseId);
+
+    Page<Voucher> findByInstructor_UserIdAndCodeContainingIgnoreCase(Long instructorId, String code, Pageable pageable);
 }

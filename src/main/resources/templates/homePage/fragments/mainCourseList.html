@@ -29,11 +29,13 @@
                                         <i class="fas fa-star text-warning me-1"></i>
                                         <span th:text="${course.totalRatings}">0</span>
                                     </span>
-                                    <a href="#" class="h6 fw-light wishlist-toggle"
-                                       th:attr="data-course-id=${course.courseId}, data-course-title=${course.title}"
-                                       th:classappend="${wishlistCourseIds != null and wishlistCourseIds.contains(course.courseId)} ? 'fas fa-heart text-danger' : 'far fa-heart'">
+                                    <button type="button"
+                                            class="btn btn-link text-muted p-0 wishlist-toggle"
+                                            th:data-course-id="${course.courseId}"
+                                            th:onclick="'toggleWishlist(this, ' + ${course.courseId} + ')'"
+                                            style="font-size: 1.2rem;">
                                         <i class="far fa-heart"></i>
-                                    </a>
+                                    </button>
                                 </div>
                             </div>
 
@@ -124,4 +126,5 @@
     </div>
     <!-- Pagination END -->
     <script th:src="@{/js/homePage/addtocart.js}"></script>
+    <script th:src="@{/js/homePage/wishlist.js}"></script>
 </div>

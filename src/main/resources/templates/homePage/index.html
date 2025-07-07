@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
-
-
-<div th:replace="~{homePage/fragments/header :: header}"></div>
+<head th:replace="~{homePage/fragments/header :: header}">
+</head>
 
 <body>
-
 	<!-- Header START -->
 	<div th:replace="~{homePage/fragments/navHeader :: navHeader}"></div>
 	<!-- Header END -->
@@ -37,8 +35,7 @@ Footer END -->
 
 	<!-- Template Functions -->
 	<script src="assets/js/functions.js"></script>
-
-
+	<script src="/js/homePage/wishlist.js"></script>
 
 	<script>
 		function toggleMoreCategories(event) {
@@ -58,6 +55,8 @@ Footer END -->
 					},
 					success: function (data) {
 						$('#course-pills-tabContent').html(data);
+						// Trigger custom event to update wishlist status
+						document.dispatchEvent(new CustomEvent('courses-loaded'));
 					},
 					error: function () {
 						console.error('Lỗi khi tải dữ liệu');
@@ -85,10 +84,6 @@ Footer END -->
 		});
 	</script>
 
-
-
 </body>
-
-
 
 </html>

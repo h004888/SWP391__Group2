@@ -14,8 +14,8 @@ import com.OLearning.service.cart.impl.CartServiceImpl;
 import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.course.CourseService;
 import com.OLearning.service.courseReview.CourseReviewService;
-import com.OLearning.service.vnpay.VNPayService;
 import com.OLearning.service.voucher.VoucherService;
+import com.OLearning.service.payment.VNPayService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.Cookie;
@@ -31,6 +31,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.OLearning.service.enrollment.EnrollmentService;
+import com.OLearning.service.wishlist.WishlistService;
+import com.OLearning.service.order.OrdersService;
+import com.OLearning.service.payment.VietQRService;
 
 @Controller
 @RequestMapping("/home")
@@ -70,6 +73,15 @@ public class HomeController {
 
     @Autowired
     private CourseReviewService courseReviewService;
+
+    @Autowired
+    private WishlistService wishlistService;
+
+    @Autowired
+    private OrdersService ordersService;
+
+    @Autowired
+    private VietQRService vietQRService;
 
     @GetMapping()
         public String getMethodName(Model model, @AuthenticationPrincipal UserDetails userDetails) {
@@ -128,6 +140,7 @@ public class HomeController {
     public String buyNow(@AuthenticationPrincipal UserDetails userDetails,
                          @RequestParam("courseId") Long courseId,
                          @RequestParam(value = "voucherId", required = false) Long voucherId,
+                         @RequestParam(value = "paymentMethod", required = false) String paymentMethod,
                          HttpServletRequest request,
                          HttpServletResponse response,
                          RedirectAttributes redirectAttributes) {
@@ -156,7 +169,7 @@ public class HomeController {
             item.put("id", UUID.randomUUID().toString());
             item.put("courseId", courseId);
             item.put("courseTitle", course.getTitle());
-            double price = course.getPrice() != null ? course.getPrice() : 0.0;
+            double price = course.getPrice().doubleValue();
             if (voucherId != null) {
                 var voucherOpt = voucherRepository.findById(voucherId);
                 if (voucherOpt.isPresent()) {
@@ -185,7 +198,24 @@ public class HomeController {
                 }
                 redirectAttributes.addFlashAttribute("message", "Purchase completed using wallet!");
                 return "redirect:/home/course-detail?id=" + courseId;
+            } else if ("qr".equalsIgnoreCase(paymentMethod)) {
+                Order order = ordersService.createOrder(user, totalAmount, "course_purchase", "temp_description");
+                String description = "Mua khóa học OLearning - ORDER" + order.getOrderId();
+                order.setDescription(description);
+                ordersService.saveOrder(order);
+                com.OLearning.entity.OrderDetail orderDetail = new com.OLearning.entity.OrderDetail();
+                orderDetail.setOrder(order);
+                orderDetail.setCourse(course);
+                orderDetail.setUnitPrice(price);
+                ordersService.saveOrderDetail(orderDetail);
+                String qrUrl = vietQRService.generateSePayQRUrl(order.getAmount(), order.getDescription());
+                request.setAttribute("orderId", order.getOrderId());
+                request.setAttribute("amount", order.getAmount());
+                request.setAttribute("description", order.getDescription());
+                request.setAttribute("qrUrl", qrUrl);
+                return "homePage/qr_checkout";
             } else {
+                // Mặc định: VNPay
                 String encodedCartJson = Base64.getEncoder().encodeToString(cartJson.getBytes(StandardCharsets.UTF_8));
                 Cookie buyNowCookie = new Cookie("buy_now", encodedCartJson);
                 buyNowCookie.setPath("/");
@@ -261,6 +291,19 @@ public class HomeController {
                 }
 
                 cartService.completeCheckout(cart, order, false, transactionId);
+
+                // Update voucher usage if applied (for buy now)
+                if (cart != null) {
+                    List<Map<String, Object>> items = (List<Map<String, Object>>) cart.get("items");
+                    if (items != null && !items.isEmpty()) {
+                        Object vId = items.get(0).get("appliedVoucherId");
+                        if (vId != null) {
+                            Long voucherId = Long.valueOf(vId.toString());
+                            voucherService.useVoucherForUserAndCourse(voucherId, userId);
+                        }
+                    }
+                }
+
                 redirectAttributes.addFlashAttribute("message", "VNPay payment successful!");
                 if (courseId != null) {
                     return "redirect:/home/course-detail?id=" + courseId;
@@ -337,5 +380,23 @@ public class HomeController {
         cookie.setMaxAge(0);
         cookie.setHttpOnly(true);
         response.addCookie(cookie);
+    }
+
+    private String getWishlistCookie(HttpServletRequest request, Long userId) {
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if (cookie.getName().equals("wishlist_" + userId)) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return "";
+    }
+
+    private Long getLongValue(Object value) {
+        if (value instanceof Number) {
+            return ((Number) value).longValue();
+        }
+        throw new IllegalStateException("Value is not a number: " + (value != null ? value.getClass().getName() : "null"));
     }
 }

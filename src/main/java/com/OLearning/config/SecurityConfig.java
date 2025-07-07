@@ -20,6 +20,9 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import com.OLearning.repository.UserRepository;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 
 @Configuration
 @EnableWebSecurity
@@ -38,6 +41,10 @@ public class SecurityConfig {
 //                return NoOpPasswordEncoder.getInstance();
                  return new BCryptPasswordEncoder();
         }
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring().requestMatchers("/api/payment/sepay/webhook");
+    }
 
     @Bean
     public AuthenticationSuccessHandler authenticationSuccessHandler() {
@@ -77,7 +84,8 @@ public class SecurityConfig {
 
                         // Root path redirect
                         .requestMatchers("/home/**").permitAll()
-
+                        .requestMatchers("/home/cart").authenticated()
+                        .requestMatchers("/api/sepay/**", "/api/order/status").permitAll() // Thêm lại /api/sepay/**
                         // Chỉ admin mới được truy cập /admin/**
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 

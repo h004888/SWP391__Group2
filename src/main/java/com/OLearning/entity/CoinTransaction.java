@@ -19,7 +19,7 @@ public class CoinTransaction {
     @Column(name = "TransactionID")
     private Long transactionId;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "UserID", nullable = false)
     private User user;
 
@@ -37,4 +37,8 @@ public class CoinTransaction {
 
     @Column(name = "CreatedAt")
     private LocalDateTime createdAt;
+
+    @ManyToOne
+    @JoinColumn(name = "OrderID", nullable = false)
+    private Order order;
 } 
