@@ -21,7 +21,7 @@ import com.OLearning.repository.CourseReviewRepository;
 import com.OLearning.entity.CourseReview;
 import com.OLearning.mapper.comment.CommentMapper;
 import com.OLearning.dto.comment.CommentDTO;
-
+import com.OLearning.service.notification.NotificationService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -63,6 +63,8 @@ public class UserCourseController {
     private CourseReviewRepository courseReviewRepository;
     @Autowired
     private CommentMapper commentMapper;
+    @Autowired
+    private NotificationService notificationService;
 
     @GetMapping
     public String showUserDashboard(Principal principal, Model model) {
@@ -93,6 +95,10 @@ public class UserCourseController {
         } else {
             model.addAttribute("course", null); // hoặc ẩn phần này trên giao diện
         }
+
+        // Add unread notification count
+        long unreadCount = notificationService.countUnreadByUserId(currentUser.getUserId());
+        model.addAttribute("unreadCount", unreadCount);
 
         return "userPage/LearningDashboard";
     }
@@ -184,6 +190,11 @@ public class UserCourseController {
         
         model.addAttribute("comments", comments);
         model.addAttribute("user", currentUser);
+        
+        // Add unread notification count
+        long unreadCount = notificationService.countUnreadByUserId(currentUser.getUserId());
+        model.addAttribute("unreadCount", unreadCount);
+        
         return "userPage/course-detail-min";
     }
 
@@ -273,6 +284,11 @@ public class UserCourseController {
         
         model.addAttribute("comments", comments);
         model.addAttribute("user", user);
+        
+        // Add unread notification count
+        long unreadCount = notificationService.countUnreadByUserId(user.getUserId());
+        model.addAttribute("unreadCount", unreadCount);
+        
         return "userPage/course-detail-min";
     }
 
@@ -293,7 +309,12 @@ public class UserCourseController {
         model.addAttribute("comments", comments);
         model.addAttribute("course", course);
         model.addAttribute("user", currentUser);
-        
+        model.addAttribute("currentLesson", null); // Đảm bảo fragment nhận biết là trang public
+        // Add unread notification count if user is logged in
+        if (currentUser != null) {
+            long unreadCount = notificationService.countUnreadByUserId(currentUser.getUserId());
+            model.addAttribute("unreadCount", unreadCount);
+        }
         return "userPage/course-detail-min";
     }
 

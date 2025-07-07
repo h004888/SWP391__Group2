@@ -121,6 +121,17 @@
                 <span class="visually-hidden">items in cart</span>
                 </span>
             </div>
+            
+            <!-- Notification button START -->
+            <div class="me-2 me-md-3" sec:authorize="isAuthenticated()">
+                <a class="btn btn-light btn-round mb-0 position-relative notification-page-btn" 
+                   th:href="@{/user/notifications}" 
+                   th:title="${unreadCount > 0} ? 'View All Notifications (' + ${unreadCount} + ' unread)' : 'View All Notifications'">
+                    <i class="bi bi-bell-fill fa-fw"></i>
+                    <span th:if="${unreadCount > 0}" class="notif-badge"></span>
+                </a>
+            </div>
+            <!-- Notification button END -->
             <div class="navbar-nav ms-2">
                 <button type="button" sec:authorize="isAnonymous()" th:onclick="|window.location='@{/login}'|"
                     class="btn btn-sm btn-dark mb-0">
@@ -238,6 +249,150 @@
         });
     </script>
 
+    <!-- Notification button styles -->
+    <style>
+        .notification-page-btn {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .notification-page-btn:hover {
+            background-color: #f8f9fa;
+            border-color: #dee2e6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .notification-page-btn .bi-bell-fill {
+            transition: color 0.3s ease;
+        }
+        
+        .notification-page-btn:hover .bi-bell-fill {
+            color: #0d6efd !important;
+        }
+        
+        .notification-page-btn .notif-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 14px;
+            height: 14px;
+            background-color: #dc3545;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        .notification-page-btn.has-notifications {
+            background-color: #fff3cd;
+            border-color: #ffeaa7;
+        }
+        
+        .notification-page-btn.has-notifications:hover {
+            background-color: #ffeaa7;
+            border-color: #fdcb6e;
+        }
+        
+        .notification-page-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .notification-page-btn.loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        
+        .notification-page-btn.loading .bi-bell-fill {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .notification-page-btn .notif-badge {
+                width: 12px;
+                height: 12px;
+                top: -3px;
+                right: -3px;
+            }
+        }
+    </style>
+
+    <!-- Notification button JavaScript -->
+    <script>
+        // Add loading effect to notification page button
+        document.addEventListener('DOMContentLoaded', function() {
+            const notificationPageBtn = document.querySelector('.notification-page-btn');
+            if (notificationPageBtn) {
+                notificationPageBtn.addEventListener('click', function() {
+                    this.classList.add('loading');
+                    // Remove loading class after navigation
+                    setTimeout(() => {
+                        this.classList.remove('loading');
+                    }, 1000);
+                });
+            }
+        });
+        
+        // Update notification page button tooltip and styling
+        function updateNotificationPageButton(unreadCount) {
+            const notificationPageBtn = document.querySelector('.notification-page-btn');
+            if (notificationPageBtn) {
+                if (unreadCount > 0) {
+                    notificationPageBtn.title = `View All Notifications (${unreadCount} unread)`;
+                    notificationPageBtn.classList.add('has-notifications');
+                } else {
+                    notificationPageBtn.title = 'View All Notifications';
+                    notificationPageBtn.classList.remove('has-notifications');
+                }
+            }
+        }
+        
+        // Load notifications count for homepage
+        function loadHomepageNotifications() {
+            fetch('/user/notifications/api/latest')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error('Error loading notifications:', data.error);
+                        return;
+                    }
+                    updateNotificationPageButton(data.unreadCount);
+                })
+                .catch(error => {
+                    console.error('Error loading notifications:', error);
+                });
+        }
+        
+        // Load notifications when page loads (only for authenticated users)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is authenticated (notification button exists)
+            const notificationPageBtn = document.querySelector('.notification-page-btn');
+            if (notificationPageBtn) {
+                loadHomepageNotifications();
+            }
+        });
+    </script>
 
 </header>
 

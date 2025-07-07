@@ -3,6 +3,8 @@ package com.OLearning.controller.profile;
 import com.OLearning.dto.user.UserProfileEditDTO;
 import com.OLearning.service.cloudinary.UploadFile;
 import com.OLearning.service.user.UserService;
+import com.OLearning.service.notification.NotificationService;
+import com.OLearning.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,6 +29,12 @@ public class UserProfileController {
     @Autowired
     private UploadFile uploadFile;
 
+    @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
+    private UserRepository userRepository;
+
     @GetMapping()
     public String showProfile(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         Optional<UserProfileEditDTO> profileOpt = userService.getProfileByUsername(userDetails.getUsername());
@@ -36,6 +44,14 @@ public class UserProfileController {
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
         boolean isInstructor = userDetails.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_INSTRUCTOR"));
+        
+        // Add unread notification count for students
+        if (!isAdmin && !isInstructor) {
+            userRepository.findByUsername(userDetails.getUsername()).ifPresent(user -> {
+                long unreadCount = notificationService.countUnreadByUserId(user.getUserId());
+                model.addAttribute("unreadCount", unreadCount);
+            });
+        }
         
         if (isAdmin) {
             model.addAttribute("fragmentContent", "adminDashBoard/fragments/profileContent :: profileContent");
@@ -59,6 +75,15 @@ public class UserProfileController {
                 .anyMatch(a -> a.getAuthority().equals("ROLE_INSTRUCTOR"));
         boolean isStudent = userDetails.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_STUDENT"));
+        
+        // Add unread notification count for students
+        if (isStudent) {
+            userRepository.findByUsername(userDetails.getUsername()).ifPresent(user -> {
+                long unreadCount = notificationService.countUnreadByUserId(user.getUserId());
+                model.addAttribute("unreadCount", unreadCount);
+            });
+        }
+        
         if (isAdmin) {
             model.addAttribute("fragmentContent", "adminDashBoard/fragments/editProfileContent :: editProfileContent");
             return "adminDashBoard/index";
@@ -97,6 +122,14 @@ public class UserProfileController {
                 .anyMatch(a -> a.getAuthority().equals("ROLE_INSTRUCTOR"));
             boolean isStudent = userDetails.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_STUDENT"));
+            
+            // Add unread notification count for students
+            if (isStudent) {
+                userRepository.findByUsername(userDetails.getUsername()).ifPresent(user -> {
+                    long unreadCount = notificationService.countUnreadByUserId(user.getUserId());
+                    model.addAttribute("unreadCount", unreadCount);
+                });
+            }
             
             if (isAdmin) {
                 model.addAttribute("fragmentContent", "adminDashBoard/fragments/editProfileContent :: editProfileContent");

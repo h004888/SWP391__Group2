@@ -99,7 +99,7 @@
 <!-- Header END -->
 
 <!-- **************** MAIN CONTENT START **************** -->
-<div th:replace="userPage/fragmentLessonVideo/mainContentLessonVideo :: mainContentLessonVideo"></div>
+<div th:replace="userPage/fragmentLessonVideo/mainContentLessonVideo :: mainContentLessonVideo(currentLesson=${currentLesson}, course=${course}, user=${user})"></div>
 <!-- **************** MAIN CONTENT END **************** -->
 
 <!-- =======================

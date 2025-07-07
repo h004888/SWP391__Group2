@@ -4,6 +4,7 @@ package com.OLearning.controller.homePage;
 import com.OLearning.dto.voucher.UserVoucherDTO;
 import com.OLearning.dto.voucher.VoucherDTO;
 import com.OLearning.service.voucher.VoucherService;
+import com.OLearning.service.notification.NotificationService;
 import com.OLearning.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -24,6 +25,9 @@ public class VoucherController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private NotificationService notificationService;
+
     
     @GetMapping
     public String showVoucherPage(@AuthenticationPrincipal UserDetails userDetails, Model model) {
@@ -35,6 +39,11 @@ public class VoucherController {
         model.addAttribute("userVouchers", userVouchers);
         model.addAttribute("voucherCode", "");
         model.addAttribute("currentUserId", userId);
+        
+        // Add unread notification count
+        long unreadCount = notificationService.countUnreadByUserId(userId);
+        model.addAttribute("unreadCount", unreadCount);
+        
         return "homePage/voucher";
     }
 

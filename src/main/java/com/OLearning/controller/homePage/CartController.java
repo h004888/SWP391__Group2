@@ -12,6 +12,7 @@ import com.OLearning.service.cart.CartService;
 import com.OLearning.service.cart.impl.CartServiceImpl;
 import com.OLearning.service.vnpay.VNPayService;
 import com.OLearning.service.voucher.VoucherService;
+import com.OLearning.service.notification.NotificationService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
@@ -50,6 +51,9 @@ public class CartController {
     @Autowired
     private VoucherService voucherService;
 
+    @Autowired
+    private NotificationService notificationService;
+
     @GetMapping
     public String getCart(@AuthenticationPrincipal UserDetails userDetails,
                           HttpServletRequest request,
@@ -64,6 +68,11 @@ public class CartController {
         model.addAttribute("totalPrice", calculateTotalPrice(cart));
         model.addAttribute("cartTotal", getLongValue(cart.getOrDefault("total", 0L)));
         model.addAttribute("currentUserId", userId);
+        
+        // Add unread notification count
+        long unreadCount = notificationService.countUnreadByUserId(userId);
+        model.addAttribute("unreadCount", unreadCount);
+        
         return "homePage/cart";
     }
 

@@ -4,7 +4,8 @@
         <div class="course-header bg-white rounded-4 shadow-sm p-4 mb-4">
             <div class="row align-items-center">
                 <div class="col-md-8">
-                    <h1 class="mb-3 fw-bold" th:utext="${course.title}"></h1>
+                    <h1 class="mb-3 fw-bold" th:if="${course != null}" th:utext="${course.title}"></h1>
+                    <h1 class="mb-3 fw-bold text-danger" th:unless="${course != null}">Course not found</h1>
                     <div class="d-flex align-items-center mb-3">
                         <span class="badge bg-primary me-2" th:utext="${course.categoryName}"></span>
                         <span class="text-muted me-3">

@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.OLearning.service.enrollment.EnrollmentService;
+import com.OLearning.service.notification.NotificationService;
 
 @Controller
 @RequestMapping("/home")
@@ -71,6 +72,9 @@ public class HomeController {
     @Autowired
     private CourseReviewService courseReviewService;
 
+    @Autowired
+    private NotificationService notificationService;
+
     @GetMapping()
         public String getMethodName(Model model, @AuthenticationPrincipal UserDetails userDetails) {
                 // chia làm 2 danh sách:
@@ -81,6 +85,16 @@ public class HomeController {
                 model.addAttribute("topCategories", categoryService.findTop5ByOrderByIdAsc());
                 model.addAttribute("firstFive", firstFive);
                 model.addAttribute("nextFive", nextFive);
+                
+                // Add unread notification count for authenticated users
+                if (userDetails != null) {
+                    User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
+                    if (user != null) {
+                        long unreadCount = notificationService.countUnreadByUserId(user.getUserId());
+                        model.addAttribute("unreadCount", unreadCount);
+                    }
+                }
+                
                 return "homePage/index";
         }
 
@@ -91,7 +105,8 @@ public class HomeController {
                         @RequestParam(required = false) List<String> priceFilters,
                         @RequestParam(required = false) List<String> levels,
                         @RequestParam(defaultValue = "Newest") String sortBy,
-                        @RequestParam(defaultValue = "9") int size) {
+                        @RequestParam(defaultValue = "9") int size,
+                        @AuthenticationPrincipal UserDetails userDetails) {
                 Page<CourseViewDTO> courses = courseService.searchCoursesGrid(categoryIds, priceFilters, levels, sortBy,
                                 keyword,
                                 page, size); // lưu ý trả về Page<CourseDTO>
@@ -101,6 +116,15 @@ public class HomeController {
                 model.addAttribute("totalPages", courses.getTotalPages());
                 model.addAttribute("totalItems", courses.getTotalElements());
                 model.addAttribute("categoryIds", categoryIds);
+
+                // Add unread notification count for authenticated users
+                if (userDetails != null) {
+                    User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
+                    if (user != null) {
+                        long unreadCount = notificationService.countUnreadByUserId(user.getUserId());
+                        model.addAttribute("unreadCount", unreadCount);
+                    }
+                }
 
                 return "homePage/course-grid";
         }
@@ -177,6 +201,9 @@ public class HomeController {
                     User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
                     if (user != null) {
                         model.addAttribute("currentUser", user);
+                        // Add unread notification count
+                        long unreadCount = notificationService.countUnreadByUserId(user.getUserId());
+                        model.addAttribute("unreadCount", unreadCount);
                     }
                 }
                         

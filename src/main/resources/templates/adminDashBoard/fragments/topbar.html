@@ -206,20 +206,36 @@
 
     <!-- Notification JavaScript -->
     <script>
+        // Manual test function
+        function testNotifications() {
+            console.log('Manual test: Loading notifications...');
+            loadAdminNotifications();
+        }
         // Load notifications when dropdown is shown
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, setting up notification dropdown...');
             const notificationDropdown = document.querySelector('.nav-item.dropdown [data-bs-toggle="dropdown"]');
-            if (notificationDropdown) {
+            console.log('Found notification dropdown:', notificationDropdown);
+            if (notificationDropdown && notificationDropdown.closest('.nav-item').querySelector('#adminNotificationBadge')) {
+                console.log('Setting up event listener for notification dropdown');
                 notificationDropdown.addEventListener('show.bs.dropdown', function() {
+                    console.log('Notification dropdown shown, loading notifications...');
                     loadAdminNotifications();
                 });
+            } else {
+                console.log('Notification dropdown not found or no badge element');
             }
         });
 
         function loadAdminNotifications() {
+            console.log('Loading admin notifications...');
             fetch('/admin/notifications/api/latest')
-                .then(response => response.json())
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    return response.json();
+                })
                 .then(data => {
+                    console.log('Notification data:', data);
                     if (data.error) {
                         console.error('Error loading notifications:', data.error);
                         return;
@@ -234,6 +250,7 @@
         }
 
         function updateAdminNotificationBadge(unreadCount) {
+            console.log('Updating admin notification badge with count:', unreadCount);
             const badge = document.getElementById('adminNotificationBadge');
             const countSpan = document.getElementById('adminNotificationCount');
             
@@ -243,7 +260,10 @@
                     newBadge.id = 'adminNotificationBadge';
                     newBadge.className = 'notif-badge animation-blink';
                     newBadge.style.cssText = 'width:14px;height:14px;top:6px;right:6px;';
-                    document.querySelector('.nav-item.dropdown [data-bs-toggle="dropdown"]').appendChild(newBadge);
+                    const notificationButton = document.querySelector('.nav-item.dropdown [data-bs-toggle="dropdown"]');
+                    if (notificationButton && notificationButton.closest('.nav-item').querySelector('#adminNotificationBadge')) {
+                        notificationButton.appendChild(newBadge);
+                    }
                 }
                 countSpan.textContent = unreadCount + ' new';
             } else {
@@ -255,6 +275,7 @@
         }
 
         function updateAdminNotificationList(notifications) {
+            console.log('Updating admin notification list with:', notifications.length, 'notifications');
             const list = document.getElementById('adminNotificationList');
             list.innerHTML = '';
             
@@ -264,8 +285,10 @@
             }
             
             notifications.forEach(notification => {
+                console.log('Processing notification:', notification);
                 const li = document.createElement('li');
                 li.className = 'list-group-item-action border-0 border-bottom d-flex p-3';
+                // Since API returns only unread notifications, all should be 'failed' status
                 if (notification.status === 'failed') {
                     li.style.backgroundColor = '#f8f9fa';
                     li.style.borderLeft = '3px solid #0d6efd';

@@ -34,7 +34,7 @@ public class CommentServiceImpl implements CommentService {
     private final LessonRepository lessonRepo;
 
     @Override
-    public void addComment(CommentDTO dto, Long userId, Long courseId) {
+    public CourseReview addComment(CommentDTO dto, Long userId, Long courseId) {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
         Course course = courseRepo.findById(courseId)
@@ -67,6 +67,7 @@ public class CommentServiceImpl implements CommentService {
         reviewRepo.save(review);
         
         System.out.println("Comment added successfully: " + review.getReviewId() + " for lesson: " + lesson.getLessonId());
+        return review;
     }
 
     @Override

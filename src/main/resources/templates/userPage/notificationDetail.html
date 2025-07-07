@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Notification Detail - OLearning</title>
+    
+    <!-- Favicon -->
+    <link rel="shortcut icon" th:href="@{/assets/images/favicon.ico}">
+    
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Icon Font Stylesheet -->
+    <link rel="stylesheet" th:href="@{/vendor/fontawesome-free/css/all.min.css}">
+    <link rel="stylesheet" th:href="@{/vendor/bootstrap-icons/bootstrap-icons.css}">
+    
+    <!-- Libraries Stylesheet -->
+    <link rel="stylesheet" th:href="@{/vendor/owlcarousel/assets/owl.carousel.min.css}">
+    <link rel="stylesheet" th:href="@{/vendor/aos/aos.css}">
+    
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    
+    <style>
+        .notification-detail-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .notification-type {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .type-enrollment { background: #e3f2fd; color: #1976d2; }
+        .type-completion { background: #e8f5e8; color: #2e7d32; }
+        .type-quiz { background: #fff3e0; color: #f57c00; }
+        .type-certificate { background: #f3e5f5; color: #7b1fa2; }
+        .type-payment-success { background: #e8f5e8; color: #2e7d32; }
+        .type-payment-failed { background: #ffebee; color: #c62828; }
+
+        .notification-time {
+            color: #666;
+            font-size: 0.875rem;
+        }
+
+        .notification-message {
+            color: #333;
+            line-height: 1.8;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        .notification-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #eee;
+        }
+
+        .btn-back {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background 0.3s ease;
+        }
+
+        .btn-back:hover {
+            background: #5a6268;
+            color: white;
+        }
+
+        .btn-mark-read {
+            background: #2196f3;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .btn-mark-read:hover {
+            background: #1976d2;
+        }
+
+        .notification-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-unread {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .status-read {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .notification-detail-card {
+                padding: 1.5rem;
+            }
+            
+            .notification-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .notification-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header START -->
+    <th:block th:replace="~{userPage/fragments/navHeader :: navHeader}"></th:block>
+    <!-- Header END -->
+
+    <!-- **************** MAIN CONTENT START **************** -->
+    <main>
+        <!-- =======================
+        Main hero START -->
+        <section class="pt-4 pt-xl-5">
+            <div class="container">
+                <div class="row g-4 g-lg-5">
+                    <div class="col-lg-12">
+                        <div class="card border-0 bg-primary bg-opacity-10 rounded-3">
+                            <div class="card-body p-4 p-md-5">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <h1 class="display-6 mb-3">
+                                            <i class="fas fa-bell me-2"></i>Notification Detail
+                                        </h1>
+                                        <p class="lead mb-0">View detailed information about this notification</p>
+                                    </div>
+                                    <div class="col-md-4 text-md-end">
+                                        <a th:href="@{/user/notifications}" class="btn btn-outline-primary">
+                                            <i class="fas fa-arrow-left me-1"></i>Back to Notifications
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- =======================
+        Main hero END -->
+
+        <!-- =======================
+        Notification detail START -->
+        <section class="py-0">
+            <div class="container">
+                <div class="notification-detail-card">
+                    <div class="notification-header">
+                        <div>
+                            <span th:class="'notification-type ' + (${notification.type == 'ENROLLMENT'} ? 'type-enrollment' : 
+                                                   (${notification.type == 'COURSE_COMPLETION'} ? 'type-completion' : 
+                                                   (${notification.type == 'QUIZ_RESULT'} ? 'type-quiz' : 
+                                                   (${notification.type == 'CERTIFICATE'} ? 'type-certificate' : 
+                                                   (${notification.type == 'PAYMENT_SUCCESS'} ? 'type-payment-success' : 
+                                                   (${notification.type == 'PAYMENT_FAILED'} ? 'type-payment-failed' : 'type-enrollment'))))))"
+                                  th:text="${notification.type}">ENROLLMENT</span>
+                            <span th:class="'notification-status ' + (${notification.status == 'sent'} ? 'status-read' : 'status-unread')"
+                                  th:text="${notification.status == 'sent'} ? 'Read' : 'Unread'"
+                                  style="margin-left: 1rem;">Unread</span>
+                        </div>
+                        <span class="notification-time" th:text="${#dates.format(notification.sentAt, 'dd/MM/yyyy HH:mm')}">01/01/2024 12:00</span>
+                    </div>
+                    
+                    <div class="notification-message" th:text="${notification.message}">
+                        Your course enrollment was successful!
+                    </div>
+                    <!-- Nếu là notification COMMENT và có commentId thì cho phép trả lời -->
+                    <div th:if="${notification.type == 'COMMENT' and notification.commentId != null}">
+                        <form id="replyFromNotificationForm" th:action="@{/api/course/{courseId}/comment/instructor-reply(courseId=${notification.course.courseId})}" method="post" class="mb-3">
+                            <input type="hidden" name="parentId" th:value="${notification.commentId}" />
+                            <input type="hidden" name="lessonId" th:value="${lessonId}" />
+                            <div class="input-group">
+                                <input type="text" name="comment" class="form-control" placeholder="Nhập trả lời..." required />
+                                <button class="btn btn-primary" type="submit">Trả lời</button>
+                            </div>
+                        </form>
+                        <div th:if="${lessonId != null}">
+                            <a th:href="@{/learning/course/{courseId}/lesson/{lessonId}(courseId=${notification.course.courseId}, lessonId=${lessonId})}" class="btn btn-outline-info mt-2">
+                                <i class="fas fa-external-link-alt me-1"></i>Đi tới trang bài học
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="notification-actions">
+                        <a th:href="@{/user/notifications}" class="btn-back">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Notifications
+                        </a>
+                        <button th:if="${notification.status != 'sent'}" 
+                                th:onclick="'markAsRead(' + ${notification.notificationId} + ')'"
+                                class="btn-mark-read">
+                            <i class="fas fa-check me-1"></i>Mark as Read
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- =======================
+        Notification detail END -->
+    </main>
+    <!-- **************** MAIN CONTENT END **************** -->
+
+    <!-- Footer START -->
+    <th:block th:replace="~{userPage/fragments/footer :: footer}"></th:block>
+    <!-- Footer END -->
+
+    <!-- Back to top -->
+    <div class="back-top"><i class="bi bi-arrow-up-short position-absolute top-50 start-50 translate-middle"></i></div>
+
+    <!-- Bootstrap JS -->
+    <script th:src="@{/vendor/bootstrap/dist/js/bootstrap.bundle.min.js}"></script>
+    
+    <!-- Vendors -->
+    <script th:src="@{/vendor/aos/aos.js}"></script>
+    <script th:src="@{/vendor/glightbox/js/glightbox.min.js}"></script>
+    <script th:src="@{/vendor/purecounterjs/dist/purecounter_vanilla.js}"></script>
+    <script th:src="@{/vendor/isotope-layout/dist/isotope.pkgd.min.js}"></script>
+    <script th:src="@{/vendor/owlcarousel/owl.carousel.min.js}"></script>
+    
+    <!-- Template Functions -->
+    <script th:src="@{/js/functions.js}"></script>
+
+    <script>
+        function markAsRead(notificationId) {
+            fetch(`/user/notifications/${notificationId}/mark-read`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error marking as read:', error);
+            });
+        }
+    </script>
+    <script>
+        // AJAX cho form trả lời từ notification
+        const replyForm = document.getElementById('replyFromNotificationForm');
+        if (replyForm) {
+            replyForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData
+                }).then(res => res.json()).then(() => location.reload());
+            });
+        }
+    </script>
+</body>
+</html> 

@@ -6,6 +6,7 @@ import com.OLearning.entity.CourseReview;
 import com.OLearning.entity.Report;
 import com.OLearning.entity.User;
 import com.OLearning.entity.Lesson;
+import com.OLearning.entity.Notification;
 import com.OLearning.mapper.comment.CommentMapper;
 import com.OLearning.repository.CourseRepository;
 import com.OLearning.repository.CourseReviewRepository;
@@ -13,12 +14,14 @@ import com.OLearning.repository.ReportRepository;
 import com.OLearning.repository.UserRepository;
 import com.OLearning.repository.LessonRepository;
 import com.OLearning.service.comment.CommentService;
+import com.OLearning.service.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -36,11 +39,12 @@ public class CommentController {
     private final ReportRepository reportRepo;
     private final CommentMapper commentMapper;
     private final LessonRepository lessonRepo;
+    private final NotificationService notificationService;
 
     @PostMapping("/{courseId}/comment")
     @ResponseBody
     public ResponseEntity<?> addComment(@PathVariable Long courseId,
-                                      @RequestBody CommentDTO dto,
+                                      @ModelAttribute CommentDTO dto,
                                       Principal principal) {
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -63,7 +67,20 @@ public class CommentController {
         }
 
         try {
-            commentService.addComment(dto, user.getUserId(), courseId);
+            CourseReview comment = commentService.addComment(dto, user.getUserId(), courseId);
+            // Gửi notification cho instructor
+            Course course = courseRepo.findById(courseId).orElse(null);
+            if (course != null && course.getInstructor() != null && !course.getInstructor().getUserId().equals(user.getUserId())) {
+                Notification notification = new Notification();
+                notification.setType("COMMENT");
+                notification.setUser(course.getInstructor());
+                notification.setCourse(course);
+                notification.setCommentId(comment.getReviewId()); // truyền commentId vừa tạo
+                notification.setMessage(user.getFullName() + " đã bình luận vào khóa học: " + course.getTitle());
+                notification.setSentAt(LocalDateTime.now());
+                notification.setStatus("failed");
+                notificationService.sendMess(notification);
+            }
             return ResponseEntity.ok(Map.of("success", "Đã đăng bình luận thành công"));
         } catch (RuntimeException e) {
             System.err.println("Error adding comment: " + e.getMessage());
@@ -76,7 +93,7 @@ public class CommentController {
     @PostMapping("/{courseId}/comment/reply")
     @ResponseBody
     public ResponseEntity<?> replyComment(@PathVariable Long courseId,
-                                        @RequestBody CommentDTO dto,
+                                        @ModelAttribute CommentDTO dto,
                                         Principal principal) {
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -105,6 +122,24 @@ public class CommentController {
 
         try {
             commentService.replyComment(dto, user.getUserId(), courseId);
+            // Gửi notification cho user của comment gốc
+            if (dto.getParentId() != null) {
+                CourseReview parent = reviewRepo.findById(dto.getParentId()).orElse(null);
+                if (parent != null && parent.getEnrollment() != null && parent.getEnrollment().getUser() != null) {
+                    User parentUser = parent.getEnrollment().getUser();
+                    if (!parentUser.getUserId().equals(user.getUserId())) {
+                        Notification notification = new Notification();
+                        notification.setType("COMMENT");
+                        notification.setUser(parentUser);
+                        notification.setCourse(parent.getCourse());
+                        notification.setCommentId(parent.getReviewId());
+                        notification.setMessage(user.getFullName() + " đã trả lời bình luận của bạn trong khóa học: " + parent.getCourse().getTitle());
+                        notification.setSentAt(LocalDateTime.now());
+                        notification.setStatus("failed");
+                        notificationService.sendMess(notification);
+                    }
+                }
+            }
             return ResponseEntity.ok(Map.of("success", "Đã trả lời bình luận thành công"));
         } catch (RuntimeException e) {
             System.err.println("Error replying comment: " + e.getMessage());
@@ -151,11 +186,11 @@ public class CommentController {
         }
     }
 
-    @PutMapping("/{courseId}/comment/{commentId}/edit")
+    @PostMapping("/{courseId}/comment/{commentId}/edit")
     @ResponseBody
     public ResponseEntity<?> editComment(@PathVariable Long courseId,
                                        @PathVariable Long commentId,
-                                       @RequestBody CommentDTO dto,
+                                       @ModelAttribute CommentDTO dto,
                                        Principal principal) {
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

@@ -6,6 +6,7 @@ import com.OLearning.repository.UserRepository;
 import com.OLearning.security.CustomUserDetails;
 import com.OLearning.service.coinTransaction.CoinTransactionService;
 import com.OLearning.service.vnpay.VNPayService;
+import com.OLearning.service.notification.NotificationService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,9 @@ public class CoinTransactionController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @GetMapping
     public String getMyCoinTransactions(
@@ -85,6 +89,10 @@ public class CoinTransactionController {
             model.addAttribute("startDate", startDate);
             model.addAttribute("endDate", endDate);
 
+            // Add unread notification count
+            long unreadCount = notificationService.countUnreadByUserId(customUserDetails.getUserId());
+            model.addAttribute("unreadCount", unreadCount);
+
             return "homePage/history";
         } catch (Exception e) {
             model.addAttribute("error", "An error occurred while fetching transactions");
@@ -134,6 +142,10 @@ public class CoinTransactionController {
             model.addAttribute("transactionType", transactionType);
             model.addAttribute("startDate", startDate);
             model.addAttribute("endDate", endDate);
+
+            // Add unread notification count
+            long unreadCount = notificationService.countUnreadByUserId(customUserDetails.getUserId());
+            model.addAttribute("unreadCount", unreadCount);
 
             return "homePage/history :: transactionsTableBody";
         } catch (Exception e) {

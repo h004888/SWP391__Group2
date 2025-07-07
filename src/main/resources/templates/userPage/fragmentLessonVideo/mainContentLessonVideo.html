@@ -78,35 +78,9 @@
                                     <div class="tab-pane fade show active" id="course-pills-4" role="tabpanel"
                                         aria-labelledby="course-pills-tab-4">
                                         <!-- Comment START -->
-                                        <div class="row mb-4">
+                                        <div class="row mb-4" th:if="${currentLesson != null and course != null}">
                                             <div class="col-12">
-                                                <h5 class="mb-4">Ask Your Question</h5>
-
-                                                <!-- Comment Form -->
-                                                <div class="d-flex mb-4" th:if="${user != null}">
-                                                    <div class="avatar avatar-sm flex-shrink-0 me-2">
-                                                        <img class="avatar-img rounded-circle"
-                                                             th:src="${user != null and user.profilePicture != null and user.profilePicture != ''} ? ${user.profilePicture} : @{/assets/images/avatar/default.jpg}"
-                                                             th:alt="${user != null ? user.fullName : 'User'}">
-                                                    </div>
-                                                    <form id="commentForm" class="w-100 d-flex">
-                                                        <input type="hidden" name="courseId" th:value="${course.courseId}" />
-                                                        <input type="hidden" name="lessonId" th:value="${currentLesson != null ? currentLesson.lessonId : ''}" />
-                                                        <div class="flex-grow-1 me-2">
-                                                            <textarea class="form-control pe-4 bg-light" name="comment" rows="1"
-                                                                      placeholder="Add a comment..." required></textarea>
-                                                        </div>
-                                                        <button class="btn btn-primary mb-0" type="submit">Post</button>
-                                                    </form>
-                                                </div>
-
-                                                <!-- Comment Message -->
-                                                <div id="commentMessage"></div>
-
-                                                <!-- Comments List -->
-                                                <div id="commentsList">
-                                                    <!-- Comments will be loaded here -->
-                                                </div>
+                                                <div th:replace="userPage/fragmentLessonVideo/commentLessonVideoFragment :: commentLessonVideoFragment(comments=${comments}, currentLesson=${currentLesson}, user=${user})"></div>
                                             </div>
                                         </div>
                                         <!-- Comment END -->
@@ -439,51 +413,52 @@
     }
 
     // Add comment
-    document.getElementById('commentForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const formData = new FormData(this);
-        const comment = formData.get('comment');
-        const courseId = formData.get('courseId');
-        const lessonId = formData.get('lessonId');
-        
-        console.log('Submitting comment:', { comment, courseId, lessonId });
-        
-        // Validate lessonId is present - bắt buộc
-        if (!lessonId) {
-            showMessage('Lỗi: Không tìm thấy thông tin bài học. Comment phải thuộc về một bài học cụ thể.', 'error');
-            return;
-        }
-        
-        fetch(`/api/course/${courseId}/comment`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                comment: comment,
-                courseId: courseId,
-                lessonId: parseInt(lessonId) // lessonId bắt buộc
-            })
-        })
-        .then(response => {
-            console.log('Comment submit response status:', response.status);
-            return response.json();
-        })
-        .then(data => {
-            console.log('Comment submit response:', data);
-            if (data.success) {
-                showMessage('Comment posted successfully!', 'success');
-                this.reset();
-                // Reload comments for this lesson
-                loadComments(courseId, lessonId);
-            } else {
-                showMessage(data.error || 'Error posting comment', 'error');
+    document.addEventListener('submit', function(e) {
+        if (e.target && e.target.id === 'commentForm') {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const comment = formData.get('comment');
+            const courseId = formData.get('courseId');
+            const lessonId = formData.get('lessonId');
+            
+            console.log('Submitting comment:', { comment, courseId, lessonId });
+            
+            // Validate lessonId is present - bắt buộc
+            if (!lessonId) {
+                showMessage('Lỗi: Không tìm thấy thông tin bài học. Comment phải thuộc về một bài học cụ thể.', 'error');
+                return;
             }
-        })
-        .catch(error => {
-            console.error('Error submitting comment:', error);
-            showMessage('Error posting comment', 'error');
-        });
+            
+            fetch(`/api/course/${courseId}/comment`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    comment: comment,
+                    courseId: courseId,
+                    lessonId: parseInt(lessonId) // lessonId bắt buộc
+                })
+            })
+            .then(response => {
+                console.log('Comment submit response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Comment submit response:', data);
+                if (data.success) {
+                    showMessage('Thao tác thành công!', 'success');
+                    e.target.reset && e.target.reset();
+                    loadComments(courseId, lessonId);
+                } else {
+                    showMessage(data.error || 'Có lỗi xảy ra', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error submitting comment:', error);
+                showMessage('Error posting comment', 'error');
+            });
+        }
     });
 
     // Reply to comment
@@ -521,7 +496,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showMessage('Comment deleted successfully!', 'success');
+                    showMessage('Thao tác thành công!', 'success');
                     loadComments(courseId, lessonId);
                 } else {
                     showMessage(data.error || 'Error deleting comment', 'error');
@@ -551,7 +526,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showMessage('Comment reported successfully!', 'success');
+                    showMessage('Thao tác thành công!', 'success');
                 } else {
                     showMessage(data.error || 'Error reporting comment', 'error');
                 }
@@ -587,7 +562,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showMessage('Reply posted successfully!', 'success');
+                    showMessage('Thao tác thành công!', 'success');
                     loadComments(courseId, lessonId);
                 } else {
                     showMessage(data.error || 'Error posting reply', 'error');
@@ -623,7 +598,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showMessage('Comment updated successfully!', 'success');
+                    showMessage('Thao tác thành công!', 'success');
                     loadComments(courseId, lessonId);
                 } else {
                     showMessage(data.error || 'Error updating comment', 'error');

@@ -185,57 +185,78 @@
     </div>
   </div>
 
-  <!-- Notification JavaScript -->
-  <script>
-      // Load notifications when dropdown is shown
-      document.addEventListener('DOMContentLoaded', function() {
-          const notificationDropdown = document.querySelector('.nav-item.dropdown [data-bs-toggle="dropdown"]');
-          if (notificationDropdown) {
-              notificationDropdown.addEventListener('show.bs.dropdown', function() {
-                  loadInstructorNotifications();
-              });
-          }
-      });
+      <!-- Notification JavaScript -->
+    <script>
+        // Manual test function
+        function testNotifications() {
+            console.log('Manual test: Loading instructor notifications (update)...');
+            loadInstructorNotifications();
+        }
+              // Load notifications when dropdown is shown
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, setting up instructor notification dropdown (update)...');
+            const notificationDropdown = document.querySelector('.nav-item.dropdown [data-bs-toggle="dropdown"]');
+            console.log('Found instructor notification dropdown (update):', notificationDropdown);
+            if (notificationDropdown && notificationDropdown.closest('.nav-item').querySelector('#instructorNotificationBadge')) {
+                console.log('Setting up event listener for instructor notification dropdown (update)');
+                notificationDropdown.addEventListener('show.bs.dropdown', function() {
+                    console.log('Instructor notification dropdown shown (update), loading notifications...');
+                    loadInstructorNotifications();
+                });
+            } else {
+                console.log('Instructor notification dropdown not found or no badge element (update)');
+            }
+        });
 
-      function loadInstructorNotifications() {
-          fetch('/api/instructor/latest')
-              .then(response => response.json())
-              .then(data => {
-                  if (data.error) {
-                      console.error('Error loading notifications:', data.error);
-                      return;
-                  }
-                  
-                  updateInstructorNotificationBadge(data.unreadCount);
-                  updateInstructorNotificationList(data.notifications);
-              })
-              .catch(error => {
-                  console.error('Error loading notifications:', error);
-              });
-      }
+              function loadInstructorNotifications() {
+            console.log('Loading instructor notifications...');
+            fetch('/api/instructor/latest')
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Notification data:', data);
+                    if (data.error) {
+                        console.error('Error loading notifications:', data.error);
+                        return;
+                    }
+                    
+                    updateInstructorNotificationBadge(data.unreadCount);
+                    updateInstructorNotificationList(data.notifications);
+                })
+                .catch(error => {
+                    console.error('Error loading notifications:', error);
+                });
+        }
 
-      function updateInstructorNotificationBadge(unreadCount) {
-          const badge = document.getElementById('instructorNotificationBadge');
-          const countSpan = document.getElementById('instructorNotificationCount');
-          
-          if (unreadCount > 0) {
-              if (!badge) {
-                  const newBadge = document.createElement('span');
-                  newBadge.id = 'instructorNotificationBadge';
-                  newBadge.className = 'notif-badge animation-blink';
-                  newBadge.style.cssText = 'width:14px;height:14px;top:6px;right:6px;';
-                  document.querySelector('.nav-item.dropdown [data-bs-toggle="dropdown"]').appendChild(newBadge);
-              }
-              countSpan.textContent = unreadCount + ' new';
-          } else {
-              if (badge) {
-                  badge.remove();
-              }
-              countSpan.textContent = '0 new';
-          }
-      }
+              function updateInstructorNotificationBadge(unreadCount) {
+            console.log('Updating instructor notification badge with count:', unreadCount);
+            const badge = document.getElementById('instructorNotificationBadge');
+            const countSpan = document.getElementById('instructorNotificationCount');
+            
+            if (unreadCount > 0) {
+                if (!badge) {
+                    const newBadge = document.createElement('span');
+                    newBadge.id = 'instructorNotificationBadge';
+                    newBadge.className = 'notif-badge animation-blink';
+                    newBadge.style.cssText = 'width:14px;height:14px;top:6px;right:6px;';
+                    const notificationButton = document.querySelector('.nav-item.dropdown [data-bs-toggle="dropdown"]');
+                    if (notificationButton && notificationButton.closest('.nav-item').querySelector('#instructorNotificationBadge')) {
+                        notificationButton.appendChild(newBadge);
+                    }
+                }
+                countSpan.textContent = unreadCount + ' new';
+            } else {
+                if (badge) {
+                    badge.remove();
+                }
+                countSpan.textContent = '0 new';
+            }
+        }
 
       function updateInstructorNotificationList(notifications) {
+          console.log('Updating instructor notification list with:', notifications.length, 'notifications');
           const list = document.getElementById('instructorNotificationList');
           list.innerHTML = '';
           
@@ -245,8 +266,10 @@
             }
           
           notifications.forEach(notification => {
+              console.log('Processing instructor notification (update):', notification);
               const li = document.createElement('li');
                               li.className = 'list-group-item-action border-0 border-bottom d-flex p-3';
+                // Since API returns only unread notifications, all should be 'failed' status
                 if (notification.status === 'failed') {
                     li.style.backgroundColor = '#f8f9fa';
                     li.style.borderLeft = '3px solid #0d6efd';
