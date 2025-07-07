@@ -173,7 +173,7 @@ public class WishlistController {
         String encodedWishlistJson = Base64.getEncoder().encodeToString(wishlistJson.getBytes(StandardCharsets.UTF_8));
         Cookie wishlistCookie = new Cookie("wishlist_" + userId, encodedWishlistJson);
         wishlistCookie.setPath("/");
-        wishlistCookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
+        wishlistCookie.setMaxAge(30 * 24 * 60 * 60);
         wishlistCookie.setHttpOnly(true);
         response.addCookie(wishlistCookie);
     }

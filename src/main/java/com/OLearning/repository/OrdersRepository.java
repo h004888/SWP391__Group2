@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 
 @Repository
@@ -25,6 +26,7 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
     // Tìm tất cả đơn hàng với phân trang
     @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
     Page<Order> findAll(Pageable pageable);
+
 
     // Tìm đơn hàng theo username (LIKE)
     @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})

@@ -36,6 +36,10 @@ public class Order {
     @Column(name = "RefCode")
     private String refCode;
 
+    @Column(name = "Description")
+    private String description;
+
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "UserID", nullable = false)
     private User user;

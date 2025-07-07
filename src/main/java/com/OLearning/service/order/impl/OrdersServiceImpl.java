@@ -19,9 +19,19 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.OLearning.entity.User;
+import java.util.Optional;
+import com.OLearning.service.cart.CartService;
+import jakarta.servlet.http.Cookie;
+import org.springframework.beans.factory.annotation.Value;
+import java.util.ArrayList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class OrdersServiceImpl implements OrdersService {
+
+    private static final Logger logger = LoggerFactory.getLogger(OrdersServiceImpl.class);
 
     @Autowired
     private OrdersRepository ordersRepository;
@@ -31,6 +41,9 @@ public class OrdersServiceImpl implements OrdersService {
 
     @Autowired
     private OrdersMapper ordersMapper;
+
+    @Autowired
+    private CartService cartService;
 
     @Override
     public List<OrdersDTO> getAllOrders() {
@@ -321,5 +334,44 @@ public class OrdersServiceImpl implements OrdersService {
             revenueByDate.put(monthYear, totalAmount);
         }
         return revenueByDate;
+    }
+
+    @Override
+    public void markOrderAsPaid(Long orderId) {
+        Optional<Order> optionalOrder = ordersRepository.findById(orderId);
+        if (optionalOrder.isPresent()) {
+            Order order = optionalOrder.get();
+            order.setStatus("completed");
+            ordersRepository.save(order);
+        }
+    }
+
+    @Override
+    public String getOrderStatusById(Long orderId) {
+        Optional<Order> optionalOrder = ordersRepository.findById(orderId);
+        return optionalOrder.map(Order::getStatus).orElse("NOT_FOUND");
+    }
+
+    @Override
+    public Order createOrder(User user, double amount, String orderType, String description) {
+        Order order = new Order();
+        order.setUser(user);
+        order.setAmount(amount);
+        order.setOrderType(orderType);
+        order.setDescription(description);
+        order.setStatus("pending");
+        order.setOrderDate(java.time.LocalDateTime.now());
+        Order savedOrder = ordersRepository.save(order);
+        return savedOrder;
+    }
+
+    @Override
+    public Order getOrderById(Long orderId) {
+        return ordersRepository.findById(orderId).orElse(null);
+    }
+
+    @Override
+    public void saveOrder(Order order) {
+        ordersRepository.save(order);
     }
 }
