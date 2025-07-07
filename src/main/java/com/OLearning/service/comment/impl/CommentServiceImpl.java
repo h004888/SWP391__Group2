@@ -7,6 +7,7 @@ import com.OLearning.entity.Enrollment;
 import com.OLearning.entity.Report;
 import com.OLearning.entity.User;
 import com.OLearning.entity.Lesson;
+import com.OLearning.entity.Notification;
 import com.OLearning.repository.CourseRepository;
 import com.OLearning.repository.CourseReviewRepository;
 import com.OLearning.repository.EnrollmentRepository;
@@ -14,6 +15,7 @@ import com.OLearning.repository.ReportRepository;
 import com.OLearning.repository.UserRepository;
 import com.OLearning.repository.LessonRepository;
 import com.OLearning.service.comment.CommentService;
+import com.OLearning.service.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +34,7 @@ public class CommentServiceImpl implements CommentService {
     private final EnrollmentRepository enrollmentRepo;
     private final ReportRepository reportRepo;
     private final LessonRepository lessonRepo;
+    private final NotificationService notificationService;
 
     @Override
     public CourseReview addComment(CommentDTO dto, Long userId, Long courseId) {
@@ -77,9 +80,14 @@ public class CommentServiceImpl implements CommentService {
         Course course = courseRepo.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy khóa học"));
 
-        // Kiểm tra xem user đã đăng ký khóa học chưa
-        Enrollment enrollment = enrollmentRepo.findFirstByUserAndCourseOrderByEnrollmentDateDesc(user, course)
-                .orElseThrow(() -> new RuntimeException("Bạn cần đăng ký khóa học để có thể trả lời bình luận"));
+        // Nếu là instructor của khóa học thì không cần enrollment
+        Enrollment enrollment = null;
+        if (course.getInstructor() != null && course.getInstructor().getUserId().equals(userId)) {
+            enrollment = null; // Instructor trả lời, không cần enrollment
+        } else {
+            enrollment = enrollmentRepo.findFirstByUserAndCourseOrderByEnrollmentDateDesc(user, course)
+                    .orElseThrow(() -> new RuntimeException("Bạn cần đăng ký khóa học để có thể trả lời bình luận"));
+        }
 
         // Kiểm tra comment cha tồn tại
         CourseReview parentReview = reviewRepo.findById(dto.getParentId())
@@ -99,6 +107,20 @@ public class CommentServiceImpl implements CommentService {
         reviewRepo.save(reply);
         
         System.out.println("Reply added successfully: " + reply.getReviewId() + " for lesson: " + (lesson != null ? lesson.getLessonId() : "course-level"));
+        
+        // Send notification to the original commenter if not replying to self
+        User parentUser = parentReview.getEnrollment().getUser();
+        if (!parentUser.getUserId().equals(userId)) {
+            Notification notification = new Notification();
+            notification.setType("COMMENT");
+            notification.setUser(parentUser);
+            notification.setCourse(course);
+            notification.setCommentId(parentReview.getReviewId());
+            notification.setMessage("Bình luận của bạn đã nhận được một phản hồi mới.");
+            notification.setSentAt(LocalDateTime.now());
+            notification.setStatus("failed");
+            notificationService.sendMess(notification);
+        }
     }
 
     @Override
@@ -163,7 +185,29 @@ public class CommentServiceImpl implements CommentService {
         report.setContent(reason);
         report.setCreatedAt(LocalDateTime.now());
         report.setStatus("pending");
+        report.setCommentId(reviewId);
         reportRepo.save(report);
+    }
+
+    @Override
+    public void setCommentHidden(Long reviewId, boolean hidden) {
+        CourseReview review = reviewRepo.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy bình luận"));
+        review.setHidden(hidden);
+        reviewRepo.save(review);
+        // Gửi notification cho user khi comment bị ẩn
+        if (hidden) {
+            User commentUser = review.getEnrollment().getUser();
+            Notification notification = new Notification();
+            notification.setType("COMMENT_HIDDEN");
+            notification.setUser(commentUser);
+            notification.setCourse(review.getCourse());
+            notification.setCommentId(review.getReviewId());
+            notification.setMessage("Bình luận của bạn đã bị ẩn bởi quản trị viên.");
+            notification.setSentAt(LocalDateTime.now());
+            notification.setStatus("failed");
+            notificationService.sendMess(notification);
+        }
     }
 }
 

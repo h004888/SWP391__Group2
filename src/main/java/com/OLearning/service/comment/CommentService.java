@@ -9,5 +9,6 @@ public interface CommentService {
     void editComment(CommentDTO dto, Long userId, Long courseId);
     void deleteComment(Long reviewId, Long userId);
     void reportComment(Long reviewId, Long userId, String reason);
+    void setCommentHidden(Long reviewId, boolean hidden);
 }
 

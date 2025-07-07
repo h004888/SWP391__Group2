@@ -137,10 +137,10 @@ public class NotificationsController {
             model.addAttribute("notification", notificationDTO);
             
             // If this is a comment notification, get the comment details
-            if ("comment".equals(notification.getType()) && notification.getCommentId() != null) {
+            if ("comment".equalsIgnoreCase(notification.getType()) && notification.getCommentId() != null) {
                 try {
-                    // Get comment details with user information using the new method
-                    Optional<CourseReview> commentOpt = courseReviewRepository.findByIdWithUser(notification.getCommentId());
+                    // Tạm thời dùng findById thay vì findByIdWithUser để kiểm tra lỗi
+                    Optional<CourseReview> commentOpt = courseReviewRepository.findById(notification.getCommentId());
                     if (commentOpt.isPresent()) {
                         CourseReview comment = commentOpt.get();
                         CommentDTO commentDTO = commentMapper.toDTO(comment);

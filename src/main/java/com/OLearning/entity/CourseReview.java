@@ -20,7 +20,7 @@ public class CourseReview {
     private Long reviewId;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "EnrollmentID", nullable = false)
+    @JoinColumn(name = "EnrollmentID", nullable = true)
     private Enrollment enrollment;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -36,6 +36,9 @@ public class CourseReview {
 
     @Column(name = "Comment", length = 1000)
     private String comment;
+
+    @Column(name = "Hidden", nullable = false)
+    private boolean hidden = false;
 
     @Column(name = "CreatedAt")
     private LocalDateTime createdAt;

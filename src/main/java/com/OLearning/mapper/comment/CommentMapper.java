@@ -28,14 +28,19 @@ public class CommentMapper {
         dto.setReviewId(review.getReviewId());
         dto.setCourseId(review.getCourse().getCourseId());
         dto.setLessonId(review.getLesson() != null ? review.getLesson().getLessonId() : null);
-        dto.setUserId(review.getEnrollment().getUser().getUserId());
+        if (review.getEnrollment() != null) {
+            dto.setUserId(review.getEnrollment().getUser().getUserId());
+            dto.setUser(review.getEnrollment().getUser());
+        } else if (review.getCourse() != null && review.getCourse().getInstructor() != null) {
+            dto.setUserId(review.getCourse().getInstructor().getUserId());
+            dto.setUser(review.getCourse().getInstructor());
+        } else {
+            dto.setUserId(null);
+            dto.setUser(null);
+        }
         dto.setComment(review.getComment());
         dto.setRating(review.getRating());
         dto.setParentId(review.getParentReview() != null ? review.getParentReview().getReviewId() : null);
-        
-        // Use the getUser() method from entity
-        dto.setUser(review.getEnrollment().getUser());
-        
         dto.setCreatedAt(review.getCreatedAt());
         dto.setUpdatedAt(review.getUpdatedAt());
         return dto;

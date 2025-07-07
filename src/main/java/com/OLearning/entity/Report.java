@@ -25,6 +25,9 @@ public class Report {
     @JoinColumn(name = "NotificationID")
     private Notification notification;
 
+    @Column(name = "CommentID")
+    private Long commentId;
+
     @Column(columnDefinition = "TEXT")
     private String content; // Nội dung report/phản hồi
 
@@ -57,4 +60,6 @@ public class Report {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getProcessedAt() { return processedAt; }
     public void setProcessedAt(LocalDateTime processedAt) { this.processedAt = processedAt; }
+    public Long getCommentId() { return commentId; }
+    public void setCommentId(Long commentId) { this.commentId = commentId; }
 } 

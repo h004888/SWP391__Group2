@@ -21,6 +21,10 @@ public class ServiceTestRunner implements CommandLineRunner {
         System.out.println("Running ServiceTestRunner...");
         Long lessonId = 1L; // Example lessonId
         Quiz quiz = quizTestService.getQuizByLessonId(lessonId);
+        if (quiz == null) {
+            System.out.println("Quiz not found for lessonId " + lessonId);
+            return;
+        }
         System.out.println("Quiz for lessonId " + quiz.getTitle());
 
         System.out.println("Quiz Questions:");

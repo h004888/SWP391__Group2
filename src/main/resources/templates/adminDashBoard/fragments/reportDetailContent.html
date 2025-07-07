@@ -42,10 +42,55 @@
                 <dd class="col-sm-9">
                     <span th:text="${report.status}"></span>
                 </dd>
+
+                <!-- Hiển thị nội dung comment bị report nếu là report comment -->
+                <th:block th:if="${report.reportType == 'COMMENT' and reportedComment != null}">
+                    <dt class="col-sm-3">Nội dung bình luận bị báo cáo</dt>
+                    <dd class="col-sm-9">
+                        <div class="border rounded p-2 mb-2" th:text="${reportedComment.comment}"></div>
+                        <span class="badge bg-secondary me-2" th:text="'Tác giả: ' + ${reportedComment.enrollment.user.fullName}"></span>
+                        <span class="badge bg-info" th:text="${#temporals.format(reportedComment.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+                        <div class="mt-2">
+                            <button type="button" class="btn btn-warning btn-sm" th:if="${!reportedComment.hidden}" th:onclick="|hideComment(${reportedComment.reviewId}, true)|">Ẩn bình luận</button>
+                            <button type="button" class="btn btn-success btn-sm" th:if="${reportedComment.hidden}" th:onclick="|hideComment(${reportedComment.reviewId}, false)|">Hiện bình luận</button>
+                            <span th:if="${reportedComment.hidden}" class="badge bg-danger ms-2">Đã bị ẩn</span>
+                        </div>
+                    </dd>
+                </th:block>
+                <th:block th:if="${report.reportType == 'COMMENT' and reportedComment == null}">
+                    <dt class="col-sm-3">Nội dung bình luận bị báo cáo</dt>
+                    <dd class="col-sm-9 text-danger">Bình luận đã bị xóa hoặc không tồn tại.</dd>
+                </th:block>
             </dl>
             <form th:if="${report.status != 'processed'}" th:action="@{/admin/reports/process/{id}(id=${report.id})}" method="post">
                 <button type="submit" class="btn btn-success">Processed</button>
             </form>
         </div>
+        <script>
+            function hideComment(reviewId, hidden) {
+                if (hidden && !confirm('Bạn có chắc muốn ẩn bình luận này?')) return;
+                if (!hidden && !confirm('Bạn có chắc muốn hiện lại bình luận này?')) return;
+                fetch('/admin/reports/hide-comment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reviewId: reviewId, hidden: hidden })
+                })
+                .then(res => res.text())
+                .then(data => {
+                    if (data === 'success') {
+                        // Nếu trang lesson đang mở ở window.opener, reload comment động
+                        if (window.opener && typeof window.opener.loadComments === 'function') {
+                            window.opener.loadComments(
+                                window.opener.document.querySelector('input[name="courseId"]').value,
+                                window.opener.document.querySelector('input[name="lessonId"]').value
+                            );
+                        }
+                        location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra!');
+                    }
+                });
+            }
+        </script>
     </div>
 </div>

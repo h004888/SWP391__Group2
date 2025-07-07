@@ -113,35 +113,8 @@ public class UserProfileController {
             }
             
             userService.updateProfileByUsername(userDetails.getUsername(), profileEditDTO);
-            model.addAttribute("profile", profileEditDTO);
-            model.addAttribute("success", true);
-            
-            boolean isAdmin = userDetails.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-            boolean isInstructor = userDetails.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_INSTRUCTOR"));
-            boolean isStudent = userDetails.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_STUDENT"));
-            
-            // Add unread notification count for students
-            if (isStudent) {
-                userRepository.findByUsername(userDetails.getUsername()).ifPresent(user -> {
-                    long unreadCount = notificationService.countUnreadByUserId(user.getUserId());
-                    model.addAttribute("unreadCount", unreadCount);
-                });
-            }
-            
-            if (isAdmin) {
-                model.addAttribute("fragmentContent", "adminDashBoard/fragments/editProfileContent :: editProfileContent");
-                return "adminDashBoard/index";
-            } else if (isInstructor) {
-                model.addAttribute("fragmentContent", "instructorDashboard/fragments/editProfileContent :: editProfileContent");
-                return "instructorDashboard/indexUpdate";
-            } else if (isStudent) {
-                return "homePage/editProfile";
-            } else {
-                return "homePage/editProfile";
-            }
+            // Sau khi lưu thành công, redirect về trang profile
+            return "redirect:/profile";
         } catch (IOException e) {
             model.addAttribute("error", "Không thể tải lên ảnh. Vui lòng thử lại.");
             return showEditProfile(userDetails, model);

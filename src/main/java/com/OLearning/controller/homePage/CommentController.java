@@ -348,14 +348,16 @@ public class CommentController {
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy bài học"));
             
             // Load comments (Rating = null) for the specific lesson only
-            List<CourseReview> parentComments = reviewRepo.findByLessonAndRatingIsNullAndParentReviewIsNull(lesson);
+            List<CourseReview> parentComments = reviewRepo.findByLessonAndRatingIsNullAndParentReviewIsNull(lesson)
+                .stream().filter(c -> !c.isHidden()).collect(Collectors.toList());
             List<CommentDTO> comments = new ArrayList<>();
             
             for (CourseReview parentComment : parentComments) {
                 CommentDTO commentDTO = commentMapper.toDTO(parentComment);
                 
                 // Load replies for this comment
-                List<CourseReview> replies = reviewRepo.findByParentReviewOrderByCreatedAtDesc(parentComment);
+                List<CourseReview> replies = reviewRepo.findByParentReviewOrderByCreatedAtDesc(parentComment)
+                    .stream().filter(r -> !r.isHidden()).collect(Collectors.toList());
                 List<CommentDTO> replyDTOs = replies.stream()
                         .map(reply -> commentMapper.toDTO(reply))
                         .collect(Collectors.toList());

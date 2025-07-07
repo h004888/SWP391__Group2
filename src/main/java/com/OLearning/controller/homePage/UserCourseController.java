@@ -148,6 +148,12 @@ public class UserCourseController {
         accessibleLessonIds.add(currentLesson.getLessonId()); // Bài hiện tại cũng có thể học
         if ("quiz".equalsIgnoreCase(currentLesson.getContentType())) {
             Quiz quiz = quizTestService.getQuizByLessonId(currentLesson.getLessonId());
+            if (quiz == null) {
+                model.addAttribute("quizError", "Quiz not found for this lesson.");
+                model.addAttribute("currentLesson", currentLesson);
+                model.addAttribute("course", courseService.getCourseById(courseId));
+                return "userPage/doQuiz";
+            }
             System.out.println("Quiz for quizID" + quiz.getId());
             List<QuizQuestion> questions = quizQuestionService.getQuestionsByQuizId(quiz.getId());
 
@@ -206,8 +212,9 @@ public class UserCourseController {
             return "redirect:/login";
         }
 
-        // Thêm kiểm tra enrollment
-        if (!enrollmentService.hasEnrolled(user.getUserId(), courseId)) {
+        CourseViewDTO course = courseService.getCourseById(courseId);
+        boolean isInstructor = course != null && course.getInstructor() != null && course.getInstructor().getUserId().equals(user.getUserId());
+        if (!isInstructor && !enrollmentService.hasEnrolled(user.getUserId(), courseId)) {
             return "redirect:/learning";
         }
 
@@ -224,7 +231,8 @@ public class UserCourseController {
         Lesson nextAvailableLesson = lessonService.getNextLessonAfterCompleted(user.getUserId(), courseId).orElse(null);
 
         // Chỉ cho phép truy cập nếu bài đã hoàn thành hoặc là bài tiếp theo có thể học
-        boolean canAccess = completedLessonIds.contains(lessonId) ||
+        boolean canAccess = isInstructor ||
+                completedLessonIds.contains(lessonId) ||
                 (nextAvailableLesson != null && nextAvailableLesson.getLessonId().equals(lessonId));
 
         if (!canAccess) {
@@ -232,7 +240,7 @@ public class UserCourseController {
         }
 
         Lesson nextLesson = lessonService.getNextLesson(courseId, lessonId);
-        CourseViewDTO course = courseService.getCourseById(courseId);
+        CourseViewDTO courseView = courseService.getCourseById(courseId);
 
         // Xác định các bài có thể truy cập
         Set<Long> accessibleLessonIds = new HashSet<>(completedLessonIds);
@@ -241,12 +249,18 @@ public class UserCourseController {
         }
         if ("quiz".equalsIgnoreCase(currentLesson.getContentType())) {
             Quiz quiz = quizTestService.getQuizByLessonId(currentLesson.getLessonId());
+            if (quiz == null) {
+                model.addAttribute("quizError", "Quiz not found for this lesson.");
+                model.addAttribute("currentLesson", currentLesson);
+                model.addAttribute("course", courseView);
+                return "userPage/doQuiz";
+            }
             System.out.println("Quiz for quizID" + quiz.getId());
             List<QuizQuestion> questions = quizQuestionService.getQuestionsByQuizId(quiz.getId());
 
             model.addAttribute("quiz", quiz);
             model.addAttribute("currentLesson", currentLesson);
-            model.addAttribute("course", course);
+            model.addAttribute("course", courseView);
 
             model.addAttribute("questions", questions);
             QuizSubmissionForm submissionForm = new QuizSubmissionForm();
@@ -263,8 +277,8 @@ public class UserCourseController {
         model.addAttribute("currentLessonId", lessonId); // Thay đổi từ currentLesson.getLessonId() thành lessonId
         model.addAttribute("currentLesson", currentLesson);
         model.addAttribute("nextLesson", nextLesson);
-        model.addAttribute("course", course);
-        model.addAttribute("chapters", course.getListOfChapters());
+        model.addAttribute("course", courseView);
+        model.addAttribute("chapters", courseView.getListOfChapters());
         
         // Load comments for the specific lesson only (Rating = null)
         Course courseEntity = courseService.findCourseById(courseId);

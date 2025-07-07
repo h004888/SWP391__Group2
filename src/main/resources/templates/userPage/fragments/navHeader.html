@@ -362,16 +362,15 @@
     // Load notifications when dropdown is shown
     document.addEventListener('DOMContentLoaded', function() {
         console.log('DOM loaded, setting up user notification dropdown...');
-        const notificationDropdown = document.querySelector('.nav-item.dropdown [data-bs-toggle="dropdown"]');
-        console.log('Found user notification dropdown:', notificationDropdown);
-        if (notificationDropdown && notificationDropdown.closest('.nav-item').querySelector('#userNotificationBadge')) {
-            console.log('Setting up event listener for user notification dropdown');
+        // Use a more specific selector for the notification bell dropdown
+        const notificationDropdown = document.querySelector('a[title="Notifications"][data-bs-toggle="dropdown"]');
+        if (notificationDropdown) {
             notificationDropdown.addEventListener('show.bs.dropdown', function() {
                 console.log('User notification dropdown shown, loading notifications...');
                 loadUserNotifications();
             });
         } else {
-            console.log('User notification dropdown not found or no badge element');
+            console.log('User notification dropdown not found');
         }
     });
 
@@ -388,7 +387,7 @@
                 newBadge.id = 'userNotificationBadge';
                 newBadge.className = 'notif-badge animation-blink';
                 newBadge.style.cssText = 'width:14px;height:14px;top:6px;right:6px;';
-                const notificationButton = document.querySelector('.nav-item.dropdown [data-bs-toggle="dropdown"]');
+                const notificationButton = document.querySelector('a[title="Notifications"][data-bs-toggle="dropdown"]');
                 if (notificationButton && notificationButton.closest('.nav-item').querySelector('#userNotificationBadge')) {
                     notificationButton.appendChild(newBadge);
                 }

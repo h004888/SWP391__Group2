@@ -39,7 +39,7 @@ public class UserNotificationsController {
         Long userId = userDetails.getUserId();
         Pageable pageable = PageRequest.of(page, size);
         if (types == null || types.isEmpty()) {
-            types = List.of("ENROLLMENT", "COURSE_COMPLETION", "QUIZ_RESULT", "CERTIFICATE", "PAYMENT_SUCCESS", "PAYMENT_FAILED");
+            types = List.of("ENROLLMENT", "COURSE_COMPLETION", "QUIZ_RESULT", "CERTIFICATE", "PAYMENT_SUCCESS", "PAYMENT_FAILED", "COMMENT", "COMMENT_HIDDEN");
         }
         Page<NotificationDTO> notificationPage;
         if (search != null && !search.isBlank()) {
@@ -91,13 +91,17 @@ public class UserNotificationsController {
             Long userId = userDetails.getUserId();
             var notificationOpt = notificationService.findById(id);
             if (notificationOpt.isPresent() && notificationOpt.get().getUser().getUserId().equals(userId)) {
+                // Mark as read if not already
+                if (!"sent".equals(notificationOpt.get().getStatus())) {
+                    notificationService.markAsRead(id);
+                }
                 NotificationDTO notificationDTO = new NotificationDTO();
                 var notification = notificationOpt.get();
                 notificationDTO.setNotificationId(notification.getNotificationId());
                 notificationDTO.setMessage(notification.getMessage());
                 notificationDTO.setSentAt(notification.getSentAt());
                 notificationDTO.setType(notification.getType());
-                notificationDTO.setStatus(notification.getStatus());
+                notificationDTO.setStatus("sent"); // ensure status is 'sent' for view
                 notificationDTO.setUser(notification.getUser());
                 notificationDTO.setCourse(notification.getCourse());
                 notificationDTO.setCommentId(notification.getCommentId());
@@ -144,7 +148,7 @@ public class UserNotificationsController {
             
             // Lấy 5 thông báo chưa đọc
             Pageable pageable = PageRequest.of(0, 5);
-            List<String> types = List.of("ENROLLMENT", "COURSE_COMPLETION", "QUIZ_RESULT", "CERTIFICATE", "PAYMENT_SUCCESS", "PAYMENT_FAILED");
+            List<String> types = List.of("ENROLLMENT", "COURSE_COMPLETION", "QUIZ_RESULT", "CERTIFICATE", "PAYMENT_SUCCESS", "PAYMENT_FAILED", "COMMENT", "COMMENT_HIDDEN");
             Page<NotificationDTO> notificationPage = notificationService.getUnreadNotificationsByUserId(userId, types, pageable);
             
             long unreadCount = notificationService.countUnreadByUserId(userId);

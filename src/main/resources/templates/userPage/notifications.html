@@ -31,23 +31,28 @@
             padding: 0.25rem 0.5rem;
         }
         .search-container {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #fff;
             border-radius: 15px;
             padding: 2rem;
             margin-bottom: 2rem;
-            color: white;
+            color: #222;
         }
         .search-container .form-control {
-            border: none;
+            border: 1px solid #ddd;
             border-radius: 25px;
             padding: 0.75rem 1.5rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            color: #222;
+            background: #fff;
         }
         .search-container .btn {
             border-radius: 25px;
             padding: 0.75rem 2rem;
             font-weight: 600;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            color: #222;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
         }
         .notification-stats {
             background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
@@ -78,6 +83,15 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+        }
+        .notifications-header {
+            background: #222;
+            color: #fff;
+            padding: 1rem;
+            border-radius: 10px 10px 0 0;
+        }
+        .notifications-header *, .notifications-header i, .notifications-header h5, .notifications-header svg {
+            color: #fff !important;
         }
         @media (max-width: 768px) {
             .notification-message {
@@ -247,17 +261,17 @@
     <div class="back-top"><i class="bi bi-arrow-up-short position-absolute top-50 start-50 translate-middle"></i></div>
 
     <!-- Bootstrap JS -->
-    <script th:src="@{/vendor/bootstrap/dist/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js}"></script>
     
     <!-- Vendors -->
-    <script th:src="@{/vendor/aos/aos.js}"></script>
-    <script th:src="@{/vendor/glightbox/js/glightbox.min.js}"></script>
-    <script th:src="@{/vendor/purecounterjs/dist/purecounter_vanilla.js}"></script>
-    <script th:src="@{/vendor/isotope-layout/dist/isotope.pkgd.min.js}"></script>
-    <script th:src="@{/vendor/owlcarousel/owl.carousel.min.js}"></script>
+    <script th:src="@{/assets/vendor/aos/aos.js}"></script>
+    <script th:src="@{/assets/vendor/glightbox/js/glightbox.min.js}"></script>
+    <script th:src="@{/assets/vendor/purecounterjs/dist/purecounter_vanilla.js}"></script>
+    <script th:src="@{/assets/vendor/isotope-layout/dist/isotope.pkgd.min.js}"></script>
+    <script th:src="@{/assets/vendor/owlcarousel/owl.carousel.min.js}"></script>
     
     <!-- Template Functions -->
-    <script th:src="@{/js/functions.js}"></script>
+    <script th:src="@{/assets/js/functions.js}"></script>
 
     <script>
         function viewNotification(notificationId) {
@@ -300,7 +314,5 @@
             }
         }
     </script>
-    <script th:src="@{/assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js}"></script>
-    <script th:src="@{/assets/js/functions.js}"></script>
 </body>
 </html> 
