@@ -25,6 +25,7 @@ import com.OLearning.service.lesson.LessonService;
 import com.OLearning.service.quiz.QuizService;
 import com.OLearning.service.user.UserService;
 import com.OLearning.service.video.VideoService;
+import com.OLearning.service.termsAndCondition.TermsAndConditionService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -89,6 +90,8 @@ public class ControlllerAddCourse {
     private UploadFile uploadFile;
     @Autowired
     private EnrollmentService enrollmentService;
+    @Autowired
+    private TermsAndConditionService termsAndConditionService;
 
     //dashhboard
     @GetMapping()
@@ -723,6 +726,9 @@ public class ControlllerAddCourse {
             courseService.submitCourse(courseId, "draft");
             return "redirect:../courses";
         }
+        // Fetch terms and conditions for INSTRUCTOR and ALL
+        java.util.List<com.OLearning.entity.TermsAndCondition> terms = termsAndConditionService.getByRoleTargetOrAll("INSTRUCTOR");
+        model.addAttribute("termsAndConditions", terms);
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/step4SubmitCourse :: step4Content");
         return "instructorDashboard/indexUpdate";
     }

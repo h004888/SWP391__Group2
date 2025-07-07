@@ -59,4 +59,8 @@ public class TermsAndConditionService {
         HtmlConverter.convertToPdf(html.toString(), baos);
         return baos.toByteArray();
     }
+
+    public java.util.List<TermsAndCondition> getByRoleTargetOrAll(String roleTarget) {
+        return termsAndConditionRepository.findByRoleTargetOrAll(roleTarget);
+    }
 }
