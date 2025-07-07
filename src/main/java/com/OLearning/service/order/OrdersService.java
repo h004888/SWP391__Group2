@@ -23,10 +23,10 @@ public interface OrdersService {
     Page<OrdersDTO> filterAndSortOrdersWithStatus(String username, String amountDirection, String orderType, String startDate, String endDate, String status, int page, int size);
     Map<String, Double> getRevenuePerMonth();
     Map<String, Double> getRevenueByDateRange(LocalDate startDate, LocalDate endDate);
-    void markOrderAsPaid(Long orderId);
+    void markOrderAsPaid(Long orderId, String refCode);
     String getOrderStatusById(Long orderId);
     Order createOrder(User user, double amount, String orderType, String description);
     Order getOrderById(Long orderId);
     void saveOrder(Order order);
-
+    void saveOrderDetail(OrderDetail orderDetail);
 }

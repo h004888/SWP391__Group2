@@ -1,22 +1,18 @@
 package com.OLearning.controller.homePage;
 
-import com.OLearning.config.VNPayConfig;
 import com.OLearning.entity.Order;
 import com.OLearning.entity.User;
-import com.OLearning.entity.UserVoucher;
 import com.OLearning.repository.CourseRepository;
-import com.OLearning.repository.OrdersRepository;
 import com.OLearning.repository.UserRepository;
 import com.OLearning.repository.VoucherRepository;
 import com.OLearning.repository.UserVoucherRepository;
 import com.OLearning.service.cart.CartService;
 import com.OLearning.service.cart.impl.CartServiceImpl;
 import com.OLearning.service.order.OrdersService;
-import com.OLearning.service.vnpay.VNPayService;
-import com.OLearning.service.vnpay.VietQRService;
+import com.OLearning.service.payment.VNPayService;
+import com.OLearning.service.payment.VietQRService;
 import com.OLearning.service.voucher.VoucherService;
 import com.OLearning.service.wishlist.WishlistService;
-import com.OLearning.repository.OrdersRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -31,14 +27,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.OutputStream;
 
 @Controller
 @RequestMapping("/cart")
@@ -268,11 +260,23 @@ public class CartController {
                 updateCartCookie(cartService.clearCart(userDetails.getUsername()), response, userId);
                 model.addAttribute("message", "Checkout completed using wallet!");
                 return "redirect:/cart";
-            } else if ("vietqr".equalsIgnoreCase(paymentMethod)) {
+            } else if ("qr".equalsIgnoreCase(paymentMethod)) {
                 Order order = ordersService.createOrder(user, totalAmount, "course_purchase", "temp_description");
-                String description = "ORDER" + order.getOrderId();
+                String description = "Mua khóa học OLearning - ORDER" + order.getOrderId();
                 order.setDescription(description);
                 ordersService.saveOrder(order);
+
+                for (Map<String, Object> item : items) {
+                    Long courseId = Long.valueOf(item.get("courseId").toString());
+                    double price = Double.valueOf(item.get("price").toString());
+                    com.OLearning.entity.Course course = courseRepository.findById(courseId)
+                        .orElseThrow(() -> new EntityNotFoundException("Course not found: " + courseId));
+                    com.OLearning.entity.OrderDetail orderDetail = new com.OLearning.entity.OrderDetail();
+                    orderDetail.setOrder(order);
+                    orderDetail.setCourse(course);
+                    orderDetail.setUnitPrice(price);
+                    ordersService.saveOrderDetail(orderDetail);
+                }
 
                 String qrUrl = vietQRService.generateSePayQRUrl(order.getAmount(), order.getDescription());
                 model.addAttribute("orderId", order.getOrderId());
@@ -292,7 +296,6 @@ public class CartController {
                 request.setAttribute("urlReturn", returnUrl);
                 return "redirect:" + vnPayService.createOrder(request);
             } else {
-                // fallback: xử lý mặc định (ví, vnpay, ...)
                 model.addAttribute("error", "Vui lòng chọn phương thức thanh toán!");
                 return "redirect:/cart";
             }
@@ -336,7 +339,6 @@ public class CartController {
                         voucherService.useVoucherForUserAndCourse(voucherId, userId);
                     }
                 }
-                
                 updateCartCookie(cartService.clearCart(userDetails.getUsername()), response, userId);
                 model.addAttribute("message", "VNPay payment successful!");
                 return "redirect:/cart";
@@ -391,6 +393,19 @@ public class CartController {
         }
         
         return result;
+    }
+
+    @GetMapping("/clear-cookie")
+    @ResponseBody
+    public String clearCartCookie(@AuthenticationPrincipal UserDetails userDetails, HttpServletResponse response) {
+        if (userDetails == null) return "not_logged_in";
+        Long userId = getUserIdFromUserDetails(userDetails);
+        Cookie cartCookie = new Cookie("cart_" + userId, null);
+        cartCookie.setPath("/");
+        cartCookie.setMaxAge(0);
+        cartCookie.setHttpOnly(true);
+        response.addCookie(cartCookie);
+        return "cleared";
     }
 
     private double calculateTotalPrice(Map<String, Object> cart) {

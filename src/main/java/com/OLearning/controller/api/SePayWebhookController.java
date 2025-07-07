@@ -29,7 +29,14 @@ public class SePayWebhookController {
         try {
             Long orderId = extractOrderId(rawContent);
             if (orderId != null) {
-                ordersService.markOrderAsPaid(orderId);
+                // Lấy refCode từ payload (ưu tiên referenceCode, nếu không có thì lấy id)
+                String refCode = null;
+                if (payload.get("referenceCode") != null) {
+                    refCode = payload.get("referenceCode").toString();
+                } else if (payload.get("id") != null) {
+                    refCode = payload.get("id").toString();
+                }
+                ordersService.markOrderAsPaid(orderId, refCode);
                 return "success";
             } else {
                 return "error: invalid order ID in content";

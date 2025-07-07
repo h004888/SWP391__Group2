@@ -1,26 +1,142 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-    <title>Thanh toán VietQR</title>
+    <meta charset="UTF-8">
+    <title>Thanh toán QR Banking</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: #f8f9fc;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .qr-container {
+            max-width: 400px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+            padding: 2.5rem 2rem 2rem 2rem;
+            text-align: center;
+        }
+        .qr-container h2 {
+            color: #4e73df;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+        }
+        .qr-img {
+            width: 220px;
+            height: 220px;
+            object-fit: contain;
+            border-radius: 12px;
+            border: 2px solid #e3e6f0;
+            margin-bottom: 1.2rem;
+            background: #f8f9fc;
+        }
+        .info-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.7rem;
+        }
+        .info-row i {
+            color: #1cc88a;
+            margin-right: 0.7rem;
+            font-size: 1.2rem;
+        }
+        .info-label {
+            color: #858796;
+            font-size: 1rem;
+            min-width: 120px;
+            text-align: left;
+        }
+        .info-value {
+            font-weight: 600;
+            color: #222;
+            font-size: 1.1rem;
+            margin-top: 4px;
+        }
+        .desc-box {
+            background: #e9f7ef;
+            color: #1cc88a;
+            border-radius: 8px;
+            padding: 0.7rem 1rem;
+            margin: 1rem 0 1.2rem 0;
+            font-weight: 600;
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .desc-box i {
+            margin-right: 0.6rem;
+        }
+        #status {
+            margin-top: 1.2rem;
+            font-size: 1.08rem;
+        }
+        @media (max-width: 500px) {
+            .qr-container {
+                max-width: 98vw;
+                padding: 1.2rem 0.5rem 1.5rem 0.5rem;
+            }
+            .qr-img {
+                width: 90vw;
+                height: 90vw;
+                max-width: 260px;
+                max-height: 260px;
+            }
+        }
+        .btn-back-cart {
+            display: inline-block;
+            margin: 24px auto 0 auto;
+            background: #4e73df;
+            color: #fff;
+            font-weight: 600;
+            padding: 0.7rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(78,115,223,0.08);
+            transition: background 0.18s;
+        }
+        .btn-back-cart:hover {
+            background: #2e59d9;
+            color: #fff;
+        }
+    </style>
 </head>
 <body>
-    <h2>Quét mã QR để thanh toán</h2>
-    <img id="qrImg" th:src="${qrUrl}" alt="QR Code" />
-    <p>Số tiền: <b th:text="${amount}"></b></p>
-    <p>Nội dung chuyển khoản: <b th:text="${description}"></b></p>
-    <p>Sau khi chuyển khoản, hệ thống sẽ tự động xác nhận thanh toán.</p>
-    <div id="status"></div>
+    <div class="qr-container">
+        <h2><i class="fas fa-qrcode me-2"></i>Quét mã QR để thanh toán</h2>
+        <img class="qr-img" id="qrImg" th:src="${qrUrl}" alt="QR Code" />
+        <div class="info-row">
+            <i class="fas fa-money-bill-wave"></i>
+            <span class="info-label">Số tiền:</span>
+            <span class="info-value" th:text="${amount}"></span>
+        </div>
+        <div class="desc-box">
+            <i class="fas fa-info-circle"></i>
+            Nội dung chuyển khoản: <b style="margin-left: 0.5rem;" th:text="${description}"></b>
+        </div>
+        <div class="info-row">
+            <i class="fas fa-shield-check"></i>
+            <span class="info-label">Trạng thái:</span>
+            <span class="info-value" id="status"></span>
+        </div>
+        <a href="/cart" class="btn-back-cart">
+            <i class="fas fa-arrow-left"></i> Quay lại giỏ hàng
+        </a>
+    </div>
     <script th:inline="javascript">
         /*<![CDATA[*/
         var orderId = /*[[${orderId}]]*/ null;
-
-        // Polling kiểm tra trạng thái đơn hàng
-        setInterval(function() {
+        var pollingInterval = setInterval(function() {
             if (orderId) {
                 fetch('/api/order/status?orderId=' + orderId)
                     .then(res => {
                         if (!res.ok) {
-                            // Xử lý lỗi HTTP (ví dụ: 400, 404, 500)
                             console.error('HTTP error! status: ' + res.status);
                             return res.text().then(text => { throw new Error(text); });
                         }
@@ -28,19 +144,21 @@
                     })
                     .then(data => {
                         if (data.status === 'completed') {
-                            document.getElementById('status').innerHTML = '<b style="color: green;">Đã thanh toán thành công! Bạn sẽ được chuyển hướng về trang giỏ hàng.</b>';
-                            // Dừng polling sau khi thành công
-                            clearInterval(this);
-                            // Chuyển hướng về trang giỏ hàng sau 3 giây
-                            setTimeout(function() {
-                                window.location.href = '/cart'; // Giả sử URL trang giỏ hàng là /cart
-                            }, 3000);
+                            document.getElementById('status').innerHTML = '<b style="color: green;">Đã thanh toán thành công! Đang chuyển hướng...</b>';
+                            clearInterval(pollingInterval);
+                            fetch('/cart/clear-cookie').then(() => {
+                                setTimeout(function() {
+                                    window.location.href = '/cart';
+                                }, 2500);
+                            });
                         } else if (data.status === 'failed' || data.status === 'cancelled') {
                             document.getElementById('status').innerHTML = '<b style="color: red;">Thanh toán thất bại hoặc đã hủy! Vui lòng thử lại.</b>';
-                            clearInterval(this); // Dừng polling nếu thanh toán thất bại
+                            clearInterval(pollingInterval);
                             setTimeout(function() {
-                                window.location.href = '/cart'; // Chuyển hướng về trang giỏ hàng sau 3 giây
-                            }, 3000);
+                                window.location.href = '/cart';
+                            }, 2500);
+                        } else {
+                            document.getElementById('status').innerHTML = '<span style="color:#858796;">Đang chờ thanh toán...</span>';
                         }
                     })
                     .catch(error => {

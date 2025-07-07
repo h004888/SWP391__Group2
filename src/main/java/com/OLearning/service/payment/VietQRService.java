@@ -1,4 +1,4 @@
-package com.OLearning.service.vnpay;
+package com.OLearning.service.payment;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

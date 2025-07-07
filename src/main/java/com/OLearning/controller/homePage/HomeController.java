@@ -16,7 +16,7 @@ import com.OLearning.service.cart.impl.CartServiceImpl;
 import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.course.CourseService;
 
-import com.OLearning.service.vnpay.VNPayService;
+import com.OLearning.service.payment.VNPayService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.Cookie;
@@ -35,6 +35,8 @@ import com.OLearning.service.enrollment.EnrollmentService;
 import com.OLearning.repository.VoucherRepository;
 import com.OLearning.service.voucher.VoucherService;
 import com.OLearning.service.wishlist.WishlistService;
+import com.OLearning.service.order.OrdersService;
+import com.OLearning.service.payment.VietQRService;
 
 @Controller
 @RequestMapping("/home")
@@ -75,6 +77,12 @@ public class HomeController {
 
     @Autowired
     private WishlistService wishlistService;
+
+    @Autowired
+    private OrdersService ordersService;
+
+    @Autowired
+    private VietQRService vietQRService;
 
     @GetMapping()
     public String getMethodName(Model model, @AuthenticationPrincipal UserDetails userDetails, HttpServletRequest request) {
@@ -188,6 +196,7 @@ public class HomeController {
     public String buyNow(@AuthenticationPrincipal UserDetails userDetails,
                          @RequestParam("courseId") Long courseId,
                          @RequestParam(value = "voucherId", required = false) Long voucherId,
+                         @RequestParam(value = "paymentMethod", required = false) String paymentMethod,
                          HttpServletRequest request,
                          HttpServletResponse response,
                          RedirectAttributes redirectAttributes) {
@@ -245,7 +254,24 @@ public class HomeController {
                 }
                 redirectAttributes.addFlashAttribute("message", "Purchase completed using wallet!");
                 return "redirect:/home/course-detail?id=" + courseId;
+            } else if ("qr".equalsIgnoreCase(paymentMethod)) {
+                Order order = ordersService.createOrder(user, totalAmount, "course_purchase", "temp_description");
+                String description = "Mua khóa học OLearning - ORDER" + order.getOrderId();
+                order.setDescription(description);
+                ordersService.saveOrder(order);
+                com.OLearning.entity.OrderDetail orderDetail = new com.OLearning.entity.OrderDetail();
+                orderDetail.setOrder(order);
+                orderDetail.setCourse(course);
+                orderDetail.setUnitPrice(price);
+                ordersService.saveOrderDetail(orderDetail);
+                String qrUrl = vietQRService.generateSePayQRUrl(order.getAmount(), order.getDescription());
+                request.setAttribute("orderId", order.getOrderId());
+                request.setAttribute("amount", order.getAmount());
+                request.setAttribute("description", order.getDescription());
+                request.setAttribute("qrUrl", qrUrl);
+                return "homePage/qr_checkout";
             } else {
+                // Mặc định: VNPay
                 String encodedCartJson = Base64.getEncoder().encodeToString(cartJson.getBytes(StandardCharsets.UTF_8));
                 Cookie buyNowCookie = new Cookie("buy_now", encodedCartJson);
                 buyNowCookie.setPath("/");
