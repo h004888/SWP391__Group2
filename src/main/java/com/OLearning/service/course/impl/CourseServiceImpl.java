@@ -102,6 +102,11 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    public CourseViewDTO getCourseRecentIncomplete(Long userId) {
+        return CourseMapper.toCourseViewDTO(courseRepository.findMostRecentIncompleteCourse(userId));
+    }
+
+    @Override
     public List<CourseViewDTO> getTopCourses() {
         return courseRepository.findAllOrderByStudentCountDesc().stream()
                 .map(CourseMapper::toCourseViewDTO)

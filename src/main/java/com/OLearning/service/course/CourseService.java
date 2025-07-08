@@ -34,4 +34,6 @@ public interface CourseService {
                         int page,
                         int size);
 
+        CourseViewDTO getCourseRecentIncomplete (Long userId);
+
 }

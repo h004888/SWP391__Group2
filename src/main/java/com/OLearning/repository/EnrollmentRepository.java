@@ -10,6 +10,7 @@ import com.OLearning.entity.Enrollment;
 
 import jakarta.transaction.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,5 +55,8 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
             WHERE e.UserID = :userId AND e.CourseID = :courseId
             """, nativeQuery = true)
     void updateProgressByUser(@Param("userId") Long userId, @Param("courseId") Long courseId);
+
+    Optional<Enrollment> findByEnrollmentDateAfter(LocalDate date);
+    Optional<Enrollment> findByUser_UserId(Long userId);
 
 }

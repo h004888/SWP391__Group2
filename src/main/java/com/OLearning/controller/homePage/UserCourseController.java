@@ -1,11 +1,10 @@
 package com.OLearning.controller.homePage;
 
 import java.security.Principal;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.OLearning.dto.chapter.ChapterProgress;
 import com.OLearning.dto.course.CourseViewDTO;
 import com.OLearning.dto.lessonCompletion.LessonCompletionDTO;
 import com.OLearning.dto.quiz.QuizSubmissionForm;
@@ -70,18 +69,22 @@ public class UserCourseController {
         List<Course> courses = enrollmentService.getCoursesByUserId(currentUser.getUserId());
         model.addAttribute("courses", courses); // nếu cần hiển thị list
 
-        if (!courses.isEmpty()) {
-            model.addAttribute("course", courses.get(0)); // hoặc getFirst() nếu bạn dùng ListDeque
-            model.addAttribute("progress",
-                    lessonCompletionService.getOverallProgressOfUser(currentUser.getUserId(),
-                            courses.get(0).getCourseId()));
-            model.addAttribute("weeksEnrolled", enrollmentService.getWeeksEnrolled(currentUser.getUserId(),
-                    courses.get(0).getCourseId()));
-            model.addAttribute("numberOfCompletedLessons", lessonCompletionService.getNumberOfCompletedLessons(currentUser.getUserId(),
-                    courses.get(0).getCourseId()));
-        } else {
+        if (courses.isEmpty()) {
             model.addAttribute("course", null); // hoặc ẩn phần này trên giao diện
+
+            return "userPage/LearningDashboard";
         }
+
+        CourseViewDTO courseViewDTO = courseService.getCourseRecentIncomplete(currentUser.getUserId());
+
+
+        model.addAttribute("course", courseViewDTO);
+        model.addAttribute("progress", lessonCompletionService.getOverallProgressOfUser(currentUser.getUserId(), courseViewDTO.getCourseId()));
+        model.addAttribute("weeksEnrolled", enrollmentService.getWeeksEnrolled(currentUser.getUserId(), courseViewDTO.getCourseId()));
+        model.addAttribute("numberOfCompletedLessons", lessonCompletionService.getNumberOfCompletedLessons(currentUser.getUserId(),
+                courseViewDTO.getCourseId()));
+
+        model.addAttribute("currentLesson",lessonService.getNextLessonAfterCompleted(currentUser.getUserId(),courseViewDTO.getCourseId()).get());
 
         return "userPage/LearningDashboard";
     }
@@ -146,20 +149,30 @@ public class UserCourseController {
             model.addAttribute("submissionForm", submissionForm);
             return "userPage/doQuiz";
         }
+        CourseViewDTO course = courseService.getCourseById(courseId);
+
+        Map<Long, ChapterProgress> chapterProgressMap = new HashMap<>();
+        for (Chapter chapter: course.getListOfChapters()){
+            List<Lesson> lessons = chapter.getLessons();
+            int totalLessons = lessons.size();
+            int completedLessons = (int) lessons.stream().filter(lesson -> completedLessonIds.contains(lesson.getLessonId())).count();
+            chapterProgressMap.put(chapter.getChapterId(),  new ChapterProgress(totalLessons, completedLessons));
+        }
 
         model.addAttribute("completedLessonIds", completedLessonIds);
         model.addAttribute("accessibleLessonIds", accessibleLessonIds);
         model.addAttribute("currentLessonId", currentLesson.getLessonId());
         model.addAttribute("currentLesson", currentLesson);
-        CourseViewDTO course = courseService.getCourseById(courseId);
+
         model.addAttribute("course", course);
         model.addAttribute("chapters", course.getListOfChapters());
+        model.addAttribute("chapterProgressMap", chapterProgressMap);
         return "userPage/course-detail-min";
     }
 
     @GetMapping("course/{courseId}/lesson/{lessonId}")
     public String showUserLessonDetail(Principal principal, Model model, @PathVariable("lessonId") Long lessonId,
-            @PathVariable("courseId") Long courseId) {
+                                       @PathVariable("courseId") Long courseId) {
         User user = extractCurrentUser(principal);
         if (user == null) {
             return "redirect:/login";
@@ -216,6 +229,15 @@ public class UserCourseController {
             return "userPage/doQuiz";
         }
 
+
+        Map<Long, ChapterProgress> chapterProgressMap = new HashMap<>();
+        for (Chapter chapter: course.getListOfChapters()){
+            List<Lesson> lessons = chapter.getLessons();
+            int totalLessons = lessons.size();
+            int completedLessons = (int) lessons.stream().filter(lesson -> completedLessonIds.contains(lesson.getLessonId())).count();
+            chapterProgressMap.put(chapter.getChapterId(),  new ChapterProgress(totalLessons, completedLessons));
+        }
+
         model.addAttribute("completedLessonIds", completedLessonIds);
         model.addAttribute("accessibleLessonIds", accessibleLessonIds);
         // QUAN TRỌNG: currentLessonId bây giờ là bài đang được xem (lessonId từ URL)
@@ -224,6 +246,8 @@ public class UserCourseController {
         model.addAttribute("nextLesson", nextLesson);
         model.addAttribute("course", course);
         model.addAttribute("chapters", course.getListOfChapters());
+        model.addAttribute("chapterProgressMap", chapterProgressMap);
+
         return "userPage/course-detail-min";
     }
 }
