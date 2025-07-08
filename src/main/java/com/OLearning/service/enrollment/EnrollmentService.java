@@ -1,5 +1,6 @@
 package com.OLearning.service.enrollment;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -66,4 +67,10 @@ public interface EnrollmentService {
     List<Enrollment> findAllByUserAndCourseOrderByEnrollmentDateDesc(User user, Course course);
     
     void cleanupDuplicateEnrollments(User user, Course course);
+
+    // Lấy enrollment trong 30 ngày gần nhất
+    List<Enrollment> findByEnrollmentDateAfter(LocalDate date);
+
+    // Lấy enrollment của một user cụ thể
+    List<Enrollment> findByUserId(Long userId);
 }

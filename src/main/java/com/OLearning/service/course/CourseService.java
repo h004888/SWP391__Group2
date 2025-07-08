@@ -72,4 +72,7 @@ public interface CourseService {
     Course findById(Long courseId);
 
     int countByInstructorAndStatus(Long userId, String status);
+
+    CourseViewDTO getCourseRecentIncomplete (Long userId);
+
 }

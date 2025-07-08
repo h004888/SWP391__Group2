@@ -1,5 +1,6 @@
 package com.OLearning.service.enrollment.impl;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -243,5 +244,15 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 enrollmentRepository.delete(enrollments.get(i));
             }
         }
+    }
+
+    @Override
+    public List<Enrollment> findByEnrollmentDateAfter(LocalDate date) {
+        return enrollmentRepository.findByEnrollmentDateAfter(date).stream().toList();
+    }
+
+    @Override
+    public List<Enrollment> findByUserId(Long userId) {
+        return enrollmentRepository.findByUser_UserId(userId).stream().toList();
     }
 }

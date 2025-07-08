@@ -11,8 +11,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 import com.OLearning.entity.Enrollment;
 import jakarta.transaction.Transactional;
-import java.util.List;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Date;
 import java.util.Optional;
 
@@ -82,7 +82,9 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
                     """,
             nativeQuery = true
     )
+
     Integer getWeeksEnrolled(@Param("userId") Long userId, @Param("courseId") Long courseId);
+
     @Modifying
     @Transactional
     @Query(value = """
@@ -110,9 +112,11 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
     void updateProgressByUser(@Param("userId") Long userId, @Param("courseId") Long courseId);
 
     Optional<Enrollment> findByUserAndCourse(User user, Course course);
+
     //lay all enrollment theo InstructorId
     @Query("SELECT e FROM Enrollment e JOIN e.course c WHERE c.instructor.userId = :instructorId")
     List<Enrollment> calculateSumEnrollment(@Param("instructorId") Long instructorId);
+
     @Query("SELECT e FROM Enrollment e WHERE e.user = :user AND e.course = :course ORDER BY e.enrollmentDate DESC")
     List<Enrollment> findByUserAndCourseOrderByEnrollmentDateDesc(@Param("user") User user, @Param("course") Course course);
 
@@ -124,4 +128,9 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
 
     @Query("SELECT e FROM Enrollment e WHERE e.user = :user AND e.course = :course ORDER BY e.enrollmentDate DESC")
     List<Enrollment> findAllByUserAndCourseOrderByEnrollmentDateDesc(@Param("user") User user, @Param("course") Course course);
+
+    Optional<Enrollment> findByEnrollmentDateAfter(LocalDate date);
+
+    Optional<Enrollment> findByUser_UserId(Long userId);
+
 }

@@ -59,7 +59,8 @@
                                     <div class="overflow-hidden mt-3">
                                         <div class="d-flex justify-content-between">
                                             <h6 class="uppercase">Overall Progress</h6>
-                                            <span class="h6 mb-0" th:text="${progress + '%'}">20%</span>
+                                            <span class="h6 mb-0"
+                                                th:text="${#numbers.formatDecimal(progress, 1, 2) + '%'}">20%</span>
                                         </div>
                                         <div class="progress progress-sm bg-success bg-opacity-10">
                                             <div class="progress-bar bg-success aos" role="progressbar"
@@ -76,8 +77,10 @@
                                     <div class="d-flex justify-content-between align-items-center mt-3">
                                         <!-- List -->
                                         <ul class="nav nav-divider small mb-0">
-                                            <li class="nav-item h6 mb-0" th:text="${'Week ' + weeksEnrolled}">Week 2</li>
-                                            <li class="nav-item" th:text="${'Lecture ' + numberOfCompletedLessons}">Lecture 12</li>
+                                            <li class="nav-item h6 mb-0" th:text="${'Week ' + weeksEnrolled}">Week 2
+                                            </li>
+                                            <li class="nav-item" th:text="${'Lessons ' + numberOfCompletedLessons}">
+                                                Lecture 12</li>
                                         </ul>
 
                                         <!-- Dropdown -->
@@ -94,7 +97,7 @@
                 <!-- Card START -->
                 <div class="col-xl-4">
                     <div class="card card-body bg-transparent border">
-                        <h5 class="mb-3">Schedule exam</h5>
+                        <h5 class="mb-3">Next lesson</h5>
                         <!-- List -->
                         <div class="d-flex align-items-center position-relative">
                             <!-- Video button -->
@@ -103,12 +106,16 @@
                             </a>
                             <!-- Content -->
                             <div class="ms-3">
-                                <a href="#" class="d-inline-block text-truncate mb-0 h6 fw-normal stretched-link">Quiz -
+                                <a th:href="@{/learning/course/view(courseId=${course.courseId})}"
+                                    class="d-inline-block text-truncate mb-0 h6 fw-normal stretched-link"
+                                    th:text="${currentLesson.title}">Quiz -
                                     Digital Marketing</a>
                                 <ul class="nav nav-divider small mb-0">
-                                    <li class="nav-item">12 June</li>
-                                    <li class="nav-item">20 pts</li>
-                                    <li class="nav-item">30 min</li>
+                                    <li class="nav-item"
+                                        th:text="'Last updated ' + ${#temporals.format(currentLesson.updatedAt, 'MM/yyyy')}">
+                                        12 June</li>
+                                    <li class="nav-item" th:text="${currentLesson.contentType}">20 pts</li>
+                                    <li class="nav-item" th:text="${currentLesson.duration/60 +'min'}">30 min</li>
                                 </ul>
                             </div>
                         </div>
@@ -121,6 +128,7 @@
     <!-- =======================
 User login content END -->
 
+    <p th:text="${trendingCourses}"></p>
     <!-- =======================
 Trending course START -->
     <div th:replace="userPage/fragments/trendingCourse :: trendingCourse"></div>

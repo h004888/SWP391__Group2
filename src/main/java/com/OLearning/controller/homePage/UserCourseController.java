@@ -5,8 +5,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.ArrayList;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.OLearning.dto.chapter.ChapterProgress;
 import com.OLearning.dto.course.CourseViewDTO;
 import com.OLearning.dto.lessonCompletion.LessonCompletionDTO;
 import com.OLearning.dto.quiz.QuizSubmissionForm;
@@ -83,18 +85,22 @@ public class UserCourseController {
         List<Course> courses = enrollmentService.getCoursesByUserId(currentUser.getUserId());
         model.addAttribute("courses", courses); // nếu cần hiển thị list
 
-        if (!courses.isEmpty()) {
-            model.addAttribute("course", courses.get(0)); // hoặc getFirst() nếu bạn dùng ListDeque
-            model.addAttribute("progress",
-                    lessonCompletionService.getOverallProgressOfUser(currentUser.getUserId(),
-                            courses.get(0).getCourseId()));
-            model.addAttribute("weeksEnrolled", enrollmentService.getWeeksEnrolled(currentUser.getUserId(),
-                    courses.get(0).getCourseId()));
-            model.addAttribute("numberOfCompletedLessons", lessonCompletionService.getNumberOfCompletedLessons(currentUser.getUserId(),
-                    courses.get(0).getCourseId()));
-        } else {
+        if (courses.isEmpty()) {
             model.addAttribute("course", null); // hoặc ẩn phần này trên giao diện
+
+            return "userPage/LearningDashboard";
         }
+
+        CourseViewDTO courseViewDTO = courseService.getCourseRecentIncomplete(currentUser.getUserId());
+
+
+        model.addAttribute("course", courseViewDTO);
+        model.addAttribute("progress", lessonCompletionService.getOverallProgressOfUser(currentUser.getUserId(), courseViewDTO.getCourseId()));
+        model.addAttribute("weeksEnrolled", enrollmentService.getWeeksEnrolled(currentUser.getUserId(), courseViewDTO.getCourseId()));
+        model.addAttribute("numberOfCompletedLessons", lessonCompletionService.getNumberOfCompletedLessons(currentUser.getUserId(),
+                courseViewDTO.getCourseId()));
+
+        model.addAttribute("currentLesson",lessonService.getNextLessonAfterCompleted(currentUser.getUserId(),courseViewDTO.getCourseId()).get());
 
         // Add unread notification count
         long unreadCount = notificationService.countUnreadByUserId(currentUser.getUserId());
@@ -113,8 +119,8 @@ public class UserCourseController {
         return null;
     }
 
-    @GetMapping("/course/{courseId}/detail")
-    public String showUserCourseDetail(Principal principal, Model model, @PathVariable("courseId") Long courseId) {
+    @GetMapping("/course/view")
+    public String showUserCourseDetail(Principal principal, Model model, @RequestParam("courseId") Long courseId) {
         if (principal == null) {
             return "redirect:/login";
         }
@@ -169,21 +175,30 @@ public class UserCourseController {
             model.addAttribute("submissionForm", submissionForm);
             return "userPage/doQuiz";
         }
+        CourseViewDTO course = courseService.getCourseById(courseId);
+
+        Map<Long, ChapterProgress> chapterProgressMap = new HashMap<>();
+        for (Chapter chapter: course.getListOfChapters()){
+            List<Lesson> lessons = chapter.getLessons();
+            int totalLessons = lessons.size();
+            int completedLessons = (int) lessons.stream().filter(lesson -> completedLessonIds.contains(lesson.getLessonId())).count();
+            chapterProgressMap.put(chapter.getChapterId(),  new ChapterProgress(totalLessons, completedLessons));
+        }
 
         model.addAttribute("completedLessonIds", completedLessonIds);
         model.addAttribute("accessibleLessonIds", accessibleLessonIds);
         model.addAttribute("currentLessonId", currentLesson.getLessonId());
         model.addAttribute("currentLesson", currentLesson);
-        CourseViewDTO course = courseService.getCourseById(courseId);
+
         model.addAttribute("course", course);
         model.addAttribute("chapters", course.getListOfChapters());
-        
+
         // Load comments for the specific lesson only (Rating = null)
         Course courseEntity = courseService.findCourseById(courseId);
         // Since we only support lesson-specific comments now, load comments for current lesson
         List<CourseReview> parentComments = courseReviewRepository.findByLessonAndRatingIsNullAndParentReviewIsNull(currentLesson);
         List<CommentDTO> comments = new ArrayList<>();
-        
+
         for (CourseReview parentComment : parentComments) {
             CommentDTO commentDTO = commentMapper.toDTO(parentComment);
             List<CourseReview> replies = courseReviewRepository.findByParentReviewOrderByCreatedAtDesc(parentComment);
@@ -193,20 +208,21 @@ public class UserCourseController {
             commentDTO.setChildren(replyDTOs);
             comments.add(commentDTO);
         }
-        
+
         model.addAttribute("comments", comments);
         model.addAttribute("user", currentUser);
-        
+
         // Add unread notification count
         long unreadCount = notificationService.countUnreadByUserId(currentUser.getUserId());
         model.addAttribute("unreadCount", unreadCount);
-        
+
+        model.addAttribute("chapterProgressMap", chapterProgressMap);
         return "userPage/course-detail-min";
     }
 
     @GetMapping("course/{courseId}/lesson/{lessonId}")
     public String showUserLessonDetail(Principal principal, Model model, @PathVariable("lessonId") Long lessonId,
-            @PathVariable("courseId") Long courseId) {
+                                       @PathVariable("courseId") Long courseId) {
         User user = extractCurrentUser(principal);
         if (user == null) {
             return "redirect:/login";
@@ -271,6 +287,15 @@ public class UserCourseController {
             return "userPage/doQuiz";
         }
 
+
+        Map<Long, ChapterProgress> chapterProgressMap = new HashMap<>();
+        for (Chapter chapter: course.getListOfChapters()){
+            List<Lesson> lessons = chapter.getLessons();
+            int totalLessons = lessons.size();
+            int completedLessons = (int) lessons.stream().filter(lesson -> completedLessonIds.contains(lesson.getLessonId())).count();
+            chapterProgressMap.put(chapter.getChapterId(),  new ChapterProgress(totalLessons, completedLessons));
+        }
+
         model.addAttribute("completedLessonIds", completedLessonIds);
         model.addAttribute("accessibleLessonIds", accessibleLessonIds);
         // QUAN TRỌNG: currentLessonId bây giờ là bài đang được xem (lessonId từ URL)
@@ -279,13 +304,13 @@ public class UserCourseController {
         model.addAttribute("nextLesson", nextLesson);
         model.addAttribute("course", courseView);
         model.addAttribute("chapters", courseView.getListOfChapters());
-        
+
         // Load comments for the specific lesson only (Rating = null)
         Course courseEntity = courseService.findCourseById(courseId);
         // Since we only support lesson-specific comments now, load comments for current lesson
         List<CourseReview> parentComments = courseReviewRepository.findByLessonAndRatingIsNullAndParentReviewIsNull(currentLesson);
         List<CommentDTO> comments = new ArrayList<>();
-        
+
         for (CourseReview parentComment : parentComments) {
             CommentDTO commentDTO = commentMapper.toDTO(parentComment);
             List<CourseReview> replies = courseReviewRepository.findByParentReviewOrderByCreatedAtDesc(parentComment);
@@ -295,14 +320,14 @@ public class UserCourseController {
             commentDTO.setChildren(replyDTOs);
             comments.add(commentDTO);
         }
-        
+
         model.addAttribute("comments", comments);
         model.addAttribute("user", user);
-        
+
         // Add unread notification count
         long unreadCount = notificationService.countUnreadByUserId(user.getUserId());
         model.addAttribute("unreadCount", unreadCount);
-        
+
         return "userPage/course-detail-min";
     }
 
@@ -329,28 +354,30 @@ public class UserCourseController {
             long unreadCount = notificationService.countUnreadByUserId(currentUser.getUserId());
             model.addAttribute("unreadCount", unreadCount);
         }
+        model.addAttribute("chapters", course.getListOfChapters());
+
         return "userPage/course-detail-min";
     }
 
-    @GetMapping("/course/view")
-    public String showCourseView(Principal principal, Model model, @RequestParam("courseId") Long courseId) {
-        User currentUser = null;
-        if (principal != null) {
-            currentUser = extractCurrentUser(principal);
-        }
-
-        // Kiểm tra xem user đã đăng ký khóa học chưa
-        boolean isEnrolled = false;
-        if (currentUser != null) {
-            isEnrolled = enrollmentService.hasEnrolled(currentUser.getUserId(), courseId);
-        }
-
-        if (isEnrolled) {
-            // Nếu đã đăng ký, redirect đến trang detail
-            return "redirect:/learning/course/" + courseId + "/detail";
-        } else {
-            // Nếu chưa đăng ký, redirect đến trang public
-            return "redirect:/learning/course/" + courseId + "/public";
-        }
-    }
+//    @GetMapping("/course/view")
+//    public String showCourseView(Principal principal, Model model, @RequestParam("courseId") Long courseId) {
+//        User currentUser = null;
+//        if (principal != null) {
+//            currentUser = extractCurrentUser(principal);
+//        }
+//
+//        // Kiểm tra xem user đã đăng ký khóa học chưa
+//        boolean isEnrolled = false;
+//        if (currentUser != null) {
+//            isEnrolled = enrollmentService.hasEnrolled(currentUser.getUserId(), courseId);
+//        }
+//
+//        if (isEnrolled) {
+//            // Nếu đã đăng ký, redirect đến trang detail
+//            return "redirect:/learning/course/" + courseId + "/detail";
+//        } else {
+//            // Nếu chưa đăng ký, redirect đến trang public
+//            return "redirect:/learning/course/" + courseId + "/public";
+//        }
+//    }
 }

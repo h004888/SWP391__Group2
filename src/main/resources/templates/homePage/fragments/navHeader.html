@@ -1,6 +1,6 @@
 <!-- Header START -->
 <header class="navbar-light navbar-sticky header-static" th:fragment="navHeader"
-        xmlns:sec="http://www.w3.org/1999/xhtml">
+    xmlns:sec="http://www.w3.org/1999/xhtml">
     <!-- Nav START -->
     <nav class="navbar navbar-expand-xl">
         <div class="container-fluid px-3 px-xl-5">
@@ -26,69 +26,33 @@
             <div class="navbar-collapse w-100 collapse" id="navbarCollapse">
 
                 <!-- Nav category menu START -->
-                <ul class="navbar-nav navbar-nav-scroll me-auto">
-                    <!-- Nav item 1 Demos -->
-                    <li class="nav-item dropdown dropdown-menu-shadow-stacked">
-                        <a class="nav-link bg-primary bg-opacity-10 rounded-3 text-primary px-3 py-3 py-xl-0" href="#"
-                            id="categoryMenu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="bi bi-ui-radios-grid me-2"></i><span>Category</span>
-                        </a>
-
-                        <ul class="dropdown-menu" aria-labelledby="categoryMenu">
-                            <!-- Hiển thị 5 category đầu tiên -->
-                            <li th:each="cat : ${firstFive}">
-                                <a class="dropdown-item" th:text="${cat.name}"
-                                    th:href="@{'/home/coursesGrid'(categoryIds=${cat.id})}"></a>
-                            </li>
-
-
-                            <!-- Nút View all -->
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li>
-                                <a class="dropdown-item bg-primary text-primary bg-opacity-10 rounded-2 mb-0" href="#"
-                                    onclick="toggleMoreCategories(event)">View all categories</a>
-                            </li>
-
-                            <!-- Hiển thị 5 category tiếp theo khi click -->
-                            <li id="moreCategories" style="display:none;" th:each="cat : ${nextFive}">
-                                <a class="dropdown-item" th:text="${cat.name}"
-                                    th:href="@{/courses/category/{id}(id=${cat.id})}"></a>
-                            </li>
-                        </ul>
-                    </li>
-
-                </ul>
+                <div th:if="${navCategory != null}" th:replace="~{__${navCategory}__}"></div>
                 <!-- Nav category menu END -->
 
                 <!-- Nav Main menu START -->
                 <ul class="navbar-nav navbar-nav-scroll me-auto">
                     <!-- Nav item 1 Demos -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link " th:href="@{/home/coursesGrid}" id="demoMenu"
-                            aria-haspopup="true" aria-expanded="false">Courses</a>
+                        <a class="nav-link " th:href="@{/home/coursesGrid}" id="demoMenu" aria-haspopup="true"
+                            aria-expanded="false">Courses</a>
 
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link " th:href="@{/learning}"
-                           aria-haspopup="true" aria-expanded="false">Education</a>
+                        <a class="nav-link " th:href="@{/learning}" aria-haspopup="true"
+                            aria-expanded="false">Education</a>
 
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link " href="#"
-                           aria-haspopup="true" aria-expanded="false">About</a>
+                        <a class="nav-link " href="#" aria-haspopup="true" aria-expanded="false">About</a>
 
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link " href="#"
-                           aria-haspopup="true" aria-expanded="false">Contact</a>
+                        <a class="nav-link " href="#" aria-haspopup="true" aria-expanded="false">Contact</a>
 
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link " th:href="@{/vouchers}"
                            aria-haspopup="true" aria-expanded="false">Voucher</a>
-
                     </li>
 
                 </ul>
@@ -562,3 +526,42 @@
 </header>
 
 <!-- Header END -->
+
+<ul class="navbar-nav navbar-nav-scroll me-auto" th:fragment="navHeaderCategory">
+    <!-- Nav item 1 Demos -->
+    <li class="nav-item dropdown dropdown-menu-shadow-stacked">
+        <a class="nav-link bg-primary bg-opacity-10 rounded-3 text-primary px-3 py-3 py-xl-0" href="#" id="categoryMenu"
+            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="bi bi-ui-radios-grid me-2"></i><span>Category</span>
+        </a>
+
+        <ul class="dropdown-menu" aria-labelledby="categoryMenu">
+            <!-- Hiển thị 5 category đầu tiên -->
+            <li th:each="cat : ${firstFive}">
+                <a class="dropdown-item" th:text="${cat.name}"
+                    th:href="@{'/home/coursesGrid'(categoryIds=${cat.id})}"></a>
+            </li>
+
+
+            <!-- Nút View all -->
+            <li>
+                <hr class="dropdown-divider">
+            </li>
+            <li>
+                <a class="dropdown-item bg-primary text-primary bg-opacity-10 rounded-2 mb-0" href="#"
+                    onclick="toggleMoreCategories(event)">View all categories</a>
+            </li>
+
+            <!-- Hiển thị 5 category tiếp theo khi click -->
+            <li id="moreCategories" style="display:none;" th:each="cat : ${nextFive}">
+                <a class="dropdown-item" th:text="${cat.name}" th:href="@{/courses/category/{id}(id=${cat.id})}"></a>
+            </li>
+        </ul>
+    </li>
+
+</ul>
+
+<ul class="navbar-nav navbar-nav-scroll me-auto" th:fragment="navHeaderDefault">
+
+
+</ul>

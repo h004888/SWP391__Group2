@@ -82,6 +82,7 @@ public class CartController {
         model.addAttribute("totalPrice", calculateTotalPrice(cart));
         model.addAttribute("cartTotal", getLongValue(cart.getOrDefault("total", 0L)));
         model.addAttribute("currentUserId", userId);
+        model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderDefault");
 
         // Add wishlist total
         String encodedWishlistJson = getWishlistCookie(request, userId);

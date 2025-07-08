@@ -1,7 +1,6 @@
 package com.OLearning.repository;
 
 import com.OLearning.entity.Course;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -124,10 +123,21 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 
     @Query("SELECT c FROM Course c WHERE c.category.id = :categoryId")
     List<Course> findByCategoryId(@Param("categoryId") Long categoryId);
-     // find course by category id
+
+    // find course by category id
      List<Course> findByCategoryId(int categoryId);
 
     @Query("SELECT COUNT(c) FROM Course c WHERE c.instructor.userId = :userId AND c.status = :status")
     int countByInstructorUserIdAndStatus(@Param("userId") Long userId, @Param("status") String status);
     //tinh tong course cua instructor do
+    @Query(value = """
+                SELECT TOP 1 c.*
+                FROM Enrollments e
+                JOIN Courses c ON e.CourseID = c.CourseID
+                WHERE e.UserID = :userId
+                  AND e.Progress < 100
+                ORDER BY e.EnrollmentDate ASC
+            """, nativeQuery = true)
+    Course findMostRecentIncompleteCourse(@Param("userId") Long userId);
+
 }

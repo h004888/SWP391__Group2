@@ -107,6 +107,7 @@ public class HomeController {
                     }
                 }
 
+                model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderCategory");
                 return "homePage/index";
         }
 
@@ -128,6 +129,7 @@ public class HomeController {
                 model.addAttribute("totalPages", courses.getTotalPages());
                 model.addAttribute("totalItems", courses.getTotalElements());
                 model.addAttribute("categoryIds", categoryIds);
+                model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderDefault");
 
                 // Add unread notification count for authenticated users
                 if (userDetails != null) {
@@ -189,9 +191,11 @@ public class HomeController {
 
                 model.addAttribute("totalStudents", course.getEnrollments().size());
                 model.addAttribute("courseByInstructor",
-                                course.getInstructor().getCourses().stream().map(CourseMapper::toCourseViewDTO).collect(Collectors.toList()));
+                                course.getInstructor().getCourses().stream().map(CourseMapper::toCourseViewDTO)
+                                                .collect(Collectors.toList()));
                 model.addAttribute("courseByCategory",
-                                course.getCategory().getCourses().stream().map(CourseMapper::toCourseViewDTO).collect(Collectors.toList()));
+                                course.getCategory().getCourses().stream().map(CourseMapper::toCourseViewDTO)
+                                                .collect(Collectors.toList()));
                 model.addAttribute("course", course);
                 model.addAttribute("reviews", reviews);
                 model.addAttribute("averageRating", averageRating);
@@ -218,6 +222,8 @@ public class HomeController {
                         model.addAttribute("unreadCount", unreadCount);
                     }
                 }
+
+                model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderDefault");
 
                 return "homePage/course-detail";
         }

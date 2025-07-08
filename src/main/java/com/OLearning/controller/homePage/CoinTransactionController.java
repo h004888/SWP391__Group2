@@ -62,6 +62,7 @@ public class CoinTransactionController {
         model.addAttribute("status", status);
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
+        model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderDefault");
         return "homePage/history";
     }
 
