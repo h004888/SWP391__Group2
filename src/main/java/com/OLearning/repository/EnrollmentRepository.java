@@ -113,4 +113,15 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
     //lay all enrollment theo InstructorId
     @Query("SELECT e FROM Enrollment e JOIN e.course c WHERE c.instructor.userId = :instructorId")
     List<Enrollment> calculateSumEnrollment(@Param("instructorId") Long instructorId);
+    @Query("SELECT e FROM Enrollment e WHERE e.user = :user AND e.course = :course ORDER BY e.enrollmentDate DESC")
+    List<Enrollment> findByUserAndCourseOrderByEnrollmentDateDesc(@Param("user") User user, @Param("course") Course course);
+
+    @Query("SELECT e FROM Enrollment e WHERE e.user = :user AND e.course = :course ORDER BY e.enrollmentDate DESC")
+    Optional<Enrollment> findFirstByUserAndCourseOrderByEnrollmentDateDesc(@Param("user") User user, @Param("course") Course course);
+
+    @Query("SELECT COUNT(e) FROM Enrollment e WHERE e.user = :user AND e.course = :course")
+    Long countByUserAndCourse(@Param("user") User user, @Param("course") Course course);
+
+    @Query("SELECT e FROM Enrollment e WHERE e.user = :user AND e.course = :course ORDER BY e.enrollmentDate DESC")
+    List<Enrollment> findAllByUserAndCourseOrderByEnrollmentDateDesc(@Param("user") User user, @Param("course") Course course);
 }

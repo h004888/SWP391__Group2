@@ -69,7 +69,8 @@
                                         <div class="d-sm-flex align-items-center">
                                             <!-- Avatar -->
                                             <div class="avatar avatar-md flex-shrink-0">
-                                                <img class="avatar-img rounded-circle" th:src="${u.profilePicture}"
+                                                <img class="avatar-img rounded-circle"
+                                                     th:src="${u.profilePicture != null and u.profilePicture != ''} ? ${u.profilePicture} : @{/img/undraw_profile.svg}"
                                                      alt="avatar">
                                             </div>
                                             <!-- Info -->
@@ -217,7 +218,8 @@
                                         <div class="d-flex align-items-center position-relative">
                                             <!-- Image -->
                                             <div class="avatar avatar-md">
-                                                <img th:src="${u.profilePicture}" class="rounded-circle" alt="">
+                                                <img th:src="${u.profilePicture != null and u.profilePicture != ''} ? ${u.profilePicture} : @{/img/undraw_profile.svg}"
+                                                     class="rounded-circle" alt="">
                                             </div>
                                             <div class="mb-0 ms-2">
                                                 <!-- Title -->

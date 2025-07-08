@@ -237,7 +237,7 @@
             </div>
 
             <!-- Comment Section for Comment Notifications -->
-            <div th:if="${notification.type == 'comment' and notification.commentId != null}" class="comment-section">
+            <div th:if="${#strings.equalsIgnoreCase(notification.type, 'comment') and notification.commentId != null}" class="comment-section">
                 <div class="card border-0">
                     <div class="card-header bg-info text-white">
                         <h6 class="mb-0">
@@ -257,7 +257,7 @@
                                     <div class="bg-light p-3 rounded">
                                         <div class="d-flex justify-content-between align-items-start">
                                             <div>
-                                                <h6 class="mb-1 fw-bold" th:text="${comment.user != null ? comment.user.fullName : 'Unknown User'}">User Name</h6>
+                                                <h6 class="mb-1 fw-bold" th:text="${comment.user != null ? comment.user.fullName : (comment.course != null && comment.course.instructor != null ? comment.course.instructor.fullName : 'Instructor')}">User Name</h6>
                                                 <p class="mb-0" th:text="${comment.comment}">Comment content</p>
                                             </div>
                                             <small class="text-muted" th:text="${comment.createdAt != null ? #temporals.format(comment.createdAt, 'dd/MM/yyyy HH:mm') : ''}">Time</small>
@@ -289,6 +289,9 @@
                                     <button type="submit" class="btn btn-primary">
                                         <i class="fas fa-paper-plane me-2"></i>Send Reply
                                     </button>
+                                    <a th:if="${comment.lessonId != null && notification.course != null}" th:href="@{/course/{courseId}/lesson/{lessonId}(courseId=${notification.course.courseId}, lessonId=${comment.lessonId})}" class="btn btn-info">
+                                        <i class="fas fa-arrow-right me-2"></i>Go to Lesson
+                                    </a>
                                     <button type="button" class="btn btn-secondary" onclick="window.history.back()">
                                         <i class="fas fa-arrow-left me-2"></i>Back
                                     </button>

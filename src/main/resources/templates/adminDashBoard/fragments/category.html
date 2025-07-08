@@ -74,12 +74,15 @@
                             </tr>
                         </thead>
                         <tbody id="categoryTableBody"  >
-                            <tr th:if="${#lists.isEmpty(category)}">
-                                <td colspan="4" class="text-center py-5">
-                                    <i class="fas fa-folder-open display-6 text-muted mb-3"></i>
-                                    <p class="mb-0">No categories found.</p>
-                                </td>
-                            </tr>
+                        <!-- Empty state -->
+                        <tr th:if="${#lists.isEmpty(category)}">
+                            <td colspan="8" class="text-center align-middle py-5">
+                                <div class="d-flex flex-column align-items-center justify-content-center">
+                                    <i class="fas fa-folder-open fa-3x mb-3 opacity-50"></i>
+                                    <h5>No categories found</h5>
+                                </div>
+                            </td>
+                        </tr>
                             <tr th:each="categoryItem : ${category}">
                                 <td th:text="${categoryItem.id}"></td>
                                 <td>

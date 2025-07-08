@@ -137,10 +137,10 @@ public class NotificationsController {
             model.addAttribute("notification", notificationDTO);
             
             // If this is a comment notification, get the comment details
-            if ("comment".equals(notification.getType()) && notification.getCommentId() != null) {
+            if ("comment".equalsIgnoreCase(notification.getType()) && notification.getCommentId() != null) {
                 try {
-                    // Get comment details with user information using the new method
-                    Optional<CourseReview> commentOpt = courseReviewRepository.findByIdWithUser(notification.getCommentId());
+                    // Tạm thời dùng findById thay vì findByIdWithUser để kiểm tra lỗi
+                    Optional<CourseReview> commentOpt = courseReviewRepository.findById(notification.getCommentId());
                     if (commentOpt.isPresent()) {
                         CourseReview comment = commentOpt.get();
                         CommentDTO commentDTO = commentMapper.toDTO(comment);
@@ -243,5 +243,30 @@ public class NotificationsController {
         Long userId = userDetails.getUserId();
         notificationService.deleteAllReadNotifications(userId);
         return "redirect:/instructordashboard/notifications";
+    }
+
+    // API endpoint để lấy 5 thông báo chưa đọc cho dropdown
+    @GetMapping("/api/instructor/latest")
+    @ResponseBody
+    public ResponseEntity<?> getLatestNotifications(Authentication authentication) {
+        try {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            Long userId = userDetails.getUserId();
+            
+            // Lấy 5 thông báo chưa đọc
+            Pageable pageable = PageRequest.of(0, 5);
+            List<String> types = List.of("COURSE_BLOCKED", "comment", "COURSE_UNBLOCKED", "COURSE_REJECTION", "COURSE_APPROVED", "MAINTENANCE_FEE", "COURSE_CREATED", "SUCCESSFULLY");
+            Page<NotificationDTO> notificationPage = notificationService.getUnreadNotificationsByUserId(userId, types, pageable);
+            
+            long unreadCount = notificationService.countUnreadByUserId(userId);
+            
+            return ResponseEntity.ok(Map.of(
+                "notifications", notificationPage.getContent(),
+                "unreadCount", unreadCount
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error loading notifications: " + e.getMessage()));
+        }
     }
 }

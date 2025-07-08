@@ -2,6 +2,9 @@ package com.OLearning.controller.adminDashBoard;
 
 import com.OLearning.entity.Report;
 import com.OLearning.repository.ReportRepository;
+import com.OLearning.repository.CourseReviewRepository;
+import com.OLearning.service.comment.CommentService;
+import com.OLearning.entity.CourseReview;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,14 +16,19 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RequestBody;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/admin/reports")
-public class ReportController {
+public class ReportMnController {
     @Autowired
     private ReportRepository reportRepository;
+    @Autowired
+    private CourseReviewRepository courseReviewRepository;
+    @Autowired
+    private CommentService commentService;
 
     @GetMapping
     public String listReports(@RequestParam(required = false) String type,
@@ -55,6 +63,11 @@ public class ReportController {
     public String viewReport(@PathVariable Long id, Model model) {
         Report report = reportRepository.findById(id).orElse(null);
         model.addAttribute("report", report);
+        // Nếu là report comment, truyền thêm comment bị report
+        if (report != null && "COMMENT".equalsIgnoreCase(report.getReportType()) && report.getCommentId() != null) {
+            CourseReview comment = courseReviewRepository.findById(report.getCommentId()).orElse(null);
+            model.addAttribute("reportedComment", comment);
+        }
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/reportDetailContent :: reportDetailContent");
         model.addAttribute("accNamePage", "Chi tiết báo cáo");
         return "adminDashBoard/index";
@@ -68,5 +81,14 @@ public class ReportController {
             reportRepository.save(report);
         }
         return "redirect:/admin/reports";
+    }
+
+    @PostMapping("/hide-comment")
+    @ResponseBody
+    public String hideComment(@RequestBody Map<String, Object> payload) {
+        Long reviewId = Long.valueOf(payload.get("reviewId").toString());
+        boolean hidden = Boolean.parseBoolean(payload.get("hidden").toString());
+        commentService.setCommentHidden(reviewId, hidden);
+        return "success";
     }
 }

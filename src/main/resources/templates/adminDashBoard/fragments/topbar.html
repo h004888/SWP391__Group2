@@ -63,11 +63,31 @@
                 <ul class="navbar-nav flex-row align-items-center">
 
                     <!-- Notification dropdown START -->
-                    <li class="nav-item ms-2 ms-md-3">
-                        <a class="btn btn-light btn-round mb-0 position-relative" th:href="@{/admin/notifications}" title="Notifications" style="width:48px;height:48px;">
+                    <li class="nav-item ms-2 ms-md-3 dropdown">
+                        <!-- Notification button -->
+                        <a class="btn btn-light btn-round mb-0 position-relative" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside" title="Notifications" style="width:48px;height:48px;">
                             <i class="bi bi-bell fa-fw" style="font-size:2rem;line-height:48px;"></i>
-                            <span th:if="${unreadCount > 0}" class="notif-badge animation-blink" style="width:14px;height:14px;top:6px;right:6px;"></span>
+                            <span id="adminNotificationBadge" th:if="${unreadCount > 0}" class="notif-badge animation-blink" style="width:14px;height:14px;top:6px;right:6px;"></span>
                         </a>
+
+                        <!-- Notification dropdown menu START -->
+                        <div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0">
+                            <div class="card bg-transparent">
+                                <div class="card-header bg-transparent border-bottom py-4 d-flex justify-content-between align-items-center">
+                                    <h6 class="m-0">Unread Notifications <span id="adminNotificationCount" class="badge bg-danger bg-opacity-10 text-danger ms-2">0 new</span></h6>
+                                </div>
+                                <div class="card-body p-0">
+                                    <ul id="adminNotificationList" class="list-group list-unstyled list-group-flush">
+                                        <!-- Notifications will be loaded here -->
+                                    </ul>
+                                </div>
+                                <!-- Button -->
+                                <div class="card-footer bg-transparent border-0 py-3 text-center position-relative">
+                                    <a th:href="@{/admin/notifications}" class="stretched-link">View all notifications</a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Notification dropdown menu END -->
                     </li>
                     <!-- Notification dropdown END -->
 
@@ -77,10 +97,11 @@
                         <a class="avatar avatar-sm p-0" href="#" id="profileDropdown" role="button"
                            data-bs-auto-close="outside" data-bs-display="static" data-bs-toggle="dropdown"
                            aria-expanded="false">
-                            <img class="avatar-img rounded-circle" th:src="${#authentication.principal.profilePicture}"
+                            <img class="avatar-img rounded-circle"  th:src="${#authentication.principal.profilePicture != null} ?
+                                                                                             ${#authentication.principal.profilePicture} :
+                                                                                             @{/img/undraw_profile.svg}"
                                  alt="avatar">
                         </a>
-
                         <!-- Profile dropdown START -->
                         <ul class="dropdown-menu dropdown-animation dropdown-menu-end shadow pt-3"
                             sec:authorize="isAuthenticated()"
@@ -92,7 +113,7 @@
                                     <div class="avatar me-3 mb-3">
                                         <img class="avatar-img rounded-circle shadow" th:src="${#authentication.principal.profilePicture != null} ?
                                                                                              ${#authentication.principal.profilePicture} :
-                                                                                             @{/assets/images/avatar/01.jpg}"
+                                                                                             @{/img/undraw_profile.svg}"
                                              alt="avatar">
                                     </div>
                                     <div>
@@ -107,8 +128,7 @@
                                 <hr class="dropdown-divider">
                             </li>
                             <!-- Links -->
-                            <li><a class="dropdown-item" th:href="@{/profile/edit}"><i class="bi bi-person fa-fw me-2"></i>Edit
-                                Profile</a></li>
+                            <li><a class="dropdown-item" th:href="@{/profile}"><i class="bi bi-person fa-fw me-2"></i>Profile</a></li>
                             <li><a class="dropdown-item" href="#"><i class="bi bi-gear fa-fw me-2"></i>Account Settings</a>
                             </li>
                             <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle fa-fw me-2"></i>Help</a>
@@ -183,5 +203,146 @@
             </div>
         </div>
     </div>
+
+    <!-- Notification JavaScript -->
+    <script>
+        // Manual test function
+        function testNotifications() {
+            console.log('Manual test: Loading notifications...');
+            loadAdminNotifications();
+        }
+        // Load notifications when dropdown is shown
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, setting up notification dropdown...');
+            const notificationDropdown = document.querySelector('.nav-item.dropdown [data-bs-toggle="dropdown"]');
+            console.log('Found notification dropdown:', notificationDropdown);
+            if (notificationDropdown && notificationDropdown.closest('.nav-item').querySelector('#adminNotificationBadge')) {
+                console.log('Setting up event listener for notification dropdown');
+                notificationDropdown.addEventListener('show.bs.dropdown', function() {
+                    console.log('Notification dropdown shown, loading notifications...');
+                    loadAdminNotifications();
+                });
+            } else {
+                console.log('Notification dropdown not found or no badge element');
+            }
+        });
+
+        function loadAdminNotifications() {
+            console.log('Loading admin notifications...');
+            fetch('/admin/notifications/api/latest')
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Notification data:', data);
+                    if (data.error) {
+                        console.error('Error loading notifications:', data.error);
+                        return;
+                    }
+                    
+                    updateAdminNotificationBadge(data.unreadCount);
+                    updateAdminNotificationList(data.notifications);
+                })
+                .catch(error => {
+                    console.error('Error loading notifications:', error);
+                });
+        }
+
+        function updateAdminNotificationBadge(unreadCount) {
+            console.log('Updating admin notification badge with count:', unreadCount);
+            const badge = document.getElementById('adminNotificationBadge');
+            const countSpan = document.getElementById('adminNotificationCount');
+            
+            if (unreadCount > 0) {
+                if (!badge) {
+                    const newBadge = document.createElement('span');
+                    newBadge.id = 'adminNotificationBadge';
+                    newBadge.className = 'notif-badge animation-blink';
+                    newBadge.style.cssText = 'width:14px;height:14px;top:6px;right:6px;';
+                    const notificationButton = document.querySelector('.nav-item.dropdown [data-bs-toggle="dropdown"]');
+                    if (notificationButton && notificationButton.closest('.nav-item').querySelector('#adminNotificationBadge')) {
+                        notificationButton.appendChild(newBadge);
+                    }
+                }
+                countSpan.textContent = unreadCount + ' new';
+            } else {
+                if (badge) {
+                    badge.remove();
+                }
+                countSpan.textContent = '0 new';
+            }
+        }
+
+        function updateAdminNotificationList(notifications) {
+            console.log('Updating admin notification list with:', notifications.length, 'notifications');
+            const list = document.getElementById('adminNotificationList');
+            list.innerHTML = '';
+            
+            if (notifications.length === 0) {
+                list.innerHTML = '<li class="p-3 text-center text-muted">No unread notifications</li>';
+                return;
+            }
+            
+            notifications.forEach(notification => {
+                console.log('Processing notification:', notification);
+                const li = document.createElement('li');
+                li.className = 'list-group-item-action border-0 border-bottom d-flex p-3';
+                // Since API returns only unread notifications, all should be 'failed' status
+                if (notification.status === 'failed') {
+                    li.style.backgroundColor = '#f8f9fa';
+                    li.style.borderLeft = '3px solid #0d6efd';
+                }
+                
+                const timeAgo = getTimeAgo(notification.sentAt);
+                const typeIcon = getNotificationTypeIcon(notification.type);
+                
+                li.innerHTML = `
+                    <div class="me-3">
+                        <div class="avatar avatar-md">
+                            <i class="${typeIcon}" style="font-size: 1.5rem; color: #6c757d;"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h6 class="mb-1">${notification.type.replace(/_/g, ' ')}</h6>
+                        <p class="small text-body m-0">${notification.message}</p>
+                        <small class="text-body">${timeAgo}</small>
+                    </div>
+                `;
+                
+                li.addEventListener('click', function() {
+                    window.location.href = `/admin/notifications/view/${notification.notificationId}`;
+                });
+                
+                list.appendChild(li);
+            });
+        }
+
+        function getTimeAgo(sentAt) {
+            const now = new Date();
+            const sent = new Date(sentAt);
+            const diffInMinutes = Math.floor((now - sent) / (1000 * 60));
+            
+            if (diffInMinutes < 1) return 'Just now';
+            if (diffInMinutes < 60) return `${diffInMinutes} min ago`;
+            
+            const diffInHours = Math.floor(diffInMinutes / 60);
+            if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+            
+            const diffInDays = Math.floor(diffInHours / 24);
+            return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+        }
+
+        function getNotificationTypeIcon(type) {
+            switch(type) {
+                case 'REPORT_COURSE': return 'fas fa-flag';
+                case 'INSTRUCTOR_REPLY_BLOCK': return 'fas fa-reply';
+                case 'REPORT_COMMENT': return 'fas fa-comment-slash';
+                default: return 'fas fa-bell';
+            }
+        }
+
+
+    </script>
 </nav>
 

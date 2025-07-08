@@ -72,7 +72,7 @@
     </script>
 
     <!-- Favicon -->
-    <link rel="shortcut icon" th:href="@{//assets/images/favicon.ico}">
+    <link rel="shortcut icon" th:href="@{/assets/images/favicon.ico}">
 
     <!-- Google Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com/">
@@ -99,7 +99,7 @@
 <!-- Header END -->
 
 <!-- **************** MAIN CONTENT START **************** -->
-<div th:replace="userPage/fragmentLessonVideo/mainContentLessonVideo :: mainContentLessonVideo"></div>
+<div th:replace="userPage/fragmentLessonVideo/mainContentLessonVideo :: mainContentLessonVideo(currentLesson=${currentLesson}, course=${course}, user=${user})"></div>
 <!-- **************** MAIN CONTENT END **************** -->
 
 <!-- =======================

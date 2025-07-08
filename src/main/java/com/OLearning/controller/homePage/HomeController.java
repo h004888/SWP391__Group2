@@ -34,6 +34,7 @@ import com.OLearning.service.enrollment.EnrollmentService;
 import com.OLearning.service.wishlist.WishlistService;
 import com.OLearning.service.order.OrdersService;
 import com.OLearning.service.payment.VietQRService;
+import com.OLearning.service.notification.NotificationService;
 
 @Controller
 @RequestMapping("/home")
@@ -83,6 +84,9 @@ public class HomeController {
     @Autowired
     private VietQRService vietQRService;
 
+    @Autowired
+    private NotificationService notificationService;
+
     @GetMapping()
         public String getMethodName(Model model, @AuthenticationPrincipal UserDetails userDetails) {
                 // chia làm 2 danh sách:
@@ -93,6 +97,16 @@ public class HomeController {
                 model.addAttribute("topCategories", categoryService.findTop5ByOrderByIdAsc());
                 model.addAttribute("firstFive", firstFive);
                 model.addAttribute("nextFive", nextFive);
+
+                // Add unread notification count for authenticated users
+                if (userDetails != null) {
+                    User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
+                    if (user != null) {
+                        long unreadCount = notificationService.countUnreadByUserId(user.getUserId());
+                        model.addAttribute("unreadCount", unreadCount);
+                    }
+                }
+
                 return "homePage/index";
         }
 
@@ -103,7 +117,8 @@ public class HomeController {
                         @RequestParam(required = false) List<String> priceFilters,
                         @RequestParam(required = false) List<String> levels,
                         @RequestParam(defaultValue = "Newest") String sortBy,
-                        @RequestParam(defaultValue = "9") int size) {
+                        @RequestParam(defaultValue = "9") int size,
+                        @AuthenticationPrincipal UserDetails userDetails) {
                 Page<CourseViewDTO> courses = courseService.searchCoursesGrid(categoryIds, priceFilters, levels, sortBy,
                                 keyword,
                                 page, size); // lưu ý trả về Page<CourseDTO>
@@ -113,6 +128,15 @@ public class HomeController {
                 model.addAttribute("totalPages", courses.getTotalPages());
                 model.addAttribute("totalItems", courses.getTotalElements());
                 model.addAttribute("categoryIds", categoryIds);
+
+                // Add unread notification count for authenticated users
+                if (userDetails != null) {
+                    User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
+                    if (user != null) {
+                        long unreadCount = notificationService.countUnreadByUserId(user.getUserId());
+                        model.addAttribute("unreadCount", unreadCount);
+                    }
+                }
 
                 return "homePage/course-grid";
         }
@@ -125,6 +149,43 @@ public class HomeController {
             Model model,
             @AuthenticationPrincipal UserDetails userDetails) {
                 CourseViewDTO course = courseService.getCourseById(id);
+                Course courseEntity = courseRepository.findById(id).orElse(null);
+
+                // Lấy danh sách review của course (chỉ những review có rating)
+                List<CourseReview> reviews = new ArrayList<>();
+                double averageRating = 0.0;
+                Map<Integer, Long> ratingDistribution = new HashMap<>();
+                if (courseEntity != null) {
+                    reviews = courseReviewService.getReviewsByCourseWithUser(courseEntity);
+
+                    // Filter theo sao nếu có
+                    if (star > 0 && star <= 5) {
+                        reviews = reviews.stream()
+                                .filter(review -> review.getRating() == star)
+                                .collect(Collectors.toList());
+                    }
+
+                    if (!reviews.isEmpty()) {
+                        averageRating = reviews.stream()
+                                .mapToInt(CourseReview::getRating)
+                                .average()
+                                .orElse(0.0);
+
+                        // Tính phân bố rating (từ tất cả reviews, không chỉ filtered)
+                        List<CourseReview> allReviews = courseReviewService.getReviewsByCourseWithUser(courseEntity);
+                        ratingDistribution = allReviews.stream()
+                                .collect(Collectors.groupingBy(CourseReview::getRating, Collectors.counting()));
+                    }
+                }
+
+                // Kiểm tra user đã đăng ký course chưa
+                boolean isEnrolled = false;
+                if (userDetails != null) {
+                    User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
+                    if (user != null && courseEntity != null) {
+                        isEnrolled = enrollmentService.findFirstByUserAndCourseOrderByEnrollmentDateDesc(user, courseEntity).isPresent();
+                    }
+                }
 
                 model.addAttribute("totalStudents", course.getEnrollments().size());
                 model.addAttribute("courseByInstructor",
@@ -132,7 +193,32 @@ public class HomeController {
                 model.addAttribute("courseByCategory",
                                 course.getCategory().getCourses().stream().map(CourseMapper::toCourseViewDTO).collect(Collectors.toList()));
                 model.addAttribute("course", course);
-                        
+                model.addAttribute("reviews", reviews);
+                model.addAttribute("averageRating", averageRating);
+                model.addAttribute("ratingDistribution", ratingDistribution);
+                model.addAttribute("selectedStar", star);
+                model.addAttribute("isEnrolled", isEnrolled);
+
+                // Thêm thông tin số review của user hiện tại
+                if (userDetails != null) {
+                    User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
+                    if (user != null) {
+                        Long userReviewCount = courseReviewService.countByUserIdAndCourseId(user.getUserId(), id);
+                        model.addAttribute("userReviewCount", userReviewCount);
+                    }
+                }
+
+                // Thêm thông tin user nếu đã đăng nhập
+                if (userDetails != null) {
+                    User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
+                    if (user != null) {
+                        model.addAttribute("currentUser", user);
+                        // Add unread notification count
+                        long unreadCount = notificationService.countUnreadByUserId(user.getUserId());
+                        model.addAttribute("unreadCount", unreadCount);
+                    }
+                }
+
                 return "homePage/course-detail";
         }
 

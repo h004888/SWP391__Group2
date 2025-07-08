@@ -12,6 +12,7 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.http.ResponseEntity;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,9 +42,11 @@ public class GlobalExceptionHandler {
 
     // Xử lý Exception cho giao diện người dùng (trả về view)
     @ExceptionHandler(Exception.class)
-    public ModelAndView handleException(Exception ex, WebRequest request) {
+    public ModelAndView handleException(Exception ex, WebRequest request, HttpServletRequest httpRequest) {
         ModelAndView mav = new ModelAndView();
         mav.addObject("errorMessage", ex.getMessage());
+        String referer = httpRequest.getHeader("Referer");
+        mav.addObject("lastUrl", referer);
         mav.setViewName("error/global-error"); // Tạo view này để hiển thị lỗi chung
         return mav;
     }

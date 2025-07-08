@@ -194,6 +194,10 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Role not found: " + userDTO.getRoleName());
         }
         User user = userMapper.toUser(userDTO, roleOpt.get());
+        // Set default avatar if not provided
+        if (user.getProfilePicture() == null || user.getProfilePicture().trim().isEmpty()) {
+            user.setProfilePicture("/img/undraw_profile.svg");
+        }
         //Default password
         String encodedPassword = new BCryptPasswordEncoder().encode("123");
         user.setPassword(encodedPassword);

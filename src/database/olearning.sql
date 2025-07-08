@@ -124,7 +124,7 @@ GO
 CREATE TABLE Video (
                        VideoID INT IDENTITY(1,1) PRIMARY KEY,
                        LessonID INT NOT NULL,
-                       VideoURL NVARCHAR(MAX) NOT NULL,
+                       VideoURL NVARCHAR(1000) NOT NULL,
                        Duration INT NULL, -- Nên là INT (giây) thay vì TIME để dễ tính toán.
                        UploadDate DATETIME NOT NULL DEFAULT GETDATE(),
                        FOREIGN KEY (LessonID) REFERENCES Lessons(LessonID) ON DELETE CASCADE
@@ -173,7 +173,8 @@ CREATE TABLE OrderDetail (
                              CourseID INT NOT NULL,
                              UnitPrice DECIMAL(10,2) NOT NULL,
                              FOREIGN KEY (OrderID) REFERENCES Orders(OrderID),
-                             FOREIGN KEY (CourseID) REFERENCES Courses(CourseID)
+                             FOREIGN KEY (CourseID) REFERENCES Courses(CourseID),
+                             CONSTRAINT UQ_OrderDetail_Order_Course UNIQUE (OrderID, CourseID)
 );
 GO
 
@@ -215,9 +216,9 @@ GO
 -- Fees: Bảng các mức phí
 CREATE TABLE Fees (
                       FeeID INT IDENTITY(1,1) PRIMARY KEY,
-                      MinEnrollments INT NOT NULL,
-                      MaxEnrollments INT NULL,
-                      MaintenanceFee DECIMAL(10,2) NOT NULL,
+                      MinEnrollments BIGINT NOT NULL,
+                      MaxEnrollments BIGINT NULL,
+                      MaintenanceFee BIGINT NOT NULL,
                       UNIQUE (MinEnrollments, MaxEnrollments)
 );
 GO
@@ -229,7 +230,7 @@ CREATE TABLE CourseMaintenance (
                                    FeeID INT NOT NULL,
                                    OrderID INT NULL,
                                    MonthYear DATE NOT NULL,
-                                   EnrollmentCount INT NOT NULL,
+                                   EnrollmentCount BIGINT NOT NULL,
                                    Status VARCHAR(10) DEFAULT 'pending' CHECK (status IN ('pending', 'completed','overdue')),
                                    DueDate DATE NOT NULL,
                                    SentAt DATETIME DEFAULT GETDATE(),
@@ -251,8 +252,9 @@ CREATE TABLE Notifications (
                                Status NVARCHAR(10) NOT NULL DEFAULT 'sent' CHECK (
         Status IN ('sent','failed')
     ),
-                               Message NVARCHAR(1000) NOT NULL,
+                               Message NVARCHAR(MAX) NOT NULL,
                                SentAt DATETIME NOT NULL DEFAULT GETDATE(),
+                               CommentID INT NULL,
                                FOREIGN KEY (UserID) REFERENCES Users(UserID),
                                FOREIGN KEY (CourseID) REFERENCES Courses(CourseID)
 );
@@ -297,7 +299,6 @@ CREATE TABLE LessonCompletion (
                                   FOREIGN KEY (LessonID) REFERENCES Lessons(LessonID),
                                   CONSTRAINT UQ_User_Lesson UNIQUE (UserID, LessonID)
 );
-
 GO
 USE [OLearning_New]
 GO
@@ -352,9 +353,21 @@ GO
 SET IDENTITY_INSERT [dbo].[Fees] OFF
 GO
 
+-- TermsAndConditions: Bảng điều khoản và điều kiện
+CREATE TABLE TermsAndConditions (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    RoleTarget NVARCHAR(20) NOT NULL,
+    SectionTitle NVARCHAR(255) NOT NULL,
+    Content NVARCHAR(MAX) NOT NULL,
+    DisplayOrder INT NULL,
+    CreatedAt DATETIME2 NULL,
+    UpdatedAt DATETIME2 NULL
+);
+GO
+
 -- LƯU Ý: Lệnh CREATE TABLE cho [TermsAndConditions] không có trong script bạn cung cấp.
 -- Các lệnh INSERT dưới đây giả định bảng này đã tồn tại và không có khóa ngoại. Nếu chưa có, bạn cần tạo bảng này trước.
- SET IDENTITY_INSERT [dbo].[TermsAndConditions] ON
+SET IDENTITY_INSERT [dbo].[TermsAndConditions] ON
  GO
  INSERT [dbo].[TermsAndConditions] ([DisplayOrder], [CreatedAt], [UpdatedAt], [id], [RoleTarget], [SectionTitle], [Content]) VALUES (1, CAST(N'2025-06-23T15:20:26.3700000' AS DateTime2), CAST(N'2025-06-24T00:18:41.0893160' AS DateTime2), 1, N'ALL', N'Giới thiệu', N'<ul><li><strong>Bằng việc sử dụng nền tảng của chúng tôi, bạn đồng ý tuân thủ các điều khoản dưới đây.</strong></li><li><strong>Các điều khoản có thể được cập nhật bất kỳ lúc nào và sẽ được thông báo công khai.</strong></li></ul>')
  GO

@@ -21,7 +21,7 @@ public class User {
     @Column(name = "UserID")
     private Long userId;
     
-    @Column(name = "Username")
+    @Column(name = "Username", columnDefinition = "nvarchar(255)")
     @Normalized
     private String username;
     
@@ -31,7 +31,7 @@ public class User {
     @Column(name = "Password")
     private String password;
     
-    @Column(name = "FullName")
+    @Column(name = "FullName", columnDefinition = "nvarchar(255)")
     private String fullName;
     
     @Column(name = "Phone")
@@ -43,7 +43,7 @@ public class User {
     @Column(name = "Birthday")
     private LocalDate birthDay;
     
-    @Column(name = "Address")
+    @Column(name = "Address" , columnDefinition = "nvarchar(255)")
     private String address;
     
     @Column(name = "ProfilePicture")
@@ -52,7 +52,7 @@ public class User {
     @Column(name = "IsGooglePicture")
     private Boolean isGooglePicture = false;
     
-    @Column(name = "PersonalSkill")
+    @Column(name = "PersonalSkill" , columnDefinition = "nvarchar(MAX)")
     private String personalSkill;
     
     @Column(name = "Status")

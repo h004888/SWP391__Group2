@@ -231,7 +231,7 @@ public class UserController {
         return "redirect:/admin/account";
     }
 
-    @GetMapping("/account/delete/{userId}")
+    @PostMapping("/account/delete/{userId}")
     public String deleteAccount(Model model, @PathVariable("userId") long id,RedirectAttributes redirectAttributes) {
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/accountContent :: accountContent");
         redirectAttributes.addFlashAttribute("successMessage", SUCCESS_MESSAGE_DELETE_STAFF);

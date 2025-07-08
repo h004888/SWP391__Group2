@@ -56,4 +56,14 @@ public interface EnrollmentService {
     void updateProgressByUser( Long userId,  Long courseId);
 
     Optional<Enrollment> findByUserAndCourse(User user, Course course);
+    
+    List<Enrollment> findByUserAndCourseOrderByEnrollmentDateDesc(User user, Course course);
+    
+    Optional<Enrollment> findFirstByUserAndCourseOrderByEnrollmentDateDesc(User user, Course course);
+    
+    Long countByUserAndCourse(User user, Course course);
+    
+    List<Enrollment> findAllByUserAndCourseOrderByEnrollmentDateDesc(User user, Course course);
+    
+    void cleanupDuplicateEnrollments(User user, Course course);
 }

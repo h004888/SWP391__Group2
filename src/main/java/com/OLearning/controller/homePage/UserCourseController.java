@@ -4,6 +4,7 @@ import java.security.Principal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import com.OLearning.dto.course.CourseViewDTO;
@@ -15,6 +16,12 @@ import com.OLearning.service.lesson.LessonService;
 import com.OLearning.service.lessonCompletion.LessonCompletionService;
 import com.OLearning.service.quizQuestion.QuizQuestionService;
 import com.OLearning.service.quizTest.QuizTestService;
+import com.OLearning.service.comment.CommentService;
+import com.OLearning.repository.CourseReviewRepository;
+import com.OLearning.entity.CourseReview;
+import com.OLearning.mapper.comment.CommentMapper;
+import com.OLearning.dto.comment.CommentDTO;
+import com.OLearning.service.notification.NotificationService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -52,6 +59,12 @@ public class UserCourseController {
 
     @Autowired
     private LessonService lessonService;
+    @Autowired
+    private CourseReviewRepository courseReviewRepository;
+    @Autowired
+    private CommentMapper commentMapper;
+    @Autowired
+    private NotificationService notificationService;
 
     @GetMapping
     public String showUserDashboard(Principal principal, Model model) {
@@ -83,6 +96,10 @@ public class UserCourseController {
             model.addAttribute("course", null); // hoặc ẩn phần này trên giao diện
         }
 
+        // Add unread notification count
+        long unreadCount = notificationService.countUnreadByUserId(currentUser.getUserId());
+        model.addAttribute("unreadCount", unreadCount);
+
         return "userPage/LearningDashboard";
     }
 
@@ -96,8 +113,8 @@ public class UserCourseController {
         return null;
     }
 
-    @GetMapping("/course/view")
-    public String showUserCourseDetail(Principal principal, Model model, @RequestParam("courseId") Long courseId) {
+    @GetMapping("/course/{courseId}/detail")
+    public String showUserCourseDetail(Principal principal, Model model, @PathVariable("courseId") Long courseId) {
         if (principal == null) {
             return "redirect:/login";
         }
@@ -131,6 +148,12 @@ public class UserCourseController {
         accessibleLessonIds.add(currentLesson.getLessonId()); // Bài hiện tại cũng có thể học
         if ("quiz".equalsIgnoreCase(currentLesson.getContentType())) {
             Quiz quiz = quizTestService.getQuizByLessonId(currentLesson.getLessonId());
+            if (quiz == null) {
+                model.addAttribute("quizError", "Quiz not found for this lesson.");
+                model.addAttribute("currentLesson", currentLesson);
+                model.addAttribute("course", courseService.getCourseById(courseId));
+                return "userPage/doQuiz";
+            }
             System.out.println("Quiz for quizID" + quiz.getId());
             List<QuizQuestion> questions = quizQuestionService.getQuestionsByQuizId(quiz.getId());
 
@@ -154,6 +177,30 @@ public class UserCourseController {
         CourseViewDTO course = courseService.getCourseById(courseId);
         model.addAttribute("course", course);
         model.addAttribute("chapters", course.getListOfChapters());
+        
+        // Load comments for the specific lesson only (Rating = null)
+        Course courseEntity = courseService.findCourseById(courseId);
+        // Since we only support lesson-specific comments now, load comments for current lesson
+        List<CourseReview> parentComments = courseReviewRepository.findByLessonAndRatingIsNullAndParentReviewIsNull(currentLesson);
+        List<CommentDTO> comments = new ArrayList<>();
+        
+        for (CourseReview parentComment : parentComments) {
+            CommentDTO commentDTO = commentMapper.toDTO(parentComment);
+            List<CourseReview> replies = courseReviewRepository.findByParentReviewOrderByCreatedAtDesc(parentComment);
+            List<CommentDTO> replyDTOs = replies.stream()
+                    .map(reply -> commentMapper.toDTO(reply))
+                    .collect(Collectors.toList());
+            commentDTO.setChildren(replyDTOs);
+            comments.add(commentDTO);
+        }
+        
+        model.addAttribute("comments", comments);
+        model.addAttribute("user", currentUser);
+        
+        // Add unread notification count
+        long unreadCount = notificationService.countUnreadByUserId(currentUser.getUserId());
+        model.addAttribute("unreadCount", unreadCount);
+        
         return "userPage/course-detail-min";
     }
 
@@ -165,8 +212,9 @@ public class UserCourseController {
             return "redirect:/login";
         }
 
-        // Thêm kiểm tra enrollment
-        if (!enrollmentService.hasEnrolled(user.getUserId(), courseId)) {
+        CourseViewDTO course = courseService.getCourseById(courseId);
+        boolean isInstructor = course != null && course.getInstructor() != null && course.getInstructor().getUserId().equals(user.getUserId());
+        if (!isInstructor && !enrollmentService.hasEnrolled(user.getUserId(), courseId)) {
             return "redirect:/learning";
         }
 
@@ -183,7 +231,8 @@ public class UserCourseController {
         Lesson nextAvailableLesson = lessonService.getNextLessonAfterCompleted(user.getUserId(), courseId).orElse(null);
 
         // Chỉ cho phép truy cập nếu bài đã hoàn thành hoặc là bài tiếp theo có thể học
-        boolean canAccess = completedLessonIds.contains(lessonId) ||
+        boolean canAccess = isInstructor ||
+                completedLessonIds.contains(lessonId) ||
                 (nextAvailableLesson != null && nextAvailableLesson.getLessonId().equals(lessonId));
 
         if (!canAccess) {
@@ -191,7 +240,7 @@ public class UserCourseController {
         }
 
         Lesson nextLesson = lessonService.getNextLesson(courseId, lessonId);
-        CourseViewDTO course = courseService.getCourseById(courseId);
+        CourseViewDTO courseView = courseService.getCourseById(courseId);
 
         // Xác định các bài có thể truy cập
         Set<Long> accessibleLessonIds = new HashSet<>(completedLessonIds);
@@ -200,12 +249,18 @@ public class UserCourseController {
         }
         if ("quiz".equalsIgnoreCase(currentLesson.getContentType())) {
             Quiz quiz = quizTestService.getQuizByLessonId(currentLesson.getLessonId());
+            if (quiz == null) {
+                model.addAttribute("quizError", "Quiz not found for this lesson.");
+                model.addAttribute("currentLesson", currentLesson);
+                model.addAttribute("course", courseView);
+                return "userPage/doQuiz";
+            }
             System.out.println("Quiz for quizID" + quiz.getId());
             List<QuizQuestion> questions = quizQuestionService.getQuestionsByQuizId(quiz.getId());
 
             model.addAttribute("quiz", quiz);
             model.addAttribute("currentLesson", currentLesson);
-            model.addAttribute("course", course);
+            model.addAttribute("course", courseView);
 
             model.addAttribute("questions", questions);
             QuizSubmissionForm submissionForm = new QuizSubmissionForm();
@@ -222,8 +277,80 @@ public class UserCourseController {
         model.addAttribute("currentLessonId", lessonId); // Thay đổi từ currentLesson.getLessonId() thành lessonId
         model.addAttribute("currentLesson", currentLesson);
         model.addAttribute("nextLesson", nextLesson);
-        model.addAttribute("course", course);
-        model.addAttribute("chapters", course.getListOfChapters());
+        model.addAttribute("course", courseView);
+        model.addAttribute("chapters", courseView.getListOfChapters());
+        
+        // Load comments for the specific lesson only (Rating = null)
+        Course courseEntity = courseService.findCourseById(courseId);
+        // Since we only support lesson-specific comments now, load comments for current lesson
+        List<CourseReview> parentComments = courseReviewRepository.findByLessonAndRatingIsNullAndParentReviewIsNull(currentLesson);
+        List<CommentDTO> comments = new ArrayList<>();
+        
+        for (CourseReview parentComment : parentComments) {
+            CommentDTO commentDTO = commentMapper.toDTO(parentComment);
+            List<CourseReview> replies = courseReviewRepository.findByParentReviewOrderByCreatedAtDesc(parentComment);
+            List<CommentDTO> replyDTOs = replies.stream()
+                    .map(reply -> commentMapper.toDTO(reply))
+                    .collect(Collectors.toList());
+            commentDTO.setChildren(replyDTOs);
+            comments.add(commentDTO);
+        }
+        
+        model.addAttribute("comments", comments);
+        model.addAttribute("user", user);
+        
+        // Add unread notification count
+        long unreadCount = notificationService.countUnreadByUserId(user.getUserId());
+        model.addAttribute("unreadCount", unreadCount);
+        
         return "userPage/course-detail-min";
+    }
+
+    @GetMapping("/course/{courseId}/public")
+    public String showPublicCourseDetail(Principal principal, Model model, @PathVariable("courseId") Long courseId) {
+        User currentUser = null;
+        if (principal != null) {
+            currentUser = extractCurrentUser(principal);
+        }
+
+        Course course = courseService.findCourseById(courseId);
+        if (course == null) {
+            return "redirect:/learning";
+        }
+
+        // Since we only support lesson-specific comments now, no comments to load for course-level
+        List<CommentDTO> comments = new ArrayList<>();
+        model.addAttribute("comments", comments);
+        model.addAttribute("course", course);
+        model.addAttribute("user", currentUser);
+        model.addAttribute("currentLesson", null); // Đảm bảo fragment nhận biết là trang public
+        // Add unread notification count if user is logged in
+        if (currentUser != null) {
+            long unreadCount = notificationService.countUnreadByUserId(currentUser.getUserId());
+            model.addAttribute("unreadCount", unreadCount);
+        }
+        return "userPage/course-detail-min";
+    }
+
+    @GetMapping("/course/view")
+    public String showCourseView(Principal principal, Model model, @RequestParam("courseId") Long courseId) {
+        User currentUser = null;
+        if (principal != null) {
+            currentUser = extractCurrentUser(principal);
+        }
+
+        // Kiểm tra xem user đã đăng ký khóa học chưa
+        boolean isEnrolled = false;
+        if (currentUser != null) {
+            isEnrolled = enrollmentService.hasEnrolled(currentUser.getUserId(), courseId);
+        }
+
+        if (isEnrolled) {
+            // Nếu đã đăng ký, redirect đến trang detail
+            return "redirect:/learning/course/" + courseId + "/detail";
+        } else {
+            // Nếu chưa đăng ký, redirect đến trang public
+            return "redirect:/learning/course/" + courseId + "/public";
+        }
     }
 }

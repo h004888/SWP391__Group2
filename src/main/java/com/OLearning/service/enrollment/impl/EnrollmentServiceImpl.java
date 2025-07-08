@@ -211,6 +211,37 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Override
     public Optional<Enrollment> findByUserAndCourse(User user, Course course) {
-        return enrollmentRepository.findByUserAndCourse(user, course);
+        return enrollmentRepository.findFirstByUserAndCourseOrderByEnrollmentDateDesc(user, course);
+    }
+    
+    @Override
+    public List<Enrollment> findByUserAndCourseOrderByEnrollmentDateDesc(User user, Course course) {
+        return enrollmentRepository.findByUserAndCourseOrderByEnrollmentDateDesc(user, course);
+    }
+    
+    @Override
+    public Optional<Enrollment> findFirstByUserAndCourseOrderByEnrollmentDateDesc(User user, Course course) {
+        return enrollmentRepository.findFirstByUserAndCourseOrderByEnrollmentDateDesc(user, course);
+    }
+    
+    @Override
+    public Long countByUserAndCourse(User user, Course course) {
+        return enrollmentRepository.countByUserAndCourse(user, course);
+    }
+    
+    @Override
+    public List<Enrollment> findAllByUserAndCourseOrderByEnrollmentDateDesc(User user, Course course) {
+        return enrollmentRepository.findAllByUserAndCourseOrderByEnrollmentDateDesc(user, course);
+    }
+    
+    @Override
+    public void cleanupDuplicateEnrollments(User user, Course course) {
+        List<Enrollment> enrollments = enrollmentRepository.findAllByUserAndCourseOrderByEnrollmentDateDesc(user, course);
+        if (enrollments.size() > 1) {
+            // Giữ lại enrollment đầu tiên (mới nhất), xóa các enrollment còn lại
+            for (int i = 1; i < enrollments.size(); i++) {
+                enrollmentRepository.delete(enrollments.get(i));
+            }
+        }
     }
 }
