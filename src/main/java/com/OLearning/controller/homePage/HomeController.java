@@ -118,6 +118,7 @@ public class HomeController {
             }
         }
         model.addAttribute("topCoursesEnrolledMap", topCoursesEnrolledMap);
+        model.addAttribute("fragmentContent", "homePage/fragments/mainContent :: mainContent");
         return "homePage/index";
     }
 

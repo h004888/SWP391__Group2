@@ -82,7 +82,6 @@ public class CartController {
         model.addAttribute("totalPrice", calculateTotalPrice(cart));
         model.addAttribute("cartTotal", getLongValue(cart.getOrDefault("total", 0L)));
         model.addAttribute("currentUserId", userId);
-
         // Add wishlist total
         String encodedWishlistJson = getWishlistCookie(request, userId);
         Map<String, Object> wishlist = wishlistService.getWishlistDetails(encodedWishlistJson, userDetails.getUsername());
@@ -90,7 +89,8 @@ public class CartController {
         if ("qr_success".equals(message)) {
             model.addAttribute("message", "Thanh toán thành công bằng QR!");
         }
-        return "homePage/cart";
+        model.addAttribute("fragmentContent", "homePage/fragments/cartContent :: cartContent");
+        return "homePage/index";
     }
 
     @GetMapping("/total")

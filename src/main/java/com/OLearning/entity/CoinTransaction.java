@@ -39,6 +39,6 @@ public class CoinTransaction {
     private LocalDateTime createdAt;
 
     @ManyToOne
-    @JoinColumn(name = "OrderId", nullable = false)
+    @JoinColumn(name = "OrderID", nullable = false)
     private Order order;
 } 

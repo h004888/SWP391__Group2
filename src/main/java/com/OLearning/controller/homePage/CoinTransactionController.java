@@ -62,7 +62,8 @@ public class CoinTransactionController {
         model.addAttribute("status", status);
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
-        return "homePage/history";
+        model.addAttribute("fragmentContent", "homePage/fragments/historyContent :: historyContent");
+        return "homePage/index";
     }
 
     @PostMapping("/deposit")
