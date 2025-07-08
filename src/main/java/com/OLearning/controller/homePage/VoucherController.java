@@ -58,8 +58,8 @@ public class VoucherController {
         model.addAttribute("hasNext", page < totalPages - 1);
         model.addAttribute("hasPrevious", page > 0);
         model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderDefault");
-
-        return "homePage/voucher";
+        model.addAttribute("fragmentContent", "homePage/fragments/voucherContent :: voucherContent");
+        return "homePage/index";
     }
 
     @PostMapping("/apply")

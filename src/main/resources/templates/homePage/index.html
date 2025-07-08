@@ -10,7 +10,8 @@
 	<!-- Header END -->
 
 	<!-- **************** MAIN CONTENT START **************** -->
-	<div th:replace="~{homePage/fragments/mainContent :: mainContent}"></div>
+
+	<div th:replace="~{__${fragmentContent}__}"></div>
 	<!-- **************** MAIN CONTENT END **************** -->
 
 	<!-- =======================
@@ -36,6 +37,7 @@ Footer END -->
 	<!-- Template Functions -->
 	<script src="assets/js/functions.js"></script>
 	<script src="/js/homePage/wishlist.js"></script>
+	<script src="/js/homePage/addtocart.js"></script>
 
 	<script>
 		function toggleMoreCategories(event) {

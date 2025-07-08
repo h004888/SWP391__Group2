@@ -65,8 +65,8 @@ public class WishlistController {
         model.addAttribute("hasNext", page < totalPages - 1);
         model.addAttribute("hasPrevious", page > 0);
         model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderDefault");
-
-        return "homePage/wishlist";
+        model.addAttribute("fragmentContent", "homePage/fragments/wishlistContent :: wishlistContent");
+        return "homePage/index";
     }
 
     @GetMapping("/total")

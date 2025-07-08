@@ -88,7 +88,7 @@ public class HomeController {
     private NotificationService notificationService;
 
     @GetMapping()
-        public String getMethodName(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        public String getMethodName(Model model, @AuthenticationPrincipal UserDetails userDetails,HttpServletRequest request) {
                 // chia làm 2 danh sách:
                 List<Category> firstFive = categoryService.findAll().stream().limit(5).toList();
                 List<Category> nextFive = categoryService.findAll().stream().skip(5).limit(5).toList();
@@ -106,9 +106,31 @@ public class HomeController {
                         model.addAttribute("unreadCount", unreadCount);
                     }
                 }
-
-                model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderCategory");
-                return "homePage/index";
+        // Add wishlist total
+        if (userDetails != null) {
+            Long userId = getUserIdFromUserDetails(userDetails);
+            String encodedWishlistJson = getWishlistCookie(request, userId);
+            Map<String, Object> wishlist = wishlistService.getWishlistDetails(encodedWishlistJson, userDetails.getUsername());
+            model.addAttribute("wishlistTotal", getLongValue(wishlist.getOrDefault("total", 0L)));
+        } else {
+            model.addAttribute("wishlistTotal", 0L);
+        }
+        // Thêm map courseId -> isEnrolled
+        Map<Long, Boolean> topCoursesEnrolledMap = new HashMap<>();
+        if (userDetails != null) {
+            String email = userDetails.getUsername();
+            User user = userRepository.findByEmail(email).orElse(null);
+            if (user != null) {
+                for (CourseViewDTO c : topCourses) {
+                    boolean enrolled = enrollmentService.hasEnrolled(user.getUserId(), c.getCourseId());
+                    topCoursesEnrolledMap.put(c.getCourseId(), enrolled);
+                }
+            }
+        }
+        model.addAttribute("topCoursesEnrolledMap", topCoursesEnrolledMap);
+        model.addAttribute("fragmentContent", "homePage/fragments/mainContent :: mainContent");
+        model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderCategory");
+        return "homePage/index";
         }
 
         @GetMapping("/coursesGrid")

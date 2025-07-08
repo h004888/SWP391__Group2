@@ -1,19 +1,10 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{homePage/fragments/header :: header}">
-</head>
-<body>
-    <!-- Notification Element -->
+<main th:fragment="voucherContent">
     <div id="notification" class="position-fixed top-0 end-0 p-3" style="z-index: 1050; transform: translateX(200%); transition: transform 0.5s ease;">
         <div id="notification-alert" class="alert d-flex align-items-center mb-0" role="alert" style="min-width: 250px;">
             <i id="notification-icon" class="me-2"></i>
             <span id="notification-message"></span>
         </div>
     </div>
-
-    <!-- Header -->
-    <nav th:replace="~{homePage/fragments/navHeader :: navHeader}"></nav>
-
     <!-- Main Content -->
     <main class="pt-5">
         <div class="container">
@@ -35,7 +26,7 @@
                             </h2>
                             <form th:action="@{/vouchers/apply}" method="post" id="voucher-form">
                                 <div class="input-group">
-                                    <input type="text" id="voucher-code" name="code" th:value="${voucherCode}" placeholder="Nhập mã voucher" 
+                                    <input type="text" id="voucher-code" name="code" th:value="${voucherCode}" placeholder="Nhập mã voucher"
                                            class="form-control form-control-lg">
                                     <button type="submit" class="btn btn-primary btn-lg">
                                         Áp dụng
@@ -58,24 +49,24 @@
                             <h2 class="h5 fw-bold text-dark mb-4">
                                 <i class="fas fa-list text-primary me-2"></i>Danh sách Voucher của bạn
                             </h2>
-                            
+
                             <!-- Content and info -->
                             <div class="d-sm-flex justify-content-sm-between align-items-center mb-4">
                                 <div>
                                     <h5 class="mb-2 mb-sm-0">Bạn có <span th:text="${totalItems}">0</span> voucher</h5>
                                     <p class="text-muted mb-0" th:if="${totalPages > 1}">
-                                        Hiển thị <span th:text="${currentPage * pageSize + 1}">1</span> đến 
-                                        <span th:text="${currentPage * pageSize + #lists.size(userVouchers)}">6</span> trong tổng số 
+                                        Hiển thị <span th:text="${currentPage * pageSize + 1}">1</span> đến
+                                        <span th:text="${currentPage * pageSize + #lists.size(userVouchers)}">6</span> trong tổng số
                                         <span th:text="${totalItems}">0</span> voucher
                                     </p>
                                 </div>
                             </div>
-                            
+
                             <div id="empty-voucher" class="text-center py-5 text-muted" th:if="${#lists.isEmpty(userVouchers)}">
                                 <i class="fas fa-ticket-alt fa-3x mb-3 text-muted"></i>
                                 <p class="mb-0">Bạn chưa có voucher nào. Hãy nhập mã voucher để nhận ưu đãi!</p>
                             </div>
-                            
+
                             <div id="voucher-list" class="row g-4" th:if="${!#lists.isEmpty(userVouchers)}">
                                 <!-- Voucher cards will be generated here -->
                                 <div th:each="voucher : ${userVouchers}" class="col-md-6 col-lg-4">
@@ -108,7 +99,7 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <!-- Pagination START -->
                             <div th:if="${totalPages > 1}" class="row">
                                 <div class="col-12">
@@ -123,16 +114,16 @@
                                                     <i class="fas fa-angle-left"></i>
                                                 </span>
                                             </li>
-                                            
+
                                             <!-- Page numbers -->
                                             <li class="page-item mb-0" th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}">
-                                                <a class="page-link" th:href="@{/vouchers(page=${pageNum})}" 
+                                                <a class="page-link" th:href="@{/vouchers(page=${pageNum})}"
                                                    th:text="${pageNum + 1}"
                                                    th:classappend="${pageNum == currentPage} ? 'active'">
                                                     1
                                                 </a>
                                             </li>
-                                            
+
                                             <!-- Next button -->
                                             <li class="page-item mb-0" th:classappend="${!hasNext} ? 'disabled'">
                                                 <a class="page-link" th:href="@{/vouchers(page=${currentPage + 1})}" th:if="${hasNext}">
@@ -153,16 +144,22 @@
             </div>
         </div>
     </main>
-
-    <!-- Footer -->
-    <footer th:replace="~{homePage/fragments/footer :: footer}"></footer>
-
-    <!-- Scripts -->
-    <script src="assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/vendor/tiny-slider/tiny-slider.js"></script>
-    <script src="assets/vendor/glightbox/js/glightbox.js"></script>
-    <script src="assets/js/functions.js"></script>
-
+    <!-- Modal hiển thị danh sách khóa học hợp lệ cho voucher -->
+    <div class="modal fade" id="voucherCoursesModal" tabindex="-1" aria-labelledby="voucherCoursesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="voucherCoursesModalLabel">Danh sách khóa học hợp lệ</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="voucher-courses-list">
+                        <!-- Danh sách khóa học sẽ được render ở đây -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <script th:inline="javascript">
         // Function to show notification
         function showNotification(message, type) {
@@ -224,26 +221,26 @@
                 },
                 body: 'code=' + encodeURIComponent(code)
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showNotification(data.message, 'success');
-                    // Reload trang ngay khi nhập voucher thành công
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 300); // Delay 1 giây để user thấy thông báo thành công
-                } else {
-                    showNotification(data.message, 'error');
-                }
-            })
-            .catch(() => {
-                showNotification('Có lỗi xảy ra, vui lòng thử lại.', 'error');
-            })
-            .finally(() => {
-                // Restore button state
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalText;
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotification(data.message, 'success');
+                        // Reload trang ngay khi nhập voucher thành công
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 300); // Delay 1 giây để user thấy thông báo thành công
+                    } else {
+                        showNotification(data.message, 'error');
+                    }
+                })
+                .catch(() => {
+                    showNotification('Có lỗi xảy ra, vui lòng thử lại.', 'error');
+                })
+                .finally(() => {
+                    // Restore button state
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                });
         });
 
         // Initialize the page
@@ -257,7 +254,7 @@
             if (errorMessage && errorMessage.textContent.trim()) {
                 showNotification(errorMessage.textContent.trim(), 'error');
             }
-            
+
             // Auto focus vào input field
             const codeInput = document.getElementById('voucher-code');
             if (codeInput) {
@@ -315,21 +312,5 @@
         });
     </script>
 
-    <!-- Modal hiển thị danh sách khóa học hợp lệ cho voucher -->
-    <div class="modal fade" id="voucherCoursesModal" tabindex="-1" aria-labelledby="voucherCoursesModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="voucherCoursesModalLabel">Danh sách khóa học hợp lệ</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <div id="voucher-courses-list">
-              <!-- Danh sách khóa học sẽ được render ở đây -->
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-</body>
-</html>
+
+</main>

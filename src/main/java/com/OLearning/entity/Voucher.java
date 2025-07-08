@@ -16,10 +16,11 @@ import java.util.List;
 public class Voucher {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "VoucherID")
     private Long voucherId;
 
     @ManyToOne
-    @JoinColumn(name = "userId", nullable = false)
+    @JoinColumn(name = "userID", nullable = false)
     private User instructor;
 
     @Column(name = "Code")

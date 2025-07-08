@@ -91,7 +91,8 @@ public class CartController {
         if ("qr_success".equals(message)) {
             model.addAttribute("message", "Thanh toán thành công bằng QR!");
         }
-        return "homePage/cart";
+        model.addAttribute("fragmentContent", "homePage/fragments/cartContent :: cartContent");
+        return "homePage/index";
     }
 
     @GetMapping("/total")

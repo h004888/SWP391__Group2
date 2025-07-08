@@ -24,7 +24,7 @@ public class Course {
     @Column(name = "Title")
     private String title;
 
-    @Column(name = "Description")
+    @Column(name = "Description",columnDefinition = "nvarchar(max)")
     private String description;
 
     @Column(name = "Price")

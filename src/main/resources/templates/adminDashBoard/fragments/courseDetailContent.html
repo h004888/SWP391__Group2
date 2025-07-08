@@ -674,22 +674,49 @@
 
     <script>
         function playVideo(element) {
-            const videoId = element.getAttribute('data-videoid');
-            const videoSource = document.getElementById('videoSource');
-            const video = document.getElementById('lessonVideo');
-
-            videoSource.src = videoId;
-            video.load();
-
-            const videoModal = new bootstrap.Modal(document.getElementById('videoModal'));
-            videoModal.show();
+            var publicId = element.getAttribute('data-videoid');
+            if (!publicId) return;
+            fetch('/api/video/signed-url?publicId=' + encodeURIComponent(publicId))
+                .then(response => response.text())
+                .then(url => {
+                    var video = document.getElementById('modalVideo');
+                    video.src = url;
+                    var modal = new bootstrap.Modal(document.getElementById('videoModal'));
+                    modal.show();
+                    video.play();
+                });
         }
 
-        function stopVideo() {
-            const video = document.getElementById('lessonVideo');
-            video.pause();
-            video.currentTime = 0;
-        }
+        document.addEventListener('DOMContentLoaded', function () {
+            var playBtn = document.getElementById('playVideoBtn');
+            if (playBtn) {
+                playBtn.addEventListener('click', function() {
+                    var publicId = this.getAttribute('data-publicid');
+                    if (!publicId) return;
+                    fetch('/api/video/signed-url?publicId=' + encodeURIComponent(publicId))
+                        .then(res => res.text())
+                        .then(url => {
+                            var video = document.getElementById('modalVideo');
+                            video.src = url;
+                            var modal = new bootstrap.Modal(document.getElementById('videoModal'));
+                            modal.show();
+                            video.play();
+                        });
+                });
+            }
+
+            var videoModal = document.getElementById('videoModal');
+            if (videoModal) {
+                videoModal.addEventListener('hidden.bs.modal', function () {
+                    var video = document.getElementById('modalVideo');
+                    if (video) {
+                        video.pause();
+                        video.currentTime = 0;
+                        video.src = "";
+                    }
+                });
+            }
+        });
     </script>
 
 </div>
