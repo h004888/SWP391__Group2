@@ -60,7 +60,7 @@ public class TermsAndConditionService {
         return baos.toByteArray();
     }
 
-    public java.util.List<TermsAndCondition> getByRoleTargetOrAll(String roleTarget) {
+    public List<TermsAndCondition> getByRoleTargetOrAll(String roleTarget) {
         return termsAndConditionRepository.findByRoleTargetOrAll(roleTarget);
     }
 }

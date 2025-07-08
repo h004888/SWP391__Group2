@@ -727,7 +727,7 @@ public class ControlllerAddCourse {
             return "redirect:../courses";
         }
         // Fetch terms and conditions for INSTRUCTOR and ALL
-        java.util.List<com.OLearning.entity.TermsAndCondition> terms = termsAndConditionService.getByRoleTargetOrAll("INSTRUCTOR");
+        java.util.List<TermsAndCondition> terms = termsAndConditionService.getByRoleTargetOrAll("INSTRUCTOR");
         model.addAttribute("termsAndConditions", terms);
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/step4SubmitCourse :: step4Content");
         return "instructorDashboard/indexUpdate";
