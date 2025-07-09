@@ -210,8 +210,8 @@ public class ControlllerAddCourse {
             , RedirectAttributes redirectAttributes, HttpServletRequest request) {
         //tim course theo course ID
         //set status
-        courseService.submitCourse(courseId, "lived");
-        redirectAttributes.addFlashAttribute("successMessage", "course public successfully.");
+        courseService.submitCourse(courseId, "published");
+        redirectAttributes.addFlashAttribute("successMessage", "course published successfully.");
         return "redirect:../courses";
     }
     //unpublic course

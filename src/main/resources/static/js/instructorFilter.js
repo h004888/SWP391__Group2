@@ -133,11 +133,18 @@ function showToast(message, type = 'info') {
 
 // Các hàm xử lý hành động khóa học
 function upToPublic(courseId) {
-    showConfirmActionModal(
-        'Bạn có chắc chắn muốn công khai khóa học này?',
-        '/instructor/courses/uptopublic',
-        courseId
-    );
+    if (!courseId) return;
+    if (confirm('Are you sure you want to publish this course?')) {
+        $.post('/instructor/courses/uptopublic', { courseId: courseId })
+            .done(function() {
+                // Reload tab publish
+                filterCourses('published', 0);
+                // Reload tab approved (nếu cần)
+                filterCourses('approved', 0);
+                // Update badge
+                updateStatusBadges();
+            });
+    }
 }
 
 function unpublishCourse(courseId) {
