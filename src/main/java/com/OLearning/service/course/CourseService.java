@@ -61,4 +61,5 @@ public interface CourseService {
 
 
     int countByInstructorAndStatus(Long userId, String status);
+    int countByInstructorAndStatusWithFilter(Long userId, String status, Long categoryId, String price, String title);
 }

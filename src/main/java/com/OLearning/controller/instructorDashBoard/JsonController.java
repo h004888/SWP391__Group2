@@ -19,34 +19,30 @@ public class JsonController {
     @Autowired
     private UploadFile uploadFile;
 
-    @GetMapping("/signed-url")
-    public ResponseEntity<String> getSignedUrl(
-            @RequestParam String publicId,
-            @RequestParam(defaultValue = "video") String resourceType,
-            @RequestParam(defaultValue = "3") int expireSeconds) {
-        String url = uploadFile.generateSignedVideoUrl(publicId, expireSeconds, resourceType);
-        return ResponseEntity.ok(url);
-    }
+//    @GetMapping("/signed-url")
+//    public ResponseEntity<String> getSignedUrl(
+//            @RequestParam String publicId,
+//            @RequestParam(defaultValue = "video") String resourceType) {
+//        String url = uploadFile.generateSignedVideoUrl(publicId, resourceType);
+//        return ResponseEntity.ok(url);
+//    }
 
     @GetMapping("/stream/video/{publicId}")
     public void streamVideo(@PathVariable String publicId, HttpServletRequest request, HttpServletResponse response) throws IOException {
         // Lấy signed URL từ Cloudinary (type: private)
-        String cloudinaryUrl = uploadFile.generateSignedVideoUrl(publicId, 3600, "video");
+        String cloudinaryUrl = uploadFile.generateSignedVideoUrl(publicId,"video");
 
         java.net.URL url = new java.net.URL(cloudinaryUrl);
         java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
 
-        // Truyền header Range nếu có (hỗ trợ tua video)
         String range = request.getHeader("Range");
         if (range != null) {
             conn.setRequestProperty("Range", range);
         }
 
-        // Lấy mã trạng thái từ Cloudinary
         int code = conn.getResponseCode();
         response.setStatus(code);
 
-        // Truyền lại các header quan trọng cho video streaming
         String contentType = conn.getHeaderField("Content-Type");
         if (contentType != null) response.setContentType(contentType);
         else response.setContentType("video/mp4");

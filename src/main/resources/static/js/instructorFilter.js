@@ -14,44 +14,8 @@ $(document).ready(function() {
     // Initialize dropdowns
     initializeDropdowns();
 
-    // Filter functionality
-    $('#filterCategory, #filterPrice').on('change', function() {
-        let currentStatus = $('.nav-link.active').data('status');
-        filterCourses(currentStatus, 0);
-    });
-
-    // Search functionality
-    $('#searchInput').on('input', function() {
-        let currentStatus = $('.nav-link.active').data('status');
-        filterCourses(currentStatus, 0);
-    });
-
     // Tab change functionality
-    $('.nav-link[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) {
-        let status = $(this).data('status');
-        filterCourses(status, 0);
-    });
-
-    // Pagination functionality
-    $(document).on('click', '.pagination .page-link', function(e) {
-        e.preventDefault();
-
-        if ($(this).parent().hasClass('disabled')) {
-            return;
-        }
-
-        let page = $(this).data('page');
-        let status = $(this).data('status');
-        if (page !== undefined && status !== undefined) {
-            filterCourses(status, page);
-        }
-    });
-
-    // Load initial data for active tab
-    let initialStatus = $('.nav-link.active').data('status');
-    if (initialStatus) {
-        filterCourses(initialStatus, 0);
-    }
+    initCourseTab();
 
     // Update status badges
     updateStatusBadges();
@@ -107,7 +71,7 @@ function filterCourses(status, page = 0) {
 
     // AJAX request for table body
     $.ajax({
-        url: '/instructordashboard/courses/filter',
+        url: '/instructor/courses/filter',
         type: 'GET',
         data: requestData,
         success: function(response) {
@@ -115,7 +79,8 @@ function filterCourses(status, page = 0) {
             $('#' + status + 'TableBody').html(response);
             hideLoading(status);
             afterAjaxUpdate();
-            updateStatusBadges();
+            // Update badge cho tất cả các tab với filter hiện tại
+            updateAllTabBadges({category, price, keyword});
         },
         error: function(xhr, status, error) {
             console.error("Error filtering courses:", error);
@@ -126,7 +91,7 @@ function filterCourses(status, page = 0) {
 
     // AJAX request for pagination
     $.ajax({
-        url: '/instructordashboard/courses/pagination',
+        url: '/instructor/courses/pagination',
         type: 'GET',
         data: requestData,
         success: function(response) {
@@ -170,7 +135,7 @@ function showToast(message, type = 'info') {
 function upToPublic(courseId) {
     showConfirmActionModal(
         'Bạn có chắc chắn muốn công khai khóa học này?',
-        '/instructordashboard/courses/uptopublic',
+        '/instructor/courses/uptopublic',
         courseId
     );
 }
@@ -178,7 +143,7 @@ function upToPublic(courseId) {
 function unpublishCourse(courseId) {
     showConfirmActionModal(
         'Bạn có chắc chắn muốn hủy công khai khóa học này?',
-        '/instructordashboard/courses/unpublish',
+        '/instructor/courses/unpublish',
         courseId
     );
 }
@@ -186,7 +151,7 @@ function unpublishCourse(courseId) {
 function hideCourse(courseId) {
     showConfirmActionModal(
         'Bạn có chắc chắn muốn ẩn khóa học này?',
-        '/instructordashboard/courses/hide',
+        '/instructor/courses/hide',
         courseId
     );
 }
@@ -194,7 +159,7 @@ function hideCourse(courseId) {
 function unhideCourse(courseId) {
     showConfirmActionModal(
         'Bạn có chắc chắn muốn hiển thị lại khóa học này?',
-        '/instructordashboard/courses/unhide',
+        '/instructor/courses/unhide',
         courseId
     );
 }
@@ -202,7 +167,7 @@ function unhideCourse(courseId) {
 function blockCourse(courseId) {
     showConfirmActionModal(
         'Bạn có chắc chắn muốn chặn khóa học này?',
-        '/instructordashboard/courses/block',
+        '/instructor/courses/block',
         courseId
     );
 }
@@ -210,7 +175,7 @@ function blockCourse(courseId) {
 function unblockCourse(courseId) {
     showConfirmActionModal(
         'Bạn có chắc chắn muốn bỏ chặn khóa học này?',
-        '/instructordashboard/courses/unblock',
+        '/instructor/courses/unblock',
         courseId
     );
 }
@@ -304,9 +269,98 @@ window.unblockCourse = unblockCourse;
 window.deleteCourse = deleteCourse;
 
 function updateStatusBadges() {
-    $.get('/instructordashboard/courses/count-by-status', function(data) {
-        for (let status in data) {
-            $('#' + status + 'Count').text(data[status]);
+    const statuses = [
+        { tab: 'pending', badge: 'pendingCount' },
+        { tab: 'approved', badge: 'approvedCount' },
+        { tab: 'publish', badge: 'publishCount', db: 'published' },
+        { tab: 'rejected', badge: 'rejectedCount' },
+        { tab: 'hidden', badge: 'hiddenCount' },
+        { tab: 'blocked', badge: 'blockedCount' },
+        { tab: 'draft', badge: 'draftCount' }
+    ];
+    statuses.forEach(function(s) {
+        let status = s.db || s.tab;
+        if (status === 'publish') status = 'published';
+        $.ajax({
+            url: '/instructor/courses/count-by-status',
+            type: 'GET',
+            data: { status: status },
+            success: function(count) {
+                $('#' + s.badge).text(count);
+            },
+            error: function() {
+                $('#' + s.badge).text('0');
+            }
+        });
+    });
+}
+
+// Update badge cho tất cả các tab với filter hiện tại
+function updateAllTabBadges(filter) {
+    const statuses = [
+        { tab: 'pending', badge: 'pendingCount' },
+        { tab: 'approved', badge: 'approvedCount' },
+        { tab: 'publish', badge: 'publishCount', db: 'published' },
+        { tab: 'rejected', badge: 'rejectedCount' },
+        { tab: 'hidden', badge: 'hiddenCount' },
+        { tab: 'blocked', badge: 'blockedCount' },
+        { tab: 'draft', badge: 'draftCount' }
+    ];
+    statuses.forEach(function(s) {
+        let status = s.db || s.tab;
+        if (status === 'publish') status = 'published';
+        let data = { status: status };
+        if (filter.category) data.category = filter.category;
+        if (filter.price) data.price = filter.price;
+        if (filter.keyword) data.title = filter.keyword;
+        $.ajax({
+            url: '/instructor/courses/count-by-status',
+            type: 'GET',
+            data: data,
+            success: function(count) {
+                $('#' + s.badge).text(count);
+            },
+            error: function() {
+                $('#' + s.badge).text('0');
+            }
+        });
+    });
+}
+
+function filterAllTabs(page = 0) {
+    const statuses = ['pending', 'approved', 'publish', 'rejected', 'hidden', 'blocked', 'draft'];
+    statuses.forEach(status => {
+        let realStatus = status === 'publish' ? 'published' : status;
+        filterCourses(realStatus, page);
+    });
+}
+
+function initCourseTab() {
+    // Bind lại tất cả event handler cho tab, filter, search, pagination...
+    $('.nav-link[data-bs-toggle="tab"]').off('shown.bs.tab').on('shown.bs.tab', function(e) {
+        let status = $(this).data('status');
+        if (status === 'publish') status = 'published';
+        filterCourses(status, 0);
+    });
+
+    $('#filterCategory, #filterPrice').off('change').on('change', function() {
+        filterAllTabs(0);
+    });
+
+    $('#searchInput').off('input').on('input', function() {
+        filterAllTabs(0);
+    });
+
+    $(document).off('click', '.pagination .page-link').on('click', '.pagination .page-link', function(e) {
+        e.preventDefault();
+        if ($(this).parent().hasClass('disabled')) return;
+        let page = $(this).data('page');
+        let status = $(this).data('status');
+        if (page !== undefined && status !== undefined) {
+            filterCourses(status, page);
         }
     });
+
+    // Khi load trang, gọi filterAllTabs để đảm bảo tất cả tab đều update đúng
+    filterAllTabs(0);
 }

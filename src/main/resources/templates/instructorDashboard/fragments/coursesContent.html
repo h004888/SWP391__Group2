@@ -7,7 +7,7 @@
                            placeholder="Search…"
                            th:value="${title}">
                 </div>
-                <a href="/instructordashboard/createcourse/coursebasic" class="btn btn-primary d-flex align-items-center" style="height: 40px; min-width: 150px;">
+                <a href="/instructor/createcourse/coursebasic" class="btn btn-primary d-flex align-items-center" style="height: 40px; min-width: 150px;">
                     <i class="fas fa-plus me-2"></i> Create Course
                 </a>
             </div>
@@ -29,9 +29,9 @@
                         <option value="">All Prices</option>
                         <option value="free" th:selected="${selectedPrice == 'free'}">Free</option>
                         <option value="paid" th:selected="${selectedPrice == 'paid'}">Paid</option>
-                        <option value="low" th:selected="${selectedPrice == 'low'}">Below 50000000</option>
-                        <option value="mid" th:selected="${selectedPrice == 'mid'}">$50000 - $100000000</option>
-                        <option value="high" th:selected="${selectedPrice == 'high'}">Above $100000000</option>
+                        <option value="low" th:selected="${selectedPrice == 'low'}">Below 50,000</option>
+                        <option value="mid" th:selected="${selectedPrice == 'mid'}">50,000 - 100,000</option>
+                        <option value="high" th:selected="${selectedPrice == 'high'}">Above 100,000</option>
                     </select>
                 </div>
             </form>
@@ -49,25 +49,19 @@
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="approved-tab" data-bs-toggle="tab"
                             data-bs-target="#approved" type="button" role="tab" data-status="approved">
-                        Approved<span class="badge bg-light text-dark ms-2" id="approveCount">0</span>
+                        Approved<span class="badge bg-light text-dark ms-2" id="approvedCount">0</span>
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="lived-tab" data-bs-toggle="tab"
-                            data-bs-target="#lived" type="button" role="tab" data-status="lived">
-                        Live<span class="badge bg-light text-dark ms-2" id="livedCount">0</span>
+                    <button class="nav-link" id="publish-tab" data-bs-toggle="tab"
+                            data-bs-target="#publish" type="button" role="tab" data-status="publish">
+                        Publish<span class="badge bg-light text-dark ms-2" id="publishCount">0</span>
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="rejected-tab" data-bs-toggle="tab"
                             data-bs-target="#rejected" type="button" role="tab" data-status="rejected">
-                        Rejected<span class="badge bg-light text-dark ms-2" id="rejectCount">0</span>
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="resubmit-tab" data-bs-toggle="tab"
-                            data-bs-target="#resubmit" type="button" role="tab" data-status="resubmit">
-                        Resubmit<span class="badge bg-light text-dark ms-2" id="resubmitCount">0</span>
+                        Rejected<span class="badge bg-light text-dark ms-2" id="rejectedCount">0</span>
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
@@ -148,8 +142,8 @@
                     </table>
                     <div id="approvedPagination" class="pagination-container"></div>
                 </div>
-                <!-- Live Tab -->
-                <div class="tab-pane fade" id="lived" role="tabpanel">
+                <!-- Publish Tab -->
+                <div class="tab-pane fade" id="publish" role="tabpanel">
                     <table class="table course-table">
                         <thead>
                         <tr>
@@ -161,11 +155,11 @@
                             <th>Actions</th>
                         </tr>
                         </thead>
-                        <tbody id="livedTableBody">
+                        <tbody id="publishTableBody">
                         <!-- Data will be loaded here -->
                         </tbody>
                     </table>
-                    <div id="livedPagination" class="pagination-container"></div>
+                    <div id="publishPagination" class="pagination-container"></div>
                 </div>
                 <!-- Rejected Tab -->
                 <div class="tab-pane fade" id="rejected" role="tabpanel">
@@ -185,25 +179,6 @@
                         </tbody>
                     </table>
                     <div id="rejectedPagination" class="pagination-container"></div>
-                </div>
-                <!-- Resubmit Tab -->
-                <div class="tab-pane fade" id="resubmit" role="tabpanel">
-                    <table class="table course-table">
-                        <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Price</th>
-                            <th>Total Lessons</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody id="resubmitTableBody">
-                        <!-- Data will be loaded here -->
-                        </tbody>
-                    </table>
-                    <div id="resubmitPagination" class="pagination-container"></div>
                 </div>
                 <!-- Hidden Tab -->
                 <div class="tab-pane fade" id="hidden" role="tabpanel">
@@ -247,7 +222,6 @@
         </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script th:src="@{/js/instructorFilter.js}"></script>
 
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
@@ -264,7 +238,7 @@
                 <div class="modal-footer">
                     <div class="d-flex gap-2" style="min-width: 300px;">
                         <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancel</button>
-                        <form id="deleteForm" method="post" action="/instructordashboard/createcourse/deletecourse" style="width: 100%;">
+                        <form id="deleteForm" method="post" action="/instructor/createcourse/deletecourse" style="width: 100%;">
                             <input type="hidden" name="courseId" id="deleteCourseId">
                             <button type="submit" class="btn btn-danger w-100">Delete Course</button>
                         </form>
@@ -296,28 +270,4 @@
         </div>
     </div>
 </div>
-
-<style>
-.course-table th, .course-table td {
-  vertical-align: middle;
-  white-space: nowrap;
-}
-.course-table td:nth-child(2) { /* Tên khoá học */
-  max-width: 220px;
-  min-width: 120px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.course-table td a {
-  display: inline-block;
-  max-width: 180px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.course-table td .d-flex {
-  flex-wrap: nowrap;
-}
-</style>
 

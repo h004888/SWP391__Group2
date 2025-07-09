@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping("/instructordashboard/enrolled")
+@RequestMapping("/instructor/enrolled")
 public class ControllerEnrolled {
     @Autowired
     private EnrollmentService enrollmentService;
@@ -63,7 +63,7 @@ public class ControllerEnrolled {
             redirectAttributes.addFlashAttribute("errorMessage", "Error: " + e.getMessage());
         }
 
-        return "redirect:/instructordashboard/enrolled";
+        return "redirect:/instructor/enrolled";
     }
 
     @PostMapping("/unblock/{enrollmentId}")
@@ -82,7 +82,7 @@ public class ControllerEnrolled {
             redirectAttributes.addFlashAttribute("errorMessage", "Error: " + e.getMessage());
         }
 
-        return "redirect:/instructordashboard/enrolled";
+        return "redirect:/instructor/enrolled";
     }
 
     @PostMapping("/send-message")
@@ -95,7 +95,7 @@ public class ControllerEnrolled {
             // Kiểm tra enrollmentId
             if (enrollmentId <= 0) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Invalid enrollment ID");
-                return "redirect:/instructordashboard/enrolled";
+                return "redirect:/instructor/enrolled";
             }
             
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -106,17 +106,17 @@ public class ControllerEnrolled {
             
             if (enrollment == null) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Enrollment not found");
-                return "redirect:/instructordashboard/enrolled";
+                return "redirect:/instructor/enrolled";
             }
             
             // Gửi email
             emailService.sendInstructorMessageEmail(instructor, enrollment.getUser(), enrollment.getCourse(), subject, content);
             
             redirectAttributes.addFlashAttribute("successMessage", "Message sent successfully to " + enrollment.getUser().getFullName());
-            return "redirect:/instructordashboard/enrolled";
+            return "redirect:/instructor/enrolled";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Failed to send message: " + e.getMessage());
-            return "redirect:/instructordashboard/enrolled";
+            return "redirect:/instructor/enrolled";
         }
     }
     @PostMapping("/details/{id}")

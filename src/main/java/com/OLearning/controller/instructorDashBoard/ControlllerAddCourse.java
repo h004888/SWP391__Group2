@@ -52,7 +52,7 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/instructordashboard")
+@RequestMapping("/instructor")
 public class ControlllerAddCourse {
     @Autowired
     private CourseService courseService;
@@ -157,7 +157,10 @@ public class ControlllerAddCourse {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
-
+        // Đồng bộ status publish -> published
+        if (status != null && status.equalsIgnoreCase("publish")) {
+            status = "published";
+        }
         Page<CourseDTO> coursePage = courseService.filterCoursesInstructorManage(userId, categoryId, status, price, title, page, size);
         model.addAttribute("courses", coursePage.getContent());
         model.addAttribute("currentPage", page);
@@ -182,7 +185,9 @@ public class ControlllerAddCourse {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
-
+        if (status != null && status.equalsIgnoreCase("publish")) {
+            status = "published";
+        }
         Page<CourseDTO> coursePage = courseService.filterCoursesInstructorManage(userId, categoryId, status, price, title, page, size);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", coursePage.getTotalPages());
@@ -930,16 +935,18 @@ public class ControlllerAddCourse {
 
     @GetMapping("/courses/count-by-status")
     @ResponseBody
-    public Map<String, Integer> countCoursesByStatus() {
+    public int countCoursesByStatus(
+        @RequestParam(name = "status", required = false) String status,
+        @RequestParam(name = "category", required = false) Long categoryId,
+        @RequestParam(name = "price", required = false) String price,
+        @RequestParam(name = "title", required = false) String title
+    ) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
-        Map<String, Integer> result = new HashMap<>();
-        String[] statuses = {"pending", "approved", "lived", "rejected", "resubmit", "hidden", "blocked", "draft"};
-        for (String status : statuses) {
-            int count = courseService.countByInstructorAndStatus(userId, status);
-            result.put(status, count);
+        if (status != null && status.equalsIgnoreCase("publish")) {
+            status = "published";
         }
-        return result;
+        return courseService.countByInstructorAndStatusWithFilter(userId, status, categoryId, price, title);
     }
 }

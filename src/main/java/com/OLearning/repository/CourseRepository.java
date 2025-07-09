@@ -63,9 +63,10 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
       AND (:categoryId IS NULL OR c.category.id = :categoryId)
       AND (
         (:status IS NULL OR :status = '') OR
-        (:status = 'draft' AND c.status = 'draft') OR
-        (:status = 'unknown' AND c.status IS NULL) OR
-        (:status != 'draft' AND :status != 'unknown' AND c.status = :status)
+        (LOWER(:status) = 'draft' AND LOWER(c.status) = 'draft') OR
+        (LOWER(:status) = 'unknown' AND c.status IS NULL) OR
+        (LOWER(:status) = 'published' AND LOWER(c.status) = 'published') OR
+        (LOWER(:status) NOT IN ('draft', 'unknown', 'published') AND LOWER(c.status) = LOWER(:status))
       )
       AND (
            :price IS NULL OR :price = '' OR
@@ -125,4 +126,35 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     @Query("SELECT COUNT(c) FROM Course c WHERE c.instructor.userId = :userId AND c.status = :status")
     int countByInstructorUserIdAndStatus(@Param("userId") Long userId, @Param("status") String status);
     //tinh tong course cua instructor do
+
+    @Query("""
+    SELECT COUNT(c) FROM Course c
+    WHERE (:instructorId IS NULL OR c.instructor.userId = :instructorId)
+      AND (:categoryId IS NULL OR c.category.id = :categoryId)
+      AND (
+        (:status IS NULL OR :status = '') OR
+        (LOWER(:status) = 'draft' AND LOWER(c.status) = 'draft') OR
+        (LOWER(:status) = 'unknown' AND c.status IS NULL) OR
+        (LOWER(:status) = 'published' AND LOWER(c.status) = 'published') OR
+        (LOWER(:status) NOT IN ('draft', 'unknown', 'published') AND LOWER(c.status) = LOWER(:status))
+      )
+      AND (
+           :price IS NULL OR :price = '' OR
+           (:price = 'free' AND c.price = 0) OR
+           (:price = 'paid' AND c.price > 0) OR
+           (:price = 'low' AND c.price > 0 AND c.price < 50000) OR
+           (:price = 'mid' AND c.price >= 50000 AND c.price <= 100000) OR
+           (:price = 'high' AND c.price > 100000)
+      )
+      AND (
+           :title IS NULL OR :title = '' OR LOWER(c.title) LIKE LOWER(CONCAT('%', :title, '%'))
+      )
+    """)
+    int countByFilters(
+        @Param("instructorId") Long instructorId,
+        @Param("categoryId") Long categoryId,
+        @Param("status") String status,
+        @Param("price") String price,
+        @Param("title") String title
+    );
 }

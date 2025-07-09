@@ -16,7 +16,7 @@
             </div>
             <div class="flex-grow-1 text-truncate">
                 <h6 class="mb-0 text-truncate">
-                    <a th:href="@{|/instructordashboard/courses/detail/${course.courseId}|}" 
+                    <a th:href="@{|/instructor/courses/detail/${course.courseId}|}"
                        th:text="${course.title}" 
                        class="text-decoration-none text-dark"></a>
                 </h6>
@@ -34,8 +34,7 @@
             <span th:case="'pending'" class="badge bg-warning text-dark">Pending</span>
             <span th:case="'approved'" class="badge bg-info">Approved</span>
             <span th:case="'rejected'" class="badge bg-danger">Rejected</span>
-            <span th:case="'resubmit'" class="badge bg-warning">Resubmit</span>
-            <span th:case="'lived'" class="badge bg-success">Live</span>
+            <span th:case="'published'" class="badge bg-success">Publish</span>
             <span th:case="'blocked'" class="badge bg-danger">Blocked</span>
             <span th:case="'hidden'" class="badge bg-secondary">Hidden</span>
             <span th:case="null" class="badge bg-secondary">Draft</span>
@@ -45,10 +44,10 @@
     <td style="width: 140px;">
         <div class="d-flex justify-content-center align-items-center gap-2" style="min-width: 120px;">
             <!-- Edit button -->
-            <a th:href="@{/instructordashboard/createcourse/coursebasic(courseId=${course.courseId})}"
+            <a th:href="@{/instructor/createcourse/coursebasic(courseId=${course.courseId})}"
                class="btn btn-icon btn-sm btn-light border shadow-sm rounded-circle text-primary d-flex align-items-center justify-content-center"
                title="Edit Course"
-               th:if="${course.status != 'pending' and course.status != 'lived'}"
+               th:if="${course.status != 'pending' and course.status != 'published'}"
                style="width: 36px; height: 36px;">
                 <i class="fas fa-pen"></i>
             </a>
@@ -79,8 +78,8 @@
                             <i class="bi bi-upload me-2"></i>Up to Public
                         </a>
                     </li>
-                    <!-- Unpublish: only for live -->
-                    <li th:if="${course.status == 'lived'}">
+                    <!-- Unpublish: only for published -->
+                    <li th:if="${course.status == 'published'}">
                         <a class="dropdown-item" href="#" th:onclick="|unpublishCourse('${course.courseId}')|">
                             <i class="bi bi-eye-slash me-2"></i>Unpublish
                         </a>

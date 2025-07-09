@@ -119,7 +119,7 @@
                                         <h5 class="mb-2" th:utext="${instructor.username}"></h5>
     
                                         <div class="d-flex">
-                                            <a th:href="@{/instructordashboard/profile}" class="btn btn-outline-secondary">
+                                            <a th:href="@{/instructor/profile}" class="btn btn-outline-secondary">
                                                 <i class="bi bi-person me-1"></i> View Profile
                                             </a>
                                         </div>
@@ -491,7 +491,7 @@
             var publicId = this.getAttribute('data-publicid');
             if (!publicId) return;
             var video = document.getElementById('modalVideo');
-            video.src = '/api/stream/video/' + encodeURIComponent(publicId);
+            video.src = '/api/video/stream/video/' + encodeURIComponent(publicId);
             var modal = new bootstrap.Modal(document.getElementById('videoModal'));
             modal.show();
             video.play();
@@ -503,7 +503,6 @@
             video.currentTime = 0;
             video.src = "";
         });
-
     </script>
     <script>
         document.addEventListener('click', function(e) {

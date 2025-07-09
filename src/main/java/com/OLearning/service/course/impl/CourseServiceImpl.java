@@ -261,6 +261,10 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Page<CourseDTO> filterCoursesInstructorManage(Long userId, Long categoryId, String status, String price, String title, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
+        // Đồng bộ status publish -> published
+        if (status != null && status.equalsIgnoreCase("publish")) {
+            status = "published";
+        }
         Page<Course> coursePage = courseRepository.findCoursesByFilters(userId, categoryId, status, price, title, pageable);
         return coursePage.map(course -> mapCourseToDTO(course));
     }
@@ -346,6 +350,10 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public int countByInstructorAndStatus(Long userId, String status) {
         return courseRepository.countByInstructorUserIdAndStatus(userId, status);
+    }
+
+    public int countByInstructorAndStatusWithFilter(Long userId, String status, Long categoryId, String price, String title) {
+        return courseRepository.countByFilters(userId, categoryId, status, price, title);
     }
 
     // Lưu course entity

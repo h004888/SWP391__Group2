@@ -137,7 +137,7 @@
 
                                 <!-- Table data: Course -->
                                 <td>
-                                    <a th:href="@{'/instructordashboard/courses/detail/' + ${enrollment.courseId}}" th:text="${enrollment.courseTitle}">Course Title</a>
+                                    <a th:href="@{'/instructor/courses/detail/' + ${enrollment.courseId}}" th:text="${enrollment.courseTitle}">Course Title</a>
                                 </td>
 
                                 <!-- Table data: Enrolled date -->
@@ -218,7 +218,7 @@
                             <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
                                 <!-- Previous page -->
                                 <li class="page-item mb-0" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
-                                    <a class="page-link" th:href="@{/instructordashboard/enrolled(page=${currentPage - 1}, size=${size})}" tabindex="-1">
+                                    <a class="page-link" th:href="@{/instructor/enrolled(page=${currentPage - 1}, size=${size})}" tabindex="-1">
                                         <i class="fas fa-angle-left"></i>
                                     </a>
                                 </li>
@@ -227,7 +227,7 @@
                                 <li class="page-item mb-0" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" 
                                     th:if="${i < 5 || i > totalPages - 3 || (i >= currentPage - 1 && i <= currentPage + 1)}"
                                     th:classappend="${currentPage == i ? 'active' : ''}">
-                                    <a class="page-link" th:href="@{/instructordashboard/enrolled(page=${i}, size=${size})}" th:text="${i + 1}">1</a>
+                                    <a class="page-link" th:href="@{/instructor/enrolled(page=${i}, size=${size})}" th:text="${i + 1}">1</a>
                                 </li>
                                 
                                 <!-- Ellipsis for skipped pages -->
@@ -240,7 +240,7 @@
                                 
                                 <!-- Next page -->
                                 <li class="page-item mb-0" th:classappend="${currentPage + 1 >= totalPages ? 'disabled' : ''}">
-                                    <a class="page-link" th:href="@{/instructordashboard/enrolled(page=${currentPage + 1}, size=${size})}">
+                                    <a class="page-link" th:href="@{/instructor/enrolled(page=${currentPage + 1}, size=${size})}">
                                         <i class="fas fa-angle-right"></i>
                                     </a>
                                 </li>
@@ -327,7 +327,7 @@
                     <h5 class="modal-title" id="messageModalLabel">Send Message to Student</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="messageForm" th:action="@{/instructordashboard/enrolled/send-message}" method="post">
+                <form id="messageForm" th:action="@{/instructor/enrolled/send-message}" method="post">
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="recipientName" class="form-label">To:</label>
@@ -409,7 +409,7 @@
             modal.show();
             
             // Fetch enrollment details
-            fetch(`/instructordashboard/enrolled/details/${enrollmentId}`)
+            fetch(`/instructor/enrolled/details/${enrollmentId}`)
                 .then(response => response.text())
                 .then(html => {
                     document.getElementById('enrollmentDetailsContent').innerHTML = html;
@@ -429,14 +429,14 @@
         document.getElementById('searchForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const searchTerm = document.getElementById('searchInput').value.trim();
-            window.location.href = `/instructordashboard/enrolled/search?keyword=${encodeURIComponent(searchTerm)}`;
+            window.location.href = `/instructor/enrolled/search?keyword=${encodeURIComponent(searchTerm)}`;
         });
         
         // Sort functionality
         document.getElementById('sortBy').addEventListener('change', function() {
             const sortValue = this.value;
             if (sortValue) {
-                window.location.href = `/instructordashboard/enrolled/sort?sort=${encodeURIComponent(sortValue)}`;
+                window.location.href = `/instructor/enrolled/sort?sort=${encodeURIComponent(sortValue)}`;
             }
         });
 
@@ -467,7 +467,7 @@
                 // Tạo form động và submit
                 const form = document.createElement('form');
                 form.method = 'POST';
-                form.action = `/instructordashboard/enrolled/block/${enrollmentIdToBlock}`;
+                form.action = `/instructor/enrolled/block/${enrollmentIdToBlock}`;
                 document.body.appendChild(form);
                 form.submit();
             }
@@ -479,7 +479,7 @@
                 // Tạo form động và submit
                 const form = document.createElement('form');
                 form.method = 'POST';
-                form.action = `/instructordashboard/enrolled/unblock/${enrollmentIdToUnblock}`;
+                form.action = `/instructor/enrolled/unblock/${enrollmentIdToUnblock}`;
                 document.body.appendChild(form);
                 form.submit();
             }

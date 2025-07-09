@@ -80,7 +80,7 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
                         // Cho phép cả ADMIN và INSTRUCTOR truy cập /instructordashboard/**
-                        .requestMatchers("/instructordashboard/**").hasAnyRole("ADMIN", "INSTRUCTOR")
+                        .requestMatchers("/instructor/**").hasAnyRole("ADMIN", "INSTRUCTOR")
 
                         .anyRequest().authenticated()
                 )
