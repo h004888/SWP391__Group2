@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 import com.OLearning.repository.CourseReviewRepository;
+import com.OLearning.dto.notification.NotificationDropdownDTO;
 
 @Controller
 @RequestMapping("/user/notifications")
@@ -145,16 +146,28 @@ public class UserNotificationsController {
         try {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             Long userId = userDetails.getUserId();
-            
-            // Lấy 5 thông báo chưa đọc
             Pageable pageable = PageRequest.of(0, 5);
             List<String> types = List.of("ENROLLMENT", "COURSE_COMPLETION", "QUIZ_RESULT", "CERTIFICATE", "PAYMENT_SUCCESS", "PAYMENT_FAILED", "COMMENT", "COMMENT_HIDDEN");
             Page<NotificationDTO> notificationPage = notificationService.getUnreadNotificationsByUserId(userId, types, pageable);
-            
             long unreadCount = notificationService.countUnreadByUserId(userId);
-            
+            // Chuyển sang NotificationDropdownDTO, rút gọn message chỉ 25 ký tự
+            List<NotificationDropdownDTO> dropdownList = notificationPage.getContent().stream()
+                .map(n -> {
+                    String msg = n.getMessage();
+                    if (msg != null) {
+                        msg = msg.split("\\r?\\n")[0]; // chỉ lấy dòng đầu tiên
+                        if (msg.length() > 25) msg = msg.substring(0, 25) + "...";
+                    }
+                    return new NotificationDropdownDTO(
+                        n.getNotificationId(),
+                        msg,
+                        n.getType(),
+                        n.getStatus(),
+                        n.getSentAt()
+                    );
+                }).toList();
             return ResponseEntity.ok(Map.of(
-                "notifications", notificationPage.getContent(),
+                "notifications", dropdownList,
                 "unreadCount", unreadCount
             ));
         } catch (Exception e) {

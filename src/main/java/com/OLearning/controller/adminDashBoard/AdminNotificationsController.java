@@ -1,6 +1,7 @@
 package com.OLearning.controller.adminDashBoard;
 
 import com.OLearning.dto.notification.NotificationDTO;
+import com.OLearning.dto.notification.NotificationDropdownDTO;
 import com.OLearning.entity.Notification;
 import com.OLearning.mapper.notification.NotificationMapper;
 import com.OLearning.security.CustomUserDetails;
@@ -158,8 +159,24 @@ public class AdminNotificationsController {
             
             long unreadCount = notificationService.countUnreadByUserId(userId);
             
+            // Chuyển sang NotificationDropdownDTO, rút gọn message chỉ 25 ký tự
+            List<NotificationDropdownDTO> dropdownList = notificationPage.getContent().stream()
+                .map(n -> {
+                    String msg = n.getMessage();
+                    if (msg != null) {
+                        msg = msg.split("\\r?\\n")[0]; // chỉ lấy dòng đầu tiên
+                        if (msg.length() > 25) msg = msg.substring(0, 25) + "...";
+                    }
+                    return new NotificationDropdownDTO(
+                        n.getNotificationId(),
+                        msg,
+                        n.getType(),
+                        n.getStatus(),
+                        n.getSentAt()
+                    );
+                }).toList();
             return ResponseEntity.ok(Map.of(
-                "notifications", notificationPage.getContent(),
+                "notifications", dropdownList,
                 "unreadCount", unreadCount
             ));
         } catch (Exception e) {

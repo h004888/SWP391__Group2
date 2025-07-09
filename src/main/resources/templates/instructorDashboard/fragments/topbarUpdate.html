@@ -71,7 +71,7 @@
             </a>
 
             <!-- Notification dropdown menu START -->
-            <div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0">
+            <div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0" style="width:220px;min-width:220px;max-width:220px;border:1px solid #ddd;">
                 <div class="card bg-transparent">
                     <div class="card-header bg-transparent border-bottom py-4 d-flex justify-content-between align-items-center">
                         <h6 class="m-0">Unread Notifications <span id="instructorNotificationCount" class="badge bg-danger bg-opacity-10 text-danger ms-2">0 new</span></h6>
@@ -82,7 +82,7 @@
                         </ul>
                     </div>
                     <!-- Button -->
-                    <div class="card-footer bg-transparent border-0 py-3 text-center position-relative">
+                    <div class="card-footer bg-transparent border-0 py-3 text-center position-relative" style="padding-top:0;">
                         <a th:href="@{/instructordashboard/notifications}" class="stretched-link">View all notifications</a>
                     </div>
                 </div>
@@ -191,19 +191,18 @@
             console.log('Manual test: Loading instructor notifications (update)...');
             loadInstructorNotifications();
         }
-              // Load notifications when dropdown is shown
+        // Load notifications when dropdown is shown
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, setting up instructor notification dropdown (update)...');
             const notificationDropdown = document.querySelector('.nav-item.dropdown [data-bs-toggle="dropdown"]');
             console.log('Found instructor notification dropdown (update):', notificationDropdown);
-            if (notificationDropdown && notificationDropdown.closest('.nav-item').querySelector('#instructorNotificationBadge')) {
-                console.log('Setting up event listener for instructor notification dropdown (update)');
+            if (notificationDropdown) {
                 notificationDropdown.addEventListener('show.bs.dropdown', function() {
-                    console.log('Instructor notification dropdown shown (update), loading notifications...');
+                    console.log('Instructor notification dropdown (update) shown, loading notifications...');
                     loadInstructorNotifications();
                 });
             } else {
-                console.log('Instructor notification dropdown not found or no badge element (update)');
+                console.log('Instructor notification dropdown (update) not found');
             }
         });
 

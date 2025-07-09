@@ -15,6 +15,8 @@ import com.OLearning.repository.UserRepository;
 import com.OLearning.repository.LessonRepository;
 import com.OLearning.service.comment.CommentService;
 import com.OLearning.service.notification.NotificationService;
+import com.OLearning.dto.report.ReportCourseDTO;
+import com.OLearning.service.report.ReportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Comparator;
 
 @RestController
 @RequestMapping("/api/course")
@@ -40,6 +44,8 @@ public class CommentController {
     private final CommentMapper commentMapper;
     private final LessonRepository lessonRepo;
     private final NotificationService notificationService;
+    @Autowired
+    private ReportService reportService;
 
     @PostMapping("/{courseId}/comment")
     @ResponseBody
@@ -318,16 +324,13 @@ public class CommentController {
         }
 
         try {
-            // Tạo report cho course
-            Report report = new Report();
-            report.setReportType("BLOCK_COURSE");
-            report.setCourse(courseRepo.findById(courseId).orElseThrow(() -> new RuntimeException("Không tìm thấy khóa học")));
-            report.setUser(user);
-            report.setContent(reason.trim());
-            report.setCreatedAt(java.time.LocalDateTime.now());
-            report.setStatus("PENDING");
-            reportRepo.save(report);
-            
+            // Gọi service để xử lý báo cáo và gửi notification cho admin
+            ReportCourseDTO dto = new ReportCourseDTO();
+            dto.setCourseId(courseId);
+            dto.setUserId(user.getUserId());
+            dto.setReason(reason.trim());
+            dto.setReportType("REPORT_COURSE");
+            reportService.reportCourse(dto);
             return ResponseEntity.ok(Map.of("success", "Đã báo cáo khóa học thành công"));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest()
@@ -349,7 +352,9 @@ public class CommentController {
             
             // Load comments (Rating = null) for the specific lesson only
             List<CourseReview> parentComments = reviewRepo.findByLessonAndRatingIsNullAndParentReviewIsNull(lesson)
-                .stream().filter(c -> !c.isHidden()).collect(Collectors.toList());
+                .stream().filter(c -> !c.isHidden())
+                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt())) // MỚI NHẤT LÊN TRÊN
+                .collect(Collectors.toList());
             List<CommentDTO> comments = new ArrayList<>();
             
             for (CourseReview parentComment : parentComments) {
@@ -357,9 +362,11 @@ public class CommentController {
                 
                 // Load replies for this comment
                 List<CourseReview> replies = reviewRepo.findByParentReviewOrderByCreatedAtDesc(parentComment)
-                    .stream().filter(r -> !r.isHidden()).collect(Collectors.toList());
+                    .stream().filter(r -> !r.isHidden())
+                    .collect(Collectors.toList());
                 List<CommentDTO> replyDTOs = replies.stream()
                         .map(reply -> commentMapper.toDTO(reply))
+                        .sorted(Comparator.comparing(CommentDTO::getCreatedAt)) // Đảm bảo reply mới nhất xuống dưới
                         .collect(Collectors.toList());
                 commentDTO.setChildren(replyDTOs);
                 

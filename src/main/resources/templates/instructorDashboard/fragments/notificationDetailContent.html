@@ -179,10 +179,52 @@
                         <p class="lead" th:text="${notification.message}"></p>
 
                         <div class="mt-4">
-                                <span th:class="'badge fs-6 ' + ${notification.type == 'COURSE_REJECTION' ? 'bg-danger' : (notification.type == 'ENROLLMENT' ? 'bg-success' : (notification.type == 'comment' ? 'bg-info' : 'bg-primary'))}">
-                                    <i th:class="'fas me-2 ' + ${notification.type == 'COURSE_REJECTION' ? 'fa-times-circle' : (notification.type == 'ENROLLMENT' ? 'fa-user-plus' : (notification.type == 'comment' ? 'fa-comment' : 'fa-info-circle'))}"></i>
+                            <span th:switch="${notification.type}">
+                                <span th:case="'COURSE_REJECTION'" class="badge fs-6 bg-danger">
+                                    <i class="fas me-2 fa-times-circle"></i>
                                     <span th:text="${notification.type}"></span>
                                 </span>
+                                <span th:case="'REPORT_COURSE'" class="badge fs-6 bg-danger">
+                                    <i class="fas me-2 fa-flag"></i>
+                                    <span th:text="${notification.type}"></span>
+                                </span>
+                                <span th:case="'REPORT_COMMENT'" class="badge fs-6 bg-danger">
+                                    <i class="fas me-2 fa-flag"></i>
+                                    <span th:text="${notification.type}"></span>
+                                </span>
+                                <span th:case="'ENROLLMENT'" class="badge fs-6 bg-success">
+                                    <i class="fas me-2 fa-user-plus"></i>
+                                    <span th:text="${notification.type}"></span>
+                                </span>
+                                <span th:case="'COURSE_APPROVED'" class="badge fs-6 bg-success">
+                                    <i class="fas me-2 fa-check"></i>
+                                    <span th:text="${notification.type}"></span>
+                                </span>
+                                <span th:case="'COURSE_UNBLOCKED'" class="badge fs-6 bg-success">
+                                    <i class="fas me-2 fa-unlock"></i>
+                                    <span th:text="${notification.type}"></span>
+                                </span>
+                                <span th:case="'SUCCESSFULLY'" class="badge fs-6 bg-success">
+                                    <i class="fas me-2 fa-check-circle"></i>
+                                    <span th:text="${notification.type}"></span>
+                                </span>
+                                <span th:case="'COURSE_BLOCKED'" class="badge fs-6 bg-warning text-dark">
+                                    <i class="fas me-2 fa-lock"></i>
+                                    <span th:text="${notification.type}"></span>
+                                </span>
+                                <span th:case="'MAINTENANCE_FEE'" class="badge fs-6 bg-warning text-dark">
+                                    <i class="fas me-2 fa-wrench"></i>
+                                    <span th:text="${notification.type}"></span>
+                                </span>
+                                <span th:case="'comment'" class="badge fs-6 bg-info">
+                                    <i class="fas me-2 fa-comment"></i>
+                                    <span th:text="${notification.type}"></span>
+                                </span>
+                                <span th:case="*" class="badge fs-6 bg-primary">
+                                    <i class="fas me-2 fa-info-circle"></i>
+                                    <span th:text="${notification.type}"></span>
+                                </span>
+                            </span>
                         </div>
                     </div>
 

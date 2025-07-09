@@ -104,6 +104,7 @@ public class CommentServiceImpl implements CommentService {
         reply.setRating(null); // Set rating = null for replies
         reply.setCreatedAt(LocalDateTime.now());
         reply.setParentReview(parentReview);
+        reply.setReplyToUserName(dto.getReplyToUserName());
         reviewRepo.save(reply);
         
         System.out.println("Reply added successfully: " + reply.getReviewId() + " for lesson: " + (lesson != null ? lesson.getLessonId() : "course-level"));
@@ -174,7 +175,13 @@ public class CommentServiceImpl implements CommentService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy bình luận"));
 
         // Check if user is not reporting their own comment
-        if (review.getEnrollment().getUser().getUserId().equals(userId)) {
+        Long ownerId = null;
+        if (review.getEnrollment() != null && review.getEnrollment().getUser() != null) {
+            ownerId = review.getEnrollment().getUser().getUserId();
+        } else if (review.getCourse() != null && review.getCourse().getInstructor() != null) {
+            ownerId = review.getCourse().getInstructor().getUserId();
+        }
+        if (ownerId != null && ownerId.equals(userId)) {
             throw new RuntimeException("Bạn không thể báo cáo bình luận của chính mình");
         }
 

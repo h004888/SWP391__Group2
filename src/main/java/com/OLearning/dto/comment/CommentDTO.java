@@ -23,6 +23,8 @@ public class CommentDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<CommentDTO> children;
+    private boolean hidden;
+    private String replyToUserName;
 }
 
 

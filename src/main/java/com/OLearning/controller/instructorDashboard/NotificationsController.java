@@ -2,6 +2,7 @@ package com.OLearning.controller.instructorDashboard;
 
 import com.OLearning.dto.comment.CommentDTO;
 import com.OLearning.dto.notification.NotificationDTO;
+import com.OLearning.dto.notification.NotificationDropdownDTO;
 import com.OLearning.entity.CourseReview;
 import com.OLearning.entity.Notification;
 import com.OLearning.mapper.comment.CommentMapper;
@@ -252,16 +253,28 @@ public class NotificationsController {
         try {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             Long userId = userDetails.getUserId();
-            
-            // Lấy 5 thông báo chưa đọc
             Pageable pageable = PageRequest.of(0, 5);
             List<String> types = List.of("COURSE_BLOCKED", "comment", "COURSE_UNBLOCKED", "COURSE_REJECTION", "COURSE_APPROVED", "MAINTENANCE_FEE", "COURSE_CREATED", "SUCCESSFULLY");
             Page<NotificationDTO> notificationPage = notificationService.getUnreadNotificationsByUserId(userId, types, pageable);
-            
             long unreadCount = notificationService.countUnreadByUserId(userId);
-            
+            // Chuyển sang NotificationDropdownDTO, rút gọn message chỉ 25 ký tự
+            List<NotificationDropdownDTO> dropdownList = notificationPage.getContent().stream()
+                .map(n -> {
+                    String msg = n.getMessage();
+                    if (msg != null) {
+                        msg = msg.split("\\r?\\n")[0]; // chỉ lấy dòng đầu tiên
+                        if (msg.length() > 25) msg = msg.substring(0, 25) + "...";
+                    }
+                    return new NotificationDropdownDTO(
+                        n.getNotificationId(),
+                        msg,
+                        n.getType(),
+                        n.getStatus(),
+                        n.getSentAt()
+                    );
+                }).toList();
             return ResponseEntity.ok(Map.of(
-                "notifications", notificationPage.getContent(),
+                "notifications", dropdownList,
                 "unreadCount", unreadCount
             ));
         } catch (Exception e) {
