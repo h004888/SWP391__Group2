@@ -554,7 +554,8 @@ Trending courses START -->
                                                 <i class="fas fa-star text-warning ms-1"></i>
                                             </p>
 
-                                            <span class="small" th:text="${'(' + course.courseReviews.size()+')'}">(6500)</span>
+                                            <span class="small"
+                                                th:text="${'(' + course.courseReviews.size()+')'}">(6500)</span>
                                         </div>
                                         <div class="hstack gap-2">
                                             <p class="h6 fw-light mb-0 m-0" th:text="${course.enrollments.size()}">

@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.OLearning.security.CustomUserDetails;
 import com.OLearning.service.category.CategoryService;
+import com.OLearning.service.cloudinary.UploadFile;
 import com.OLearning.service.course.CourseService;
 import com.OLearning.service.user.UserService;
 
@@ -52,6 +53,9 @@ public class UserCourseController {
     @Autowired
     private LessonService lessonService;
 
+    @Autowired
+    private UploadFile uploadFile;
+
     @GetMapping
     public String showUserDashboard(Principal principal, Model model) {
 
@@ -77,14 +81,17 @@ public class UserCourseController {
 
         CourseViewDTO courseViewDTO = courseService.getCourseRecentIncomplete(currentUser.getUserId());
 
-
         model.addAttribute("course", courseViewDTO);
-        model.addAttribute("progress", lessonCompletionService.getOverallProgressOfUser(currentUser.getUserId(), courseViewDTO.getCourseId()));
-        model.addAttribute("weeksEnrolled", enrollmentService.getWeeksEnrolled(currentUser.getUserId(), courseViewDTO.getCourseId()));
-        model.addAttribute("numberOfCompletedLessons", lessonCompletionService.getNumberOfCompletedLessons(currentUser.getUserId(),
-                courseViewDTO.getCourseId()));
+        model.addAttribute("progress",
+                lessonCompletionService.getOverallProgressOfUser(currentUser.getUserId(), courseViewDTO.getCourseId()));
+        model.addAttribute("weeksEnrolled",
+                enrollmentService.getWeeksEnrolled(currentUser.getUserId(), courseViewDTO.getCourseId()));
+        model.addAttribute("numberOfCompletedLessons",
+                lessonCompletionService.getNumberOfCompletedLessons(currentUser.getUserId(),
+                        courseViewDTO.getCourseId()));
 
-        model.addAttribute("currentLesson",lessonService.getNextLessonAfterCompleted(currentUser.getUserId(),courseViewDTO.getCourseId()).get());
+        model.addAttribute("currentLesson",
+                lessonService.getNextLessonAfterCompleted(currentUser.getUserId(), courseViewDTO.getCourseId()).get());
 
         return "userPage/LearningDashboard";
     }
@@ -152,17 +159,20 @@ public class UserCourseController {
         CourseViewDTO course = courseService.getCourseById(courseId);
 
         Map<Long, ChapterProgress> chapterProgressMap = new HashMap<>();
-        for (Chapter chapter: course.getListOfChapters()){
+        for (Chapter chapter : course.getListOfChapters()) {
             List<Lesson> lessons = chapter.getLessons();
             int totalLessons = lessons.size();
-            int completedLessons = (int) lessons.stream().filter(lesson -> completedLessonIds.contains(lesson.getLessonId())).count();
-            chapterProgressMap.put(chapter.getChapterId(),  new ChapterProgress(totalLessons, completedLessons));
+            int completedLessons = (int) lessons.stream()
+                    .filter(lesson -> completedLessonIds.contains(lesson.getLessonId())).count();
+            chapterProgressMap.put(chapter.getChapterId(), new ChapterProgress(totalLessons, completedLessons));
         }
 
         model.addAttribute("completedLessonIds", completedLessonIds);
         model.addAttribute("accessibleLessonIds", accessibleLessonIds);
         model.addAttribute("currentLessonId", currentLesson.getLessonId());
         model.addAttribute("currentLesson", currentLesson);
+        model.addAttribute("lessonVideoURL",
+                uploadFile.generateSignedVideoUrl(currentLesson.getVideo().getVideoUrl(), 30, "video"));
 
         model.addAttribute("course", course);
         model.addAttribute("chapters", course.getListOfChapters());
@@ -172,7 +182,7 @@ public class UserCourseController {
 
     @GetMapping("course/{courseId}/lesson/{lessonId}")
     public String showUserLessonDetail(Principal principal, Model model, @PathVariable("lessonId") Long lessonId,
-                                       @PathVariable("courseId") Long courseId) {
+            @PathVariable("courseId") Long courseId) {
         User user = extractCurrentUser(principal);
         if (user == null) {
             return "redirect:/login";
@@ -229,13 +239,13 @@ public class UserCourseController {
             return "userPage/doQuiz";
         }
 
-
         Map<Long, ChapterProgress> chapterProgressMap = new HashMap<>();
-        for (Chapter chapter: course.getListOfChapters()){
+        for (Chapter chapter : course.getListOfChapters()) {
             List<Lesson> lessons = chapter.getLessons();
             int totalLessons = lessons.size();
-            int completedLessons = (int) lessons.stream().filter(lesson -> completedLessonIds.contains(lesson.getLessonId())).count();
-            chapterProgressMap.put(chapter.getChapterId(),  new ChapterProgress(totalLessons, completedLessons));
+            int completedLessons = (int) lessons.stream()
+                    .filter(lesson -> completedLessonIds.contains(lesson.getLessonId())).count();
+            chapterProgressMap.put(chapter.getChapterId(), new ChapterProgress(totalLessons, completedLessons));
         }
 
         model.addAttribute("completedLessonIds", completedLessonIds);
