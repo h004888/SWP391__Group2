@@ -334,9 +334,7 @@
                                     <a th:if="${comment.lessonId != null && notification.course != null}" th:href="@{/course/{courseId}/lesson/{lessonId}(courseId=${notification.course.courseId}, lessonId=${comment.lessonId})}" class="btn btn-info">
                                         <i class="fas fa-arrow-right me-2"></i>Go to Lesson
                                     </a>
-                                    <button type="button" class="btn btn-secondary" onclick="window.history.back()">
-                                        <i class="fas fa-arrow-left me-2"></i>Back
-                                    </button>
+
                                 </div>
                             </form>
                         </div>

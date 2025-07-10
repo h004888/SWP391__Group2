@@ -185,7 +185,14 @@
                                 </span>
                         </td>
                         <td>
-                            <a th:href="@{/user/notifications/view/{id}(id=${n.notificationId})}"
+                            <a th:if="${n.type == 'COMMENT' and n.commentId != null and n.course != null and n.course.courseId != null and lessonIdMap[n.notificationId] != null}"
+                               th:href="@{'/course/' + ${n.course.courseId} + '/lesson/' + ${lessonIdMap[n.notificationId]} + '/video?commentId=' + ${n.commentId}}"
+                               class="btn btn-outline-success btn-sm action-btn"
+                               title="Xem bình luận">
+                                <i class="fas fa-comment"></i>
+                            </a>
+                            <a th:if="${!(n.type == 'COMMENT' and n.commentId != null and n.course != null and n.course.courseId != null and lessonIdMap[n.notificationId] != null)}"
+                               th:href="@{/user/notifications/view/{id}(id=${n.notificationId})}"
                                class="btn btn-outline-primary btn-sm action-btn"
                                title="View Details">
                                 <i class="fas fa-eye"></i>

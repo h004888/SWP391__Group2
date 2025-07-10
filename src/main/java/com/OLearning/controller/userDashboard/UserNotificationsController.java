@@ -58,6 +58,17 @@ public class UserNotificationsController {
         long unreadCount = notificationService.countUnreadByUserId(userId);
         model.addAttribute("unreadCount", unreadCount);
         model.addAttribute("user", userDetails.getUser());
+        // --- Thêm map notificationId -> lessonId cho notification comment ---
+        java.util.Map<Long, Long> lessonIdMap = new java.util.HashMap<>();
+        for (var n : notificationPage.getContent()) {
+            if ("COMMENT".equals(n.getType()) && n.getCommentId() != null) {
+                var commentOpt = courseReviewRepository.findById(n.getCommentId());
+                if (commentOpt.isPresent() && commentOpt.get().getLesson() != null) {
+                    lessonIdMap.put(n.getNotificationId(), commentOpt.get().getLesson().getLessonId());
+                }
+            }
+        }
+        model.addAttribute("lessonIdMap", lessonIdMap);
         model.addAttribute("fragmentContent", "homePage/fragments/notificationsContent :: notificationsContent");
         return "homePage/index";
     }

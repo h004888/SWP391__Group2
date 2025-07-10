@@ -202,28 +202,29 @@
                 <!-- Notification page button END -->
 
                 <!-- Notification dropdown START -->
-                <li class="nav-item ms-2 ms-sm-3 dropdown">
+                <li class="nav-item ms-2 ms-md-3 dropdown">
                     <!-- Notification button -->
-                    <a class="btn btn-light btn-round mb-0 position-relative" href="#" role="button" data-bs-toggle="dropdown"
-                       aria-expanded="false" data-bs-auto-close="outside" title="Notifications" style="width:48px;height:48px;">
-                        <i class="bi bi-bell fa-fw" style="font-size:2rem;line-height:48px;"></i>
-                        <span id="userNotificationBadge" th:if="${unreadCount > 0}" class="notif-badge animation-blink" style="width:14px;height:14px;top:6px;right:6px;"></span>
+                    <a class="btn btn-light btn-round mb-0" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
+                        <i class="bi bi-bell fa-fw"></i>
                     </a>
+                    <!-- Notification dote -->
+                    <span id="userNotificationBadge" th:if="${unreadCount > 0}" class="notif-badge animation-blink"></span>
 
                     <!-- Notification dropdown menu START -->
-                    <div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0" style="width:220px;min-width:220px;max-width:220px;border:1px solid #ddd;">
+                    <div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0">
                         <div class="card bg-transparent">
                             <div class="card-header bg-transparent border-bottom py-4 d-flex justify-content-between align-items-center">
-                                <h6 class="m-0">Unread Notifications <span id="userNotificationCount" class="badge bg-danger bg-opacity-10 text-danger ms-2">0 new</span></h6>
+                                <h6 class="m-0">Notifications <span id="userNotificationCount" class="badge bg-danger bg-opacity-10 text-danger ms-2">0 new</span></h6>
+                                <a class="small" href="#" onclick="markAllAsRead(); return false;">Clear all</a>
                             </div>
                             <div class="card-body p-0">
                                 <ul id="userNotificationList" class="list-group list-unstyled list-group-flush">
-                                    <!-- Notifications will be loaded here -->
+                                    <!-- Notifications will be loaded here by JS -->
                                 </ul>
                             </div>
                             <!-- Button -->
-                            <div class="card-footer bg-transparent border-0 py-3 text-center position-relative" style="padding-top:0;">
-                                <a th:href="@{/user/notifications}" class="stretched-link">View all notifications</a>
+                            <div class="card-footer bg-transparent border-0 py-3 text-center position-relative">
+                                <a th:href="@{/user/notifications}" class="stretched-link">See all incoming activity</a>
                             </div>
                         </div>
                     </div>
@@ -396,45 +397,36 @@
     }
 
     function updateUserNotificationList(notifications) {
-        console.log('Updating user notification list with:', notifications.length, 'notifications');
         const list = document.getElementById('userNotificationList');
         list.innerHTML = '';
-        
         if (notifications.length === 0) {
             list.innerHTML = '<li class="p-3 text-center text-muted">No unread notifications</li>';
             return;
         }
-        
         notifications.forEach(notification => {
-            console.log('Processing user notification:', notification);
             const li = document.createElement('li');
             li.className = 'list-group-item-action border-0 border-bottom d-flex p-3';
-            // Since API returns only unread notifications, all should be 'failed' status
-            if (notification.status === 'failed') {
-                li.style.backgroundColor = '#f8f9fa';
-                li.style.borderLeft = '3px solid #0d6efd';
+            // Avatar/icon
+            let avatarHtml = `<div class=\"me-3\"><div class=\"avatar avatar-md\">`;
+            if (notification.type === 'COMMENT') {
+                avatarHtml += `<i class=\"fas fa-comment\" style=\"font-size: 1.5rem; color: #0d6efd;\"></i>`;
+            } else if (notification.type === 'ENROLLMENT') {
+                avatarHtml += `<i class=\"fas fa-user-plus\" style=\"font-size: 1.5rem; color: #28a745;\"></i>`;
+            } else if (notification.type === 'COURSE_COMPLETION') {
+                avatarHtml += `<i class=\"fas fa-graduation-cap\" style=\"font-size: 1.5rem; color: #ffc107;\"></i>`;
+            } else {
+                avatarHtml += `<i class=\"fas fa-bell\" style=\"font-size: 1.5rem; color: #6c757d;\"></i>`;
             }
-            
+            avatarHtml += `</div></div>`;
+            // Message + time
             const timeAgo = getTimeAgo(notification.sentAt);
-            const typeIcon = getNotificationTypeIcon(notification.type);
-            
-            li.innerHTML = `
-                <div class="me-3">
-                    <div class="avatar avatar-md">
-                        <i class="${typeIcon}" style="font-size: 1.5rem; color: #6c757d;"></i>
-                    </div>
-                </div>
-                <div>
-                    <h6 class="mb-1">${notification.type.replace(/_/g, ' ')}</h6>
-                    <p class="small text-body m-0">${notification.message}</p>
-                    <small class="text-body">${timeAgo}</small>
-                </div>
-            `;
-            
+            let contentHtml = `<div><h6 class=\"mb-1\">${notification.type.replace(/_/g, ' ')}</h6>`;
+            contentHtml += `<p class=\"small text-body m-0\">${notification.message}</p>`;
+            contentHtml += `<small class=\"text-body\">${timeAgo}</small></div>`;
+            li.innerHTML = avatarHtml + contentHtml;
             li.addEventListener('click', function() {
                 window.location.href = `/user/notifications/view/${notification.notificationId}`;
             });
-            
             list.appendChild(li);
         });
     }

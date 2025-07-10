@@ -298,6 +298,27 @@
                 commentsList.innerHTML = renderComments(comments);
                 // Scroll tới cuối danh sách comment để thấy reply mới
                 commentsList.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                // --- Scroll to comment if commentId param exists ---
+                const urlParams = new URLSearchParams(window.location.search);
+                const commentId = urlParams.get('commentId');
+                if (commentId) {
+                    const commentElem = document.getElementById('comment-' + commentId);
+                    if (commentElem) {
+                        commentElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        commentElem.style.backgroundColor = '#ffffcc';
+                        setTimeout(() => commentElem.style.backgroundColor = '', 2000);
+                    } else {
+                        // Hiển thị thông báo nếu không tìm thấy comment
+                        let noti = document.getElementById('comment-not-found-message');
+                        if (!noti) {
+                            noti = document.createElement('div');
+                            noti.id = 'comment-not-found-message';
+                            noti.className = 'alert alert-warning mt-3';
+                            noti.innerText = 'Bình luận này có thể đã bị xóa hoặc không tồn tại.';
+                            commentsList.prepend(noti);
+                        }
+                    }
+                }
             })
             .catch(error => {
                 console.error('Error loading comments:', error);
@@ -569,6 +590,9 @@
                     showMessage('Thao tác thành công!', 'success');
                     // Ẩn form trả lời và reset input
                     e.target.classList.add('d-none');
+                    // Reset input
+                    const input = e.target.querySelector('input[name="comment"]');
+                    if (input) input.value = '';
                     e.target.reset && e.target.reset();
                     // Gọi lại loadComments để cập nhật danh sách
                     loadComments(courseId, lessonId);
