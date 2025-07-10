@@ -1,19 +1,17 @@
-package com.OLearning.controller.instructorDashBoard;
+package com.OLearning.controller.api;
 
-import com.OLearning.repository.CourseRepository;
 import com.OLearning.service.cloudinary.UploadFile;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Map;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -94,8 +92,8 @@ public class JsonController {
             return;
         }
 
-        try (java.io.InputStream is = conn.getInputStream();
-             java.io.OutputStream os = response.getOutputStream()) {
+        try (InputStream is = conn.getInputStream();
+             OutputStream os = response.getOutputStream()) {
             byte[] buffer = new byte[8192];
             int bytesRead;
             while ((bytesRead = is.read(buffer)) != -1) {

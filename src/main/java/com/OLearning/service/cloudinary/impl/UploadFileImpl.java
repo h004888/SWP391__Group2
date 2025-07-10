@@ -102,7 +102,6 @@ public class UploadFileImpl implements UploadFile {
     //generate tu publicId sang Signed de co the phat
     @Override
     public String generateSignedVideoUrl(String publicId, String resourceType) {
-        // Không tự thêm extension, chỉ trả về đúng publicId như lưu trên Cloudinary
         return cloudinary.url()
                 .resourceType(resourceType)
                 .type("private")
