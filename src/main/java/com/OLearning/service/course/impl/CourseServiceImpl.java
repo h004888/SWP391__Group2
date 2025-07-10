@@ -108,7 +108,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public List<CourseViewDTO> getTopCourses() {
-        return courseRepository.findAllOrderByStudentCountDesc().stream()
+        return courseRepository.findAllPublishedOrderByStudentCountDesc().stream()
                 .map(CourseMapper::toCourseViewDTO)
                 .collect(Collectors.toList());
     }
@@ -126,8 +126,8 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public List<CourseViewDTO> getCoursesByCategoryId(int categoryId) {
-        return courseRepository.findByCategoryId(categoryId).stream()
+    public List<CourseViewDTO> getCoursesByCategoryId(Long categoryId) {
+        return courseRepository.findByCategoryIdAndStatusIgnoreCase(categoryId,"publish").stream()
                 .map(CourseMapper::toCourseViewDTO)
                 .collect(Collectors.toList());
     }

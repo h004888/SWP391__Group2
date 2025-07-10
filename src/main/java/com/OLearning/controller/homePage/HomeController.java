@@ -35,6 +35,7 @@ public class HomeController {
                 model.addAttribute("firstFive", firstFive);
                 model.addAttribute("nextFive", nextFive);
                 model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderCategory");
+                model.addAttribute("fragmentContent", "homePage/fragments/mainContent :: mainContent");
                 return "homePage/index";
         }
 

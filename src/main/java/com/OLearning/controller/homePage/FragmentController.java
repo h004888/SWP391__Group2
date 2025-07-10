@@ -38,7 +38,7 @@ public class FragmentController {
     }
 
     @GetMapping("/courseByCategory")
-    public String getAllCoursesByCategory(@RequestParam("categoryId") int categoryId, Model model) {
+    public String getAllCoursesByCategory(@RequestParam("categoryId") Long categoryId, Model model) {
 
         // Convert List<Course> to List<CourseViewDTO>
         model.addAttribute("courses", courseService.getCoursesByCategoryId(categoryId));

@@ -16,13 +16,15 @@ import java.util.Optional;
 
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Long> {
-    @Query("SELECT c FROM Course c LEFT JOIN c.enrollments e GROUP BY c ORDER BY COUNT(e) DESC")
-    List<Course> findAllOrderByStudentCountDesc();
+  @Query("SELECT c FROM Course c LEFT JOIN c.enrollments e WHERE LOWER(c.status) = 'publish' GROUP BY c ORDER BY COUNT(e) DESC")
+  List<Course> findAllPublishedOrderByStudentCountDesc();
 
-    // function search + filter + sort
+
+  // function search + filter + sort
     @Query("""
                 SELECT c FROM Course c
-                WHERE (:keyword       IS NULL
+                WHERE LOWER(c.status) = 'publish' 
+                  AND (:keyword       IS NULL
                        OR LOWER(c.title)       LIKE LOWER(CONCAT('%', :keyword, '%'))
                        OR LOWER(c.description) LIKE LOWER(CONCAT('%', :keyword, '%')))
                   AND (:categoryIds  IS NULL OR c.category.id    IN :categoryIds)
@@ -45,8 +47,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
             @Param("levels") List<String> levels,
             Pageable pageable);
 
-    // find course by category id
-    List<Course> findByCategoryId(int categoryId);
+  List<Course> findByCategoryIdAndStatusIgnoreCase(Long categoryId, String status);
 
     @Query(value = """
                 SELECT TOP 1 c.*

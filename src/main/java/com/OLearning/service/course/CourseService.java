@@ -23,7 +23,7 @@ public interface CourseService {
 
         List<CourseViewDTO> getTopCourses();
 
-        List<CourseViewDTO> getCoursesByCategoryId(int categoryId);
+        List<CourseViewDTO> getCoursesByCategoryId(Long categoryId);
 
         Page<CourseViewDTO> searchCoursesGrid(
                         List<Long> categoryIds,
