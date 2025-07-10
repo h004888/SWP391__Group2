@@ -41,32 +41,28 @@ public class JsonController {
     @Autowired
     private EnrollmentRepository enrollmentRepository;
 
-//    @GetMapping("/signed-url")
-//    public ResponseEntity<String> getSignedUrl(
-//            @RequestParam String publicId,
-//            @RequestParam(defaultValue = "video") String resourceType) {
-//        String url = uploadFile.generateSignedVideoUrl(publicId, resourceType);
-//        return ResponseEntity.ok(url);
-//    }
-
     @GetMapping("/stream/video/{publicId}")
     public void streamVideo(@PathVariable String publicId, HttpServletRequest request, HttpServletResponse response) throws IOException {
        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+      //lay va kiem tra user, xem co null khong
        if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal().equals("anonymousUser")) {
-           response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+        //tra ve loi chua dang nhap, va chuyen luon ve trang dang nhap
+           response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Bạn chưa đăng nhập");
            return;
        }
-       String username = null;
+       String email = null;
        Object principal = authentication.getPrincipal();
        if (principal instanceof UserDetails) {
-           username = ((UserDetails) principal).getUsername();
+           email = ((UserDetails) principal).getUsername();
        } else if (principal instanceof String) {
-           username = (String) principal;
+           email = (String) principal;
        }
-       if (!checkUserAccessToVideo(username, publicId)) {
-           response.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
+       //neu no khong phai 1 trong 3 dieu kien la instructor, admin, enrollment thi no in ra loi
+       if (!checkUserAccessToVideo(email, publicId)) {
+           response.sendError(HttpServletResponse.SC_FORBIDDEN, "bạn chưa có quyền");
            return;
        }
+       //con khong thi no generate ra binh thuong de phat video
         String cloudinaryUrl = uploadFile.generateSignedVideoUrl(publicId,"video");
 
         URL url = new URL(cloudinaryUrl);
@@ -109,8 +105,8 @@ public class JsonController {
         }
     }
 
-    private boolean checkUserAccessToVideo(String username, String videoUrl) {
-        Optional<User> userOpt = userRepository.findByEmail(username);
+    private boolean checkUserAccessToVideo(String email, String videoUrl) {
+        Optional<User> userOpt = userRepository.findByEmail(email);
         if (userOpt.isEmpty()) {
             return false;
         }
@@ -118,10 +114,14 @@ public class JsonController {
         if (user.getRole() == null || user.getRole().getName() == null) {
             return false;
         }
-        String roleName = user.getRole().getName();
-        if ("admin".equalsIgnoreCase(roleName.toLowerCase()) || "Instructor".equalsIgnoreCase(roleName.toLowerCase())) {
+        String roleName = user.getRole().getName().toLowerCase();
+
+        // 1. neu la admin thi luon co quyen truy cap
+        if ("admin".equals(roleName)) {
             return true;
         }
+
+        // lay tat ca lien quan den course tu videoUrl
         Optional<Video> videoOpt = videoRepository.findByVideoUrl(videoUrl);
         if (videoOpt.isEmpty()) {
             return false;
@@ -139,9 +139,19 @@ public class JsonController {
         if (course == null) {
             return false;
         }
+
+        // chi lay instructor theo course
+        if ("instructor".equals(roleName)) {
+            Long userId = user.getUserId();
+            if (course.getInstructor() != null && userId.equals(course.getInstructor().getUserId())) {
+                return true;
+            }
+            return false;
+        }
+
+        // phai chuan enroll
         Long courseId = course.getCourseId();
         Enrollment enrollment = enrollmentRepository.findByUserIdAndCourseId(user.getUserId(), courseId);
-        boolean enrolled = enrollment != null;
-        return enrolled;
+        return enrollment != null;
     }
 }
