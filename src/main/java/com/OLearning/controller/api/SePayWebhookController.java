@@ -21,11 +21,9 @@ public class SePayWebhookController {
         if (rawContent == null) {
             rawContent = (String) payload.get("description");
         }
-
         if (rawContent == null) {
             return "error: missing content or description";
         }
-
         try {
             Long orderId = extractOrderId(rawContent);
             if (orderId != null) {

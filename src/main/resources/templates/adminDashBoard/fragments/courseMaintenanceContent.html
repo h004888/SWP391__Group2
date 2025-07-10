@@ -10,7 +10,7 @@
                 <a href="#" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#termsModal">
                     <i class="fas fa-file-contract me-1"></i> Business Rules
                 </a>
-                <a class="btn btn-success" th:href="@{/admin/courseMaintenance/check-overdue}">
+                <a class="btn btn-danger" th:href="@{/admin/courseMaintenance/check-overdue}">
                     <i class="fas fa-check-circle me-2"></i> Check Overdue
                 </a>
             </div>
@@ -57,6 +57,11 @@
                     <div class="row g-2">
                         <div class="col-md-6">
                             <input type="month" id="monthYearFilter" class="form-control" placeholder="Select Month">
+                        </div>
+                        <div class="col-md-6">
+                            <a class="btn btn-success me-2" th:href="@{/admin/courseMaintenance/process-monthly}">
+                                <i class="fas fa-calendar me-2"></i> Check Invoice
+                            </a>
                         </div>
                     </div>
                 </div>

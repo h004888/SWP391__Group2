@@ -39,7 +39,7 @@ public class UserNotificationsController {
         Long userId = userDetails.getUserId();
         Pageable pageable = PageRequest.of(page, size);
         if (types == null || types.isEmpty()) {
-            types = List.of("ENROLLMENT", "COURSE_COMPLETION", "QUIZ_RESULT", "CERTIFICATE", "PAYMENT_SUCCESS", "PAYMENT_FAILED", "COMMENT", "COMMENT_HIDDEN");
+            types = List.of("ENROLLMENT", "COURSE_COMPLETION", "QUIZ_RESULT", "CERTIFICATE", "PAYMENT_SUCCESS", "PAYMENT_FAILED", "COMMENT", "COMMENT_HIDDEN","INSTRUCTOR_REQUEST");
         }
         Page<NotificationDTO> notificationPage;
         if (search != null && !search.isBlank()) {

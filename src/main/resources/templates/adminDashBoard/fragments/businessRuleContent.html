@@ -451,6 +451,14 @@
             </div>
         </div>
 
+        <!-- Success Alert -->
+        <div th:if="${successMessage}"
+             class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-4 shadow"
+             role="alert" id="success-alert" style="z-index: 1055; min-width: 300px;">
+            <strong th:text="${successMessage}">Thành công!</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
         <!-- Document Container -->
         <div class="document-container">
             <!-- Document Header -->
@@ -637,6 +645,19 @@
     </body>
     <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
     <script>
+        setTimeout(function() {
+            var alert = document.getElementById('success-alert');
+            if (alert) {
+                alert.classList.remove('show');
+                alert.classList.add('fade');
+                setTimeout(function() {
+                    if (alert.parentNode) {
+                        alert.parentNode.removeChild(alert);
+                    }
+                }, 500);
+            }
+        }, 3000);
+
         function makeEditable(element) {
             if (element.classList.contains('editing')) return;
 

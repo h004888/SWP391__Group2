@@ -28,10 +28,6 @@ public class CourseMaintenance {
     @JoinColumn(name = "FeeID")
     private Fee fee;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "OrderID")
-    private Order orders;
-
     @Column(name = "MonthYear")
     private LocalDate monthYear;
     

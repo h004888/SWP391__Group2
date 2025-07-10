@@ -294,7 +294,7 @@ $('#confirmActionForm').on('submit', function(e) {
     });
 });
 
-// Đảm bảo các hàm action luôn được bind lại sau khi AJAX load content
+
 window.upToPublic = upToPublic;
 window.unpublishCourse = unpublishCourse;
 window.hideCourse = hideCourse;

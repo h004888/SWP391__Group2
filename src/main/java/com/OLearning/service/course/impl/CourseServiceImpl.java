@@ -4,11 +4,8 @@ import com.OLearning.dto.course.AddCourseStep1DTO;
 import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.course.CourseDetailDTO;
 import com.OLearning.dto.course.CourseMediaDTO;
-import com.OLearning.entity.Category;
+import com.OLearning.entity.*;
 import com.OLearning.dto.course.CourseViewDTO;
-import com.OLearning.entity.Chapter;
-import com.OLearning.entity.Course;
-import com.OLearning.entity.User;
 import com.OLearning.mapper.course.CourseDetailMapper;
 import com.OLearning.mapper.course.CourseMapper;
 import com.OLearning.repository.*;
@@ -307,7 +304,7 @@ public class CourseServiceImpl  implements CourseService {
                         courseRepository.save(course);
                         // Gửi notification cho instructor
                         if (course.getInstructor() != null) {
-                            com.OLearning.entity.Notification notification = new com.OLearning.entity.Notification();
+                            Notification notification = new Notification();
                             notification.setUser(course.getInstructor());
                             notification.setCourse(course);
                             notification.setMessage("Khóa học '" + course.getTitle() + "' của bạn đã được admin phê duyệt.");
@@ -330,6 +327,17 @@ public class CourseServiceImpl  implements CourseService {
                         course.setStatus("rejected");
                         course.setUpdatedAt(LocalDateTime.now());
                         courseRepository.save(course);
+                        // Gửi notification cho instructor
+                        if (course.getInstructor() != null) {
+                            Notification notification = new Notification();
+                            notification.setUser(course.getInstructor());
+                            notification.setCourse(course);
+                            notification.setMessage("Khóa học '" + course.getTitle() + "' của bạn đã bị admin từ chối.");
+                            notification.setType("COURSE_REJECTED");
+                            notification.setStatus("failed");
+                            notification.setSentAt(LocalDateTime.now());
+                            notificationRepository.save(notification);
+                        }
                         return true;
                     }
                     return false;

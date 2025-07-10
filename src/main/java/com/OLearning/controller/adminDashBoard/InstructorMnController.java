@@ -31,6 +31,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import com.OLearning.dto.instructorRequest.InstructorRequestDTO;
+import com.OLearning.mapper.instructorRequest.InstructorRequestMapper;
 
 @Controller
 @RequestMapping("/admin/mnInstructors")
@@ -220,9 +222,10 @@ public class InstructorMnController {
     }
 
     @GetMapping("/request/details/{id}")
-    public ResponseEntity<InstructorRequest> getRequestDetails(@PathVariable Long id) {
+    @ResponseBody
+    public InstructorRequestDTO getRequestDetails(@PathVariable Long id) {
         InstructorRequest request = instructorRequestService.getRequestById(id);
-        return ResponseEntity.ok(request);
+        return InstructorRequestMapper.mapToDTO(request);
     }
 
     @PostMapping("/request/accept/{id}")

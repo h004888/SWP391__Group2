@@ -35,20 +35,18 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link " th:href="@{/home/coursesGrid}" id="demoMenu" aria-haspopup="true"
                             aria-expanded="false">Courses</a>
-
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link " th:href="@{/learning}" aria-haspopup="true"
                             aria-expanded="false">Education</a>
-
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link " href="#" aria-haspopup="true" aria-expanded="false">About</a>
-
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link " href="#" aria-haspopup="true" aria-expanded="false">Contact</a>
-
+                    <li class="nav-item dropdown"
+                        th:if="${#authentication.principal.userEntity.role.roleId == 3}">
+                        <a class="nav-link" th:href="@{/become-instructor}"
+                           aria-haspopup="true" aria-expanded="false">Become Instructor</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link " th:href="@{/vouchers}"

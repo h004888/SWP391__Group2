@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDateTime;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -48,7 +47,7 @@ public class BusinessRuleController {
             .updatedAt(LocalDateTime.now())
             .build();
         termsAndConditionService.save(clause);
-        redirectAttributes.addFlashAttribute("successMessage", "Clause added successfully!");
+        redirectAttributes.addFlashAttribute("successMessage", "Rule added successfully!");
         return "redirect:/admin/businessRule";
     }
 
@@ -66,14 +65,14 @@ public class BusinessRuleController {
         clause.setRoleTarget(roleTarget);
         clause.setUpdatedAt(LocalDateTime.now());
         termsAndConditionService.save(clause);
-        redirectAttributes.addFlashAttribute("successMessage", "Clause updated successfully!");
+        redirectAttributes.addFlashAttribute("successMessage", "Rule updated successfully!");
         return "redirect:/admin/businessRule";
     }
 
     @PostMapping("/admin/businessRule/delete")
     public String deleteClause(@RequestParam Long id, RedirectAttributes redirectAttributes) {
         termsAndConditionService.deleteById(id);
-        redirectAttributes.addFlashAttribute("successMessage", "Clause deleted successfully!");
+        redirectAttributes.addFlashAttribute("successMessage", "Rule deleted successfully!");
         return "redirect:/admin/businessRule";
     }
 

@@ -52,7 +52,8 @@ public class UserProfileController {
                 model.addAttribute("unreadCount", unreadCount);
             });
         }
-        
+        model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderDefault");
+
         if (isAdmin) {
             model.addAttribute("fragmentContent", "adminDashBoard/fragments/profileContent :: profileContent");
             return "adminDashBoard/index";
@@ -83,7 +84,8 @@ public class UserProfileController {
                 model.addAttribute("unreadCount", unreadCount);
             });
         }
-        
+        model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderDefault");
+
         if (isAdmin) {
             model.addAttribute("fragmentContent", "adminDashBoard/fragments/editProfileContent :: editProfileContent");
             return "adminDashBoard/index";

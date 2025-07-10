@@ -1,5 +1,6 @@
 package com.OLearning.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.validator.constraints.Normalized;
@@ -63,30 +64,39 @@ public class User {
     private Role role;
 
     @OneToMany(mappedBy = "instructor", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Course> courses;
 
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Order> order;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Notification> notifications;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<InstructorRequest> instructorRequests;
 
     @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<InstructorRequest> approvedRequests;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<CoinTransaction> coinTransactions;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Enrollment> enrollments;
 
     @OneToMany(mappedBy = "instructor")
+    @JsonIgnore
     private List<Voucher> vouchers;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<UserVoucher> userVouchers;
 }
 

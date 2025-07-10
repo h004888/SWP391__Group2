@@ -30,6 +30,9 @@ public class InstructorRequest {
     @Column(name = "DecisionDate")
     private LocalDateTime decisionDate;
 
+    @Column(name = "Personal_skill", columnDefinition = "NVARCHAR(MAX)")
+    private String personalSkill;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "UserID", nullable = false)
     private User user; // Người gửi yêu cầu
