@@ -2,7 +2,6 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 
-
 <div th:replace="~{homePage/fragments/header :: header}"></div>
 
 <body>
@@ -12,8 +11,9 @@
 	<!-- Header END -->
 
 	<!-- **************** MAIN CONTENT START **************** -->
-	<div th:replace="~{homePage/fragments/mainContent :: mainContent}"></div>
+	<div th:replace="~{__${fragmentContent}__}"></div>
 	<!-- **************** MAIN CONTENT END **************** -->
+
 
 	<!-- =======================
 Footer START -->
@@ -82,6 +82,26 @@ Footer END -->
 				const defaultCategoryId = firstActiveTab.data('category-id');
 				loadCoursesByCategory(defaultCategoryId);
 			}
+		});
+
+		$(document).ready(function () {
+			// Khi bấm Profile trên dropdown
+			$('#dropdown-profile-btn').on('click', function (e) {
+				e.preventDefault();
+				$.get('/user/profile/fragment', function (data) {
+					$('#profile-container').html(data);
+					// Gắn lại sự kiện cho nút Edit Profile trong fragment
+					$('#btn-edit-profile').on('click', function () {
+						$.get('/user/profile/edit-fragment', function (data) {
+							$('#profile-container').html(data);
+							// Gắn lại sự kiện cho nút Cancel trong form edit
+							$('#btn-cancel-edit').on('click', function () {
+								$('#dropdown-profile-btn').click();
+							});
+						});
+					});
+				});
+			});
 		});
 	</script>
 

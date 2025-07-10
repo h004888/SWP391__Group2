@@ -99,7 +99,7 @@ public class CommentController {
     @PostMapping("/{courseId}/comment/reply")
     @ResponseBody
     public ResponseEntity<?> replyComment(@PathVariable Long courseId,
-                                        @ModelAttribute CommentDTO dto,
+                                        @RequestBody CommentDTO dto,
                                         Principal principal) {
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

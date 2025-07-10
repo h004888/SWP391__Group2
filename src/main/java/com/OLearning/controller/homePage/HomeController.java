@@ -94,7 +94,7 @@ public class HomeController {
                         model.addAttribute("unreadCount", unreadCount);
                     }
                 }
-                
+        model.addAttribute("fragmentContent", "homePage/fragments/mainContent :: mainContent");
                 return "homePage/index";
         }
 

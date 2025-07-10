@@ -1,0 +1,61 @@
+<div th:fragment="editProfile">
+    <div class="card shadow border-0 rounded-4 mx-auto" style="max-width: 900px;">
+        <div class="card-body p-5">
+            <h2 class="mb-4 text-center">Edit Profile</h2>
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                Cập nhật thông tin thành công!
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <form th:action="@{/profile/edit}" th:object="${profile}" method="post" enctype="multipart/form-data">
+                <div class="row mb-4 justify-content-center">
+                    <div class="col-md-4 text-center">
+                        <img th:src="${profile.avatarUrl != null ? profile.avatarUrl : '/assets/images/avatar/01.jpg'}" alt="Avatar" class="rounded-circle shadow mb-3" style="width: 120px; height: 120px; object-fit: cover; border: 4px solid #fff;">
+                        <div class="mb-2">
+                            <input type="file" name="avatarFile" class="form-control" accept="image/*">
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" th:field="*{fullName}" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Username</label>
+                                <input type="text" th:field="*{username}" class="form-control" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email</label>
+                                <input type="email" th:field="*{email}" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Phone</label>
+                                <input type="text" th:field="*{phone}" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Address</label>
+                                <input type="text" th:field="*{address}" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Personal Skill</label>
+                                <input type="text" th:field="*{personalSkill}" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Birthday</label>
+                                <input type="date" th:field="*{birthDay}" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-success px-4 me-2"><i class="bi bi-save me-2"></i>Save</button>
+                    <button type="button" class="btn btn-secondary px-4" id="btn-cancel-edit">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div> 

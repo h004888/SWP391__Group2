@@ -58,7 +58,8 @@ public class UserNotificationsController {
         long unreadCount = notificationService.countUnreadByUserId(userId);
         model.addAttribute("unreadCount", unreadCount);
         model.addAttribute("user", userDetails.getUser());
-        return "userPage/notifications";
+        model.addAttribute("fragmentContent", "homePage/fragments/notificationsContent :: notificationsContent");
+        return "homePage/index";
     }
 
     @PostMapping("/{id}/mark-read")
@@ -116,8 +117,9 @@ public class UserNotificationsController {
                 }
                 model.addAttribute("notification", notificationDTO);
                 model.addAttribute("lessonId", lessonId);
-                model.addAttribute("user", userDetails.getUser()); // Thêm dòng này
-                return "userPage/notificationDetail";
+                model.addAttribute("user", userDetails.getUser());
+                 model.addAttribute("fragmentContent", "homePage/fragments/notificationsDetailContent :: notificationsDetailContent");
+                return "homePage/index";
             } else {
                 return "redirect:/user/notifications";
             }
