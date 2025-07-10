@@ -70,6 +70,75 @@ $(document).ready(function () {
         currentPages[currentStatus] = 0;
         filterMaintenances(currentStatus, 0);
     });
+
+    // Validate fee rule before submit
+    function getFeeRulesFromTable() {
+        let rules = [];
+        document.querySelectorAll('.fee-form').forEach(form => {
+            const min = parseInt(form.querySelector('.min-enrollments').value, 10);
+            const maxInput = form.querySelector('.max-enrollments').value;
+            const max = maxInput === "" ? null : parseInt(maxInput, 10);
+            rules.push({min, max, form});
+        });
+        return rules;
+    }
+
+    function validateFeeRule(currentMin, currentMax, rules, currentForm) {
+        // Nếu max trống, min phải lớn nhất
+        if (currentMax === null) {
+            const maxMin = Math.max(...rules.filter(r => r.form !== currentForm).map(r => r.min));
+            if (rules.length > 1 && currentMin <= maxMin) {
+                return "Nếu không nhập Max Enrollments, Min Enrollments phải lớn nhất!";
+            }
+        }
+        // Nếu max có giá trị, min < max
+        if (currentMax !== null && currentMin >= currentMax) {
+            return "Min Enrollments phải nhỏ hơn Max Enrollments!";
+        }
+        // Không được chồng chéo các khoảng
+        for (let rule of rules) {
+            if (rule.form === currentForm) continue;
+            let minA = currentMin, maxA = currentMax, minB = rule.min, maxB = rule.max;
+            if (maxA === null) maxA = Infinity;
+            if (maxB === null) maxB = Infinity;
+            if (Math.max(minA, minB) < Math.min(maxA, maxB)) {
+                return "Khoảng Min-Max bị chồng chéo với rule khác!";
+            }
+        }
+        return null;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Validate on save (update)
+        document.querySelectorAll('.fee-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const min = parseInt(form.querySelector('.min-enrollments').value, 10);
+                const maxInput = form.querySelector('.max-enrollments').value;
+                const max = maxInput === "" ? null : parseInt(maxInput, 10);
+                const rules = getFeeRulesFromTable();
+                const error = validateFeeRule(min, max, rules, form);
+                if (error) {
+                    e.preventDefault();
+                    alert(error);
+                }
+            });
+        });
+        // Validate on add
+        const addForm = document.getElementById('addFeeForm');
+        if (addForm) {
+            addForm.addEventListener('submit', function(e) {
+                const min = parseInt(addForm.querySelector('input[name="minEnrollments"]').value, 10);
+                const maxInput = addForm.querySelector('input[name="maxEnrollments"]').value;
+                const max = maxInput === "" ? null : parseInt(maxInput, 10);
+                const rules = getFeeRulesFromTable();
+                const error = validateFeeRule(min, max, rules, null);
+                if (error) {
+                    e.preventDefault();
+                    alert(error);
+                }
+            });
+        }
+    });
 });
 
 // Function to handle max enrollment input changes

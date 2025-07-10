@@ -76,13 +76,34 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
 
     @Override
     public void updateFee(Long feeId, Long minEnrollments, Long maxEnrollments, Long maintenanceFee) {
+        List<Fee> existingFees = feesRepository.findAll();
+        existingFees.removeIf(f -> f.getFeeId().equals(feeId)); // loại trừ chính nó
+        // Nếu max null, min phải lớn nhất
+        if (maxEnrollments == null) {
+            Long maxMin = existingFees.stream().mapToLong(Fee::getMinEnrollments).max().orElse(Long.MIN_VALUE);
+            if (!existingFees.isEmpty() && minEnrollments <= maxMin) {
+                throw new RuntimeException("Nếu không nhập Max Enrollments, Min Enrollments phải lớn nhất!");
+            }
+        }
+        // Nếu max có giá trị, min < max
+        if (maxEnrollments != null && minEnrollments >= maxEnrollments) {
+            throw new RuntimeException("Min enrollments must be less than max enrollments");
+        }
+        // Check overlap
+        for (Fee existingFee : existingFees) {
+            Long minA = minEnrollments;
+            Long maxA = maxEnrollments == null ? Long.MAX_VALUE : maxEnrollments;
+            Long minB = existingFee.getMinEnrollments();
+            Long maxB = existingFee.getMaxEnrollments() == null ? Long.MAX_VALUE : existingFee.getMaxEnrollments();
+            if (Math.max(minA, minB) < Math.min(maxA, maxB)) {
+                throw new RuntimeException("Fee range overlaps with existing fee range");
+            }
+        }
         Fee fee = feesRepository.findById(feeId)
                 .orElseThrow(() -> new RuntimeException("Fee not found"));
-        
         fee.setMinEnrollments(minEnrollments);
         fee.setMaxEnrollments(maxEnrollments);
         fee.setMaintenanceFee(maintenanceFee);
-        
         feesRepository.save(fee);
     }
 
@@ -101,25 +122,32 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
 
     @Override
     public void addFee(Long minEnrollments, Long maxEnrollments, Long maintenanceFee) {
-        // Validate input
-        if (minEnrollments >= maxEnrollments) {
+        List<Fee> existingFees = feesRepository.findAll();
+        // Nếu max null, min phải lớn nhất
+        if (maxEnrollments == null) {
+            Long maxMin = existingFees.stream().mapToLong(Fee::getMinEnrollments).max().orElse(Long.MIN_VALUE);
+            if (!existingFees.isEmpty() && minEnrollments <= maxMin) {
+                throw new RuntimeException("Nếu không nhập Max Enrollments, Min Enrollments phải lớn nhất!");
+            }
+        }
+        // Nếu max có giá trị, min < max
+        if (maxEnrollments != null && minEnrollments >= maxEnrollments) {
             throw new RuntimeException("Min enrollments must be less than max enrollments");
         }
-        
-        // Check for overlapping ranges
-        List<Fee> existingFees = feesRepository.findAll();
+        // Check overlap
         for (Fee existingFee : existingFees) {
-            if ((minEnrollments <= existingFee.getMaxEnrollments() && 
-                 maxEnrollments >= existingFee.getMinEnrollments())) {
+            Long minA = minEnrollments;
+            Long maxA = maxEnrollments == null ? Long.MAX_VALUE : maxEnrollments;
+            Long minB = existingFee.getMinEnrollments();
+            Long maxB = existingFee.getMaxEnrollments() == null ? Long.MAX_VALUE : existingFee.getMaxEnrollments();
+            if (Math.max(minA, minB) < Math.min(maxA, maxB)) {
                 throw new RuntimeException("Fee range overlaps with existing fee range");
             }
         }
-        
         Fee newFee = new Fee();
         newFee.setMinEnrollments(minEnrollments);
         newFee.setMaxEnrollments(maxEnrollments);
         newFee.setMaintenanceFee(maintenanceFee);
-        
         feesRepository.save(newFee);
     }
 
