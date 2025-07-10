@@ -34,7 +34,7 @@
             <span th:case="'pending'" class="badge bg-warning text-dark">Pending</span>
             <span th:case="'approved'" class="badge bg-info">Approved</span>
             <span th:case="'rejected'" class="badge bg-danger">Rejected</span>
-            <span th:case="'published'" class="badge bg-success">Publish</span>
+            <span th:case="'publish'" class="badge bg-success">Publish</span>
             <span th:case="'blocked'" class="badge bg-danger">Blocked</span>
             <span th:case="'hidden'" class="badge bg-secondary">Hidden</span>
             <span th:case="null" class="badge bg-secondary">Draft</span>
@@ -47,7 +47,7 @@
             <a th:href="@{/instructor/createcourse/coursebasic(courseId=${course.courseId})}"
                class="btn btn-icon btn-sm btn-light border shadow-sm rounded-circle text-primary d-flex align-items-center justify-content-center"
                title="Edit Course"
-               th:if="${course.status != 'pending' and course.status != 'published'}"
+               th:if="${course.status != 'pending' and course.status != 'publish'}"
                style="width: 36px; height: 36px;">
                 <i class="fas fa-pen"></i>
             </a>
@@ -79,7 +79,7 @@
                         </a>
                     </li>
                     <!-- Unpublish: only for published -->
-                    <li th:if="${course.status == 'published'}">
+                    <li th:if="${course.status == 'publish'}">
                         <a class="dropdown-item" href="#" th:onclick="|unpublishCourse('${course.courseId}')|">
                             <i class="bi bi-eye-slash me-2"></i>Unpublish
                         </a>

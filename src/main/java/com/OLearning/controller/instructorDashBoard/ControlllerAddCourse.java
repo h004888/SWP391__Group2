@@ -157,17 +157,14 @@ public class ControlllerAddCourse {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
-        // Đồng bộ status publish -> published
-        if (status != null && status.equalsIgnoreCase("publish")) {
-            status = "published";
-        }
         Page<CourseDTO> coursePage = courseService.filterCoursesInstructorManage(userId, categoryId, status, price, title, page, size);
+        model.addAttribute("status", status);
         model.addAttribute("courses", coursePage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", coursePage.getTotalPages());
         model.addAttribute("totalElements", coursePage.getTotalElements());
         model.addAttribute("size", size);
-        model.addAttribute("status", status);
+
         // Trả về fragment table row cho tbody
         return "instructorDashboard/fragments/courseTableRowContent :: courseTableRowContent";
     }
@@ -210,7 +207,7 @@ public class ControlllerAddCourse {
             , RedirectAttributes redirectAttributes, HttpServletRequest request) {
         //tim course theo course ID
         //set status
-        courseService.submitCourse(courseId, "published");
+        courseService.submitCourse(courseId, "publish");
         redirectAttributes.addFlashAttribute("successMessage", "course published successfully.");
         return "redirect:../courses";
     }
@@ -944,9 +941,7 @@ public class ControlllerAddCourse {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
-        if (status != null && status.equalsIgnoreCase("publish")) {
-            status = "published";
-        }
+        // Không chuyển publish thành published nữa
         return courseService.countByInstructorAndStatusWithFilter(userId, status, categoryId, price, title);
     }
 }

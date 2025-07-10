@@ -137,11 +137,7 @@ function upToPublic(courseId) {
     if (confirm('Are you sure you want to publish this course?')) {
         $.post('/instructor/courses/uptopublic', { courseId: courseId })
             .done(function() {
-                // Reload tab publish
-                filterCourses('published', 0);
-                // Reload tab approved (nếu cần)
-                filterCourses('approved', 0);
-                // Update badge
+                filterAllTabs(0); // Reload tất cả các tab
                 updateStatusBadges();
             });
     }
@@ -151,7 +147,11 @@ function unpublishCourse(courseId) {
     showConfirmActionModal(
         'Bạn có chắc chắn muốn hủy công khai khóa học này?',
         '/instructor/courses/unpublish',
-        courseId
+        courseId,
+        function() {
+            filterAllTabs(0);
+            updateStatusBadges();
+        }
     );
 }
 
@@ -159,7 +159,11 @@ function hideCourse(courseId) {
     showConfirmActionModal(
         'Bạn có chắc chắn muốn ẩn khóa học này?',
         '/instructor/courses/hide',
-        courseId
+        courseId,
+        function() {
+            filterAllTabs(0);
+            updateStatusBadges();
+        }
     );
 }
 
@@ -167,7 +171,11 @@ function unhideCourse(courseId) {
     showConfirmActionModal(
         'Bạn có chắc chắn muốn hiển thị lại khóa học này?',
         '/instructor/courses/unhide',
-        courseId
+        courseId,
+        function() {
+            filterAllTabs(0);
+            updateStatusBadges();
+        }
     );
 }
 
@@ -175,7 +183,11 @@ function blockCourse(courseId) {
     showConfirmActionModal(
         'Bạn có chắc chắn muốn chặn khóa học này?',
         '/instructor/courses/block',
-        courseId
+        courseId,
+        function() {
+            filterAllTabs(0);
+            updateStatusBadges();
+        }
     );
 }
 
@@ -183,15 +195,26 @@ function unblockCourse(courseId) {
     showConfirmActionModal(
         'Bạn có chắc chắn muốn bỏ chặn khóa học này?',
         '/instructor/courses/unblock',
-        courseId
+        courseId,
+        function() {
+            filterAllTabs(0);
+            updateStatusBadges();
+        }
     );
 }
 
-function showConfirmActionModal(message, actionUrl, courseId) {
+function showConfirmActionModal(message, actionUrl, courseId, callback) {
     $('#confirmActionMessage').text(message);
     $('#confirmActionForm').attr('action', actionUrl);
     $('#confirmActionCourseId').val(courseId);
-    
+    $('#confirmActionForm').off('submit').on('submit', function(e) {
+        e.preventDefault();
+        $.post(actionUrl, { courseId: courseId })
+            .done(function() {
+                if (typeof callback === 'function') callback();
+                $('#confirmActionModal').modal('hide');
+            });
+    });
     var modal = new bootstrap.Modal(document.getElementById('confirmActionModal'));
     modal.show();
 }
@@ -199,9 +222,16 @@ function showConfirmActionModal(message, actionUrl, courseId) {
 function deleteCourse(courseId, courseTitle) {
     $('#courseTitle').text(courseTitle);
     $('#deleteCourseId').val(courseId);
-    
-    var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
-    modal.show();
+    $('#deleteForm').off('submit').on('submit', function(e) {
+        e.preventDefault();
+        $.post('/instructor/createcourse/deletecourse', { courseId: courseId })
+            .done(function() {
+                filterAllTabs(0);
+                updateStatusBadges();
+                $('#deleteModal').modal('hide');
+            });
+    });
+    $('#deleteModal').modal('show');
 }
 
 // Handle delete form submission
@@ -279,7 +309,7 @@ function updateStatusBadges() {
     const statuses = [
         { tab: 'pending', badge: 'pendingCount' },
         { tab: 'approved', badge: 'approvedCount' },
-        { tab: 'publish', badge: 'publishCount', db: 'published' },
+        { tab: 'publish', badge: 'publishCount'},
         { tab: 'rejected', badge: 'rejectedCount' },
         { tab: 'hidden', badge: 'hiddenCount' },
         { tab: 'blocked', badge: 'blockedCount' },
@@ -287,7 +317,6 @@ function updateStatusBadges() {
     ];
     statuses.forEach(function(s) {
         let status = s.db || s.tab;
-        if (status === 'publish') status = 'published';
         $.ajax({
             url: '/instructor/courses/count-by-status',
             type: 'GET',
@@ -307,7 +336,7 @@ function updateAllTabBadges(filter) {
     const statuses = [
         { tab: 'pending', badge: 'pendingCount' },
         { tab: 'approved', badge: 'approvedCount' },
-        { tab: 'publish', badge: 'publishCount', db: 'published' },
+        { tab: 'publish', badge: 'publishCount'},
         { tab: 'rejected', badge: 'rejectedCount' },
         { tab: 'hidden', badge: 'hiddenCount' },
         { tab: 'blocked', badge: 'blockedCount' },
@@ -315,7 +344,6 @@ function updateAllTabBadges(filter) {
     ];
     statuses.forEach(function(s) {
         let status = s.db || s.tab;
-        if (status === 'publish') status = 'published';
         let data = { status: status };
         if (filter.category) data.category = filter.category;
         if (filter.price) data.price = filter.price;
@@ -337,8 +365,7 @@ function updateAllTabBadges(filter) {
 function filterAllTabs(page = 0) {
     const statuses = ['pending', 'approved', 'publish', 'rejected', 'hidden', 'blocked', 'draft'];
     statuses.forEach(status => {
-        let realStatus = status === 'publish' ? 'published' : status;
-        filterCourses(realStatus, page);
+        filterCourses(status, page);
     });
 }
 
@@ -346,7 +373,6 @@ function initCourseTab() {
     // Bind lại tất cả event handler cho tab, filter, search, pagination...
     $('.nav-link[data-bs-toggle="tab"]').off('shown.bs.tab').on('shown.bs.tab', function(e) {
         let status = $(this).data('status');
-        if (status === 'publish') status = 'published';
         filterCourses(status, 0);
     });
 

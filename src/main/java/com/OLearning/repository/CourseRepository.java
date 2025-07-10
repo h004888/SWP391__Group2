@@ -65,8 +65,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
         (:status IS NULL OR :status = '') OR
         (LOWER(:status) = 'draft' AND LOWER(c.status) = 'draft') OR
         (LOWER(:status) = 'unknown' AND c.status IS NULL) OR
-        (LOWER(:status) = 'published' AND LOWER(c.status) = 'published') OR
-        (LOWER(:status) NOT IN ('draft', 'unknown', 'published') AND LOWER(c.status) = LOWER(:status))
+        (LOWER(c.status) = LOWER(:status))
       )
       AND (
            :price IS NULL OR :price = '' OR
@@ -135,8 +134,8 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
         (:status IS NULL OR :status = '') OR
         (LOWER(:status) = 'draft' AND LOWER(c.status) = 'draft') OR
         (LOWER(:status) = 'unknown' AND c.status IS NULL) OR
-        (LOWER(:status) = 'published' AND LOWER(c.status) = 'published') OR
-        (LOWER(:status) NOT IN ('draft', 'unknown', 'published') AND LOWER(c.status) = LOWER(:status))
+        (LOWER(:status) = 'publish' AND LOWER(c.status) = 'publish') OR
+        (LOWER(:status) NOT IN ('draft', 'unknown', 'publish') AND LOWER(c.status) = LOWER(:status))
       )
       AND (
            :price IS NULL OR :price = '' OR

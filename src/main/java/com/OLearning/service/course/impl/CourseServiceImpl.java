@@ -262,9 +262,6 @@ public class CourseServiceImpl implements CourseService {
     public Page<CourseDTO> filterCoursesInstructorManage(Long userId, Long categoryId, String status, String price, String title, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         // Đồng bộ status publish -> published
-        if (status != null && status.equalsIgnoreCase("publish")) {
-            status = "published";
-        }
         Page<Course> coursePage = courseRepository.findCoursesByFilters(userId, categoryId, status, price, title, pageable);
         return coursePage.map(course -> mapCourseToDTO(course));
     }
