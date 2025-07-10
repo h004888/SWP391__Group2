@@ -20,14 +20,14 @@
                 <!-- Card header -->
                 <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center">
                     <h5 class="card-header-title mb-0">Edit Personal Information</h5>
-                    <a th:href="@{/instructordashboard/profile}" class="btn btn-outline-secondary btn-sm">
+                    <a th:href="@{/instructor/profile}" class="btn btn-outline-secondary btn-sm">
                         <i class="bi bi-arrow-left me-1"></i> Back to Profile
                     </a>
                 </div>
 
                 <!-- Card body -->
                 <div class="card-body">
-                    <form th:action="@{/instructordashboard/profile/update}" method="POST" th:object="${profileUpdateDTO}">
+                    <form th:action="@{/instructor/profile/update}" method="POST" th:object="${profileUpdateDTO}">
                         <input type="hidden" name="userId" th:value="${userDetail.userId}">
                         
                         <!-- Profile Picture Upload -->
@@ -152,9 +152,6 @@
 
                         <!-- Action Buttons -->
                         <div class="d-flex justify-content-end gap-2 mt-4">
-                            <a th:href="@{/instructordashboard/profile}" class="btn btn-outline-secondary">
-                                Cancel
-                            </a>
                             <button type="submit" class="btn btn-primary" id="saveProfileBtn" disabled>
                                 <i class="bi bi-check-circle me-1"></i> Save Changes
                             </button>
@@ -245,7 +242,7 @@
                 const formData = new FormData();
                 formData.append('file', file);
 
-                fetch('/instructordashboard/profile/upload-picture', {
+                fetch('/instructor/profile/upload-picture', {
                     method: 'POST',
                     body: formData
                 })
@@ -282,7 +279,7 @@
             
             console.log('Testing upload with file:', file.name);
             
-            fetch('/instructordashboard/profile/test-upload', {
+            fetch('/instructor/profile/test-upload', {
                 method: 'POST',
                 body: formData
             })

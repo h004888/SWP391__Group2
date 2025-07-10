@@ -24,7 +24,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.Optional;
 
 @Controller
-@RequestMapping("/instructordashboard/profile")
+@RequestMapping("/instructor/profile")
 public class InstructorProfileController {
 
     @Autowired
@@ -107,7 +107,7 @@ public class InstructorProfileController {
             // Security check: ensure user can only update their own profile
             if (!userId.equals(profileUpdateDTO.getUserId())) {
                 redirectAttributes.addFlashAttribute("errorMessage", "You can only update your own profile");
-                return "redirect:/instructordashboard/profile/edit";
+                return "redirect:/instructor/profile/edit";
             }
 
             // Check for validation errors
@@ -124,10 +124,10 @@ public class InstructorProfileController {
             User updatedUser = userService.updateProfile(userId, profileUpdateDTO);
             redirectAttributes.addFlashAttribute("successMessage", "Profile updated successfully!");
             
-            return "redirect:/instructordashboard/profile";
+            return "redirect:/instructor/profile";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Failed to update profile: " + e.getMessage());
-            return "redirect:/instructordashboard/profile/edit";
+            return "redirect:/instructor/profile/edit";
         }
     }
 

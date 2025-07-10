@@ -75,4 +75,5 @@ public interface CourseService {
 
     CourseViewDTO getCourseRecentIncomplete (Long userId);
 
+    int countByInstructorAndStatusWithFilter(Long userId, String status, Long categoryId, String price, String title);
 }

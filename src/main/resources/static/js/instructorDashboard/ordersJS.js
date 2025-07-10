@@ -111,19 +111,19 @@ function filterOrders(status, page = 0, size = 10) {
     Promise.all([
         // Load table rows
         $.ajax({
-            url: '/instructordashboard/orders/filter',
+            url: '/instructor/orders/filter',
             method: 'GET',
             data: ajaxData
         }),
         // Load pagination
         $.ajax({
-            url: '/instructordashboard/orders/pagination',
+            url: '/instructor/orders/pagination',
             method: 'GET',
             data: ajaxData
         }),
         // Load total count for badge
         $.ajax({
-            url: '/instructordashboard/orders/count',
+            url: '/instructor/orders/count',
             method: 'GET',
             data: { ...ajaxData, page: 0, size: 1 }
         })

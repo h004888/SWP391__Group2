@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.util.Base64;
 import java.util.Map;
 import java.util.UUID;
 
@@ -99,17 +101,10 @@ public class UploadFileImpl implements UploadFile {
     }
     //generate tu publicId sang Signed de co the phat
     @Override
-    public String generateSignedVideoUrl(String publicId, int expireSeconds, String ResourceType) {
-        long timestamp = System.currentTimeMillis() / 1000L;
-        long expireAt = timestamp + expireSeconds;
-        Map options = ObjectUtils.asMap(
-                "resource_type", ResourceType,
-                "type", "private",
-                "sign_url", true,
-                "expires_at", expireAt
-        );
+    public String generateSignedVideoUrl(String publicId, String resourceType) {
+        // Không tự thêm extension, chỉ trả về đúng publicId như lưu trên Cloudinary
         return cloudinary.url()
-                .resourceType(ResourceType)
+                .resourceType(resourceType)
                 .type("private")
                 .signed(true)
                 .generate(publicId);

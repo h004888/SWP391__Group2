@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@RequestMapping("/instructordashboard/orders")
+@RequestMapping("/instructor/orders")
 public class ControllerOrder {
     @Autowired
     private OrdersService ordersService;
@@ -138,7 +138,7 @@ public class ControllerOrder {
 
         // Check if instructor has any courses in this order
         if (orderDetails.isEmpty()) {
-            return "redirect:/instructordashboard/orders?error=access_denied";
+            return "redirect:/instructor/orders?error=access_denied";
         }
 
         // TÍNH TỔNG DOANH THU CHO INSTRUCTOR

@@ -25,6 +25,7 @@ import com.OLearning.service.lesson.LessonService;
 import com.OLearning.service.quiz.QuizService;
 import com.OLearning.service.user.UserService;
 import com.OLearning.service.video.VideoService;
+import com.OLearning.service.termsAndCondition.TermsAndConditionService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -51,7 +52,7 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/instructordashboard")
+@RequestMapping("/instructor")
 public class ControlllerAddCourse {
     @Autowired
     private CourseService courseService;
@@ -89,6 +90,8 @@ public class ControlllerAddCourse {
     private UploadFile uploadFile;
     @Autowired
     private EnrollmentService enrollmentService;
+    @Autowired
+    private TermsAndConditionService termsAndConditionService;
 
     //dashhboard
     @GetMapping()
@@ -154,14 +157,14 @@ public class ControlllerAddCourse {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
-
         Page<CourseDTO> coursePage = courseService.filterCoursesInstructorManage(userId, categoryId, status, price, title, page, size);
+        model.addAttribute("status", status);
         model.addAttribute("courses", coursePage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", coursePage.getTotalPages());
         model.addAttribute("totalElements", coursePage.getTotalElements());
         model.addAttribute("size", size);
-        model.addAttribute("status", status);
+
         // Trả về fragment table row cho tbody
         return "instructorDashboard/fragments/courseTableRowContent :: courseTableRowContent";
     }
@@ -179,7 +182,9 @@ public class ControlllerAddCourse {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
-
+        if (status != null && status.equalsIgnoreCase("publish")) {
+            status = "published";
+        }
         Page<CourseDTO> coursePage = courseService.filterCoursesInstructorManage(userId, categoryId, status, price, title, page, size);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", coursePage.getTotalPages());
@@ -202,8 +207,8 @@ public class ControlllerAddCourse {
             , RedirectAttributes redirectAttributes, HttpServletRequest request) {
         //tim course theo course ID
         //set status
-        courseService.submitCourse(courseId, "lived");
-        redirectAttributes.addFlashAttribute("successMessage", "course public successfully.");
+        courseService.submitCourse(courseId, "publish");
+        redirectAttributes.addFlashAttribute("successMessage", "course published successfully.");
         return "redirect:../courses";
     }
     //unpublic course
@@ -723,6 +728,9 @@ public class ControlllerAddCourse {
             courseService.submitCourse(courseId, "draft");
             return "redirect:../courses";
         }
+        // Fetch terms and conditions for INSTRUCTOR and ALL
+        java.util.List<TermsAndCondition> terms = termsAndConditionService.getByRoleTargetOrAll("INSTRUCTOR");
+        model.addAttribute("termsAndConditions", terms);
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/step4SubmitCourse :: step4Content");
         return "instructorDashboard/indexUpdate";
     }
@@ -924,16 +932,16 @@ public class ControlllerAddCourse {
 
     @GetMapping("/courses/count-by-status")
     @ResponseBody
-    public Map<String, Integer> countCoursesByStatus() {
+    public int countCoursesByStatus(
+        @RequestParam(name = "status", required = false) String status,
+        @RequestParam(name = "category", required = false) Long categoryId,
+        @RequestParam(name = "price", required = false) String price,
+        @RequestParam(name = "title", required = false) String title
+    ) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
-        Map<String, Integer> result = new HashMap<>();
-        String[] statuses = {"pending", "approved", "lived", "rejected", "resubmit", "hidden", "blocked", "draft"};
-        for (String status : statuses) {
-            int count = courseService.countByInstructorAndStatus(userId, status);
-            result.put(status, count);
-        }
-        return result;
+        // Không chuyển publish thành published nữa
+        return courseService.countByInstructorAndStatusWithFilter(userId, status, categoryId, price, title);
     }
 }

@@ -87,7 +87,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         String redirectURL = request.getContextPath();
 
         if (hasRole(authentication, "ROLE_INSTRUCTOR")) {
-            redirectURL += "/instructordashboard";
+            redirectURL += "/instructor";
         } else if (hasRole(authentication, "ROLE_USER")) {
             redirectURL += "/home";
         } else {

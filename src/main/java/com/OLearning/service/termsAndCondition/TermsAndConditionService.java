@@ -63,4 +63,8 @@ public class TermsAndConditionService {
     public List<TermsAndCondition> getByRoles(List<String> roles) {
         return termsAndConditionRepository.findByRoleTargetInIgnoreCaseOrderByDisplayOrderAsc(roles);
     }
+
+    public List<TermsAndCondition> getByRoleTargetOrAll(String roleTarget) {
+        return termsAndConditionRepository.findByRoleTargetOrAll(roleTarget);
+    }
 }

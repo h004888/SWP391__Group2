@@ -1,116 +1,32 @@
-<!-- Thêm thông báo thành công/lỗi vào đầu template -->
-
-
+<!-- Simplified enrolledContent.html: Only student list and AJAX pagination, no block/unblock/message -->
 <div class="container" th:fragment="enrollment">
     <div class="row">
-        <!-- Main content START -->
         <div class="col-12">
-            <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
-                <div th:if="${successMessage}" class="toast align-items-center text-white bg-success border-0 show"
-                     role="alert">
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            <span th:text="${successMessage}"></span>
-                        </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                                aria-label="Close"></button>
-                    </div>
-                </div>
-                <div th:if="${errorMessage}" class="toast align-items-center text-white bg-danger border-0 show"
-                     role="alert">
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            <span th:text="${errorMessage}"></span>
-                        </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                                aria-label="Close"></button>
-                    </div>
-                </div>
-            </div>
-            <!-- Card START -->
             <div class="card border bg-transparent rounded-3">
-                <!-- Card header START -->
                 <div class="card-header bg-transparent border-bottom">
                     <h3 class="mb-0">My Students List</h3>
                 </div>
-                <!-- Card header END -->
-
-                <!-- Card body START -->
                 <div class="card-body">
-
-                    <!-- Search and select START -->
-                    <div class="row g-3 align-items-center justify-content-between mb-4">
-                        <!-- Search -->
-                        <div class="col-md-4">
-                            <form class="rounded position-relative" id="searchForm">
-                                <input class="form-control pe-5 bg-transparent" type="search" id="searchInput" placeholder="Search student name" aria-label="Search">
-                                <button class="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset" type="submit">
-                                    <i class="fas fa-search fs-6"></i>
-                                </button>
-                            </form>
-                        </div>
-
-                        <!-- Select option -->
-                        <div class="col-md-3">
-                            <!-- Short by filter -->
-                            <form>
-                                <select class="form-select js-choice border-0 z-index-9 bg-transparent" id="sortBy" aria-label=".form-select-sm">
-                                    <option value="">Sort by</option>
-                                    <option value="progress_asc">Progress (Low to High)</option>
-                                    <option value="progress_desc">Progress (High to Low)</option>
-                                    <option value="date_asc">Enrollment Date (Oldest)</option>
-                                    <option value="date_desc">Enrollment Date (Newest)</option>
-                                </select>
-                            </form>
-                        </div>
-                    </div>
-                    <!-- Search and select END -->
-
-                    <!-- Student list table START -->
                     <div class="table-responsive border-0">
                         <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
-                            <!-- Table head -->
                             <thead>
                             <tr>
                                 <th scope="col" class="border-0 rounded-start">Student name</th>
                                 <th scope="col" class="border-0">Progress</th>
                                 <th scope="col" class="border-0">Course</th>
                                 <th scope="col" class="border-0">Enrolled date</th>
-                                <th scope="col" class="border-0">Status</th>
-                                <th scope="col" class="border-0 rounded-end">Action</th>
+                                <th scope="col" class="border-0 rounded-end">Status</th>
                             </tr>
                             </thead>
-
-                            <!-- Table body START -->
                             <tbody>
-                            <!-- Table item -->
-                            <tr th:each="enrollment : ${courses}" 
-                                th:data-enrollment-id="${enrollment.enrollmentId}"
-                                th:class="${enrollment.status == 'blocked' ? 'opacity-50' : ''}">
-                                <!-- Table data: Student name -->
+                            <tr th:each="enrollment : ${courses}">
                                 <td>
                                     <div class="d-flex align-items-center position-relative">
-                                        <!-- Image -->
                                         <div class="avatar avatar-md mb-2 mb-md-0">
                                             <img th:src="${enrollment.user.profilePicture != null ? enrollment.user.profilePicture : 'https://res.cloudinary.com/dmwo4yrsq/image/upload/son-tung-m-tp-1_vodsiz.jpg?_a=DAGAACAVZAA0'}" class="rounded" alt="">
                                         </div>
                                         <div class="mb-0 ms-2">
-                                            <!-- Title -->
-                                            <h6 class="mb-0"><a href="#"
-                                                                class="stretched-link"
-                                                                data-bs-toggle="modal"
-                                                                data-bs-target="#appDetail"
-                                                                th:attr="data-enrollment-id=${enrollment.enrollmentId},
-                                                data-fullname=${enrollment.user.fullName},
-                                                data-email=${enrollment.user.email},
-                                                data-phone=${enrollment.user.phone},
-                                                data-picture=${enrollment.user.profilePicture},
-                                                data-address=${enrollment.user.address},
-                                                data-progress=${enrollment.progress},
-                                                data-birthday=${enrollment.user.birthday},
-                                                data-enrollment-date=${#temporals.format(enrollment.enrollmentDate, 'dd/MM/yyyy')}"
-                                                                th:text="${enrollment.user.fullName}"></a></h6>
-                                            <!-- Address -->
+                                            <h6 class="mb-0" th:text="${enrollment.user.fullName}"></h6>
                                             <span class="text-body small" th:if="${enrollment.user.address != null}">
                                                 <i class="fas fa-fw fa-map-marker-alt me-1 mt-1"></i>
                                                 <span th:text="${enrollment.user.address}"></span>
@@ -118,15 +34,11 @@
                                         </div>
                                     </div>
                                 </td>
-
-                                <!-- Table data: Progress -->
                                 <td class="text-center text-sm-start">
                                     <div class="overflow-hidden">
                                         <h6 class="mb-0" th:text="${enrollment.progress + '%'}"></h6>
                                         <div class="progress progress-sm bg-primary bg-opacity-10">
                                             <div class="progress-bar bg-primary aos" role="progressbar" 
-                                                 data-aos="slide-right" data-aos-delay="200" 
-                                                 data-aos-duration="1000" data-aos-easing="ease-in-out" 
                                                  th:style="'width: ' + ${enrollment.progress} + '%'" 
                                                  th:aria-valuenow="${enrollment.progress}" 
                                                  aria-valuemin="0" aria-valuemax="100">
@@ -134,16 +46,10 @@
                                         </div>
                                     </div>
                                 </td>
-
-                                <!-- Table data: Course -->
                                 <td>
-                                    <a th:href="@{'/instructordashboard/courses/detail/' + ${enrollment.courseId}}" th:text="${enrollment.courseTitle}">Course Title</a>
+                                    <a th:href="@{'/instructor/courses/detail/' + ${enrollment.courseId}}" th:text="${enrollment.courseTitle}">Course Title</a>
                                 </td>
-
-                                <!-- Table data: Enrolled date -->
                                 <td th:text="${#temporals.format(enrollment.enrollmentDate, 'dd/MM/yyyy')}">01/01/2023</td>
-
-                                <!-- Table data: Status -->
                                 <td>
                                     <div th:switch="${enrollment.status}">
                                         <span th:case="'blocked'" class="badge bg-danger">Blocked</span>
@@ -152,46 +58,9 @@
                                         <span th:case="*" class="badge bg-secondary">Unknown</span>
                                     </div>
                                 </td>
-
-                                <!-- Table data: Action -->
-                                <td>
-                                    <!-- Nút Message - chỉ hiển thị khi enrollment không bị khóa -->
-                                    <button th:if="${enrollment.status != 'blocked'}" 
-                                            class="btn btn-success-soft btn-round me-1 mb-0"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#messageModal"
-                                            th:attr="data-student-name=${enrollment.user.fullName},
-                                                    data-student-email=${enrollment.user.email},
-                                                    data-enrollment-id=${enrollment.enrollmentId}"
-                                            title="Message">
-                                        <i class="far fa-envelope"></i>
-                                    </button>
-                                    
-                                    <!-- Nút Block - hiển thị khi enrollment chưa bị khóa -->
-                                    <button th:if="${enrollment.status != 'blocked'}" 
-                                            class="btn btn-danger-soft btn-round mb-0" 
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#blockConfirmationModal"
-                                            th:attr="data-enrollment-id=${enrollment.enrollmentId}"
-                                            title="Block">
-                                        <i class="fas fa-ban"></i>
-                                    </button>
-                                    
-                                    <!-- Nút Unblock - hiển thị khi enrollment đã bị khóa -->
-                                    <button th:if="${enrollment.status == 'blocked'}" 
-                                            class="btn btn-success-soft btn-round mb-0" 
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#unblockConfirmationModal"
-                                            th:attr="data-enrollment-id=${enrollment.enrollmentId}"
-                                            title="Unblock">
-                                        <i class="fas fa-unlock"></i>
-                                    </button>
-                                </td>
                             </tr>
-
-                            <!-- Empty state when no enrollments -->
                             <tr th:if="${#lists.isEmpty(courses)}">
-                                <td colspan="6" class="text-center py-5">
+                                <td colspan="5" class="text-center py-5">
                                     <div class="py-4">
                                         <i class="fas fa-user-graduate fs-1 text-muted mb-3"></i>
                                         <h6>No students enrolled yet</h6>
@@ -200,47 +69,51 @@
                                 </td>
                             </tr>
                             </tbody>
-                            <!-- Table body END -->
                         </table>
                     </div>
-                    <!-- Student list table END -->
-
                     <!-- Pagination START -->
                     <div class="d-sm-flex justify-content-sm-between align-items-sm-center mt-4 mt-sm-3" th:if="${totalPages > 0}">
-                        <!-- Content -->
                         <p class="mb-0 text-center text-sm-start">
                             Showing <span th:text="${currentPage * size + 1}">1</span> to 
                             <span th:text="${(currentPage * size) + #lists.size(courses) > totalElements ? totalElements : (currentPage * size) + #lists.size(courses)}">8</span> of 
                             <span th:text="${totalElements}">20</span> entries
                         </p>
-                        <!-- Pagination -->
                         <nav class="d-flex justify-content-center mb-0" aria-label="navigation">
                             <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
                                 <!-- Previous page -->
                                 <li class="page-item mb-0" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
-                                    <a class="page-link" th:href="@{/instructordashboard/enrolled(page=${currentPage - 1}, size=${size})}" tabindex="-1">
+                                    <a class="page-link" th:href="@{/instructor/enrolled(page=${currentPage - 1}, size=${size})}" tabindex="-1">
                                         <i class="fas fa-angle-left"></i>
                                     </a>
                                 </li>
-                                
-                                <!-- Page numbers -->
-                                <li class="page-item mb-0" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" 
-                                    th:if="${i < 5 || i > totalPages - 3 || (i >= currentPage - 1 && i <= currentPage + 1)}"
+
+                                <!-- First page -->
+                                <li class="page-item mb-0" th:if="${currentPage > 2}">
+                                    <a class="page-link" th:href="@{/instructor/enrolled(page=0, size=${size})}">1</a>
+                                </li>
+                                <li class="page-item mb-0 disabled" th:if="${currentPage > 3}">
+                                    <span class="page-link">...</span>
+                                </li>
+
+                                <!-- Pages around current -->
+                                <li class="page-item mb-0"
+                                    th:each="i : ${#numbers.sequence((currentPage-1 > 0 ? currentPage-1 : 0), (currentPage+1 < totalPages-1 ? currentPage+1 : totalPages-1))}"
                                     th:classappend="${currentPage == i ? 'active' : ''}">
-                                    <a class="page-link" th:href="@{/instructordashboard/enrolled(page=${i}, size=${size})}" th:text="${i + 1}">1</a>
+                                    <a class="page-link" th:href="@{/instructor/enrolled(page=${i}, size=${size})}" th:text="${i+1}">1</a>
                                 </li>
-                                
-                                <!-- Ellipsis for skipped pages -->
-                                <li class="page-item mb-0 disabled" th:if="${totalPages > 7 && currentPage > 3}">
+
+                                <!-- Ellipsis before last page -->
+                                <li class="page-item mb-0 disabled" th:if="${currentPage < totalPages - 4}">
                                     <span class="page-link">...</span>
                                 </li>
-                                <li class="page-item mb-0 disabled" th:if="${totalPages > 7 && currentPage < totalPages - 4}">
-                                    <span class="page-link">...</span>
+                                <!-- Last page -->
+                                <li class="page-item mb-0" th:if="${totalPages > 1 && currentPage < totalPages - 2}">
+                                    <a class="page-link" th:href="@{/instructor/enrolled(page=${totalPages-1}, size=${size})}" th:text="${totalPages}">1</a>
                                 </li>
-                                
+
                                 <!-- Next page -->
                                 <li class="page-item mb-0" th:classappend="${currentPage + 1 >= totalPages ? 'disabled' : ''}">
-                                    <a class="page-link" th:href="@{/instructordashboard/enrolled(page=${currentPage + 1}, size=${size})}">
+                                    <a class="page-link" th:href="@{/instructor/enrolled(page=${currentPage + 1}, size=${size})}">
                                         <i class="fas fa-angle-right"></i>
                                     </a>
                                 </li>
@@ -249,301 +122,39 @@
                     </div>
                     <!-- Pagination END -->
                 </div>
-                <!-- Card body END -->
-            </div>
-            <!-- Card END -->
-        </div>
-        <!-- Main content END -->
-    </div>
-
-    <!-- Modal for enrollment details -->
-    <div class="modal fade" id="enrollmentDetailsModal" tabindex="-1" aria-labelledby="enrollmentDetailsModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header bg-dark">
-                    <h5 class="modal-title text-white" id="enrollmentDetailsModalLabel">Enrollment Details</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" id="enrollmentDetailsContent">
-                    <div class="text-center py-4">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p class="mt-2">Loading enrollment details...</p>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
             </div>
         </div>
     </div>
-
-    <!-- Modal for block confirmation -->
-    <div class="modal fade" id="blockConfirmationModal" tabindex="-1" aria-labelledby="blockConfirmationModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title" id="blockConfirmationModalLabel">Block Enrollment</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Are you sure you want to block this enrollment?</p>
-                    <p class="text-muted">This will prevent the student from accessing your course content.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger" id="confirmBlockBtn">Block Enrollment</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal for unblock confirmation -->
-    <div class="modal fade" id="unblockConfirmationModal" tabindex="-1" aria-labelledby="unblockConfirmationModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title" id="unblockConfirmationModalLabel">Unblock Enrollment</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Are you sure you want to unblock this enrollment?</p>
-                    <p class="text-muted">This will allow the student to access your course content again.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-success" id="confirmUnblockBtn">Unblock Enrollment</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal for sending message -->
-    <div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title" id="messageModalLabel">Send Message to Student</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form id="messageForm" th:action="@{/instructordashboard/enrolled/send-message}" method="post">
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="recipientName" class="form-label">To:</label>
-                            <input type="text" class="form-control" id="recipientName" readonly>
-                            <input type="hidden" id="recipientEmail" name="recipientEmail">
-                            <input type="hidden" id="enrollmentId" name="enrollmentId" value="0">
-                        </div>
-                        <div class="mb-3">
-                            <label for="messageSubject" class="form-label">Subject:</label>
-                            <input type="text" class="form-control" id="messageSubject" name="subject" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="messageContent" class="form-label">Message:</label>
-                            <textarea class="form-control" id="messageContent" name="content" rows="5" required></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-success" id="sendMessageBtn">
-                            <i class="fas fa-paper-plane me-2"></i>Send Message
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    <div class="modal fade" id="appDetail" tabindex="-1" aria-labelledby="appDetaillabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <!-- Modal header -->
-                <div class="modal-header bg-dark">
-                    <h5 class="modal-title text-white" id="appDetaillabel">Student Details</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-
-                <!-- Modal body -->
-                <div class="modal-body p-5">
-                    <!-- Name -->
-                    <span class="small">Enrollment ID:</span>
-                    <h6 class="mb-2" id="applicantEnrolledId">Loading...</h6>
-
-                    <span class="small">Profile Picture:</span>
-                    <h6 class="mb-2" id="applicantPicture">Loading...</h6>
-
-                    <span class="small">Full Name:</span>
-                    <h6 class="mb-2" id="applicantName">Loading...</h6>
-
-                    <span class="small">Address:</span>
-                    <h6 class="mb-2" id="applicantAddress">Loading...</h6>
-                    
-                    <span class="small">Email:</span>
-                    <h6 class="mb-2" id="applicantEmail">Loading...</h6>
-
-                    <span class="small">Progress:</span>
-                    <h6 class="mb-2" id="applicantProgress">Loading...</h6>
-                    
-                    <span class="small">Phone number:</span>
-                    <h6 class="mb-2" id="applicantPhone">Loading...</h6>
-
-                    <span class="small">Birthday:</span>
-                    <h6 class="mb-2" id="applicantBirthday">Loading...</h6>
-
-                    <span class="small">Enrollment Date:</span>
-                    <h6 class="mb-2" id="applicantEnrollmentDate">Loading...</h6>
-                </div>
-
-                <!-- Modal footer -->
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger-soft my-0" data-bs-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- JavaScript for enrollment details -->
     <script>
-        function viewEnrollmentDetails(enrollmentId) {
-            // Show modal with loading state
-            const modal = new bootstrap.Modal(document.getElementById('enrollmentDetailsModal'));
-            modal.show();
-            
-            // Fetch enrollment details
-            fetch(`/instructordashboard/enrolled/details/${enrollmentId}`)
-                .then(response => response.text())
-                .then(html => {
-                    document.getElementById('enrollmentDetailsContent').innerHTML = html;
-                })
-                .catch(error => {
-                    document.getElementById('enrollmentDetailsContent').innerHTML = `
-                        <div class="alert alert-danger">
-                            <i class="fas fa-exclamation-circle me-2"></i>
-                            Failed to load enrollment details. Please try again.
-                        </div>
-                    `;
-                    console.error('Error fetching enrollment details:', error);
+        function attachEnrolledPaginationAjax() {
+            document.querySelectorAll('.pagination .page-link').forEach(function(link) {
+                link.onclick = null;
+                link.addEventListener('click', function(e) {
+                    const li = this.closest('li');
+                    if (li && (li.classList.contains('disabled') || li.classList.contains('active') || this.getAttribute('href') === '#')) {
+                        return;
+                    }
+                    e.preventDefault();
+                    const url = this.getAttribute('href');
+                    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                        .then(response => response.text())
+                        .then(html => {
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(html, 'text/html');
+                            const newFragment = doc.querySelector('[th\\:fragment="enrollment"], [data-th-fragment="enrollment"], .container')
+                            if (newFragment) {
+                                const current = document.querySelector('.container[th\\:fragment="enrollment"], .container[data-th-fragment="enrollment"]');
+                                if (current) {
+                                    current.replaceWith(newFragment);
+                                    setTimeout(attachEnrolledPaginationAjax, 100); // chỉ gọi lại nếu thay thế thành công
+                                }
+                            }
+                            // Nếu không tìm thấy fragment, không gọi lại nữa để tránh vòng lặp fetch
+                        });
                 });
+            });
         }
-        
-        // Search functionality
-        document.getElementById('searchForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const searchTerm = document.getElementById('searchInput').value.trim();
-            window.location.href = `/instructordashboard/enrolled/search?keyword=${encodeURIComponent(searchTerm)}`;
-        });
-        
-        // Sort functionality
-        document.getElementById('sortBy').addEventListener('change', function() {
-            const sortValue = this.value;
-            if (sortValue) {
-                window.location.href = `/instructordashboard/enrolled/sort?sort=${encodeURIComponent(sortValue)}`;
-            }
-        });
-
-        let enrollmentIdToBlock;
-        let enrollmentIdToUnblock;
-        
-        // Lắng nghe sự kiện khi modal block được hiển thị
-        document.getElementById('blockConfirmationModal').addEventListener('show.bs.modal', function (event) {
-            // Lấy button đã kích hoạt modal
-            const button = event.relatedTarget;
-            
-            // Lưu enrollmentId để sử dụng khi xác nhận
-            enrollmentIdToBlock = button.getAttribute('data-enrollment-id');
-        });
-        
-        // Lắng nghe sự kiện khi modal unblock được hiển thị
-        document.getElementById('unblockConfirmationModal').addEventListener('show.bs.modal', function (event) {
-            // Lấy button đã kích hoạt modal
-            const button = event.relatedTarget;
-            
-            // Lưu enrollmentId để sử dụng khi xác nhận
-            enrollmentIdToUnblock = button.getAttribute('data-enrollment-id');
-        });
-        
-        // Xử lý sự kiện khi nhấn nút xác nhận block
-        document.getElementById('confirmBlockBtn').addEventListener('click', function() {
-            if (enrollmentIdToBlock) {
-                // Tạo form động và submit
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = `/instructordashboard/enrolled/block/${enrollmentIdToBlock}`;
-                document.body.appendChild(form);
-                form.submit();
-            }
-        });
-        
-        // Xử lý sự kiện khi nhấn nút xác nhận unblock
-        document.getElementById('confirmUnblockBtn').addEventListener('click', function() {
-            if (enrollmentIdToUnblock) {
-                // Tạo form động và submit
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = `/instructordashboard/enrolled/unblock/${enrollmentIdToUnblock}`;
-                document.body.appendChild(form);
-                form.submit();
-            }
-        });
+        document.addEventListener('DOMContentLoaded', attachEnrolledPaginationAjax);
     </script>
-
-
-    <!-- Back to top button -->
-    <div class="back-top"><i class="bi bi-arrow-up-short position-absolute top-50 start-50 translate-middle"></i></div>
-    
-    <!-- Bootstrap JS -->
-    <script src="assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Vendors -->
-    <script src="assets/vendor/choices/js/choices.min.js"></script>
-    <script src="assets/vendor/aos/aos.js"></script>
-    <!-- Template Functions -->
-    <script src="assets/js/functions.js"></script>
+      <script th:src="@{/assets/vendor/aos/aos.js}"></script>
 </div>
-<script>
-    // Xử lý khi modal message được hiển thị
-    document.getElementById('messageModal').addEventListener('show.bs.modal', function (event) {
-        // Lấy button đã kích hoạt modal
-        const button = event.relatedTarget;
-        
-        // Lấy thông tin học viên từ data attributes
-        const studentName = button.getAttribute('data-student-name');
-        const studentEmail = button.getAttribute('data-student-email');
-        const enrollmentId = button.getAttribute('data-enrollment-id');
-        
-        console.log("EnrollmentID:", enrollmentId); // Debug để kiểm tra giá trị
-        
-        // Cập nhật thông tin trong form
-        document.getElementById('recipientName').value = studentName;
-        document.getElementById('recipientEmail').value = studentEmail;
-        document.getElementById('enrollmentId').value = enrollmentId || "0"; // Đảm bảo không bao giờ rỗng
-        
-        // Reset form fields
-        document.getElementById('messageSubject').value = '';
-        document.getElementById('messageContent').value = '';
-    });
-    
-    // Thêm loading state khi form được submit
-    document.getElementById('messageForm').addEventListener('submit', function() {
-        const sendButton = document.getElementById('sendMessageBtn');
-        sendButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Sending...';
-        sendButton.disabled = true;
-    });
-    $(document).on('click', '[data-bs-target=\"#appDetail\"]', function() {
-        const $btn = $(this);
-        $('#applicantEnrolledId').text($btn.data('enrollment-id') || 'N/A');
-        // Hiển thị hình ảnh nếu có, nếu không thì text
-        const picture = $btn.data('picture');
-        if (picture) {
-            $('#applicantPicture').html('<img src="' + picture + '" alt="Profile Picture" class="rounded" style="width: 80px; height: 80px;">');
-        } else {
-            $('#applicantPicture').text('N/A');
-        }
-        $('#applicantName').text($btn.data('fullname') || 'N/A');
-        $('#applicantAddress').text($btn.data('address') || 'N/A');
-        $('#applicantEmail').text($btn.data('email') || 'N/A');
-        $('#applicantProgress').text(($btn.data('progress') !== undefined ? $btn.data('progress') + '%' : 'N/A'));
-        $('#applicantPhone').text($btn.data('phone') || 'N/A');
-        $('#applicantBirthday').text($btn.data('birthday') || 'N/A');
-        $('#applicantEnrollmentDate').text($btn.data('enrollment-date') || 'N/A');
-    });
-
-</script>
