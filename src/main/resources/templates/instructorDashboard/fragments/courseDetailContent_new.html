@@ -109,24 +109,6 @@
                                 <p class="text-muted" th:utext="${course.description}"></p>
                             </div>
 
-                            <div class="content-card bg-white rounded-4 shadow-sm p-4">
-                                <h3 class="mb-4">Instructor</h3>
-                                <div class="d-flex align-items-start">
-                                    <img th:src="${instructor.profilePicture != null ? instructor.profilePicture : 'https://res.cloudinary.com/dmwo4yrsq/image/upload/son-tung-m-tp-1_vodsiz.jpg?_a=DAGAACAVZAA0'}"
-                                         alt="Instructor"
-                                         class="rounded-circle me-3"
-                                         style="width:64px; height:64px; object-fit:cover;">
-                                    <div>
-                                        <h5 class="mb-2" th:utext="${instructor.username}"></h5>
-    
-                                        <div class="d-flex">
-                                            <a th:href="@{/instructor/profile}" class="btn btn-outline-secondary">
-                                                <i class="bi bi-person me-1"></i> View Profile
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
 
                         <div class="col-lg-4">
