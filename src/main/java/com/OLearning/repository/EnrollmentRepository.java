@@ -58,5 +58,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
 
     Optional<Enrollment> findByEnrollmentDateAfter(LocalDate date);
     Optional<Enrollment> findByUser_UserId(Long userId);
+    @Query("SELECT e FROM Enrollment e WHERE e.user.userId = :userId AND e.course.courseId = :courseId")
+    Enrollment findByUserIdAndCourseId(@Param("userId") Long userId, @Param("courseId") Long courseId);
 
 }

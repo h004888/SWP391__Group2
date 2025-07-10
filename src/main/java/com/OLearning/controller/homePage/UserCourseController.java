@@ -171,8 +171,7 @@ public class UserCourseController {
         model.addAttribute("accessibleLessonIds", accessibleLessonIds);
         model.addAttribute("currentLessonId", currentLesson.getLessonId());
         model.addAttribute("currentLesson", currentLesson);
-        model.addAttribute("lessonVideoURL",
-                uploadFile.generateSignedVideoUrl(currentLesson.getVideo().getVideoUrl(), 30, "video"));
+        model.addAttribute("lessonVideoURL",currentLesson.getVideo().getVideoUrl() );
 
         model.addAttribute("course", course);
         model.addAttribute("chapters", course.getListOfChapters());
@@ -251,7 +250,8 @@ public class UserCourseController {
         model.addAttribute("completedLessonIds", completedLessonIds);
         model.addAttribute("accessibleLessonIds", accessibleLessonIds);
         // QUAN TRỌNG: currentLessonId bây giờ là bài đang được xem (lessonId từ URL)
-        model.addAttribute("currentLessonId", lessonId); // Thay đổi từ currentLesson.getLessonId() thành lessonId
+        model.addAttribute("lessonVideoURL",currentLesson.getVideo().getVideoUrl() );
+        model.addAttribute("currentLessonId", lessonId);
         model.addAttribute("currentLesson", currentLesson);
         model.addAttribute("nextLesson", nextLesson);
         model.addAttribute("course", course);
