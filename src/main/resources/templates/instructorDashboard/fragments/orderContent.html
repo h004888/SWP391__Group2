@@ -74,6 +74,12 @@
                             Cancelled<span class="badge bg-light text-dark ms-2" id="cancelledCount">0</span>
                         </button>
                     </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="maintenance-tab" data-bs-toggle="tab"
+                                data-bs-target="#maintenance" type="button" role="tab" data-status="MAINTENANCE">
+                            Maintenance<span class="badge bg-light text-dark ms-2" id="maintenanceCount" th:text="${#lists.size(maintenancePayments)}">0</span>
+                        </button>
+                    </li>
                 </ul>
 
                 <div class="tab-content p-0" id="orderTabsContent">
@@ -130,6 +136,46 @@
                             <!-- Pagination for Cancelled -->
                             <div id="cancelledPagination" class="pagination-container">
                                 <!-- Pagination will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Maintenance Tab -->
+                    <div class="tab-pane fade" id="maintenance" role="tabpanel">
+                        <div id="maintenanceTableWrapper">
+                            <div class="table-responsive border-0">
+                                <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                                    <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Fee</th>
+                                        <th>Month/Year</th>
+                                        <th>Status</th>
+                                        <th>Course Name</th>
+                                        <th>Description</th>
+                                        <th>Due Date</th>
+                                        <th>Action</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="m, iterStat : ${maintenancePayments}">
+                                        <td th:text="${iterStat.index + 1}"></td>
+                                        <td th:text="${m.fee != null ? #numbers.formatDecimal(m.fee.maintenanceFee, 0, 'COMMA', 0, 'POINT') : 'N/A'}"></td>
+                                        <td th:text="${m.monthYear != null ? #temporals.format(m.monthYear, 'MM/yyyy') : 'N/A'}"></td>
+                                        <td th:text="${m.status}"></td>
+                                        <td th:text="${m.course != null ? m.course.title : ''}"></td>
+                                        <td th:text="${m.description != null ? m.description : ''}"></td>
+                                        <td th:text="${m.dueDate != null ? #temporals.format(m.dueDate, 'dd/MM/yyyy') : 'N/A'}"></td>
+                                        <td>
+                                            <div th:if="${m.status == 'completed'}" class="btn btn-success btn-sm" disabled>Đã thanh toán</div>
+                                            <a th:if="${m.status != 'completed'}" th:href="@{/instructordashboard/orders/pay/{id}(id=${m.maintenanceId})}" class="btn btn-primary btn-sm">Thanh toán</a>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(maintenancePayments)}">
+                                        <td colspan="8" class="text-center text-muted">No maintenance payments found.</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>

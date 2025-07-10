@@ -30,5 +30,4 @@ public class UserVoucher {
     private Boolean isUsed;
     @Column(name = "UsedDate")
     private LocalDate usedDate;
-
 }

@@ -54,23 +54,29 @@ public class ControllerCreateVoucher {
         model.addAttribute("stats", stats);
         model.addAttribute("courses", courses);
         model.addAttribute("voucherDTO", new VoucherDTO());
-        return "instructorDashboard/managerVoucher";
+        model.addAttribute("fragmentContent", "instructorDashboard/fragments/voucherContent :: voucherContent");
+        return "instructorDashboard/indexUpdate";
     }
 
     @PostMapping("/create")
     public String createVoucher(@ModelAttribute @Valid VoucherDTO voucherDTO,
+                               BindingResult bindingResult, // Đặt ngay sau @Valid
                                @AuthenticationPrincipal UserDetails userDetails,
                                @RequestParam(value = "selectedCourses", required = false) List<Long> selectedCourses,
                                RedirectAttributes redirectAttributes,
-                               BindingResult bindingResult) {
+                               Model model) {
         if (userDetails == null) return "redirect:/login";
         String email = userDetails.getUsername();
         User instructor = userRepository.findByEmail(email).orElse(null);
         if (instructor == null) return "redirect:/login";
 
         if (bindingResult.hasErrors()) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Dữ liệu không hợp lệ: " + bindingResult.getAllErrors().stream().map(Object::toString).collect(Collectors.joining(", ")));
-            return "redirect:/instructordashboard/voucher";
+            VoucherStatsDTO stats = voucherService.getVoucherStatsForInstructor(instructor.getUserId(), null);
+            List<Course> courses = courseRepository.findByInstructorUserId(instructor.getUserId());
+            model.addAttribute("stats", stats);
+            model.addAttribute("courses", courses);
+            model.addAttribute("fragmentContent", "instructorDashboard/fragments/voucherContent :: voucherContent");
+            return "instructorDashboard/indexUpdate";
         }
 
         try {

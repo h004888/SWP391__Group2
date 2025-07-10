@@ -88,24 +88,34 @@ public class HomeController {
     private NotificationService notificationService;
 
     @GetMapping()
-        public String getMethodName(Model model, @AuthenticationPrincipal UserDetails userDetails,HttpServletRequest request) {
-                // chia làm 2 danh sách:
-                List<Category> firstFive = categoryService.findAll().stream().limit(5).toList();
-                List<Category> nextFive = categoryService.findAll().stream().skip(5).limit(5).toList();
-                List<CourseViewDTO> topCourses = courseService.getTopCourses().stream().limit(5).collect(Collectors.toList());
-                model.addAttribute("topCourses", topCourses);
-                model.addAttribute("topCategories", categoryService.findTop5ByOrderByIdAsc());
-                model.addAttribute("firstFive", firstFive);
-                model.addAttribute("nextFive", nextFive);
+    public String getMethodName(Model model, @AuthenticationPrincipal UserDetails userDetails, HttpServletRequest request) {
+        // chia làm 2 danh sách:
+        List<Category> firstFive = categoryService.findAll().stream().limit(5).toList();
+        List<Category> nextFive = categoryService.findAll().stream().skip(5).limit(5).toList();
+        List<CourseViewDTO> topCourses = courseService.getTopCourses().stream().limit(5).collect(Collectors.toList());
 
-                // Add unread notification count for authenticated users
-                if (userDetails != null) {
-                    User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
-                    if (user != null) {
-                        long unreadCount = notificationService.countUnreadByUserId(user.getUserId());
-                        model.addAttribute("unreadCount", unreadCount);
-                    }
-                }
+        addUserHomePageAttributes(model, userDetails, request, topCourses);
+        model.addAttribute("topCourses", topCourses);
+        model.addAttribute("topCategories", categoryService.findTop5ByOrderByIdAsc());
+        model.addAttribute("firstFive", firstFive);
+        model.addAttribute("nextFive", nextFive);
+
+
+
+        model.addAttribute("fragmentContent", "homePage/fragments/mainContent :: mainContent");
+        model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderCategory");
+        return "homePage/index";
+    }
+
+    private void addUserHomePageAttributes(Model model, UserDetails userDetails, HttpServletRequest request, List<CourseViewDTO> topCourses) {
+        // Add unread notification count for authenticated users
+        if (userDetails != null) {
+            User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
+            if (user != null) {
+                long unreadCount = notificationService.countUnreadByUserId(user.getUserId());
+                model.addAttribute("unreadCount", unreadCount);
+            }
+        }
         // Add wishlist total
         if (userDetails != null) {
             Long userId = getUserIdFromUserDetails(userDetails);
@@ -128,10 +138,7 @@ public class HomeController {
             }
         }
         model.addAttribute("topCoursesEnrolledMap", topCoursesEnrolledMap);
-        model.addAttribute("fragmentContent", "homePage/fragments/mainContent :: mainContent");
-        model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderCategory");
-        return "homePage/index";
-        }
+    }
 
         @GetMapping("/coursesGrid")
         public String coursesGrid(Model model, @RequestParam(defaultValue = "0") int page,
@@ -153,7 +160,6 @@ public class HomeController {
                 model.addAttribute("categoryIds", categoryIds);
                 model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderDefault");
 
-                // Add unread notification count for authenticated users
                 if (userDetails != null) {
                     User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
                     if (user != null) {

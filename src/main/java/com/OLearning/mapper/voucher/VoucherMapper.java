@@ -19,6 +19,7 @@ public class VoucherMapper {
         dto.setUsedCount(voucher.getUsedCount());
         dto.setIsActive(voucher.getIsActive());
         dto.setIsGlobal(voucher.getIsGlobal());
+        dto.setIsPublic(voucher.getIsPublic());
         dto.setCreatedDate(voucher.getCreatedDate());
         
         if (voucher.getVoucherCourses() != null && !voucher.getVoucherCourses().isEmpty()) {

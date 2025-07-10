@@ -84,7 +84,8 @@ public class SecurityConfig {
 
                         // Root path redirect
                         .requestMatchers("/home/**").permitAll()
-                        .requestMatchers("/home/cart").authenticated()
+                        .requestMatchers("/vouchers").permitAll()
+                        .requestMatchers("/cart").authenticated()
                         .requestMatchers("/api/sepay/**", "/api/order/status").permitAll() // Thêm lại /api/sepay/**
                         // Chỉ admin mới được truy cập /admin/**
                         .requestMatchers("/admin/**").hasRole("ADMIN")

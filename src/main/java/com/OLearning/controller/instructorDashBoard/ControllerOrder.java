@@ -5,6 +5,8 @@ import com.OLearning.dto.order.InstructorOrderDTO;
 import com.OLearning.entity.OrderDetail;
 import com.OLearning.security.CustomUserDetails;
 import com.OLearning.service.order.OrdersService;
+import com.OLearning.service.courseMaintance.CourseMaintenanceService;
+import com.OLearning.entity.CourseMaintenance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
@@ -12,6 +14,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.OLearning.service.payment.VietQRService;
 
 import java.util.List;
 
@@ -20,6 +24,10 @@ import java.util.List;
 public class ControllerOrder {
     @Autowired
     private OrdersService ordersService;
+    @Autowired
+    private CourseMaintenanceService courseMaintenanceService;
+    @Autowired
+    private VietQRService vietQRService;
     
     @GetMapping
     public String getAllOrders(Model model,
@@ -37,9 +45,12 @@ public class ControllerOrder {
         // Default to PAID status for initial load
         Page<InstructorOrderDTO> ordersPage = ordersService.filterAndSortInstructorOrders(
                 username, amountDirection, orderType, startDate, endDate, "PAID", page, size, instructorId);
+        // Fetch maintenance payments for this instructor
+        List<CourseMaintenance> maintenancePayments = courseMaintenanceService.getMaintenancesByInstructorId(instructorId);
         //ok
         model.addAttribute("accNamePage", "Management Orders");
         model.addAttribute("orders", ordersPage.getContent());
+        model.addAttribute("maintenancePayments", maintenancePayments);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", ordersPage.getTotalPages());
         model.addAttribute("totalItems", ordersPage.getTotalElements());
@@ -155,5 +166,25 @@ public class ControllerOrder {
         model.addAttribute("totalAmount", totalAmount); // <-- TRUYỀN VÀO MODEL
         model.addAttribute("fragmentContent", "instructorDashBoard/fragments/orderDetailsContent :: contentOrderDetails");
         return "instructorDashboard/indexUpdate";
+    }
+
+    @GetMapping("/pay/{maintenanceId}")
+    public String payMaintenance(@PathVariable("maintenanceId") Long maintenanceId, Model model, RedirectAttributes redirectAttributes) {
+        CourseMaintenance maintenance = courseMaintenanceService.getAllCourseMaintenances().stream()
+            .filter(cm -> cm.getMaintenanceId().equals(maintenanceId))
+            .findFirst().orElse(null);
+        if (maintenance == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Maintenance fee not found!");
+            return "redirect:/instructordashboard/orders";
+        }
+        String description = "thanh toan bao tri thang "+ maintenance.getMonthYear() + "MAINTENANCE" + maintenance.getMaintenanceId();
+        double amount = maintenance.getFee() != null ? maintenance.getFee().getMaintenanceFee() : 0.0;
+        String qrUrl = vietQRService.generateSePayQRUrl(amount, description);
+        model.addAttribute("maintenanceId", maintenance.getMaintenanceId());
+        model.addAttribute("isMaintenance", true);
+        model.addAttribute("amount", amount);
+        model.addAttribute("description", description);
+        model.addAttribute("qrUrl", qrUrl);
+        return "homePage/qr_checkout";
     }
 }

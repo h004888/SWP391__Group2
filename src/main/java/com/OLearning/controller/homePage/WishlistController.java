@@ -73,14 +73,22 @@ public class WishlistController {
     @ResponseBody
     public Map<String, Long> getWishlistTotal(HttpServletRequest request,
                                               @AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null) {
-            return Map.of("total", 0L);
-        }
-        Long userId = getUserIdFromUserDetails(userDetails);
-        String encodedWishlistJson = getWishlistCookie(request, userId);
-        Map<String, Object> wishlist = wishlistService.getWishlistDetails(encodedWishlistJson, userDetails.getUsername());
         Map<String, Long> response = new HashMap<>();
-        response.put("total", getLongValue(wishlist.getOrDefault("total", 0L)));
+        
+        if (userDetails == null) {
+            response.put("total", 0L);
+            return response;
+        }
+        
+        try {
+            Long userId = getUserIdFromUserDetails(userDetails);
+            String encodedWishlistJson = getWishlistCookie(request, userId);
+            Map<String, Object> wishlist = wishlistService.getWishlistDetails(encodedWishlistJson, userDetails.getUsername());
+            response.put("total", getLongValue(wishlist.getOrDefault("total", 0L)));
+        } catch (Exception e) {
+            response.put("total", 0L);
+        }
+        
         return response;
     }
 

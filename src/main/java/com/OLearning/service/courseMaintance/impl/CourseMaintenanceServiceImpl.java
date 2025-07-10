@@ -4,11 +4,15 @@ import com.OLearning.entity.Course;
 import com.OLearning.entity.CourseMaintenance;
 import com.OLearning.entity.Fee;
 import com.OLearning.entity.Notification;
+import com.OLearning.entity.User;
+import com.OLearning.entity.CoinTransaction;
 import com.OLearning.repository.CourseRepository;
 import com.OLearning.repository.EnrollmentRepository;
 import com.OLearning.repository.FeesRepository;
 import com.OLearning.repository.NotificationRepository;
 import com.OLearning.repository.CourseMaintenanceRepository;
+import com.OLearning.repository.UserRepository;
+import com.OLearning.repository.CoinTransactionRepository;
 import com.OLearning.service.courseMaintance.CourseMaintenanceService;
 import com.OLearning.service.email.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +30,7 @@ import java.util.HashMap;
 import java.time.format.DateTimeFormatter;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+import java.math.BigDecimal;
 
 @Service
 public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
@@ -42,6 +47,10 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
     private FeesRepository feesRepository;
     @Autowired
     private NotificationRepository notificationRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private CoinTransactionRepository coinTransactionRepository;
 
     @Autowired
     private EmailService emailService;
@@ -207,6 +216,17 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
         return maintenanceData;
     }
 
+    @Override
+    public List<CourseMaintenance> getMaintenancesByInstructorId(Long instructorId) {
+        return courseMaintenanceRepository.findByCourse_Instructor_UserId(instructorId);
+    }
+
+    @Override
+    public String getMaintenanceStatusById(Long maintenanceId) {
+        CourseMaintenance maintenance = courseMaintenanceRepository.findById(maintenanceId).orElse(null);
+        return maintenance != null ? maintenance.getStatus() : "not_found";
+    }
+
     @Scheduled(cron = "0 0 9 * * ?") // Chạy mỗi ngày lúc 9:00 sáng
     @Override
     public void checkOverdueMaintenance() {
@@ -311,6 +331,64 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
             } catch (Exception e) {
                 System.err.println("Error processing overdue maintenance: " + e.getMessage());
             }
+        }
+    }
+
+    @Override
+    public boolean processMaintenancePayment(Long maintenanceId, String refCode) {
+        try {
+            CourseMaintenance maintenance = courseMaintenanceRepository.findById(maintenanceId).orElse(null);
+            if (maintenance == null) return false;
+            if ("completed".equalsIgnoreCase(maintenance.getStatus())) return true; // Already paid
+            User instructor = maintenance.getCourse().getInstructor();
+            Fee fee = maintenance.getFee();
+            double feeAmount = fee != null ? fee.getMaintenanceFee() : 0.0;
+            // 1. Nếu instructor không đủ coin, cộng coin trước
+            if (instructor.getCoin() < feeAmount) {
+                instructor.setCoin(instructor.getCoin() + (long) feeAmount);
+                CoinTransaction topup = new CoinTransaction();
+                topup.setUser(instructor);
+                topup.setAmount(BigDecimal.valueOf(feeAmount));
+                topup.setTransactionType("top_up");
+                topup.setStatus("completed");
+                topup.setNote("SePay maintenance fee top up");
+                topup.setCreatedAt(LocalDateTime.now());
+                topup.setOrder(null);
+                coinTransactionRepository.save(topup);
+            }
+            // 2. Trừ coin instructor
+            instructor.setCoin(instructor.getCoin() - (long) feeAmount);
+            CoinTransaction pay = new CoinTransaction();
+            pay.setUser(instructor);
+            pay.setAmount(BigDecimal.valueOf(-feeAmount));
+            pay.setTransactionType("maintenance_fee");
+            pay.setStatus("completed");
+            pay.setNote("Pay maintenance fee");
+            pay.setCreatedAt(LocalDateTime.now());
+            pay.setOrder(null);
+            coinTransactionRepository.save(pay);
+            // 3. Cộng coin cho admin (userId=1)
+            User admin = userRepository.findById(1L).orElse(null);
+            if (admin != null) {
+                admin.setCoin(admin.getCoin() + (long) feeAmount);
+                CoinTransaction receive = new CoinTransaction();
+                receive.setUser(admin);
+                receive.setAmount(BigDecimal.valueOf(feeAmount));
+                receive.setTransactionType("maintenance_fee");
+                receive.setStatus("completed");
+                receive.setNote("Receive maintenance fee from instructor " + instructor.getUserId());
+                receive.setCreatedAt(LocalDateTime.now());
+                receive.setOrder(null);
+                coinTransactionRepository.save(receive);
+                userRepository.save(admin);
+            }
+            userRepository.save(instructor);
+            maintenance.setStatus("completed");
+            maintenance.setDescription(refCode != null ? refCode : "Đã thanh toán");
+            courseMaintenanceRepository.save(maintenance);
+            return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 }

@@ -13,13 +13,16 @@
             </span>
         </td>
         <td>
+            <span th:text="${voucher.isPublic} ? 'Có' : 'Không'"></span>
+        </td>
+        <td>
             <button class="btn btn-info btn-sm" th:onclick="|viewCourses(${voucher.voucherId})|">
                 <i class="bi bi-eye"></i> View
             </button>
         </td>
     </tr>
     <tr th:if="${#lists.isEmpty(vouchers)}">
-        <td colspan="7" class="text-center"
+        <td colspan="8" class="text-center"
             th:text="${status == 'valid' ? 'Không có voucher còn hạn.' : (status == 'expired' ? 'Không có voucher hết hạn.' : 'Không có voucher nào.')}"></td>
     </tr>
 </th:block>
