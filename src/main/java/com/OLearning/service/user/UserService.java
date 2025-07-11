@@ -2,12 +2,10 @@ package com.OLearning.service.user;
 
 import com.OLearning.dto.user.UserDTO;
 import com.OLearning.dto.user.UserDetailDTO;
-import com.OLearning.dto.course.CourseDTO;
-import com.OLearning.dto.login.RegisterDTO;
+import com.OLearning.dto.user.UserProfileUpdateDTO;import com.OLearning.dto.login.RegisterDTO;
+import com.OLearning.dto.user.UserProfileEditDTO;
 import com.OLearning.entity.Role;
 import com.OLearning.entity.User;
-
-import org.mapstruct.control.MappingControl.Use;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -64,5 +62,18 @@ public interface UserService {
     User findById(Long id);
 
     void updatePasswordByEmail(String email, String newPassword);
+
+    /**
+     * Cập nhật thông tin profile cho user
+     */
+    void updateProfile(Long userId, UserProfileEditDTO profileEditDTO);
+
+    Optional<UserProfileEditDTO> getProfileByUsername(String username);
+    void updateProfileByUsername(String username, UserProfileEditDTO profileEditDTO);
+
+    // Profile management methods
+    User updateProfile(Long userId, UserProfileUpdateDTO profileUpdateDTO);
+
+    User updateProfilePicture(Long userId, String newProfilePictureUrl);
 
 }

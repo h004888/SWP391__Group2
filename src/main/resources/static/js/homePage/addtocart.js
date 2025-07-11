@@ -2,6 +2,11 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.add-to-cart-btn').forEach(function(btn) {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
+            // Kiểm tra đăng nhập
+            if (!window.userId || window.userId == 0) {
+                window.location.href = '/login'; // Đổi lại nếu URL login khác
+                return;
+            }
             const courseId = btn.getAttribute('data-course-id');
             fetch('/cart/add/' + courseId, {
                 method: 'POST',
@@ -12,13 +17,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert('Đã thêm vào giỏ hàng!');
+                        showNotification('Added to cart successfully!', 'success');
                         document.dispatchEvent(new Event('cart-updated'));
                     } else {
-                        alert(data.error || 'Có lỗi xảy ra!');
+                        showNotification(data.error || 'An error occurred!', 'error');
                     }
                 })
-                .catch(() => alert('Có lỗi xảy ra!'));
+                .catch(() => showNotification('An error occurred!', 'error'));
         });
     });
 });

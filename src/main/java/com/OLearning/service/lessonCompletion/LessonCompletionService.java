@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.OLearning.dto.lessonCompletion.LessonCompletionDTO;
 
-import com.OLearning.entity.LessonCompletion;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,5 +14,7 @@ public interface LessonCompletionService {
 
     void markLessonAsCompleted(Long userId, Long lessonId);
 
-}
+    Double getOverallProgressOfUser(Long userId, Long courseId);
 
+    Integer getNumberOfCompletedLessons(Long userId, Long courseId);
+}

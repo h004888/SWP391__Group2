@@ -1,0 +1,668 @@
+<main th:fragment="mainContentLessonVideo">
+    <!-- =======================
+    Page banner video START -->
+
+    <div class="row px-6">
+        <div class="row ">
+
+            <!-- Course video START -->
+            <div class="col-lg-9">
+                <div class="video-player rounded-3">
+                    <video controls crossorigin="anonymous" playsinline poster="/assets/images/videos/poster.jpg">
+                        <source th:src="@{/api/video/stream/video/{videoURL}(videoURL=${lessonVideoURL})}" size="360">
+                        <source th:src="@{/api/video/stream/video/{videoURL}(videoURL=${lessonVideoURL})}" size="720">
+                        <source th:src="@{/api/video/stream/video/{videoURL}(videoURL=${lessonVideoURL})}" size="1080">
+                        <!-- Caption files -->
+                        <track kind="captions" label="English" srclang="en" src="/assets/images/videos/en.vtt" default>
+                        <track kind="captions" label="French" srclang="fr" src="/assets/images/videos/fr.vtt">
+                    </video>
+                </div>
+
+
+                <div class="row">
+
+                    <!-- Main content START -->
+                    <div class="col mt-3">
+                        <div class="row">
+
+                            <!-- Course title START -->
+                            <div class="col-12">
+                                <!-- Title -->
+                                <h1 th:text="${currentLesson.title}">The Complete Digital Marketing Course - 12 Courses
+                                    in
+                                    1</h1>
+
+                            </div>
+                            <!-- Course title END -->
+
+                            <!-- Instructor detail START -->
+                            <div class="col-12">
+                                <div class="d-sm-flex justify-content-sm-between align-items-center ms-2 mb-2">
+                                    <!-- Avatar detail -->
+                                    <div class="d-flex align-items-center">
+                                        <!-- Avatar image -->
+                                        <div class="avatar avatar-lg">
+                                            <img class="avatar-img rounded-circle" src="/assets/images/avatar/05.jpg"
+                                                alt="avatar">
+                                        </div>
+                                        <div class="ms-3">
+                                            <h6 class="mb-0"><a href="#" th:text="${course.instructor.fullName}">By
+                                                    Jacqueline Miller</a></h6>
+                                            <p class="mb-0 small" th:text="${course.instructor.personalSkill}">Founder
+                                                Eduport company</p>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                            <!-- Instructor detail END -->
+
+                            <!-- Course detail START -->
+                            <div class="col-12">
+                                <!-- Tabs START -->
+                                <ul class="nav nav-pills nav-pills-bg-soft px-3" id="course-pills-tab" role="tablist">
+                                    <!-- Tab item -->
+                                    <li class="nav-item me-2 me-sm-4" role="presentation">
+                                        <button class="nav-link mb-0 active" id="course-pills-tab-4"
+                                            data-bs-toggle="pill" data-bs-target="#course-pills-4" type="button"
+                                            role="tab" aria-controls="course-pills-4" aria-selected="true">Comments
+                                        </button>
+                                    </li>
+                                </ul>
+                                <!-- Tabs END -->
+
+                                <!-- Tab contents START -->
+                                <div class="tab-content pt-4 px-3" id="course-pills-tabContent">
+                                    <!-- Comments Tab START -->
+                                    <div class="tab-pane fade show active" id="course-pills-4" role="tabpanel"
+                                        aria-labelledby="course-pills-tab-4">
+                                        <!-- Comment START -->
+                                        <div class="row mb-4" th:if="${currentLesson != null and course != null}">
+                                            <div class="col-12">
+                                                <div th:replace="userPage/fragmentLessonVideo/commentLessonVideoFragment :: commentLessonVideoFragment(comments=${comments}, currentLesson=${currentLesson}, user=${user})"></div>
+                                            </div>
+                                        </div>
+                                        <!-- Comment END -->
+                                    </div>
+                                    <!-- Comments Tab END -->
+                                </div>
+                                <!-- Tab contents END -->
+                            </div>
+                            <!-- Course detail END -->
+                        </div>
+                    </div>
+                    <!-- Main content END -->
+
+
+
+                </div><!-- Row END -->
+            </div>
+            <!-- Course video END -->
+
+            <!-- Right sidebar START -->
+            <div class="col-lg-3">
+                <!-- Responsive offcanvas body START -->
+                <div class="offcanvas-lg offcanvas-end" tabindex="-1" id="offcanvasSidebar"
+                    aria-labelledby="offcanvasSidebarLabel">
+                    <div class="offcanvas-header bg-dark">
+                        <h5 class="offcanvas-title text-white" id="offcanvasSidebarLabel">Course playlist</h5>
+                        <button type="button" class="btn btn-sm btn-light mb-0" data-bs-dismiss="offcanvas"
+                            data-bs-target="#offcanvasSidebar" aria-label="Close"><i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                    <div class="offcanvas-body p-3 p-lg-0">
+                        <div class="col-12">
+                            <!-- Accordion START -->
+                            <div class="accordion accordion-icon accordion-bg-light" id="accordionExample2">
+                                <!-- Item -->
+                                <div class="accordion-item mb-3" th:each="chapter, interStat : ${chapters}">
+                                    <h6 class="accordion-header font-base" th:id="'heading-' + ${interStat.index}">
+                                        <a class="accordion-button fw-bold rounded collapsed d-block"
+                                            th:href="'#collapse-' + ${interStat.index}" data-bs-toggle="collapse"
+                                            th:data-bs-target="'#collapse-' + ${interStat.index}" aria-expanded="false"
+                                            th:aria-controls="'collapse-' + ${interStat.index}">
+                                            <span class="mb-0" th:text="${chapter.title}">Introduction of Digital
+                                                Marketing</span>
+                                            <span class="small d-block mt-1"
+                                                th:text="${chapter.lessons.size() + ' Lessons' + (chapter.lessons.size() > 1 ? 's' : '')}">(3
+                                                Lectures)</span>
+                                        </a>
+                                    </h6>
+                                    <div th:id="'collapse-' + ${interStat.index}" class="accordion-collapse collapse"
+                                        th:classappend="${chapter.lessons.?[lessonId == __${currentLessonId}__].size() > 0} ? 'show' : ''"
+                                        th:aria-labelledby="'heading-' + ${interStat.index}"
+                                        data-bs-parent="#accordionExample2">
+                                        <div class="accordion-body mt-3">
+                                            <div class="vstack gap-3">
+
+                                                <!-- Progress bar -->
+                                                <th:block th:with="progress=${chapterProgressMap[chapter.chapterId]}">
+                                                    <div class="d-flex justify-content-between">
+                                                        <p class="mb-1 h6"
+                                                            th:text="${progress.completedLessons + '/' + progress.totalLessons + ' Completed'}">
+                                                            0/0 Completed
+                                                        </p>
+                                                        <h6 class="mb-1 text-end"
+                                                            th:text="${#numbers.formatDecimal(progress.percent, 0, 0) + '%'}">
+                                                            0%
+                                                        </h6>
+                                                    </div>
+
+                                                    <div class="progress progress-sm bg-primary bg-opacity-10">
+                                                        <div class="progress-bar bg-primary aos" role="progressbar"
+                                                            data-aos-delay="200" data-aos-duration="1000"
+                                                            data-aos-easing="ease-in-out"
+                                                            th:style="'width:' + ${progress.percent} + '%'"
+                                                            th:aria-valuenow="${progress.percent}" aria-valuemin="0"
+                                                            aria-valuemax="100">
+                                                        </div>
+                                                    </div>
+                                                </th:block>
+
+
+
+                                                <!-- Course lecture -->
+                                                <div th:each="lesson : ${chapter.lessons}"
+                                                    th:classappend="${lesson.lessonId == currentLessonId} ? 'p-2 bg-success bg-opacity-10 rounded-3' : ''"
+                                                    class="d-flex justify-content-between align-items-center mb-2">
+
+                                                    <div class="position-relative d-flex align-items-center">
+
+                                                        <!-- Nếu bài có thể truy cập (đã học hoặc có thể học) -->
+                                                        <a th:if="${accessibleLessonIds.contains(lesson.lessonId)}"
+                                                            th:href="@{/learning/course/{courseId}/lesson/{lessonId}(courseId=${course.courseId}, lessonId=${lesson.lessonId})}"
+                                                            th:class="${lesson.lessonId == currentLessonId} ? 'btn btn-warning btn-round btn-sm mb-0 stretched-link position-static' :
+                     (${completedLessonIds.contains(lesson.lessonId)} ? 'btn btn-success btn-round btn-sm mb-0 stretched-link position-static' : 'btn btn-primary btn-round btn-sm mb-0 stretched-link position-static')">
+                                                            <i
+                                                                th:class="${lesson.lessonId == currentLessonId} ? 'fas fa-play me-0' :
+                         (${completedLessonIds.contains(lesson.lessonId)} ? 'fas fa-check me-0' : 'fas fa-play me-0')"></i>
+                                                        </a>
+
+                                                        <!-- Nếu bài bị khóa -->
+                                                        <button
+                                                            th:if="${!accessibleLessonIds.contains(lesson.lessonId)}"
+                                                            class="btn btn-secondary btn-round btn-sm mb-0 position-static"
+                                                            disabled>
+                                                            <i class="fas fa-lock me-0"></i>
+                                                        </button>
+
+                                                        <!-- Tiêu đề bài -->
+                                                        <span style="margin-left: 10px;"
+                                                            class="d-inline-block text-truncate ms-2 mb-0 h6 fw-light w-200px"
+                                                            th:class="${lesson.lessonId == currentLessonId} ? 'fw-bold' : 'fw-light'"
+                                                            th:text="${lesson.title}">Tên bài học</span>
+                                                    </div>
+
+                                                    <div class="text-end">
+                                                        <!-- Hiển thị trạng thái -->
+                                                        <p class="mb-0 text-truncate"
+                                                            th:if="${lesson.lessonId == currentLessonId}">
+                                                            <span class="badge bg-warning text-dark">
+                                                                <i class="fas fa-play me-1"></i>Playing
+                                                            </span>
+                                                        </p>
+                                                        <p class="mb-0 text-truncate"
+                                                            th:if="${completedLessonIds.contains(lesson.lessonId) and lesson.lessonId != currentLessonId}">
+                                                            <span class="badge bg-success">
+                                                                <i class="fas fa-check me-1"></i>Completed
+                                                            </span>
+                                                        </p>
+                                                        <p class="mb-0 text-truncate"
+                                                            th:if="${!completedLessonIds.contains(lesson.lessonId) and lesson.lessonId != currentLessonId and accessibleLessonIds.contains(lesson.lessonId)}">
+                                                            <span class="text-primary fw-bold">
+                                                                <i class="fas fa-clock me-1"></i>
+                                                                <span th:text="${lesson.duration / 60} + ' min'"></span>
+                                                            </span>
+                                                        </p>
+                                                        <p class="mb-0 text-truncate"
+                                                            th:if="${!accessibleLessonIds.contains(lesson.lessonId)}">
+                                                            <span class="text-muted">
+                                                                <i class="fas fa-lock me-1"></i>
+                                                                <span th:text="${lesson.duration / 60} + ' min'"></span>
+                                                            </span>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Accordion END -->
+                        </div>
+                    </div>
+                </div>
+                <!-- Responsive offcanvas body END -->
+
+                <!-- Tags START -->
+                <div class="mt-4">
+                    <h4 class="mb-3">Tags</h4>
+                    <ul class="list-inline mb-0">
+                        <li class="list-inline-item"><a class="btn btn-outline-light btn-sm" href="#">blog</a></li>
+                        <li class="list-inline-item"><a class="btn btn-outline-light btn-sm" href="#">business</a>
+                        </li>
+                        <li class="list-inline-item"><a class="btn btn-outline-light btn-sm" href="#">theme</a></li>
+                        <li class="list-inline-item"><a class="btn btn-outline-light btn-sm" href="#">bootstrap</a>
+                        </li>
+                        <li class="list-inline-item"><a class="btn btn-outline-light btn-sm" href="#">data
+                                science</a></li>
+                        <li class="list-inline-item"><a class="btn btn-outline-light btn-sm" href="#">web
+                                development</a></li>
+                        <li class="list-inline-item"><a class="btn btn-outline-light btn-sm" href="#">tips</a></li>
+                        <li class="list-inline-item"><a class="btn btn-outline-light btn-sm" href="#">machine
+                                learning</a></li>
+                    </ul>
+                </div>
+                <!-- Tags END -->
+            </div>
+            <!-- Right sidebar END -->
+
+        </div>
+        <!-- =======================
+        Page banner video END -->
+
+        <!-- =======================
+        Page content START -->
+
+
+
+        <!-- =======================
+        Page content END -->
+
+</main>
+
+<!-- JavaScript for comment functionality -->
+<script th:inline="javascript">
+    // Load comments when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        const courseId = document.querySelector('input[name="courseId"]').value;
+        const lessonId = document.querySelector('input[name="lessonId"]').value;
+        
+        console.log('Page loaded with:', { courseId, lessonId });
+        
+        // Validate lessonId is present - bắt buộc
+        if (!lessonId) {
+            console.error('Lesson ID is missing! Comment system requires lesson ID.');
+            document.getElementById('commentsList').innerHTML = '<p class="text-danger">Lỗi: Không tìm thấy thông tin bài học. Comment system yêu cầu lesson ID.</p>';
+            return;
+        }
+        
+        // Load comments for this specific lesson
+        loadComments(courseId, lessonId);
+    });
+
+    // Load comments function - chỉ theo lesson
+    function loadComments(courseId, lessonId) {
+        // Comment chỉ có thể theo lesson, không có course-level comments
+        const url = `/api/course/${courseId}/lesson/${lessonId}/comments`;
+        console.log('Loading comments from:', url);
+        fetch(url)
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.json();
+            })
+            .then(comments => {
+                console.log('Comments loaded:', comments);
+                const commentsList = document.getElementById('commentsList');
+                commentsList.innerHTML = renderComments(comments);
+                // Scroll tới cuối danh sách comment để thấy reply mới
+                commentsList.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                // --- Scroll to comment if commentId param exists ---
+                const urlParams = new URLSearchParams(window.location.search);
+                const commentId = urlParams.get('commentId');
+                if (commentId) {
+                    const commentElem = document.getElementById('comment-' + commentId);
+                    if (commentElem) {
+                        commentElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        commentElem.style.backgroundColor = '#ffffcc';
+                        setTimeout(() => commentElem.style.backgroundColor = '', 2000);
+                    } else {
+                        // Hiển thị thông báo nếu không tìm thấy comment
+                        let noti = document.getElementById('comment-not-found-message');
+                        if (!noti) {
+                            noti = document.createElement('div');
+                            noti.id = 'comment-not-found-message';
+                            noti.className = 'alert alert-warning mt-3';
+                            noti.innerText = 'Bình luận này có thể đã bị xóa hoặc không tồn tại.';
+                            commentsList.prepend(noti);
+                        }
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error loading comments:', error);
+                document.getElementById('commentsList').innerHTML = '<p class="text-muted">Error loading comments</p>';
+            });
+    }
+
+    // Render comments HTML
+    function renderComments(comments) {
+        if (!comments || comments.length === 0) {
+            return '<p class="text-muted">No comments yet. Be the first to comment!</p>';
+        }
+
+        return comments.map(comment => `
+            <div class="border p-2 p-sm-4 rounded-3 mb-4">
+                <ul class="list-unstyled mb-0">
+                    <li class="comment-item">
+                        <div class="d-flex mb-3">
+                            <div class="avatar avatar-sm flex-shrink-0">
+                                <a href="#"><img class="avatar-img rounded-circle"
+                                        src="${comment.user && comment.user.profilePicture ? comment.user.profilePicture : '/assets/images/avatar/default.jpg'}"
+                                        alt="${comment.user ? comment.user.fullName : 'User'}"></a>
+                            </div>
+                            <div class="ms-2">
+                                <div class="bg-light p-3 rounded">
+                                    <div class="d-flex justify-content-between">
+                                        <div class="me-2">
+                                            <h6 class="mb-1 lead fw-bold">
+                                                <a href="#!">${comment.user ? comment.user.fullName : 'Unknown User'}</a>
+                                            </h6>
+                                            <p class="h6 mb-0">${comment.comment}</p>
+                                        </div>
+                                        <small>${new Date(comment.createdAt).toLocaleString()}</small>
+                                    </div>
+                                </div>
+                                <ul class="nav nav-divider py-2 small">
+                                    <li class="nav-item">
+                                        <a class="text-primary-hover" href="#" onclick="replyToComment(${comment.reviewId})">Reply</a>
+                                    </li>
+                                    ${comment.user && comment.user.userId === window.currentUserId ? `
+                                        <li class="nav-item">
+                                            <a class="text-primary-hover" href="#" onclick="editComment(${comment.reviewId})">Edit</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="text-danger-hover" href="#" onclick="deleteComment(${comment.reviewId})">Delete</a>
+                                        </li>
+                                    ` : `
+                                        <li class="nav-item">
+                                            <a class="text-warning-hover" href="#" onclick="reportComment(${comment.reviewId})">Report</a>
+                                        </li>
+                                    `}
+                                </ul>
+                            </div>
+                        </div>
+                        ${comment.children && comment.children.length > 0 ? `
+                            <ul class="list-unstyled ms-4">
+                                ${comment.children.map(reply => `
+                                    <li class="comment-item">
+                                        <div class="d-flex">
+                                            <div class="avatar avatar-xs flex-shrink-0">
+                                                <a href="#"><img class="avatar-img rounded-circle"
+                                                        src="${reply.user && reply.user.profilePicture ? reply.user.profilePicture : '/assets/images/avatar/default.jpg'}"
+                                                        alt="${reply.user ? reply.user.fullName : 'User'}"></a>
+                                            </div>
+                                            <div class="ms-2">
+                                                <div class="bg-light p-3 rounded">
+                                                    <div class="d-flex justify-content-between">
+                                                        <div class="me-2">
+                                                            <h6 class="mb-1 lead fw-bold">
+                                                                <a href="#">${reply.user ? reply.user.fullName : 'Unknown User'}</a>
+                                                            </h6>
+                                                            <p class="mb-0">${reply.comment}</p>
+                                                        </div>
+                                                        <small>${new Date(reply.createdAt).toLocaleString()}</small>
+                                                    </div>
+                                                </div>
+                                                <ul class="nav nav-divider py-2 small">
+                                                    ${reply.user && reply.user.userId === window.currentUserId ? `
+                                                        <li class="nav-item">
+                                                            <a class="text-primary-hover" href="#" onclick="editReply(${reply.reviewId})">Edit</a>
+                                                        </li>
+                                                        <li class="nav-item">
+                                                            <a class="text-danger-hover" href="#" onclick="deleteComment(${reply.reviewId})">Delete</a>
+                                                        </li>
+                                                    ` : `
+                                                        <li class="nav-item">
+                                                            <a class="text-warning-hover" href="#" onclick="reportComment(${reply.reviewId})">Report</a>
+                                                        </li>
+                                                    `}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        ` : ''}
+                    </li>
+                </ul>
+            </div>
+        `).join('');
+    }
+
+    // Generate star rating HTML
+    function generateStarRating(rating) {
+        const stars = [];
+        for (let i = 1; i <= 5; i++) {
+            if (i <= rating) {
+                stars.push('<i class="fas fa-star text-warning"></i>');
+            } else {
+                stars.push('<i class="far fa-star text-warning"></i>');
+            }
+        }
+        return stars.join('');
+    }
+
+    // Add comment
+    document.addEventListener('submit', function(e) {
+        if (e.target && e.target.id === 'commentForm') {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const comment = formData.get('comment');
+            const courseId = formData.get('courseId');
+            const lessonId = formData.get('lessonId');
+            
+            console.log('Submitting comment:', { comment, courseId, lessonId });
+            
+            // Validate lessonId is present - bắt buộc
+            if (!lessonId) {
+                showMessage('Lỗi: Không tìm thấy thông tin bài học. Comment phải thuộc về một bài học cụ thể.', 'error');
+                return;
+            }
+            
+            fetch(`/api/course/${courseId}/comment`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    comment: comment,
+                    courseId: courseId,
+                    lessonId: parseInt(lessonId) // lessonId bắt buộc
+                })
+            })
+            .then(response => {
+                console.log('Comment submit response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Comment submit response:', data);
+                if (data.success) {
+                    showMessage('Thao tác thành công!', 'success');
+                    e.target.reset && e.target.reset();
+                    loadComments(courseId, lessonId);
+                } else {
+                    showMessage(data.error || 'Có lỗi xảy ra', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error submitting comment:', error);
+                showMessage('Error posting comment', 'error');
+            });
+        }
+    });
+
+    // Reply to comment
+    function replyToComment(commentId) {
+        const replyForm = document.getElementById('replyForm' + commentId);
+        replyForm.style.display = 'block';
+    }
+
+    function cancelReply(commentId) {
+        const replyForm = document.getElementById('replyForm' + commentId);
+        replyForm.style.display = 'none';
+        replyForm.querySelector('textarea').value = '';
+    }
+
+    // Edit comment
+    function editComment(commentId) {
+        const editForm = document.getElementById('editForm' + commentId);
+        editForm.style.display = 'block';
+    }
+
+    function cancelEdit(commentId) {
+        const editForm = document.getElementById('editForm' + commentId);
+        editForm.style.display = 'none';
+    }
+
+    // Delete comment
+    function deleteComment(commentId) {
+        if (confirm('Are you sure you want to delete this comment?')) {
+            const courseId = document.querySelector('input[name="courseId"]').value;
+            const lessonId = document.querySelector('input[name="lessonId"]').value;
+            
+            fetch(`/api/course/${courseId}/comment/${commentId}/delete`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage('Thao tác thành công!', 'success');
+                    loadComments(courseId, lessonId);
+                } else {
+                    showMessage(data.error || 'Error deleting comment', 'error');
+                }
+            })
+            .catch(error => {
+                showMessage('Error deleting comment', 'error');
+            });
+        }
+    }
+
+    // Report comment
+    function reportComment(commentId) {
+        const reason = prompt('Please provide a reason for reporting this comment:');
+        if (reason && reason.trim()) {
+            const courseId = document.querySelector('input[name="courseId"]').value;
+            
+            fetch(`/api/course/${courseId}/comment/${commentId}/report`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    reason: reason.trim()
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage('Thao tác thành công!', 'success');
+                } else {
+                    showMessage(data.error || 'Error reporting comment', 'error');
+                }
+            })
+            .catch(error => {
+                showMessage('Error reporting comment', 'error');
+            });
+        }
+    }
+
+    // Handle reply form submission
+    document.addEventListener('submit', function(e) {
+        if (e.target.classList.contains('replyCommentForm')) {
+            e.preventDefault();
+            // Lấy giá trị trực tiếp từ input, không dùng FormData
+            const comment = e.target.querySelector('input[name="comment"]').value;
+            const courseId = e.target.querySelector('input[name="courseId"]') ? e.target.querySelector('input[name="courseId"]').value : document.querySelector('input[name="courseId"]').value;
+            const parentId = e.target.querySelector('input[name="parentId"]').value;
+            const lessonId = e.target.querySelector('input[name="lessonId"]').value;
+            const replyToUserNameInput = e.target.querySelector('input[name="replyToUserName"]');
+            const replyToUserName = replyToUserNameInput ? replyToUserNameInput.value : null;
+
+            fetch(`/api/course/${courseId}/comment/reply`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    comment: comment,
+                    courseId: courseId,
+                    parentId: parentId,
+                    lessonId: lessonId ? parseInt(lessonId) : null,
+                    replyToUserName: replyToUserName
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage('Thao tác thành công!', 'success');
+                    // Ẩn form trả lời và reset input
+                    e.target.classList.add('d-none');
+                    // Reset input
+                    const input = e.target.querySelector('input[name="comment"]');
+                    if (input) input.value = '';
+                    e.target.reset && e.target.reset();
+                    // Gọi lại loadComments để cập nhật danh sách
+                    loadComments(courseId, lessonId);
+                } else {
+                    showMessage(data.error || 'Error posting reply', 'error');
+                }
+            })
+            .catch(error => {
+                showMessage('Error posting reply', 'error');
+            });
+        }
+    });
+
+    // Handle edit form submission
+    document.addEventListener('submit', function(e) {
+        if (e.target.classList.contains('editCommentForm')) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const comment = formData.get('comment');
+            const courseId = formData.get('courseId');
+            const commentId = e.target.dataset.commentId;
+            const lessonId = document.querySelector('input[name="lessonId"]').value;
+            
+            fetch(`/api/course/${courseId}/comment/${commentId}/edit`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    comment: comment,
+                    courseId: courseId,
+                    lessonId: lessonId ? parseInt(lessonId) : null
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage('Thao tác thành công!', 'success');
+                    loadComments(courseId, lessonId);
+                } else {
+                    showMessage(data.error || 'Error updating comment', 'error');
+                }
+            })
+            .catch(error => {
+                showMessage('Error updating comment', 'error');
+            });
+        }
+    });
+
+    // Show message function
+    function showMessage(message, type) {
+        const messageDiv = document.getElementById('commentMessage');
+        messageDiv.innerHTML = `<div class="alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>`;
+        
+        // Auto hide after 5 seconds
+        setTimeout(() => {
+            messageDiv.innerHTML = '';
+        }, 5000);
+    }
+</script>

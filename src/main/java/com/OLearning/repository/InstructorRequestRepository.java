@@ -24,4 +24,5 @@ public interface InstructorRequestRepository extends JpaRepository<InstructorReq
         Pageable pageable
     );
 
+    InstructorRequest findTopByUser_UserIdOrderByRequestDateDesc(Long userId);
 }

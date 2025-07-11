@@ -3,6 +3,7 @@ package com.OLearning.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -11,21 +12,21 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
 public class UserVoucher {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID")
     private Long Id;
 
     @ManyToOne
-    @JoinColumn(name = "userId", nullable = false)
+    @JoinColumn(name = "userID", nullable = false)
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "voucherId", nullable = false)
+    @JoinColumn(name = "voucherID", nullable = false)
     private Voucher voucher;
-
+    @Column(name = "IsUsed")
     private Boolean isUsed;
-    private LocalDateTime usedDate;
-
+    @Column(name = "UsedDate")
+    private LocalDate usedDate;
 }

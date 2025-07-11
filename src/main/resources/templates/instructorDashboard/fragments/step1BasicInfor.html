@@ -1,16 +1,14 @@
 <div class="main-content" th:fragment="step1Content">
   <div class="container-fluid py-4">
-    <!-- Breadcrumb -->
-
-    <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <h1 class="h3 mb-0">Create New Course</h1>
+    <!-- Page Header & Step Indicator -->
+    <div class="content-card sticky-step-indicator mb-4 rounded-3 border-0 shadow-sm px-4 py-3">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-2">
+        <div>
+          <h1 class="h3 mb-1 fw-bold text-primary">Create New Course</h1>
+          <p class="text-muted mb-0">Fill in the details below to create your course</p>
+        </div>
       </div>
-    </div>
-    <!-- Step Indicator -->
-    <div class="content-card">
-      <div class="step-indicator">
+      <div class="step-indicator mt-3">
         <div class="step active" data-step="1">
           <div class="step-circle">1</div>
           <div class="step-label">Basic Info</div>
@@ -30,97 +28,67 @@
       </div>
     </div>
 
-    <div class="row">
-      <div>
+    <form th:action="@{/instructor/createcourse/coursemedia}" th:object="${coursestep1}" method="POST">
+      <div class="card border-0 shadow-sm mb-4 rounded-3">
+        <div class="card-body p-4">
+          <h3 class="mb-4 fw-semibold text-dark">Basic Course Information</h3>
 
-        <form th:action="@{/instructordashboard/createcourse/coursemedia}" th:object="${coursestep1}" method="POST">
-          <!-- Step 1: Basic Information -->
-          <div class="step-content" id="step-1">
-            <div class="content-card">
-              <h3 class="mb-4">Basic Course Information</h3>
+          <div class="mb-4">
+            <label class="form-label fw-semibold mb-2" for="courseTitle">Course Title</label>
+            <input type="hidden" th:field="*{id}" >
+            <input type="text" class="form-control form-control-lg rounded-2" th:field="*{title}" id="courseTitle" placeholder="Enter course title">
+            <div class="form-text text-danger" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+          </div>
 
-              <div class="row mb-3">
-                <div class="col-12">
-                  <label class="form-label">Course Title</label>
-                  <div class="form-floating">
-                    <input type="hidden" th:field="*{id}" >
-                    <input type="text" class="form-control" th:field="*{title}" id="courseTitle"
-                           placeholder="Course Title">
-                    <label for="courseTitle">Enter course title</label>
-                    <div style="color: red" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="row mb-3">
-                <div class="col-md-6">
-                  <label class="form-label">Course Category</label>
-                  <div class="form-floating">
-                    <select class="form-select" th:field="*{categoryName}" id="courseCategory">
-                      <option value="">Select Category</option>
-                      <option th:each="cat : ${categories}"
-                              th:value="${cat.name}"
-                              th:text="${cat.name}">
-                      </option>
-                    </select>
-                    <label for="courseCategory">Category</label>
-                    <div style="color: red" th:if="${#fields.hasErrors('categoryName')}" th:errors="*{categoryName}"></div>
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Course Price</label>
-                  <div class="form-floating">
-                    <input type="number" class="form-control" th:field="*{price}" id="coursePrice" placeholder="Price" min="0" step="0.01">
-                    <label for="coursePrice">Enter course price</label>
-                    <div style="color: red" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></div>
-                    <div style="color: red" th:if="${priceTypeError}" th:text="${priceTypeError}"></div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-12">
-                <label class="form-label">Course level</label>
-                <select class="form-select js-choice"
-                        aria-label=".form-select-sm"
-                        data-search-enabled="false"
-                        data-remove-item-button="true"
-                        th:field="*{courseLevel}">
-                  <option value="">Select course level</option>
-                  <option value="All level">All level</option>
-                  <option value="Beginner">Beginner</option>
-                  <option value="Intermediate">Intermediate</option>
-                  <option value="Advance">Advance</option>
-                </select>
-                <div style="color: red" th:if="${#fields.hasErrors('courseLevel')}" th:errors="*{courseLevel}"></div>
-              </div>
-              <div class="row mb-3">
-                <div class="col-12">
-                  <label class="form-label">Course Description</label>
-                  <div class="form-floating">
-                                                <textarea class="form-control" th:field="*{description}" id="courseDescription"
-                                                          placeholder="Course Description" style="height: 250px;"></textarea>
-                    <label for="courseDescription">Enter course Description</label>
-                    <div style="color: red" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
-                  </div>
-                </div>
-              </div>
+          <div class="row g-4 mb-4">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold mb-2" for="courseCategory">Course Category</label>
+              <select class="form-select form-select-lg rounded-2" th:field="*{categoryName}" id="courseCategory">
+                <option value="">Select Category</option>
+                <option th:each="cat : ${categories}" th:value="${cat.name}" th:text="${cat.name}"></option>
+              </select>
+              <div class="form-text text-danger" th:if="${#fields.hasErrors('categoryName')}" th:errors="*{categoryName}"></div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold mb-2" for="coursePrice">Course Price</label>
+              <input type="number" class="form-control form-control-lg rounded-2" th:field="*{price}" id="coursePrice" placeholder="Enter price" min="0" step="0.01">
+              <div class="form-text text-danger" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></div>
+              <div class="form-text text-danger" th:if="${priceTypeError}" th:text="${priceTypeError}"></div>
             </div>
           </div>
 
-          <!-- Navigation Buttons -->
-
-          <div class="content-card">
-            <div class="d-flex justify-content-between">
-              <button class="btn btn-outline-secondary me-2" name="action" value="draft">
-                <i class="bi bi-save me-1"></i> Save as Draft
-              </button>
-              <button class="btn btn-primary ms-auto" name="action" value="nextstep">
-                Next <i class="bi bi-arrow-right ms-1"></i>
-              </button>
-            </div>
+          <div class="mb-4">
+            <label class="form-label fw-semibold mb-2" for="courseLevel">Course Level</label>
+            <select class="form-select form-select-lg rounded-2" th:field="*{courseLevel}" id="courseLevel">
+              <option value="">Select course level</option>
+              <option value="All level">All level</option>
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate">Intermediate</option>
+              <option value="Advance">Advance</option>
+            </select>
+            <div class="form-text text-danger" th:if="${#fields.hasErrors('courseLevel')}" th:errors="*{courseLevel}"></div>
           </div>
-        </form>
+
+          <div class="mb-2">
+            <label class="form-label fw-semibold mb-2" for="courseDescription">Course Description</label>
+            <textarea class="form-control form-control-lg rounded-2" th:field="*{description}" id="courseDescription" placeholder="Enter course description" style="height: 160px;"></textarea>
+            <div class="form-text text-danger" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
+          </div>
+        </div>
       </div>
-    </div>
+
+      <!-- Navigation Buttons -->
+      <div class="content-card sticky-navigation-buttons rounded-3 border-0 shadow-sm px-4 py-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <button class="btn btn-outline-secondary px-4 py-2 rounded-2" id="saveDraftBtn" name="action" value="draft">
+            <i class="bi bi-save me-1"></i> Save as Draft
+          </button>
+          <button class="btn btn-primary px-4 py-2 rounded-2 ms-auto" name="action" value="nextstep">
+            Next <i class="bi bi-arrow-right ms-1"></i>
+          </button>
+        </div>
+      </div>
+    </form>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <!-- Page level custom scripts -->
@@ -130,12 +98,16 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <!-- CKEditor CDN -->
+  <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+  <script>
+    CKEDITOR.replace('courseDescription', { height: 200 });
+  </script>
   <style>
     body {
       min-height: 100vh;
       background-color: #f8f9fa;
     }
-
     .content-card {
       background-color: #fff;
       border-radius: 0.5rem;
@@ -143,19 +115,39 @@
       padding: 1.5rem;
       margin-bottom: 1.5rem;
     }
-
+    .sticky-step-indicator {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background-color: #f0f4fa;
+      margin-bottom: 1.5rem;
+      padding-top: 10px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #b6c6e3;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .content-card.sticky-navigation-buttons {
+      position: sticky;
+      bottom: 0;
+      z-index: 1000;
+      background-color: #f0f4fa;
+      margin-top: 1.5rem;
+      padding-top: 15px;
+      padding-bottom: 15px;
+      border-top: 2px solid #b6c6e3;
+      box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+    }
     .step-indicator {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 2rem;
+      margin-bottom: 0;
+      gap: 0.5rem;
     }
-
     .step {
       flex: 1;
       text-align: center;
       position: relative;
     }
-
     .step:not(:last-child)::after {
       content: '';
       position: absolute;
@@ -166,14 +158,12 @@
       background-color: #dee2e6;
       z-index: 1;
     }
-
     .step.active:not(:last-child)::after {
       background-color: #0d6efd;
     }
-
     .step-circle {
-      width: 30px;
-      height: 30px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       background-color: #dee2e6;
       color: #6c757d;
@@ -184,103 +174,35 @@
       margin-bottom: 0.5rem;
       position: relative;
       z-index: 2;
+      font-size: 1.1rem;
     }
-
     .step.active .step-circle {
       background-color: #0d6efd;
       color: white;
     }
-
     .step.completed .step-circle {
       background-color: #198754;
       color: white;
     }
-
-    .image-upload-area {
-      border: 2px dashed #dee2e6;
-      border-radius: 0.5rem;
-      padding: 2rem;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.3s;
+    .form-label {
+      font-size: 1rem;
     }
-
-    .image-upload-area:hover {
-      border-color: #0d6efd;
-      background-color: rgba(13, 110, 253, 0.05);
+    .form-control-lg, .form-select-lg {
+      font-size: 1.05rem;
+      padding: 0.75rem 1rem;
     }
-
-    .image-upload-area.dragover {
-      border-color: #0d6efd;
-      background-color: rgba(13, 110, 253, 0.1);
+    .btn {
+      font-size: 1.05rem;
     }
-
-    .lesson-item {
-      border: 1px solid #dee2e6;
-      border-radius: 0.5rem;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      background-color: #f8f9fa;
-    }
-
-    .lesson-item.dragging {
-      opacity: 0.5;
-    }
-
-    .drag-handle {
-      cursor: move;
-      color: #6c757d;
-    }
-
-    .video-upload-area {
-      border: 2px dashed #dee2e6;
-      border-radius: 0.5rem;
-      padding: 1.5rem;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .video-upload-area:hover {
-      border-color: #0d6efd;
-      background-color: rgba(13, 110, 253, 0.05);
-    }
-
-    .progress-container {
-      display: none;
-      margin-top: 1rem;
-    }
-
-    .avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-
-    .tab-content {
-      padding-top: 1rem;
-    }
-
-    .form-floating textarea {
-      min-height: 120px;
-    }
-
-    .preview-card {
-      border: 1px solid #dee2e6;
-      border-radius: 0.5rem;
-      overflow: hidden;
-    }
-
-    .preview-image {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-    }
-
-    .sticky-sidebar {
-      position: sticky;
-      top: 20px;
+    @media (max-width: 768px) {
+      .card-body, .content-card.sticky-step-indicator, .content-card.sticky-navigation-buttons {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+      }
+      .col-12.col-md-10.col-lg-8 {
+        padding-left: 0;
+        padding-right: 0;
+      }
     }
   </style>
 </div>

@@ -3,7 +3,7 @@ package com.OLearning.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -12,24 +12,42 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
 public class Voucher {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "VoucherID")
     private Long voucherId;
 
     @ManyToOne
-    @JoinColumn(name = "userId", nullable = false)
+    @JoinColumn(name = "userID", nullable = false)
     private User instructor;
 
+    @Column(name = "Code")
     private String code;
+
+    @Column(name = "Discount")
     private Double discount;
-    private LocalDateTime expiryDate;
+
+    @Column(name = "ExpiryDate")
+    private LocalDate expiryDate;
+
+    @Column(name = "Limitation")
     private Long limitation;
+
+    @Column(name = "UsedCount")
     private Long usedCount;
+
+    @Column(name = "IsActive")
     private Boolean isActive;
+
+    @Column(name = "IsGlobal")
     private Boolean isGlobal;
-    private LocalDateTime createdDate;
+
+    @Column(name = "IsPublic")
+    private Boolean isPublic;
+
+    @Column(name = "CreatedDate")
+    private LocalDate createdDate;
 
     @OneToMany(mappedBy = "voucher")
     private List<VoucherCourse> voucherCourses;

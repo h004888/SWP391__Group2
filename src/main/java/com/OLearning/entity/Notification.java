@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
 public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,19 +19,21 @@ public class Notification {
 
     @Column(name = "Message", columnDefinition = "nvarchar(max)")
     private String message;
-    
+
     @Column(name = "SentAt")
     private LocalDateTime sentAt;
-    
+
     @Column(name = "Type")
     private String type;
-    
+
     @Column(name = "Status")
-    private boolean status;
+    private String status;
+    @Column(name = "CommentID")
+    private Long commentId;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "UserID", nullable = false)
-    private User user;
+    private User user;;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "CourseID")

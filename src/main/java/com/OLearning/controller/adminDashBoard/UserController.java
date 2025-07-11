@@ -25,6 +25,14 @@ import java.util.Optional;
 @Controller
 @RequestMapping("/admin")
 public class UserController {
+    // Các biến constant dùng cho model attribute (gán giá trị thực tế)
+    private static final String ACC_NAME_PAGE_MANAGEMENT = "Management Account";
+    private static final String ACC_NAME_PAGE_DETAIL = "Detail Account";
+    private static final String ERROR_MESSAGE_USER_ADD = "User added successfully";
+    private static final String ERROR_MESSAGE_UNEXPECTED = "Unexpected error: ";
+    private static final String SUCCESS_MESSAGE_RESET_PASS = "Reset password successfully";
+    private static final String SUCCESS_MESSAGE_DELETE_STAFF = "Delete staff successfully";
+
     @Autowired
     private UserService userService;
 
@@ -180,6 +188,34 @@ public class UserController {
         return "adminDashBoard/fragments/accountDetailContent :: enrolledCourseListFragment";
     }
 
+    @GetMapping("/account/counts")
+    @ResponseBody
+    public Map<String, Long> getAccountCounts(
+            @RequestParam(required = false) String keyword) {
+        Map<String, Long> counts = new HashMap<>();
+        for (long roleId = 1; roleId <= 3; roleId++) {
+            Pageable pageable = PageRequest.of(0, 1);
+            // Active
+            Page<UserDTO> activePage;
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                activePage = userService.searchByNameAndStatusWithPagination(keyword.trim(), roleId, true, pageable);
+            } else {
+                activePage = userService.getUsersByRoleAndStatusWithPagination(roleId, true, pageable);
+            }
+            // Inactive
+            Page<UserDTO> inactivePage;
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                inactivePage = userService.searchByNameAndStatusWithPagination(keyword.trim(), roleId, false, pageable);
+            } else {
+                inactivePage = userService.getUsersByRoleAndStatusWithPagination(roleId, false, pageable);
+            }
+            String roleKey = roleId == 1 ? "admin" : roleId == 2 ? "instructor" : "user";
+            counts.put(roleKey + "Active", activePage.getTotalElements());
+            counts.put(roleKey + "Inactive", inactivePage.getTotalElements());
+        }
+        return counts;
+    }
+
     @GetMapping("/account/block/{userId}")
     public String blockAccount(Model model, @PathVariable("userId") long id) {
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/accountContent :: accountContent");
@@ -195,10 +231,10 @@ public class UserController {
         return "redirect:/admin/account";
     }
 
-    @GetMapping("/account/delete/{userId}")
+    @PostMapping("/account/delete/{userId}")
     public String deleteAccount(Model model, @PathVariable("userId") long id,RedirectAttributes redirectAttributes) {
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/accountContent :: accountContent");
-        redirectAttributes.addFlashAttribute("successMessage", "Delete staff successfully");
+        redirectAttributes.addFlashAttribute("successMessage", SUCCESS_MESSAGE_DELETE_STAFF);
         userService.deleteAcc(id);
         return "redirect:/admin/account";
     }

@@ -40,8 +40,9 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         if (optionalUser.isPresent()) {
             user = optionalUser.get();
-            if (picture != null && !picture.equals(user.getProfilePicture())) {
+            if (picture != null && (user.getIsGooglePicture() == null || user.getIsGooglePicture())) {
                 user.setProfilePicture(picture);
+                user.setIsGooglePicture(true);
                 userRepository.save(user);
             }
 
@@ -52,6 +53,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             user.setUsername(email.split("@")[0]);
             user.setStatus(true);
             user.setProfilePicture(picture);
+            user.setIsGooglePicture(true);
 
             // Default ROLE_USER
             Role roleUser = roleRepository.findRoleByName("User")

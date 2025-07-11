@@ -101,6 +101,7 @@ public class LoginController {
             model.addAttribute("error", "An unexpected error occurred. Please try again.");
             return "loginPage/normalLogin/signup";
         }
+        redirectAttributes.addFlashAttribute("successMessage", "Đăng ký thành công! Vui lòng đăng nhập.");
         return "redirect:/login";
     }
 

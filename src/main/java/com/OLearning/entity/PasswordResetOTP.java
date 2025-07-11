@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
 public class PasswordResetOTP {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,3 +38,4 @@ public class PasswordResetOTP {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 }
+

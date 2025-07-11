@@ -24,6 +24,7 @@ public class UserDetailDTO {
     private String address;
     private LocalDate birthDay;
     private String profilePicture;
+    private Boolean isGooglePicture;
     private String personalSkill;
     private List<CourseDTO> enrolledCourses;
 }

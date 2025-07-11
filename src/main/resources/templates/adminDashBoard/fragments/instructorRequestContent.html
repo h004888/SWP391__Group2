@@ -172,15 +172,15 @@
                 <!-- Modal body -->
                 <div class="modal-body p-5">
                     <!-- Name -->
-                    <span class="small">Applicant Name:</span>
+                    <span class="small">Name:</span>
                     <h6 class="mb-3" id="applicantName">Loading...</h6>
 
                     <!-- Email -->
-                    <span class="small">Applicant Email id:</span>
+                    <span class="small">Email:</span>
                     <h6 class="mb-3" id="applicantEmail">Loading...</h6>
 
                     <!-- Phone number -->
-                    <span class="small">Applicant Phone number:</span>
+                    <span class="small">Phone number:</span>
                     <h6 class="mb-3" id="applicantPhone">Loading...</h6>
 
                     <!-- Request Date -->
@@ -191,8 +191,12 @@
                     <span class="small">Status:</span>
                     <h6 class="mb-3" id="requestStatus">Loading...</h6>
 
-                    <!-- Note -->
-                    <span class="small">Note:</span>
+                    <!-- Personal Skills -->
+                    <span class="small">Personal Skills:</span>
+                    <p class="text-dark mb-2" id="requestPersonalSkills">Loading...</p>
+
+                    <!-- Note (admin response) -->
+                    <span class="small">Admin Response (Note):</span>
                     <p class="text-dark mb-2" id="requestNote">Loading...</p>
 
                     <!-- Hidden input for request ID -->
@@ -279,25 +283,31 @@
         function loadRequestDetails(requestId) {
             // Store the request ID for later use
             document.getElementById('detailRequestId').value = requestId;
-            
             fetch('/admin/mnInstructors/request/details/' + requestId)
-                .then(response => response.json())
-                .then(data => {
-                    // Update modal content with the fetched data
-                    document.getElementById('applicantName').textContent = data.user.fullName;
-                    document.getElementById('applicantEmail').textContent = data.user.email;
-                    document.getElementById('applicantPhone').textContent = data.user.phone || 'Not provided';
-                    document.getElementById('requestDate').textContent = new Date(data.requestDate).toLocaleDateString();
-                    document.getElementById('requestStatus').textContent = data.status || 'PENDING';
-                    document.getElementById('requestNote').textContent = data.note || 'No note provided.';
-                    
-                    // Show/hide action buttons based on status
-                    const actionButtons = document.getElementById('actionButtons');
-                    if (data.status === null || data.status === 'PENDING') {
-                        actionButtons.style.display = 'block';
-                    } else {
-                        actionButtons.style.display = 'none';
-                    }
+                .then(response => {
+                    return response.text().then(text => {
+                        console.log('Response text:', text);
+                        try {
+                            const data = JSON.parse(text);
+                            // Update modal content with the fetched data
+                            document.getElementById('applicantName').textContent = data.name;
+                            document.getElementById('applicantEmail').textContent = data.email;
+                            document.getElementById('applicantPhone').textContent = data.phone || 'Not provided';
+                            document.getElementById('requestDate').textContent = new Date(data.requestDate).toLocaleDateString();
+                            document.getElementById('requestStatus').textContent = data.status || 'PENDING';
+                            document.getElementById('requestPersonalSkills').textContent = data.personalSkill || 'No personal skills provided.';
+                            document.getElementById('requestNote').textContent = data.note || 'No admin response provided.';
+                            // Show/hide action buttons based on status
+                            const actionButtons = document.getElementById('actionButtons');
+                            if (data.status === null || data.status === 'PENDING') {
+                                actionButtons.style.display = 'block';
+                            } else {
+                                actionButtons.style.display = 'none';
+                            }
+                        } catch (error) {
+                            console.error('JSON parse error:', error, '\nResponse text:', text);
+                        }
+                    });
                 })
                 .catch(error => console.error('Error loading request details:', error));
         }

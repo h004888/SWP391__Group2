@@ -21,6 +21,10 @@ public class UserMapper {
         return dto;
     }
 
+    /*
+     * 
+     */
+
     public User toUser(UserDTO dto, Role role) {
         User user = new User();
         user.setUserId(dto.getUserId());
@@ -31,6 +35,7 @@ public class UserMapper {
         user.setProfilePicture(dto.getProfilePicture());
         user.setCourses(dto.getCourse());
         user.setStatus(true);
+        user.setFullName(dto.getFullName());
         return user;
     }
 }

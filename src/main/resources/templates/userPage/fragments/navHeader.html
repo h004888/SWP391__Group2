@@ -1,0 +1,519 @@
+
+<!-- Header START -->
+<header th:fragment="navHeader" class="navbar-light navbar-sticky">
+    <style>
+        .notification-page-btn {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .notification-page-btn:hover {
+            background-color: #f8f9fa;
+            border-color: #dee2e6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .notification-page-btn .bi-bell-fill {
+            transition: color 0.3s ease;
+        }
+
+        .notification-page-btn:hover .bi-bell-fill {
+            color: #0d6efd !important;
+        }
+
+        .notification-page-btn .notif-badge {
+            background-color: #dc3545;
+            border: 2px solid #fff;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+    <style>
+        .notification-page-btn {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .notification-page-btn:hover {
+            background-color: #f8f9fa;
+            border-color: #dee2e6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .notification-page-btn .bi-bell-fill {
+            transition: color 0.3s ease;
+        }
+
+        .notification-page-btn:hover .bi-bell-fill {
+            color: #0d6efd !important;
+        }
+
+        .notification-page-btn .notif-badge {
+            background-color: #dc3545;
+            border: 2px solid #fff;
+            animation: pulse 2s infinite;
+        }
+
+        .notification-page-btn.has-notifications {
+            background-color: #fff3cd;
+            border-color: #ffeaa7;
+        }
+
+        .notification-page-btn.has-notifications:hover {
+            background-color: #ffeaa7;
+            border-color: #fdcb6e;
+        }
+
+        .notification-page-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .notification-page-btn.loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .notification-page-btn.loading .bi-bell-fill {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .notification-page-btn {
+                width: 40px !important;
+                height: 40px !important;
+            }
+
+            .notification-page-btn .bi-bell-fill {
+                font-size: 1.2rem !important;
+                line-height: 40px !important;
+            }
+
+            .notification-page-btn .notif-badge {
+                width: 12px !important;
+                height: 12px !important;
+                top: 4px !important;
+                right: 4px !important;
+            }
+        }
+    </style>
+    <!-- Nav START -->
+    <nav class="navbar navbar-expand-xl z-index-9">
+        <div class="container">
+            <!-- Logo START -->
+            <a class="navbar-brand" th:href="@{/home}">
+                <img class="light-mode-item navbar-brand-item" th:src="@{/assets/images/logo.svg}" alt="logo">
+                <img class="dark-mode-item navbar-brand-item" th:src="@{/assets/images/logo-light.svg}" alt="logo">
+            </a>
+            <!-- Logo END -->
+
+            <!-- Responsive navbar toggler -->
+            <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-animation">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </span>
+            </button>
+
+            <!-- Main navbar START -->
+            <div class="navbar-collapse collapse" id="navbarCollapse">
+                <!-- Nav Search START -->
+                <div class="col-xxl-6">
+                    <div class="nav my-3 my-xl-0 px-4 flex-nowrap align-items-center">
+                        <div class="nav-item w-100">
+                            <form class="rounded position-relative">
+                                <input class="form-control pe-5 bg-secondary bg-opacity-10 border-0" type="search"
+                                    placeholder="Search" aria-label="Search">
+                                <button
+                                    class="btn btn-link bg-transparent px-2 py-0 position-absolute top-50 end-0 translate-middle-y"
+                                    type="submit"><i class="fas fa-search fs-6 text-primary"></i></button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <!-- Nav Search END -->
+
+                <!-- Nav Main menu START -->
+                <ul class="navbar-nav navbar-nav-scroll ms-auto">
+                    <!-- Nav item 1 Demos -->
+                    <li class="nav-item dropdown"><a class="nav-link" href="#">Certificate</a></li>
+
+
+
+                    <!-- Nav item 3 My learning -->
+                    <li class="nav-item"><a class="nav-link active" href="#">My learning</a></li>
+                </ul>
+                <!-- Nav Main menu END -->
+            </div>
+            <!-- Main navbar END -->
+
+            <!-- Profile and notification START -->
+            <ul class="nav flex-row align-items-center list-unstyled ms-xl-auto">
+
+                <!-- Wishlist START -->
+                <li class="nav-item ms-0 ms-sm-2 d-none d-sm-block">
+                    <a class="btn btn-light btn-round mb-0" href="#"> <i class="bi bi-heart fa-fw"></i></a>
+                </li>
+                <!-- Wishlist END -->
+
+                <!-- Notification page button START -->
+
+                <!-- Notification page button END -->
+
+                <!-- Notification dropdown START -->
+                <li class="nav-item ms-2 ms-md-3 dropdown">
+                    <!-- Notification button -->
+                    <a class="btn btn-light btn-round mb-0" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
+                    <a class="btn btn-light btn-round mb-0" href="#" role="button" data-bs-toggle="dropdown"
+                        aria-expanded="false" data-bs-auto-close="outside">
+                        <i class="bi bi-bell fa-fw"></i>
+                    </a>
+                    <!-- Notification dote -->
+                    <span id="userNotificationBadge" th:if="${unreadCount > 0}" class="notif-badge animation-blink"></span>
+
+                    <!-- Notification dropdown menu START -->
+                    <div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0">
+                    <div
+                        class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0">
+                        <div class="card bg-transparent">
+                            <div class="card-header bg-transparent border-bottom py-4 d-flex justify-content-between align-items-center">
+                                <h6 class="m-0">Notifications <span id="userNotificationCount" class="badge bg-danger bg-opacity-10 text-danger ms-2">0 new</span></h6>
+                                <a class="small" href="#" onclick="markAllAsRead(); return false;">Clear all</a>
+                            <div
+                                class="card-header bg-transparent border-bottom py-4 d-flex justify-content-between align-items-center">
+                                <h6 class="m-0">Notifications <span
+                                        class="badge bg-danger bg-opacity-10 text-danger ms-2">2 new</span></h6>
+                                <a class="small" href="#">Clear all</a>
+                            </div>
+                            <div class="card-body p-0">
+                                <ul id="userNotificationList" class="list-group list-unstyled list-group-flush">
+                                    <!-- Notifications will be loaded here by JS -->
+                                </ul>
+                            </div>
+                            <!-- Button -->
+                            <div class="card-footer bg-transparent border-0 py-3 text-center position-relative">
+                                <a th:href="@{/user/notifications}" class="stretched-link">See all incoming activity</a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Notification dropdown menu END -->
+                </li>
+                <!-- Notification dropdown END -->
+
+                <!-- Profile dropdown START -->
+                <li class="nav-item ms-3 dropdown">
+                    <!-- Avatar -->
+                    <a class="avatar avatar-sm p-0" href="#" id="profileDropdown" role="button"
+                       data-bs-auto-close="outside" data-bs-display="static" data-bs-toggle="dropdown"
+                       aria-expanded="false">
+                        <img class="avatar-img rounded-circle" src="assets/images/avatar/01.jpg" alt="avatar">
+                    </a>
+
+                    <!-- Profile dropdown START -->
+                    <ul class="dropdown-menu dropdown-animation dropdown-menu-end shadow pt-3"
+                        aria-labelledby="profileDropdown">
+                        <!-- Profile info -->
+                        <li class="px-3 mb-3">
+                            <div class="d-flex align-items-center">
+                                <!-- Avatar -->
+                                <div class="avatar me-3">
+                                    <img class="avatar-img rounded-circle shadow" src="assets/images/avatar/01.jpg"
+                                        alt="avatar">
+                                </div>
+                                <div>
+                                    <a class="h6" href="#" th:text="${user.username}">Lori Ferguson</a>
+                                    <p class="small m-0" th:text="${user.email}">
+                                        example@gmail.com</p>
+                                </div>
+                            </div>
+                        </li>
+                        <!-- Links -->
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" th:href="@{/profile}"><i class="bi bi-person fa-fw me-2"></i>Profile</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-gear fa-fw me-2"></i>Account
+                                Settings</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle fa-fw me-2"></i>Help</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item bg-danger-soft-hover" th:href="@{/logout}">
+                                <i class="bi bi-power fa-fw me-2"></i>
+                                Sign Out
+                            </a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <!-- Dark mode options START -->
+                        <li>
+                            <div
+                                class="bg-light dark-mode-switch theme-icon-active d-flex align-items-center p-1 rounded mt-2">
+                                <button type="button" class="btn btn-sm mb-0" data-bs-theme-value="light">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                        class="bi bi-sun fa-fw mode-switch" viewBox="0 0 16 16">
+                                        <path
+                                            d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z" />
+                                        <use href="#"></use>
+                                    </svg> Light
+                                </button>
+                                <button type="button" class="btn btn-sm mb-0" data-bs-theme-value="dark">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                        class="bi bi-moon-stars fa-fw mode-switch" viewBox="0 0 16 16">
+                                        <path
+                                            d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278zM4.858 1.311A7.269 7.269 0 0 0 1.025 7.71c0 4.02 3.279 7.276 7.319 7.276a7.316 7.316 0 0 0 5.205-2.162c-.337.042-.68.063-1.029.063-4.61 0-8.343-3.714-8.343-8.29 0-1.167.242-2.278.681-3.286z" />
+                                        <path
+                                            d="M10.794 3.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387a1.734 1.734 0 0 0-1.097 1.097l-.387 1.162a.217.217 0 0 1-.412 0l-.387-1.162A1.734 1.734 0 0 0 9.31 6.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387a1.734 1.734 0 0 0 1.097-1.097l.387-1.162zM13.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.156 1.156 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.156 1.156 0 0 0-.732-.732l-.774-.258a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732L13.863.1z" />
+                                        <use href="#"></use>
+                                    </svg> Dark
+                                </button>
+                                <button type="button" class="btn btn-sm mb-0 active" data-bs-theme-value="auto">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                        class="bi bi-circle-half fa-fw mode-switch" viewBox="0 0 16 16">
+                                        <path d="M8 15A7 7 0 1 0 8 1v14zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16z" />
+                                        <use href="#"></use>
+                                    </svg> Auto
+                                </button>
+                            </div>
+                        </li>
+                        <!-- Dark mode options END-->
+                    </ul>
+                    <!-- Profile dropdown END -->
+                </li>
+            </ul>
+            <!-- Profile and notification END -->
+        </div>
+    </nav>
+    <!-- Nav END -->
+
+    <hr class="my-0">
+
+    <!-- Category Nav link START -->
+    <nav class="navbar navbar-expand-xl nav-category">
+        <div class="container px-0">
+
+            <!-- Responsive navbar toggler -->
+            <button class="navbar-toggler m-auto w-100" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarCollapse2" aria-controls="navbarCollapse2" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <i class="bi bi-grid-fill"></i> Category
+            </button>
+
+            <!-- Main navbar START -->
+            <div class="navbar-collapse w-100 collapse" id="navbarCollapse2">
+                <!-- Nav Main menu START -->
+                <ul class="navbar-nav navbar-nav-scroll mx-auto">
+
+                    <li class="nav-item" th:each="category : ${categories}"><a class="nav-link"
+                            th:href="@{'/home/coursesGrid'(categoryIds=${category.id})}"
+                            th:text="${category.name}">Finance & Accounting</a></li>
+
+
+                </ul>
+            </div>
+            <!-- Main navbar END -->
+        </div>
+    </nav>
+    <!-- Category Nav link END -->
+
+</header>
+<!-- Header END -->
+
+<!-- Notification JavaScript -->
+<script>
+    // Manual test function
+    function testNotifications() {
+        console.log('Manual test: Loading user notifications...');
+        loadUserNotifications();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const notificationDropdown = document.querySelector('a[title="Notifications"][data-bs-toggle="dropdown"]');
+        if (notificationDropdown) {
+            notificationDropdown.addEventListener('show.bs.dropdown', function() {
+                loadUserNotifications();
+            });
+        }
+    });
+
+
+
+    function updateUserNotificationBadge(unreadCount) {
+        console.log('Updating user notification badge with count:', unreadCount);
+        const badge = document.getElementById('userNotificationBadge');
+        const countSpan = document.getElementById('userNotificationCount');
+
+        if (unreadCount > 0) {
+            if (!badge) {
+                const newBadge = document.createElement('span');
+                newBadge.id = 'userNotificationBadge';
+                newBadge.className = 'notif-badge animation-blink';
+                newBadge.style.cssText = 'width:14px;height:14px;top:6px;right:6px;';
+                const notificationButton = document.querySelector('a[title="Notifications"][data-bs-toggle="dropdown"]');
+                if (notificationButton && notificationButton.closest('.nav-item').querySelector('#userNotificationBadge')) {
+                    notificationButton.appendChild(newBadge);
+                }
+            }
+            countSpan.textContent = unreadCount + ' new';
+        } else {
+            if (badge) {
+                badge.remove();
+            }
+            countSpan.textContent = '0 new';
+        }
+    }
+
+    function updateUserNotificationList(notifications) {
+        const list = document.getElementById('userNotificationList');
+        list.innerHTML = '';
+        if (notifications.length === 0) {
+            list.innerHTML = '<li class="p-3 text-center text-muted">No unread notifications</li>';
+            return;
+        }
+        notifications.forEach(notification => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item-action border-0 border-bottom d-flex p-3';
+            // Avatar/icon
+            let avatarHtml = `<div class=\"me-3\"><div class=\"avatar avatar-md\">`;
+            if (notification.type === 'COMMENT') {
+                avatarHtml += `<i class=\"fas fa-comment\" style=\"font-size: 1.5rem; color: #0d6efd;\"></i>`;
+            } else if (notification.type === 'ENROLLMENT') {
+                avatarHtml += `<i class=\"fas fa-user-plus\" style=\"font-size: 1.5rem; color: #28a745;\"></i>`;
+            } else if (notification.type === 'COURSE_COMPLETION') {
+                avatarHtml += `<i class=\"fas fa-graduation-cap\" style=\"font-size: 1.5rem; color: #ffc107;\"></i>`;
+            } else {
+                avatarHtml += `<i class=\"fas fa-bell\" style=\"font-size: 1.5rem; color: #6c757d;\"></i>`;
+            }
+            avatarHtml += `</div></div>`;
+            // Message + time
+            const timeAgo = getTimeAgo(notification.sentAt);
+            let contentHtml = `<div><h6 class=\"mb-1\">${notification.type.replace(/_/g, ' ')}</h6>`;
+            contentHtml += `<p class=\"small text-body m-0\">${notification.message}</p>`;
+            contentHtml += `<small class=\"text-body\">${timeAgo}</small></div>`;
+            li.innerHTML = avatarHtml + contentHtml;
+            li.addEventListener('click', function() {
+                window.location.href = `/user/notifications/view/${notification.notificationId}`;
+            });
+            list.appendChild(li);
+        });
+    }
+
+    function getTimeAgo(sentAt) {
+        const now = new Date();
+        const sent = new Date(sentAt);
+        const diffInMinutes = Math.floor((now - sent) / (1000 * 60));
+
+        if (diffInMinutes < 1) return 'Just now';
+        if (diffInMinutes < 60) return `${diffInMinutes} min ago`;
+
+        const diffInHours = Math.floor(diffInMinutes / 60);
+        if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+
+        const diffInDays = Math.floor(diffInHours / 24);
+        return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+    }
+
+    function getNotificationTypeIcon(type) {
+        switch(type) {
+            case 'ENROLLMENT': return 'fas fa-user-plus';
+            case 'COURSE_COMPLETION': return 'fas fa-graduation-cap';
+            case 'QUIZ_RESULT': return 'fas fa-question-circle';
+            case 'CERTIFICATE': return 'fas fa-certificate';
+            case 'PAYMENT_SUCCESS': return 'fas fa-check-circle';
+            case 'PAYMENT_FAILED': return 'fas fa-times-circle';
+            default: return 'fas fa-bell';
+        }
+    }
+
+    // Update notification page button tooltip and styling
+    function updateNotificationPageButton(unreadCount) {
+        const notificationPageBtn = document.querySelector('.notification-page-btn');
+        if (notificationPageBtn) {
+            if (unreadCount > 0) {
+                notificationPageBtn.title = `View All Notifications (${unreadCount} unread)`;
+                notificationPageBtn.classList.add('has-notifications');
+            } else {
+                notificationPageBtn.title = 'View All Notifications';
+                notificationPageBtn.classList.remove('has-notifications');
+            }
+        }
+    }
+
+    // Add loading effect to notification page button
+    document.addEventListener('DOMContentLoaded', function() {
+        const notificationPageBtn = document.querySelector('.notification-page-btn');
+        if (notificationPageBtn) {
+            notificationPageBtn.addEventListener('click', function() {
+                this.classList.add('loading');
+                // Remove loading class after navigation
+                setTimeout(() => {
+                    this.classList.remove('loading');
+                }, 1000);
+            });
+        }
+    });
+
+    // Call this function when notifications are loaded
+    function loadUserNotifications() {
+        console.log('Loading user notifications...');
+        fetch('/user/notifications/api/latest')
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Notification data:', data);
+                if (data.error) {
+                    console.error('Error loading notifications:', data.error);
+                    return;
+                }
+
+                updateUserNotificationBadge(data.unreadCount);
+                updateUserNotificationList(data.notifications);
+                updateNotificationPageButton(data.unreadCount); // Update page button tooltip
+            })
+            .catch(error => {
+                console.error('Error loading notifications:', error);
+            });
+    }
+</script>

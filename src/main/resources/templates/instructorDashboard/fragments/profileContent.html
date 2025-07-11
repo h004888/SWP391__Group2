@@ -1,0 +1,187 @@
+<th:block th:fragment="profileViewContent">
+    <!-- Title -->
+    <div class="row">
+        <div class="col-12 mb-3">
+            <h1 class="h3 mb-2 mb-sm-0">My Profile</h1>
+        </div>
+    </div>
+
+    <!-- Toast container for notifications -->
+    <div id="toast-container" style="position: fixed; bottom: 32px; right: 32px; z-index: 9999;"></div>
+
+    <!-- Toast notification script -->
+    <div th:with="successMsg=${successMessage}?:'' , errorMsg=${errorMessage}?:''">
+    <script th:inline="javascript">
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-bg-${type === 'success' ? 'success' : 'danger'} border-0 show`;
+            toast.style.minWidth = '250px';
+            toast.style.marginBottom = '10px';
+            toast.innerHTML = `
+                <div class=\"d-flex\">
+                    <div class=\"toast-body\">
+                        <i class=\"bi ${type === 'success' ? 'bi-check-circle' : 'bi-exclamation-triangle'} me-2\"></i>
+                        ${message}
+                    </div>
+                    <button type=\"button\" class=\"btn-close btn-close-white me-2 m-auto\" onclick=\"this.parentElement.parentElement.remove()\"></button>
+                </div>
+            `;
+            document.getElementById('toast-container').appendChild(toast);
+            setTimeout(() => {
+                toast.remove();
+            }, 5000);
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            var success = /*[[${successMsg}]]*/ '';
+            var error = /*[[${errorMsg}]]*/ '';
+            if (typeof success === 'string' && success.length > 0) showToast(success, 'success');
+            if (typeof error === 'string' && error.length > 0) showToast(error, 'error');
+        });
+    </script>
+    </div>
+
+    <!-- Xóa alert cũ (nếu có) -->
+
+    <div class="row g-4">
+        <!-- Personal Information Card -->
+        <div class="col-xxl-8">
+            <div class="card bg-transparent border rounded-3 h-100">
+                <!-- Card header -->
+                <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="card-header-title mb-0">Personal Information</h5>
+                    <a th:href="@{/instructor/profile/edit}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-pencil me-1"></i> Edit Profile
+                    </a>
+                </div>
+
+                <!-- Card body -->
+                <div class="card-body">
+                    <!-- Profile picture -->
+                    <div class="text-center mb-4">
+                        <div class="avatar avatar-xxl mx-auto mb-3">
+                            <img class="avatar-img rounded-circle border border-white border-3 shadow"
+                                 th:src="${userDetail.profilePicture != null ? userDetail.profilePicture : '/assets/images/avatar/01.jpg'}" 
+                                 alt="Profile Picture">
+                        </div>
+                        <!-- Show image source info -->
+                        <div class="small text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            <span th:if="${userDetail.isGooglePicture}" class="text-primary">Google Profile Picture</span>
+                            <span th:unless="${userDetail.isGooglePicture}" class="text-success">Custom Uploaded Picture</span>
+                        </div>
+                    </div>
+
+                    <!-- Information -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-group list-group-borderless">
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span class="fw-semibold">Full Name:</span>
+                                    <span th:text="${userDetail.fullName}">Full Name</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span class="fw-semibold">Username:</span>
+                                    <span th:text="${userDetail.username}">Username</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span class="fw-semibold">Email:</span>
+                                    <span th:text="${userDetail.email}">Email</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span class="fw-semibold">Phone:</span>
+                                    <span th:text="${userDetail.phone != null ? userDetail.phone : 'Not provided'}">Phone</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-group list-group-borderless">
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span class="fw-semibold">Birthday:</span>
+                                    <span th:text="${userDetail.birthDay != null ? #temporals.format(userDetail.birthDay, 'dd/MM/yyyy') : 'Not provided'}">Birthday</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span class="fw-semibold">Address:</span>
+                                    <span th:text="${userDetail.address != null ? userDetail.address : 'Not provided'}">Address</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span class="fw-semibold">Role:</span>
+                                    <span class="badge bg-primary" th:text="${userDetail.roleName}">Role</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span class="fw-semibold">Coins:</span>
+                                    <span class="text-success fw-bold" th:text="${userDetail.coin != null ? userDetail.coin : '0'}">0</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Professional Information -->
+                    <div class="mt-4" th:if="${userDetail.personalSkill != null}">
+                        <h6 class="fw-semibold mb-2">Professional Skills:</h6>
+                        <p class="text-muted mb-0 fw-bold" th:text="${userDetail.personalSkill}">Professional skills description</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Card -->
+        <div class="col-xxl-4">
+            <div class="card bg-transparent border rounded-3 h-100">
+                <!-- Card header -->
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="card-header-title mb-0">Teaching Statistics</h5>
+                </div>
+
+                <!-- Card body -->
+                <div class="card-body">
+                    <div class="row g-3">
+                        <!-- Total Courses -->
+                        <div class="col-6">
+                            <div class="text-center p-3 bg-primary-soft rounded-3">
+                                <div class="icon-lg bg-primary text-white rounded-circle mx-auto mb-2">
+                                    <i class="bi bi-book"></i>
+                                </div>
+                                <h4 class="mb-1" th:text="${totalCourse}"></h4>
+                                <p class="small mb-0">Total Courses</p>
+                            </div>
+                        </div>
+
+                        <!-- Total Students -->
+                        <div class="col-6">
+                            <div class="text-center p-3 bg-success-soft rounded-3">
+                                <div class="icon-lg bg-success text-white rounded-circle mx-auto mb-2">
+                                    <i class="bi bi-people"></i>
+                                </div>
+                                <h4 class="mb-1" th:text="${totalEnrollment}">0</h4>
+                                <p class="small mb-0">Total Students</p>
+                            </div>
+                        </div>
+
+                        <!-- Average Rating -->
+                        <div class="col-6">
+                            <div class="text-center p-3 bg-warning-soft rounded-3">
+                                <div class="icon-lg bg-warning text-white rounded-circle mx-auto mb-2">
+                                    <i class="bi bi-star"></i>
+                                </div>
+                                <h4 class="mb-1">4.5</h4>
+                                <p class="small mb-0">Average Rating</p>
+                            </div>
+                        </div>
+
+                        <!-- Total Revenue -->
+                        <div class="col-6">
+                            <div class="text-center p-3 bg-info-soft rounded-3">
+                                <div class="icon-lg bg-info text-white rounded-circle mx-auto mb-2">
+                                    <i class="bi bi-currency-dollar"></i>
+                                </div>
+                                <h4 class="mb-1" th:text="${totalRevue != null ? #numbers.formatDecimal(totalRevue, 0, 'COMMA', 0, 'POINT') : 'N/A'}"></h4>
+                                <p class="small mb-0">Total Revenue</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block> 

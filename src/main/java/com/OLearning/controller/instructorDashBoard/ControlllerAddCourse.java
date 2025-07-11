@@ -4,6 +4,7 @@ import com.OLearning.dto.chapter.ChapterDTO;
 import com.OLearning.dto.course.AddCourseStep1DTO;
 import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.course.CourseMediaDTO;
+import com.OLearning.dto.enrollment.EnrollmentDTO;
 import com.OLearning.dto.lesson.LessonTitleDTO;
 import com.OLearning.dto.quiz.QuizDTO;
 import com.OLearning.dto.quiz.QuizQuestionDTO;
@@ -16,20 +17,23 @@ import com.OLearning.repository.VideoRepository;
 import com.OLearning.security.CustomUserDetails;
 import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.chapter.ChapterService;
+import com.OLearning.service.cloudinary.UploadFile;
 import com.OLearning.service.course.CourseService;
+import com.OLearning.service.courseChapterLesson.*;
+import com.OLearning.service.enrollment.EnrollmentService;
 import com.OLearning.service.lesson.LessonService;
 import com.OLearning.service.quiz.QuizService;
-import com.OLearning.service.courseChapterLesson.CourseChapterService;
-import com.OLearning.service.courseChapterLesson.LessonChapterService;
-import com.OLearning.service.courseChapterLesson.LessonQuizService;
 import com.OLearning.service.user.UserService;
 import com.OLearning.service.video.VideoService;
+import com.OLearning.service.termsAndCondition.TermsAndConditionService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -37,15 +41,18 @@ import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
-@RequestMapping("/instructordashboard")
+@RequestMapping("/instructor")
 public class ControlllerAddCourse {
     @Autowired
     private CourseService courseService;
@@ -75,6 +82,16 @@ public class ControlllerAddCourse {
     private QuizRepository quizRepository;
     @Autowired
     private CourseRepository courseRepository;
+    @Autowired
+    private FindAllCourseService FindAllCourseService;
+    @Autowired
+    private CourseDetailService courseDetailService;
+    @Autowired
+    private UploadFile uploadFile;
+    @Autowired
+    private EnrollmentService enrollmentService;
+    @Autowired
+    private TermsAndConditionService termsAndConditionService;
 
     //dashhboard
     @GetMapping()
@@ -87,14 +104,14 @@ public class ControlllerAddCourse {
     //viewAllCourses
     @GetMapping("/courses")
     public String viewCourse(@RequestParam(name = "page", defaultValue = "0") int page,
-                             @RequestParam(name = "size", defaultValue = "7") int size,
+                             @RequestParam(name = "size", defaultValue = "10") int size,
                              Model model, ModelMap modelMap) {
         //lay ra course tu userId dang nhap
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
 
-        Page<CourseDTO> coursePage = courseService.findCourseByUserId(userId, page, size);
+        Page<CourseDTO> coursePage = FindAllCourseService.findCourseByUserId(userId, page, size);
         modelMap.put("courses", coursePage.getContent());
         modelMap.put("currentPage", page);
         modelMap.put("totalPages", coursePage.getTotalPages());
@@ -105,12 +122,13 @@ public class ControlllerAddCourse {
         return "instructorDashboard/indexUpdate";
     }
 
+
     //search course
     @GetMapping("courses/searchcourse")
     public String searchCourse(
             @RequestParam(required = false) String title,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "7") int size,
+            @RequestParam(defaultValue = "10") int size,
             Model model, ModelMap modelMap) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
@@ -126,46 +144,55 @@ public class ControlllerAddCourse {
         return "instructorDashboard/indexUpdate";
     }
 
-    //filter Course
-    @GetMapping("courses/filter")
+    // AJAX filter courses for instructor dashboard (tabbed table)
+    @GetMapping("/courses/filter")
     public String filterCourses(
-            @RequestParam(required = false) String category,
-            @RequestParam(required = false) String status,
-            @RequestParam(required = false) String price,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "7") int size,
+            @RequestParam(name = "status", required = false) String status,
+            @RequestParam(name = "category", required = false) Long categoryId,
+            @RequestParam(name = "price", required = false) String price,
+            @RequestParam(name = "title", required = false) String title,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
             Model model) {
-
-        // Lấy ID của người dùng hiện tại
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
-
-        Long categoryId = null;
-        if (category != null && !category.isEmpty()) {
-            try {
-                categoryId = Long.parseLong(category);
-            } catch (NumberFormatException e) {
-            }
-        }
-
-        Page<CourseDTO> coursePage = courseService.filterCoursesInstructorManage(
-                userId, categoryId, status, price, page, size);
-
-        List<Category> categories = categoryService.findAll();
-
+        Page<CourseDTO> coursePage = courseService.filterCoursesInstructorManage(userId, categoryId, status, price, title, page, size);
+        model.addAttribute("status", status);
         model.addAttribute("courses", coursePage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", coursePage.getTotalPages());
         model.addAttribute("totalElements", coursePage.getTotalElements());
         model.addAttribute("size", size);
-        model.addAttribute("categories", categories);
-        model.addAttribute("selectedCategory", categoryId);
-        model.addAttribute("status", status);
-        model.addAttribute("selectedPrice", price);
 
-        return "instructorDashboard/fragments/coursesContent :: listsCourseContent";
+        // Trả về fragment table row cho tbody
+        return "instructorDashboard/fragments/courseTableRowContent :: courseTableRowContent";
     }
+
+    // AJAX get pagination fragment
+    @GetMapping("/courses/pagination")
+    public String getPaginationFragment(
+            @RequestParam(name = "status", required = false) String status,
+            @RequestParam(name = "category", required = false) Long categoryId,
+            @RequestParam(name = "price", required = false) String price,
+            @RequestParam(name = "title", required = false) String title,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long userId = userDetails.getUserId();
+        if (status != null && status.equalsIgnoreCase("publish")) {
+            status = "published";
+        }
+        Page<CourseDTO> coursePage = courseService.filterCoursesInstructorManage(userId, categoryId, status, price, title, page, size);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", coursePage.getTotalPages());
+        model.addAttribute("status", status);
+        // Trả về fragment phân trang
+        return "instructorDashboard/fragments/pagination :: pagination";
+    }
+
     //delete course
     @PostMapping("/createcourse/deletecourse")
     public String deletecourse(@RequestParam(name = "courseId") Long courseId
@@ -174,16 +201,82 @@ public class ControlllerAddCourse {
         redirectAttributes.addFlashAttribute("errorMessage", "course deleted successfully.");
         return "redirect:../courses";
     }
+    //uppublic course
+    @PostMapping("/courses/uptopublic")
+    public String upcourse(@RequestParam(name = "courseId") Long courseId
+            , RedirectAttributes redirectAttributes, HttpServletRequest request) {
+        //tim course theo course ID
+        //set status
+        courseService.submitCourse(courseId, "publish");
+        redirectAttributes.addFlashAttribute("successMessage", "course published successfully.");
+        return "redirect:../courses";
+    }
+    //unpublic course
+    @PostMapping("/courses/unpublish")
+    public String down(@RequestParam(name = "courseId") Long courseId
+            , RedirectAttributes redirectAttributes, HttpServletRequest request) {
+        courseService.submitCourse(courseId, "approved");
+        redirectAttributes.addFlashAttribute("successMessage", "course unpublish successfully.");
+        return "redirect:../courses";
+    }
+
+    //hidden course
+    @PostMapping("/courses/hide")
+    public String hide(@RequestParam(name = "courseId") Long courseId, RedirectAttributes redirectAttributes) {
+        Course course = courseService.findCourseById(courseId);
+        if (course != null && !"hidden".equals(course.getStatus())) {
+            course.setPreviousStatus(course.getStatus());
+            course.setStatus("hidden");
+            courseService.saveCourse(course.getCourseId());
+        }
+        redirectAttributes.addFlashAttribute("successMessage", "course hidden successfully.");
+        return "redirect:../courses";
+    }
+
+    //unhide course
+    @PostMapping("/courses/unhide")
+    public String unhide(@RequestParam(name = "courseId") Long courseId, RedirectAttributes redirectAttributes) {
+        Course course = courseService.findCourseById(courseId);
+        if (course != null && "hidden".equals(course.getStatus())) {
+            String prev = course.getPreviousStatus();
+            course.setStatus(prev != null ? prev : "draft");
+            course.setPreviousStatus(null);
+            courseService.saveCourse(course.getCourseId());
+        }
+        redirectAttributes.addFlashAttribute("successMessage", "course unhidden successfully.");
+        return "redirect:../courses";
+    }
+
+    //block course
+    @PostMapping("/courses/block")
+    public String block(@RequestParam(name = "courseId") Long courseId
+            , RedirectAttributes redirectAttributes, HttpServletRequest request) {
+        courseService.submitCourse(courseId, "blocked");
+        redirectAttributes.addFlashAttribute("successMessage", "course blocked successfully.");
+        return "redirect:../courses";
+    }
+
+    //unblock course
+    @PostMapping("/courses/unblock")
+    public String unblock(@RequestParam(name = "courseId") Long courseId
+            , RedirectAttributes redirectAttributes, HttpServletRequest request) {
+        courseService.submitCourse(courseId, "approved");
+        redirectAttributes.addFlashAttribute("successMessage", "course unblocked successfully.");
+        return "redirect:../courses";
+    }
 
     //viewCourseDetail
     @GetMapping("/courses/detail/{courseId}")
-    public String viewCourseDetail(@PathVariable("courseId") Long courseId, Model model) {
+    public String viewCourseDetail(@PathVariable("courseId") Long courseId, Model model, ModelMap modelMap,
+                                   @RequestParam(defaultValue = "0") int page,
+                                   @RequestParam(defaultValue = "7") int size,
+                                   @RequestHeader(value = "X-Requested-With", required = false) String requestedWith) {
         Course course = courseService.findCourseById(courseId);
         if (course == null) {
             return "redirect:/courses";
         }
         User instructor = course.getInstructor();
-        model.addAttribute("course", course);
+        model.addAttribute("course", courseDetailService.findCourseById(courseId));
         model.addAttribute("instructor", instructor);
         List<Chapter> chapters = chapterService.chapterListByCourse(courseId);//tim list chapter theo courseID
         for (Chapter chapter : chapters) {
@@ -195,7 +288,18 @@ public class ControlllerAddCourse {
         if (chapters != null && !chapters.isEmpty()) {
             model.addAttribute("chapters", chapters);
         }
+        Page<EnrollmentDTO> enrollmentPage = enrollmentService.getEnrollmentByCourseId(courseId, page, size);
+        modelMap.put("enrollment", enrollmentPage.getContent());
+        modelMap.put("currentPage", page);
+        modelMap.put("totalPages", enrollmentPage.getTotalPages());
+        modelMap.put("totalElements", enrollmentPage.getTotalElements());
+        modelMap.put("size", size);
         model.addAttribute("courseId", courseId);
+
+        if ("XMLHttpRequest".equals(requestedWith)) {
+            // Nếu là AJAX, chỉ trả về fragment nhỏ
+            return "instructorDashboard/fragments/courseDetailEnrollmentTable :: course-detail-table";
+        }
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/courseDetailContent_new :: courseDetailContent");
         return "instructorDashboard/indexUpdate";
     }
@@ -270,8 +374,9 @@ public class ControlllerAddCourse {
         Long courseId = course.getCourseId();
         model.addAttribute("courseId", courseId);
         model.addAttribute("coursestep2", new CourseMediaDTO());
+        model.addAttribute("course", course);
         model.addAttribute("imageUrl", course.getCourseImg());
-        model.addAttribute("videoUrl", course.getVideoUrlPreview()); 
+        model.addAttribute("videoUrl", course.getVideoUrlPreview());
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/step2CourseMedia :: step2Content");
         return "instructorDashboard/indexUpdate";
     }
@@ -402,7 +507,7 @@ public class ControlllerAddCourse {
         chapter.setTitle(title);
         chapter.setDescription(description);
         chapter.setOrderNumber(orderNumber);
-        chapter.setUpdatedAt(java.time.LocalDateTime.now());
+        chapter.setUpdatedAt(LocalDateTime.now());
         chapterService.updateChapter(chapter);
         // Lưu lại ID để đảm bảo update đúng chapter
         chapter.setChapterId(chapterId);
@@ -416,23 +521,6 @@ public class ControlllerAddCourse {
             , RedirectAttributes redirectAttributes, HttpServletRequest request) {
         lessonChapterService.deleteChapter(chapterId);
         redirectAttributes.addFlashAttribute("errorMessage", "Chapter deleted successfully.");
-        int totalLesson = 0;
-        int totalDuration = 0;
-        Long courseId = getCourseIdFromCookie(request);
-        Course course = courseService.findCourseById(courseId);
-        List<Chapter> chapters = chapterService.chapterListByCourse(courseId);
-        for (Chapter chapter : chapters) {
-            List<Lesson> lessons = lessonService.findLessonsByChapterId(chapter.getChapterId());
-            if (lessons != null && lessons.size() > 0) {
-                totalLesson += lessons.size();
-                for (Lesson lesson : lessons) {
-                    if (lesson.getDuration() != null) {
-                        totalDuration += lesson.getDuration();
-                    }
-                }
-            }
-        }
-        courseService.saveCourse(courseId);
         return "redirect:../createcourse/coursecontent";
     }
 
@@ -507,14 +595,10 @@ public class ControlllerAddCourse {
             // Update lesson
             Lesson lesson = lessonRepository.findById(lessonId).orElseThrow();
             lesson.setContentType("video");
-            
+            lesson.setDuration(videoDTO.getDuration());
             lesson.setUpdatedAt(LocalDateTime.now());
             lesson.setVideo(video);
-            lesson.setDuration(videoDTO.getDuration());
             lessonRepository.save(lesson);
-
-            // Update course totals
-            updateCourseTotals(lesson.getChapter().getCourse().getCourseId());
 
             redirectAttributes.addFlashAttribute("successMessage", "Video added successfully.");
         } catch (Exception e) {
@@ -530,24 +614,6 @@ public class ControlllerAddCourse {
             , RedirectAttributes redirectAttributes, HttpServletRequest request) {
         lessonQuizService.deleteAllFkByLessonId(lessonId);
         redirectAttributes.addFlashAttribute("errorMessage", "Lesson deleted successfully.");
-        int totalLesson = 0;
-        int totalDuration = 0;
-        Long courseId = getCourseIdFromCookie(request);
-        Course course = courseService.findCourseById(courseId);
-        List<Chapter> chapters = chapterService.chapterListByCourse(courseId);
-        for (Chapter chapter : chapters) {
-            List<Lesson> lessons = lessonService.findLessonsByChapterId(chapter.getChapterId());
-            if (lessons != null && lessons.size() > 0) {
-                totalLesson += lessons.size();
-                for (Lesson lesson : lessons) {
-                    if (lesson.getDuration() != null) {
-                        totalDuration += lesson.getDuration();
-                    }
-                }
-            }
-        }
-
-        courseService.saveCourse(courseId);
         return "redirect:../createcourse/coursecontent";
     }
 
@@ -652,31 +718,19 @@ public class ControlllerAddCourse {
             courseMediaDTO.setCourseId(course.getCourseId());
             model.addAttribute("courseId", course.getCourseId());
             model.addAttribute("coursestep2", courseMediaDTO);
+            model.addAttribute("course", course);
             model.addAttribute("imageUrl", course.getCourseImg());
-            model.addAttribute("videoUrl", course.getVideoUrlPreview()); 
+            model.addAttribute("videoUrl", course.getVideoUrlPreview());
             model.addAttribute("fragmentContent", "instructorDashboard/fragments/step2CourseMedia :: step2Content");
             return "instructorDashboard/indexUpdate";
         }
-        int totalLesson = 0;
-        int totalDuration = 0;
-        List<Chapter> chapters = chapterService.chapterListByCourse(courseId);
-        for (Chapter chapter : chapters) {
-            List<Lesson> lessons = lessonService.findLessonsByChapterId(chapter.getChapterId());
-            if (lessons != null && lessons.size() > 0) {
-                totalLesson += lessons.size();
-                for (Lesson lesson : lessons) {
-                    if (lesson.getDuration() != null) {
-                        totalDuration += lesson.getDuration();
-                    }
-                }
-            }
-        }
-
-        courseService.saveCourse(courseId);
         if (action.equalsIgnoreCase("draft")) {
             courseService.submitCourse(courseId, "draft");
             return "redirect:../courses";
         }
+        // Fetch terms and conditions for INSTRUCTOR and ALL
+        java.util.List<TermsAndCondition> terms = termsAndConditionService.getByRoleTargetOrAll("INSTRUCTOR");
+        model.addAttribute("termsAndConditions", terms);
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/step4SubmitCourse :: step4Content");
         return "instructorDashboard/indexUpdate";
     }
@@ -759,14 +813,15 @@ public class ControlllerAddCourse {
                 if (videoFile != null && !videoFile.isEmpty()) {
                     VideoDTO videoDTO = new VideoDTO();
                     videoDTO.setVideoUrl(videoFile);
-                    
-                    // Cập nhật duration nếu có
-                    if (duration != null) {
-                        lesson.setDuration(duration);
-                    }
+                    videoDTO.setDuration(duration);
                     
                     Video video = videoService.saveVideo(videoDTO, lessonId);
                     lesson.setVideo(video);
+                }
+                
+                // Cập nhật duration nếu có
+                if (duration != null) {
+                    lesson.setDuration(duration);
                 }
                 
                 // Xóa quiz nếu có
@@ -849,10 +904,6 @@ public class ControlllerAddCourse {
             
             // Lưu lesson
             lessonRepository.save(lesson);
-            
-            // Cập nhật tổng số lesson và duration cho course
-            updateCourseTotals(lesson.getChapter().getCourse().getCourseId());
-            
             redirectAttributes.addFlashAttribute("successMessage", "Lesson updated successfully.");
         } catch (Exception e) {
             e.printStackTrace();
@@ -862,29 +913,6 @@ public class ControlllerAddCourse {
         return "redirect:../createcourse/coursecontent";
     }
 
-    // Helper method để cập nhật tổng số lesson và duration cho course
-    private void updateCourseTotals(Long courseId) {
-        Course course = courseService.findCourseById(courseId);
-        if (course != null) {
-            int totalLesson = 0;
-            int totalDuration = 0;
-            
-            List<Chapter> chapters = chapterService.chapterListByCourse(courseId);
-            for (Chapter chapter : chapters) {
-                List<Lesson> lessons = lessonRepository.findByChapterId(chapter.getChapterId());
-                if (lessons != null) {
-                    totalLesson += lessons.size();
-                    for (Lesson lesson : lessons) {
-                        if (lesson.getDuration() != null) {
-                            totalDuration += lesson.getDuration();
-                        }
-                    }
-                }
-            }
-
-            courseService.saveCourse(course.getCourseId());
-        }
-    }
     @PostMapping("/createcourse/autofillchapter")
     public String autoFillChapterOrderNumbers(RedirectAttributes redirectAttributes,
                                               HttpServletRequest request) {
@@ -900,5 +928,20 @@ public class ControlllerAddCourse {
         lessonService.autoFillOrderNumbers(chapterId);
         redirectAttributes.addFlashAttribute("successMessage", "Lesson order numbers auto-filled successfully.");
         return "redirect:../createcourse/coursecontent";
+    }
+
+    @GetMapping("/courses/count-by-status")
+    @ResponseBody
+    public int countCoursesByStatus(
+        @RequestParam(name = "status", required = false) String status,
+        @RequestParam(name = "category", required = false) Long categoryId,
+        @RequestParam(name = "price", required = false) String price,
+        @RequestParam(name = "title", required = false) String title
+    ) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long userId = userDetails.getUserId();
+        // Không chuyển publish thành published nữa
+        return courseService.countByInstructorAndStatusWithFilter(userId, status, categoryId, price, title);
     }
 }

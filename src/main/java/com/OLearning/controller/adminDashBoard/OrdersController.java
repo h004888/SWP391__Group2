@@ -19,6 +19,9 @@ import java.util.List;
 @RequestMapping("/admin/orders")
 public class OrdersController {
 
+    private static final String ACC_NAME_PAGE_MANAGEMENT = "Management Orders";
+    private static final String ACC_NAME_PAGE_ORDER_DETAILS = "Order Details";
+
     @Autowired
     private OrdersService ordersService;
 
@@ -34,7 +37,7 @@ public class OrdersController {
         // Default to PAID status for initial load
         Page<OrdersDTO> ordersPage = ordersService.filterAndSortOrdersWithStatus(
             username, amountDirection, orderType, startDate, endDate, "PAID", page, size);
-        model.addAttribute("accNamePage", "Management Orders");
+        model.addAttribute("accNamePage", ACC_NAME_PAGE_MANAGEMENT);
         model.addAttribute("orders", ordersPage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", ordersPage.getTotalPages());
@@ -110,7 +113,7 @@ public class OrdersController {
 
     @GetMapping("/view/{orderId}")
     public String viewOrderDetails(@PathVariable("orderId") Long orderId, Model model) {
-        model.addAttribute("accNamePage", "Order Details");
+        model.addAttribute("accNamePage", ACC_NAME_PAGE_ORDER_DETAILS);
         List<OrderDetail> orderDetails = ordersService.getOrderDetailsByOrderId(orderId);
         model.addAttribute("orderDetails", orderDetails);
         model.addAttribute("orderId", orderId);

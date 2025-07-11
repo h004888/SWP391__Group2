@@ -8,16 +8,17 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class NotificationMapper {
-    public static NotificationDTO toDTO(Notification notification) {
+    public NotificationDTO toDTO(Notification notification) {
 
         NotificationDTO dto = new NotificationDTO();
         dto.setNotificationId(notification.getNotificationId());
         dto.setMessage(notification.getMessage());
         dto.setSentAt(notification.getSentAt());
         dto.setType(notification.getType());
-        dto.setStatus(notification.isStatus());
-        dto.setUserId(notification.getUser() != null ? notification.getUser().getUserId() : null);
-        dto.setCourseId(notification.getCourse() != null ? notification.getCourse().getCourseId() : null);
+        dto.setStatus(notification.getStatus());
+        dto.setUser(notification.getUser());
+        dto.setCourse(notification.getCourse());
+        dto.setCommentId(notification.getCommentId()); // Map commentId
 
         return dto;
     }
@@ -28,9 +29,10 @@ public class NotificationMapper {
         notification.setMessage(dto.getMessage());
         notification.setSentAt(dto.getSentAt());
         notification.setType(dto.getType());
-        notification.setStatus(dto.isStatus());
+        notification.setStatus(dto.getStatus());
         notification.setUser(user);
         notification.setCourse(course); // có thể null nếu không liên quan
+        notification.setCommentId(dto.getCommentId()); // Map commentId
 
         return notification;
     }

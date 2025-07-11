@@ -13,39 +13,23 @@ import java.util.Optional;
 @Service
 public interface CategoryService {
 
-    Category findByName(String name);
-
     Optional<Category> findById(Long id);
-
-    boolean existsByName(String name);
-
-    boolean existsById(Long id);
 
     List<Category> findAll();
 
     Page<Category> findAll(Pageable pageable);
 
-
-    List<Category> findTop5ByOrderByIdAsc();
-
-    Category save(Category categories);
-
     void deleteById(Long id);
-
-    void delete(Category categories);
-
-    void updateCategory(Long id, String name);
-
-    List<Category> findByNameContaining(String name);
 
     List<Category> getListCategories();
 
-    List<Category> filterCategories(String name, String select);
+    Page<Category> filterAndSortCategories(String name, String sort, int page, int size);
 
-    Page<Category> findByNameContaining(String name, Pageable pageable);
+    List<Category> findTop5ByOrderByIdAsc();
 
-    Page<Category> findByNameContainingIgnoreCase(String name, Pageable pageable);
-
-    Page<Category> filterCategories(String name, String sort, Pageable pageable);
-
+    Category save(Category category);
+    
+    boolean existsByName(String name);
+    
+    boolean existsByNameAndIdNot(String name, Long id);
 }

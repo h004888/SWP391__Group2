@@ -42,4 +42,7 @@ public interface CourseMaintenanceRepository extends JpaRepository<CourseMainten
         @Param("monthYear") LocalDate monthYear,
         Pageable pageable
     );
+
+    // Find all maintenance payments for a given instructor
+    List<CourseMaintenance> findByCourse_Instructor_UserId(Long instructorId);
 }

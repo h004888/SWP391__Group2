@@ -57,6 +57,10 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
         return this.user;
     }
 
+    public String getRoleName() {
+        return user.getRole() != null ? user.getRole().getName() : "USER";
+    }
+
     //LOGIN OAUTH2
     @Override
     public Map<String, Object> getAttributes() {

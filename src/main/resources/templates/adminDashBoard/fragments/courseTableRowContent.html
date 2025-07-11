@@ -4,14 +4,14 @@
         <td class="d-flex align-items-center position-relative">
             <div class="w-60px"><img th:src="${course.courseImg}" class="rounded" alt=""></div>
             <h6 class="table-responsive-title mb-0 ms-2">
-                <a href="#" class="stretched-link" th:text="${course.title}">Course Title</a>
+                <a th:href="@{/admin/course/detail/{courseId}(courseId=${course.courseId})}"
+                   class="stretched-link" th:text="${course.title}">Course Title</a>
             </h6>
         </td>
         <td th:text="${course.price != null ? #numbers.formatDecimal(course.price, 0, 'COMMA', 0, 'POINT') : 'N/A'}"></td>
         <td th:text="${course.totalLessons == null ? 'N/A' : course.totalLessons}"></td>
         <td th:text="${#temporals.format(course.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
         <td th:text="${#temporals.format(course.updatedAt, 'dd/MM/yyyy HH:mm')}"></td>
-<!--        <td th:text="${course.instructor.fullName == null ? 'N/A' : course.instructor.fullName}"></td>-->
         <td class="text-uppercase">
                          <span th:switch="${course.status}">
                              <span th:case="null" class="badge bg-secondary">
@@ -38,26 +38,53 @@
                    data-bs-toggle="tooltip" data-bs-placement="top" title="View Detail">
                     <i class="fas fa-eye"></i>
                 </a>
-
-                <a th:href="@{/admin/course/delete/{courseId}(courseId=${course.courseId})}"
-                   class="btn btn-danger-soft btn-round me-1 mb-1 mb-md-0"
-                   onclick="return confirm('Bạn có chắc chắn muốn xóa khóa học này không?')" title="Delete">
-                    <i class="fas fa-trash"></i>
-                </a>
+                <!-- Block Course Button -->
+                <button type="button" class="btn btn-danger-soft btn-round me-1 mb-1 mb-md-0" data-bs-toggle="modal" th:attr="data-bs-target='#blockCourseReasonModal' + ${course.courseId}" title="Block Course">
+                    <i class="fas fa-ban"></i>
+                </button>
+            </div>
+            <!-- Block Course Modal for each course -->
+            <div class="modal fade" th:id="'blockCourseReasonModal' + ${course.courseId}" tabindex="-1" aria-labelledby="blockCourseReasonModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form th:action="@{'/admin/course/' + ${course.courseId} + '/block'}" method="post">
+                            <div class="modal-header bg-danger text-white">
+                                <h5 class="modal-title" id="blockCourseReasonModalLabel">Block Course - Nhập lý do</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="blockReason" class="form-label">Lý do block khóa học</label>
+                                    <textarea class="form-control" id="blockReason" name="reason" rows="4" required placeholder="Nhập lý do block..."></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                <button type="submit" class="btn btn-danger">Gửi lý do & Block</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </td>
     </tr>
+    <!-- Empty state -->
+<tr th:if="${#lists.isEmpty(listCourse)}">
+    <td colspan="8" class="text-center align-middle py-5">
+        <div class="d-flex flex-column align-items-center justify-content-center">
+            <i class="fas fa-book fa-3x mb-3 opacity-50"></i>
+            <h5>No courses found</h5>
+            <p>Try adjusting your filters or create a new course.</p>
+        </div>
+    </td>
+</tr>
 </div>
-
 <div th:fragment="coursePagination" class="d-sm-flex justify-content-sm-between align-items-sm-center mt-2">
     <div class="mb-0 text-center text-sm-start">
         <p class="mb-0 text-center text-sm-start" th:if="${totalItems > 0}">
             Showing <span th:text="${currentPage * 5 + 1}">1</span> to
             <span th:text="${(currentPage * 5) + 5 > totalItems ? totalItems : (currentPage * 5) + 5}">5</span> of
             <span th:text="${totalItems}">20</span> entries
-        </p>
-        <p class="mb-0 text-center text-sm-start" th:if="${totalItems == 0}">
-            No entries found
         </p>
     </div>
     <nav  class="d-flex justify-content-center mb-0" aria-label="navigation" th:if="${totalPages > 0}">

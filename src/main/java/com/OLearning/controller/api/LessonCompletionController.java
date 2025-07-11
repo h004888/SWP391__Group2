@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.OLearning.entity.LessonCompletion;
+
 import com.OLearning.service.lessonCompletion.LessonCompletionService;
 
 import java.util.List;

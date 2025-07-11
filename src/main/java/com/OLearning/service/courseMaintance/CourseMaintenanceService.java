@@ -33,4 +33,10 @@ public interface CourseMaintenanceService {
     void deleteFee(Long feeId);
 
     void addFee(Long minEnrollments, Long maxEnrollments, Long maintenanceFee);
+
+    List<CourseMaintenance> getMaintenancesByInstructorId(Long instructorId);
+
+    boolean processMaintenancePayment(Long maintenanceId, String refCode);
+
+    String getMaintenanceStatusById(Long maintenanceId);
 }

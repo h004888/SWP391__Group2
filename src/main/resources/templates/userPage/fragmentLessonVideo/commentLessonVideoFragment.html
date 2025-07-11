@@ -1,0 +1,328 @@
+<!-- commentLessonVideoFragment.html -->
+<div th:fragment="commentLessonVideoFragment(comments, currentLesson, user)">
+    <div class="comments-section mt-4">
+        <h5>Bình luận</h5>
+        <!-- Form bình luận mới lên đầu -->
+        <form id="commentForm" th:action="@{/api/course/{courseId}/comment(courseId=${course.courseId})}" method="post" class="mb-4">
+            <input type="hidden" name="lessonId" th:value="${currentLesson.lessonId}" />
+            <input type="hidden" name="userId" th:value="${user.userId}" />
+            <div class="input-group">
+                <input type="text" name="comment" class="form-control" placeholder="Nhập bình luận..." required />
+                <button class="btn btn-success" type="submit">Bình luận</button>
+            </div>
+        </form>
+        <div th:if="${#lists.isEmpty(comments)}">
+            <p>Chưa có bình luận nào. Hãy là người đầu tiên bình luận!</p>
+        </div>
+        <div th:each="comment : ${comments}" th:if="${comment.hidden == null or comment.hidden == false}" class="mb-3" th:attr="id='comment-'+${comment.reviewId}">
+            <div class="d-flex align-items-start">
+                <img th:src="${comment.user != null and comment.user.profilePicture != null and comment.user.profilePicture != ''} ? ${comment.user.profilePicture} : @{/assets/images/avatar/default.jpg}" class="rounded-circle me-2" width="40" height="40" alt="avatar">
+                <div>
+                    <strong th:text="${comment.user != null ? comment.user.fullName : 'Người dùng'}"></strong>
+                    <span class="text-muted small ms-2" th:text="${#temporals.format(comment.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+                    <p th:text="${comment.comment}" class="mb-1 comment-content"></p>
+                    <div class="mb-1">
+                        <a href="#" class="reply-link small text-primary me-2" th:attr="data-comment-id=${comment.reviewId},data-reply-form-id='reply-form-'+${comment.reviewId}">Trả lời</a>
+                        <span th:if="${user == null or comment.user == null or user.userId != comment.user.userId}">
+                            <a href="#" class="report-link small text-danger me-2" th:attr="data-comment-id=${comment.reviewId}">Báo cáo</a>
+                        </span>
+                        <span th:if="${user != null and comment.user != null and user.userId == comment.user.userId}">
+                            <a href="#" class="edit-link small text-success me-2" th:attr="data-comment-id=${comment.reviewId}">Sửa</a>
+                            <a href="#" class="delete-link small text-secondary" th:attr="data-comment-id=${comment.reviewId}">Xóa</a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <!-- Form sửa bình luận ẩn -->
+            <form th:action="@{/api/course/{courseId}/comment/{commentId}/edit(courseId=${course.courseId}, commentId=${comment.reviewId})}" method="post" class="edit-form editCommentForm ms-5 mt-2 d-none" th:attr="id='edit-form-'+${comment.reviewId}">
+                <input type="hidden" name="lessonId" th:value="${currentLesson.lessonId}" />
+                <input type="hidden" name="userId" th:value="${user.userId}" />
+                <div class="input-group">
+                    <input type="text" name="comment" class="form-control form-control-sm" th:value="${comment.comment}" required />
+                    <button class="btn btn-success btn-sm" type="submit">Lưu</button>
+                    <button class="btn btn-outline-secondary btn-sm cancel-edit" type="button">Hủy</button>
+                </div>
+            </form>
+            <!-- Danh sách reply -->
+            <div th:if="${!#lists.isEmpty(comment.children)}" class="ms-5 mt-2">
+                <div th:each="reply : ${comment.children}" th:if="${reply.hidden == null or reply.hidden == false}" class="mb-2" th:attr="id='comment-'+${reply.reviewId}">
+                    <div class="d-flex align-items-start">
+                        <img th:src="${reply.user != null and reply.user.profilePicture != null and reply.user.profilePicture != ''} ? ${reply.user.profilePicture} : @{/assets/images/avatar/default.jpg}" class="rounded-circle me-2" width="32" height="32" alt="avatar">
+                        <div style="flex:1;">
+                            <div class="d-flex align-items-center mb-1">
+                                <strong th:text="${reply.user != null ? reply.user.fullName : 'Người dùng'}"></strong>
+                                <span class="text-primary ms-2" th:if="${reply.replyToUserName != null}" th:text="'→ ' + ${reply.replyToUserName}"></span>
+                                <span class="text-muted small ms-2" th:text="${#temporals.format(reply.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+                            </div>
+                            <div class="d-flex flex-column">
+                                <p class="mb-1 reply-content"><span th:text="${reply.comment}"></span></p>
+                                <div class="mb-1">
+                                    <a href="#" class="reply-link small text-primary me-2"
+                                       th:attr="data-comment-id=${reply.reviewId},
+                                                data-reply-form-id='reply-form-'+${reply.reviewId},
+                                                data-root-comment-id=${comment.reviewId},
+                                                data-reply-to-username=${reply.user != null ? reply.user.fullName : 'Người dùng'}">Trả lời</a>
+                                    <span th:if="${user == null or reply.user == null or user.userId != reply.user.userId}">
+                                        <a href="#" class="report-link small text-danger me-2" th:attr="data-comment-id=${reply.reviewId}">Báo cáo</a>
+                                    </span>
+                                    <span th:if="${user != null and reply.user != null and user.userId == reply.user.userId}">
+                                        <a href="#" class="edit-link small text-success me-2" th:attr="data-comment-id=${reply.reviewId}">Sửa</a>
+                                        <a href="#" class="delete-link small text-secondary" th:attr="data-comment-id=${reply.reviewId}">Xóa</a>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Form sửa reply ẩn -->
+                    <form th:action="@{/api/course/{courseId}/comment/{commentId}/edit(courseId=${course.courseId}, commentId=${reply.reviewId})}" method="post" class="edit-form editCommentForm ms-5 mt-2 d-none" th:attr="id='edit-form-'+${reply.reviewId}">
+                        <input type="hidden" name="lessonId" th:value="${currentLesson.lessonId}" />
+                        <input type="hidden" name="userId" th:value="${user.userId}" />
+                        <div class="input-group">
+                            <input type="text" name="comment" class="form-control form-control-sm" th:value="${reply.comment}" required />
+                            <button class="btn btn-success btn-sm" type="submit">Lưu</button>
+                            <button class="btn btn-outline-secondary btn-sm cancel-edit" type="button">Hủy</button>
+                        </div>
+                    </form>
+                    <!-- Form trả lời ẩn cho reply (ngay sau mỗi reply) -->
+                    <form class="reply-form replyCommentForm ms-5 mt-2 d-none" th:attr="id='reply-form-'+${reply.reviewId}">
+                        <input type="hidden" name="lessonId" th:value="${currentLesson.lessonId}" />
+                        <input type="hidden" name="parentId" th:value="${comment.reviewId}" />
+                        <input type="hidden" name="userId" th:value="${user.userId}" />
+                        <input type="hidden" name="replyToUserName" value="" />
+                        <input type="hidden" name="courseId" th:value="${course.courseId}" />
+                        <div class="input-group">
+                            <input type="text" name="comment" class="form-control form-control-sm" placeholder="Nhập trả lời..." required />
+                            <button class="btn btn-primary btn-sm" type="submit">Gửi</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- Form trả lời ẩn cho comment gốc (dưới mỗi comment) -->
+            <form class="reply-form replyCommentForm ms-5 mt-2 d-none" th:attr="id='reply-form-'+${comment.reviewId}">
+                <input type="hidden" name="lessonId" th:value="${currentLesson.lessonId}" />
+                <input type="hidden" name="parentId" th:value="${comment.reviewId}" />
+                <input type="hidden" name="userId" th:value="${user.userId}" />
+                <input type="hidden" name="replyToUserName" th:value="${comment.user != null ? comment.user.fullName : 'Người dùng'}" />
+                <input type="hidden" name="courseId" th:value="${course.courseId}" />
+                <div class="input-group">
+                    <input type="text" name="comment" class="form-control form-control-sm" placeholder="Nhập trả lời..." required />
+                    <button class="btn btn-primary btn-sm" type="submit">Gửi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Modal báo cáo -->
+    <div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reportModalLabel">Báo cáo bình luận</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="reportCommentId" />
+                    <input type="hidden" id="reportCourseId" th:value="${course.courseId}" />
+                    <div class="mb-3">
+                        <label for="reportReason" class="form-label">Chọn lý do báo cáo:</label>
+                        <select class="form-select" id="reportReason">
+                            <option value="Nội dung không phù hợp">Nội dung không phù hợp</option>
+                            <option value="Spam/quảng cáo">Spam/quảng cáo</option>
+                            <option value="Ngôn từ xúc phạm">Ngôn từ xúc phạm</option>
+                            <option value="Khác">Khác</option>
+                        </select>
+                    </div>
+                    <div class="mb-3 d-none" id="otherReasonDiv">
+                        <label for="otherReason" class="form-label">Nhập lý do khác:</label>
+                        <input type="text" class="form-control" id="otherReason" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-danger" id="submitReportBtn">Gửi báo cáo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Hiện form trả lời khi bấm "Trả lời"
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.reply-link').forEach(function(link) {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var formId = this.getAttribute('data-reply-form-id');
+                    var form = document.getElementById(formId);
+                    if (form) {
+                        // Lấy đúng parentId từ data-root-comment-id hoặc data-comment-id
+                        var rootCommentId = this.getAttribute('data-root-comment-id') || this.getAttribute('data-comment-id');
+                        form.querySelector('input[name=parentId]').value = rootCommentId;
+                        var replyToUserName = this.getAttribute('data-reply-to-username');
+                        if (formId !== ('reply-form-' + rootCommentId)) {
+                            form.querySelector('input[name=replyToUserName]').value = replyToUserName;
+                        }
+                        form.classList.toggle('d-none');
+                        form.querySelector('input[name=comment]').focus();
+                    }
+                });
+            });
+            // Hiện form sửa khi bấm Sửa
+            document.querySelectorAll('.edit-link').forEach(function(link) {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var commentId = this.getAttribute('data-comment-id');
+                    var form = document.getElementById('edit-form-' + commentId);
+                    if (form && form.classList.contains('edit-form')) {
+                        form.classList.toggle('d-none');
+                        form.querySelector('input[name=comment]').focus();
+                    }
+                });
+            });
+            // Ẩn form sửa khi bấm Hủy
+            document.querySelectorAll('.cancel-edit').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    this.closest('.edit-form').classList.add('d-none');
+                });
+            });
+            // Xóa bình luận
+            document.querySelectorAll('.delete-link').forEach(function(link) {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (confirm('Bạn có chắc muốn xóa bình luận này?')) {
+                        var commentId = this.getAttribute('data-comment-id');
+                        var courseId = document.querySelector('input[name=lessonId]').form.closest('form').querySelector('input[name=lessonId]').value;
+                        fetch(`/api/course/${courseId}/comment/${commentId}/delete`, { method: 'DELETE' })
+                            .then(res => res.json())
+                            .then(data => location.reload());
+                    }
+                });
+            });
+            // Báo cáo bình luận
+            document.querySelectorAll('.report-link').forEach(function(link) {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var commentId = this.getAttribute('data-comment-id');
+                    document.getElementById('reportCommentId').value = commentId;
+                    var modal = new bootstrap.Modal(document.getElementById('reportModal'));
+                    modal.show();
+                });
+            });
+        });
+
+
+        document.addEventListener('submit', function(e) {
+            if (e.target.classList.contains('replyCommentForm')) {
+                console.log('Reply form submit intercepted!');
+                e.preventDefault();
+                // Lấy giá trị trực tiếp từ input, không dùng FormData
+                const comment = e.target.querySelector('input[name="comment"]').value;
+                const courseId = e.target.querySelector('input[name="courseId"]') ? e.target.querySelector('input[name="courseId"]').value : document.querySelector('input[name="courseId"]').value;
+                const parentId = e.target.querySelector('input[name="parentId"]').value;
+                const lessonId = e.target.querySelector('input[name="lessonId"]').value;
+                const replyToUserNameInput = e.target.querySelector('input[name="replyToUserName"]');
+                const replyToUserName = replyToUserNameInput ? replyToUserNameInput.value : null;
+
+                fetch(`/api/course/${courseId}/comment/reply`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        comment: comment,
+                        courseId: courseId,
+                        parentId: parentId,
+                        lessonId: lessonId ? parseInt(lessonId) : null,
+                        replyToUserName: replyToUserName
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('Thao tác thành công!', 'success');
+                        loadComments(courseId, lessonId);
+                    } else {
+                        showMessage(data.error || 'Error posting reply', 'error');
+                    }
+                })
+                .catch(error => {
+                    showMessage('Error posting reply', 'error');
+                });
+            }
+        });
+        // AJAX cho form bình luận mới
+        const commentForm = document.getElementById('commentForm');
+        if (commentForm) {
+            commentForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData
+                }).then(res => res.json()).then(() => location.reload());
+            });
+        }
+        // AJAX cho form sửa bình luận/reply
+        document.addEventListener('submit', function(e) {
+            if (e.target.classList.contains('editCommentForm')) {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const comment = formData.get('comment');
+                const courseId = formData.get('courseId') || document.querySelector('input[name="courseId"]').value;
+                const lessonId = formData.get('lessonId') || document.querySelector('input[name="lessonId"]').value;
+                // Lấy commentId từ action URL
+                const action = e.target.getAttribute('action') || e.target.action;
+                const match = action.match(/comment\/(\d+)\/edit/);
+                const commentId = match ? match[1] : null;
+                if (!commentId) {
+                    showMessage('Không xác định được comment cần sửa!', 'error');
+                    return;
+                }
+                fetch(`/api/course/${courseId}/comment/${commentId}/edit`, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('Thao tác thành công!', 'success');
+                        e.target.classList.add('d-none');
+                        loadComments(courseId, lessonId);
+                    } else {
+                        showMessage(data.error || 'Có lỗi xảy ra', 'error');
+                    }
+                });
+            }
+        });
+        // Hiện ô nhập lý do khác nếu chọn Khác
+        document.getElementById('reportReason').addEventListener('change', function() {
+            var otherDiv = document.getElementById('otherReasonDiv');
+            if (this.value === 'Khác') {
+                otherDiv.classList.remove('d-none');
+            } else {
+                otherDiv.classList.add('d-none');
+            }
+        });
+        // Gửi báo cáo khi bấm Gửi báo cáo trong modal
+        document.getElementById('submitReportBtn').addEventListener('click', function() {
+            var commentId = document.getElementById('reportCommentId').value;
+            var courseId = document.getElementById('reportCourseId').value;
+            var reason = document.getElementById('reportReason').value;
+            if (reason === 'Khác') {
+                reason = document.getElementById('otherReason').value;
+            }
+            if (!reason || reason.trim() === '') {
+                alert('Vui lòng nhập lý do báo cáo!');
+                return;
+            }
+            fetch(`/api/course/${courseId}/comment/${commentId}/report`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reason: reason })
+            }).then(res => res.json()).then(data => {
+                alert(data.success || data.error);
+                var modal = bootstrap.Modal.getInstance(document.getElementById('reportModal'));
+                modal.hide();
+                location.reload();
+            });
+        });
+    </script>
+</div> 

@@ -1,19 +1,14 @@
 <div class="main-content" th:fragment="step2Content">
     <div class="container-fluid py-4">
-        <!-- Breadcrumb -->
-
-
-        <!-- Page Header -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h1 class="h3 mb-0">Create New Course</h1>
-                <p class="text-muted">Fill in the details below to create your course</p>
+        <!-- Page Header & Step Indicator -->
+        <div class="content-card sticky-step-indicator mb-4 rounded-3 border-0 shadow-sm px-4 py-3">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-2">
+                <div>
+                    <h1 class="h3 mb-1 fw-bold text-primary">Create New Course</h1>
+                    <p class="text-muted mb-0">Fill in the details below to create your course</p>
+                </div>
             </div>
-
-        </div>
-
-        <div class="content-card">
-            <div class="step-indicator">
+            <div class="step-indicator mt-3">
                 <div class="step completed" data-step="1">
                     <div class="step-circle">1</div>
                     <div class="step-label">Basic Info</div>
@@ -32,33 +27,24 @@
                 </div>
             </div>
         </div>
-        <form th:action="@{/instructordashboard/createcourse/coursecontent}" th:object="${coursestep2}" method="POST" enctype="multipart/form-data">
+
+        <form th:action="@{/instructor/createcourse/coursecontent}" th:object="${coursestep2}" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="courseId" th:value="${courseId}" />
             <input type="hidden" id="imageUrl" th:value="${imageUrl}">
             <input type="hidden" id="videoUrl" th:value="${videoUrl}">
-            <div class="row">
-                <div class="col-lg-12">
-                    <!-- Title -->
-                    <h4>Course media</h4>
-
-                    <hr>
-
-                    <div class="row">
+            <div class="card border-0 shadow-sm mb-4 rounded-3">
+                <div class="card-body p-4">
+                    <h3 class="mb-4 fw-semibold text-dark">Course Media</h3>
+                    <div class="row g-4">
                         <!-- Upload image START -->
-                        <div class="col-12">
-                            <div
-                                    class="text-center justify-content-center align-items-center p-4 p-sm-5 border border-2 border-dashed position-relative rounded-3">
-                                <!-- Image container that will toggle between SVG and preview -->
+                        <div class="col-md-6">
+                            <div class="text-center justify-content-center align-items-center p-4 p-sm-5 border border-2 border-dashed position-relative rounded-3 h-100">
                                 <div id="imageContainer">
-                                    <!-- Default SVG image (will be hidden when preview is shown) -->
                                     <img id="defaultGalleryIcon" th:src="@{/assets/images/element/gallery.svg}" class="h-100px" alt="">
-                                    
-                                    <!-- Preview image (initially hidden) -->
-                                    <img style="max-height: 250px; display: none;" alt="avatar-preview" id="avatarPreview" class="img-fluid rounded">
+                                    <img style="max-height: 200px; display: none;" alt="avatar-preview" id="avatarPreview" class="img-fluid rounded">
                                 </div>
-                                
                                 <div>
-                                    <h6 style="color: #0a58ca" class="my-2">Upload course image here</h6>
+                                    <h6 style="color: #0a58ca" class="my-2">Upload course image</h6>
                                     <label>
                                         <span>
                                             <input type="file" id="avatarFile" accept=".png, .jpg, .jpeg" th:field="*{image}" class="form-control">
@@ -66,80 +52,42 @@
                                     </label>
                                 </div>
                             </div>
-
                         </div>
                         <!-- Upload image END -->
-
                         <!-- Upload video START -->
-                        <div class="col-12">
-                            <!-- Input -->
-                            <div class="position-relative my-4">
-                                <hr>
-                                <p class="small position-absolute top-50 start-50 translate-middle bg-body px-3 mb-0">Or
-                                </p>
-                            </div>
-
-
-
-                            <div class="col-12">
-                                <label class="form-label">Upload video</label>
-                                <div class="input-group mb-3">
-                                    <input type="file" th:field="*{video}" class="form-control" id="videoFile" accept="video/mp4">
-                                    <label class="input-group-text">.mp4</label>
+                        <div class="col-md-6">
+                            <div class="text-center justify-content-center align-items-center p-4 p-sm-5 border border-2 border-dashed position-relative rounded-3 h-100">
+                                <div id="videoContainer"
+                                     th:attr="data-publicid=${course != null and course.videoUrlPreview != null ? course.videoUrlPreview : ''}">
+                                    <i class="bi bi-film" style="font-size: 3rem; color: #6c757d;"></i>
+                                    <div id="videoPreviewContainer" style="display: none;" class="mt-3 text-center">
+                                        <video id="videoPreview" style="width: 100%; max-width: 400px; height: auto;" controls class="mx-auto"></video>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h6 style="color: #0a58ca" class="my-2">Upload course video</h6>
+                                    <div class="input-group">
+                                        <input type="file" th:field="*{video}" class="form-control" id="videoFile" accept="video/mp4">
+                                        <label class="input-group-text">.mp4</label>
+                                    </div>
                                 </div>
                             </div>
-
-                            <!-- Preview -->
-                            <h5 class="mt-4">Video preview</h5>
-                            <video id="videoPreview" style="max-width: 70%;" controls></video>
-
-                            <script>
-                                $(document).ready(function () {
-                                    // Hiển thị preview từ backend nếu có
-                                    const videoUrl = $("#videoUrl").val();
-                                    if (videoUrl) {
-                                        $("#videoPreview").attr("src", videoUrl).show();
-                                    } else if (sessionStorage.getItem("videoPreview")) {
-                                        $("#videoPreview").attr("src", sessionStorage.getItem("videoPreview")).show();
-                                    }
-
-                                    $("#videoFile").change(function (e) {
-                                        const file = e.target.files[0];
-                                        if (file) {
-                                            const url = URL.createObjectURL(file);
-                                            $("#videoPreview").attr("src", url).show();
-                                            sessionStorage.setItem("videoPreview", url);
-                                        } else {
-                                            $("#videoPreview").hide().attr("src", "");
-                                            sessionStorage.removeItem("videoPreview");
-                                        }
-                                    });
-                                });
-                            </script>
                         </div>
                         <!-- Upload video END -->
-
-                        <!-- Step 2 button -->
-
                     </div>
-
-                    <!-- SCRIPT: Save preview in sessionStorage -->
-
-
-
                 </div>
-                <div class="content-card">
-                    <div class="d-flex justify-content-between">
-                        <button class="btn btn-outline-secondary me-3" name="action" value="previousstep">
-                            <i class="bi bi-arrow-left me-1"></i> Previous
-                        </button>
-                        <button class="btn btn-outline-secondary me-2" id="saveDraftBtn" name="action" value="draft">
-                            <i class="bi bi-save me-1"></i> Save as Draft
-                        </button>
-                        <button class="btn btn-primary ms-auto" name="action" value="nextstep">
-                            Next <i class="bi bi-arrow-right ms-1"></i>
-                        </button>
-                    </div>
+            </div>
+            <div class="content-card sticky-navigation-buttons rounded-3 border-0 shadow-sm px-4 py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <button class="btn btn-outline-secondary px-4 py-2 rounded-2 me-2" name="action" value="previousstep">
+                        <i class="bi bi-arrow-left me-1"></i> Previous
+                    </button>
+                    <button class="btn btn-outline-secondary px-4 py-2 rounded-2 me-2" id="saveDraftBtn" name="action" value="draft">
+                        <i class="bi bi-save me-1"></i> Save as Draft
+                    </button>
+                    <button class="btn btn-primary px-4 py-2 rounded-2 ms-auto" name="action" value="nextstep">
+                        Next <i class="bi bi-arrow-right ms-1"></i>
+                    </button>
                 </div>
             </div>
         </form>
@@ -151,15 +99,15 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script>
-        $(document).ready(() => {
-            // Hiển thị preview từ backend nếu có
+        $(document).ready(function () {
+            // Xử lý preview ảnh
             const imageUrl = $("#imageUrl").val();
             if (imageUrl) {
                 $("#avatarPreview").attr("src", imageUrl).show();
-                $("#defaultGalleryIcon").hide(); // Ẩn biểu tượng SVG
+                $("#defaultGalleryIcon").hide();
             } else if (sessionStorage.getItem("avatarPreview")) {
                 $("#avatarPreview").attr("src", sessionStorage.getItem("avatarPreview")).show();
-                $("#defaultGalleryIcon").hide(); // Ẩn biểu tượng SVG
+                $("#defaultGalleryIcon").hide();
             }
 
             $("#avatarFile").change(function (e) {
@@ -167,19 +115,54 @@
                 if (file) {
                     const imgURL = URL.createObjectURL(file);
                     $("#avatarPreview").attr("src", imgURL).show();
-                    $("#defaultGalleryIcon").hide(); // Ẩn biểu tượng SVG
+                    $("#defaultGalleryIcon").hide();
                     sessionStorage.setItem("avatarPreview", imgURL);
                 } else {
                     $("#avatarPreview").hide();
-                    $("#defaultGalleryIcon").show(); // Hiện lại biểu tượng SVG
+                    $("#defaultGalleryIcon").show();
                     sessionStorage.removeItem("avatarPreview");
                 }
             });
-        });
 
-        $("form").submit(function() {
-            sessionStorage.removeItem("avatarPreview");
-            sessionStorage.removeItem("videoPreview");
+            let videoRefreshInterval = null;
+
+            function showVideoPreviewFromServer(publicId) {
+                if (!publicId) return;
+                $("#videoPreview").attr("src", '/api/video/stream/video/' + encodeURIComponent(publicId));
+                $("#videoPreviewContainer").show();
+                $("#videoContainer .bi-film").hide();
+                // Không cần interval refresh vì backend proxy luôn cấp link hợp lệ
+                if (videoRefreshInterval) clearInterval(videoRefreshInterval);
+            }
+
+            function showVideoPreviewFromLocal(file) {
+                if (videoRefreshInterval) {
+                    clearInterval(videoRefreshInterval);
+                    videoRefreshInterval = null;
+                }
+                const url = URL.createObjectURL(file);
+                $("#videoPreview").attr("src", url);
+                $("#videoPreviewContainer").show();
+                $("#videoContainer .bi-film").hide();
+            }
+
+            // Khi chọn file mới từ máy tính
+            $("#videoFile").change(function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    showVideoPreviewFromLocal(file);
+                } else {
+                    $("#videoPreviewContainer").hide();
+                    $("#videoPreview").attr("src", "");
+                    $("#videoContainer .bi-film").show();
+                }
+            });
+
+            // Khi quay lại step này (next/previous), nếu có publicId thì show preview từ server
+            var publicId = $("#videoContainer").data("publicid");
+            if (publicId && publicId !== 'null' && publicId !== '') {
+                showVideoPreviewFromServer(publicId);
+            }
         });
     </script>
     <style>
@@ -187,7 +170,6 @@
             min-height: 100vh;
             background-color: #f8f9fa;
         }
-
         .content-card {
             background-color: #fff;
             border-radius: 0.5rem;
@@ -195,19 +177,39 @@
             padding: 1.5rem;
             margin-bottom: 1.5rem;
         }
-
+        .sticky-step-indicator {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background-color: #f0f4fa;
+            margin-bottom: 1.5rem;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #b6c6e3;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .content-card.sticky-navigation-buttons {
+            position: sticky;
+            bottom: 0;
+            z-index: 1000;
+            background-color: #f0f4fa;
+            margin-top: 1.5rem;
+            padding-top: 15px;
+            padding-bottom: 15px;
+            border-top: 2px solid #b6c6e3;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+        }
         .step-indicator {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 2rem;
+            margin-bottom: 0;
+            gap: 0.5rem;
         }
-
         .step {
             flex: 1;
             text-align: center;
             position: relative;
         }
-
         .step:not(:last-child)::after {
             content: '';
             position: absolute;
@@ -218,14 +220,12 @@
             background-color: #dee2e6;
             z-index: 1;
         }
-
         .step.active:not(:last-child)::after {
             background-color: #0d6efd;
         }
-
         .step-circle {
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             background-color: #dee2e6;
             color: #6c757d;
@@ -236,103 +236,31 @@
             margin-bottom: 0.5rem;
             position: relative;
             z-index: 2;
+            font-size: 1.1rem;
         }
-
         .step.active .step-circle {
             background-color: #0d6efd;
             color: white;
         }
-
         .step.completed .step-circle {
             background-color: #198754;
             color: white;
         }
-
-        .image-upload-area {
-            border: 2px dashed #dee2e6;
-            border-radius: 0.5rem;
-            padding: 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
+        .form-label {
+            font-size: 1rem;
         }
-
-        .image-upload-area:hover {
-            border-color: #0d6efd;
-            background-color: rgba(13, 110, 253, 0.05);
+        .form-control-lg, .form-select-lg {
+            font-size: 1.05rem;
+            padding: 0.75rem 1rem;
         }
-
-        .image-upload-area.dragover {
-            border-color: #0d6efd;
-            background-color: rgba(13, 110, 253, 0.1);
+        .btn {
+            font-size: 1.05rem;
         }
-
-        .lesson-item {
-            border: 1px solid #dee2e6;
-            border-radius: 0.5rem;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            background-color: #f8f9fa;
-        }
-
-        .lesson-item.dragging {
-            opacity: 0.5;
-        }
-
-        .drag-handle {
-            cursor: move;
-            color: #6c757d;
-        }
-
-        .video-upload-area {
-            border: 2px dashed #dee2e6;
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .video-upload-area:hover {
-            border-color: #0d6efd;
-            background-color: rgba(13, 110, 253, 0.05);
-        }
-
-        .progress-container {
-            display: none;
-            margin-top: 1rem;
-        }
-
-        .avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .tab-content {
-            padding-top: 1rem;
-        }
-
-        .form-floating textarea {
-            min-height: 120px;
-        }
-
-        .preview-card {
-            border: 1px solid #dee2e6;
-            border-radius: 0.5rem;
-            overflow: hidden;
-        }
-
-        .preview-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-
-        .sticky-sidebar {
-            position: sticky;
-            top: 20px;
+        @media (max-width: 768px) {
+            .card-body, .content-card.sticky-step-indicator, .content-card.sticky-navigation-buttons {
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+            }
         }
     </style>
 </div>

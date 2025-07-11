@@ -22,6 +22,12 @@ public class AdminAccessFilter implements Filter {
 
         String uri = request.getRequestURI();
 
+        // Bỏ qua filter cho webhook của SePay
+        if (uri.equals("/api/payment/sepay/webhook")) {
+            filterChain.doFilter(servletRequest, servletResponse);
+            return;
+        }
+
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isAdmin = auth != null && auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 

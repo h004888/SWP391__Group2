@@ -12,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
+
 public class Course {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,7 +25,7 @@ public class Course {
     @Column(name = "Title")
     private String title;
 
-    @Column(name = "Description")
+    @Column(name = "Description",columnDefinition = "nvarchar(max)")
     private String description;
 
     @Column(name = "Price")
@@ -70,5 +71,11 @@ public class Course {
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<CourseReview> courseReviews;
+
+    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
+    private List<VoucherCourse> voucherCourses;
+
+    @Column(name = "PreviousStatus")
+    private String previousStatus;
 
 }

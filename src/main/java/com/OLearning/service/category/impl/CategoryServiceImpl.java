@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -29,24 +30,15 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public void delete(Category categories) {
-        categoryRepository.delete(categories);
-    }
-
-    @Override
     public void deleteById(Long id) {
         categoryRepository.deleteById(id);
     }
 
     @Override
-    public boolean existsById(Long id) {
-        return categoryRepository.existsById(id);
+    public List<Category> findTop5ByOrderByIdAsc() {
+        return categoryRepository.findTop5ByOrderByIdAsc();
     }
 
-    @Override
-    public boolean existsByName(String name) {
-        return categoryRepository.existsByName(name);
-    }
 
     @Override
     public List<Category> findAll() {
@@ -58,74 +50,66 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryRepository.findAll(pageable);
     }
 
+
     @Override
     public Optional<Category> findById(Long id) {
         return categoryRepository.findById(id);
     }
 
     @Override
-    public Category findByName(String name) {
-        return categoryRepository.findByName(name);
-    }
-
-    @Override
-    public Category save(Category categories) {
-        return categoryRepository.save(categories);
-    }
-
-    @Transactional
-    @Override
-    public void updateCategory(Long id, String name) {
-        categoryRepository.updateCategory(id, name);
-    }
-
-    @Override
-    public List<Category> findByNameContaining(String name) {
-        return categoryRepository.findByNameContaining(name);
-    }
-
-    @Override
-    public List<Category> filterCategories(String name, String select) {
-        List<Category> categories;
-
-        if (name == null || name.isEmpty()) {
-            categories = categoryRepository.findAll();
-        } else {
-            categories = categoryRepository.findByNameContaining(name);
-        }
-
-        if (select != null) {
-            if (select.equals("1")) {
-                categories.sort(Comparator.comparing(Category::getName, String.CASE_INSENSITIVE_ORDER));
-            } else if (select.equals("2")) {
-                categories.sort(Comparator.comparing(Category::getName, String.CASE_INSENSITIVE_ORDER).reversed());
+    public Page<Category> filterAndSortCategories(String name, String sort, int page, int size) {
+        Pageable pageable;
+        
+        // Only apply sorting if user explicitly chooses a sort option
+        if (sort != null && !sort.trim().isEmpty()) {
+            if (sort.equalsIgnoreCase("desc")) {
+                pageable = PageRequest.of(page, size, Sort.by("name").descending());
+            } else if (sort.equalsIgnoreCase("asc")) {
+                pageable = PageRequest.of(page, size, Sort.by("name").ascending());
+            } else {
+                // Invalid sort parameter, use default (no sorting)
+                pageable = PageRequest.of(page, size);
             }
-        }
-
-        return categories;
-    }
-
-    @Override
-    public Page<Category> findByNameContaining(String name, Pageable pageable) {
-        return categoryRepository.findByNameContaining(name, pageable);
-    }
-
-    @Override
-    public List<Category> findTop5ByOrderByIdAsc() {
-        return categoryRepository.findTop5ByOrderByIdAsc();
-    }
-
-    @Override
-    public Page<Category> findByNameContainingIgnoreCase(String name, Pageable pageable) {
-        return categoryRepository.findByNameContainingIgnoreCase(name, pageable);
-    }
-
-    @Override
-    public Page<Category> filterCategories(String name, String sort, Pageable pageable) {
-        if (name == null || name.isEmpty()) {
-            return categoryRepository.findAll(pageable);
         } else {
-            return categoryRepository.findByNameContainingIgnoreCase(name, pageable);
+            // No sorting applied, use default order (by ID)
+            pageable = PageRequest.of(page, size, Sort.by("id").ascending());
         }
+        
+        Page<Category> categoryPage;
+        if (name != null && !name.trim().isEmpty()) {
+            categoryPage = categoryRepository.findByNameContainingIgnoreCase(name.trim(), pageable);
+        } else {
+            categoryPage = categoryRepository.findAll(pageable);
+        }
+        
+        // Ensure no duplicates and load courses properly
+        List<Category> uniqueCategories = categoryPage.getContent().stream()
+            .distinct()
+            .toList();
+        
+        // Force loading of courses for each category to avoid lazy loading issues
+        uniqueCategories.forEach(category -> {
+            if (category.getCourses() != null) {
+                category.getCourses().size(); // Force loading
+            }
+        });
+        
+        // Create a new Page with unique content
+        return new PageImpl<>(uniqueCategories, pageable, categoryPage.getTotalElements());
+    }
+
+    @Override
+    public Category save(Category category) {
+        return categoryRepository.save(category);
+    }
+
+    @Override
+    public boolean existsByName(String name) {
+        return categoryRepository.existsByName(name);
+    }
+
+    @Override
+    public boolean existsByNameAndIdNot(String name, Long id) {
+        return categoryRepository.existsByNameAndIdNot(name, id);
     }
 }

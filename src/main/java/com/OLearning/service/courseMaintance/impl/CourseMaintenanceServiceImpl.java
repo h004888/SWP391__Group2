@@ -4,11 +4,15 @@ import com.OLearning.entity.Course;
 import com.OLearning.entity.CourseMaintenance;
 import com.OLearning.entity.Fee;
 import com.OLearning.entity.Notification;
+import com.OLearning.entity.User;
+import com.OLearning.entity.CoinTransaction;
 import com.OLearning.repository.CourseRepository;
 import com.OLearning.repository.EnrollmentRepository;
 import com.OLearning.repository.FeesRepository;
 import com.OLearning.repository.NotificationRepository;
 import com.OLearning.repository.CourseMaintenanceRepository;
+import com.OLearning.repository.UserRepository;
+import com.OLearning.repository.CoinTransactionRepository;
 import com.OLearning.service.courseMaintance.CourseMaintenanceService;
 import com.OLearning.service.email.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +30,7 @@ import java.util.HashMap;
 import java.time.format.DateTimeFormatter;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+import java.math.BigDecimal;
 
 @Service
 public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
@@ -42,6 +47,10 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
     private FeesRepository feesRepository;
     @Autowired
     private NotificationRepository notificationRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private CoinTransactionRepository coinTransactionRepository;
 
     @Autowired
     private EmailService emailService;
@@ -76,13 +85,34 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
 
     @Override
     public void updateFee(Long feeId, Long minEnrollments, Long maxEnrollments, Long maintenanceFee) {
+        List<Fee> existingFees = feesRepository.findAll();
+        existingFees.removeIf(f -> f.getFeeId().equals(feeId)); // loại trừ chính nó
+        // Nếu max null, min phải lớn nhất
+        if (maxEnrollments == null) {
+            Long maxMin = existingFees.stream().mapToLong(Fee::getMinEnrollments).max().orElse(Long.MIN_VALUE);
+            if (!existingFees.isEmpty() && minEnrollments <= maxMin) {
+                throw new RuntimeException("Nếu không nhập Max Enrollments, Min Enrollments phải lớn nhất!");
+            }
+        }
+        // Nếu max có giá trị, min < max
+        if (maxEnrollments != null && minEnrollments >= maxEnrollments) {
+            throw new RuntimeException("Min enrollments must be less than max enrollments");
+        }
+        // Check overlap
+        for (Fee existingFee : existingFees) {
+            Long minA = minEnrollments;
+            Long maxA = maxEnrollments == null ? Long.MAX_VALUE : maxEnrollments;
+            Long minB = existingFee.getMinEnrollments();
+            Long maxB = existingFee.getMaxEnrollments() == null ? Long.MAX_VALUE : existingFee.getMaxEnrollments();
+            if (Math.max(minA, minB) < Math.min(maxA, maxB)) {
+                throw new RuntimeException("Fee range overlaps with existing fee range");
+            }
+        }
         Fee fee = feesRepository.findById(feeId)
                 .orElseThrow(() -> new RuntimeException("Fee not found"));
-        
         fee.setMinEnrollments(minEnrollments);
         fee.setMaxEnrollments(maxEnrollments);
         fee.setMaintenanceFee(maintenanceFee);
-        
         feesRepository.save(fee);
     }
 
@@ -101,25 +131,32 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
 
     @Override
     public void addFee(Long minEnrollments, Long maxEnrollments, Long maintenanceFee) {
-        // Validate input
-        if (minEnrollments >= maxEnrollments) {
+        List<Fee> existingFees = feesRepository.findAll();
+        // Nếu max null, min phải lớn nhất
+        if (maxEnrollments == null) {
+            Long maxMin = existingFees.stream().mapToLong(Fee::getMinEnrollments).max().orElse(Long.MIN_VALUE);
+            if (!existingFees.isEmpty() && minEnrollments <= maxMin) {
+                throw new RuntimeException("Nếu không nhập Max Enrollments, Min Enrollments phải lớn nhất!");
+            }
+        }
+        // Nếu max có giá trị, min < max
+        if (maxEnrollments != null && minEnrollments >= maxEnrollments) {
             throw new RuntimeException("Min enrollments must be less than max enrollments");
         }
-        
-        // Check for overlapping ranges
-        List<Fee> existingFees = feesRepository.findAll();
+        // Check overlap
         for (Fee existingFee : existingFees) {
-            if ((minEnrollments <= existingFee.getMaxEnrollments() && 
-                 maxEnrollments >= existingFee.getMinEnrollments())) {
+            Long minA = minEnrollments;
+            Long maxA = maxEnrollments == null ? Long.MAX_VALUE : maxEnrollments;
+            Long minB = existingFee.getMinEnrollments();
+            Long maxB = existingFee.getMaxEnrollments() == null ? Long.MAX_VALUE : existingFee.getMaxEnrollments();
+            if (Math.max(minA, minB) < Math.min(maxA, maxB)) {
                 throw new RuntimeException("Fee range overlaps with existing fee range");
             }
         }
-        
         Fee newFee = new Fee();
         newFee.setMinEnrollments(minEnrollments);
         newFee.setMaxEnrollments(maxEnrollments);
         newFee.setMaintenanceFee(maintenanceFee);
-        
         feesRepository.save(newFee);
     }
 
@@ -181,7 +218,7 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
                 notification.setSentAt(LocalDateTime.now());
                 notification.setCourse(course);
                 notification.setUser(course.getInstructor());
-                notification.setStatus(false);
+                notification.setStatus("failed");
                 notificationRepository.save(notification);
             } catch (Exception e) {
                 System.err.println("Error sending maintenance invoice email: " + e.getMessage());
@@ -205,6 +242,17 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
         }
 
         return maintenanceData;
+    }
+
+    @Override
+    public List<CourseMaintenance> getMaintenancesByInstructorId(Long instructorId) {
+        return courseMaintenanceRepository.findByCourse_Instructor_UserId(instructorId);
+    }
+
+    @Override
+    public String getMaintenanceStatusById(Long maintenanceId) {
+        CourseMaintenance maintenance = courseMaintenanceRepository.findById(maintenanceId).orElse(null);
+        return maintenance != null ? maintenance.getStatus() : "not_found";
     }
 
     @Scheduled(cron = "0 0 9 * * ?") // Chạy mỗi ngày lúc 9:00 sáng
@@ -246,7 +294,7 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
                     notification.setType("ACCOUNT_LOCKED");
                     notification.setSentAt(LocalDateTime.now());
                     notification.setCourse(course);
-                    notification.setStatus(false);
+                    notification.setStatus("failed");
                     notificationRepository.save(notification);
 
                 } else if (daysOverdue >= 7) {
@@ -275,7 +323,7 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
                     notification.setType("COURSE_HIDDEN");
                     notification.setSentAt(LocalDateTime.now());
                     notification.setCourse(course);
-                    notification.setStatus(false);
+                    notification.setStatus("failed");
                     notificationRepository.save(notification);
 
                 } else if (daysOverdue >= 3) {
@@ -300,7 +348,7 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
                     notification.setType("SECOND_REMINDER");
                     notification.setSentAt(LocalDateTime.now());
                     notification.setCourse(course);
-                    notification.setStatus(false);
+                    notification.setStatus("failed");
                     notificationRepository.save(notification);
                 }
 
@@ -311,6 +359,64 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
             } catch (Exception e) {
                 System.err.println("Error processing overdue maintenance: " + e.getMessage());
             }
+        }
+    }
+
+    @Override
+    public boolean processMaintenancePayment(Long maintenanceId, String refCode) {
+        try {
+            CourseMaintenance maintenance = courseMaintenanceRepository.findById(maintenanceId).orElse(null);
+            if (maintenance == null) return false;
+            if ("PAID".equalsIgnoreCase(maintenance.getStatus())) return true;
+            User instructor = maintenance.getCourse().getInstructor();
+            Fee fee = maintenance.getFee();
+            double feeAmount = fee != null ? fee.getMaintenanceFee() : 0.0;
+            // 1. Nếu instructor không đủ coin, cộng coin trước
+            if (instructor.getCoin() < feeAmount) {
+                instructor.setCoin(instructor.getCoin() + (long) feeAmount);
+                CoinTransaction topup = new CoinTransaction();
+                topup.setUser(instructor);
+                topup.setAmount(BigDecimal.valueOf(feeAmount));
+                topup.setTransactionType("top_up");
+                topup.setStatus("PAID");
+                topup.setNote("SePay maintenance fee top up");
+                topup.setCreatedAt(LocalDateTime.now());
+                topup.setOrder(null);
+                coinTransactionRepository.save(topup);
+            }
+            // 2. Trừ coin instructor
+            instructor.setCoin(instructor.getCoin() - (long) feeAmount);
+            CoinTransaction pay = new CoinTransaction();
+            pay.setUser(instructor);
+            pay.setAmount(BigDecimal.valueOf(-feeAmount));
+            pay.setTransactionType("maintenance_fee");
+            pay.setStatus("PAID");
+            pay.setNote("Pay maintenance fee");
+            pay.setCreatedAt(LocalDateTime.now());
+            pay.setOrder(null);
+            coinTransactionRepository.save(pay);
+            User admin = userRepository.findById(1L).orElse(null);
+            if (admin != null) {
+                admin.setCoin(admin.getCoin() + (long) feeAmount);
+                CoinTransaction receive = new CoinTransaction();
+                receive.setUser(admin);
+                receive.setAmount(BigDecimal.valueOf(feeAmount));
+                receive.setTransactionType("maintenance_fee");
+                receive.setStatus("PAID");
+                receive.setNote("Receive maintenance fee from instructor " + instructor.getUserId());
+                receive.setCreatedAt(LocalDateTime.now());
+                receive.setOrder(null);
+                coinTransactionRepository.save(receive);
+                userRepository.save(admin);
+            }
+            userRepository.save(instructor);
+            maintenance.setStatus("PAID");
+            maintenance.setDescription("Thanh toán bảo trì");
+            maintenance.setRefCode(refCode != null ? refCode : "Đã thanh toán");
+            courseMaintenanceRepository.save(maintenance);
+            return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 }

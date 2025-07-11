@@ -73,7 +73,7 @@
 	</script>
 
 	<!-- Favicon -->
-	<link rel="shortcut icon" href="assets/images/favicon.ico">
+	<link rel="shortcut icon" href="/assets/images/favicon.ico">
 
 	<!-- Google Font -->
 	<link rel="preconnect" href="https://fonts.googleapis.com/">
@@ -223,10 +223,10 @@
 										<li> <a class="dropdown-item" href="shop.html">Shop grid</a></li>
 										<li> <a class="dropdown-item" href="shop-product-detail.html">Product detail</a>
 										</li>
-										<li> <a class="dropdown-item" href="cart.html">Cart</a></li>
+										<li> <a class="dropdown-item" href="/cart">Cart</a></li>
 										<li> <a class="dropdown-item" href="checkout.html">Checkout</a></li>
 										<li> <a class="dropdown-item" href="empty-cart.html">Empty Cart</a></li>
-										<li> <a class="dropdown-item" href="wishlist.html">Wishlist</a></li>
+										<li> <a class="dropdown-item" href="/wishlist">Wishlist</a></li>
 									</ul>
 								</li>
 
@@ -1018,70 +1018,7 @@ Footer END -->
 
 	<!-- Template Functions -->
 	<script src="assets/js/functions.js"></script>
-	<!-- <script>
-		// --- ĐỊNH NGHĨA HÀM Ở PHẠM VI TOÀN CỤC ---
-		// Đưa hàm ra ngoài $(document).ready() để onclick trong HTML có thể gọi được
-		function loadPage(page) {
-			console.log(`[loadPage] Được gọi để tải trang: ${page}`);
-
-			// BƯỚC 1: Lấy danh sách ID đang được chọn từ các checkbox
-			let selectedIds = [];
-			$('.category-checkbox:checked').each(function () {
-				selectedIds.push($(this).val());
-			});
-			console.log('[loadPage] Với các Category ID đang được chọn:', selectedIds);
-
-			// BƯỚC 2: Thực hiện gọi AJAX với cả page và categoryIds
-			$.ajax({
-				url: '/fragments/courses',
-				type: 'GET',
-				data: {
-					page: page,
-					categoryIds: selectedIds // Gửi cả hai tham số lên server
-				},
-				traditional: true, // Quan trọng để gửi mảng ID đúng cách
-				success: function (data) {
-					console.log('[AJAX] Tải dữ liệu thành công cho trang ' + page);
-					$('#courseList').html(data); // Cập nhật phần danh sách và phân trang
-				},
-				error: function () {
-					console.error('[AJAX] Lỗi khi tải dữ liệu.');
-					alert("Không thể tải dữ liệu, vui lòng thử lại.");
-				}
-			});
-		}
-
-
-		// --- GẮN SỰ KIỆN KHI TRANG ĐÃ SẴN SÀNG ---
-		$(document).ready(function () {
-
-			// Xử lý sự kiện 'change' cho các checkbox
-			$('.category-checkbox, #checkAll').on('change', function () {
-				console.log('--- Event "change" trên checkbox đã kích hoạt ---');
-				console.log('Đối tượng kích hoạt:', this);
-
-				// Logic check/uncheck cho "All"
-				if ($(this).is('#checkAll')) {
-					const isAllChecked = $(this).is(':checked');
-					$('.category-checkbox').prop('checked', isAllChecked);
-				} else {
-					const totalCheckboxes = $('.category-checkbox').length;
-					const checkedCheckboxes = $('.category-checkbox:checked').length;
-					$('#checkAll').prop('checked', totalCheckboxes === checkedCheckboxes);
-				}
-
-				// QUAN TRỌNG: Khi bộ lọc thay đổi, gọi lại hàm loadPage và reset về trang đầu tiên (page 0)
-				console.log('Bộ lọc thay đổi, kích hoạt tải lại dữ liệu từ trang đầu tiên.');
-				loadPage(0);
-				console.log('--------------------------------------');
-			});
-
-			// KHÔNG CẦN listener cho .page-link nữa, vì HTML đã có onclick.
-
-			// (Tùy chọn) Tải dữ liệu lần đầu khi trang được mở
-			// loadPage(0);
-		});
-	</script> -->
+	<script src="/js/homePage/wishlist.js"></script>
 
 	<script>
 		// Hàm gọi AJAX để tải dữ liệu theo filter và trang
@@ -1112,6 +1049,8 @@ Footer END -->
 				success: function (data) {
 					console.log('[AJAX] Thành công - cập nhật dữ liệu');
 					$('#courseList').html(data);
+					// Trigger custom event to update wishlist status
+					document.dispatchEvent(new CustomEvent('courses-loaded'));
 				},
 				error: function () {
 					console.error('[AJAX] Lỗi khi tải dữ liệu.');
