@@ -53,5 +53,8 @@ public class CourseReview {
     @OneToMany(mappedBy = "parentReview", cascade = CascadeType.ALL, orphanRemoval = true)
     private java.util.List<CourseReview> children = new java.util.ArrayList<>();
 
+    @Column(name = "ReplyToUserName")
+    private String replyToUserName;
+
 
 }

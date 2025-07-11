@@ -564,7 +564,6 @@
     </div>
 
     <!-- Bootstrap JS Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const approveModal = document.getElementById('approveModal');
@@ -676,15 +675,11 @@
         function playVideo(element) {
             var publicId = element.getAttribute('data-videoid');
             if (!publicId) return;
-            fetch('/api/video/signed-url?publicId=' + encodeURIComponent(publicId))
-                .then(response => response.text())
-                .then(url => {
-                    var video = document.getElementById('modalVideo');
-                    video.src = url;
-                    var modal = new bootstrap.Modal(document.getElementById('videoModal'));
-                    modal.show();
-                    video.play();
-                });
+            var video = document.getElementById('modalVideo');
+            video.src = '/api/video/stream/video/' + encodeURIComponent(publicId);
+            var modal = new bootstrap.Modal(document.getElementById('videoModal'));
+            modal.show();
+            video.play();
         }
 
         document.addEventListener('DOMContentLoaded', function () {
@@ -693,15 +688,11 @@
                 playBtn.addEventListener('click', function() {
                     var publicId = this.getAttribute('data-publicid');
                     if (!publicId) return;
-                    fetch('/api/video/signed-url?publicId=' + encodeURIComponent(publicId))
-                        .then(res => res.text())
-                        .then(url => {
-                            var video = document.getElementById('modalVideo');
-                            video.src = url;
-                            var modal = new bootstrap.Modal(document.getElementById('videoModal'));
-                            modal.show();
-                            video.play();
-                        });
+                    var video = document.getElementById('modalVideo');
+                    video.src = '/api/video/stream/video/' + encodeURIComponent(publicId);
+                    var modal = new bootstrap.Modal(document.getElementById('videoModal'));
+                    modal.show();
+                    video.play();
                 });
             }
 

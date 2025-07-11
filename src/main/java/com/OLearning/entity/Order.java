@@ -12,7 +12,6 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

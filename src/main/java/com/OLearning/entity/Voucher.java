@@ -12,7 +12,6 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
 public class Voucher {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

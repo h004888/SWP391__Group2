@@ -20,6 +20,7 @@ public class CommentMapper {
                 .comment(dto.getComment())
                 .rating(dto.getRating())
                 .parentReview(parent)
+                .replyToUserName(dto.getReplyToUserName())
                 .build();
     }
 
@@ -41,8 +42,10 @@ public class CommentMapper {
         dto.setComment(review.getComment());
         dto.setRating(review.getRating());
         dto.setParentId(review.getParentReview() != null ? review.getParentReview().getReviewId() : null);
+        dto.setReplyToUserName(review.getReplyToUserName());
         dto.setCreatedAt(review.getCreatedAt());
         dto.setUpdatedAt(review.getUpdatedAt());
+        dto.setHidden(review.isHidden());
         return dto;
     }
     

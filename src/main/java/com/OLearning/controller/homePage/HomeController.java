@@ -128,8 +128,8 @@ public class HomeController {
             }
         }
         model.addAttribute("topCoursesEnrolledMap", topCoursesEnrolledMap);
-        model.addAttribute("fragmentContent", "homePage/fragments/mainContent :: mainContent");
         model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderCategory");
+        model.addAttribute("fragmentContent", "homePage/fragments/mainContent :: mainContent");
         return "homePage/index";
         }
 
@@ -317,7 +317,7 @@ public class HomeController {
                 String description = "Mua khóa học OLearning - ORDER" + order.getOrderId();
                 order.setDescription(description);
                 ordersService.saveOrder(order);
-                com.OLearning.entity.OrderDetail orderDetail = new com.OLearning.entity.OrderDetail();
+                OrderDetail orderDetail = new com.OLearning.entity.OrderDetail();
                 orderDetail.setOrder(order);
                 orderDetail.setCourse(course);
                 orderDetail.setUnitPrice(price);
@@ -350,6 +350,52 @@ public class HomeController {
             redirectAttributes.addFlashAttribute("error", "Purchase error: " + e.getMessage());
             return "redirect:/home/course-detail?id=" + courseId;
         }
+    }
+
+    @PostMapping("/course-review/add")
+    public String addCourseReview(@RequestParam("courseId") Long courseId,
+                                  @RequestParam("rating") Integer rating,
+                                  @RequestParam("comment") String comment,
+                                  @AuthenticationPrincipal UserDetails userDetails,
+                                  RedirectAttributes redirectAttributes) {
+        if (userDetails == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Bạn cần đăng nhập để đánh giá.");
+            return "redirect:/home/course-detail?id=" + courseId;
+        }
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
+        if (user == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy người dùng.");
+            return "redirect:/home/course-detail?id=" + courseId;
+        }
+        Course course = courseRepository.findById(courseId).orElse(null);
+        if (course == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy khóa học.");
+            return "redirect:/home/course-detail?id=" + courseId;
+        }
+        // Kiểm tra đã đăng ký khóa học chưa
+        boolean isEnrolled = enrollmentService.findFirstByUserAndCourseOrderByEnrollmentDateDesc(user, course).isPresent();
+        if (!isEnrolled) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Bạn cần đăng ký khóa học để đánh giá.");
+            return "redirect:/home/course-detail?id=" + courseId;
+        }
+        // Kiểm tra đã review chưa (nếu chỉ cho review 1 lần)
+        Long userReviewCount = courseReviewService.countByUserIdAndCourseId(user.getUserId(), courseId);
+        if (userReviewCount != null && userReviewCount > 0) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Bạn đã đánh giá khóa học này rồi.");
+            return "redirect:/home/course-detail?id=" + courseId;
+        }
+        // Tạo review mới
+        CourseReview review = new CourseReview();
+        review.setCourse(course);
+        review.setRating(rating);
+        review.setComment(comment);
+        review.setCreatedAt(java.time.LocalDateTime.now());
+        // Gán enrollment
+        Enrollment enrollment = enrollmentService.findFirstByUserAndCourseOrderByEnrollmentDateDesc(user, course).orElse(null);
+        review.setEnrollment(enrollment);
+        courseReviewService.save(review);
+        redirectAttributes.addFlashAttribute("successMessage", "Đánh giá của bạn đã được ghi nhận.");
+        return "redirect:/home/course-detail?id=" + courseId;
     }
 
     @GetMapping("/vnpay-payment-return")

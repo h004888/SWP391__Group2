@@ -2,6 +2,7 @@ package com.OLearning.controller.instructorDashBoard;
 
 import com.OLearning.dto.comment.CommentDTO;
 import com.OLearning.dto.notification.NotificationDTO;
+import com.OLearning.dto.notification.NotificationDropdownDTO;
 import com.OLearning.entity.CourseReview;
 import com.OLearning.entity.Notification;
 import com.OLearning.mapper.comment.CommentMapper;
@@ -46,7 +47,7 @@ public class NotificationsController {
     @Autowired
     private CourseService courseService;
 
-    @GetMapping("/instructordashboard/notifications")
+    @GetMapping("/instructor/notifications")
     public String viewNotifications(Authentication authentication, Model model,
                                    @RequestParam(value = "page", defaultValue = "0") int page,
                                    @RequestParam(value = "size", defaultValue = "10") int size,
@@ -73,7 +74,7 @@ public class NotificationsController {
         return "instructorDashboard/indexUpdate";
     }
 
-    @GetMapping("/instructordashboard/notifications/search")
+    @GetMapping("/instructor/notifications/search")
     public String searchNotifications(@RequestParam("keyword") String keyword,
                                       @RequestParam(value = "page", defaultValue = "0") int page,
                                       @RequestParam(value = "size", defaultValue = "10") int size,
@@ -97,7 +98,7 @@ public class NotificationsController {
         return "instructorDashboard/indexUpdate";
     }
 
-    @PostMapping("/instructordashboard/notifications/{id}/mark-read")
+    @PostMapping("/instructor/notifications/{id}/mark-read")
     @ResponseBody
     public ResponseEntity<?> markAsRead(@PathVariable Long id) {
         try {
@@ -108,7 +109,7 @@ public class NotificationsController {
         }
     }
 
-    @PostMapping("/instructordashboard/notifications/mark-all-read")
+    @PostMapping("/instructor/notifications/mark-all-read")
     public String markAllAsRead(Authentication authentication) {
         // Ép kiểu để lấy ra CustomUserDetails
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
@@ -120,10 +121,10 @@ public class NotificationsController {
         notificationService.markAllAsRead(userId);
 
         // Redirect về trang thông báo (không cần truyền userId)
-        return "redirect:/instructordashboard/notifications";
+        return "redirect:/instructor/notifications";
     }
 
-    @GetMapping("/instructordashboard/notifications/view/{id}")
+    @GetMapping("/instructor/notifications/view/{id}")
     public String viewNotificationDetail(@PathVariable("id") Long notificationId, Model model) {
         Optional<Notification> notificationOpt = notificationService.findById(notificationId);
         if (notificationOpt.isPresent()) {
@@ -155,7 +156,7 @@ public class NotificationsController {
             model.addAttribute("fragmentContent", "instructorDashboard/fragments/notificationDetailContent :: notificationDetailContent");
             return "instructorDashboard/indexUpdate";
         } else {
-            return "redirect:/instructordashboard/notifications";
+            return "redirect:/instructor/notifications";
         }
     }
 
@@ -189,7 +190,7 @@ public class NotificationsController {
         }
     }
 
-    @PostMapping("/instructordashboard/courses/reply-block")
+    @PostMapping("/instructor/courses/reply-block")
     public String replyBlockCourse(@RequestParam("courseId") Long courseId,
                                    @RequestParam("notificationId") Long notificationId,
                                    @RequestParam("replyContent") String replyContent,
@@ -212,21 +213,21 @@ public class NotificationsController {
             }
         }
         model.addAttribute("success", "Phản hồi của bạn đã được gửi thành công!");
-        return "redirect:/instructordashboard/notifications";
+        return "redirect:/instructor/notifications";
     }
 
-    @GetMapping("/instructordashboard/courses/view/{id}")
+    @GetMapping("/instructor/courses/view/{id}")
     public String viewCourseDetail(Model model, @PathVariable("id") Long id) {
         var optionalDetail = courseService.getDetailCourse(id);
         if (optionalDetail.isEmpty()) {
-            return "redirect:/instructordashboard/notifications";
+            return "redirect:/instructor/notifications";
         }
         model.addAttribute("detailCourse", optionalDetail.get());
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/courseDetailContent :: courseDetailContent");
         return "instructorDashboard/indexUpdate";
     }
 
-    @PostMapping("/instructordashboard/notifications/{id}/delete")
+    @PostMapping("/instructor/notifications/{id}/delete")
     @ResponseBody
     public ResponseEntity<?> deleteNotification(@PathVariable Long id) {
         try {
@@ -237,12 +238,12 @@ public class NotificationsController {
         }
     }
 
-    @PostMapping("/instructordashboard/notifications/delete-read")
+    @PostMapping("/instructor/notifications/delete-read")
     public String deleteAllReadNotifications(Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
         notificationService.deleteAllReadNotifications(userId);
-        return "redirect:/instructordashboard/notifications";
+        return "redirect:/instructor/notifications";
     }
 
     // API endpoint để lấy 5 thông báo chưa đọc cho dropdown
@@ -252,16 +253,28 @@ public class NotificationsController {
         try {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             Long userId = userDetails.getUserId();
-            
-            // Lấy 5 thông báo chưa đọc
             Pageable pageable = PageRequest.of(0, 5);
             List<String> types = List.of("COURSE_BLOCKED", "comment", "COURSE_UNBLOCKED", "COURSE_REJECTION", "COURSE_APPROVED", "MAINTENANCE_FEE", "COURSE_CREATED", "SUCCESSFULLY");
             Page<NotificationDTO> notificationPage = notificationService.getUnreadNotificationsByUserId(userId, types, pageable);
-            
             long unreadCount = notificationService.countUnreadByUserId(userId);
-            
+            // Chuyển sang NotificationDropdownDTO, rút gọn message chỉ 25 ký tự
+            List<NotificationDropdownDTO> dropdownList = notificationPage.getContent().stream()
+                .map(n -> {
+                    String msg = n.getMessage();
+                    if (msg != null) {
+                        msg = msg.split("\\r?\\n")[0]; // chỉ lấy dòng đầu tiên
+                        if (msg.length() > 25) msg = msg.substring(0, 25) + "...";
+                    }
+                    return new NotificationDropdownDTO(
+                        n.getNotificationId(),
+                        msg,
+                        n.getType(),
+                        n.getStatus(),
+                        n.getSentAt()
+                    );
+                }).toList();
             return ResponseEntity.ok(Map.of(
-                "notifications", notificationPage.getContent(),
+                "notifications", dropdownList,
                 "unreadCount", unreadCount
             ));
         } catch (Exception e) {

@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
 public class CoinTransaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,6 +38,6 @@ public class CoinTransaction {
     private LocalDateTime createdAt;
 
     @ManyToOne
-    @JoinColumn(name = "OrderID", nullable = false)
+    @JoinColumn(name = "OrderID", nullable = true)
     private Order order;
 } 

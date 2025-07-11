@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
 public class CourseMaintenance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -44,7 +44,7 @@
                         <a class="nav-link " href="#" aria-haspopup="true" aria-expanded="false">About</a>
                     </li>
                     <li class="nav-item dropdown"
-                        th:if="${#authentication.principal.userEntity.role.roleId == 3}">
+                        sec:authorize="hasRole('USER')">
                         <a class="nav-link" th:href="@{/become-instructor}"
                            aria-haspopup="true" aria-expanded="false">Become Instructor</a>
                     </li>
@@ -91,7 +91,7 @@
                     <span id="userNotificationBadge" th:if="${unreadCount > 0}" class="notif-badge animation-blink"></span>
                 </a>
                 <!-- Notification dropdown menu START -->
-                <div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0">
+                <div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0" style="width:220px;min-width:220px;max-width:220px;border:1px solid #ddd;">
                     <div class="card bg-transparent">
                         <div class="card-header bg-transparent border-bottom py-4 d-flex justify-content-between align-items-center">
                             <h6 class="m-0">Unread Notifications <span id="userNotificationCount" class="badge bg-danger bg-opacity-10 text-danger ms-2">0 new</span></h6>
@@ -102,7 +102,7 @@
                             </ul>
                         </div>
                         <!-- Button -->
-                        <div class="card-footer bg-transparent border-0 py-3 text-center position-relative">
+                        <div class="card-footer bg-transparent border-0 py-3 text-center position-relative" style="padding-top:0;">
                             <a th:href="@{/user/notifications}" class="stretched-link">View all notifications</a>
                         </div>
                     </div>
@@ -132,7 +132,9 @@
             <div class="dropdown ms-1 ms-lg-0" sec:authorize="isAuthenticated()">
                 <a class="avatar avatar-sm p-0" href="#" id="profileDropdown" role="button" data-bs-auto-close="outside"
                     data-bs-display="static" data-bs-toggle="dropdown" aria-expanded="false">
-                    <img class="avatar-img rounded-circle" src="assets/images/avatar/01.jpg" alt="avatar">
+                    <img class="avatar-img rounded-circle" th:src="${#authentication.principal.profilePicture != null} ?
+                                                                                             ${#authentication.principal.profilePicture} :
+                                                                                             @{/img/undraw_profile.svg}" alt="avatar">
                 </a>
                 <ul class="dropdown-menu dropdown-animation dropdown-menu-end shadow pt-3"
                     aria-labelledby="profileDropdown">
@@ -141,7 +143,9 @@
                         <div class="d-flex align-items-center">
                             <!-- Avatar -->
                             <div class="avatar me-3">
-                                <img class="avatar-img rounded-circle shadow" src="assets/images/avatar/01.jpg"
+                                <img class="avatar-img rounded-circle shadow" th:src="${#authentication.principal.profilePicture != null} ?
+                                                                                             ${#authentication.principal.profilePicture} :
+                                                                                             @{/img/undraw_profile.svg}"
                                     alt="avatar">
                             </div>
                             <div>
@@ -156,8 +160,9 @@
                         <hr class="dropdown-divider">
                     </li>
                     <!-- Links -->
+                    <li><a class="dropdown-item" sec:authorize="hasRole('INSTRUCTOR')"
+                           th:href="@{/instructor}"><i class="bi bi-gear fa-fw me-2"></i>DashBoard</a></li>
                     <li><a class="dropdown-item" th:href="@{/profile}"><i class="bi bi-person fa-fw me-2"></i>Profile</a></li>
-                    <li><a class="dropdown-item" href="#"><i class="bi bi-gear fa-fw me-2"></i>Account Settings</a></li>
                     <li><a class="dropdown-item" th:href="@{/history}"><i class="fas fa-history me-2"></i>History</a></li>
                     <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle fa-fw me-2"></i>Help</a></li>
                     <li>
@@ -203,7 +208,6 @@
                     <!-- Dark mode options END-->
                 </ul>
             </div>
-            <!-- Profile START -->
         </div>
     </nav>
     <!-- Nav END -->

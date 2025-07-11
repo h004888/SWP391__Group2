@@ -288,7 +288,7 @@
             </div>
         </div>
         <!-- Pagination -->
-        <nav th:if="${totalPages > 1}" aria-label="Notification pagination" class="mt-4">
+        <nav aria-label="Notification pagination" class="mt-4">
             <ul class="pagination justify-content-center">
                 <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
                     <a class="page-link" th:if="${isSearch}" th:href="@{/admin/notifications/search(page=${currentPage - 1}, size=${pageSize}, keyword=${keyword})}" aria-label="Previous">

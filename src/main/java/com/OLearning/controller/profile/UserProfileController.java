@@ -61,7 +61,8 @@ public class UserProfileController {
             model.addAttribute("fragmentContent", "instructorDashboard/fragments/profileContent :: profileContent");
             return "instructorDashboard/index";
         } else {
-            return "homePage/profile";
+            model.addAttribute("fragmentContent", "homePage/fragments/profileFragment :: profile");
+            return "homePage/index";
         }
     }
 
@@ -93,9 +94,11 @@ public class UserProfileController {
             model.addAttribute("fragmentContent", "instructorDashboard/fragments/editProfileContent :: editProfileContent");
             return "instructorDashboard/indexUpdate";
         } else if (isStudent) {
-            return "homePage/editProfile";
+            model.addAttribute("fragmentContent", "homePage/fragments/editProfileFragment :: editProfile");
+            return "homePage/index";
         } else {
-            return "homePage/editProfile";
+            model.addAttribute("fragmentContent", "homePage/fragments/editProfileFragment :: editProfile");
+            return "homePage/index";
         }
     }
 
@@ -122,4 +125,7 @@ public class UserProfileController {
             return showEditProfile(userDetails, model);
         }
     }
+
+
+
 }
