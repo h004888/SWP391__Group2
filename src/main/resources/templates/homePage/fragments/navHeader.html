@@ -227,10 +227,13 @@
                     });
                     if (!response.ok) throw new Error('Failed to fetch cart total');
                     const data = await response.json();
-                    cartTotalBadge.textContent = data.total || 0;
+                    if (cartTotalBadge) {
+                        cartTotalBadge.textContent = data.total || 0;
+                    }
                 } catch (error) {
-                    console.error('Error updating cart total:', error);
-                    cartTotalBadge.textContent = '0';
+                    if (cartTotalBadge) {
+                        cartTotalBadge.textContent = '0';
+                    }
                 }
             };
 
@@ -245,10 +248,13 @@
                     });
                     if (!response.ok) throw new Error('Failed to fetch wishlist total');
                     const data = await response.json();
-                    wishlistTotalBadge.textContent = data.total || 0;
+                    if (wishlistTotalBadge) {
+                        wishlistTotalBadge.textContent = data.total || 0;
+                    }
                 } catch (error) {
-                    console.error('Error updating wishlist total:', error);
-                    wishlistTotalBadge.textContent = '0';
+                    if (wishlistTotalBadge) {
+                        wishlistTotalBadge.textContent = '0';
+                    }
                 }
             };
 

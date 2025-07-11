@@ -43,6 +43,8 @@ public class VoucherDTO {
     private Long usedCount;
     private Boolean isActive;
     private Boolean isGlobal;
+    @NotNull(message = "Vui lòng chọn chế độ công khai")
+    private Boolean isPublic;
     private LocalDate createdDate;
     private List<Long> courseName;
 }

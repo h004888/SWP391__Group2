@@ -74,6 +74,12 @@
                             Cancelled<span class="badge bg-light text-dark ms-2" id="cancelledCount">0</span>
                         </button>
                     </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="maintenance-tab" data-bs-toggle="tab"
+                                data-bs-target="#maintenance" type="button" role="tab" data-status="MAINTENANCE">
+                            Maintenance<span class="badge bg-light text-dark ms-2" id="maintenanceCount" th:text="${#lists.size(maintenancePayments)}">0</span>
+                        </button>
+                    </li>
                 </ul>
 
                 <div class="tab-content p-0" id="orderTabsContent">
@@ -143,6 +149,6 @@
     <!-- Main card END -->
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script th:src="@{/js/instructorDashboard/ordersJS.js}"></script>
+    <script th:src="@{/js/instructor/ordersJS.js}"></script>
 </div>
 

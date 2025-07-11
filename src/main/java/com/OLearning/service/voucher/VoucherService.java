@@ -25,4 +25,7 @@ public interface VoucherService {
     VoucherDTO createVoucherForInstructor(VoucherDTO voucherDTO, Long instructorId, List<Long> selectedCourses);
     Map<String, Object> getFilteredVouchersForInstructor(Long instructorId, String keyword, String tabType, int page, int size);
     Page<VoucherDTO> getVouchersForInstructor(Long instructorId, String keyword, String status, int page, int size);
+    List<VoucherDTO> getPublicVouchers();
+    void claimPublicVoucher(Long voucherId, Long userId);
+    List<CourseDTO> getCoursesForVoucher(Long voucherId);
 }

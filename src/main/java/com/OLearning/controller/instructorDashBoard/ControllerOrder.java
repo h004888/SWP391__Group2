@@ -5,6 +5,8 @@ import com.OLearning.dto.order.InstructorOrderDTO;
 import com.OLearning.entity.OrderDetail;
 import com.OLearning.security.CustomUserDetails;
 import com.OLearning.service.order.OrdersService;
+import com.OLearning.service.courseMaintance.CourseMaintenanceService;
+import com.OLearning.entity.CourseMaintenance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
@@ -12,6 +14,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.OLearning.service.payment.VietQRService;
 
 import java.util.List;
 
@@ -20,6 +24,10 @@ import java.util.List;
 public class ControllerOrder {
     @Autowired
     private OrdersService ordersService;
+    @Autowired
+    private CourseMaintenanceService courseMaintenanceService;
+    @Autowired
+    private VietQRService vietQRService;
     
     @GetMapping
     public String getAllOrders(Model model,
@@ -37,9 +45,12 @@ public class ControllerOrder {
         // Default to PAID status for initial load
         Page<InstructorOrderDTO> ordersPage = ordersService.filterAndSortInstructorOrders(
                 username, amountDirection, orderType, startDate, endDate, "PAID", page, size, instructorId);
+        // Fetch maintenance payments for this instructor
+        List<CourseMaintenance> maintenancePayments = courseMaintenanceService.getMaintenancesByInstructorId(instructorId);
         //ok
         model.addAttribute("accNamePage", "Management Orders");
         model.addAttribute("orders", ordersPage.getContent());
+        model.addAttribute("maintenancePayments", maintenancePayments);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", ordersPage.getTotalPages());
         model.addAttribute("totalItems", ordersPage.getTotalElements());
@@ -156,4 +167,6 @@ public class ControllerOrder {
         model.addAttribute("fragmentContent", "instructorDashBoard/fragments/orderDetailsContent :: contentOrderDetails");
         return "instructorDashboard/indexUpdate";
     }
+
+
 }

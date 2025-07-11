@@ -43,6 +43,9 @@ public class Voucher {
     @Column(name = "IsGlobal")
     private Boolean isGlobal;
 
+    @Column(name = "IsPublic")
+    private Boolean isPublic;
+
     @Column(name = "CreatedDate")
     private LocalDate createdDate;
 

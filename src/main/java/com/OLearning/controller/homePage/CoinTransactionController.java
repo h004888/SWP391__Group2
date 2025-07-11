@@ -218,7 +218,6 @@ public class CoinTransactionController {
         }
     }
 
-    // API lấy chi tiết giao dịch cho modal (AJAX)
     @GetMapping("/detail/{id}")
     @ResponseBody
     public CoinTransactionDTO getTransactionDetail(@PathVariable("id") Long transactionId) {

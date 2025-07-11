@@ -88,24 +88,34 @@ public class HomeController {
     private NotificationService notificationService;
 
     @GetMapping()
-        public String getMethodName(Model model, @AuthenticationPrincipal UserDetails userDetails,HttpServletRequest request) {
-                // chia làm 2 danh sách:
-                List<Category> firstFive = categoryService.findAll().stream().limit(5).toList();
-                List<Category> nextFive = categoryService.findAll().stream().skip(5).limit(5).toList();
-                List<CourseViewDTO> topCourses = courseService.getTopCourses().stream().limit(5).collect(Collectors.toList());
-                model.addAttribute("topCourses", topCourses);
-                model.addAttribute("topCategories", categoryService.findTop5ByOrderByIdAsc());
-                model.addAttribute("firstFive", firstFive);
-                model.addAttribute("nextFive", nextFive);
+    public String getMethodName(Model model, @AuthenticationPrincipal UserDetails userDetails, HttpServletRequest request) {
+        // chia làm 2 danh sách:
+        List<Category> firstFive = categoryService.findAll().stream().limit(5).toList();
+        List<Category> nextFive = categoryService.findAll().stream().skip(5).limit(5).toList();
+        List<CourseViewDTO> topCourses = courseService.getTopCourses().stream().limit(5).collect(Collectors.toList());
 
-                // Add unread notification count for authenticated users
-                if (userDetails != null) {
-                    User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
-                    if (user != null) {
-                        long unreadCount = notificationService.countUnreadByUserId(user.getUserId());
-                        model.addAttribute("unreadCount", unreadCount);
-                    }
-                }
+        addUserHomePageAttributes(model, userDetails, request, topCourses);
+        model.addAttribute("topCourses", topCourses);
+        model.addAttribute("topCategories", categoryService.findTop5ByOrderByIdAsc());
+        model.addAttribute("firstFive", firstFive);
+        model.addAttribute("nextFive", nextFive);
+
+
+
+        model.addAttribute("fragmentContent", "homePage/fragments/mainContent :: mainContent");
+        model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderCategory");
+        return "homePage/index";
+    }
+
+    private void addUserHomePageAttributes(Model model, UserDetails userDetails, HttpServletRequest request, List<CourseViewDTO> topCourses) {
+        // Add unread notification count for authenticated users
+        if (userDetails != null) {
+            User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
+            if (user != null) {
+                long unreadCount = notificationService.countUnreadByUserId(user.getUserId());
+                model.addAttribute("unreadCount", unreadCount);
+            }
+        }
         // Add wishlist total
         if (userDetails != null) {
             Long userId = getUserIdFromUserDetails(userDetails);
@@ -128,10 +138,7 @@ public class HomeController {
             }
         }
         model.addAttribute("topCoursesEnrolledMap", topCoursesEnrolledMap);
-        model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderCategory");
-        model.addAttribute("fragmentContent", "homePage/fragments/mainContent :: mainContent");
-        return "homePage/index";
-        }
+    }
 
         @GetMapping("/coursesGrid")
         public String coursesGrid(Model model, @RequestParam(defaultValue = "0") int page,
@@ -314,10 +321,10 @@ public class HomeController {
                 return "redirect:/home/course-detail?id=" + courseId;
             } else if ("qr".equalsIgnoreCase(paymentMethod)) {
                 Order order = ordersService.createOrder(user, totalAmount, "course_purchase", "temp_description");
-                String description = "Mua khóa học OLearning - ORDER" + order.getOrderId();
+                String description = "Buy Course " + course.getTitle() + " - ORDER" + order.getOrderId();
                 order.setDescription(description);
                 ordersService.saveOrder(order);
-                OrderDetail orderDetail = new com.OLearning.entity.OrderDetail();
+                OrderDetail orderDetail = new OrderDetail();
                 orderDetail.setOrder(order);
                 orderDetail.setCourse(course);
                 orderDetail.setUnitPrice(price);
@@ -329,7 +336,6 @@ public class HomeController {
                 request.setAttribute("qrUrl", qrUrl);
                 return "homePage/qr_checkout";
             } else {
-                // Mặc định: VNPay
                 String encodedCartJson = Base64.getEncoder().encodeToString(cartJson.getBytes(StandardCharsets.UTF_8));
                 Cookie buyNowCookie = new Cookie("buy_now", encodedCartJson);
                 buyNowCookie.setPath("/");

@@ -1,6 +1,8 @@
 package com.OLearning.controller.homePage;
 
+import com.OLearning.entity.Course;
 import com.OLearning.entity.Order;
+import com.OLearning.entity.OrderDetail;
 import com.OLearning.entity.User;
 import com.OLearning.repository.CourseRepository;
 import com.OLearning.repository.UserRepository;
@@ -35,8 +37,6 @@ import java.util.*;
 @Controller
 @RequestMapping("/cart")
 public class CartController {
-    private static final Logger logger = LoggerFactory.getLogger(CartController.class);
-
     @Autowired
     private VNPayService vnPayService;
     @Autowired
@@ -98,14 +98,22 @@ public class CartController {
     @ResponseBody
     public Map<String, Long> getCartTotal(HttpServletRequest request,
                                           @AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null) {
-            return Map.of("total", 0L);
-        }
-        Long userId = getUserIdFromUserDetails(userDetails);
-        String encodedCartJson = getCartCookie(request, userId);
-        Map<String, Object> cart = cartService.getCartDetails(encodedCartJson, userDetails.getUsername());
         Map<String, Long> response = new HashMap<>();
-        response.put("total", getLongValue(cart.getOrDefault("total", 0L)));
+        
+        if (userDetails == null) {
+            response.put("total", 0L);
+            return response;
+        }
+        
+        try {
+            Long userId = getUserIdFromUserDetails(userDetails);
+            String encodedCartJson = getCartCookie(request, userId);
+            Map<String, Object> cart = cartService.getCartDetails(encodedCartJson, userDetails.getUsername());
+            response.put("total", getLongValue(cart.getOrDefault("total", 0L)));
+        } catch (Exception e) {
+            response.put("total", 0L);
+        }
+        
         return response;
     }
 
@@ -263,16 +271,16 @@ public class CartController {
                 return "redirect:/cart";
             } else if ("qr".equalsIgnoreCase(paymentMethod)) {
                 Order order = ordersService.createOrder(user, totalAmount, "course_purchase", "temp_description");
-                String description = "Mua khóa học OLearning - ORDER" + order.getOrderId();
+                String description = "Buy Course OLearning - ORDER" + order.getOrderId();
                 order.setDescription(description);
                 ordersService.saveOrder(order);
 
                 for (Map<String, Object> item : items) {
                     Long courseId = Long.valueOf(item.get("courseId").toString());
                     double price = Double.valueOf(item.get("price").toString());
-                    com.OLearning.entity.Course course = courseRepository.findById(courseId)
+                    Course course = courseRepository.findById(courseId)
                         .orElseThrow(() -> new EntityNotFoundException("Course not found: " + courseId));
-                    com.OLearning.entity.OrderDetail orderDetail = new com.OLearning.entity.OrderDetail();
+                    OrderDetail orderDetail = new OrderDetail();
                     orderDetail.setOrder(order);
                     orderDetail.setCourse(course);
                     orderDetail.setUnitPrice(price);
@@ -356,13 +364,46 @@ public class CartController {
     @PostMapping("/apply-voucher")
     @ResponseBody
     public Map<String, Object> applyVoucherToCourse(@RequestBody Map<String, Object> req) {
-        Long userId = Long.valueOf(req.get("userId").toString());
-        Long courseId = Long.valueOf(req.get("courseId").toString());
-        Long voucherId = Long.valueOf(req.get("voucherId").toString());
-        
         Map<String, Object> result = new HashMap<>();
         
         try {
+            // Validate required parameters
+            if (req == null) {
+                result.put("error", "Request body is null");
+                return result;
+            }
+            
+            Object userIdObj = req.get("userId");
+            Object courseIdObj = req.get("courseId");
+            Object voucherIdObj = req.get("voucherId");
+            
+            if (userIdObj == null || courseIdObj == null || voucherIdObj == null) {
+                result.put("error", "Missing required parameters: userId, courseId, or voucherId");
+                return result;
+            }
+            
+            Long userId = Long.valueOf(userIdObj.toString());
+            Long courseId = Long.valueOf(courseIdObj.toString());
+            Long voucherId = Long.valueOf(voucherIdObj.toString());
+            
+            // Kiểm tra user có tồn tại không
+            if (!userRepository.existsById(userId)) {
+                result.put("error", "User not found");
+                return result;
+            }
+            
+            // Kiểm tra course có tồn tại không
+            if (!courseRepository.existsById(courseId)) {
+                result.put("error", "Course not found");
+                return result;
+            }
+            
+            // Kiểm tra voucher có tồn tại không
+            if (!voucherRepository.existsById(voucherId)) {
+                result.put("error", "Voucher not found");
+                return result;
+            }
+            
             var userVoucherOpt = userVoucherRepository.findByUser_UserIdAndVoucher_VoucherId(userId, voucherId);
             if (userVoucherOpt.isEmpty()) {
                 result.put("error", "User does not have this voucher");
@@ -371,6 +412,7 @@ public class CartController {
             
             var userVoucher = userVoucherOpt.get();
             if (Boolean.TRUE.equals(userVoucher.getIsUsed())) {
+                result.put("error", "Voucher has already been used");
                 return result;
             }
 
@@ -389,8 +431,10 @@ public class CartController {
             result.put("voucherCode", voucherCode);
             result.put("discountedPrice", (long) discountedPrice);
             
+        } catch (NumberFormatException e) {
+            result.put("error", "Invalid parameter format. Please check userId, courseId, and voucherId values.");
         } catch (Exception e) {
-            result.put("error", e.getMessage());
+            result.put("error", "An error occurred while applying the voucher: " + e.getMessage());
         }
         
         return result;
@@ -425,7 +469,7 @@ public class CartController {
         String encodedCartJson = Base64.getEncoder().encodeToString(cartJson.getBytes(StandardCharsets.UTF_8));
         Cookie cartCookie = new Cookie("cart_" + userId, encodedCartJson);
         cartCookie.setPath("/");
-        cartCookie.setMaxAge(7 * 24 * 60 * 60);
+        cartCookie.setMaxAge(14 * 24 * 60 * 60);
         cartCookie.setHttpOnly(true);
         response.addCookie(cartCookie);
     }

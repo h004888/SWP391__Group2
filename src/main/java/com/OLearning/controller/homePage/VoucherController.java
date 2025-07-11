@@ -12,10 +12,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import com.OLearning.dto.course.CourseDTO;
+import com.OLearning.repository.CourseRepository;
 
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/vouchers")
@@ -27,17 +29,23 @@ public class VoucherController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private CourseRepository courseRepository;
     
     @GetMapping
     public String showVoucherPage(@AuthenticationPrincipal UserDetails userDetails, 
                                   Model model,
                                   @RequestParam(defaultValue = "0") int page,
                                   @RequestParam(defaultValue = "6") int size) {
-        if (userDetails == null) {
-            return "redirect:/login";
-        }
-        Long userId = getUserIdFromUserDetails(userDetails);
-        List<UserVoucherDTO> userVouchers = voucherService.getUserVouchersSortedByLatest(userId);
+        Long userId = userDetails != null ? getUserIdFromUserDetails(userDetails) : 0L;
+        List<UserVoucherDTO> userVouchers = userDetails != null ? voucherService.getUserVouchersSortedByLatest(userId) : List.of();
+        List<VoucherDTO> publicVouchers = voucherService.getPublicVouchers();
+
+        // Filter out public vouchers that the user already has
+        List<VoucherDTO> filteredPublicVouchers = publicVouchers.stream()
+                .filter(publicVoucher -> userVouchers.stream()
+                        .noneMatch(userVoucher -> userVoucher.getVoucherId().equals(publicVoucher.getVoucherId())))
+                .collect(Collectors.toList());
         
         // Tính toán phân trang
         int totalItems = userVouchers.size();
@@ -46,7 +54,7 @@ public class VoucherController {
         int endIndex = Math.min(startIndex + size, totalItems);
         
         // Lấy items cho trang hiện tại
-        List<UserVoucherDTO> pageVouchers = userVouchers.subList(startIndex, endIndex);
+        List<UserVoucherDTO> pageVouchers = userVouchers.isEmpty() ? List.of() : userVouchers.subList(startIndex, endIndex);
         
         model.addAttribute("userVouchers", pageVouchers);
         model.addAttribute("voucherCode", "");
@@ -59,6 +67,7 @@ public class VoucherController {
         model.addAttribute("hasPrevious", page > 0);
         model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderDefault");
         model.addAttribute("fragmentContent", "homePage/fragments/voucherContent :: voucherContent");
+        model.addAttribute("publicVouchers", filteredPublicVouchers);
         return "homePage/index";
     }
 
@@ -68,7 +77,7 @@ public class VoucherController {
         Map<String, Object> result = new HashMap<>();
         if (userDetails == null) {
             result.put("success", false);
-            result.put("message", "Bạn cần đăng nhập.");
+            result.put("message", "You need to login.");
             return result;
         }
         Long userId = getUserIdFromUserDetails(userDetails);
@@ -82,8 +91,29 @@ public class VoucherController {
             userVoucherDTO.setExpiryDate(voucher.getExpiryDate());
             userVoucherDTO.setIsUsed(false);
             result.put("success", true);
-            result.put("message", "Áp dụng voucher thành công!");
+            result.put("message", "Voucher applied successfully!");
             result.put("voucher", userVoucherDTO);
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", e.getMessage());
+        }
+        return result;
+    }
+
+    @PostMapping("/claim/{voucherId}")
+    @ResponseBody
+    public Map<String, Object> claimPublicVoucher(@PathVariable Long voucherId, @AuthenticationPrincipal UserDetails userDetails) {
+        Map<String, Object> result = new HashMap<>();
+        if (userDetails == null) {
+            result.put("success", false);
+            result.put("message", "You need to login to receive voucher.");
+            return result;
+        }
+        Long userId = getUserIdFromUserDetails(userDetails);
+        try {
+            voucherService.claimPublicVoucher(voucherId, userId);
+            result.put("success", true);
+            result.put("message", "Received voucher successfully!");
         } catch (Exception e) {
             result.put("success", false);
             result.put("message", e.getMessage());
@@ -118,14 +148,34 @@ public class VoucherController {
     @GetMapping("/course/{courseId}/user/{userId}")
     @ResponseBody
     public List<UserVoucherDTO> getValidVouchersForCourseAndUser(@PathVariable Long courseId, @PathVariable Long userId) {
-        List<UserVoucherDTO> result = voucherService.getValidVouchersForCourseAndUser(courseId, userId);
-        return result;
+        try {
+            // Kiểm tra user có tồn tại không
+            if (!userRepository.existsById(userId)) {
+                return List.of();
+            }
+            
+            // Kiểm tra course có tồn tại không
+            if (!courseRepository.existsById(courseId)) {
+                return List.of();
+            }
+            
+            List<UserVoucherDTO> result = voucherService.getValidVouchersForCourseAndUser(courseId, userId);
+            return result;
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
     @GetMapping("/voucher/{voucherId}/user/{userId}/courses")
     @ResponseBody
     public List<CourseDTO> getValidCoursesForVoucherAndUser(@PathVariable Long voucherId, @PathVariable Long userId) {
         return voucherService.getValidCoursesForVoucherAndUser(voucherId, userId);
+    }
+
+    @GetMapping("/voucher/{voucherId}/courses")
+    @ResponseBody
+    public List<CourseDTO> getCoursesForVoucher(@PathVariable Long voucherId) {
+        return voucherService.getCoursesForVoucher(voucherId);
     }
 
     private Long getUserIdFromUserDetails(UserDetails userDetails) {

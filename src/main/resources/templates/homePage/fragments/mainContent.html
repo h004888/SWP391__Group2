@@ -1,14 +1,34 @@
 <!-- **************** MAIN CONTENT START **************** -->
 <main th:fragment="mainContent">
-    <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
-        <span th:text="${message}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
 
-    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-        <span th:text="${error}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div id="notification" class="position-fixed top-0 end-0 p-5" style="z-index: 1050; top: 80px; transform: translateX(200%); transition: transform 0.5s ease;">
+        <div id="notification-alert" class="alert d-flex align-items-center mb-0" role="alert" style="min-width: 250px;">
+            <i id="notification-icon" class="me-2"></i>
+            <span id="notification-message"></span>
+        </div>
     </div>
+    <script>
+        // Function to show notification (copied from voucherContent.html)
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            const notificationAlert = document.getElementById('notification-alert');
+            const notificationIcon = document.getElementById('notification-icon');
+            const notificationMessage = document.getElementById('notification-message');
+            notificationAlert.classList.remove('alert-success', 'alert-danger');
+            notificationMessage.textContent = message;
+            if (type === 'success') {
+                notificationAlert.classList.add('alert-success');
+                notificationIcon.className = 'fas fa-check-circle me-2';
+            } else {
+                notificationAlert.classList.add('alert-danger');
+                notificationIcon.className = 'fas fa-exclamation-circle me-2';
+            }
+            notification.style.transform = 'translateX(0)';
+            setTimeout(() => {
+                notification.style.transform = 'translateX(200%)';
+            }, 4000);
+        }
+    </script>
     <!-- =======================
 Main Banner START -->
     <section class="position-relative overflow-hidden pt-5 pt-lg-3">

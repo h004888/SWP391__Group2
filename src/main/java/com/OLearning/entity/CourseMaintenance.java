@@ -36,6 +36,12 @@ public class CourseMaintenance {
     @Column(name = "Status")
     private String status;
 
+    @Column(name = "RefCode")
+    private String refCode;
+
+    @Column(name = "Description")
+    private String description;
+
     @Column(name = "DueDate")
     private LocalDate dueDate;
     
