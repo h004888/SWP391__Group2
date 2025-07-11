@@ -320,10 +320,10 @@ public class HomeController {
                 return "redirect:/home/course-detail?id=" + courseId;
             } else if ("qr".equalsIgnoreCase(paymentMethod)) {
                 Order order = ordersService.createOrder(user, totalAmount, "course_purchase", "temp_description");
-                String description = "Mua khóa học OLearning - ORDER" + order.getOrderId();
+                String description = "Buy Course " + course.getTitle() + " - ORDER" + order.getOrderId();
                 order.setDescription(description);
                 ordersService.saveOrder(order);
-                com.OLearning.entity.OrderDetail orderDetail = new com.OLearning.entity.OrderDetail();
+                OrderDetail orderDetail = new OrderDetail();
                 orderDetail.setOrder(order);
                 orderDetail.setCourse(course);
                 orderDetail.setUnitPrice(price);
@@ -335,7 +335,6 @@ public class HomeController {
                 request.setAttribute("qrUrl", qrUrl);
                 return "homePage/qr_checkout";
             } else {
-                // Mặc định: VNPay
                 String encodedCartJson = Base64.getEncoder().encodeToString(cartJson.getBytes(StandardCharsets.UTF_8));
                 Cookie buyNowCookie = new Cookie("buy_now", encodedCartJson);
                 buyNowCookie.setPath("/");

@@ -125,8 +125,14 @@
             <span class="info-label">Trạng thái:</span>
             <span class="info-value" id="status"></span>
         </div>
-        <a href="/cart" class="btn-back-cart">
-            <i class="fas fa-arrow-left"></i> Quay lại giỏ hàng
+        <a href="javascript:void(0)" class="btn-back-cart" onclick="
+            if(document.referrer && document.referrer !== window.location.href) {
+                window.location.href = document.referrer;
+            } else {
+                window.location.href = '/home';
+            }
+"       >
+            <i class="fas fa-arrow-left"></i> Quay lại
         </a>
     </div>
     <script th:inline="javascript">
@@ -150,19 +156,23 @@
                         return res.json();
                     })
                     .then(data => {
-                        if (data.status === 'completed') {
+                        if (data.status === 'PAID') {
                             document.getElementById('status').innerHTML = '<b style="color: green;">Đã thanh toán thành công! Đang chuyển hướng...</b>';
                             clearInterval(pollingInterval);
                             fetch('/cart/clear-cookie').then(() => {
                                 setTimeout(function() {
-                                    window.location.href = '/cart';
+                                    window.location.href = document.referrer && document.referrer !== window.location.href
+                                        ? document.referrer
+                                        : '/home';
                                 }, 2500);
                             });
                         } else if (data.status === 'failed' || data.status === 'cancelled') {
                             document.getElementById('status').innerHTML = '<b style="color: red;">Thanh toán thất bại hoặc đã hủy! Vui lòng thử lại.</b>';
                             clearInterval(pollingInterval);
                             setTimeout(function() {
-                                window.location.href = '/cart';
+                                window.location.href = document.referrer && document.referrer !== window.location.href
+                                    ? document.referrer
+                                    : '/home';
                             }, 2500);
                         } else {
                             document.getElementById('status').innerHTML = '<span style="color:#858796;">Đang chờ thanh toán...</span>';

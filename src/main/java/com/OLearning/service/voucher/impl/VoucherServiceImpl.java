@@ -23,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.PageImpl;
@@ -65,6 +66,17 @@ public class VoucherServiceImpl implements VoucherService {
     @Autowired
     private VoucherCourseRepository voucherCourseRepository;
 
+    // Chạy mỗi ngày lúc 0h
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void deactivateExpiredVouchers() {
+        LocalDate today = LocalDate.now();
+        List<Voucher> expiredVouchers = voucherRepository.findByExpiryDateBeforeAndIsActiveTrue(today);
+        for (Voucher voucher : expiredVouchers) {
+            voucher.setIsActive(false);
+        }
+        voucherRepository.saveAll(expiredVouchers);
+    }
+
     @Override
     @Transactional
     public VoucherDTO applyVoucher(String code, Long userId) {
@@ -100,7 +112,10 @@ public class VoucherServiceImpl implements VoucherService {
     @Override
     public List<UserVoucherDTO> getUserVouchers(Long userId) {
         List<UserVoucher> userVouchers = userVoucherRepository.findByUser_UserIdAndIsUsedFalse(userId);
+        LocalDate today = LocalDate.now();
         return userVouchers.stream()
+                .filter(uv -> uv.getVoucher().getIsActive() != null && uv.getVoucher().getIsActive())
+                .filter(uv -> uv.getVoucher().getExpiryDate() != null && !uv.getVoucher().getExpiryDate().isBefore(today))
                 .map(userVoucherMapper::toUserVoucherDTO)
                 .collect(Collectors.toList());
     }
@@ -108,7 +123,10 @@ public class VoucherServiceImpl implements VoucherService {
     @Override
     public List<UserVoucherDTO> getUserVouchersSortedByLatest(Long userId) {
         List<UserVoucher> userVouchers = userVoucherRepository.findByUser_UserIdAndIsUsedFalseOrderByIdDesc(userId);
+        LocalDate today = LocalDate.now();
         return userVouchers.stream()
+                .filter(uv -> uv.getVoucher().getIsActive() != null && uv.getVoucher().getIsActive())
+                .filter(uv -> uv.getVoucher().getExpiryDate() != null && !uv.getVoucher().getExpiryDate().isBefore(today))
                 .map(userVoucherMapper::toUserVoucherDTO)
                 .collect(Collectors.toList());
     }
@@ -479,16 +497,34 @@ public class VoucherServiceImpl implements VoucherService {
     @Override
     public Page<VoucherDTO> getVouchersForInstructor(Long instructorId, String keyword, String status, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("expiryDate").descending());
-        Page<Voucher> voucherPage = voucherRepository.findByInstructor_UserIdAndCodeContainingIgnoreCase(instructorId, keyword == null ? "" : keyword, pageable);
-        List<Voucher> filteredList = voucherPage.getContent();
-        if (status != null && !status.equals("all")) {
-            if (status.equals("valid")) {
-                filteredList = filteredList.stream().filter(v -> v.getIsActive() != null && v.getIsActive() && v.getExpiryDate() != null && v.getExpiryDate().isAfter(LocalDate.now())).toList();
-            } else if (status.equals("expired")) {
-                filteredList = filteredList.stream().filter(v -> v.getExpiryDate() == null || v.getExpiryDate().isBefore(LocalDate.now()) || Boolean.FALSE.equals(v.getIsActive())).toList();
+        Page<Voucher> voucherPage;
+        LocalDate now = LocalDate.now();
+        if (status != null && status.equals("valid")) {
+            voucherPage = voucherRepository.findByInstructor_UserIdAndExpiryDateAfterAndIsActiveTrue(instructorId, now, pageable);
+            if (keyword != null && !keyword.isBlank()) {
+                voucherPage = new PageImpl<>(
+                    voucherPage.getContent().stream()
+                        .filter(v -> v.getCode() != null && v.getCode().toLowerCase().contains(keyword.toLowerCase()))
+                        .toList(),
+                    pageable,
+                    voucherPage.getTotalElements()
+                );
             }
+        } else if (status != null && status.equals("expired")) {
+            voucherPage = voucherRepository.findByInstructor_UserIdAndExpiryDateBeforeOrIsActiveFalse(instructorId, now, pageable);
+            if (keyword != null && !keyword.isBlank()) {
+                voucherPage = new PageImpl<>(
+                    voucherPage.getContent().stream()
+                        .filter(v -> v.getCode() != null && v.getCode().toLowerCase().contains(keyword.toLowerCase()))
+                        .toList(),
+                    pageable,
+                    voucherPage.getTotalElements()
+                );
+            }
+        } else {
+            voucherPage = voucherRepository.findByInstructor_UserIdAndCodeContainingIgnoreCase(instructorId, keyword == null ? "" : keyword, pageable);
         }
-        List<VoucherDTO> dtoList = filteredList.stream().map(voucherMapper::toVoucherDTO).toList();
+        List<VoucherDTO> dtoList = voucherPage.getContent().stream().map(voucherMapper::toVoucherDTO).toList();
         return new PageImpl<>(dtoList, pageable, voucherPage.getTotalElements());
     }
 

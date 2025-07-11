@@ -71,8 +71,8 @@
                 </td>
                 <td th:text="${#numbers.formatDecimal(transaction.discountedPrice, 0, 'COMMA', 0, 'POINT')} + ' VND'" class="fw-bold text-center"></td>
                 <td class="text-center">
-                  <span th:if="${transaction.status == 'completed'}" class="badge bg-success">Đã thanh toán</span>
-                  <span th:if="${transaction.status == 'pending'}" class="badge bg-warning text-dark">Chờ thanh toán</span>
+                  <span th:if="${transaction.status == 'PAID'}" class="badge bg-success">Đã thanh toán</span>
+                  <span th:if="${transaction.status == 'PENDING'}" class="badge bg-warning text-dark">Chờ thanh toán</span>
                   <span th:if="${transaction.status == 'cancelled'}" class="badge bg-danger">Đã hủy</span>
                 </td>
                 <td class="text-center">

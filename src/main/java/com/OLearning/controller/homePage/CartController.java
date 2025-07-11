@@ -1,6 +1,8 @@
 package com.OLearning.controller.homePage;
 
+import com.OLearning.entity.Course;
 import com.OLearning.entity.Order;
+import com.OLearning.entity.OrderDetail;
 import com.OLearning.entity.User;
 import com.OLearning.repository.CourseRepository;
 import com.OLearning.repository.UserRepository;
@@ -35,8 +37,6 @@ import java.util.*;
 @Controller
 @RequestMapping("/cart")
 public class CartController {
-    private static final Logger logger = LoggerFactory.getLogger(CartController.class);
-
     @Autowired
     private VNPayService vnPayService;
     @Autowired
@@ -272,16 +272,16 @@ public class CartController {
                 return "redirect:/cart";
             } else if ("qr".equalsIgnoreCase(paymentMethod)) {
                 Order order = ordersService.createOrder(user, totalAmount, "course_purchase", "temp_description");
-                String description = "Mua khóa học OLearning - ORDER" + order.getOrderId();
+                String description = "Buy Course OLearning - ORDER" + order.getOrderId();
                 order.setDescription(description);
                 ordersService.saveOrder(order);
 
                 for (Map<String, Object> item : items) {
                     Long courseId = Long.valueOf(item.get("courseId").toString());
                     double price = Double.valueOf(item.get("price").toString());
-                    com.OLearning.entity.Course course = courseRepository.findById(courseId)
+                    Course course = courseRepository.findById(courseId)
                         .orElseThrow(() -> new EntityNotFoundException("Course not found: " + courseId));
-                    com.OLearning.entity.OrderDetail orderDetail = new com.OLearning.entity.OrderDetail();
+                    OrderDetail orderDetail = new OrderDetail();
                     orderDetail.setOrder(order);
                     orderDetail.setCourse(course);
                     orderDetail.setUnitPrice(price);
@@ -435,7 +435,6 @@ public class CartController {
         } catch (NumberFormatException e) {
             result.put("error", "Invalid parameter format. Please check userId, courseId, and voucherId values.");
         } catch (Exception e) {
-            logger.error("Error applying voucher: ", e);
             result.put("error", "An error occurred while applying the voucher: " + e.getMessage());
         }
         
@@ -471,7 +470,7 @@ public class CartController {
         String encodedCartJson = Base64.getEncoder().encodeToString(cartJson.getBytes(StandardCharsets.UTF_8));
         Cookie cartCookie = new Cookie("cart_" + userId, encodedCartJson);
         cartCookie.setPath("/");
-        cartCookie.setMaxAge(7 * 24 * 60 * 60);
+        cartCookie.setMaxAge(14 * 24 * 60 * 60);
         cartCookie.setHttpOnly(true);
         response.addCookie(cartCookie);
     }

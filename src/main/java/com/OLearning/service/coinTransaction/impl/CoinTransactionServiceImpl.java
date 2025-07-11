@@ -69,7 +69,7 @@ public class CoinTransactionServiceImpl implements CoinTransactionService {
         transaction.setUser(user);
         transaction.setAmount(amount);
         transaction.setTransactionType("top_up");
-        transaction.setStatus("completed");
+        transaction.setStatus("PAID");
         transaction.setNote("VNPay TransactionId: " + transactionId);
         transaction.setCreatedAt(LocalDateTime.now());
         transaction.setOrder(null);
@@ -98,7 +98,7 @@ public class CoinTransactionServiceImpl implements CoinTransactionService {
         transaction.setUser(user);
         transaction.setAmount(amount.negate());
         transaction.setTransactionType("withdraw");
-        transaction.setStatus("completed");
+        transaction.setStatus("PAID");
         transaction.setNote("Withdrawal processed");
         transaction.setCreatedAt(LocalDateTime.now());
         transaction.setOrder(null);
@@ -161,7 +161,6 @@ public class CoinTransactionServiceImpl implements CoinTransactionService {
         return transactionPage.map(coinTransactionMapper::toDTO);
     }
 
-    // Lấy danh sách giao dịch mua khóa học với filter/search/pagination
     public Page<CoinTransactionDTO> getUserCoursePurchaseTransactions(Long userId, String courseName, String status, String startDate, String endDate, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         String transactionType = "course_purchase";

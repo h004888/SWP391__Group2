@@ -35,6 +35,9 @@ public class CartServiceImpl implements CartService {
     private OrderDetailRepository orderDetailRepository;
 
     @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
     private EnrollmentRepository enrollmentRepository;
 
     @Autowired
@@ -211,18 +214,27 @@ public class CartServiceImpl implements CartService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         order.setOrderType("course_purchase");
-        order.setStatus("completed");
+        order.setStatus("PAID");
         order.setOrderDate(LocalDateTime.now());
         order.setRefCode(refCode != null ? refCode : UUID.randomUUID().toString());
         order.setAmount(totalPrice.doubleValue());
-
+        order.setDescription("Buy Course OLearning - ORDER" + order.getOrderId());
         ordersRepository.save(order);
+
+        Notification notification = new Notification();
+        notification.setUser(user);
+        notification.setCourse(null);
+        notification.setMessage("You have received a payment of " + totalPrice + " VND");
+        notification.setType("PAYMENT_RECEIVED");
+        notification.setStatus("failed");
+        notification.setSentAt(java.time.LocalDateTime.now());
+        notificationRepository.save(notification);
 
         if (!useCoins) {
             CoinTransaction transaction = new CoinTransaction();
             transaction.setUser(user);
             transaction.setAmount(totalPrice);
-            transaction.setStatus("completed");
+            transaction.setStatus("PAID");
             transaction.setTransactionType("top_up");
             transaction.setCreatedAt(LocalDateTime.now());
             transaction.setNote("VNPay payment"+ refCode);
@@ -257,7 +269,7 @@ public class CartServiceImpl implements CartService {
             CoinTransaction studentTransaction = new CoinTransaction();
             studentTransaction.setUser(user);
             studentTransaction.setAmount(coursePrice.negate());
-            studentTransaction.setStatus("completed");
+            studentTransaction.setStatus("PAID");
             studentTransaction.setCreatedAt(LocalDateTime.now());
             studentTransaction.setOrder(order);
 
@@ -278,7 +290,7 @@ public class CartServiceImpl implements CartService {
                 CoinTransaction instructorTransaction = new CoinTransaction();
                 instructorTransaction.setUser(instructor);
                 instructorTransaction.setAmount(coursePrice);
-                instructorTransaction.setStatus("completed");
+                instructorTransaction.setStatus("PAID");
                 instructorTransaction.setCreatedAt(LocalDateTime.now());
                 instructorTransaction.setOrder(null);
                 instructorTransaction.setTransactionType("course_purchase");
@@ -286,6 +298,15 @@ public class CartServiceImpl implements CartService {
                 coinTransactionRepository.save(instructorTransaction);
                 instructor.setCoin(instructor.getCoin() + coursePrice.longValue());
                 userRepository.save(instructor);
+
+                Notification notificationinstructor = new Notification();
+                notificationinstructor.setUser(instructor);
+                notificationinstructor.setCourse(course);
+                notificationinstructor.setMessage("You have received a payment of " + coursePrice + " VND for your course " + course.getTitle());
+                notificationinstructor.setType("PAYMENT_RECEIVED");
+                notificationinstructor.setStatus("failed");
+                notificationinstructor.setSentAt(LocalDateTime.now());
+                notificationRepository.save(notification);
             }
         }
 

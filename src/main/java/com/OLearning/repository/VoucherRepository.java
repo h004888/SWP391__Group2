@@ -25,4 +25,9 @@ public interface VoucherRepository extends JpaRepository<Voucher, Long> {
 
     @Query("SELECT v FROM Voucher v WHERE v.isPublic = true AND v.isActive = true AND v.expiryDate >= :currentDate AND v.limitation > v.usedCount")
     List<Voucher> findAvailablePublicVouchers(LocalDate currentDate);
+
+    List<Voucher> findByExpiryDateBeforeAndIsActiveTrue(LocalDate today);
+
+    Page<Voucher> findByInstructor_UserIdAndExpiryDateBeforeOrIsActiveFalse(Long instructorId, LocalDate now, Pageable pageable);
+    Page<Voucher> findByInstructor_UserIdAndExpiryDateAfterAndIsActiveTrue(Long instructorId, LocalDate now, Pageable pageable);
 }

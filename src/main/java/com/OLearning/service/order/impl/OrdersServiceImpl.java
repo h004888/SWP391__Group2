@@ -2,12 +2,10 @@ package com.OLearning.service.order.impl;
 
 import com.OLearning.dto.order.OrdersDTO;
 import com.OLearning.dto.order.InstructorOrderDTO;
-import com.OLearning.entity.Order;
-import com.OLearning.entity.OrderDetail;
+import com.OLearning.entity.*;
 import com.OLearning.mapper.order.OrdersMapper;
 import com.OLearning.mapper.order.InstructorOrderMapper;
-import com.OLearning.repository.OrderDetailRepository;
-import com.OLearning.repository.OrdersRepository;
+import com.OLearning.repository.*;
 import com.OLearning.service.order.OrdersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,13 +14,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import com.OLearning.entity.User;
 import java.util.Optional;
 import com.OLearning.service.cart.CartService;
 import jakarta.servlet.http.Cookie;
@@ -30,14 +28,7 @@ import org.springframework.beans.factory.annotation.Value;
 import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.OLearning.entity.Enrollment;
-import com.OLearning.repository.EnrollmentRepository;
-import com.OLearning.entity.CoinTransaction;
-import com.OLearning.repository.CoinTransactionRepository;
-import com.OLearning.repository.UserRepository;
 import com.OLearning.service.voucher.VoucherService;
-import com.OLearning.repository.UserVoucherRepository;
-import com.OLearning.repository.VoucherRepository;
 
 @Service
 public class OrdersServiceImpl implements OrdersService {
@@ -64,6 +55,9 @@ public class OrdersServiceImpl implements OrdersService {
 
     @Autowired
     private CoinTransactionRepository coinTransactionRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -517,8 +511,8 @@ public class OrdersServiceImpl implements OrdersService {
         Optional<Order> optionalOrder = ordersRepository.findById(orderId);
         if (optionalOrder.isPresent()) {
             Order order = optionalOrder.get();
-            if (!"completed".equals(order.getStatus())) {
-                order.setStatus("completed");
+            if (!"PAID".equals(order.getStatus())) {
+                order.setStatus("PAID");
                 if (refCode != null) order.setRefCode(refCode);
                 ordersRepository.save(order);
                 processOrderCompletion(order);
@@ -526,14 +520,12 @@ public class OrdersServiceImpl implements OrdersService {
         }
     }
 
-    // Hàm xử lý hoàn tất đơn hàng cho SePay và VNPay
     private void processOrderCompletion(Order order) {
         User user = order.getUser();
         Long userId = user.getUserId();
         List<OrderDetail> orderDetails = orderDetailRepository.findByOrder(order);
         if (orderDetails == null || orderDetails.isEmpty()) return;
 
-        // 1. Enroll user vào các khóa học
         for (OrderDetail orderDetail : orderDetails) {
             boolean alreadyEnrolled = enrollmentRepository.existsByUser_UserIdAndCourse_CourseId(user.getUserId(), orderDetail.getCourse().getCourseId());
             if (!alreadyEnrolled) {
@@ -557,7 +549,7 @@ public class OrdersServiceImpl implements OrdersService {
                 CoinTransaction studentTransaction = new CoinTransaction();
                 studentTransaction.setUser(user);
                 studentTransaction.setAmount(java.math.BigDecimal.valueOf(-coursePrice));
-                studentTransaction.setStatus("completed");
+                studentTransaction.setStatus("PAID");
                 studentTransaction.setCreatedAt(java.time.LocalDateTime.now());
                 studentTransaction.setOrder(order);
                 studentTransaction.setTransactionType("course_purchase");
@@ -565,12 +557,20 @@ public class OrdersServiceImpl implements OrdersService {
                 coinTransactionRepository.save(studentTransaction);
                 user.setCoin(user.getCoin() - (long) coursePrice);
 
+                Notification notificationuser = new Notification();
+                notificationuser.setUser(user);
+                notificationuser.setCourse(orderDetail.getCourse());
+                notificationuser.setMessage("You have purchased a course: " + orderDetail.getCourse().getTitle());
+                notificationuser.setSentAt(java.time.LocalDateTime.now());
+                notificationuser.setStatus("failed");
+                notificationRepository.save(notificationuser);
+
                 User instructor = orderDetail.getCourse().getInstructor();
                 if (instructor != null) {
                     CoinTransaction instructorTransaction = new CoinTransaction();
                     instructorTransaction.setUser(instructor);
                     instructorTransaction.setAmount(java.math.BigDecimal.valueOf(coursePrice));
-                    instructorTransaction.setStatus("completed");
+                    instructorTransaction.setStatus("PAID");
                     instructorTransaction.setCreatedAt(java.time.LocalDateTime.now());
                     instructorTransaction.setOrder(null);
                     instructorTransaction.setTransactionType("course_purchase");
@@ -579,18 +579,23 @@ public class OrdersServiceImpl implements OrdersService {
                     instructor.setCoin(instructor.getCoin() + (long) coursePrice);
                     userRepository.save(instructor);
                 }
+                Notification notification = new Notification();
+                notification.setUser(instructor);
+                notification.setCourse(orderDetail.getCourse());
+                notification.setMessage("You have received a payment of " + coursePrice + " VND for your course " + orderDetail.getCourse().getTitle());
+                notification.setType("PAYMENT_RECEIVED");
+                notification.setStatus("failed");
+                notification.setSentAt(java.time.LocalDateTime.now());
+                notificationRepository.save(notification);
             }
             userRepository.save(user);
         }
 
-        // 3. Xóa giỏ hàng (clearCart)
         cartService.clearCart(user.getEmail());
 
-        // 4. Đánh dấu voucher đã dùng (nếu có)
         for (OrderDetail orderDetail : orderDetails) {
-            // Nếu có logic lưu voucherId vào OrderDetail thì lấy ra, ở đây giả sử có field voucherId
             try {
-                java.lang.reflect.Field voucherField = orderDetail.getClass().getDeclaredField("voucherId");
+                Field voucherField = orderDetail.getClass().getDeclaredField("voucherId");
                 voucherField.setAccessible(true);
                 Object voucherIdObj = voucherField.get(orderDetail);
                 if (voucherIdObj != null) {
@@ -616,7 +621,7 @@ public class OrdersServiceImpl implements OrdersService {
         order.setAmount(amount);
         order.setOrderType(orderType);
         order.setDescription(description);
-        order.setStatus("pending");
+        order.setStatus("PENDING");
         order.setOrderDate(java.time.LocalDateTime.now());
         Order savedOrder = ordersRepository.save(order);
         return savedOrder;
