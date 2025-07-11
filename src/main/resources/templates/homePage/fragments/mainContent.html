@@ -516,7 +516,9 @@ Trending courses START -->
                         <div th:each="course : ${topCourses}">
                             <div class="card action-trigger-hover border bg-transparent" style="height: 580px;">
                                 <!-- Image -->
-                                <img src="assets/images/courses/4by3/14.jpg" class="card-img-top" alt="course image">
+                                <img th:if="${course.courseImg != null}" th:src="${course.courseImg}"
+                                    src="assets/images/courses/4by3/14.jpg" class="card-img-top" alt="course image"
+                                    style="height: 300px; object-fit: contain; background: #f8f9fa;">
                                 <!-- Ribbon -->
 
                                 <div class="ribbon mt-3" th:if="${course.price == 0}">
@@ -879,7 +881,7 @@ Reviews START -->
                         direct me so. Departure defective arranging rapturous did believe him all had supported. Family
                         months lasted simple set nature vulgar him. Picture for attempt joy excited ten carried manners
                         talking how.</p>
-                    <a href="#" class="btn btn-primary mb-0">View Reviews</a>
+
                 </div>
             </div> <!-- Row END -->
         </div>

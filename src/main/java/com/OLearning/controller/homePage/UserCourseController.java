@@ -89,10 +89,18 @@ public class UserCourseController {
         model.addAttribute("numberOfCompletedLessons",
                 lessonCompletionService.getNumberOfCompletedLessons(currentUser.getUserId(),
                         courseViewDTO.getCourseId()));
-
         model.addAttribute("currentLesson",
                 lessonService.getNextLessonAfterCompleted(currentUser.getUserId(), courseViewDTO.getCourseId()).get());
-
+        model.addAttribute("courseByUser",
+                courseService.getCourseByUserId(currentUser.getUserId()).stream()
+                        .filter(co -> !co.getCourseId().equals(courseViewDTO.getCourseId()))
+                        .collect(Collectors.toList()));
+        model.addAttribute("progressCourses",
+                enrollmentService.getProgressCoursesByUserId(currentUser.getUserId()).stream()
+                        .filter(progress -> !progress.getCourseId().equals(courseViewDTO.getCourseId()))
+                        .collect(Collectors.toList()));
+        model.addAttribute("lsInstructor", userService.getUsersByRole(2L));
+        model.addAttribute("totalEnrollments", courseViewDTO);
         return "userPage/LearningDashboard";
     }
 
@@ -171,7 +179,7 @@ public class UserCourseController {
         model.addAttribute("accessibleLessonIds", accessibleLessonIds);
         model.addAttribute("currentLessonId", currentLesson.getLessonId());
         model.addAttribute("currentLesson", currentLesson);
-        model.addAttribute("lessonVideoURL",currentLesson.getVideo().getVideoUrl() );
+        model.addAttribute("lessonVideoURL", currentLesson.getVideo().getVideoUrl());
 
         model.addAttribute("course", course);
         model.addAttribute("chapters", course.getListOfChapters());
@@ -250,7 +258,7 @@ public class UserCourseController {
         model.addAttribute("completedLessonIds", completedLessonIds);
         model.addAttribute("accessibleLessonIds", accessibleLessonIds);
         // QUAN TRỌNG: currentLessonId bây giờ là bài đang được xem (lessonId từ URL)
-        model.addAttribute("lessonVideoURL",currentLesson.getVideo().getVideoUrl() );
+        model.addAttribute("lessonVideoURL", currentLesson.getVideo().getVideoUrl());
         model.addAttribute("currentLessonId", lessonId);
         model.addAttribute("currentLesson", currentLesson);
         model.addAttribute("nextLesson", nextLesson);

@@ -17,8 +17,6 @@ public interface CourseService {
 
         CourseViewDTO getCourseById(Long id);
 
-
-
         List<Chapter> getChaptersWithLessons(Long courseId);
 
         List<CourseViewDTO> getTopCourses();
@@ -34,6 +32,8 @@ public interface CourseService {
                         int page,
                         int size);
 
-        CourseViewDTO getCourseRecentIncomplete (Long userId);
+        CourseViewDTO getCourseRecentIncomplete(Long userId);
+
+        List<CourseViewDTO> getCourseByUserId(Long userId);
 
 }

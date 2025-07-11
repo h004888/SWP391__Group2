@@ -10,6 +10,7 @@ import com.OLearning.repository.ChapterRepository;
 import com.OLearning.repository.CourseRepository;
 import com.OLearning.service.course.CourseService;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,7 +128,15 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public List<CourseViewDTO> getCoursesByCategoryId(Long categoryId) {
-        return courseRepository.findByCategoryIdAndStatusIgnoreCase(categoryId,"publish").stream()
+        return courseRepository.findByCategoryIdAndStatusIgnoreCase(categoryId, "publish").stream()
+                .map(CourseMapper::toCourseViewDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public List<CourseViewDTO> getCourseByUserId(Long userId) {
+        return courseRepository.findCoursesByUserId(userId).stream()
                 .map(CourseMapper::toCourseViewDTO)
                 .collect(Collectors.toList());
     }

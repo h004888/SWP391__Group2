@@ -17,6 +17,7 @@ public class UserMapper {
         dto.setStatus(user.getStatus());
         dto.setPersonalSkill(user.getPersonalSkill());
         dto.setCourse(user.getCourses());
+        dto.setFullName(user.getFullName());
         return dto;
     }
 
@@ -34,6 +35,7 @@ public class UserMapper {
         user.setProfilePicture(dto.getProfilePicture());
         user.setCourses(dto.getCourse());
         user.setStatus(true);
+        user.setFullName(dto.getFullName());
         return user;
     }
 }

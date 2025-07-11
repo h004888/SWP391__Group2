@@ -5,6 +5,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import com.OLearning.entity.Quiz;
+import com.OLearning.service.course.CourseService;
 import com.OLearning.service.quizQuestion.QuizQuestionService;
 
 @Component
@@ -14,6 +15,8 @@ public class ServiceTestRunner implements CommandLineRunner {
     private QuizTestService quizTestService;
     @Autowired
     private QuizQuestionService quizQuestionService;
+    @Autowired
+    private CourseService courseService;
 
     @Override
     public void run(String... args) throws Exception {
@@ -34,6 +37,8 @@ public class ServiceTestRunner implements CommandLineRunner {
             System.out.println("Đáp án đúng: " + q.getCorrectAnswer());
             System.out.println("-----");
         });
+
+        System.out.println("Course Service Test:" + courseService.getCourseByUserId(16L).get(0).getTitle());
 
     }
 

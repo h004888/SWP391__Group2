@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.OLearning.dto.enrollment.UserCourseProgressDTO;
 import com.OLearning.entity.Enrollment;
 
 import jakarta.transaction.Transactional;
@@ -21,15 +22,13 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
 
     boolean existsByUser_UserIdAndCourse_CourseId(Long userId, Long courseId);
 
-    @Query(
-            value = """
-                    SELECT DATEDIFF(WEEK, e.EnrollmentDate, GETDATE()) 
-                    FROM Enrollments e 
-                    WHERE e.UserID = :userId AND e.CourseID = :courseId
-                    """,
-            nativeQuery = true
-    )
+    @Query(value = """
+            SELECT DATEDIFF(WEEK, e.EnrollmentDate, GETDATE())
+            FROM Enrollments e
+            WHERE e.UserID = :userId AND e.CourseID = :courseId
+            """, nativeQuery = true)
     Integer getWeeksEnrolled(@Param("userId") Long userId, @Param("courseId") Long courseId);
+
     @Modifying
     @Transactional
     @Query(value = """
@@ -57,8 +56,46 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
     void updateProgressByUser(@Param("userId") Long userId, @Param("courseId") Long courseId);
 
     Optional<Enrollment> findByEnrollmentDateAfter(LocalDate date);
+
     Optional<Enrollment> findByUser_UserId(Long userId);
+
     @Query("SELECT e FROM Enrollment e WHERE e.user.userId = :userId AND e.course.courseId = :courseId")
     Enrollment findByUserIdAndCourseId(@Param("userId") Long userId, @Param("courseId") Long courseId);
 
+    @Query("""
+                SELECT new com.OLearning.dto.enrollment.UserCourseProgressDTO(
+                    e.user.userId,
+                    e.course.courseId,
+                    e.enrollmentId,
+                    e.progress
+                )
+                FROM Enrollment e
+                WHERE e.user.userId = :userId
+                  AND e.course.courseId NOT IN (
+                      SELECT e2.course.courseId
+                      FROM Enrollment e2
+                      WHERE e2.user.userId = :userId
+                        AND e2.status = 'completed'
+                  )
+            """)
+    List<UserCourseProgressDTO> findProgressDTOExcludingCompleted(@Param("userId") Long userId);
+
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE Enrollments SET Status = 'completed' WHERE Status = 'on going' AND UserID = :userId AND CourseID = :courseId", nativeQuery = true)
+    int updateStatusCompleted(@Param("userId") Long userId, @Param("courseId") Long courseId);
+
+    @Query("""
+
+
+            SELECT
+
+                COUNT(*) AS TotalEnrollments
+            FROM
+                Courses c
+                INNER JOIN Enrollments e ON c.CourseID = e.CourseID
+            WHERE
+                c.InstructorID = :instructorId;
+            """)
+    Long countTotalEnrollmentByUserId(@Param("instructorId") Long instructorId);
 }

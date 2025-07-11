@@ -25,17 +25,18 @@ public class LessonAPI {
     private LessonCompletionService lessonCompletionService;
     @Autowired
     private EnrollmentService enrollmentService;
-//
-//    @GetMapping("/next")
-//    public ResponseEntity<Lesson> getNextLesson(
-//            @RequestParam("userId")   Long userId,
-//            @RequestParam("courseId") Long courseId) {
-//
-//        Optional<Lesson> next = lessonService.getNextLesson(userId, courseId);
-//        return next
-//                .map(ResponseEntity::ok)
-//                .orElseGet(() -> ResponseEntity.noContent().build());
-//    }
+
+    //
+    // @GetMapping("/next")
+    // public ResponseEntity<Lesson> getNextLesson(
+    // @RequestParam("userId") Long userId,
+    // @RequestParam("courseId") Long courseId) {
+    //
+    // Optional<Lesson> next = lessonService.getNextLesson(userId, courseId);
+    // return next
+    // .map(ResponseEntity::ok)
+    // .orElseGet(() -> ResponseEntity.noContent().build());
+    // }
     @GetMapping("/first")
     public ResponseEntity<Lesson> getFirstLesson(
             @RequestParam("courseId") Long courseId) {
@@ -45,6 +46,7 @@ public class LessonAPI {
                 ? ResponseEntity.ok(first)
                 : ResponseEntity.noContent().build();
     }
+
     private User extractCurrentUser(Principal principal) {
         if (principal instanceof Authentication authentication) {
             Object principalObj = authentication.getPrincipal();
@@ -60,8 +62,7 @@ public class LessonAPI {
     public ResponseEntity<?> markLessonComplete(
             @RequestParam Long lessonId,
             @RequestParam Long courseId,
-            Principal principal
-    ) {
+            Principal principal) {
         User user = extractCurrentUser(principal);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -71,13 +72,15 @@ public class LessonAPI {
             lessonCompletionService.markLessonAsCompleted(user.getUserId(), lessonId);
             enrollmentService.updateProgressByUser(user.getUserId(), courseId);
         }
+        if (lessonCompletionService.getOverallProgressOfUser(user.getUserId(), courseId) >= 100) {
+            enrollmentService.updateStatusToCompleted(user.getUserId(), courseId);
+        }
 
-       Lesson nextLesson = lessonService.getNextLesson(courseId, lessonId);
-        if (nextLesson!=null) {
+        Lesson nextLesson = lessonService.getNextLesson(courseId, lessonId);
+        if (nextLesson != null) {
             return ResponseEntity.ok(Map.of(
                     "status", "success",
-                    "nextLessonUrl", "/learning/course/" + courseId + "/lesson/" + nextLesson.getLessonId()
-            ));
+                    "nextLessonUrl", "/learning/course/" + courseId + "/lesson/" + nextLesson.getLessonId()));
         } else {
             return ResponseEntity.ok(Map.of("status", "completed_all"));
         }

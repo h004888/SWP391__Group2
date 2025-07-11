@@ -9,6 +9,8 @@ import com.OLearning.service.course.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.OLearning.dto.enrollment.UserCourseProgressDTO;
+import com.OLearning.dto.user.UserDTO;
 import com.OLearning.entity.Course;
 import com.OLearning.entity.Enrollment;
 import com.OLearning.repository.EnrollmentRepository;
@@ -41,7 +43,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Override
     public void updateProgressByUser(Long userId, Long courseId) {
-       enrollmentRepository.updateProgressByUser(userId, courseId);
+        enrollmentRepository.updateProgressByUser(userId, courseId);
     }
 
     @Override
@@ -52,5 +54,23 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Override
     public List<Enrollment> findByUserId(Long userId) {
         return enrollmentRepository.findByUser_UserId(userId).stream().toList();
+    }
+
+    @Override
+    public List<UserCourseProgressDTO> getProgressCoursesByUserId(Long userId) {
+        return enrollmentRepository.findProgressDTOExcludingCompleted(userId);
+    }
+
+    @Override
+    public int updateStatusToCompleted(Long userId, Long courseId) {
+        return enrollmentRepository.updateStatusCompleted(userId, courseId);
+    }
+
+    @Override
+    public List<Long> getTotalEnrollmentOfInstructor(List<UserDTO> instructors) {
+        return instructors.stream()
+                .map(UserDTO::getUserId)
+                .map(enrollmentRepository::countTotalEnrollmentByUserId)
+                .collect(Collectors.toList());
     }
 }

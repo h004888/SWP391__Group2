@@ -19,47 +19,46 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
   @Query("SELECT c FROM Course c LEFT JOIN c.enrollments e WHERE LOWER(c.status) = 'publish' GROUP BY c ORDER BY COUNT(e) DESC")
   List<Course> findAllPublishedOrderByStudentCountDesc();
 
-
   // function search + filter + sort
-    @Query("""
-                SELECT c FROM Course c
-                WHERE LOWER(c.status) = 'publish' 
-                  AND (:keyword       IS NULL
-                       OR LOWER(c.title)       LIKE LOWER(CONCAT('%', :keyword, '%'))
-                       OR LOWER(c.description) LIKE LOWER(CONCAT('%', :keyword, '%')))
-                  AND (:categoryIds  IS NULL OR c.category.id    IN :categoryIds)
-                  AND (
-                       :priceFilters IS NULL
-                       OR (
-                           ('Free' IN (:priceFilters)  AND c.price = 0)
-                        OR ('Paid' IN (:priceFilters)  AND c.price > 0)
-                       )
-                  )
-                  AND (
-                       :levels IS NULL
-                    OR c.courseLevel IN :levels
-                  )
-            """)
-    Page<Course> searchCourses(
-            @Param("keyword") String keyword,
-            @Param("categoryIds") List<Long> categoryIds,
-            @Param("priceFilters") List<String> priceFilters,
-            @Param("levels") List<String> levels,
-            Pageable pageable);
+  @Query("""
+          SELECT c FROM Course c
+          WHERE LOWER(c.status) = 'publish'
+            AND (:keyword       IS NULL
+                 OR LOWER(c.title)       LIKE LOWER(CONCAT('%', :keyword, '%'))
+                 OR LOWER(c.description) LIKE LOWER(CONCAT('%', :keyword, '%')))
+            AND (:categoryIds  IS NULL OR c.category.id    IN :categoryIds)
+            AND (
+                 :priceFilters IS NULL
+                 OR (
+                     ('Free' IN (:priceFilters)  AND c.price = 0)
+                  OR ('Paid' IN (:priceFilters)  AND c.price > 0)
+                 )
+            )
+            AND (
+                 :levels IS NULL
+              OR c.courseLevel IN :levels
+            )
+      """)
+  Page<Course> searchCourses(
+      @Param("keyword") String keyword,
+      @Param("categoryIds") List<Long> categoryIds,
+      @Param("priceFilters") List<String> priceFilters,
+      @Param("levels") List<String> levels,
+      Pageable pageable);
 
   List<Course> findByCategoryIdAndStatusIgnoreCase(Long categoryId, String status);
 
-    @Query(value = """
-                SELECT TOP 1 c.*
-                FROM Enrollments e
-                JOIN Courses c ON e.CourseID = c.CourseID
-                WHERE e.UserID = :userId
-                  AND e.Progress < 100
-                ORDER BY e.EnrollmentDate ASC
-            """, nativeQuery = true)
-    Course findMostRecentIncompleteCourse(@Param("userId") Long userId);
+  @Query(value = """
+          SELECT TOP 1 c.*
+          FROM Enrollments e
+          JOIN Courses c ON e.CourseID = c.CourseID
+          WHERE e.UserID = :userId
+            AND e.Progress < 100
+          ORDER BY e.EnrollmentDate ASC, e.Progress desc
+      """, nativeQuery = true)
+  Course findMostRecentIncompleteCourse(@Param("userId") Long userId);
 
-
-
+  @Query("SELECT e.course FROM Enrollment e WHERE e.user.userId = :userId")
+  List<Course> findCoursesByUserId(@Param("userId") Long userId);
 
 }
