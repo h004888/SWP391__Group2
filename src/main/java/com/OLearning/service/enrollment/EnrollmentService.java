@@ -3,18 +3,14 @@ package com.OLearning.service.enrollment;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
-
+import com.OLearning.dto.enrollment.UserCourseProgressDTO;
+import com.OLearning.dto.user.UserDTO;
 import com.OLearning.entity.Course;
 import com.OLearning.entity.Enrollment;
 import com.OLearning.entity.User;
-
 import com.OLearning.dto.enrollment.EnrollmentDTO;
 import org.springframework.data.domain.Page;
-
-import java.time.LocalDate;
 import java.util.Map;
 
 @Service
@@ -57,15 +53,15 @@ public interface EnrollmentService {
     void updateProgressByUser( Long userId,  Long courseId);
 
     Optional<Enrollment> findByUserAndCourse(User user, Course course);
-    
+
     List<Enrollment> findByUserAndCourseOrderByEnrollmentDateDesc(User user, Course course);
-    
+
     Optional<Enrollment> findFirstByUserAndCourseOrderByEnrollmentDateDesc(User user, Course course);
-    
+
     Long countByUserAndCourse(User user, Course course);
-    
+
     List<Enrollment> findAllByUserAndCourseOrderByEnrollmentDateDesc(User user, Course course);
-    
+
     void cleanupDuplicateEnrollments(User user, Course course);
 
     // Lấy enrollment trong 30 ngày gần nhất
@@ -73,4 +69,9 @@ public interface EnrollmentService {
 
     // Lấy enrollment của một user cụ thể
     List<Enrollment> findByUserId(Long userId);
+
+    List<UserCourseProgressDTO> getProgressCoursesByUserId(Long userId);
+
+    int updateStatusToCompleted(Long userId, Long courseId);
+
 }

@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -90,8 +92,8 @@ public class JsonController {
             return;
         }
 
-        try (java.io.InputStream is = conn.getInputStream();
-             java.io.OutputStream os = response.getOutputStream()) {
+        try (InputStream is = conn.getInputStream();
+             OutputStream os = response.getOutputStream()) {
             byte[] buffer = new byte[8192];
             int bytesRead;
             while ((bytesRead = is.read(buffer)) != -1) {

@@ -15,8 +15,12 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     List<Course> findByInstructorUserId(Long userId);
 
     List<Course> findByStatus(String status);
-     @Query("SELECT c FROM Course c LEFT JOIN c.enrollments e GROUP BY c ORDER BY COUNT(e) DESC")
+
+    @Query("SELECT c FROM Course c LEFT JOIN c.enrollments e GROUP BY c ORDER BY COUNT(e) DESC")
      List<Course> findAllOrderByStudentCountDesc();
+
+  @Query("SELECT c FROM Course c LEFT JOIN c.enrollments e WHERE LOWER(c.status) = 'publish' GROUP BY c ORDER BY COUNT(e) DESC")
+  List<Course> findAllPublishedOrderByStudentCountDesc();
 
     Page<Course> findByInstructorUserId(Long userId, Pageable pageable);
 
@@ -34,8 +38,8 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
             @Param("userId") Long userId,
             Pageable pageable
     );
-    //phan trang theo status
 
+    //phan trang theo status
     @Query("SELECT c FROM Course c WHERE " +
             "(:keyword IS NULL OR :keyword = '' OR LOWER(c.title) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
             "(:categoryId IS NULL OR c.category.id = :categoryId) AND " +
@@ -98,7 +102,8 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     // function search + filter + sort
     @Query("""
                    SELECT c FROM Course c
-                   WHERE (:keyword       IS NULL
+                   WHERE LOWER(c.status) = 'publish'
+                          AND(:keyword       IS NULL
                           OR LOWER(c.title)       LIKE LOWER(CONCAT('%', :keyword, '%'))
                           OR LOWER(c.description) LIKE LOWER(CONCAT('%', :keyword, '%')))
                      AND (:categoryIds  IS NULL OR c.category.id    IN :categoryIds)
@@ -125,10 +130,13 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     List<Course> findByCategoryId(@Param("categoryId") Long categoryId);
 
     // find course by category id
-     List<Course> findByCategoryId(int categoryId);
+    List<Course> findByCategoryId(int categoryId);
+
+  List<Course> findByCategoryIdAndStatusIgnoreCase(Long categoryId, String status);
 
     @Query("SELECT COUNT(c) FROM Course c WHERE c.instructor.userId = :userId AND c.status = :status")
     int countByInstructorUserIdAndStatus(@Param("userId") Long userId, @Param("status") String status);
+
     //tinh tong course cua instructor do
     @Query(value = """
                 SELECT TOP 1 c.*
@@ -139,7 +147,6 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
                 ORDER BY e.EnrollmentDate ASC
             """, nativeQuery = true)
     Course findMostRecentIncompleteCourse(@Param("userId") Long userId);
-
 
     @Query("""
     SELECT COUNT(c) FROM Course c
@@ -171,4 +178,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
         @Param("price") String price,
         @Param("title") String title
     );
+  @Query("SELECT e.course FROM Enrollment e WHERE e.user.userId = :userId")
+  List<Course> findCoursesByUserId(@Param("userId") Long userId);
+
 }

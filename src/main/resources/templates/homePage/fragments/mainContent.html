@@ -544,7 +544,9 @@ Trending courses START -->
                         <div th:each="course : ${topCourses}">
                             <div class="card action-trigger-hover border bg-transparent" style="height: 580px;">
                                 <!-- Image -->
-                                <img src="assets/images/courses/4by3/14.jpg" class="card-img-top" alt="course image">
+                                <img th:if="${course.courseImg != null}" th:src="${course.courseImg}"
+                                    src="assets/images/courses/4by3/14.jpg" class="card-img-top" alt="course image"
+                                    style="height: 300px; object-fit: contain; background: #f8f9fa;">
                                 <!-- Ribbon -->
 
                                 <div class="ribbon mt-3" th:if="${course.price == 0}">
@@ -588,7 +590,8 @@ Trending courses START -->
                                                 <i class="fas fa-star text-warning ms-1"></i>
                                             </p>
 
-                                            <span class="small" th:text="${'(' + course.courseReviews.size()+')'}">(6500)</span>
+                                            <span class="small"
+                                                th:text="${'(' + course.courseReviews.size()+')'}">(6500)</span>
                                         </div>
                                         <div class="hstack gap-2">
                                             <p class="h6 fw-light mb-0 m-0" th:text="${course.enrollments.size()}">
@@ -913,7 +916,7 @@ Reviews START -->
                         direct me so. Departure defective arranging rapturous did believe him all had supported. Family
                         months lasted simple set nature vulgar him. Picture for attempt joy excited ten carried manners
                         talking how.</p>
-                    <a href="#" class="btn btn-primary mb-0">View Reviews</a>
+
                 </div>
             </div> <!-- Row END -->
         </div>
@@ -924,7 +927,7 @@ Reviews END -->
     <!-- Chatbot Widget -->
     <div th:replace="~{homePage/fragments/chatbotWidget.html}"></div>
 
-    <script src="/js/homePage/addtocart.js"></script>
+    <script th:src="@{/js/homePage/addtocart.js}"></script>
 
 </main>
 <!-- **************** MAIN CONTENT END **************** -->

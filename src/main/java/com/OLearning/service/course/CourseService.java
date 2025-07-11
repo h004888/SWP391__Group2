@@ -54,7 +54,7 @@ public interface CourseService {
 
     List<CourseViewDTO> getTopCourses();
 
-    List<CourseViewDTO> getCoursesByCategoryId(int categoryId);
+    List<CourseViewDTO> getCoursesByCategoryId(Long categoryId);
 
     Page<CourseViewDTO> searchCoursesGrid(
             List<Long> categoryIds,
@@ -76,4 +76,7 @@ public interface CourseService {
     CourseViewDTO getCourseRecentIncomplete (Long userId);
 
     int countByInstructorAndStatusWithFilter(Long userId, String status, Long categoryId, String price, String title);
+
+    List<CourseViewDTO> getCourseByUserId(Long userId);
+
 }

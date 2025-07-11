@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.OLearning.security.CustomUserDetails;
 import com.OLearning.service.category.CategoryService;
+import com.OLearning.service.cloudinary.UploadFile;
 import com.OLearning.service.course.CourseService;
 import com.OLearning.service.user.UserService;
 
@@ -53,12 +54,10 @@ public class UserCourseController {
     private EnrollmentService enrollmentService;
     @Autowired
     private LessonCompletionService lessonCompletionService;
-
     @Autowired
     private QuizTestService quizTestService;
     @Autowired
     private QuizQuestionService quizQuestionService;
-
     @Autowired
     private LessonService lessonService;
     @Autowired
@@ -67,6 +66,8 @@ public class UserCourseController {
     private CommentMapper commentMapper;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private UploadFile uploadFile;
 
     @GetMapping
     public String showUserDashboard(Principal principal, Model model) {
@@ -93,7 +94,6 @@ public class UserCourseController {
 
         CourseViewDTO courseViewDTO = courseService.getCourseRecentIncomplete(currentUser.getUserId());
 
-
         model.addAttribute("course", courseViewDTO);
         model.addAttribute("progress", lessonCompletionService.getOverallProgressOfUser(currentUser.getUserId(), courseViewDTO.getCourseId()));
         model.addAttribute("weeksEnrolled", enrollmentService.getWeeksEnrolled(currentUser.getUserId(), courseViewDTO.getCourseId()));
@@ -106,6 +106,25 @@ public class UserCourseController {
         long unreadCount = notificationService.countUnreadByUserId(currentUser.getUserId());
         model.addAttribute("unreadCount", unreadCount);
 
+        model.addAttribute("progress",
+                lessonCompletionService.getOverallProgressOfUser(currentUser.getUserId(), courseViewDTO.getCourseId()));
+        model.addAttribute("weeksEnrolled",
+                enrollmentService.getWeeksEnrolled(currentUser.getUserId(), courseViewDTO.getCourseId()));
+        model.addAttribute("numberOfCompletedLessons",
+                lessonCompletionService.getNumberOfCompletedLessons(currentUser.getUserId(),
+                        courseViewDTO.getCourseId()));
+        model.addAttribute("currentLesson",
+                lessonService.getNextLessonAfterCompleted(currentUser.getUserId(), courseViewDTO.getCourseId()).get());
+        model.addAttribute("courseByUser",
+                courseService.getCourseByUserId(currentUser.getUserId()).stream()
+                        .filter(co -> !co.getCourseId().equals(courseViewDTO.getCourseId()))
+                        .collect(Collectors.toList()));
+        model.addAttribute("progressCourses",
+                enrollmentService.getProgressCoursesByUserId(currentUser.getUserId()).stream()
+                        .filter(progress -> !progress.getCourseId().equals(courseViewDTO.getCourseId()))
+                        .collect(Collectors.toList()));
+        model.addAttribute("lsInstructor", userService.getUsersByRole(2L));
+        model.addAttribute("totalEnrollments", courseViewDTO);
         return "userPage/LearningDashboard";
     }
 
@@ -178,17 +197,19 @@ public class UserCourseController {
         CourseViewDTO course = courseService.getCourseById(courseId);
 
         Map<Long, ChapterProgress> chapterProgressMap = new HashMap<>();
-        for (Chapter chapter: course.getListOfChapters()){
+        for (Chapter chapter : course.getListOfChapters()) {
             List<Lesson> lessons = chapter.getLessons();
             int totalLessons = lessons.size();
-            int completedLessons = (int) lessons.stream().filter(lesson -> completedLessonIds.contains(lesson.getLessonId())).count();
-            chapterProgressMap.put(chapter.getChapterId(),  new ChapterProgress(totalLessons, completedLessons));
+            int completedLessons = (int) lessons.stream()
+                    .filter(lesson -> completedLessonIds.contains(lesson.getLessonId())).count();
+            chapterProgressMap.put(chapter.getChapterId(), new ChapterProgress(totalLessons, completedLessons));
         }
 
         model.addAttribute("completedLessonIds", completedLessonIds);
         model.addAttribute("accessibleLessonIds", accessibleLessonIds);
         model.addAttribute("currentLessonId", currentLesson.getLessonId());
         model.addAttribute("currentLesson", currentLesson);
+        model.addAttribute("lessonVideoURL", currentLesson.getVideo().getVideoUrl());
 
         model.addAttribute("course", course);
         model.addAttribute("chapters", course.getListOfChapters());
@@ -222,7 +243,7 @@ public class UserCourseController {
 
     @GetMapping("course/{courseId}/lesson/{lessonId}")
     public String showUserLessonDetail(Principal principal, Model model, @PathVariable("lessonId") Long lessonId,
-                                       @PathVariable("courseId") Long courseId) {
+            @PathVariable("courseId") Long courseId) {
         User user = extractCurrentUser(principal);
         if (user == null) {
             return "redirect:/login";
@@ -287,19 +308,20 @@ public class UserCourseController {
             return "userPage/doQuiz";
         }
 
-
         Map<Long, ChapterProgress> chapterProgressMap = new HashMap<>();
-        for (Chapter chapter: course.getListOfChapters()){
+        for (Chapter chapter : course.getListOfChapters()) {
             List<Lesson> lessons = chapter.getLessons();
             int totalLessons = lessons.size();
-            int completedLessons = (int) lessons.stream().filter(lesson -> completedLessonIds.contains(lesson.getLessonId())).count();
-            chapterProgressMap.put(chapter.getChapterId(),  new ChapterProgress(totalLessons, completedLessons));
+            int completedLessons = (int) lessons.stream()
+                    .filter(lesson -> completedLessonIds.contains(lesson.getLessonId())).count();
+            chapterProgressMap.put(chapter.getChapterId(), new ChapterProgress(totalLessons, completedLessons));
         }
 
         model.addAttribute("completedLessonIds", completedLessonIds);
         model.addAttribute("accessibleLessonIds", accessibleLessonIds);
         // QUAN TRỌNG: currentLessonId bây giờ là bài đang được xem (lessonId từ URL)
-        model.addAttribute("currentLessonId", lessonId); // Thay đổi từ currentLesson.getLessonId() thành lessonId
+        model.addAttribute("lessonVideoURL", currentLesson.getVideo().getVideoUrl());
+        model.addAttribute("currentLessonId", lessonId);
         model.addAttribute("currentLesson", currentLesson);
         model.addAttribute("nextLesson", nextLesson);
         model.addAttribute("course", courseView);

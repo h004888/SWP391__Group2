@@ -13,6 +13,7 @@ import com.OLearning.security.CustomUserDetails;
 import com.OLearning.service.cloudinary.UploadFile;
 import com.OLearning.service.course.CourseService;
 import com.OLearning.service.email.EmailService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -169,10 +170,11 @@ public class CourseServiceImpl  implements CourseService {
 
     @Override
     public List<CourseViewDTO> getTopCourses() {
-        return courseRepository.findAllOrderByStudentCountDesc().stream()
+        return courseRepository.findAllPublishedOrderByStudentCountDesc().stream()
                 .map(CourseMapper::toCourseViewDTO)
                 .collect(Collectors.toList());
     }
+
     @Override
     public Optional<CourseDetailDTO> getDetailCourse(Long id) {
         return courseRepository.findById(id).map(courseDetailMapper::toDTO);
@@ -389,8 +391,16 @@ public class CourseServiceImpl  implements CourseService {
     }
 
     @Override
-    public List<CourseViewDTO> getCoursesByCategoryId(int categoryId) {
-        return courseRepository.findByCategoryId(categoryId).stream()
+    public List<CourseViewDTO> getCoursesByCategoryId(Long categoryId) {
+        return courseRepository.findByCategoryIdAndStatusIgnoreCase(categoryId, "publish").stream()
+                .map(CourseMapper::toCourseViewDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public List<CourseViewDTO> getCourseByUserId(Long userId) {
+        return courseRepository.findCoursesByUserId(userId).stream()
                 .map(CourseMapper::toCourseViewDTO)
                 .collect(Collectors.toList());
     }

@@ -9,9 +9,9 @@
             <div class="col-lg-9">
                 <div class="video-player rounded-3">
                     <video controls crossorigin="anonymous" playsinline poster="/assets/images/videos/poster.jpg">
-                        <source th:src="${currentLesson.video.videoUrl}" size="360">
-                        <source th:src="${currentLesson.video.videoUrl}" size="720">
-                        <source th:src="${currentLesson.video.videoUrl}" size="1080">
+                        <source th:src="@{/api/video/stream/video/{videoURL}(videoURL=${lessonVideoURL})}" size="360">
+                        <source th:src="@{/api/video/stream/video/{videoURL}(videoURL=${lessonVideoURL})}" size="720">
+                        <source th:src="@{/api/video/stream/video/{videoURL}(videoURL=${lessonVideoURL})}" size="1080">
                         <!-- Caption files -->
                         <track kind="captions" label="English" srclang="en" src="/assets/images/videos/en.vtt" default>
                         <track kind="captions" label="French" srclang="fr" src="/assets/images/videos/fr.vtt">
@@ -140,7 +140,7 @@
                                                 <th:block th:with="progress=${chapterProgressMap[chapter.chapterId]}">
                                                     <div class="d-flex justify-content-between">
                                                         <p class="mb-1 h6"
-                                                           th:text="${progress.completedLessons + '/' + progress.totalLessons + ' Completed'}">
+                                                            th:text="${progress.completedLessons + '/' + progress.totalLessons + ' Completed'}">
                                                             0/0 Completed
                                                         </p>
                                                         <h6 class="mb-1 text-end"
@@ -151,11 +151,11 @@
 
                                                     <div class="progress progress-sm bg-primary bg-opacity-10">
                                                         <div class="progress-bar bg-primary aos" role="progressbar"
-                                                             data-aos-delay="200"
-                                                             data-aos-duration="1000" data-aos-easing="ease-in-out"
-                                                             th:style="'width:' + ${progress.percent} + '%'"
-                                                             th:aria-valuenow="${progress.percent}"
-                                                             aria-valuemin="0" aria-valuemax="100">
+                                                            data-aos-delay="200" data-aos-duration="1000"
+                                                            data-aos-easing="ease-in-out"
+                                                            th:style="'width:' + ${progress.percent} + '%'"
+                                                            th:aria-valuenow="${progress.percent}" aria-valuemin="0"
+                                                            aria-valuemax="100">
                                                         </div>
                                                     </div>
                                                 </th:block>
