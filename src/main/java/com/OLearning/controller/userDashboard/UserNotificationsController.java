@@ -32,7 +32,7 @@ public class UserNotificationsController {
     @GetMapping
     public String viewNotifications(Authentication authentication, Model model,
                                    @RequestParam(value = "page", defaultValue = "0") int page,
-                                   @RequestParam(value = "size", defaultValue = "10") int size,
+                                   @RequestParam(value = "size", defaultValue = "5") int size,
                                    @RequestParam(value = "type", required = false) List<String> types,
                                    @RequestParam(value = "status", required = false) String status,
                                    @RequestParam(value = "search", required = false) String search) {
@@ -176,12 +176,25 @@ public class UserNotificationsController {
                         msg = msg.split("\\r?\\n")[0]; // chỉ lấy dòng đầu tiên
                         if (msg.length() > 25) msg = msg.substring(0, 25) + "...";
                     }
+                    
+                    // Lấy lessonId nếu là notification comment
+                    Long lessonId = null;
+                    if ("COMMENT".equals(n.getType()) && n.getCommentId() != null) {
+                        var commentOpt = courseReviewRepository.findById(n.getCommentId());
+                        if (commentOpt.isPresent() && commentOpt.get().getLesson() != null) {
+                            lessonId = commentOpt.get().getLesson().getLessonId();
+                        }
+                    }
+                    
                     return new NotificationDropdownDTO(
                         n.getNotificationId(),
                         msg,
                         n.getType(),
                         n.getStatus(),
-                        n.getSentAt()
+                        n.getSentAt(),
+                        n.getCommentId(),
+                        n.getCourse() != null ? n.getCourse().getCourseId() : null,
+                        lessonId
                     );
                 }).toList();
             return ResponseEntity.ok(Map.of(

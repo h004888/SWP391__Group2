@@ -425,7 +425,13 @@
             contentHtml += `<small class=\"text-body\">${timeAgo}</small></div>`;
             li.innerHTML = avatarHtml + contentHtml;
             li.addEventListener('click', function() {
-                window.location.href = `/user/notifications/view/${notification.notificationId}`;
+                // Nếu là comment notification và có đủ thông tin, chuyển đến comment
+                if (notification.type === 'COMMENT' && notification.commentId && notification.courseId && notification.lessonId) {
+                    window.location.href = `/learning/course/${notification.courseId}/lesson/${notification.lessonId}?commentId=${notification.commentId}`;
+                } else {
+                    // Các notification khác chuyển đến trang view notification
+                    window.location.href = `/user/notifications/view/${notification.notificationId}`;
+                }
             });
             list.appendChild(li);
         });

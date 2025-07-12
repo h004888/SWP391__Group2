@@ -4,6 +4,7 @@ import com.OLearning.dto.notification.NotificationDTO;
 import com.OLearning.dto.notification.NotificationDropdownDTO;
 import com.OLearning.entity.Notification;
 import com.OLearning.mapper.notification.NotificationMapper;
+import com.OLearning.repository.CourseReviewRepository;
 import com.OLearning.security.CustomUserDetails;
 import com.OLearning.service.notification.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,11 +31,13 @@ public class AdminNotificationsController {
     private NotificationService notificationService;
     @Autowired
     private NotificationMapper notificationsMapper;
+    @Autowired
+    private CourseReviewRepository courseReviewRepository;
 
     @GetMapping
     public String viewNotifications(Authentication authentication, Model model,
                                    @RequestParam(value = "page", defaultValue = "0") int page,
-                                   @RequestParam(value = "size", defaultValue = "10") int size,
+                                   @RequestParam(value = "size", defaultValue = "5") int size,
                                    @RequestParam(value = "type", required = false) List<String> types,
                                    @RequestParam(value = "status", required = false) String status) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
@@ -60,7 +63,7 @@ public class AdminNotificationsController {
     @GetMapping("/search")
     public String searchNotifications(@RequestParam("keyword") String keyword,
                                       @RequestParam(value = "page", defaultValue = "0") int page,
-                                      @RequestParam(value = "size", defaultValue = "10") int size,
+                                      @RequestParam(value = "size", defaultValue = "5") int size,
                                       Model model) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -97,14 +100,8 @@ public class AdminNotificationsController {
     public String markAllAsRead(Authentication authentication) {
         // Ép kiểu để lấy ra CustomUserDetails
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-
-        // Lấy userId từ CustomUserDetails
         Long userId = userDetails.getUserId();
-
-        // Gọi service để đánh dấu tất cả thông báo là đã đọc
         notificationService.markAllAsRead(userId);
-
-        // Redirect về trang thông báo (không cần truyền userId)
         return "redirect:/admin/notifications";
     }
 
@@ -144,7 +141,7 @@ public class AdminNotificationsController {
         return "redirect:/admin/notifications";
     }
 
-    // API endpoint để lấy 5 thông báo chưa đọc cho dropdown
+    //  lấy 5 thông báo chưa đọc cho dropdown
     @GetMapping("/api/latest")
     @ResponseBody
     public ResponseEntity<?> getLatestNotifications(Authentication authentication) {
@@ -167,12 +164,25 @@ public class AdminNotificationsController {
                         msg = msg.split("\\r?\\n")[0]; // chỉ lấy dòng đầu tiên
                         if (msg.length() > 25) msg = msg.substring(0, 25) + "...";
                     }
+                    
+                    // Lấy lessonId nếu là notification comment
+                    Long lessonId = null;
+                    if ("REPORT_COMMENT".equals(n.getType()) && n.getCommentId() != null) {
+                        var commentOpt = courseReviewRepository.findById(n.getCommentId());
+                        if (commentOpt.isPresent() && commentOpt.get().getLesson() != null) {
+                            lessonId = commentOpt.get().getLesson().getLessonId();
+                        }
+                    }
+                    
                     return new NotificationDropdownDTO(
                         n.getNotificationId(),
                         msg,
                         n.getType(),
                         n.getStatus(),
-                        n.getSentAt()
+                        n.getSentAt(),
+                        n.getCommentId(),
+                        n.getCourse() != null ? n.getCourse().getCourseId() : null,
+                        lessonId
                     );
                 }).toList();
             return ResponseEntity.ok(Map.of(

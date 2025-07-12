@@ -206,7 +206,7 @@ public class UserCourseController {
 
     @GetMapping("course/{courseId}/lesson/{lessonId}")
     public String showUserLessonDetail(Principal principal, Model model, @PathVariable("lessonId") Long lessonId,
-            @PathVariable("courseId") Long courseId) {
+            @PathVariable("courseId") Long courseId, @RequestParam(value = "commentId", required = false) Long commentId) {
         User user = extractCurrentUser(principal);
         if (user == null) {
             return "redirect:/login";
@@ -230,10 +230,15 @@ public class UserCourseController {
 
         Lesson nextAvailableLesson = lessonService.getNextLessonAfterCompleted(user.getUserId(), courseId).orElse(null);
 
-        // Chỉ cho phép truy cập nếu bài đã hoàn thành hoặc là bài tiếp theo có thể học
+        // Cho phép truy cập nếu:
+        // 1. Là instructor
+        // 2. Bài đã hoàn thành
+        // 3. Là bài tiếp theo có thể học
+        // 4. Có commentId (từ notification) - cho phép xem comment
         boolean canAccess = isInstructor ||
                 completedLessonIds.contains(lessonId) ||
-                (nextAvailableLesson != null && nextAvailableLesson.getLessonId().equals(lessonId));
+                (nextAvailableLesson != null && nextAvailableLesson.getLessonId().equals(lessonId)) ||
+                commentId != null; // Cho phép truy cập nếu có commentId từ notification
 
         if (!canAccess) {
             return "redirect:/learning/course/view?courseId=" + courseId;
@@ -246,6 +251,10 @@ public class UserCourseController {
         Set<Long> accessibleLessonIds = new HashSet<>(completedLessonIds);
         if (nextAvailableLesson != null) {
             accessibleLessonIds.add(nextAvailableLesson.getLessonId());
+        }
+        // Nếu có commentId (từ notification), cho phép truy cập lesson hiện tại
+        if (commentId != null) {
+            accessibleLessonIds.add(lessonId);
         }
         if ("quiz".equalsIgnoreCase(currentLesson.getContentType())) {
             Quiz quiz = quizTestService.getQuizByLessonId(currentLesson.getLessonId());

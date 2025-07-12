@@ -331,7 +331,7 @@
                                     <button type="submit" class="btn btn-primary">
                                         <i class="fas fa-paper-plane me-2"></i>Send Reply
                                     </button>
-                                    <a th:if="${comment.lessonId != null && notification.course != null}" th:href="@{/course/{courseId}/lesson/{lessonId}(courseId=${notification.course.courseId}, lessonId=${comment.lessonId})}" class="btn btn-info">
+                                    <a th:if="${comment.lessonId != null && notification.course != null}" th:href="@{'/learning/course/' + ${notification.course.courseId} + '/lesson/' + ${comment.lessonId} + '?commentId=' + ${notification.commentId}}" class="btn btn-info">
                                         <i class="fas fa-arrow-right me-2"></i>Go to Lesson
                                     </a>
 

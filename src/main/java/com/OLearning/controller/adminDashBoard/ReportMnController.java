@@ -35,7 +35,7 @@ public class ReportMnController {
                              @RequestParam(required = false) String status,
                              @RequestParam(required = false) String keyword,
                              @RequestParam(value = "page", defaultValue = "0") int page,
-                             @RequestParam(value = "size", defaultValue = "10") int size,
+                             @RequestParam(value = "size", defaultValue = "5") int size,
                              Model model) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Report> reportPage;

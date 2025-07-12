@@ -207,7 +207,7 @@
                         </td>
                         <td>
                             <a th:if="${n.type == 'COMMENT' and n.commentId != null and n.course != null and n.course.courseId != null and lessonIdMap[n.notificationId] != null}"
-                               th:href="@{'/course/' + ${n.course.courseId} + '/lesson/' + ${lessonIdMap[n.notificationId]} + '/video?commentId=' + ${n.commentId}}"
+                               th:href="@{'/learning/course/' + ${n.course.courseId} + '/lesson/' + ${lessonIdMap[n.notificationId]} + '?commentId=' + ${n.commentId}}"
                                class="btn btn-outline-success btn-sm action-btn"
                                title="Xem bình luận">
                                 <i class="fas fa-comment"></i>
