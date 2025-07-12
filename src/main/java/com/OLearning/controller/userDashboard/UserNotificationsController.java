@@ -39,8 +39,12 @@ public class UserNotificationsController {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
         Pageable pageable = PageRequest.of(page, size);
-        if (types == null || types.isEmpty()) {
+        if (types == null || types.isEmpty() || (types.size() == 1 && (types.get(0) == null || types.get(0).isBlank()))) {
             types = List.of("ENROLLMENT", "COURSE_COMPLETION", "QUIZ_RESULT", "CERTIFICATE", "PAYMENT_SUCCESS", "PAYMENT_FAILED", "COMMENT", "COMMENT_HIDDEN");
+        }
+        // Xử lý status khi chọn "All"
+        if (status != null && status.isBlank()) {
+            status = null;
         }
         Page<NotificationDTO> notificationPage;
         if (search != null && !search.isBlank()) {
@@ -70,6 +74,7 @@ public class UserNotificationsController {
         }
         model.addAttribute("lessonIdMap", lessonIdMap);
         model.addAttribute("fragmentContent", "homePage/fragments/notificationsContent :: notificationsContent");
+        model.addAttribute("isSearch", search != null && !search.isBlank());
         return "homePage/index";
     }
 

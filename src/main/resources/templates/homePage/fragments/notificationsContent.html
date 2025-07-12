@@ -120,13 +120,14 @@
                 <div class="col-md-3">
                     <label for="type" class="form-label mb-1">Type</label>
                     <select class="form-select" id="type" name="type">
-                        <option value="" th:selected="${selectedTypes == null or #lists.isEmpty(selectedTypes)}">All</option>
-                        <option th:value="ENROLLMENT" th:selected="${selectedTypes != null and selectedTypes.contains('ENROLLMENT')}">Enrollment</option>
-                        <option th:value="COURSE_COMPLETION" th:selected="${selectedTypes != null and selectedTypes.contains('COURSE_COMPLETION')}">Course Completion</option>
-                        <option th:value="QUIZ_RESULT" th:selected="${selectedTypes != null and selectedTypes.contains('QUIZ_RESULT')}">Quiz Results</option>
-                        <option th:value="CERTIFICATE" th:selected="${selectedTypes != null and selectedTypes.contains('CERTIFICATE')}">Certificates</option>
-                        <option th:value="PAYMENT_SUCCESS" th:selected="${selectedTypes != null and selectedTypes.contains('PAYMENT_SUCCESS')}">Payment Success</option>
-                        <option th:value="PAYMENT_FAILED" th:selected="${selectedTypes != null and selectedTypes.contains('PAYMENT_FAILED')}">Payment Failed</option>
+                        <option value="" th:selected="${selectedTypes == null or #lists.isEmpty(selectedTypes) or #lists.size(selectedTypes) == 8}">All</option>
+                        <option th:value="ENROLLMENT" th:selected="${selectedTypes != null and selectedTypes.contains('ENROLLMENT') and #lists.size(selectedTypes) == 1}">Enrollment</option>
+                        <option th:value="COURSE_COMPLETION" th:selected="${selectedTypes != null and selectedTypes.contains('COURSE_COMPLETION') and #lists.size(selectedTypes) == 1}">Course Completion</option>
+                        <option th:value="QUIZ_RESULT" th:selected="${selectedTypes != null and selectedTypes.contains('QUIZ_RESULT') and #lists.size(selectedTypes) == 1}">Quiz Results</option>
+                        <option th:value="CERTIFICATE" th:selected="${selectedTypes != null and selectedTypes.contains('CERTIFICATE') and #lists.size(selectedTypes) == 1}">Certificates</option>
+                        <option th:value="PAYMENT_SUCCESS" th:selected="${selectedTypes != null and selectedTypes.contains('PAYMENT_SUCCESS') and #lists.size(selectedTypes) == 1}">Payment Success</option>
+                        <option th:value="PAYMENT_FAILED" th:selected="${selectedTypes != null and selectedTypes.contains('PAYMENT_FAILED') and #lists.size(selectedTypes) == 1}">Payment Failed</option>
+                        <option th:value="COMMENT" th:selected="${selectedTypes != null and selectedTypes.contains('COMMENT') and #lists.size(selectedTypes) == 1}">Comment</option>
                     </select>
                 </div>
                 <div class="col-md-3">
@@ -139,7 +140,7 @@
                 </div>
                 <div class="col-md-4">
                     <label for="search" class="form-label mb-1">Search</label>
-                    <input type="text" class="form-control" id="search" name="search" placeholder="Search notifications..." th:value="${search}">
+                    <input type="text" class="form-control" id="search" name="search" placeholder="Search notifications..." th:value="${search != null ? search : ''}">
                 </div>
                 <div class="col-md-2 d-flex gap-2">
                     <button type="submit" class="btn btn-light w-100"><i class="fas fa-search me-1"></i>Filter</button>
@@ -171,8 +172,28 @@
                         <td><strong th:text="${iter.index + 1}"></strong></td>
                         <td><div class="notification-message" th:title="${n.message}" th:text="${n.message}"></div></td>
                         <td>
-                                <span th:class="'badge notification-type-badge ' + (${n.type} == 'ENROLLMENT' ? 'bg-success' : (${n.type} == 'COURSE_COMPLETION' ? 'bg-info' : (${n.type} == 'QUIZ_RESULT' ? 'bg-warning' : (${n.type} == 'CERTIFICATE' ? 'bg-primary' : (${n.type} == 'PAYMENT_SUCCESS' ? 'bg-success' : 'bg-danger')))))">
-                                    <span th:text="${n.type}"></span>
+                                <span th:class="'badge notification-type-badge'" th:switch="${n.type}">
+                                    <span th:case="'ENROLLMENT'" th:class="'badge notification-type-badge bg-success'">
+                                        <span th:text="${n.type}"></span>
+                                    </span>
+                                    <span th:case="'COURSE_COMPLETION'" th:class="'badge notification-type-badge bg-info'">
+                                        <span th:text="${n.type}"></span>
+                                    </span>
+                                    <span th:case="'QUIZ_RESULT'" th:class="'badge notification-type-badge bg-warning'">
+                                        <span th:text="${n.type}"></span>
+                                    </span>
+                                    <span th:case="'CERTIFICATE'" th:class="'badge notification-type-badge bg-primary'">
+                                        <span th:text="${n.type}"></span>
+                                    </span>
+                                    <span th:case="'PAYMENT_SUCCESS'" th:class="'badge notification-type-badge bg-success'">
+                                        <span th:text="${n.type}"></span>
+                                    </span>
+                                    <span th:case="'COMMENT'" th:class="'badge notification-type-badge bg-secondary'">
+                                        <span th:text="${n.type}"></span>
+                                    </span>
+                                    <span th:case="*" th:class="'badge notification-type-badge bg-danger'">
+                                        <span th:text="${n.type}"></span>
+                                    </span>
                                 </span>
                         </td>
                         <td>
@@ -209,19 +230,29 @@
                 <p class="text-muted">You're all caught up! Check back later for new notifications.</p>
             </div>
         </div>
-        <!-- Pagination (giữ nguyên phần cũ) -->
+        <!-- Pagination -->
         <div th:if="${totalPages != null and totalPages > 1}" class="d-flex justify-content-center mt-4">
             <nav aria-label="Notification pagination">
                 <ul class="pagination">
                     <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                        <a class="page-link" th:href="@{/user/notifications(page=${currentPage - 1}, size=${pageSize}, type=${selectedTypes}, status=${selectedStatus})}">Previous</a>
+                        <a class="page-link" th:if="${isSearch}" th:href="@{/user/notifications(page=${currentPage - 1}, size=${pageSize}, type=${selectedTypes}, status=${selectedStatus}, search=${search})}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                        <a class="page-link" th:unless="${isSearch}" th:href="@{/user/notifications(page=${currentPage - 1}, size=${pageSize}, type=${selectedTypes}, status=${selectedStatus})}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
                     </li>
-                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                        th:classappend="${i == currentPage} ? 'active'">
-                        <a class="page-link" th:href="@{/user/notifications(page=${i}, size=${pageSize}, type=${selectedTypes}, status=${selectedStatus})}" th:text="${i + 1}">1</a>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${i == currentPage} ? 'active'">
+                        <a class="page-link" th:if="${isSearch}" th:href="@{/user/notifications(page=${i}, size=${pageSize}, type=${selectedTypes}, status=${selectedStatus}, search=${search})}" th:text="${i + 1}"></a>
+                        <a class="page-link" th:unless="${isSearch}" th:href="@{/user/notifications(page=${i}, size=${pageSize}, type=${selectedTypes}, status=${selectedStatus})}" th:text="${i + 1}"></a>
                     </li>
-                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
-                        <a class="page-link" th:href="@{/user/notifications(page=${currentPage + 1}, size=${pageSize}, type=${selectedTypes}, status=${selectedStatus})}">Next</a>
+                    <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                        <a class="page-link" th:if="${isSearch}" th:href="@{/user/notifications(page=${currentPage + 1}, size=${pageSize}, type=${selectedTypes}, status=${selectedStatus}, search=${search})}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                        <a class="page-link" th:unless="${isSearch}" th:href="@{/user/notifications(page=${currentPage + 1}, size=${pageSize}, type=${selectedTypes}, status=${selectedStatus})}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
                     </li>
                 </ul>
             </nav>
@@ -270,6 +301,25 @@
                     })
                     .catch(error => {
                         console.error('Error marking all as read:', error);
+                    });
+            }
+        }
+
+        function deleteAllRead() {
+            if (confirm('Delete all read notifications? This action cannot be undone.')) {
+                fetch('/user/notifications/delete-all-read', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            location.reload();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error deleting all read notifications:', error);
                     });
             }
         }
