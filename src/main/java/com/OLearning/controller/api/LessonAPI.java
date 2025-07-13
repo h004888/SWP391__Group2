@@ -3,6 +3,7 @@ package com.OLearning.controller.api;
 import com.OLearning.entity.Lesson;
 import com.OLearning.entity.User;
 import com.OLearning.security.CustomUserDetails;
+import com.OLearning.service.enrollment.EnrollmentService;
 import com.OLearning.service.lesson.LessonService;
 import com.OLearning.service.lessonCompletion.LessonCompletionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,17 +22,20 @@ public class LessonAPI {
     private LessonService lessonService;
     @Autowired
     private LessonCompletionService lessonCompletionService;
-//
-//    @GetMapping("/next")
-//    public ResponseEntity<Lesson> getNextLesson(
-//            @RequestParam("userId")   Long userId,
-//            @RequestParam("courseId") Long courseId) {
-//
-//        Optional<Lesson> next = lessonService.getNextLesson(userId, courseId);
-//        return next
-//                .map(ResponseEntity::ok)
-//                .orElseGet(() -> ResponseEntity.noContent().build());
-//    }
+    @Autowired
+    private EnrollmentService enrollmentService;
+
+    //
+    // @GetMapping("/next")
+    // public ResponseEntity<Lesson> getNextLesson(
+    // @RequestParam("userId") Long userId,
+    // @RequestParam("courseId") Long courseId) {
+    //
+    // Optional<Lesson> next = lessonService.getNextLesson(userId, courseId);
+    // return next
+    // .map(ResponseEntity::ok)
+    // .orElseGet(() -> ResponseEntity.noContent().build());
+    // }
     @GetMapping("/first")
     public ResponseEntity<Lesson> getFirstLesson(
             @RequestParam("courseId") Long courseId) {
@@ -41,6 +45,7 @@ public class LessonAPI {
                 ? ResponseEntity.ok(first)
                 : ResponseEntity.noContent().build();
     }
+
     private User extractCurrentUser(Principal principal) {
         if (principal instanceof Authentication authentication) {
             Object principalObj = authentication.getPrincipal();
@@ -56,8 +61,7 @@ public class LessonAPI {
     public ResponseEntity<?> markLessonComplete(
             @RequestParam Long lessonId,
             @RequestParam Long courseId,
-            Principal principal
-    ) {
+            Principal principal) {
         User user = extractCurrentUser(principal);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -65,14 +69,17 @@ public class LessonAPI {
 
         if (!lessonCompletionService.checkLessonCompletion(user.getUserId(), lessonId)) {
             lessonCompletionService.markLessonAsCompleted(user.getUserId(), lessonId);
+            enrollmentService.updateProgressByUser(user.getUserId(), courseId);
+        }
+        if (lessonCompletionService.getOverallProgressOfUser(user.getUserId(), courseId) >= 100) {
+            enrollmentService.updateStatusToCompleted(user.getUserId(), courseId);
         }
 
-       Lesson nextLesson = lessonService.getNextLesson(courseId, lessonId);
-        if (nextLesson!=null) {
+        Lesson nextLesson = lessonService.getNextLesson(courseId, lessonId);
+        if (nextLesson != null) {
             return ResponseEntity.ok(Map.of(
                     "status", "success",
-                    "nextLessonUrl", "/learning/course/" + courseId + "/lesson/" + nextLesson.getLessonId()
-            ));
+                    "nextLessonUrl", "/learning/course/" + courseId + "/lesson/" + nextLesson.getLessonId()));
         } else {
             return ResponseEntity.ok(Map.of("status", "completed_all"));
         }

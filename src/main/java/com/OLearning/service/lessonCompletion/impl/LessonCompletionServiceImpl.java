@@ -25,8 +25,6 @@ public class LessonCompletionServiceImpl implements LessonCompletionService {
     @Autowired
     private LessonService lessonService;
 
-
-
     @Override
     public List<LessonCompletionDTO> getByUserAndCourse(Long userId, Long courseId) {
         return lessonCompletionRepository.findByUser_UserIdAndLesson_Chapter_Course_CourseId(userId, courseId).stream()
@@ -34,9 +32,8 @@ public class LessonCompletionServiceImpl implements LessonCompletionService {
                         lc.getCompletionId(),
                         lc.getUser().getUserId(),
                         lc.getLesson().getLessonId(),
-                        lc.getCompletedAt()
-                ))
-                .collect(Collectors.toList())   ;
+                        lc.getCompletedAt()))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -54,4 +51,15 @@ public class LessonCompletionServiceImpl implements LessonCompletionService {
             lessonCompletionRepository.save(completion);
         }
     }
+
+    @Override
+    public Double getOverallProgressOfUser(Long userId, Long courseId) {
+        return lessonCompletionRepository.getCourseProgressPercent(userId, courseId);
+    }
+
+    @Override
+    public Integer getNumberOfCompletedLessons(Long userId, Long courseId) {
+        return lessonCompletionRepository.getNumberOfCompletedLessons(userId, courseId);
+    }
+
 }

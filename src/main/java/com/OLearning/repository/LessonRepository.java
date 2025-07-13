@@ -74,6 +74,38 @@ public interface LessonRepository extends JpaRepository<Lesson, Long> {
             Pageable pageable
     );
 
+    @Query(value = """
+                DECLARE @currentLessonId INT = :currentLessonId;
+                DECLARE @courseId INT = :courseID;
+            
+                -- 1. Lấy OrderNumber và ChapterID hiện tại
+                DECLARE @currentOrder INT;
+                DECLARE @currentChapterId INT;
+            
+                SELECT\s
+                    @currentOrder = l.OrderNumber,
+                    @currentChapterId = l.ChapterID
+                FROM Lessons l
+                WHERE l.LessonID = @currentLessonId;
+            
+                -- 2. Lấy bài học tiếp theo trong cùng khóa học, bất kể đã học hay chưa
+                SELECT TOP 1 l.*
+                FROM Lessons l
+                JOIN Chapters c ON l.ChapterID = c.ChapterID
+                WHERE c.CourseID = @courseId
+                  AND (
+                        c.ChapterID > @currentChapterId
+                        OR (c.ChapterID = @currentChapterId AND l.OrderNumber > @currentOrder)
+                        OR (
+                            c.ChapterID = @currentChapterId AND l.OrderNumber = @currentOrder AND l.LessonID > @currentLessonId
+                        )
+                      )
+                ORDER BY c.ChapterID ASC, l.OrderNumber ASC, l.LessonID ASC;
+                
+            """, nativeQuery = true)
+    Lesson findNextLessonAfterCurrent(@Param("currentLessonId") Long currentLessonId,@Param("courseID") Long courseId);
+
+
 
     Optional<Lesson> findFirstByChapter_Course_CourseIdOrderByChapter_ChapterIdAscOrderNumberAsc(Long courseId);
 

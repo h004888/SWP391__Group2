@@ -20,6 +20,9 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import com.OLearning.repository.UserRepository;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 
 @Configuration
 @EnableWebSecurity
@@ -32,9 +35,15 @@ public class SecurityConfig {
 
     private final UserRepository userRepository;
 
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                // Use NoOpPasswordEncoder cho password chưa mã hóa
+//                return NoOpPasswordEncoder.getInstance();
+                 return new BCryptPasswordEncoder();
+        }
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring().requestMatchers("/api/payment/sepay/webhook");
     }
 
     @Bean
@@ -75,12 +84,16 @@ public class SecurityConfig {
 
                         // Root path redirect
                         .requestMatchers("/home/**").permitAll()
-
+                        .requestMatchers("/vouchers").permitAll()
+                        .requestMatchers("/cart").authenticated()
+                        .requestMatchers("/api/sepay/**", "/api/order/status").permitAll() // Thêm lại /api/sepay/**
                         // Chỉ admin mới được truy cập /admin/**
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
                         // Cho phép cả ADMIN và INSTRUCTOR truy cập /instructordashboard/**
-                        .requestMatchers("/instructordashboard/**").hasAnyRole("ADMIN", "INSTRUCTOR")
+                        .requestMatchers("/instructor/**").hasAnyRole("ADMIN", "INSTRUCTOR")
+
+                        .requestMatchers("/terms/user").permitAll()
 
                         .anyRequest().authenticated()
                 )

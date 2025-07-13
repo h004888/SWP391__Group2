@@ -69,9 +69,10 @@ public class CoinTransactionServiceImpl implements CoinTransactionService {
         transaction.setUser(user);
         transaction.setAmount(amount);
         transaction.setTransactionType("top_up");
-        transaction.setStatus("completed");
+        transaction.setStatus("PAID");
         transaction.setNote("VNPay TransactionId: " + transactionId);
         transaction.setCreatedAt(LocalDateTime.now());
+        transaction.setOrder(null);
 
         user.setCoin(user.getCoin() + amount.doubleValue());
         userRepository.save(user);
@@ -97,9 +98,10 @@ public class CoinTransactionServiceImpl implements CoinTransactionService {
         transaction.setUser(user);
         transaction.setAmount(amount.negate());
         transaction.setTransactionType("withdraw");
-        transaction.setStatus("completed");
+        transaction.setStatus("PAID");
         transaction.setNote("Withdrawal processed");
         transaction.setCreatedAt(LocalDateTime.now());
+        transaction.setOrder(null);
 
         // Update user's coin balance
         user.setCoin(user.getCoin() - amount.doubleValue());
@@ -107,6 +109,7 @@ public class CoinTransactionServiceImpl implements CoinTransactionService {
 
         return coinTransactionRepository.save(transaction);
     }
+
     @Override
     @Transactional
     public Page<CoinTransactionDTO> filterAndSortTransactions(Long userId, String transactionType, String startDate, String endDate, int page, int size) {
@@ -156,5 +159,53 @@ public class CoinTransactionServiceImpl implements CoinTransactionService {
         }
 
         return transactionPage.map(coinTransactionMapper::toDTO);
+    }
+
+    public Page<CoinTransactionDTO> getUserCoursePurchaseTransactions(Long userId, String courseName, String status, String startDate, String endDate, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        String transactionType = "course_purchase";
+        Page<CoinTransaction> transactionPage;
+        LocalDateTime start = null, end = null;
+        if (startDate != null && !startDate.trim().isEmpty() && endDate != null && !endDate.trim().isEmpty()) {
+            start = LocalDate.parse(startDate).atStartOfDay();
+            end = LocalDate.parse(endDate).plusDays(1).atStartOfDay().minusSeconds(1);
+        }
+        if (status != null && !status.trim().isEmpty() && start != null && end != null) {
+            transactionPage = coinTransactionRepository.findByUserUserIdAndTransactionTypeAndStatusAndCreatedAtBetween(userId, transactionType, status, start, end, pageable);
+        } else if (status != null && !status.trim().isEmpty()) {
+            transactionPage = coinTransactionRepository.findByUserUserIdAndTransactionTypeAndStatus(userId, transactionType, status, pageable);
+        } else if (start != null && end != null) {
+            transactionPage = coinTransactionRepository.findByUserUserIdAndTransactionTypeAndCreatedAtBetween(userId, transactionType, start, end, pageable);
+        } else {
+            transactionPage = coinTransactionRepository.findByUserUserIdAndTransactionType(userId, transactionType, pageable);
+        }
+        // Lọc theo tên khóa học nếu có
+        List<CoinTransactionDTO> dtos = transactionPage.getContent().stream()
+            .map(coinTransactionMapper::toDTO)
+            .filter(dto -> courseName == null || courseName.isEmpty() || (dto.getCourseName() != null && dto.getCourseName().toLowerCase().contains(courseName.toLowerCase())))
+            .toList();
+        return new PageImpl<>(dtos, pageable, transactionPage.getTotalElements());
+    }
+
+    // Thống kê tổng chi tiêu và số lượng khóa học đã mua
+    public BigDecimal getTotalSpent(Long userId) {
+        String transactionType = "course_purchase";
+        List<CoinTransaction> transactions = coinTransactionRepository.findByUserUserIdAndTransactionType(userId, transactionType, Pageable.unpaged()).getContent();
+        return transactions.stream()
+            .filter(t -> t.getAmount() != null && t.getAmount().signum() < 0)
+            .map(t -> t.getAmount().abs())
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+    public long getTotalCoursesPurchased(Long userId) {
+        String transactionType = "course_purchase";
+        List<CoinTransaction> transactions = coinTransactionRepository.findByUserUserIdAndTransactionType(userId, transactionType, Pageable.unpaged()).getContent();
+        return transactions.stream().map(coinTransactionMapper::toDTO).map(CoinTransactionDTO::getCourseName).distinct().count();
+    }
+
+    // Lấy chi tiết giao dịch
+    public CoinTransactionDTO getTransactionDetail(Long transactionId) {
+        CoinTransaction transaction = coinTransactionRepository.findById(transactionId).orElse(null);
+        if (transaction == null) return null;
+        return coinTransactionMapper.toDTO(transaction);
     }
 }

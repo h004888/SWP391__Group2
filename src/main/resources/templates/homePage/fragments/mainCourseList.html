@@ -29,18 +29,19 @@
                                         <i class="fas fa-star text-warning me-1"></i>
                                         <span th:text="${course.totalRatings}">0</span>
                                     </span>
-                                    <a href="#" class="h6 fw-light wishlist-toggle"
-                                       th:attr="data-course-id=${course.courseId}, data-course-title=${course.title}"
-                                       th:classappend="${wishlistCourseIds != null and wishlistCourseIds.contains(course.courseId)} ? 'fas fa-heart text-danger' : 'far fa-heart'">
+                                    <button type="button"
+                                            class="btn btn-link text-muted p-0 wishlist-toggle"
+                                            th:data-course-id="${course.courseId}"
+                                            th:onclick="'toggleWishlist(this, ' + ${course.courseId} + ')'"
+                                            style="font-size: 1.2rem;">
                                         <i class="far fa-heart"></i>
-                                    </a>
+                                    </button>
                                 </div>
                             </div>
 
                             <!-- Title -->
                             <h5 class="card-title">
-                                <a th:href="@{'/course-detail/' + ${course.courseId}}" th:text="${course.title}">Course
-                                    Title</a>
+                                <a th:href="@{'/course/course-detail/' + ${course.courseId}}" th:text="${course.title}">Course Title</a>
                             </h5>
 
                             <!-- Description -->
@@ -81,16 +82,14 @@
                                                 th:attr="data-course-id=${course.courseId}">
                                             <i class="fas fa-shopping-cart me-2"></i>Add to cart
                                         </button>
-                                        <form th:action="@{'/home/buy-now/' + ${course.courseId}}" method="post" class="d-inline">
+                                        <form th:action="@{'/home/buy-now'}" method="post" class="d-inline">
                                             <button type="submit" class="btn btn-sm btn-primary item-show-hover m-1"><i class="fas fa-bolt me-2"></i>Mua ngay</button>
                                         </form>
                                     </div>
                                 </div>
                                 <!-- View more button -->
-                                <a th:href="@{'/course-detail/' + ${course.courseId}}" class="btn btn-dark">View
-                                    more</a>
+                                <a th:href="@{'/course/course-detail/' + ${course.courseId}}" class="btn btn-dark">View more</a>
                             </div>
-
                         </div>
                     </div>
                 </div>
@@ -127,4 +126,5 @@
     </div>
     <!-- Pagination END -->
     <script th:src="@{/js/homePage/addtocart.js}"></script>
+    <script th:src="@{/js/homePage/wishlist.js}"></script>
 </div>

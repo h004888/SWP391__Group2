@@ -1,18 +1,16 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
-
-
 <div th:replace="~{homePage/fragments/header :: header}"></div>
 
 <body>
-
 	<!-- Header START -->
 	<div th:replace="~{homePage/fragments/navHeader :: navHeader}"></div>
 	<!-- Header END -->
 
 	<!-- **************** MAIN CONTENT START **************** -->
-	<div th:replace="~{homePage/fragments/mainContent :: mainContent}"></div>
+
+	<div th:replace="~{__${fragmentContent}__}"></div>
 	<!-- **************** MAIN CONTENT END **************** -->
 
 	<!-- =======================
@@ -37,8 +35,8 @@ Footer END -->
 
 	<!-- Template Functions -->
 	<script src="assets/js/functions.js"></script>
-
-
+	<script src="js/homePage/wishlist.js"></script>
+	<script src="js/homePage/addtocart.js"></script>
 
 	<script>
 		function toggleMoreCategories(event) {
@@ -58,6 +56,8 @@ Footer END -->
 					},
 					success: function (data) {
 						$('#course-pills-tabContent').html(data);
+						// Trigger custom event to update wishlist status
+						document.dispatchEvent(new CustomEvent('courses-loaded'));
 					},
 					error: function () {
 						console.error('Lỗi khi tải dữ liệu');
@@ -83,12 +83,28 @@ Footer END -->
 				loadCoursesByCategory(defaultCategoryId);
 			}
 		});
+
+		$(document).ready(function () {
+			// Khi bấm Profile trên dropdown
+			$('#dropdown-profile-btn').on('click', function (e) {
+				e.preventDefault();
+				$.get('/user/profile/fragment', function (data) {
+					$('#profile-container').html(data);
+					// Gắn lại sự kiện cho nút Edit Profile trong fragment
+					$('#btn-edit-profile').on('click', function () {
+						$.get('/user/profile/edit-fragment', function (data) {
+							$('#profile-container').html(data);
+							// Gắn lại sự kiện cho nút Cancel trong form edit
+							$('#btn-cancel-edit').on('click', function () {
+								$('#dropdown-profile-btn').click();
+							});
+						});
+					});
+				});
+			});
+		});
 	</script>
 
-
-
 </body>
-
-
 
 </html>

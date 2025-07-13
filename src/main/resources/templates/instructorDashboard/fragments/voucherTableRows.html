@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="voucherTableRows">
+    <tr th:each="voucher : ${vouchers}">
+        <td th:text="${voucher.code}"></td>
+        <td th:text="${voucher.discount}"></td>
+        <td th:text="${#temporals.format(voucher.expiryDate, 'dd/MM/yyyy')}"></td>
+        <td th:text="${voucher.limitation}"></td>
+        <td th:text="${voucher.usedCount}"></td>
+        <td>
+            <span th:class="'badge rounded-pill px-3 py-2 ' + (${voucher.isGlobal} ? 'bg-primary' : 'bg-info')"
+                  th:text="${voucher.isGlobal ? 'Tất cả khóa học' : 'Một số khóa học'}">
+            </span>
+        </td>
+        <td>
+            <span th:text="${voucher.isPublic} ? 'Có' : 'Không'"></span>
+        </td>
+        <td>
+            <button class="btn btn-info btn-sm" th:onclick="|viewCourses(${voucher.voucherId})|">
+                <i class="bi bi-eye"></i> View
+            </button>
+        </td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(vouchers)}">
+        <td colspan="8" class="text-center"
+            th:text="${status == 'valid' ? 'Không có voucher còn hạn.' : (status == 'expired' ? 'Không có voucher hết hạn.' : 'Không có voucher nào.')}"></td>
+    </tr>
+</th:block>
+</html> 

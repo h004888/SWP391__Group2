@@ -146,82 +146,11 @@ function toggleWithdrawForm() {
     Utils.toggleForm('withdrawForm', 'formOverlay', 'depositForm');
 }
 
-// Filter and pagination functions
-function filterTransactions(page = 0, size = 10) {
-    const filters = {
-        transactionType: $('#filterTransactionType').val(),
-        startDate: $('#filterStartDate').val(),
-        endDate: $('#filterEndDate').val()
-    };
-
-    console.log("Filtering with:", filters, "page:", page, "size:", size);
-
-    // Create new URL
-    let url = new URL(window.location.origin + '/history');
-    url.searchParams.set('page', page);
-    url.searchParams.set('size', size);
-
-    Object.entries(filters).forEach(([key, value]) => {
-        if (value && value.trim() !== '') {
-            url.searchParams.set(key, value);
-        }
-    });
-
-    // Send AJAX request
-    $.ajax({
-        url: '/history/filter',
-        method: 'GET',
-        data: {
-            ...filters,
-            page: page,
-            size: size
-        },
-        success: function (data) {
-            $('#transactionsTableBody').html(data);
-            window.history.pushState({}, '', url);
-            console.log("Transactions filter successful, URL updated to:", url.toString());
-        },
-        error: function (xhr, status, error) {
-            console.error("AJAX Error:", status, error);
-            alert("An error occurred while loading data: " + error);
-        }
-    });
-}
-
-function clearFilters() {
-    $('#filterTransactionType, #filterStartDate, #filterEndDate').val('');
-    filterTransactions(0, 10);
-}
-
 // Document ready
 $(document).ready(function () {
     // Event handlers
-    $('#filterTransactionType, #filterStartDate, #filterEndDate').on('change', function () {
-        console.log("Filter changed:", $(this).attr('id'), $(this).val());
-        filterTransactions(0, 10);
-    });
-
-    $(document).on('click', '.page-link', function (e) {
-        e.preventDefault();
-        let page = $(this).text() - 1;
-        if ($(this).find('i.fa-angle-left').length) {
-            page = parseInt($('#currentPage').val()) - 1;
-        } else if ($(this).find('i.fa-angle-right').length) {
-            page = parseInt($('#currentPage').val()) + 1;
-        }
-        if (page >= 0) {
-            filterTransactions(page, 10);
-        }
-    });
-
     $('#formOverlay').on('click', function() {
         $('#depositForm, #withdrawForm').hide();
         $(this).hide();
     });
-
-    // Initial filter if parameters exist
-    const hasInitialFilters = $('#filterTransactionType').val() || $('#filterStartDate').val() || $('#filterEndDate').val();
-    if (hasInitialFilters) {
-        filterTransactions(0, 10);
-    }
 });

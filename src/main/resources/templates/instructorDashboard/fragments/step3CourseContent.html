@@ -1,19 +1,14 @@
 <div class="main-content" th:fragment="step3Content">
     <div class="container-fluid py-4">
-        <!-- Breadcrumb -->
-
-
-        <!-- Page Header -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h1 class="h3 mb-0">Create New Course</h1>
-                <p class="text-muted">Fill in the details below to create your course</p>
+        <!-- Page Header & Step Indicator -->
+        <div class="content-card sticky-step-indicator mb-4 rounded-3 border-0 shadow-sm px-4 py-3">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-2">
+                <div>
+                    <h1 class="h3 mb-1 fw-bold text-primary">Create New Course</h1>
+                    <p class="text-muted mb-0">Fill in the details below to create your course</p>
+                </div>
             </div>
-
-        </div>
-
-        <div class="content-card">
-            <div class="step-indicator">
+            <div class="step-indicator mt-3">
                 <div class="step completed" data-step="1">
                     <div class="step-circle">1</div>
                     <div class="step-label">Basic Info</div>
@@ -32,16 +27,17 @@
                 </div>
             </div>
         </div>
+
         <div class="row">
             <div class="col-lg-12">
                 <h3 class="mb-4">Course Content</h3>
                 <button type="button" class="btn btn-primary mb-3" onclick="toggleChapterForm()">
                     <i class="bi bi-plus me-1"></i> Add Chapter
                 </button>
-                <form th:action="@{/instructordashboard/createcourse/autofillchapter}" method="post" id="autoFillChapterForm">
-                <button type="button" class="btn btn-primary mb-3" onclick="confirmAutoFillChapter()">
-                    <i class="bi bi-arrow-repeat me-1"></i> Fill Order Number Of Chapter
-                </button>
+                <form th:action="@{/instructor/createcourse/autofillchapter}" method="post" id="autoFillChapterForm">
+                    <button type="button" class="btn btn-primary mb-3" onclick="confirmAutoFillChapter()">
+                        <i class="bi bi-arrow-repeat me-1"></i> Fill Order Number Of Chapter
+                    </button>
                 </form>
                 <script>
                     function confirmAutoFillChapter() {
@@ -71,7 +67,7 @@
                 </div>
 
                 <!-- Add Chapter Form -->
-                <form th:action="@{/instructordashboard/createcourse/chaptersadd}" th:object="${chapter}" method="post" class="mb-4">
+                <form th:action="@{/instructor/createcourse/chaptersadd}" th:object="${chapter}" method="post" class="mb-4">
                     <div id="addChapterSection" th:class="${showForm} ? '' : 'd-none'">
                         <div class="row">
                             <!-- Chapter Title -->
@@ -112,18 +108,18 @@
                             <div>
                                 <a th:href="'#collapseChapter' + ${chapter.chapterId}" data-bs-toggle="collapse"
                                    th:attr="aria-controls='collapseChapter' + ${chapter.chapterId}" aria-expanded="false"
-                                   style="text-decoration:none;" onclick="toggleCollapse(this)">
+                                   style="text-decoration:none;">
                                     <h4 class="mb-1" th:text="'Chapter ' + ${chapter.orderNumber} + ': ' + ${chapter.title}"></h4>
                                 </a>
                                 <p class="text-muted mb-0" th:text="${chapter.description}"></p>
                             </div>
                             <div class="d-flex align-items-center gap-2 mb-3">
-<!--                                auto fill-->
-                                <form th:action="@{/instructordashboard/createcourse/autofilllesson}" method="post" th:id="'autoFillLessonForm' + ${chapter.chapterId}">
+                                <!--                                auto fill-->
+                                <form th:action="@{/instructor/createcourse/autofilllesson}" method="post" th:id="'autoFillLessonForm' + ${chapter.chapterId}">
                                     <input type="hidden" name="chapterId" th:value="${chapter.chapterId}" />
-                                <button type="button" class="btn btn-sm btn-primary" th:onclick="'confirmAutoFillLesson(' + ${chapter.chapterId} + ')'">
-                                    <i class="bi bi-arrow-repeat me-1"></i> Fill Order Number Of Lesson
-                                </button>
+                                    <button type="button" class="btn btn-sm btn-primary" th:onclick="'confirmAutoFillLesson(' + ${chapter.chapterId} + ')'">
+                                        <i class="bi bi-arrow-repeat me-1"></i> Fill Order Number Of Lesson
+                                    </button>
                                 </form>
                                 <script>
                                     function confirmAutoFillLesson(chapterId) {
@@ -151,7 +147,7 @@
                                 </button>
 
                                 <!-- Delete Chapter button -->
-                                <form th:action="@{/instructordashboard/createcourse/deletechapter}" method="post">
+                                <form th:action="@{/instructor/createcourse/deletechapter}" method="post">
                                     <input type="hidden" name="chapterId" th:value="${chapter.chapterId}" />
                                     <button type="submit" class="btn btn-sm btn-outline-danger"
                                             onclick="return confirm('Are you sure you want to delete this chapter?');">
@@ -164,7 +160,7 @@
                         <div th:id="'collapseChapter' + ${chapter.chapterId}" class="collapse chapter-body">
                             <!-- Add Lesson Form - Initially Hidden -->
                             <form th:id="'lessonForm' + ${chapter.chapterId}" class="lesson-form mt-3 d-none"
-                                  th:action="@{/instructordashboard/createcourse/addlesson}" th:object="${lessontitle}" method="post">
+                                  th:action="@{/instructor/createcourse/addlesson}" th:object="${lessontitle}" method="post">
                                 <div class="mb-2">
                                     <input type="hidden" name="chapterId" th:value="${chapter.chapterId}" />
                                     <label class="form-label">Lesson Title</label>
@@ -198,11 +194,27 @@
                             <div th:id="'lessonsList' + ${chapter.chapterId}" th:if="${chapter.lessons != null}">
                                 <!-- Quiz Form - Initially Hidden -->
                                 <!-- Lesson 1 -->
-                                <div class="lesson-item mb-3" th:each="lesson : ${chapter.lessons}">
+                                <div class="lesson-item mb-3" th:each="lesson : ${chapter.lessons}"
+                                     th:attr="data-videoid=${lesson.video != null ? lesson.video.videoUrl : null},
+                                              data-quizid=${lesson.quiz != null ? lesson.quiz.id : null}"
+                                     style="cursor:pointer;">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <div>
                                             <h6 class="mb-1">
-                                                <span th:text="'Lesson ' + ${lesson.orderNumber} + ': ' + ${lesson.title}"></span>
+                                                <a href="javascript:void(0)"
+                                                   class="lesson-title-link"
+                                                   th:if="${lesson.video != null and lesson.video.videoUrl != null}"
+                                                   th:attr="data-videoid=${lesson.video.videoUrl}"
+                                                   onclick="handleLessonClick(event, this)">
+                                                    <span th:text="'Lesson ' + ${lesson.orderNumber} + ': ' + ${lesson.title}"></span>
+                                                </a>
+                                                <a href="javascript:void(0)"
+                                                   class="lesson-title-link"
+                                                   th:if="${lesson.quiz != null}"
+                                                   th:attr="data-quizid=${lesson.quiz.id}"
+                                                   onclick="handleLessonClick(event, this)">
+                                                    <span th:text="'Lesson ' + ${lesson.orderNumber} + ': ' + ${lesson.title}"></span>
+                                                </a>
                                                 <span th:if="${lesson.isFree}" class="badge bg-success ms-2">Free</span>
                                                 <span th:if="${!lesson.isFree}" class="badge bg-danger ms-2">Premium</span>
                                             </h6>
@@ -231,7 +243,7 @@
                                             </button>
 
                                             <!-- Delete Lesson button -->
-                                            <form th:action="@{/instructordashboard/createcourse/deletelesson}" method="post" class="mb-0">
+                                            <form th:action="@{/instructor/createcourse/deletelesson}" method="post" class="mb-0">
                                                 <input type="hidden" name="lessonId" th:value="${lesson.lessonId}" />
                                                 <button type="submit" class="btn btn-sm btn-outline-danger"
                                                         onclick="return confirm('Are you sure you want to delete this lesson?');">
@@ -372,7 +384,7 @@
 
                                         <!-- Video Form -->
                                         <div id="videoForm" class="video-form">
-                                            <form th:action="@{/instructordashboard/createcourse/addvideo}" th:object="${videoDTO}" method="post" enctype="multipart/form-data" class="video-upload-form">
+                                            <form th:action="@{/instructor/createcourse/addvideo}" th:object="${videoDTO}" method="post" enctype="multipart/form-data" class="video-upload-form">
                                                 <input type="hidden" name="lessonId" th:value="${lesson.lessonId}" />
                                                 <div class="mb-3">
                                                     <label class="form-label">Upload video</label>
@@ -383,7 +395,7 @@
                                                 </div>
                                                 <div class="mb-3">
                                                     <label class="form-label">Duration (minutes)</label>
-                                                    <input type="number" th:field="*{durationMinutes}" class="form-control video-duration-input" id="videoDuration" readonly>
+                                                    <input type="number" th:field="*{duration}" class="form-control video-duration-input" id="videoDuration" readonly>
                                                     <small class="form-text text-muted">Duration will be calculated automatically when you select a video file.</small>
                                                 </div>
                                                 <div class="d-flex justify-content-end">
@@ -394,7 +406,7 @@
 
                                         <!-- Quiz Section - Initially Hidden -->
                                         <div class="quiz-section d-none">
-                                            <form th:action="@{/instructordashboard/createcourse/addquiz}" method="post" id="quizForm">
+                                            <form th:action="@{/instructor/createcourse/addquiz}" method="post" id="quizForm">
                                                 <input type="hidden" name="lessonId" th:value="${lesson.lessonId}" />
 
                                                 <div class="mb-3">
@@ -411,8 +423,6 @@
                                                     <label class="form-label">Time Limit (minutes)</label>
                                                     <input type="number" name="timeLimit" class="form-control"  min="1" required>
                                                 </div>
-
-                                                <h5 class="mt-4 mb-3">Quiz Questions</h5>
 
                                                 <!-- Quiz List -->
                                                 <div class="quiz-list mb-3">
@@ -486,16 +496,16 @@
 
 
 
-                <form th:action="@{/instructordashboard/createcourse/submitcourse}" method="post">
-                    <div class="content-card">
-                        <div class="d-flex justify-content-between">
-                            <button class="btn btn-outline-secondary me-3" name="action" value="previousstep">
+                <form th:action="@{/instructor/createcourse/submitcourse}" method="post">
+                    <div class="content-card sticky-navigation-buttons rounded-3 border-0 shadow-sm px-4 py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <button class="btn btn-outline-secondary px-4 py-2 rounded-2 me-2" name="action" value="previousstep">
                                 <i class="bi bi-arrow-left me-1"></i> Previous
                             </button>
-                            <button class="btn btn-outline-secondary me-2" id="saveDraftBtn" name="action" value="draft">
+                            <button class="btn btn-outline-secondary px-4 py-2 rounded-2 me-2" id="saveDraftBtn" name="action" value="draft">
                                 <i class="bi bi-save me-1"></i> Save as Draft
                             </button>
-                            <button class="btn btn-primary ms-auto" name="action" value="nextstep">
+                            <button class="btn btn-primary px-4 py-2 rounded-2 ms-auto" name="action" value="nextstep">
                                 Next <i class="bi bi-arrow-right ms-1"></i>
                             </button>
                         </div>
@@ -587,7 +597,8 @@
             .step-indicator {
                 display: flex;
                 justify-content: space-between;
-                margin-bottom: 2rem;
+                margin-bottom: 0;
+                gap: 0.5rem;
             }
 
             .step {
@@ -612,8 +623,8 @@
             }
 
             .step-circle {
-                width: 30px;
-                height: 30px;
+                width: 32px;
+                height: 32px;
                 border-radius: 50%;
                 background-color: #dee2e6;
                 color: #6c757d;
@@ -624,6 +635,7 @@
                 margin-bottom: 0.5rem;
                 position: relative;
                 z-index: 2;
+                font-size: 1.1rem;
             }
 
             .step.active .step-circle {
@@ -721,6 +733,36 @@
             .sticky-sidebar {
                 position: sticky;
                 top: 20px;
+            }
+            .content-card.sticky-step-indicator {
+                position: sticky;
+                top: 0;
+                z-index: 1000;
+                background-color: #f0f4fa;
+                margin-bottom: 1.5rem;
+                padding-top: 10px;
+                padding-bottom: 10px;
+                border-bottom: 2px solid #b6c6e3;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            }
+
+            /* Style cho sticky navigation buttons */
+            .content-card.sticky-navigation-buttons {
+                position: sticky;
+                bottom: 0;
+                z-index: 1000;
+                background-color: #f0f4fa;
+                margin-top: 1.5rem;
+                padding-top: 15px;
+                padding-bottom: 15px;
+                border-top: 2px solid #b6c6e3;
+                box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+            }
+            @media (max-width: 768px) {
+                .card-body, .content-card.sticky-step-indicator, .content-card.sticky-navigation-buttons {
+                    padding-left: 1rem !important;
+                    padding-right: 1rem !important;
+                }
             }
         </style>
         <script>
@@ -846,20 +888,16 @@
         </script>
     </div>
     <!-- Video Modal -->
-    <div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="videoModalLabel" aria-hidden="true">
+    <div class="modal fade" id="videoModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="videoModalLabel">Lesson Video</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="stopVideo()"></button>
+            <div class="modal-content bg-dark border-0 rounded-4">
+                <div class="modal-header border-0 pb-0" style="background: transparent;">
+                    <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
                 </div>
-                <div class="modal-body d-flex justify-content-center">
-                    <div style="width: 100%; max-width: 800px; aspect-ratio: 16/9;">
-                        <video id="lessonVideo" controls class="w-100 rounded">
-                            <source id="videoSource" src="" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                    </div>
+                <div class="modal-body p-0 d-flex justify-content-center align-items-center" style="min-height: 400px;">
+                    <video id="dynamicVideo" controls style="width:100%; border-radius: 0 0 1rem 1rem; background:#000;">
+                        Your browser does not support the video tag.
+                    </video>
                 </div>
             </div>
         </div>
@@ -869,7 +907,7 @@
     <div class="modal fade" id="updateChapterModal" tabindex="-1" aria-labelledby="updateChapterModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form id="updateChapterForm" th:action="@{/instructordashboard/createcourse/updatechapter}" method="post">
+                <form id="updateChapterForm" th:action="@{/instructor/createcourse/updatechapter}" method="post">
                     <div class="modal-header">
                         <h5 class="modal-title" id="updateChapterModalLabel">Update Chapter</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closeModalSafely('updateChapterModal')"></button>
@@ -899,25 +937,25 @@
     </div>
     <script>
         function playVideo(element) {
-            const videoId = element.getAttribute('data-videoid');
-            const videoSource = document.getElementById('videoSource');
-            const video = document.getElementById('lessonVideo');
-
-            // Set the video source
-            videoSource.src = videoId;
-            video.load(); // Reload the video element
-
-            // Show the modal
-            const videoModal = new bootstrap.Modal(document.getElementById('videoModal'));
-            videoModal.show();
+            var publicId = element.getAttribute('data-videoid');
+            if (!publicId) return;
+            fetch('/api/video/signed-url?publicId=' + encodeURIComponent(publicId))
+                .then(response => response.text())
+                .then(url => {
+                    var video = document.getElementById('dynamicVideo');
+                    video.src = url;
+                    var modal = new bootstrap.Modal(document.getElementById('videoModal'));
+                    modal.show();
+                    video.play();
+                });
         }
 
-        function stopVideo() {
-            const video = document.getElementById('lessonVideo');
+        document.getElementById('videoModal').addEventListener('hidden.bs.modal', function () {
+            var video = document.getElementById('dynamicVideo');
             video.pause();
             video.currentTime = 0;
-        }
-        // Show quiz modal
+            video.src = "";
+        });
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -1043,9 +1081,10 @@
                         </select>
                     </div>
                     <!-- Common Form Fields -->
-                    <form id="updateLessonForm" th:action="@{/instructordashboard/createcourse/updatelesson}" method="post" enctype="multipart/form-data">
+                    <form id="updateLessonForm" th:action="@{/instructor/createcourse/updatelesson}" method="post" enctype="multipart/form-data">
                         <input type="hidden" name="lessonId" id="lessonModalId">
                         <input type="hidden" name="contentType" id="lessonModalContentType">
+                        <input type="hidden" id="editVideoUrlHidden" value="">
 
                         <div class="mb-3">
                             <label for="lessonModalTitle" class="form-label">Title</label>
@@ -1096,7 +1135,7 @@
 
                             <div class="mb-3">
                                 <label class="form-label">Duration (minutes)</label>
-                                <input type="number" th:field="*{durationMinutes}" class="form-control video-duration-input" id="videoDuration" readonly>
+                                <input type="number" class="form-control" name="duration" id="editVideoDuration" readonly>
                             </div>
                         </div>
 
@@ -1269,43 +1308,44 @@
             document.getElementById('lessonModalIsFree').checked = isFree;
             document.getElementById('lessonModalContentType').value = contentType || 'basic';
 
-            // Chọn loại form dựa vào content type
             const editLessonType = document.getElementById('editLessonType');
             if (contentType === 'video') {
                 editLessonType.value = 'video';
-
-                // Hiển thị video hiện tại nếu có
                 if (videoUrl) {
-                    document.getElementById('currentVideoSource').src = videoUrl;
-                    document.getElementById('currentLessonVideo').load();
-                    document.getElementById('currentVideoContainer').classList.remove('d-none');
+                    // --- Hàm lấy signed URL và set vào video preview ---
+                    function refreshSignedUrl() {
+                        fetch('/api/video/signed-url?publicId=' + encodeURIComponent(videoUrl))
+                            .then(response => response.text())
+                            .then(url => {
+                                document.getElementById('currentVideoSource').src = url;
+                                document.getElementById('currentLessonVideo').load();
+                                document.getElementById('currentVideoContainer').classList.remove('d-none');
+                            });
+                    }
+                    // Lấy URL lần đầu
+                    refreshSignedUrl();
+                    // Nếu đã có interval cũ thì clear
+                    if (currentVideoRefreshInterval) clearInterval(currentVideoRefreshInterval);
+                    // Đặt interval refresh mỗi 4 phút
+                    currentVideoRefreshInterval = setInterval(refreshSignedUrl, 4 * 60 * 1000);
                 } else {
                     document.getElementById('currentVideoContainer').classList.add('d-none');
+                    if (currentVideoRefreshInterval) clearInterval(currentVideoRefreshInterval);
                 }
-
-                // Điền duration
                 document.getElementById('editVideoDuration').value = duration || '';
-
             } else if (contentType === 'quiz') {
                 editLessonType.value = 'quiz';
-
-                // Điền thông tin quiz
                 document.getElementById('editQuizId').value = quizId || '';
                 document.getElementById('editQuizTitle').value = quizTitle || '';
                 document.getElementById('editQuizDescription').value = quizDescription || '';
                 document.getElementById('editQuizTimeLimit').value = quizTimeLimit || '';
-
-                // Tải các câu hỏi quiz nếu có
                 loadQuizQuestions(lessonId);
-
+                if (currentVideoRefreshInterval) clearInterval(currentVideoRefreshInterval);
             } else {
                 editLessonType.value = 'basic';
+                if (currentVideoRefreshInterval) clearInterval(currentVideoRefreshInterval);
             }
-
-            // Hiển thị section tương ứng
             changeEditLessonType();
-
-            // Mở modal
             try {
                 const modal = new bootstrap.Modal(document.getElementById('updateLessonModal'));
                 modal.show();
@@ -1313,6 +1353,10 @@
                 console.error("Error showing modal:", e);
                 alert("Could not open edit form. Please check console for errors.");
             }
+
+            // Lưu videoUrl vào input ẩn để dùng lại khi chuyển type
+            let videoUrlInput = document.getElementById('editVideoUrlHidden');
+            if (videoUrlInput) videoUrlInput.value = videoUrl || '';
         }
 
         // Hàm thay đổi loại form khi chọn loại lesson khác
@@ -1325,11 +1369,26 @@
                 section.classList.add('d-none');
             });
 
-            // Hiển thị section tương ứng
+            // Lấy videoUrl từ input ẩn (nếu có)
+            let videoUrl = '';
+            const videoUrlInput = document.getElementById('editVideoUrlHidden');
+            if (videoUrlInput) {
+                videoUrl = videoUrlInput.value;
+            }
+
             if (selectedType === 'video') {
                 document.getElementById('videoEditSection').classList.remove('d-none');
+                // Nếu có videoUrl thì show current video, không thì ẩn
+                if (videoUrl) {
+                    document.getElementById('currentVideoContainer').classList.remove('d-none');
+                } else {
+                    document.getElementById('currentVideoContainer').classList.add('d-none');
+                }
             } else if (selectedType === 'quiz') {
                 document.getElementById('quizEditSection').classList.remove('d-none');
+                document.getElementById('currentVideoContainer').classList.add('d-none');
+            } else {
+                document.getElementById('currentVideoContainer').classList.add('d-none');
             }
         }
 
@@ -1431,6 +1490,116 @@
                     document.body.style.paddingRight = '';
                 });
             });
+        });
+    </script>
+    <script>
+        function handleLessonClick(event, element) {
+            event.stopPropagation();
+            var videoId = element.getAttribute('data-videoid');
+            var quizId = element.getAttribute('data-quizid');
+            if (videoId) {
+                // Phát video qua proxy backend
+                var video = document.getElementById('dynamicVideo');
+                video.src = '/api/video/stream/video/' + encodeURIComponent(videoId);
+                var modal = new bootstrap.Modal(document.getElementById('videoModal'));
+                modal.show();
+                video.play();
+            } else if (quizId) {
+                // Mở modal quiz
+                var modal = new bootstrap.Modal(document.getElementById('quizModal' + quizId));
+                modal.show();
+            }
+        }
+    </script>
+    <script>
+        // --- Thêm biến interval cho refresh signed URL ---
+        let currentVideoRefreshInterval = null;
+
+        // --- Sửa trong prepareEditLesson: ---
+        function prepareEditLesson(button) {
+            // ... code cũ ...
+            const lessonId = button.getAttribute('data-lesson-id');
+            const title = button.getAttribute('data-title');
+            const description = button.getAttribute('data-description');
+            const orderNumber = button.getAttribute('data-order-number');
+            const isFree = button.getAttribute('data-is-free') === 'true';
+            const contentType = button.getAttribute('data-content-type');
+            const videoUrl = button.getAttribute('data-video-url');
+            const duration = button.getAttribute('data-duration');
+            const quizId = button.getAttribute('data-quiz-id');
+            const quizTitle = button.getAttribute('data-quiz-title');
+            const quizDescription = button.getAttribute('data-quiz-description');
+            const quizTimeLimit = button.getAttribute('data-quiz-time-limit');
+
+            // ... code cũ ...
+            document.getElementById('lessonModalId').value = lessonId;
+            document.getElementById('lessonModalTitle').value = title;
+            document.getElementById('lessonModalDescription').value = description;
+            document.getElementById('lessonModalOrderNumber').value = orderNumber;
+            document.getElementById('lessonModalIsFree').checked = isFree;
+            document.getElementById('lessonModalContentType').value = contentType || 'basic';
+
+            const editLessonType = document.getElementById('editLessonType');
+            if (contentType === 'video') {
+                editLessonType.value = 'video';
+                if (videoUrl) {
+                    // --- Hàm lấy signed URL và set vào video preview ---
+                    function refreshSignedUrl() {
+                        fetch('/api/video/signed-url?publicId=' + encodeURIComponent(videoUrl))
+                            .then(response => response.text())
+                            .then(url => {
+                                document.getElementById('currentVideoSource').src = url;
+                                document.getElementById('currentLessonVideo').load();
+                                document.getElementById('currentVideoContainer').classList.remove('d-none');
+                            });
+                    }
+                    // Lấy URL lần đầu
+                    refreshSignedUrl();
+                    // Nếu đã có interval cũ thì clear
+                    if (currentVideoRefreshInterval) clearInterval(currentVideoRefreshInterval);
+                    // Đặt interval refresh mỗi 4 phút
+                    currentVideoRefreshInterval = setInterval(refreshSignedUrl, 4 * 60 * 1000);
+                } else {
+                    document.getElementById('currentVideoContainer').classList.add('d-none');
+                    if (currentVideoRefreshInterval) clearInterval(currentVideoRefreshInterval);
+                }
+                document.getElementById('editVideoDuration').value = duration || '';
+            } else if (contentType === 'quiz') {
+                editLessonType.value = 'quiz';
+                document.getElementById('editQuizId').value = quizId || '';
+                document.getElementById('editQuizTitle').value = quizTitle || '';
+                document.getElementById('editQuizDescription').value = quizDescription || '';
+                document.getElementById('editQuizTimeLimit').value = quizTimeLimit || '';
+                loadQuizQuestions(lessonId);
+                if (currentVideoRefreshInterval) clearInterval(currentVideoRefreshInterval);
+            } else {
+                editLessonType.value = 'basic';
+                if (currentVideoRefreshInterval) clearInterval(currentVideoRefreshInterval);
+            }
+            changeEditLessonType();
+            try {
+                const modal = new bootstrap.Modal(document.getElementById('updateLessonModal'));
+                modal.show();
+            } catch (e) {
+                console.error("Error showing modal:", e);
+                alert("Could not open edit form. Please check console for errors.");
+            }
+
+            // Lưu videoUrl vào input ẩn để dùng lại khi chuyển type
+            let videoUrlInput = document.getElementById('editVideoUrlHidden');
+            if (videoUrlInput) videoUrlInput.value = videoUrl || '';
+        }
+        // --- Clear interval khi đóng modal ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const updateLessonModal = document.getElementById('updateLessonModal');
+            if (updateLessonModal) {
+                updateLessonModal.addEventListener('hidden.bs.modal', function() {
+                    if (currentVideoRefreshInterval) {
+                        clearInterval(currentVideoRefreshInterval);
+                        currentVideoRefreshInterval = null;
+                    }
+                });
+            }
         });
     </script>
 </div>

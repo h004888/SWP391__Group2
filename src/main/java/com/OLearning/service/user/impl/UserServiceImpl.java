@@ -2,9 +2,9 @@ package com.OLearning.service.user.impl;
 
 import com.OLearning.dto.user.UserDTO;
 import com.OLearning.dto.user.UserDetailDTO;
+import com.OLearning.dto.user.UserProfileUpdateDTO;
 import com.OLearning.dto.login.RegisterDTO;
 import com.OLearning.dto.course.CourseDTO;
-import com.OLearning.entity.Course;
 import com.OLearning.entity.Enrollment;
 import com.OLearning.entity.Role;
 import com.OLearning.entity.User;
@@ -29,6 +29,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import com.OLearning.dto.user.UserProfileEditDTO;
 
 @Service
 @RequiredArgsConstructor
@@ -192,6 +194,10 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Role not found: " + userDTO.getRoleName());
         }
         User user = userMapper.toUser(userDTO, roleOpt.get());
+        // Set default avatar if not provided
+        if (user.getProfilePicture() == null || user.getProfilePicture().trim().isEmpty()) {
+            user.setProfilePicture("/img/undraw_profile.svg");
+        }
         //Default password
         String encodedPassword = new BCryptPasswordEncoder().encode("123");
         user.setPassword(encodedPassword);
@@ -288,6 +294,113 @@ public class UserServiceImpl implements UserService {
     public boolean existsById(Long userId) {
 
         return userRepository.existsById(userId);
+    }
+
+    @Override
+    public Optional<UserProfileEditDTO> getProfileByUsername(String username) {
+        return userRepository.findByEmail(username).map(user -> {
+            UserProfileEditDTO dto = new UserProfileEditDTO();
+            dto.setFullName(user.getFullName());
+            dto.setEmail(user.getEmail());
+            dto.setPhone(user.getPhone());
+            dto.setAvatarUrl(user.getProfilePicture());
+            dto.setUsername(user.getUsername());
+            dto.setBirthDay(user.getBirthDay());
+            dto.setAddress(user.getAddress());
+            dto.setPersonalSkill(user.getPersonalSkill());
+            return dto;
+        });
+    }
+
+    @Override
+    public void updateProfileByUsername(String username, UserProfileEditDTO profileEditDTO) {
+        User user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + username));
+        user.setFullName(profileEditDTO.getFullName());
+        user.setPhone(profileEditDTO.getPhone());
+        user.setProfilePicture(profileEditDTO.getAvatarUrl());
+        user.setUsername(profileEditDTO.getUsername());
+        user.setBirthDay(profileEditDTO.getBirthDay());
+        user.setAddress(profileEditDTO.getAddress());
+        user.setPersonalSkill(profileEditDTO.getPersonalSkill());
+        userRepository.save(user);
+    }
+
+    @Override
+    public void updateProfile(Long userId, UserProfileEditDTO profileEditDTO) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+        user.setFullName(profileEditDTO.getFullName());
+        user.setPhone(profileEditDTO.getPhone());
+        user.setProfilePicture(profileEditDTO.getAvatarUrl());
+        user.setUsername(profileEditDTO.getUsername());
+        user.setBirthDay(profileEditDTO.getBirthDay());
+        user.setAddress(profileEditDTO.getAddress());
+        user.setPersonalSkill(profileEditDTO.getPersonalSkill());
+        userRepository.save(user);
+    }
+
+    @Override
+    public User updateProfile(Long userId, UserProfileUpdateDTO profileUpdateDTO) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+
+        // Validate that user can only update their own profile
+        if (!userId.equals(profileUpdateDTO.getUserId())) {
+            throw new IllegalArgumentException("You can only update your own profile");
+        }
+
+        // Update profile information with validation
+        if (profileUpdateDTO.getFullName() != null && !profileUpdateDTO.getFullName().trim().isEmpty()) {
+            user.setFullName(profileUpdateDTO.getFullName().trim());
+        }
+
+        if (profileUpdateDTO.getPhone() != null && !profileUpdateDTO.getPhone().trim().isEmpty()) {
+            // Validate phone format
+            if (!profileUpdateDTO.getPhone().matches("^[0-9]{10,15}$")) {
+                throw new IllegalArgumentException("Invalid phone number format");
+            }
+            user.setPhone(profileUpdateDTO.getPhone().trim());
+        }
+
+        if (profileUpdateDTO.getBirthDay() != null) {
+            // Validate birthday is in the past
+            if (profileUpdateDTO.getBirthDay().isAfter(java.time.LocalDate.now())) {
+                throw new IllegalArgumentException("Birthday must be in the past");
+            }
+            user.setBirthDay(profileUpdateDTO.getBirthDay());
+        }
+
+        if (profileUpdateDTO.getAddress() != null) {
+            user.setAddress(profileUpdateDTO.getAddress().trim());
+        }
+
+        if (profileUpdateDTO.getPersonalSkill() != null) {
+            user.setPersonalSkill(profileUpdateDTO.getPersonalSkill().trim());
+        }
+
+        if (profileUpdateDTO.getProfilePicture() != null) {
+            user.setProfilePicture(profileUpdateDTO.getProfilePicture());
+            // Đánh dấu đây là ảnh custom, không phải từ Google
+            user.setIsGooglePicture(false);
+        }
+
+        try {
+            return userRepository.save(user);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update profile: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public User updateProfilePicture(Long userId, String newProfilePictureUrl) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+
+        user.setProfilePicture(newProfilePictureUrl);
+        // Đánh dấu đây là ảnh custom, không phải từ Google
+        user.setIsGooglePicture(false);
+        return userRepository.save(user);
     }
 
 }

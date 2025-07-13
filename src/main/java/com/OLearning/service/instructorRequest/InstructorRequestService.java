@@ -16,4 +16,8 @@ public interface InstructorRequestService {
     InstructorRequest rejectRequest(Long requestId, Long adminId, String rejectionReason);
     
     Page<InstructorRequest> filterRequests(String keyword, String status, Pageable pageable);
+
+    InstructorRequest save(InstructorRequest request);
+
+    InstructorRequest findLatestByUserId(Long userId);
 }

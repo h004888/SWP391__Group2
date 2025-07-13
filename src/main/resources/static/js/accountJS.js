@@ -10,6 +10,10 @@ $(document).ready(function () {
     [1, 2, 3].forEach(roleId => {
         loadUsers(roleId,'', 0, roleId === 1); // Only show pagination for admin tab (roleId === 1)
     });
+    
+    // Load initial counts
+    updateAllCounts();
+    
     function toggleAddButton(tabId) {
         if (tabId === "#admin") {
             $("#addAccountBtnContainer").show();
@@ -60,6 +64,7 @@ $(document).ready(function () {
         searchTimer = setTimeout(function () {
             currentPage = 0; // Reset về trang đầu khi search
             loadUsers(currentRole, keyword, 0, true);
+            // Removed updateAllCounts() - counts should not update when searching
         }, 300);
     });
 
@@ -69,6 +74,7 @@ $(document).ready(function () {
         currentPage = 0;
         const keyword = $('#searchInput').val().trim();
         loadUsers(currentRole, keyword, 0, true);
+        // Removed updateAllCounts() - counts should not update when filtering
     });
 
     // Khi click nút block
@@ -122,6 +128,7 @@ $(document).ready(function () {
                     $('#deleteModal').modal('hide');
                     const keyword = $('#searchInput').val().trim();
                     loadUsers(currentRole, keyword, currentPage, true);
+                    updateAllCounts(); // Update counts after blocking/activating
                 },
                 error: function () {
                     alert("Có lỗi xảy ra!");
@@ -183,14 +190,14 @@ function loadUsers(roleId, keyword = '', page = 0, showPagination = false) {
             if (typeof data === 'object' && data.tableContent && data.pagination) {
                 // Nếu server trả về object với tableContent và pagination
                 $(tableBodyElement).html(data.tableContent);
-                updateCountBadge(roleId, data.tableContent);
+                // Removed updateAllCounts() - counts should not update during normal loading
                 if (showPagination) {
                     totalPages = data.pagination.totalPages;
                 }
             } else {
                 // Nếu server chỉ trả về HTML content (current implementation)
                 $(tableBodyElement).html(data);
-                updateCountBadge(roleId, data);
+                // Removed updateAllCounts() - counts should not update during normal loading
 
                 //call API riêng để lấy pagination info hoặc modify server response
                 if (showPagination) {
@@ -217,6 +224,7 @@ function blockUser(userId, userEmail) {
             $('#deleteModal').modal('hide');
             const keyword = $('#searchInput').val().trim();
             loadUsers(currentRole, keyword, currentPage, true);
+            updateAllCounts(); // Update counts after blocking/activating
         },
         error: function (xhr, status, error) {
             $('#deleteModal').modal('hide');
@@ -281,6 +289,7 @@ $(document).on('click', '.btn-reset-password', function (e) {
             alert("Repassword sucessfully!")
             const keyword = $('#searchInput').val().trim();
             loadUsers(currentRole, keyword, currentPage, true);
+            updateAllCounts(); // Update counts after resetting password
         },
         error: function (xhr) {
             alert("Unexpected error: " + xhr.responseText);
@@ -302,31 +311,28 @@ function getTableBodyElement(roleId) {
 }
 
 function updateCountBadge(roleId, data) {
-    const tableBodyElement = getTableBodyElement(roleId);
+    // This function is now deprecated since we use updateAllCounts()
+    // But we'll keep it for backward compatibility and just call updateAllCounts
+    updateAllCounts();
+}
 
-    if (!tableBodyElement) return;
+function updateAllCounts() {
+    const keyword = $('#searchInput').val().trim();
 
-    const tempDiv = document.createElement('tbody');
-    tempDiv.innerHTML = data;
-
-    const rows = tempDiv.querySelectorAll('tr');
-
-    let badgeElement;
-    switch (roleId) {
-        case 1:
-            badgeElement = document.getElementById('adminCount');
-            break;
-        case 2:
-            badgeElement = document.getElementById('instructorCount');
-            break;
-        case 3:
-            badgeElement = document.getElementById('userCount');
-            break;
-    }
-
-    const rowCount = Array.from(rows).filter(row => !row.textContent.includes("Không tìm thấy")).length;
-
-    if (badgeElement) {
-        badgeElement.textContent = rowCount;
-    }
+    $.ajax({
+        url: '/admin/account/counts',
+        method: 'GET',
+        data: {
+            keyword: keyword || null
+        },
+        success: function (counts) {
+            // Cộng cả active và inactive cho mỗi role
+            $('#adminCount').text((counts.adminActive ?? 0) + (counts.adminInactive ?? 0));
+            $('#instructorCount').text((counts.instructorActive ?? 0) + (counts.instructorInactive ?? 0));
+            $('#userCount').text((counts.userActive ?? 0) + (counts.userInactive ?? 0));
+        },
+        error: function (xhr, status, error) {
+            console.error("Error getting counts:", error);
+        }
+    });
 }

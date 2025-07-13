@@ -1,0 +1,29 @@
+<div th:fragment="notification">
+  <div id="notification" class="position-fixed top-0 end-0 p-5" style="z-index: 1050; top: 80px; transform: translateX(200%); transition: transform 0.5s ease;">
+    <div id="notification-alert" class="alert d-flex align-items-center mb-0" role="alert" style="min-width: 250px;">
+      <i id="notification-icon" class="me-2"></i>
+      <span id="notification-message"></span>
+    </div>
+  </div>
+  <script>
+    function showNotification(message, type) {
+      const notification = document.getElementById('notification');
+      const notificationAlert = document.getElementById('notification-alert');
+      const notificationIcon = document.getElementById('notification-icon');
+      const notificationMessage = document.getElementById('notification-message');
+      notificationAlert.classList.remove('alert-success', 'alert-danger');
+      notificationMessage.textContent = message;
+      if (type === 'success') {
+        notificationAlert.classList.add('alert-success');
+        notificationIcon.className = 'fas fa-check-circle me-2';
+      } else {
+        notificationAlert.classList.add('alert-danger');
+        notificationIcon.className = 'fas fa-exclamation-circle me-2';
+      }
+      notification.style.transform = 'translateX(0)';
+      setTimeout(() => {
+        notification.style.transform = 'translateX(200%)';
+      }, 4000);
+    }
+  </script>
+</div> 

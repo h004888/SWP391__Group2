@@ -10,26 +10,29 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDateTime;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import java.util.UUID;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import java.util.Arrays;
+import java.util.List;
 
 @Controller
-@RequestMapping("/admin/businessRule")
 public class BusinessRuleController {
+
     @Autowired
     private TermsAndConditionService termsAndConditionService;
 
-    @RequestMapping
+    @RequestMapping("/admin/businessRule")
     public String getBusinessRulePage(Model model) {
         model.addAttribute("terms", termsAndConditionService.getAll());
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/businessRuleContent :: businessRuleContent");
         return "adminDashBoard/index";
     }
 
-    @PostMapping("/add")
+    @PostMapping("/admin/businessRule/add")
     public String addClause(
         @RequestParam String sectionTitle,
         @RequestParam String content,
@@ -44,11 +47,11 @@ public class BusinessRuleController {
             .updatedAt(LocalDateTime.now())
             .build();
         termsAndConditionService.save(clause);
-        redirectAttributes.addFlashAttribute("successMessage", "Clause added successfully!");
+        redirectAttributes.addFlashAttribute("successMessage", "Rule added successfully!");
         return "redirect:/admin/businessRule";
     }
 
-    @PostMapping("/edit")
+    @PostMapping("/admin/businessRule/edit")
     public String editClause(
         @RequestParam Long id,
         @RequestParam String sectionTitle,
@@ -62,18 +65,18 @@ public class BusinessRuleController {
         clause.setRoleTarget(roleTarget);
         clause.setUpdatedAt(LocalDateTime.now());
         termsAndConditionService.save(clause);
-        redirectAttributes.addFlashAttribute("successMessage", "Clause updated successfully!");
+        redirectAttributes.addFlashAttribute("successMessage", "Rule updated successfully!");
         return "redirect:/admin/businessRule";
     }
 
-    @PostMapping("/delete")
+    @PostMapping("/admin/businessRule/delete")
     public String deleteClause(@RequestParam Long id, RedirectAttributes redirectAttributes) {
         termsAndConditionService.deleteById(id);
-        redirectAttributes.addFlashAttribute("successMessage", "Clause deleted successfully!");
+        redirectAttributes.addFlashAttribute("successMessage", "Rule deleted successfully!");
         return "redirect:/admin/businessRule";
     }
 
-    @RequestMapping("/exportPdf")
+    @RequestMapping("/admin/businessRule/exportPdf")
     public ResponseEntity<byte[]> exportPdf() {
         byte[] pdfBytes = termsAndConditionService.exportAllToPdf();
         HttpHeaders headers = new HttpHeaders();
@@ -81,5 +84,11 @@ public class BusinessRuleController {
         String randomSuffix = UUID.randomUUID().toString().substring(0, 8);
         headers.setContentDispositionFormData("attachment", "business_rules_" + randomSuffix + ".pdf");
         return ResponseEntity.ok().headers(headers).body(pdfBytes);
+    }
+
+    @GetMapping("/terms/user")
+    @ResponseBody
+    public List<TermsAndCondition> getUserTerms() {
+        return termsAndConditionService.getByRoles(Arrays.asList("USER", "ALL"));
     }
 }

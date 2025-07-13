@@ -19,13 +19,15 @@ public class CourseDTO {
     private Double price;
     private Double discount;
     private String courseImg;
+    private Integer duration;
     private Boolean isFree;
     private String categoryName;
-    private int totalLessons;
+    private String videoUrlPreview;
+    private Integer totalLessons;
+    private Integer totalStudentEnrolled;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private User instructor;
     private String status;
     private String courseLevel; //beginner, intermediate, advanced
-    private int totalStudentEnrolled;
 }

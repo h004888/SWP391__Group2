@@ -1,39 +1,34 @@
 package com.OLearning.controller.instructorDashBoard;
 
 import com.OLearning.dto.enrollment.EnrollmentDTO;
-import com.OLearning.entity.Enrollment;
-import com.OLearning.entity.User;
 import com.OLearning.security.CustomUserDetails;
-import com.OLearning.service.email.EmailService;
 import com.OLearning.service.enrollment.EnrollmentService;
-import com.OLearning.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
-@RequestMapping("/instructordashboard/enrolled")
+@RequestMapping("/instructor/enrolled")
 public class ControllerEnrolled {
     @Autowired
     private EnrollmentService enrollmentService;
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private EmailService emailService;
 
-    //in ra list enrolled
+    // Only keep the paging endpoint
     @GetMapping()
-    public String getEnrolledPage(@RequestParam(name = "page", defaultValue = "0") int page,
-                                  @RequestParam(name = "size", defaultValue = "7") int size,
-                                  Model model, ModelMap modelMap) {
+    public String getEnrolledPage(
+        @RequestParam(name = "page", defaultValue = "0") int page,
+        @RequestParam(name = "size", defaultValue = "7") int size,
+        Model model, ModelMap modelMap,
+        @RequestHeader(value = "X-Requested-With", required = false) String requestedWith
+    ) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
@@ -44,88 +39,11 @@ public class ControllerEnrolled {
         modelMap.put("totalPages", enrollment.getTotalPages());
         modelMap.put("totalElements", enrollment.getTotalElements());
         modelMap.put("size", size);
+
+        if ("XMLHttpRequest".equals(requestedWith)) {
+            return "instructorDashboard/fragments/enrolledContent :: enrollment";
+        }
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/enrolledContent :: enrollment");
         return "instructorDashboard/indexUpdate";
-    }
-
-    @PostMapping("/block/{enrollmentId}")
-    public String blockEnrollment(@PathVariable int enrollmentId,
-                                  RedirectAttributes redirectAttributes) {
-        try {
-            boolean success = enrollmentService.blockEnrollment(enrollmentId);
-
-            if (success) {
-                redirectAttributes.addFlashAttribute("successMessage", "Enrollment blocked successfully");
-            } else {
-                redirectAttributes.addFlashAttribute("errorMessage", "Enrollment not found");
-            }
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error: " + e.getMessage());
-        }
-
-        return "redirect:/instructordashboard/enrolled";
-    }
-
-    @PostMapping("/unblock/{enrollmentId}")
-    public String unblockEnrollment(@PathVariable int enrollmentId,
-                                  RedirectAttributes redirectAttributes) {
-        try {
-            // Gọi service để cập nhật trạng thái enrollment thành "active"
-            boolean success = enrollmentService.unblockEnrollment(enrollmentId);
-
-            if (success) {
-                redirectAttributes.addFlashAttribute("successMessage", "Enrollment unblocked successfully");
-            } else {
-                redirectAttributes.addFlashAttribute("errorMessage", "Enrollment not found");
-            }
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error: " + e.getMessage());
-        }
-
-        return "redirect:/instructordashboard/enrolled";
-    }
-
-    @PostMapping("/send-message")
-    public String sendMessage(@RequestParam("recipientEmail") String recipientEmail,
-                             @RequestParam("subject") String subject,
-                             @RequestParam("content") String content,
-                             @RequestParam(value = "enrollmentId", required = false, defaultValue = "0") int enrollmentId,
-                             RedirectAttributes redirectAttributes) {
-        try {
-            // Kiểm tra enrollmentId
-            if (enrollmentId <= 0) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Invalid enrollment ID");
-                return "redirect:/instructordashboard/enrolled";
-            }
-            
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-            User instructor = userService.findById(userDetails.getUserId());
-            
-            Enrollment enrollment = enrollmentService.getEnrollmentById(enrollmentId);
-            
-            if (enrollment == null) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Enrollment not found");
-                return "redirect:/instructordashboard/enrolled";
-            }
-            
-            // Gửi email
-            emailService.sendInstructorMessageEmail(instructor, enrollment.getUser(), enrollment.getCourse(), subject, content);
-            
-            redirectAttributes.addFlashAttribute("successMessage", "Message sent successfully to " + enrollment.getUser().getFullName());
-            return "redirect:/instructordashboard/enrolled";
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Failed to send message: " + e.getMessage());
-            return "redirect:/instructordashboard/enrolled";
-        }
-    }
-    @PostMapping("/details/{id}")
-    public ResponseEntity<EnrollmentDTO> getRequestDetails(@PathVariable int id) {
-        try {
-            EnrollmentDTO request = enrollmentService.getRequestById(id);
-            return ResponseEntity.ok(request);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
     }
 }

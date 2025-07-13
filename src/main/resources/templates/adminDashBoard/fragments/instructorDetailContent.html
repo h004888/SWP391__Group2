@@ -171,17 +171,25 @@
                                         <td th:text="${course.courseLevel==null ? 'N/A' : course.courseLevel}">Beginner</td>
                                         <td th:text="${course.totalStudentEnrolled}">412</td>
                                         <td>
-                            <span th:switch="${course.status}">
-                                <span th:case="null" class="badge bg-secondary">Draft</span>
-                                <span th:case="'pending'" class="badge bg-secondary">Pending</span>
-                                <span th:case="'live'" class="badge bg-success">Live</span>
-                                <span th:case="'approved'" class="badge bg-success">Approved</span>
-                                <span th:case="'blocked'" class="badge bg-danger">Blocked</span>
-                                <span th:case="'rejected'" class="badge bg-danger">Rejected</span>
-                                <span th:case="*" class="badge bg-secondary" th:text="${course.status}"></span>
-                            </span>
+                                             <span th:switch="${course.status}">
+                                                    <span th:case="null" class="badge bg-secondary">Draft</span>
+                                                   <span th:case="'pending'" class="badge bg-secondary">Pending</span>
+                                                   <span th:case="'live'" class="badge bg-success">Live</span>
+                                                   <span th:case="'approved'" class="badge bg-success">Approved</span>
+                                                   <span th:case="'blocked'" class="badge bg-danger">Blocked</span>
+                                                  <span th:case="'rejected'" class="badge bg-danger">Rejected</span>
+                                                   <span th:case="*" class="badge bg-secondary" th:text="${course.status}"></span>
+                                             </span>
                                         </td>
-
+                                    </tr>
+                                    <!-- Empty state -->
+                                    <tr th:if="${#lists.isEmpty(listCourses)}">
+                                        <td colspan="8" class="text-center align-middle py-5">
+                                            <div class="d-flex flex-column align-items-center justify-content-center">
+                                                <i class="fas fa-book fa-3x mb-3 opacity-50"></i>
+                                                <h5>No courses found</h5>
+                                            </div>
+                                        </td>
                                     </tr>
                                     </tbody>
                                 </table>
@@ -192,9 +200,6 @@
                                     Showing <span th:text="${courseCurrentPage * 5 + 1}">1</span> to
                                     <span th:text="${(courseCurrentPage * 5) + 5 > courseTotalItems ? courseTotalItems : (courseCurrentPage * 5) + 5}">5</span> of
                                     <span th:text="${courseTotalItems}">20</span> entries
-                                </p>
-                                <p class="mb-0 text-center text-sm-start" th:if="${courseTotalItems == 0}">
-                                    No entries found
                                 </p>
                                 <nav class="d-flex justify-content-center mb-0" aria-label="navigation" th:if="${courseTotalPages > 1}">
                                     <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
@@ -307,7 +312,15 @@
                                                 data-comment=${review.comment}">View</a>
                                 </td>
                             </tr>
-
+                            <!-- Empty state -->
+                            <tr th:if="${#lists.isEmpty(listReview)}">
+                                <td colspan="8" class="text-center align-middle py-5">
+                                    <div class="d-flex flex-column align-items-center justify-content-center">
+                                        <i class="fas fa-comment-dots fa-3x mb-3 opacity-50"></i>
+                                        <h5>No Review found</h5>
+                                    </div>
+                                </td>
+                            </tr>
                             </tbody>
                             <!-- Table body END -->
                         </table>
@@ -323,9 +336,7 @@
                        <span th:text="${(reviewCurrentPage * 5) + 5 > reviewTotalItems ? reviewTotalItems : (reviewCurrentPage * 5) + 5}">5</span> of
                        <span th:text="${reviewTotalItems}">20</span> entries
                    </p>
-                   <p class="mb-0 text-center text-sm-start" th:if="${reviewTotalItems == 0}">
-                       No entries found
-                   </p>
+
                    <nav class="d-flex justify-content-center mb-0" aria-label="navigation" th:if="${reviewTotalPages > 1}">
                        <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
                            <li class="page-item mb-0" th:classappend="${reviewCurrentPage == 0} ? 'disabled'">

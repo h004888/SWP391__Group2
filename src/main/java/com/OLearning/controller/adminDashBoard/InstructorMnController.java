@@ -31,10 +31,17 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import com.OLearning.dto.instructorRequest.InstructorRequestDTO;
+import com.OLearning.mapper.instructorRequest.InstructorRequestMapper;
 
 @Controller
 @RequestMapping("/admin/mnInstructors")
 public class InstructorMnController {
+
+    private static final String ACC_NAME_PAGE_MANAGEMENT = "Management Instructor";
+    private static final String ACC_NAME_PAGE_DETAIL = "Detail Account";
+    private static final String SUCCESS_REQUEST_ACCEPTED = "Request accepted successfully";
+    private static final String ERROR_REQUEST_ACCEPT = "Error accepting request: ";
 
     private final Long roleInstructor = 2L;
 
@@ -69,7 +76,7 @@ public class InstructorMnController {
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/instructorListContent :: instructorListContent");
         model.addAttribute("listInstructor", listUser);
         model.addAttribute("enrollmentService", enrollmentService);
-        model.addAttribute("accNamePage", "Management Instructor");
+        model.addAttribute("accNamePage", ACC_NAME_PAGE_MANAGEMENT);
         return "adminDashBoard/index";
     }
 
@@ -133,7 +140,7 @@ public class InstructorMnController {
 
         if (userDetailDTO.isPresent()) {
             model.addAttribute("fragmentContent", "adminDashBoard/fragments/instructorDetailContent :: instructorDetailContent");
-            model.addAttribute("accNamePage", "Detail Account");
+            model.addAttribute("accNamePage", ACC_NAME_PAGE_DETAIL);
             model.addAttribute("userDetail", userDetailDTO.get());
             return "adminDashBoard/index";
         } else {
@@ -215,9 +222,10 @@ public class InstructorMnController {
     }
 
     @GetMapping("/request/details/{id}")
-    public ResponseEntity<InstructorRequest> getRequestDetails(@PathVariable Long id) {
+    @ResponseBody
+    public InstructorRequestDTO getRequestDetails(@PathVariable Long id) {
         InstructorRequest request = instructorRequestService.getRequestById(id);
-        return ResponseEntity.ok(request);
+        return InstructorRequestMapper.mapToDTO(request);
     }
 
     @PostMapping("/request/accept/{id}")
@@ -232,10 +240,10 @@ public class InstructorMnController {
                 String userName = userDetails.getUsername();
                 UserDTO admin = userService.getUserByEmail(userName);
                 instructorRequestService.acceptRequest(id, admin.getUserId());
-                redirectAttributes.addFlashAttribute("successMessage", "Request accepted successfully");
+                redirectAttributes.addFlashAttribute("successMessage", SUCCESS_REQUEST_ACCEPTED);
             }
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error accepting request: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", ERROR_REQUEST_ACCEPT + e.getMessage());
         }
         return "redirect:/admin/mnInstructors/request";
     }

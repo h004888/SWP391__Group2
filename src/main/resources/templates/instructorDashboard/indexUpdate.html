@@ -8,7 +8,7 @@
 <main>
 
     <!-- Sidebar -->
-    <th:block th:replace="instructorDashboard/fragments/sidebarUpdate :: sidebar"></th:block>
+    <th:block th:replace="instructorDashboard/fragments/sidebarUpdate :: sidebarUpdate"></th:block>
     <!-- End of Sidebar -->
 
     <!-- Content Wrapper -->
@@ -74,9 +74,9 @@
 <script th:src="@{/assets/vendor/overlay-scrollbar/js/overlayscrollbars.min.js}"></script>
 
 <!-- Template Functions -->
+
 <script th:src="@{/assets/js/functions.js}"></script>
-
-
+<script th:src="@{/js/instructorFilter.js}"></script>
 </body>
 
 </html>

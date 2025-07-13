@@ -1,0 +1,23 @@
+<div th:fragment="profile">
+    <div class="card shadow border-0 rounded-4 mx-auto" style="max-width: 900px;">
+        <div class="card-body p-5 text-center">
+            <div class="mb-4">
+                <img th:src="${profile.avatarUrl != null ? profile.avatarUrl : '/img/undraw_profile.svg'}" alt="Avatar" class="rounded-circle shadow" style="width: 140px; height: 140px; object-fit: cover; border: 4px solid #fff; box-shadow: 0 0 20px rgba(6,106,201,0.15);">
+            </div>
+            <h2 class="mb-1" th:text="${profile.fullName}">Full Name</h2>
+            <p class="text-primary mb-2" th:text="${profile.username}">Username</p>
+            <div class="row justify-content-center mb-4">
+                <div class="col-md-8 text-start">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item bg-transparent"><i class="bi bi-envelope me-2"></i> <span th:text="${profile.email}">Email</span></li>
+                        <li class="list-group-item bg-transparent"><i class="bi bi-telephone me-2"></i> <span th:text="${profile.phone}">Phone</span></li>
+                        <li class="list-group-item bg-transparent"><i class="bi bi-geo-alt me-2"></i> <span th:text="${profile.address}">Address</span></li>
+                        <li class="list-group-item bg-transparent"><i class="bi bi-lightbulb me-2"></i> <span th:text="${profile.personalSkill}">Personal Skill</span></li>
+                        <li class="list-group-item bg-transparent"><i class="bi bi-calendar-event me-2"></i> <span th:text="${profile.birthDay}">Birthday</span></li>
+                    </ul>
+                </div>
+            </div>
+            <a class="btn btn-primary px-4" th:href="@{/profile/edit}"><i class="bi bi-pencil-square me-2"></i>Edit Profile</a>
+        </div>
+    </div>
+</div> 

@@ -10,6 +10,36 @@
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
   </div>
 
+  <!-- Notification (copied from voucherContent.html) -->
+  <div id="notification" class="position-fixed top-0 end-0 p-5" style="z-index: 1050;  transform: translateX(200%); transition: transform 0.5s ease;">
+    <div id="notification-alert" class="alert d-flex align-items-center mb-0" role="alert" style="min-width: 250px;">
+      <i id="notification-icon" class="me-2"></i>
+      <span id="notification-message"></span>
+    </div>
+  </div>
+  <script>
+  // Function to show notification (copied from voucherContent.html)
+  function showNotification(message, type) {
+    const notification = document.getElementById('notification');
+    const notificationAlert = document.getElementById('notification-alert');
+    const notificationIcon = document.getElementById('notification-icon');
+    const notificationMessage = document.getElementById('notification-message');
+    notificationAlert.classList.remove('alert-success', 'alert-danger');
+    notificationMessage.textContent = message;
+    if (type === 'success') {
+      notificationAlert.classList.add('alert-success');
+      notificationIcon.className = 'fas fa-check-circle me-2';
+    } else {
+      notificationAlert.classList.add('alert-danger');
+      notificationIcon.className = 'fas fa-exclamation-circle me-2';
+    }
+    notification.style.transform = 'translateX(0)';
+    setTimeout(() => {
+      notification.style.transform = 'translateX(200%)';
+    }, 5000);
+  }
+  </script>
+
   <section class="py-0">
     <div class="container">
       <div class="row">
@@ -121,8 +151,8 @@
             <div class="d-flex justify-content-center">
               <form th:action="@{/cart/checkout}" method="post" id="checkout-form">
                 <input type="hidden" id="voucherMapping" name="voucherMapping" />
-                <button type="submit" class="btn btn-lg btn-success"
-                        onclick="return confirm('Are you sure you want to check out?')">
+                <input type="hidden" id="paymentMethod-hidden" name="paymentMethod" />
+                <button type="button" class="btn btn-lg btn-success" id="checkout-btn-modal">
                   Checkout
                 </button>
               </form>
@@ -150,13 +180,73 @@
 
   <!-- Modal chọn voucher -->
   <div class="modal" id="voucherModal" tabindex="-1" style="display:none; background:rgba(0,0,0,0.3); position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:9999;">
-    <div class="modal-dialog" style="margin:10vh auto; max-width:400px;">
+    <div class="modal-dialog voucher-modal-dialog">
+      <div class="modal-content voucher-modal-content">
+        <div class="modal-header voucher-modal-header">
+          <h5 class="modal-title">Chọn voucher cho khóa học</h5>
+          <button type="button" class="btn-close voucher-modal-close" onclick="voucherJS.closeVoucherModal()"></button>
+        </div>
+        <div class="modal-body voucher-modal-body" id="voucher-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal chọn phương thức thanh toán -->
+  <div class="modal fade" id="paymentMethodModal" tabindex="-1" aria-labelledby="paymentMethodModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Chọn voucher cho khóa học</h5>
-          <button type="button" class="btn-close" onclick="closeVoucherModal()"></button>
+          <h5 class="modal-title" id="paymentMethodModalLabel">
+            <i class="fas fa-credit-card me-2"></i>Chọn phương thức thanh toán
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closePaymentModal()"></button>
         </div>
-        <div class="modal-body" id="voucher-list"></div>
+        <div class="modal-body">
+          <div class="row g-3">
+            <!-- QR Option -->
+            <div class="col-12">
+              <div class="card payment-option-card" id="qr-card" onclick="selectPaymentMethod('qr')">
+                <div class="card-body d-flex align-items-center">
+                  <div class="payment-icon me-3">
+                    <i class="fas fa-qrcode text-primary fa-2x"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <h6 class="mb-1">QR Banking</h6>
+                    <p class="mb-0 text-muted small">Thanh toán qua chuyển khoản ngân hàng với mã QR</p>
+                  </div>
+                  <div class="payment-radio">
+                    <input type="radio" name="paymentMethodModal" value="qr" id="qr-radio">
+                    <label for="qr-radio"></label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- VNPay Option -->
+            <div class="col-12">
+              <div class="card payment-option-card" id="vnpay-card" onclick="selectPaymentMethod('vnpay')">
+                <div class="card-body d-flex align-items-center">
+                  <div class="payment-icon me-3">
+                    <i class="fas fa-credit-card text-success fa-2x"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <h6 class="mb-1">VNPay</h6>
+                    <p class="mb-0 text-muted small">Thanh toán qua thẻ ngân hàng nội địa</p>
+                  </div>
+                  <div class="payment-radio">
+                    <input type="radio" name="paymentMethodModal" value="vnpay" id="vnpay-radio">
+                    <label for="vnpay-radio"></label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="closePaymentModal()">Hủy</button>
+          <button type="button" class="btn btn-primary" onclick="proceedToCheckout()" disabled id="proceed-btn">
+            <i class="fas fa-arrow-right me-2"></i>Tiếp tục
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -169,286 +259,205 @@
       opacity: 0.8;
       transition: all 0.2s;
     }
+    /* Voucher Modal Styles */
+    .voucher-modal-dialog {
+      margin: 10vh auto;
+      max-width: 400px;
+      width: 90vw;
+    }
+    .voucher-modal-content {
+      border-radius: 18px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      border: none;
+      overflow: hidden;
+      background: #fff;
+      animation: fadeInModal 0.25s;
+    }
+    .voucher-modal-header {
+      background: linear-gradient(90deg, #4e73df 0%, #1cc88a 100%);
+      color: #fff;
+      padding: 1rem 1.5rem;
+      border-bottom: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .voucher-modal-title {
+      font-weight: 600;
+      font-size: 1.2rem;
+      margin: 0;
+    }
+    .voucher-modal-close {
+      background: rgba(255,255,255,0.7);
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .voucher-modal-close:hover {
+      background: #fff;
+    }
+    .voucher-modal-body {
+      padding: 1.5rem;
+      background: #f8f9fc;
+      min-height: 120px;
+    }
+    @media (max-width: 500px) {
+      .voucher-modal-dialog {
+        max-width: 98vw;
+        margin: 5vh auto;
+      }
+      .voucher-modal-body {
+        padding: 1rem;
+      }
+    }
+    @keyframes fadeInModal {
+      from { transform: translateY(40px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .payment-option-card {
+      cursor: pointer;
+      border: 2px solid #e3e6f0;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .payment-option-card.selected {
+      border-color: #4e73df;
+      box-shadow: 0 0 0 0.2rem rgba(78,115,223,.15);
+      background: #f8f9fc;
+    }
+    .payment-radio input[type="radio"] {
+      accent-color: #4e73df;
+      width: 18px;
+      height: 18px;
+    }
+    .payment-icon {
+      min-width: 40px;
+      text-align: center;
+    }
   </style>
 
+  <script src="/js/homePage/voucher.js"></script>
   <script th:inline="javascript">
-    let selectedCourseId = null;
-    const userId = /*[[${currentUserId}]]*/ 1;
-
-    function saveSelectedVouchers() {
-      localStorage.setItem('selectedVouchers', JSON.stringify(window.selectedVouchers));
-    }
-    function loadSelectedVouchers() {
-      const data = localStorage.getItem('selectedVouchers');
-      if (data) {
-        window.selectedVouchers = JSON.parse(data);
-      } else {
-        window.selectedVouchers = {};
-      }
-    }
-
-    // Sử dụng DOMContentLoaded thay vì setTimeout
-    document.addEventListener('DOMContentLoaded', function() {
-      loadSelectedVouchers();
-      initializeVoucherButtons();
-      initializeCheckoutForm();
-      restoreVoucherUI();
-    });
-
-    function initializeVoucherButtons() {
-      document.querySelectorAll('.voucher-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-          selectedCourseId = this.getAttribute('data-course-id');
-          console.log('Selected course ID:', selectedCourseId); // Debug log
-
-          fetch(`/vouchers/course/${selectedCourseId}/user/${userId}`)
-                  .then(res => {
-                    console.log('Response status:', res.status); // Debug log
-                    if (!res.ok) {
-                      throw new Error(`HTTP error! status: ${res.status}`);
-                    }
-                    return res.json();
-                  })
-                  .then(data => {
-                    console.log('Voucher data:', data); // Debug log
-                    displayVouchers(data);
-                  })
-                  .catch(error => {
-                    console.error('Error fetching vouchers:', error);
-                    document.getElementById('voucher-list').innerHTML = '<p class="text-danger">Lỗi khi tải voucher. Vui lòng thử lại.</p>';
-                    document.getElementById('voucherModal').style.display = 'block';
-                  });
-        });
-      });
-    }
-
-    function displayVouchers(data) {
-      let html = '';
-      let selectedVoucherId = window.selectedVouchers[selectedCourseId];
-
-      if (!data || data.length === 0) {
-        html = '<p>Không có voucher phù hợp.</p>';
-      } else {
-        data.forEach(voucher => {
-          // Đảm bảo các field tồn tại
-          const voucherCode = voucher.voucherCode || voucher.code || 'N/A';
-          const discount = voucher.discount || 0;
-          const voucherId = voucher.voucherId || voucher.id;
-
-          let isSelected = selectedVoucherId == voucherId;
-          html += `
-        <div class='d-flex justify-content-between align-items-center mb-2 p-2 border rounded'>
-          <div>
-            <strong>${voucherCode}</strong><br>
-            <small class="text-muted">Giảm ${discount}%</small>
-          </div>
-          <button class='btn btn-sm ${isSelected ? 'btn-secondary' : 'btn-success'}'
-            onclick='${isSelected ? `removeVoucher(${voucherId}, ${selectedCourseId})` : `applyVoucher(${voucherId}, ${selectedCourseId})`}'>
-            ${isSelected ? 'Hủy chọn' : 'Áp dụng'}
-          </button>
-        </div>`;
-        });
-      }
-
-      document.getElementById('voucher-list').innerHTML = html;
-      document.getElementById('voucherModal').style.display = 'block';
-    }
-
-    function applyVoucher(voucherId, courseId) {
-      // Đảm bảo 1 voucher chỉ áp dụng cho 1 course tại 1 thời điểm
-      let previousCourseId = null;
-      for (const [cId, vId] of Object.entries(window.selectedVouchers)) {
-        if (vId == voucherId && cId != courseId) {
-          previousCourseId = cId;
-          break;
-        }
-      }
-      // Nếu đã gán cho course khác, bỏ voucher khỏi course đó
-      if (previousCourseId) {
-        removeVoucher(voucherId, previousCourseId);
-        delete window.selectedVouchers[previousCourseId];
-      }
-      // Gán voucher cho course mới
-      window.selectedVouchers[courseId] = voucherId;
-      saveSelectedVouchers();
-
-      // Disable button để tránh click nhiều lần
-      const buttons = document.querySelectorAll(`button[onclick*="applyVoucher(${voucherId}, ${courseId})"]`);
-      buttons.forEach(btn => btn.disabled = true);
-
-      fetch('/cart/apply-voucher', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: JSON.stringify({
-          userId: userId,
-          courseId: courseId,
-          voucherId: voucherId
-        })
-      })
-              .then(res => {
-                if (!res.ok) {
-                  throw new Error(`HTTP error! status: ${res.status}`);
-                }
-                return res.json();
-              })
-              .then(data => {
-                console.log('Apply voucher response:', data); // Debug log
-
-                // Cập nhật UI
-                const originalPriceEl = document.getElementById('original-price-' + courseId);
-                const discountedPriceEl = document.getElementById('discounted-price-' + courseId);
-                const appliedVoucherEl = document.getElementById('applied-voucher-' + courseId);
-
-                if (originalPriceEl) {
-                  originalPriceEl.classList.add('original-price-strike');
-                }
-
-                if (discountedPriceEl && data.discountedPrice) {
-                  discountedPriceEl.textContent = ' ' + formatNumberWithCommas(Number(data.discountedPrice)) + ' đ';
-                }
-
-
-                closeVoucherModal();
-                updateCartTotal();
-              })
-              .catch(error => {
-                console.error('Error applying voucher:', error);
-                alert('Có lỗi xảy ra khi áp dụng voucher. Vui lòng thử lại.');
-              })
-              .finally(() => {
-                // Re-enable buttons
-                buttons.forEach(btn => btn.disabled = false);
-              });
-    }
-
-    function removeVoucher(voucherId, courseId) {
-      // Không xóa khỏi window.selectedVouchers ở đây, chỉ reset UI
-      const originalPriceEl = document.getElementById('original-price-' + courseId);
-      const discountedPriceEl = document.getElementById('discounted-price-' + courseId);
-      const appliedVoucherEl = document.getElementById('applied-voucher-' + courseId);
-
-      if (originalPriceEl) {
-        originalPriceEl.classList.remove('original-price-strike');
-        originalPriceEl.style.textDecoration = 'none';
-      }
-      if (discountedPriceEl) {
-        discountedPriceEl.textContent = '';
-      }
-      if (appliedVoucherEl) {
-        appliedVoucherEl.textContent = '';
-      }
-      closeVoucherModal();
-      updateCartTotal();
-      delete window.selectedVouchers[courseId];
-      saveSelectedVouchers();
-    }
-
-    function updateCartTotal() {
-      let total = 0;
-
-      document.querySelectorAll('.cart-row').forEach(tr => {
-        const courseId = tr.getAttribute('data-course-id');
-        const discountedEl = document.getElementById('discounted-price-' + courseId);
-        const originalEl = document.getElementById('original-price-' + courseId);
-
-        let price = 0;
-
-        // Ưu tiên giá đã giảm
-        if (discountedEl && discountedEl.textContent.trim()) {
-          price = Number(discountedEl.textContent.replace(/[^\d]/g, ''));
-        } else if (originalEl) {
-          price = Number(originalEl.textContent.replace(/[^\d]/g, ''));
-        }
-
-        if (!isNaN(price) && price > 0) {
-          total += price;
-        }
-      });
-
-      const cartTotalEl = document.getElementById('cart-total');
-      if (cartTotalEl) {
-        cartTotalEl.textContent = formatNumberWithCommas(total) + ' đ';
-      }
-    }
-
-    function closeVoucherModal() {
-      const modal = document.getElementById('voucherModal');
-      if (modal) {
-        modal.style.display = 'none';
-      }
-    }
-
-    function formatNumberWithCommas(x) {
-      return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
-
-    function initializeCheckoutForm() {
-      const checkoutForm = document.getElementById('checkout-form');
-      if (checkoutForm) {
-        checkoutForm.onsubmit = function(e) {
-          const voucherMappingInput = document.getElementById('voucherMapping');
-          if (voucherMappingInput) {
-            voucherMappingInput.value = JSON.stringify(window.selectedVouchers);
+    voucherJS.initCartVoucher({
+      userId: /*[[${currentUserId}]]*/ 1,
+      updatePriceUI: function(courseId, data) {
+        const originalPriceEl = document.getElementById('original-price-' + courseId);
+        const discountedPriceEl = document.getElementById('discounted-price-' + courseId);
+        const appliedVoucherEl = document.getElementById('applied-voucher-' + courseId);
+        if (originalPriceEl) {
+          if (data && data.discountedPrice) {
+            originalPriceEl.classList.add('original-price-strike');
+          } else {
+            originalPriceEl.classList.remove('original-price-strike');
           }
-
-          console.log('Checkout with vouchers:', window.selectedVouchers); // Debug log
-          return true;
+        }
+        if (discountedPriceEl) {
+          discountedPriceEl.textContent = data && data.discountedPrice ? ' ' + voucherJS.formatNumberWithCommas(Number(data.discountedPrice)) + ' đ' : '';
+        }
+      },
+      updateCartTotal: function() {
+        let total = 0;
+        document.querySelectorAll('.cart-row').forEach(tr => {
+          const courseId = tr.getAttribute('data-course-id');
+          const discountedEl = document.getElementById('discounted-price-' + courseId);
+          const originalEl = document.getElementById('original-price-' + courseId);
+          let price = 0;
+          if (discountedEl && discountedEl.textContent.trim()) {
+            price = Number(discountedEl.textContent.replace(/[^\d]/g, ''));
+          } else if (originalEl) {
+            price = Number(originalEl.textContent.replace(/[^\d]/g, ''));
+          }
+          if (!isNaN(price) && price > 0) {
+            total += price;
+          }
+        });
+        const cartTotalEl = document.getElementById('cart-total');
+        if (cartTotalEl) {
+          cartTotalEl.textContent = voucherJS.formatNumberWithCommas(total) + ' đ';
+        }
+      },
+      initializeCheckoutForm: function() {
+        const checkoutForm = document.getElementById('checkout-form');
+        if (checkoutForm) {
+          checkoutForm.onsubmit = function(e) {
+            const voucherMappingInput = document.getElementById('voucherMapping');
+            if (voucherMappingInput) {
+              voucherMappingInput.value = JSON.stringify(window.selectedVouchers);
+            }
+            return true;
+          };
+        }
+      }
+    });
+  </script>
+  <script>
+    // Hiển thị modal Bootstrap khi bấm Checkout
+    document.addEventListener('DOMContentLoaded', function() {
+      const checkoutBtn = document.getElementById('checkout-btn-modal');
+      if (checkoutBtn) {
+        checkoutBtn.onclick = function(e) {
+          e.preventDefault();
+          // Dùng Bootstrap modal nếu có, fallback nếu không
+          if (window.bootstrap && bootstrap.Modal) {
+            const modal = new bootstrap.Modal(document.getElementById('paymentMethodModal'));
+            modal.show();
+            window._paymentModalInstance = modal;
+          } else {
+            document.getElementById('paymentMethodModal').style.display = 'block';
+          }
         };
       }
+    });
+    // Chọn phương thức thanh toán
+    function selectPaymentMethod(method) {
+      // Bỏ chọn tất cả
+      document.getElementById('qr-card').classList.remove('selected');
+      document.getElementById('vnpay-card').classList.remove('selected');
+      document.getElementById('qr-radio').checked = false;
+      document.getElementById('vnpay-radio').checked = false;
+      // Chọn card và radio tương ứng
+      if (method === 'qr') {
+        document.getElementById('qr-card').classList.add('selected');
+        document.getElementById('qr-radio').checked = true;
+      } else if (method === 'vnpay') {
+        document.getElementById('vnpay-card').classList.add('selected');
+        document.getElementById('vnpay-radio').checked = true;
+      }
+      // Bật nút tiếp tục
+      document.getElementById('proceed-btn').disabled = false;
     }
-
-    // Đóng modal khi click outside
-    document.addEventListener('click', function(e) {
-      const modal = document.getElementById('voucherModal');
-      if (e.target === modal) {
-        closeVoucherModal();
+    // Đóng modal
+    function closePaymentModal() {
+      if (window._paymentModalInstance) {
+        window._paymentModalInstance.hide();
+      } else {
+        document.getElementById('paymentMethodModal').style.display = 'none';
       }
-    });
-
-    // Khi xóa course khỏi cart, cũng xóa khỏi selectedVouchers và localStorage
-    document.querySelectorAll('a[href^="/cart/remove/"]').forEach(btn => {
-      btn.addEventListener('click', function() {
-        const tr = this.closest('tr');
-        if (tr) {
-          const courseId = tr.getAttribute('data-course-id');
-          if (window.selectedVouchers && window.selectedVouchers[courseId]) {
-            delete window.selectedVouchers[courseId];
-            saveSelectedVouchers();
-          }
-        }
-      });
-    });
-
-    function restoreVoucherUI() {
-      for (const [courseId, voucherId] of Object.entries(window.selectedVouchers)) {
-        fetch('/cart/apply-voucher', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-          },
-          body: JSON.stringify({
-            userId: userId,
-            courseId: courseId,
-            voucherId: voucherId
-          })
-        })
-        .then(res => res.json())
-        .then(data => {
-          const originalPriceEl = document.getElementById('original-price-' + courseId);
-          const discountedPriceEl = document.getElementById('discounted-price-' + courseId);
-          if (originalPriceEl) originalPriceEl.classList.add('original-price-strike');
-          if (discountedPriceEl && data.discountedPrice) {
-            discountedPriceEl.textContent = ' ' + formatNumberWithCommas(Number(data.discountedPrice)) + ' đ';
-          }
-        });
+      // Reset chọn
+      document.getElementById('qr-card').classList.remove('selected');
+      document.getElementById('vnpay-card').classList.remove('selected');
+      document.getElementById('qr-radio').checked = false;
+      document.getElementById('vnpay-radio').checked = false;
+      document.getElementById('proceed-btn').disabled = true;
+    }
+    // Khi bấm Tiếp tục
+    function proceedToCheckout() {
+      let method = '';
+      const radios = document.getElementsByName('paymentMethodModal');
+      for (const r of radios) {
+        if (r.checked) method = r.value;
       }
-      setTimeout(() => {
-        updateCartTotal();
-      }, 300);
+      if (!method) {
+        alert('Vui lòng chọn phương thức thanh toán!');
+        return;
+      }
+      document.getElementById('paymentMethod-hidden').value = method;
+      closePaymentModal();
+      document.getElementById('checkout-form').submit();
     }
   </script>
 </main>

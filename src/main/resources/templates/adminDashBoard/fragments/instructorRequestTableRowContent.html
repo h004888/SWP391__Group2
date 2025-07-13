@@ -6,7 +6,7 @@
             <div class="d-flex align-items-center position-relative">
                 <!-- Image -->
                 <div class="avatar avatar-md">
-                    <img th:src="${request.user.profilePicture != null ? request.user.profilePicture : 'assets/images/avatar/default.jpg'}" class="rounded-circle" alt="">
+                    <img th:src="${request.user.profilePicture != null ? request.user.profilePicture : '/img/undraw_profile.svg'}" class="rounded-circle" alt="">
                 </div>
                 <div class="mb-0 ms-2">
                     <!-- Title -->
@@ -20,7 +20,7 @@
 
         <!-- Table data -->
         <td class="text-center text-sm-start">
-            <h6 class="mb-0" th:text="${request.user.personalSkill}">Subject</h6>
+            <h6 class="mb-0" th:text="${request.personalSkill != null ? request.personalSkill :'N/A' }">Subject</h6>
         </td>
 
         <!-- Status -->

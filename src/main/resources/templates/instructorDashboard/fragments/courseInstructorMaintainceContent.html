@@ -1,0 +1,161 @@
+<div id="content" class="container-fluid" th:fragment="maintenanceContent">
+    <!-- Error Message -->
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <span th:text="${errorMessage}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Title -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <h1 class="h3 mb-2 mb-sm-0" th:text="${accNamePage}">Management <b>Order</b></h1>
+        </div>
+    </div>
+
+    <!-- Main card START -->
+    <div class="card bg-transparent border">
+        <!-- Card header START -->
+        <div class="card-header bg-light border-bottom">
+            <!-- Search and select START -->
+            <div class="row g-3 align-items-center justify-content-between">
+                <!-- Search bar -->
+                <div class="col-md-4">
+                    <form id="filterForm" class="rounded position-relative">
+                        <input class="form-control bg-body" type="search" id="filterUsername" name="username" th:value="${username}" placeholder="Search by username..." aria-label="Search">
+                        <button class="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset" type="submit">
+                            <i class="fas fa-search fs-6"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Select options -->
+                <div class="col-md-8">
+                    <div class="d-flex gap-4">
+                        <select class="form-select js-choice border-0 z-index-9 bg-transparent" name="amountDirection" id="filterAmount">
+                            <option value="" th:selected="${amountDirection == null or amountDirection == ''}">All Amounts</option>
+                            <option value="asc" th:selected="${amountDirection == 'asc'}">Low to High</option>
+                            <option value="desc" th:selected="${amountDirection == 'desc'}">High to Low</option>
+                        </select>
+                        <select class="form-select js-choice border-0 z-index-9 bg-transparent" name="orderType" id="filterOrderType">
+                            <option value="" th:selected="${orderType == null or orderType == ''}">All Types</option>
+                            <option value="course_purchase" th:selected="${orderType == 'course_purchase'}">Course Purchase</option>
+                            <option value="creation_fee" th:selected="${orderType == 'creation_fee'}">Creation Fee</option>
+                        </select>
+                        <div class="d-flex align-items-center gap-4">
+                            <input class="form-control" type="date" id="filterStartDate" name="startDate"
+                                   th:value="${startDate != null ? startDate : #temporals.format(#temporals.createNow().withDayOfYear(1), 'yyyy-MM-dd')}">
+                            <span>To</span>
+                            <input class="form-control" type="date" id="filterEndDate" name="endDate"
+                                   th:value="${endDate != null ? endDate : #temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Search and select END -->
+        </div>
+        <!-- Card header END -->
+
+        <!-- Card body START -->
+        <div class="card-body">
+            <!-- Status Tabs -->
+            <div class="custom-tabs mt-4">
+                <ul class="nav nav-tabs" id="maintenanceTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="pending-tab" data-bs-toggle="tab"
+                                data-bs-target="#pending" type="button" role="tab">Pending
+                            <span class="badge bg-light text-dark ms-2" th:text="${#lists.size(pendingPayments)}">0</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="paid-tab" data-bs-toggle="tab"
+                                data-bs-target="#paid" type="button" role="tab">Paid
+                            <span class="badge bg-light text-dark ms-2" th:text="${#lists.size(paidPayments)}">0</span>
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content p-0" id="maintenanceTabsContent">
+                    <!-- Pending Tab -->
+                    <div class="tab-pane fade show active" id="pending" role="tabpanel">
+                        <div class="table-responsive border-0">
+                            <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Fee</th>
+                                    <th>Month/Year</th>
+                                    <th>Status</th>
+                                    <th>Course Name</th>
+                                    <th>Description</th>
+                                    <th>Due Date</th>
+                                    <th>Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="m, iterStat : ${pendingPayments}">
+                                    <td th:text="${iterStat.index + 1}"></td>
+                                    <td th:text="${m.fee != null ? #numbers.formatDecimal(m.fee.maintenanceFee, 0, 'COMMA', 0, 'POINT') : 'N/A'}"></td>
+                                    <td th:text="${m.monthYear != null ? #temporals.format(m.monthYear, 'MM/yyyy') : 'N/A'}"></td>
+                                    <td th:text="${m.status}"></td>
+                                    <td th:text="${m.course != null ? m.course.title : ''}"></td>
+                                    <td th:text="${m.description != null ? m.description : ''}"></td>
+                                    <td th:text="${m.dueDate != null ? #temporals.format(m.dueDate, 'dd/MM/yyyy') : 'N/A'}"></td>
+                                    <td>
+                                        <a th:if="${m.status != 'PAID'}" th:href="@{/instructor/maintenance/pay/{id}(id=${m.maintenanceId})}" class="btn btn-primary btn-sm">Thanh toán</a>
+                                        <div th:if="${m.status == 'PAID'}" class="btn btn-success btn-sm" disabled>Đã thanh toán</div>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(pendingPayments)}">
+                                    <td colspan="8" class="text-center text-muted">No pending payments found.</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- Paid Tab -->
+                    <div class="tab-pane fade" id="paid" role="tabpanel">
+                        <div class="table-responsive border-0">
+                            <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Fee</th>
+                                    <th>Month/Year</th>
+                                    <th>Status</th>
+                                    <th>Course Name</th>
+                                    <th>Description</th>
+                                    <th>Due Date</th>
+                                    <th>Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="m, iterStat : ${paidPayments}">
+                                    <td th:text="${iterStat.index + 1}"></td>
+                                    <td th:text="${m.fee != null ? #numbers.formatDecimal(m.fee.maintenanceFee, 0, 'COMMA', 0, 'POINT') : 'N/A'}"></td>
+                                    <td th:text="${m.monthYear != null ? #temporals.format(m.monthYear, 'MM/yyyy') : 'N/A'}"></td>
+                                    <td th:text="${m.status}"></td>
+                                    <td th:text="${m.course != null ? m.course.title : ''}"></td>
+                                    <td th:text="${m.description != null ? m.description : ''}"></td>
+                                    <td th:text="${m.dueDate != null ? #temporals.format(m.dueDate, 'dd/MM/yyyy') : 'N/A'}"></td>
+                                    <td>
+                                        <div class="btn btn-success btn-sm" disabled>Đã thanh toán</div>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(paidPayments)}">
+                                    <td colspan="8" class="text-center text-muted">No paid payments found.</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Card body END -->
+    </div>
+    <!-- Main card END -->
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script th:src="@{/js/instructor/ordersJS.js}"></script>
+</div>
+
