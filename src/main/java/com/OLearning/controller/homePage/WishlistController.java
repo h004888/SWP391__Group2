@@ -131,10 +131,10 @@ public class WishlistController {
             
         } catch (WishlistServiceImpl.CourseAlreadyInWishlistException e) {
             result.put("success", false);
-            result.put("error", e.getMessage());
+            result.put("message", e.getMessage());
         } catch (Exception e) {
             result.put("success", false);
-            result.put("error", "Failed to update wishlist");
+            result.put("message", "Failed to update wishlist");
         }
         
         return result;
@@ -153,7 +153,7 @@ public class WishlistController {
             updateWishlistCookie(emptyWishlist, response, userId);
             model.addAttribute("message", "Wishlist cleared successfully!");
         } catch (Exception e) {
-            model.addAttribute("error", "Failed to clear wishlist");
+            model.addAttribute("message", "Failed to clear wishlist");
         }
         return "redirect:/wishlist";
     }

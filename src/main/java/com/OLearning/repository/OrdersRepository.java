@@ -271,4 +271,7 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
     @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
     @Query("SELECT DISTINCT o FROM Order o JOIN o.orderDetails od WHERE od.course.instructor.userId = :instructorId ORDER BY o.amount DESC")
     Page<Order> findByInstructorIdOrderByAmountDesc(@Param("instructorId") Long instructorId, Pageable pageable);
+    
+    // Check if user has any PAID order with specific order type
+    boolean existsByUserUserIdAndOrderTypeAndStatus(Long userId, String orderType, String status);
 }

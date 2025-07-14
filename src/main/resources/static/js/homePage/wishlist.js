@@ -1,7 +1,14 @@
 // Wishlist functionality
 function toggleWishlist(button, courseId) {
+    // Kiểm tra đăng nhập trước khi thực hiện
+    if (typeof window.userId === 'undefined' || window.userId === null || window.userId === 0) {
+        window.location.href = '/login';
+        return;
+    }
+    
     fetch(`/wishlist/toggle/${courseId}`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest'
@@ -60,12 +67,12 @@ function toggleWishlist(button, courseId) {
                 }
             }
         } else {
-            alert(data.error || 'Failed to update wishlist');
+            showNotification(data.message || 'Failed to update wishlist', 'error');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Failed to update wishlist');
+        showNotification('Failed to update wishlist', 'error');
     });
 }
 
@@ -92,7 +99,9 @@ function checkWishlistStatus() {
     wishlistButtons.forEach(button => {
         const courseId = button.getAttribute('data-course-id');
         if (courseId) {
-            fetch(`/wishlist/check/${courseId}`)
+            fetch(`/wishlist/check/${courseId}`, {
+                credentials: 'include'
+            })
             .then(response => response.json())
             .then(data => {
                 const heartIcon = button.querySelector('i');

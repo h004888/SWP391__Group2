@@ -79,6 +79,11 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
     }
     
     @Override
+    public Page<CourseMaintenance> filterMaintenancesByInstructor(Long instructorId, String courseName, LocalDate monthYear, Pageable pageable) {
+        return courseMaintenanceRepository.findByInstructorIdAndCourseNameAndMonthYear(instructorId, courseName, monthYear, pageable);
+    }
+    
+    @Override
     public List<Fee> getListFees() {
         return feesRepository.findAll();
     }
@@ -373,10 +378,10 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
             double feeAmount = fee != null ? fee.getMaintenanceFee() : 0.0;
             // 1. Nếu instructor không đủ coin, cộng coin trước
             if (instructor.getCoin() < feeAmount) {
-                instructor.setCoin(instructor.getCoin() + (long) feeAmount);
+                instructor.setCoin(instructor.getCoin() + feeAmount);
                 CoinTransaction topup = new CoinTransaction();
                 topup.setUser(instructor);
-                topup.setAmount(BigDecimal.valueOf(feeAmount));
+                topup.setAmount(feeAmount);
                 topup.setTransactionType("top_up");
                 topup.setStatus("PAID");
                 topup.setNote("SePay maintenance fee top up");
@@ -385,10 +390,10 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
                 coinTransactionRepository.save(topup);
             }
             // 2. Trừ coin instructor
-            instructor.setCoin(instructor.getCoin() - (long) feeAmount);
+            instructor.setCoin(instructor.getCoin() - feeAmount);
             CoinTransaction pay = new CoinTransaction();
             pay.setUser(instructor);
-            pay.setAmount(BigDecimal.valueOf(-feeAmount));
+            pay.setAmount(-feeAmount);
             pay.setTransactionType("maintenance_fee");
             pay.setStatus("PAID");
             pay.setNote("Pay maintenance fee");
@@ -397,10 +402,10 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
             coinTransactionRepository.save(pay);
             User admin = userRepository.findById(1L).orElse(null);
             if (admin != null) {
-                admin.setCoin(admin.getCoin() + (long) feeAmount);
+                admin.setCoin(admin.getCoin() + feeAmount);
                 CoinTransaction receive = new CoinTransaction();
                 receive.setUser(admin);
-                receive.setAmount(BigDecimal.valueOf(feeAmount));
+                receive.setAmount(feeAmount);
                 receive.setTransactionType("maintenance_fee");
                 receive.setStatus("PAID");
                 receive.setNote("Receive maintenance fee from instructor " + instructor.getUserId());

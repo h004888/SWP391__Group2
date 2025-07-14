@@ -243,7 +243,7 @@ public class VoucherServiceImpl implements VoucherService {
         }
         // Lọc chỉ lấy course còn active và user chưa mua
         courses = courses.stream()
-                .filter(course -> "approved".equalsIgnoreCase(course.getStatus()))
+                .filter(course -> "public".equalsIgnoreCase(course.getStatus()))
                 .filter(course -> !enrollmentRepository.existsByUser_UserIdAndCourse_CourseId(userId, course.getCourseId()))
                 .toList();
         return courses.stream()
@@ -265,7 +265,7 @@ public class VoucherServiceImpl implements VoucherService {
         }
         // Lọc chỉ lấy course còn active
         courses = courses.stream()
-                .filter(course -> "approved".equalsIgnoreCase(course.getStatus()))
+                .filter(course -> "public".equalsIgnoreCase(course.getStatus()))
                 .toList();
         return courses.stream()
                 .map(CourseMapper::toDTO)

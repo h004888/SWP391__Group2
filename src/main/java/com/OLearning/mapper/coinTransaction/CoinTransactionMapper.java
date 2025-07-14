@@ -2,6 +2,7 @@ package com.OLearning.mapper.coinTransaction;
 
 import com.OLearning.dto.coinTransaction.CoinTransactionDTO;
 import com.OLearning.entity.CoinTransaction;
+import com.OLearning.entity.Order;
 import com.OLearning.entity.OrderDetail;
 import com.OLearning.repository.OrderDetailRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,15 +34,17 @@ public class CoinTransactionMapper {
                     if (detail.getCourse() != null) {
                         dto.setCourseName(detail.getCourse().getTitle());
                         dto.setInstructorName(detail.getCourse().getInstructor() != null ? detail.getCourse().getInstructor().getFullName() : null);
-                        dto.setOriginalPrice(detail.getCourse().getPrice() != null ? BigDecimal.valueOf(detail.getCourse().getPrice()) : null);
-                        dto.setDiscountedPrice(detail.getUnitPrice() != null ? BigDecimal.valueOf(detail.getUnitPrice()) : null);
+                        dto.setOriginalPrice(detail.getCourse().getPrice());
+                        dto.setDiscountedPrice(detail.getUnitPrice());
                     }
-                    dto.setPaymentMethod("Ví nội bộ");
+                    // Xác định phương thức thanh toán dựa trên thông tin có sẵn
+                    String paymentMethod = determinePaymentMethod(coinTransaction, coinTransaction.getOrder());
+                    dto.setPaymentMethod(paymentMethod);
                 } else {
-                    if (coinTransaction.getAmount() != null && coinTransaction.getAmount().signum() < 0) {
+                    if (coinTransaction.getAmount() != null && coinTransaction.getAmount() < 0) {
                         for (OrderDetail detail : details) {
                             if (detail.getUnitPrice() != null &&
-                                detail.getUnitPrice().doubleValue() == coinTransaction.getAmount().abs().doubleValue() &&
+                                detail.getUnitPrice().doubleValue() == Math.abs(coinTransaction.getAmount().doubleValue()) &&
                                 detail.getCourse() != null) {
                                 dto.setCourseName(detail.getCourse().getTitle());
                                 break;
@@ -57,6 +60,10 @@ public class CoinTransactionMapper {
                     }
                 }
             }
+        } else {
+            // Nếu không có Order, xác định phương thức thanh toán dựa trên transaction type và note
+            String paymentMethod = determinePaymentMethod(coinTransaction, null);
+            dto.setPaymentMethod(paymentMethod);
         }
         return dto;
     }
@@ -65,6 +72,53 @@ public class CoinTransactionMapper {
         return coinTransactions.stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    private String determinePaymentMethod(CoinTransaction transaction, Order order) {
+        // Kiểm tra note của transaction trước
+        String note = transaction.getNote();
+        if (note != null) {
+            if (note.contains("VNPay")) {
+                return "VNPay";
+            } else if (note.contains("QR")) {
+                return "QR Banking";
+            }
+        }
+
+        if (order != null) {
+            String description = order.getDescription();
+            if (description != null) {
+                if (description.contains("VNPay") || description.contains("vnp_")) {
+                    return "VNPay";
+                } else if (description.contains("QR") || description.contains("qr")) {
+                    return "QR Banking";
+                }
+            }
+
+            String refCode = order.getRefCode();
+            if (refCode != null) {
+                if (refCode.matches("\\d{10,}")) {
+                    return "VNPay";
+                }
+            }
+        }
+
+        String transactionType = transaction.getTransactionType();
+        if ("top_up".equals(transactionType)) {
+            if (note != null && note.contains("VNPay")) {
+                return "VNPay";
+            } else if (note != null && note.contains("QR")) {
+                return "QR Banking";
+            } else {
+                return "VNPay";
+            }
+        } else if ("course_purchase".equals(transactionType)) {
+            return "Ví nội bộ";
+        } else if ("withdraw".equals(transactionType)) {
+            return "Rút tiền";
+        }
+
+        return "Ví nội bộ";
     }
 }
 

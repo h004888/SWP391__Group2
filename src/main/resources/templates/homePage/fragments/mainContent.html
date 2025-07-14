@@ -7,6 +7,10 @@
             <span id="notification-message"></span>
         </div>
     </div>
+    <script th:inline="javascript">
+        // Set currentUserId for frontend JavaScript
+        window.userId = /*[[${currentUserId}]]*/ 0;
+    </script>
     <script>
         // Function to show notification (copied from voucherContent.html)
         function showNotification(message, type) {

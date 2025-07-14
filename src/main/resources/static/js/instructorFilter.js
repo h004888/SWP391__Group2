@@ -132,14 +132,28 @@ function showToast(message, type = 'info') {
 }
 
 // Các hàm xử lý hành động khóa học
-function upToPublic(courseId) {
+function upToPublic(courseId, hasPaidPublicationFee) {
     if (!courseId) return;
-    if (confirm('Are you sure you want to publish this course?')) {
-        $.post('/instructor/courses/uptopublic', { courseId: courseId })
-            .done(function() {
-                filterAllTabs(0); // Reload tất cả các tab
+    
+    // Nếu hasPaidPublicationFee là true (đã trả phí publication)
+    if (hasPaidPublicationFee === true) {
+        showConfirmActionModal(
+            'Are you sure you want to publish this course?',
+            '/instructor/courses/uptopublic',
+            courseId,
+            function() {
+                filterAllTabs(0);
                 updateStatusBadges();
-            });
+            }
+        );
+    } else {
+        // Nếu chưa trả phí publication
+        showConfirmActionModalPublic(
+            'Bạn có chắc chắn muốn công khai khóa học này? Phí công khai sẽ là 100000, các lần sau sẽ không mất phí',
+            '/instructor/courses/uptopublic',
+            courseId,
+            null
+        );
     }
 }
 
@@ -214,6 +228,16 @@ function showConfirmActionModal(message, actionUrl, courseId, callback) {
                 if (typeof callback === 'function') callback();
                 $('#confirmActionModal').modal('hide');
             });
+    });
+    var modal = new bootstrap.Modal(document.getElementById('confirmActionModal'));
+    modal.show();
+}
+
+function showConfirmActionModalPublic(message, actionUrl, courseId, callback) {
+    $('#confirmActionMessage').text(message);
+    $('#confirmActionForm').attr('action', actionUrl);
+    $('#confirmActionCourseId').val(courseId);
+    $('#confirmActionForm').off('submit').on('submit', function(e) {
     });
     var modal = new bootstrap.Modal(document.getElementById('confirmActionModal'));
     modal.show();

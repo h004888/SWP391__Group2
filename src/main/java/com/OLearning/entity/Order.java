@@ -19,7 +19,7 @@ public class Order {
     private Long orderId;
 
     @Column(name = "Amount")
-    private double amount;
+    private Double amount;
 
     @Column(name = "OrderType")
     private String orderType;

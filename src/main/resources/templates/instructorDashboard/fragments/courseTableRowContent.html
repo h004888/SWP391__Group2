@@ -74,7 +74,7 @@
                 <ul class="dropdown-menu" th:aria-labelledby="'dropdownMenuButton-' + ${course.courseId}">
                     <!-- Up to Public: only for approved -->
                     <li th:if="${course.status == 'approved'}">
-                        <a class="dropdown-item" href="#" th:onclick="|upToPublic('${course.courseId}')|">
+                        <a class="dropdown-item" href="#" th:onclick="|upToPublic('${course.courseId}', ${hasPaidPublicationFee})|">
                             <i class="bi bi-upload me-2"></i>Up to Public
                         </a>
                     </li>

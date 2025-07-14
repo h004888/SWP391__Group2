@@ -43,27 +43,18 @@
 			}, 5000);
 		}
 		</script>
-		<!-- Remove old flash messages -->
-		<!--
-		<div class="container mt-3">
-			<div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
-				<span th:text="${message}"></span>
-				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-			</div>
-			<div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
-				<span th:text="${success}"></span>
-				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-			</div>
-			<div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-				<span th:text="${error}"></span>
-				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-			</div>
-			<div th:if="${info}" class="alert alert-info alert-dismissible fade show" role="alert">
-				<span th:text="${info}"></span>
-				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-			</div>
-		</div>
-		-->
+		<!-- Notification System -->
+		<div th:if="${message}" th:attr="data-message=${message}" id="server-message" style="display: none;"></div>
+		<script>
+			// Check for server messages on page load
+			document.addEventListener('DOMContentLoaded', function() {
+				const serverMessage = document.getElementById('server-message');
+				if (serverMessage && serverMessage.getAttribute('data-message')) {
+					const message = serverMessage.getAttribute('data-message');
+					showNotification(message, 'success');
+				}
+			});
+		</script>
 
 		<!-- =======================
 Page intro START -->
@@ -1601,26 +1592,7 @@ Footer END -->
 	  }
 	</script>
 
-	<style>
-		.voucher-btn {
-			border: none !important;
-			padding: 8px 12px !important;
-			font-size: 14px !important;
-			background: transparent !important;
-			color: #6c757d !important;
-			transition: all 0.3s ease;
-		}
 
-		.voucher-btn:hover {
-			color: #0d6efd !important;
-			background: rgba(13, 110, 253, 0.1) !important;
-			transform: scale(1.05);
-		}
-
-		.voucher-btn:focus {
-			box-shadow: none !important;
-		}
-	</style>
 
 </body>
 

@@ -47,15 +47,18 @@
           </div>
         </div>
 
-        <!-- Alert messages -->
-        <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
-          <span th:text="${message}"></span>
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-          <span th:text="${error}"></span>
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+        <!-- Notification System -->
+        <div th:if="${message}" th:attr="data-message=${message}" id="server-message" style="display: none;"></div>
+        <script>
+          // Check for server messages on page load
+          document.addEventListener('DOMContentLoaded', function() {
+            const serverMessage = document.getElementById('server-message');
+            if (serverMessage && serverMessage.getAttribute('data-message')) {
+              const message = serverMessage.getAttribute('data-message');
+              showNotification(message, 'success');
+            }
+          });
+        </script>
 
         <div class="row g-4">
           <!-- Card item START -->

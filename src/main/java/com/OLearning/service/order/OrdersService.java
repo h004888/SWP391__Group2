@@ -43,11 +43,13 @@ public interface OrdersService {
 
     String getOrderStatusById(Long orderId);
 
-    Order createOrder(User user, double amount, String orderType, String description);
+    Order createOrder(User user, double amount, String orderType);
 
     Order getOrderById(Long orderId);
 
     void saveOrder(Order order);
 
     void saveOrderDetail(OrderDetail orderDetail);
+    
+    boolean hasPaidPublicationOrder(Long userId);
 }

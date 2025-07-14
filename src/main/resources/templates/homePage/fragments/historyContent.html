@@ -1,4 +1,17 @@
 <main th:fragment="historyContent">
+    <!-- Notification System -->
+    <div th:if="${message}" th:attr="data-message=${message}" id="server-message" style="display: none;"></div>
+    <script>
+      // Check for server messages on page load
+      document.addEventListener('DOMContentLoaded', function() {
+        const serverMessage = document.getElementById('server-message');
+        if (serverMessage && serverMessage.getAttribute('data-message')) {
+          const message = serverMessage.getAttribute('data-message');
+          showNotification(message, 'success');
+        }
+      });
+    </script>
+    
     <div class="container mt-4">
       <!-- Breadcrumb -->
       <nav aria-label="breadcrumb">
@@ -134,17 +147,13 @@
                 <h4 class="fs-6 fw-semibold text-dark mb-3">Thông tin khóa học</h4>
                 <div class="bg-light rounded-3 p-3">
                   <div class="row mb-2">
-                    <span class="text-secondary">Tên khóa học:</span>
-                    <div class="fw-semibold text-dark mt-1" id="modal-courseName"></div>
+                    <span class="col-6 text-secondary">Tên khóa học:</span>
+                    <div class="col-6 fw-semibold text-dark mt-1" id="modal-courseName"></div>
                   </div>
                   <div class="row mb-2">
                     <div class="col-6 text-secondary">Giảng viên:</div>
                     <div class="col-6 fw-semibold text-dark" id="modal-instructorName"></div>
                   </div>
-                  <!--                                <div class="row mb-2">-->
-                  <!--                                    <div class="col-6 text-secondary">Thời lượng:</div>-->
-                  <!--                                    <div class="col-6 fw-semibold text-dark" id="modal-courseDuration"></div>-->
-                  <!--                                </div>-->
                   <div class="row mb-2">
                     <div class="col-6 text-secondary">Giá gốc:</div>
                     <div class="col-6 text-decoration-line-through text-secondary" id="modal-originalPrice"></div>
@@ -159,7 +168,7 @@
                   </div>
                   <div class="row">
                     <div class="col-6 text-secondary">Ghi chú:</div>
-                    <div class="col-6 text-dark" id="modal-note"></div>
+                    <div class="col-6 fw-semibold text-dark" id="modal-note"></div>
                   </div>
                 </div>
               </div>
@@ -187,7 +196,7 @@
               // $('#modal-courseDuration').text(data.courseDuration || '');
               $('#modal-originalPrice').text(data.originalPrice ? data.originalPrice.toLocaleString('vi-VN') + ' VND' : '');
               $('#modal-discountedPrice').text(data.discountedPrice ? data.discountedPrice.toLocaleString('vi-VN') + ' VND' : '');
-              $('#modal-status').text(data.status === 'completed' ? 'Đã thanh toán' : (data.status === 'pending' ? 'Chờ thanh toán' : 'Đã hủy'));
+              $('#modal-status').text(data.status === 'PAID' ? 'Đã thanh toán' : (data.status === 'pending' ? 'Chờ thanh toán' : 'Đã hủy'));
               $('#modal-note').text(data.note || '');
               var modal = new bootstrap.Modal(document.getElementById('transactionModal'));
               modal.show();
