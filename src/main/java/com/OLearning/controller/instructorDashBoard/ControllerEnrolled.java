@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import com.OLearning.entity.Enrollment;
+import com.OLearning.entity.User;
 
 @Controller
 @RequestMapping("/instructor/enrolled")
@@ -45,5 +48,18 @@ public class ControllerEnrolled {
         }
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/enrolledContent :: enrollment");
         return "instructorDashboard/indexUpdate";
+    }
+
+    @GetMapping("/detail")
+    public String getEnrollmentDetail(@RequestParam("enrollmentId") int enrollmentId, Model model) {
+        Enrollment enrollment = enrollmentService.getEnrollmentById(enrollmentId);
+        if (enrollment == null) {
+            model.addAttribute("errorMessage", "Enrollment not found");
+            return "instructorDashboard/fragments/enrollmentDetailModalContent :: errorContent";
+        }
+        User user = enrollment.getUser();
+        model.addAttribute("user", user);
+        model.addAttribute("enrollment", enrollment);
+        return "instructorDashboard/fragments/enrollmentDetailModalContent :: modalContent";
     }
 }

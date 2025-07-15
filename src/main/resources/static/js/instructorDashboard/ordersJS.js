@@ -1,40 +1,19 @@
-let currentStatus = 'PAID';
-let currentPages = {
-    PAID: 0,
-    CANCELLED: 0
-};
+let currentTab = 'INVOICE';
+let currentPage = 0;
 
 // Helper function to get table body element
-function getTableBodyElement(status) {
-    const tableMap = {
-        'PAID': '#paidTableBody',
-        'CANCELLED': '#cancelledTableBody'
-    };
-    
-    const selector = tableMap[status] || '#paidTableBody';
-    return $(selector);
+function getTableBodyElement() {
+    return $('#invoiceTableBody');
 }
 
 // Helper function to get pagination element
-function getPaginationElement(status) {
-    const paginationMap = {
-        'PAID': '#paidPagination',
-        'CANCELLED': '#cancelledPagination'
-    };
-    
-    const selector = paginationMap[status] || '#paidPagination';
-    return $(selector);
+function getPaginationElement() {
+    return $('#invoicePagination');
 }
 
 // Helper function to get badge element
-function getBadgeElement(status) {
-    const badgeMap = {
-        'PAID': 'paidCount',
-        'CANCELLED': 'cancelledCount'
-    };
-    
-    const badgeId = badgeMap[status];
-    return document.getElementById(badgeId);
+function getBadgeElement() {
+    return document.getElementById('invoiceCount');
 }
 
 // Helper function to get filter values
@@ -49,7 +28,7 @@ function getFilterValues() {
 }
 
 // Helper function to create AJAX data object
-function createAjaxData(status, page = 0, size = 10) {
+function createAjaxData(page = 0, size = 10) {
     const filters = getFilterValues();
     return {
         username: filters.username || null,
@@ -57,7 +36,6 @@ function createAjaxData(status, page = 0, size = 10) {
         orderType: filters.orderType || null,
         startDate: filters.startDate || null,
         endDate: filters.endDate || null,
-        status: status,
         page: page,
         size: size
     };
@@ -69,7 +47,7 @@ function handleAjaxResponse(tableData, paginationData, countData, tableBody, pag
     if (tableData && tableData.trim() !== '') {
         tableBody.html(tableData);
     } else {
-        tableBody.html('<tr><td colspan="8" class="text-center">No orders found</td></tr>');
+        tableBody.html('<tr><td colspan="6" class="text-center">No orders found</td></tr>');
     }
 
     // Update pagination
@@ -80,32 +58,27 @@ function handleAjaxResponse(tableData, paginationData, countData, tableBody, pag
     }
 
     // Update count badge
-    updateStatusCountBadge(currentStatus, countData);
+    updateCountBadge(countData);
 }
 
 // Helper function to handle AJAX error
 function handleAjaxError(error, tableBody, paginationContainer) {
-    console.error("Error loading data for status:", currentStatus, error);
-    tableBody.html('<tr><td colspan="8" class="text-center text-danger">Error loading data</td></tr>');
+    console.error("Error loading data for invoice tab:", error);
+    tableBody.html('<tr><td colspan="6" class="text-center text-danger">Error loading data</td></tr>');
     paginationContainer.html('');
 }
 
-function filterOrders(status, page = 0, size = 10) {
-    const tableBody = getTableBodyElement(status);
-    const paginationContainer = getPaginationElement(status);
+function filterInvoices(page = 0, size = 10) {
+    const tableBody = getTableBodyElement();
+    const paginationContainer = getPaginationElement();
 
-    if (!tableBody || tableBody.length === 0) {
-        console.error("Table body not found for status:", status);
-        return;
-    }
-
-    // Update current page for this status
-    currentPages[status] = page;
+    // Update current page
+    currentPage = page;
 
     // Show loading state
-    tableBody.html('<tr><td colspan="8" class="text-center">Loading...</td></tr>');
+    tableBody.html('<tr><td colspan="6" class="text-center">Loading...</td></tr>');
 
-    const ajaxData = createAjaxData(status, page, size);
+    const ajaxData = createAjaxData(page, size);
 
     // Load table data and pagination simultaneously
     Promise.all([
@@ -134,28 +107,25 @@ function filterOrders(status, page = 0, size = 10) {
     });
 }
 
-function updateStatusCountBadge(status, totalCount) {
-    const badgeElement = getBadgeElement(status);
-
+function updateCountBadge(totalCount) {
+    const badgeElement = getBadgeElement();
     if (!badgeElement) {
-        console.error("Badge element not found for status:", status);
+        console.error("Badge element not found for invoice tab");
         return;
     }
-
     // Set the total count from server response
     const count = typeof totalCount === 'number' ? totalCount : (totalCount ? parseInt(totalCount) : 0);
     badgeElement.textContent = count;
 }
 
-function loadOrders(status, page = 0) {
-    console.log("Loading orders for status:", status, "page:", page);
-    filterOrders(status, page);
+function loadInvoices(page = 0) {
+    filterInvoices(page);
 }
 
 // Helper function to reset pagination and filter
 function resetAndFilter() {
-    currentPages[currentStatus] = 0;
-    filterOrders(currentStatus, 0);
+    currentPage = 0;
+    filterInvoices(0);
 }
 
 // Event handler for pagination clicks
@@ -163,32 +133,26 @@ $(document).on('click', '.pagination .page-link', function (e) {
     e.preventDefault();
     const page = parseInt($(this).data('page'));
     if (!isNaN(page) && page >= 0) {
-        console.log("Pagination clicked - page:", page, "for status:", currentStatus);
-        filterOrders(currentStatus, page);
+        filterInvoices(page);
     }
 });
 
 $(document).ready(function () {
-    // Load initial data for all tabs
-    const statuses = ['PAID', 'CANCELLED'];
-    statuses.forEach(status => {
-        loadOrders(status, 0);
-    });
+    // Load initial data for invoice tab
+    loadInvoices(0);
 
     // Tab change event
     $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
-        const status = $(this).data('status');
-        console.log("Tab changed to:", status);
-        currentStatus = status;
-        // Load current page for this status
-        filterOrders(currentStatus, currentPages[currentStatus] || 0);
+        const tabId = $(this).attr('id');
+        if (tabId === 'invoice-tab') {
+            loadInvoices(currentPage || 0);
+        }
     });
 
     // Filter events with debouncing
     const filterSelectors = ['#filterAmount', '#filterOrderType', '#filterStartDate', '#filterEndDate'];
     filterSelectors.forEach(selector => {
         $(selector).on('change', function () {
-            console.log("Filter changed:", $(this).attr('id'), $(this).val());
             resetAndFilter();
         });
     });
@@ -196,15 +160,9 @@ $(document).ready(function () {
     // Search input with debounce
     let searchTimer;
     $('#filterUsername').on('input', function () {
-        const searchValue = $(this).val();
-        console.log("Search input triggered - value:", searchValue);
         clearTimeout(searchTimer);
-        searchTimer = setTimeout(resetAndFilter, 500);
-    });
-
-    // Prevent form submission
-    $('#filterForm').on('submit', function (e) {
-        e.preventDefault();
-        resetAndFilter();
+        searchTimer = setTimeout(() => {
+            resetAndFilter();
+        }, 400);
     });
 }); 

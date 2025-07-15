@@ -5,12 +5,6 @@
             <span th:text="${order.instructorAmount != null ? #numbers.formatDecimal(order.instructorAmount, 0, 'COMMA', 0, 'POINT') : 'N/A'}"></span>
         </td>
         <td th:text="${order.orderType} ?: 'N/A'" class="text-uppercase text-bold "></td>
-        <td>
-            <span th:if="${order.status == 'PAID'}" class="badge bg-success">Paid</span>
-            <span th:if="${order.status == 'CANCELLED'}" class="badge bg-danger">Cancelled</span>
-            <span th:if="${order.status != 'PAID' && order.status != 'CANCELLED'}" 
-                  class="badge bg-secondary" th:text="${order.status} ?: 'N/A'"></span>
-        </td>
         <td th:with="formatter=${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}"
             th:text="${formatter}"></td>
         <td th:text="${order.username} ?: 'N/A'"></td>
