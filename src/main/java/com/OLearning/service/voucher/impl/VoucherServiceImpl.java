@@ -166,7 +166,6 @@ public class VoucherServiceImpl implements VoucherService {
 
     @Override
     public List<UserVoucherDTO> getValidVouchersForCourseAndUser(Long courseId, Long userId) {
-        // Lấy course để kiểm tra instructor
         Course course = courseRepository.findById(courseId)
             .orElseThrow(() -> new RuntimeException("Course not found"));
 
@@ -243,7 +242,7 @@ public class VoucherServiceImpl implements VoucherService {
         }
         // Lọc chỉ lấy course còn active và user chưa mua
         courses = courses.stream()
-                .filter(course -> "approved".equalsIgnoreCase(course.getStatus()))
+                .filter(course -> "publish".equalsIgnoreCase(course.getStatus()))
                 .filter(course -> !enrollmentRepository.existsByUser_UserIdAndCourse_CourseId(userId, course.getCourseId()))
                 .toList();
         return courses.stream()
@@ -265,7 +264,7 @@ public class VoucherServiceImpl implements VoucherService {
         }
         // Lọc chỉ lấy course còn active
         courses = courses.stream()
-                .filter(course -> "approved".equalsIgnoreCase(course.getStatus()))
+                .filter(course -> "publish".equalsIgnoreCase(course.getStatus()))
                 .toList();
         return courses.stream()
                 .map(CourseMapper::toDTO)
@@ -289,7 +288,7 @@ public class VoucherServiceImpl implements VoucherService {
             .filter(v -> v.getIsActive() != null && v.getIsActive() && v.getExpiryDate() != null && v.getExpiryDate().isAfter(now))
             .toList();
         List<Voucher> expiredVouchers = allVouchers.stream()
-            .filter(v -> v.getExpiryDate() == null || v.getExpiryDate().isBefore(now) || Boolean.FALSE.equals(v.getIsActive()))
+            .filter(v -> v.getExpiryDate() == null || !v.getExpiryDate().isAfter(now) || Boolean.FALSE.equals(v.getIsActive()))
             .toList();
         
         return new VoucherStatsDTO(
@@ -322,17 +321,17 @@ public class VoucherServiceImpl implements VoucherService {
         
         // Kiểm tra mã voucher đã tồn tại chưa
         if (voucherRepository.findByCode(voucherDTO.getCode().trim()).isPresent()) {
-            throw new IllegalArgumentException("Mã voucher đã tồn tại!");
+            throw new IllegalArgumentException("Voucher code already exists!");
         }
 
         // Kiểm tra nếu không phải global thì phải chọn ít nhất 1 khóa học
         if (Boolean.FALSE.equals(voucherDTO.getIsGlobal()) && (selectedCourses == null || selectedCourses.isEmpty())) {
-            throw new IllegalArgumentException("Vui lòng chọn ít nhất một khóa học!");
+            throw new IllegalArgumentException("Please select at least one course!");
         }
 
         // Lấy instructor
         User instructor = userRepository.findById(instructorId)
-                .orElseThrow(() -> new IllegalArgumentException("Instructor không tồn tại!"));
+                .orElseThrow(() -> new IllegalArgumentException("Instructor does not exist!"));
 
         // Tạo voucher
         Voucher voucher = new Voucher();
@@ -390,29 +389,25 @@ public class VoucherServiceImpl implements VoucherService {
     @Override
     public Map<String, Object> getFilteredVouchersForInstructor(Long instructorId, String keyword, String tabType, int page, int size) {
         Map<String, Object> response = new HashMap<>();
-        
         try {
             // Get all vouchers for instructor with search filter
             List<Voucher> allVouchers = voucherRepository.findAll().stream()
                 .filter(v -> v.getInstructor().getUserId().equals(instructorId))
                 .toList();
-            
             // Apply search filter
             if (keyword != null && !keyword.isBlank()) {
                 allVouchers = allVouchers.stream()
                     .filter(v -> v.getCode() != null && v.getCode().toLowerCase().contains(keyword.toLowerCase()))
                     .toList();
             }
-            
             // Separate valid and expired vouchers
             LocalDate now = LocalDate.now();
             List<Voucher> validVouchers = allVouchers.stream()
                 .filter(v -> v.getIsActive() != null && v.getIsActive() && v.getExpiryDate() != null && v.getExpiryDate().isAfter(now))
                 .toList();
             List<Voucher> expiredVouchers = allVouchers.stream()
-                .filter(v -> v.getExpiryDate() == null || v.getExpiryDate().isBefore(now) || Boolean.FALSE.equals(v.getIsActive()))
+                .filter(v -> v.getExpiryDate() == null || !v.getExpiryDate().isAfter(now) || Boolean.FALSE.equals(v.getIsActive()))
                 .toList();
-            
             // Get vouchers for current tab with pagination
             List<Voucher> currentTabVouchers;
             if ("valid".equals(tabType)) {
@@ -420,18 +415,13 @@ public class VoucherServiceImpl implements VoucherService {
             } else {
                 currentTabVouchers = expiredVouchers;
             }
-            
             // Apply pagination
             int totalItems = currentTabVouchers.size();
             int totalPages = (int) Math.ceil((double) totalItems / size);
             int startIndex = page * size;
             int endIndex = Math.min(startIndex + size, totalItems);
-            
             List<Voucher> paginatedVouchers = currentTabVouchers.subList(startIndex, endIndex);
-            
-            // Generate HTML content
-            String tableContent = generateTableContent(paginatedVouchers, tabType);
-            
+            List<VoucherDTO> voucherDTOs = paginatedVouchers.stream().map(voucherMapper::toVoucherDTO).toList();
             // Create stats
             VoucherStatsDTO stats = new VoucherStatsDTO(
                 (long) allVouchers.size(),
@@ -441,7 +431,6 @@ public class VoucherServiceImpl implements VoucherService {
                 expiredVouchers,
                 keyword
             );
-            
             // Create pagination info
             Map<String, Object> pagination = new HashMap<>();
             pagination.put("currentPage", page);
@@ -449,49 +438,15 @@ public class VoucherServiceImpl implements VoucherService {
             pagination.put("totalItems", totalItems);
             pagination.put("hasNext", page < totalPages - 1);
             pagination.put("hasPrevious", page > 0);
-            
-            response.put("tableContent", tableContent);
+            response.put("vouchers", voucherDTOs);
             response.put("stats", stats);
             response.put("pagination", pagination);
             response.put("success", true);
-            
         } catch (Exception e) {
             response.put("error", e.getMessage());
             response.put("success", false);
         }
-        
         return response;
-    }
-
-    private String generateTableContent(List<Voucher> vouchers, String tabType) {
-        String emptyMessage = "valid".equals(tabType) ? "Không có voucher còn hạn." : "Không có voucher hết hạn.";
-        
-        if (vouchers == null || vouchers.isEmpty()) {
-            return "<tr><td colspan=\"7\" class=\"text-center\">" + emptyMessage + "</td></tr>";
-        }
-        
-        StringBuilder html = new StringBuilder();
-        for (Voucher voucher : vouchers) {
-            html.append("<tr>");
-            html.append("<td>").append(voucher.getCode()).append("</td>");
-            html.append("<td>").append(voucher.getDiscount()).append("</td>");
-            html.append("<td>").append(voucher.getExpiryDate() != null ? voucher.getExpiryDate().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "").append("</td>");
-            html.append("<td>").append(voucher.getLimitation()).append("</td>");
-            html.append("<td>").append(voucher.getUsedCount()).append("</td>");
-            html.append("<td>");
-            html.append("<span class=\"badge rounded-pill px-3 py-2 ").append(voucher.getIsGlobal() ? "bg-primary" : "bg-info").append("\">");
-            html.append(voucher.getIsGlobal() ? "Tất cả khóa học" : "Một số khóa học");
-            html.append("</span>");
-            html.append("</td>");
-            html.append("<td>");
-            html.append("<button class=\"btn btn-info btn-sm\" onclick=\"viewCourses(").append(voucher.getVoucherId()).append(")\">");
-            html.append("<i class=\"bi bi-eye\"></i> View");
-            html.append("</button>");
-            html.append("</td>");
-            html.append("</tr>");
-        }
-        
-        return html.toString();
     }
 
     @Override
@@ -511,7 +466,12 @@ public class VoucherServiceImpl implements VoucherService {
                 );
             }
         } else if (status != null && status.equals("expired")) {
-            voucherPage = voucherRepository.findByInstructor_UserIdAndExpiryDateBeforeOrIsActiveFalse(instructorId, now, pageable);
+            voucherPage = voucherRepository.findExpiredOrInactiveVouchersByInstructor(instructorId, now, pageable);
+            // Lọc lại ở Java để lấy voucher expiryDate <= now hoặc isActive = false
+            List<Voucher> filtered = voucherPage.getContent().stream()
+                .filter(v -> v.getExpiryDate() == null || !v.getExpiryDate().isAfter(now) || Boolean.FALSE.equals(v.getIsActive()))
+                .toList();
+            voucherPage = new PageImpl<>(filtered, pageable, filtered.size());
             if (keyword != null && !keyword.isBlank()) {
                 voucherPage = new PageImpl<>(
                     voucherPage.getContent().stream()

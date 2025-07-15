@@ -7,6 +7,10 @@
             <span id="notification-message"></span>
         </div>
     </div>
+    <script th:inline="javascript">
+        // Set currentUserId for frontend JavaScript
+        window.userId = /*[[${currentUserId}]]*/ 0;
+    </script>
     <script>
         // Function to show notification (copied from voucherContent.html)
         function showNotification(message, type) {
@@ -627,17 +631,21 @@ Trending courses START -->
                                         </div>
                                         <!-- Price -->
                                         <div>
-
+                                            <div th:if="${topCoursesEnrolledMap[course.courseId] == null or !topCoursesEnrolledMap[course.courseId]}">
                                             <h4 class="text-success mb-0 item-show " style="font-size: 1.2rem;"
                                                 th:if="${course.price>0}"><span
                                                     th:text="${course.price != null ? #numbers.formatDecimal(course.price, 0, 'COMMA', 0, 'POINT')+' ₫' : 'N/A'}"></span>
                                             </h4>
                                             <h4 class="text-success mb-0 item-show" th:if="${course.price==0}">Free
                                             </h4>
-                                            <button type="button" class="btn btn-sm btn-success-soft item-show-hover m-1 add-to-cart-btn"
-                                                    th:attr="data-course-id=${course.courseId}">
-                                                <i class="fas fa-shopping-cart me-2"></i>Add to cart
-                                            </button>
+                                                <button type="button" class="btn btn-sm btn-success-soft item-show-hover m-1 add-to-cart-btn"
+                                                        th:attr="data-course-id=${course.courseId}">
+                                                    <i class="fas fa-shopping-cart me-2"></i>Add to cart
+                                                </button>
+                                            </div>
+                                            <a th:if="${topCoursesEnrolledMap[course.courseId] != null and topCoursesEnrolledMap[course.courseId]}"
+                                               th:href="@{/learning/course/view/{courseId}(courseId=${course.courseId})}"
+                                               class="btn btn-sm btn-primary-soft mb-0">Continue</a>
                                         </div>
                                     </div>
                                 </div>

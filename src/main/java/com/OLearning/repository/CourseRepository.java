@@ -148,6 +148,9 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
             """, nativeQuery = true)
     Course findMostRecentIncompleteCourse(@Param("userId") Long userId);
 
+    // Lấy course của instructor với status publish
+    List<Course> findByInstructorUserIdAndStatus(Long userId, String status);
+
     @Query("""
     SELECT COUNT(c) FROM Course c
     WHERE (:instructorId IS NULL OR c.instructor.userId = :instructorId)

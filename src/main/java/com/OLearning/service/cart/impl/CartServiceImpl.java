@@ -55,6 +55,13 @@ public class CartServiceImpl implements CartService {
         }
     }
 
+    private Long getLongValue(Object value) {
+        if (value instanceof Number) {
+            return ((Number) value).longValue();
+        }
+        throw new IllegalStateException("Value is not a number: " + (value != null ? value.getClass().getName() : "null"));
+    }
+
     @Override
     public Map<String, Object> getCartDetails(String encodedCartJson, String userEmail) {
         try {
@@ -88,6 +95,22 @@ public class CartServiceImpl implements CartService {
                 emptyCart.put("total", 0L);
                 emptyCart.put("items", new ArrayList<>());
                 return emptyCart;
+            }
+            // Bổ sung instructorName cho từng item
+            List<Map<String, Object>> items = (List<Map<String, Object>>) cart.getOrDefault("items", new ArrayList<>());
+            for (Map<String, Object> item : items) {
+                Object courseIdObj = item.get("courseId");
+                if (courseIdObj != null) {
+                    Long courseId = getLongValue(courseIdObj);
+                    Course course = courseRepository.findById(courseId).orElse(null);
+                    if (course != null && course.getInstructor() != null) {
+                        item.put("instructorName", course.getInstructor().getFullName());
+                    } else {
+                        item.put("instructorName", "N/A");
+                    }
+                } else {
+                    item.put("instructorName", "N/A");
+                }
             }
             return cart;
         } catch (Exception e) {
@@ -205,19 +228,19 @@ public class CartServiceImpl implements CartService {
 
         List<Map<String, Object>> items = (List<Map<String, Object>>) cart.getOrDefault("items", new ArrayList<>());
 
-        BigDecimal totalPrice = items.stream()
+        double totalPrice = items.stream()
                 .filter(Objects::nonNull)
-                .map(item -> {
+                .mapToDouble(item -> {
                     Object price = item.get("price");
-                    return price != null ? BigDecimal.valueOf(((Number) price).doubleValue()) : BigDecimal.ZERO;
+                    return price != null ? ((Number) price).doubleValue() : 0.0;
                 })
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .sum();
 
-        order.setOrderType("course_purchase");
+        order.setOrderType("COURSE_PURCHASE");
         order.setStatus("PAID");
         order.setOrderDate(LocalDateTime.now());
         order.setRefCode(refCode != null ? refCode : UUID.randomUUID().toString());
-        order.setAmount(totalPrice.doubleValue());
+        order.setAmount(totalPrice);
         order.setDescription("Buy Course OLearning - ORDER" + order.getOrderId());
         ordersRepository.save(order);
 
@@ -225,7 +248,7 @@ public class CartServiceImpl implements CartService {
         notification.setUser(user);
         notification.setCourse(null);
         notification.setMessage("You have received a payment of " + totalPrice + " VND");
-        notification.setType("PAYMENT_RECEIVED");
+        notification.setType("COURSE_PURCHASE");
         notification.setStatus("failed");
         notification.setSentAt(java.time.LocalDateTime.now());
         notificationRepository.save(notification);
@@ -240,7 +263,7 @@ public class CartServiceImpl implements CartService {
             transaction.setNote("VNPay payment"+ refCode);
             transaction.setOrder(null);
             coinTransactionRepository.save(transaction);
-            user.setCoin(user.getCoin() + totalPrice.longValue());
+            user.setCoin(user.getCoin() + totalPrice);
         }
 
         for (Map<String, Object> item : items) {
@@ -264,11 +287,11 @@ public class CartServiceImpl implements CartService {
             enrollment.setOrder(order);
             enrollmentRepository.save(enrollment);
 
-            BigDecimal coursePrice = BigDecimal.valueOf(((Number) item.get("price")).doubleValue());
+            double coursePrice = ((Number) item.get("price")).doubleValue();
 
             CoinTransaction studentTransaction = new CoinTransaction();
             studentTransaction.setUser(user);
-            studentTransaction.setAmount(coursePrice.negate());
+            studentTransaction.setAmount(-coursePrice);
             studentTransaction.setStatus("PAID");
             studentTransaction.setCreatedAt(LocalDateTime.now());
             studentTransaction.setOrder(order);
@@ -283,7 +306,7 @@ public class CartServiceImpl implements CartService {
 
             coinTransactionRepository.save(studentTransaction);
 
-            user.setCoin(user.getCoin() - coursePrice.longValue());
+            user.setCoin(user.getCoin() - coursePrice);
 
             User instructor = course.getInstructor();
             if (instructor != null) {
@@ -293,17 +316,17 @@ public class CartServiceImpl implements CartService {
                 instructorTransaction.setStatus("PAID");
                 instructorTransaction.setCreatedAt(LocalDateTime.now());
                 instructorTransaction.setOrder(null);
-                instructorTransaction.setTransactionType("course_purchase");
+                instructorTransaction.setTransactionType("COURSE_PURCHASE");
                 instructorTransaction.setNote("students buy courses");
                 coinTransactionRepository.save(instructorTransaction);
-                instructor.setCoin(instructor.getCoin() + coursePrice.longValue());
+                instructor.setCoin(instructor.getCoin() + coursePrice);
                 userRepository.save(instructor);
 
                 Notification notificationinstructor = new Notification();
                 notificationinstructor.setUser(instructor);
                 notificationinstructor.setCourse(course);
                 notificationinstructor.setMessage("You have received a payment of " + coursePrice + " VND for your course " + course.getTitle());
-                notificationinstructor.setType("PAYMENT_RECEIVED");
+                notificationinstructor.setType("COURSE_PURCHASE");
                 notificationinstructor.setStatus("failed");
                 notificationinstructor.setSentAt(LocalDateTime.now());
                 notificationRepository.save(notification);
@@ -324,12 +347,5 @@ public class CartServiceImpl implements CartService {
         if (coursePurchased) {
             throw new CourseAlreadyPurchasedException("Course '" + courseTitle + "' has already been purchased.");
         }
-    }
-
-    private Long getLongValue(Object value) {
-        if (value instanceof Number) {
-            return ((Number) value).longValue();
-        }
-        throw new IllegalStateException("Value is not a number: " + (value != null ? value.getClass().getName() : "null"));
     }
 }

@@ -14,6 +14,8 @@ import com.OLearning.repository.CourseRepository;
 import com.OLearning.repository.LessonRepository;
 import com.OLearning.repository.QuizRepository;
 import com.OLearning.repository.VideoRepository;
+import com.OLearning.repository.UserRepository;
+import com.OLearning.repository.OrdersRepository;
 import com.OLearning.security.CustomUserDetails;
 import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.chapter.ChapterService;
@@ -26,6 +28,8 @@ import com.OLearning.service.quiz.QuizService;
 import com.OLearning.service.user.UserService;
 import com.OLearning.service.video.VideoService;
 import com.OLearning.service.termsAndCondition.TermsAndConditionService;
+import com.OLearning.service.order.OrdersService;
+import com.OLearning.service.payment.VietQRService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -92,6 +96,12 @@ public class ControlllerAddCourse {
     private EnrollmentService enrollmentService;
     @Autowired
     private TermsAndConditionService termsAndConditionService;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private OrdersService ordersService;
+    @Autowired
+    private VietQRService vietQRService;
 
     //dashhboard
     @GetMapping()
@@ -118,6 +128,11 @@ public class ControlllerAddCourse {
         modelMap.put("totalElements", coursePage.getTotalElements());
         modelMap.put("size", size);
         model.addAttribute("categories", categoryService.findAll());
+        
+        // Thêm thông tin hasPaidPublicationFee vào model
+        boolean hasPaidPublicationFee = ordersService.hasPaidPublicationOrder(userId);
+        model.addAttribute("hasPaidPublicationFee", hasPaidPublicationFee);
+        
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/coursesContent :: listsCourseContent");
         return "instructorDashboard/indexUpdate";
     }
@@ -164,6 +179,10 @@ public class ControlllerAddCourse {
         model.addAttribute("totalPages", coursePage.getTotalPages());
         model.addAttribute("totalElements", coursePage.getTotalElements());
         model.addAttribute("size", size);
+        
+        // Thêm thông tin hasPaidPublicationFee vào model
+        boolean hasPaidPublicationFee = ordersService.hasPaidPublicationOrder(userId);
+        model.addAttribute("hasPaidPublicationFee", hasPaidPublicationFee);
 
         // Trả về fragment table row cho tbody
         return "instructorDashboard/fragments/courseTableRowContent :: courseTableRowContent";
@@ -204,12 +223,69 @@ public class ControlllerAddCourse {
     //uppublic course
     @PostMapping("/courses/uptopublic")
     public String upcourse(@RequestParam(name = "courseId") Long courseId
-            , RedirectAttributes redirectAttributes, HttpServletRequest request) {
-        //tim course theo course ID
-        //set status
-        courseService.submitCourse(courseId, "publish");
-        redirectAttributes.addFlashAttribute("successMessage", "course published successfully.");
-        return "redirect:../courses";
+            , RedirectAttributes redirectAttributes, HttpServletRequest request, Model model) {
+        
+        // Get current user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long userId = userDetails.getUserId();
+        
+        // Find course and instructor
+        Course course = courseService.findCourseById(courseId);
+        if (course == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Course not found.");
+            return "redirect:../courses";
+        }
+        
+        User instructor = userService.findById(userId);
+        if (instructor == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Instructor not found.");
+            return "redirect:../courses";
+        }
+        
+        // Check if this is the first publication (no previous PAID course_public order)
+        boolean isFirstPublication = !ordersService.hasPaidPublicationOrder(userId);
+        
+        if (isFirstPublication) {
+            // First publication - requires payment
+            double publicationFee = 100000.0;
+            
+            if (instructor.getCoin() >= publicationFee) {
+                // User has enough coins
+                instructor.setCoin(instructor.getCoin() - (long) publicationFee);
+                userRepository.save(instructor);
+                
+                courseService.submitCourse(courseId, "publish");
+                redirectAttributes.addFlashAttribute("successMessage", "Course published successfully!");
+                return "redirect:../courses";
+            } else {
+                // Create order for publication fee payment
+                Order order = ordersService.createOrder(instructor, publicationFee, "course_public");
+                String description = "Thanh toan phi cong bo khoa hoc " + course.getTitle() + " - ORDER" + order.getOrderId();
+                order.setDescription(description);
+                ordersService.saveOrder(order);
+                
+                // Create order detail
+                OrderDetail orderDetail = new OrderDetail();
+                orderDetail.setOrder(order);
+                orderDetail.setCourse(course);
+                orderDetail.setUnitPrice(publicationFee);
+                ordersService.saveOrderDetail(orderDetail);
+                
+                String qrUrl = vietQRService.generateSePayQRUrl(order.getAmount(), order.getDescription());
+                
+                model.addAttribute("orderId", order.getOrderId());
+                model.addAttribute("amount", order.getAmount());
+                model.addAttribute("description", order.getDescription());
+                model.addAttribute("qrUrl", qrUrl);
+                
+                return "homePage/qr_checkout";
+            }
+        } else {
+            courseService.submitCourse(courseId, "publish");
+            redirectAttributes.addFlashAttribute("successMessage", "Course published successfully!");
+            return "redirect:../courses";
+        }
     }
     //unpublic course
     @PostMapping("/courses/unpublish")

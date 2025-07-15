@@ -24,11 +24,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 import java.time.format.DateTimeFormatter;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.math.BigDecimal;
 
@@ -76,6 +73,11 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
     @Override
     public Page<CourseMaintenance> filterMaintenances(String username, String status, LocalDate monthYear, Pageable pageable) {
         return courseMaintenanceRepository.findByUsernameAndStatusAndMonthYear(username, status, monthYear, pageable);
+    }
+    
+    @Override
+    public Page<CourseMaintenance> filterMaintenancesByInstructor(Long instructorId, String courseName, LocalDate monthYear, Pageable pageable) {
+        return courseMaintenanceRepository.findByInstructorIdAndCourseNameAndMonthYear(instructorId, courseName, monthYear, pageable);
     }
     
     @Override
@@ -373,10 +375,10 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
             double feeAmount = fee != null ? fee.getMaintenanceFee() : 0.0;
             // 1. Nếu instructor không đủ coin, cộng coin trước
             if (instructor.getCoin() < feeAmount) {
-                instructor.setCoin(instructor.getCoin() + (long) feeAmount);
+                instructor.setCoin(instructor.getCoin() + feeAmount);
                 CoinTransaction topup = new CoinTransaction();
                 topup.setUser(instructor);
-                topup.setAmount(BigDecimal.valueOf(feeAmount));
+                topup.setAmount(feeAmount);
                 topup.setTransactionType("top_up");
                 topup.setStatus("PAID");
                 topup.setNote("SePay maintenance fee top up");
@@ -385,11 +387,11 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
                 coinTransactionRepository.save(topup);
             }
             // 2. Trừ coin instructor
-            instructor.setCoin(instructor.getCoin() - (long) feeAmount);
+            instructor.setCoin(instructor.getCoin() - feeAmount);
             CoinTransaction pay = new CoinTransaction();
             pay.setUser(instructor);
-            pay.setAmount(BigDecimal.valueOf(-feeAmount));
-            pay.setTransactionType("maintenance_fee");
+            pay.setAmount(-feeAmount);
+            pay.setTransactionType("MAINTENANCE_FEE");
             pay.setStatus("PAID");
             pay.setNote("Pay maintenance fee");
             pay.setCreatedAt(LocalDateTime.now());
@@ -397,11 +399,11 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
             coinTransactionRepository.save(pay);
             User admin = userRepository.findById(1L).orElse(null);
             if (admin != null) {
-                admin.setCoin(admin.getCoin() + (long) feeAmount);
+                admin.setCoin(admin.getCoin() + feeAmount);
                 CoinTransaction receive = new CoinTransaction();
                 receive.setUser(admin);
-                receive.setAmount(BigDecimal.valueOf(feeAmount));
-                receive.setTransactionType("maintenance_fee");
+                receive.setAmount(feeAmount);
+                receive.setTransactionType("MAINTENANCE_FEE");
                 receive.setStatus("PAID");
                 receive.setNote("Receive maintenance fee from instructor " + instructor.getUserId());
                 receive.setCreatedAt(LocalDateTime.now());
@@ -411,8 +413,8 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
             }
             userRepository.save(instructor);
             maintenance.setStatus("PAID");
-            maintenance.setDescription("Thanh toán bảo trì");
-            maintenance.setRefCode(refCode != null ? refCode : "Đã thanh toán");
+            maintenance.setDescription("Maintenance payment");
+            maintenance.setRefCode(refCode != null ? refCode : UUID.randomUUID().toString());
             courseMaintenanceRepository.save(maintenance);
             return true;
         } catch (Exception e) {

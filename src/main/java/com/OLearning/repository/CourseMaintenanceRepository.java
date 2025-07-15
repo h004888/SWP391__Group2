@@ -45,4 +45,19 @@ public interface CourseMaintenanceRepository extends JpaRepository<CourseMainten
 
     // Find all maintenance payments for a given instructor
     List<CourseMaintenance> findByCourse_Instructor_UserId(Long instructorId);
+    
+    // New method for filtering maintenance payments by instructor with course name and month/year
+    @Query("SELECT cm FROM CourseMaintenance cm WHERE " +
+           "cm.course.instructor.userId = :instructorId AND " +
+           "(:courseName IS NULL OR :courseName = '' OR " +
+           "LOWER(cm.course.title) LIKE LOWER(CONCAT('%', :courseName, '%'))) AND " +
+           "(:monthYear IS NULL OR FUNCTION('YEAR', cm.monthYear) = FUNCTION('YEAR', :monthYear) AND " +
+           "FUNCTION('MONTH', cm.monthYear) = FUNCTION('MONTH', :monthYear)) " +
+           "ORDER BY cm.monthYear DESC, cm.sentAt DESC")
+    Page<CourseMaintenance> findByInstructorIdAndCourseNameAndMonthYear(
+        @Param("instructorId") Long instructorId,
+        @Param("courseName") String courseName,
+        @Param("monthYear") LocalDate monthYear,
+        Pageable pageable
+    );
 }

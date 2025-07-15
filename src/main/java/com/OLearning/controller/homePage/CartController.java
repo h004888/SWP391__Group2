@@ -17,8 +17,6 @@ import com.OLearning.service.voucher.VoucherService;
 import com.OLearning.service.wishlist.WishlistService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,6 +31,9 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+
+import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/cart")
@@ -149,7 +150,7 @@ public class CartController {
         } catch (CartServiceImpl.CourseAlreadyPurchasedException | CartServiceImpl.CourseAlreadyInCartException e) {
             if (isAjax) {
                 result.put("success", false);
-                result.put("error", e.getMessage());
+                result.put("message", e.getMessage());
                 return result;
             } else {
                 model.addAttribute("error", e.getMessage());
@@ -157,7 +158,7 @@ public class CartController {
         } catch (Exception e) {
             if (isAjax) {
                 result.put("success", false);
-                result.put("error", "Failed to add course to cart");
+                result.put("message", "Failed to add course to cart");
                 return result;
             } else {
                 model.addAttribute("error", "Failed to add course to cart");
@@ -166,7 +167,7 @@ public class CartController {
         if (isAjax) {
             if (!result.containsKey("success")) {
                 result.put("success", false);
-                result.put("error", "Unknown error");
+                result.put("message", "Unknown error");
             }
             return result;
         } else {
@@ -183,7 +184,7 @@ public class CartController {
                                  @AuthenticationPrincipal UserDetails userDetails,
                                  HttpServletRequest request,
                                  HttpServletResponse response,
-                                 Model model) {
+                                 RedirectAttributes redirectAttributes) {
         if (userDetails == null) {
             return "redirect:/login";
         }
@@ -192,9 +193,9 @@ public class CartController {
         try {
             Map<String, Object> cart = cartService.removeCartDetail(encodedCartJson, cartDetailId, userDetails.getUsername());
             updateCartCookie(cart, response, userId);
-            model.addAttribute("message", "Item removed from cart successfully!");
+            redirectAttributes.addFlashAttribute("message", "Item removed from cart successfully!");
         } catch (Exception e) {
-            model.addAttribute("error", "Failed to remove item from cart");
+            redirectAttributes.addFlashAttribute("error", "Failed to remove item from cart");
         }
         return "redirect:/cart";
     }
@@ -202,7 +203,7 @@ public class CartController {
     @PostMapping("/clear")
     public String clearCart(@AuthenticationPrincipal UserDetails userDetails,
                             HttpServletResponse response,
-                            Model model) {
+                            RedirectAttributes redirectAttributes) {
         if (userDetails == null) {
             return "redirect:/login";
         }
@@ -210,9 +211,9 @@ public class CartController {
         try {
             Map<String, Object> emptyCart = cartService.clearCart(userDetails.getUsername());
             updateCartCookie(emptyCart, response, userId);
-            model.addAttribute("message", "Cart cleared successfully!");
+            redirectAttributes.addFlashAttribute("message", "Cart cleared successfully!");
         } catch (Exception e) {
-            model.addAttribute("error", "Failed to clear cart");
+            redirectAttributes.addFlashAttribute("error", "Failed to clear cart");
         }
         return "redirect:/cart";
     }
@@ -223,7 +224,8 @@ public class CartController {
                            @AuthenticationPrincipal UserDetails userDetails,
                            HttpServletRequest request,
                            HttpServletResponse response,
-                           Model model) {
+                           Model model,
+                           RedirectAttributes redirectAttributes) {
         if (userDetails == null) {
             return "redirect:/login";
         }
@@ -250,7 +252,6 @@ public class CartController {
                 totalAmount += price;
             }
             cart.put("items", items);
-            updateCartCookie(cart, response, userId);
             String ipAddr = request.getRemoteAddr();
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new EntityNotFoundException("User not found"));
@@ -267,10 +268,10 @@ public class CartController {
                     }
                 }
                 updateCartCookie(cartService.clearCart(userDetails.getUsername()), response, userId);
-                model.addAttribute("message", "Checkout completed using wallet!");
+                redirectAttributes.addFlashAttribute("message", "Checkout completed using wallet!");
                 return "redirect:/cart";
             } else if ("qr".equalsIgnoreCase(paymentMethod)) {
-                Order order = ordersService.createOrder(user, totalAmount, "course_purchase", "temp_description");
+                Order order = ordersService.createOrder(user, totalAmount, "course_purchase");
                 String description = "Buy Course OLearning - ORDER" + order.getOrderId();
                 order.setDescription(description);
                 ordersService.saveOrder(order);
@@ -298,18 +299,18 @@ public class CartController {
                 request.setAttribute("cart", encodedCartJson);
                 String currentPath = request.getRequestURI();
                 String basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
-                String returnUrl = org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath()
+                String returnUrl = fromCurrentContextPath()
                         .path(basePath)
                         .build()
                         .toUriString();
                 request.setAttribute("urlReturn", returnUrl);
                 return "redirect:" + vnPayService.createOrder(request);
             } else {
-                model.addAttribute("error", "Vui lòng chọn phương thức thanh toán!");
+                redirectAttributes.addFlashAttribute("error", "Vui lòng chọn phương thức thanh toán!");
                 return "redirect:/cart";
             }
         } catch (Exception e) {
-            model.addAttribute("error", "Checkout error: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Checkout error: " + e.getMessage());
             return "redirect:/cart";
         }
     }
@@ -317,7 +318,7 @@ public class CartController {
     @GetMapping("/vnpay-payment-return")
     public String paymentCompleted(HttpServletRequest request,
                                    HttpServletResponse response,
-                                   Model model,
+                                   RedirectAttributes redirectAttributes,
                                    @AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
             return "redirect:/login";
@@ -349,14 +350,14 @@ public class CartController {
                     }
                 }
                 updateCartCookie(cartService.clearCart(userDetails.getUsername()), response, userId);
-                model.addAttribute("message", "VNPay payment successful!");
+                redirectAttributes.addFlashAttribute("message", "VNPay payment successful!");
                 return "redirect:/cart";
             } catch (Exception e) {
-                model.addAttribute("error", "VNPay success but internal error: " + e.getMessage());
+                redirectAttributes.addFlashAttribute("error", "VNPay success but internal error: " + e.getMessage());
                 return "redirect:/cart";
             }
         } else {
-            model.addAttribute("error", "VNPay payment failed.");
+            redirectAttributes.addFlashAttribute("error", "VNPay payment failed.");
             return "redirect:/cart";
         }
     }
@@ -492,16 +493,6 @@ public class CartController {
         return "";
     }
 
-    private Long getLongValue(Object value) {
-        if (value instanceof Integer) {
-            return ((Integer) value).longValue();
-        } else if (value instanceof Long) {
-            return (Long) value;
-        } else {
-            return 0L;
-        }
-    }
-
     private String getWishlistCookie(HttpServletRequest request, Long userId) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
@@ -512,5 +503,15 @@ public class CartController {
             }
         }
         return null;
+    }
+
+    private Long getLongValue(Object value) {
+        if (value instanceof Integer) {
+            return ((Integer) value).longValue();
+        } else if (value instanceof Long) {
+            return (Long) value;
+        } else {
+            return 0L;
+        }
     }
 }

@@ -50,7 +50,9 @@ window.voucherJS = (function() {
             document.querySelectorAll('.voucher-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const courseId = this.getAttribute('data-course-id');
-                    fetch(`/vouchers/course/${courseId}/user/${userId}`)
+                    fetch(`/vouchers/course/${courseId}/user/${userId}`, {
+                        credentials: 'include'
+                    })
                         .then(res => res.json())
                         .then(data => {
                             displayVouchers(data, courseId);
@@ -73,16 +75,18 @@ window.voucherJS = (function() {
                     const voucherCode = voucher.voucherCode || voucher.code || 'N/A';
                     const discount = voucher.discount || 0;
                     const voucherId = voucher.voucherId || voucher.id;
+                    const expiry = voucher.expiryDate ? `<span class="voucher-expiry"><i class='fas fa-clock me-1'></i>HSD: ${voucher.expiryDate}</span>` : '';
                     let isSelected = selectedVoucherId == voucherId;
                     html += `
-            <div class='d-flex justify-content-between align-items-center mb-2 p-2 border rounded'>
-              <div>
-                <strong>${voucherCode}</strong><br>
-                <small class="text-muted">Reduce ${discount}%</small>
+            <div class='voucher-card-cart${isSelected ? ' selected' : ''}'>
+              <div class='voucher-icon'><i class='fas fa-ticket-alt'></i></div>
+              <div class='voucher-info'>
+                <div class='voucher-title'>${voucherCode}</div>
+                <div><span class='voucher-discount'>-${discount}%</span> ${expiry}</div>
               </div>
-              <button class='btn btn-sm ${isSelected ? 'btn-secondary' : 'btn-success'}'
+              <button class='btn voucher-apply-btn ${isSelected ? 'btn-secondary' : 'btn-success'}'
                 onclick='voucherJS.${isSelected ? `removeVoucherCart(${voucherId},${courseId})` : `applyVoucherCart(${voucherId},${courseId})`}'>
-                ${isSelected ? 'Cancel' : 'Apply'}
+                ${isSelected ? 'Huỷ' : 'Áp dụng'}
               </button>
             </div>`;
                 });
@@ -115,6 +119,7 @@ window.voucherJS = (function() {
             
             fetch('/cart/apply-voucher', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
@@ -175,6 +180,7 @@ window.voucherJS = (function() {
                 
                 fetch('/cart/apply-voucher', {
                     method: 'POST',
+                    credentials: 'include',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest'
@@ -279,7 +285,9 @@ window.voucherJS = (function() {
         function initializeVoucherButton() {
             document.querySelectorAll('.voucher-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    fetch(`/vouchers/course/${courseId}/user/${userId}`)
+                    fetch(`/vouchers/course/${courseId}/user/${userId}`, {
+                        credentials: 'include'
+                    })
                         .then(res => res.json())
                         .then(data => {
                             displayVouchers(data);
@@ -333,6 +341,7 @@ window.voucherJS = (function() {
             
             fetch('/cart/apply-voucher', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'

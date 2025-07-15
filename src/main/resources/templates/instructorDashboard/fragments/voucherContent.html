@@ -46,10 +46,32 @@
           color: #6c757d;
         }
 
+        .voucher-table tbody tr:hover {
+          background: #f8f9fa;
+          transition: background 0.2s;
+        }
+        .badge-voucher-global {
+          background: #0d6efd;
+          color: #fff;
+        }
+        .badge-voucher-partial {
+          background: #20c997;
+          color: #fff;
+        }
+        .badge-public {
+          background: #ffc107;
+          color: #212529;
+        }
+        .badge-private {
+          background: #6c757d;
+          color: #fff;
+        }
         @media (max-width: 768px) {
-          .stats-card {
-            flex: 1 1 100%;
+          .voucher-table th, .voucher-table td {
+            font-size: 0.95rem;
+            padding: 0.5rem;
           }
+          .table-responsive { overflow-x: auto; }
         }
       </style>
 
@@ -85,7 +107,7 @@
       <div th:if="${successMessage}"
            class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-4 shadow"
            role="alert" id="success-alert" style="z-index: 1055; min-width: 300px;">
-        <strong th:text="${successMessage}">Thành công!</strong>
+        <strong th:text="${successMessage}">Success!</strong>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
 
@@ -93,123 +115,128 @@
       <div th:if="${errorMessage}"
            class="alert alert-danger alert-dismissible fade show position-fixed top-0 end-0 m-4 shadow"
            role="alert" id="error-alert" style="z-index: 1055; min-width: 300px;">
-        <strong th:text="${errorMessage}">Lỗi xảy ra!</strong>
+        <strong th:text="${errorMessage}">Error occurred!</strong>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
 
       <div class="container-fluid">
-        <div class="table-responsive">
-          <div class="table-wrapper">
-            <div class="table-title">
-              <div class="row">
-                <div class="col-md-6 d-flex align-items-center">
-                  <div id="addVoucherBtnContainer" style="display: block;">
-                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addVoucherModal">
-                      <i class="fas fa-plus me-2"></i>Tạo Voucher Mới
-                    </button>
-                  </div>
-                </div>
-
-                <div class="col-md-6">
-                  <div class="d-flex justify-content-end align-items-center gap-2">
-
-                    <!-- Search Box -->
-                    <div class="search-box" style="width: 350px; position: relative;">
-                      <i class="fas fa-search fs-6 text-primary" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%);"></i>
-                      <input type="text" id="searchInput" name="search" class="form-control ps-4"
-                             placeholder="Tìm theo mã voucher..." th:value="${stats.search}">
-                    </div>
-                  </div>
-                </div>
-              </div>
+        <div class="table-wrapper">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addVoucherModal">
+                <i class="fas fa-plus me-2"></i>Create New Voucher
+              </button>
             </div>
-
-            <div class="table-wrapper">
-              <div class="custom-tabs">
-                <ul class="nav nav-tabs" id="voucherTabs" role="tablist">
-                  <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="valid-tab" data-bs-toggle="tab"
-                            data-bs-target="#valid" type="button" role="tab">
-                      <i class="bi bi-check-circle me-2"></i>Voucher Còn Hạn
-                    </button>
-                  </li>
-                  <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="expired-tab" data-bs-toggle="tab"
-                            data-bs-target="#expired" type="button" role="tab">
-                      <i class="bi bi-x-circle me-2"></i>Voucher Hết Hạn
-                    </button>
-                  </li>
-                </ul>
-
-                <div class="tab-content p-0" id="voucherTabsContent">
-
-                  <!-- Valid Vouchers Tab -->
-                  <div class="tab-pane fade show active" id="valid" role="tabpanel">
-                    <div class="table-responsive">
-                      <table class="table voucher-table text-center">
-                        <thead>
-                        <tr>
-                          <th>Mã voucher</th>
-                          <th>Giảm giá (%)</th>
-                          <th>Ngày hết hạn</th>
-                          <th>Số lượt tối đa</th>
-                          <th>Đã dùng</th>
-                          <th>Loại</th>
-                          <th>Công khai</th>
-                          <th>Action</th>
-                        </tr>
-                        </thead>
-                        <tbody id="validTableBody">
-                        <th:block th:replace="instructorDashboard/fragments/voucherTableRows :: voucherTableRows"></th:block>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-
-                  <!-- Expired Vouchers Tab -->
-                  <div class="tab-pane fade" id="expired" role="tabpanel">
-                    <div class="table-responsive">
-                      <table class="table voucher-table text-center">
-                        <thead>
-                        <tr>
-                          <th>Mã voucher</th>
-                          <th>Giảm giá (%)</th>
-                          <th>Ngày hết hạn</th>
-                          <th>Số lượt tối đa</th>
-                          <th>Đã dùng</th>
-                          <th>Loại</th>
-                          <th>Công khai</th>
-                          <th>Action</th>
-                        </tr>
-                        </thead>
-                        <tbody id="expiredTableBody">
-                        <th:block th:replace="instructorDashboard/fragments/voucherTableRows :: voucherTableRows"></th:block>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div style="width: 350px; position: relative;">
+              <i class="fas fa-search fs-6 text-primary" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%);"></i>
+              <input type="text" id="voucher-search" class="form-control ps-4" placeholder="Search by voucher code...">
             </div>
-
-            <!-- Pagination -->
-            <div id="voucherPaginationContainer">
-              <th:block th:replace="instructorDashboard/fragments/voucherPagination :: voucherPagination"></th:block>
+          </div>
+          <div class="custom-tabs">
+            <ul class="nav nav-tabs" id="voucherTabs" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="valid-tab" data-bs-toggle="tab"
+                        data-bs-target="#valid" type="button" role="tab">
+                  <i class="bi bi-check-circle me-2"></i>Voucher Valid
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="expired-tab" data-bs-toggle="tab"
+                        data-bs-target="#expired" type="button" role="tab">
+                  <i class="bi bi-x-circle me-2"></i>Expired Voucher
+                </button>
+              </li>
+            </ul>
+            <div class="tab-content p-0" id="voucherTabsContent">
+              <!-- Tab valid -->
+              <div class="tab-pane fade show active" id="valid" role="tabpanel">
+                <div class="table-responsive">
+                  <table class="table voucher-table text-center">
+                    <thead>
+                      <tr>
+                        <th>Voucher code</th>
+                        <th>Discount (%)</th>
+                        <th>Expiration date</th>
+                        <th>Quantity</th>
+                        <th>Used</th>
+                        <th>Type</th>
+                        <th>Public</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="voucher-table-body-valid">
+                      <th:block th:if="${#lists.isEmpty(vouchers)}">
+                        <tr>
+                          <td colspan="8" class="text-center py-4 text-muted">
+                            <i class="fa fa-ticket-alt fa-2x mb-2"></i>
+                            <div>There are no vouchers.</div>
+                          </td>
+                        </tr>
+                      </th:block>
+                      <tr th:each="voucher : ${vouchers}">
+                        <td th:text="${voucher.code}"></td>
+                        <td th:text="${voucher.discount}"></td>
+                        <td th:text="${#temporals.format(voucher.expiryDate, 'dd/MM/yyyy')}"></td>
+                        <td th:text="${voucher.limitation}"></td>
+                        <td th:text="${voucher.usedCount}"></td>
+                        <td>
+                          <span th:class="${voucher.isGlobal} ? 'badge badge-voucher-global' : 'badge badge-voucher-partial'"
+                                th:text="${voucher.isGlobal ? 'All Course' : 'Some Course'}"></span>
+                        </td>
+                        <td>
+                          <span th:class="${voucher.isPublic} ? 'badge badge-public' : 'badge badge-private'"
+                                th:text="${voucher.isPublic ? 'Yes' : 'No'}"></span>
+                        </td>
+                        <td>
+                          <button class="btn btn-info btn-sm" th:onclick="|viewCourses(${voucher.voucherId})|" data-bs-toggle="tooltip" data-bs-placement="top" title="View applicable courses">
+                            <i class="bi bi-eye"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="voucher-pagination-valid"></div>
+              </div>
+              <!-- Tab expired -->
+              <div class="tab-pane fade" id="expired" role="tabpanel">
+                <div class="table-responsive">
+                  <table class="table voucher-table text-center">
+                    <thead>
+                      <tr>
+                        <th>Voucher code</th>
+                        <th>Discount (%)</th>
+                        <th>Expiration date</th>
+                        <th>Quantity</th>
+                        <th>Used</th>
+                        <th>Type</th>
+                        <th>Public</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="voucher-table-body-expired">
+                      <!-- AJAX render -->
+                    </tbody>
+                  </table>
+                </div>
+                <div class="voucher-pagination-expired"></div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Modal hiển thị course hợp lệ -->
+      <!-- Modal to display eligible courses -->
       <div class="modal fade" id="coursesModal" tabindex="-1" aria-labelledby="coursesModalLabel" aria-hidden="true">
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="coursesModalLabel">Danh sách khóa học hợp lệ</h5>
+              <h5 class="modal-title" id="coursesModalLabel">List of eligible courses</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="coursesList">
               <!-- Danh sách course sẽ được load ở đây -->
+              <!-- The list of courses will be loaded here -->
             </div>
           </div>
         </div>
@@ -225,7 +252,7 @@
       <div class="modal-content">
         <div class="modal-header bg-primary text-white">
           <h5 class="modal-title" id="addVoucherModalLabel">
-            <i class="fas fa-ticket-alt me-2"></i>Tạo Voucher Mới
+            <i class="fas fa-ticket-alt me-2"></i>Create New Voucher
           </h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
@@ -234,25 +261,25 @@
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label for="code" class="form-label fw-bold">
-                  <i class="fas fa-code me-1"></i>Mã voucher
+                  <i class="fas fa-code me-1"></i>Voucher code
                 </label>
                 <div class="input-group">
                   <input type="text" class="form-control" id="code" th:field="*{code}"
-                         placeholder="VD: SUMMER2024">
+                         placeholder="Ex: SUMMER2024">
                   <button type="button" class="btn btn-outline-secondary" onclick="generateCode()">
                     <i class="fas fa-magic"></i>
                   </button>
                 </div>
-                <div class="form-text">Mã voucher phải là duy nhất</div>
+                <div class="form-text">Voucher code must be unique</div>
                 <div th:if="${#fields.hasErrors('code')}" class="text-danger" th:errors="*{code}"></div>
               </div>
               <div class="col-md-6 mb-3">
                 <label for="discount" class="form-label fw-bold">
-                  <i class="fas fa-percentage me-1"></i>Phần trăm giảm giá (%)
+                  <i class="fas fa-percentage me-1"></i>Discount (%)
                 </label>
                 <input type="number" class="form-control" id="discount" th:field="*{discount}"
-                       min="1" max="100" placeholder="VD: 20">
-                <div class="form-text">Từ 1% đến 100%</div>
+                       min="1" max="100" placeholder="Ex: 20">
+                <div class="form-text">From 1% to 100%</div>
                 <div th:if="${#fields.hasErrors('discount')}" class="text-danger" th:errors="*{discount}"></div>
               </div>
             </div>
@@ -260,26 +287,26 @@
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label for="expiryDate" class="form-label fw-bold">
-                  <i class="fas fa-calendar-times me-1"></i>Ngày hết hạn
+                  <i class="fas fa-calendar-times me-1"></i>Expiration date
                 </label>
                 <input type="date" class="form-control" id="expiryDate"
                        th:field="*{expiryDate}">
-                <div class="form-text">Chọn ngày hết hạn (phải trong tương lai)</div>
+                <div class="form-text">Select expiration date (must be in the future)</div>
                 <div th:if="${#fields.hasErrors('expiryDate')}" class="text-danger" th:errors="*{expiryDate}"></div>
               </div>
               <div class="col-md-6 mb-3">
                 <label for="limitation" class="form-label fw-bold">
-                  <i class="fas fa-users me-1"></i>Số lượt sử dụng tối đa
+                  <i class="fas fa-users me-1"></i>Maximum number of uses
                 </label>
                 <input type="number" class="form-control" id="limitation" th:field="*{limitation}"
-                       min="1" placeholder="VD: 100">
-                <div class="form-text">Số người có thể sử dụng voucher</div>
+                       min="1" placeholder="Ex: 100">
+                <div class="form-text">Number of people who can use the voucher</div>
                 <div th:if="${#fields.hasErrors('limitation')}" class="text-danger" th:errors="*{limitation}"></div>
               </div>
             </div>
             <div class="mb-3">
               <label class="form-label fw-bold">
-                <i class="fas fa-eye me-1"></i>Công khai voucher cho user?
+                <i class="fas fa-eye me-1"></i>Publish voucher for user?
               </label>
               <div class="form-check form-check-inline">
                 <input class="form-check-input " type="radio" id="isPublicNo" name="isPublic" th:field="*{isPublic}" th:value="false" checked />
@@ -290,41 +317,41 @@
                 <label class="form-check-label" for="isPublicYes">Yes</label>
               </div>
               <div th:if="${#fields.hasErrors('isPublic')}" class="text-danger" th:errors="*{isPublic}"></div>
-              <div class="form-text">Chọn "Yes" nếu muốn user nhìn thấy voucher này trong danh sách. (Mặc định: No)</div>
+              <div class="form-text">Select "Yes" if you want the user to see this voucher in the list. (Default: No)</div>
             </div>
             <div class="mb-3">
               <label for="isGlobal" class="form-label fw-bold">
-                <i class="fas fa-globe me-1"></i>Loại voucher
+                <i class="fas fa-globe me-1"></i>Voucher type
               </label>
               <select class="form-select" id="isGlobal" th:field="*{isGlobal}" onchange="toggleCourseSelect()">
-                <option th:value="true">Áp dụng cho tất cả khóa học của bạn</option>
-                <option th:value="false">Chỉ áp dụng cho một số khóa học</option>
+                <option th:value="true">Apply to all your courses</option>
+                <option th:value="false">Applicable to select courses only</option>
               </select>
-              <div class="form-text">Chọn phạm vi áp dụng voucher</div>
+              <div class="form-text">Select the scope of voucher application</div>
             </div>
 
             <div class="mb-3" id="courseSelectDiv" style="display:none;">
               <label class="form-label fw-bold">
-                <i class="fas fa-book me-1"></i>Chọn các khóa học áp dụng
+                <i class="fas fa-book me-1"></i>Select applicable courses
               </label>
               <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
-                <div th:each="course : ${courses}" class="form-check">
+                <div th:if="${!hasPublishCourse}" class="text-muted text-center py-3">
+                  You have no published courses
+                </div>
+                <div th:each="course : ${courses}" class="form-check" th:if="${hasPublishCourse}">
                   <input class="form-check-input" type="checkbox" name="selectedCourses"
                          th:value="${course.courseId}" id="course_${course.courseId}">
                   <label class="form-check-label" th:for="${'course_' + course.courseId}"
                          th:text="${course.title}"></label>
                 </div>
-                <div th:if="${#lists.isEmpty(courses)}" class="text-muted text-center py-3">
-                  Bạn chưa có khóa học nào
-                </div>
               </div>
-              <div class="form-text">Chọn các khóa học mà voucher sẽ áp dụng</div>
+              <div class="form-text">Select the courses for which the voucher will apply</div>
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
             <button type="submit" class="btn btn-primary">
-              <i class="fas fa-save me-1"></i>Tạo voucher
+              <i class="fas fa-save me-1"></i>Create voucher
             </button>
           </div>
         </form>
@@ -347,33 +374,36 @@
         const status = $(e.target).attr('id') === 'valid-tab' ? 'valid' : 'expired';
         currentTab = status;
         currentPage = 0;
-        const keyword = $('#searchInput').val().trim();
+        const keyword = $('#voucher-search').val().trim();
         loadVouchers(status, keyword, 0, true);
       });
 
       // Search input event with debouncing
-      $('#searchInput').on('input', function () {
+      $('#voucher-search').on('input', function () {
         const keyword = $(this).val().trim();
         clearTimeout(searchTimer);
         searchTimer = setTimeout(function () {
           currentPage = 0;
-          loadVouchers(currentTab, keyword, 0, true);
+          // Load lại cả hai tab với từ khóa search
+          loadVouchers('valid', keyword, 0, true);
+          loadVouchers('expired', keyword, 0, true);
         }, 300);
       });
 
       // Search on Enter key
-      $('#searchInput').on('keypress', function (e) {
+      $('#voucher-search').on('keypress', function (e) {
         if (e.key === 'Enter') {
           const keyword = $(this).val().trim();
           currentPage = 0;
-          loadVouchers(currentTab, keyword, 0, true);
+          loadVouchers('valid', keyword, 0, true);
+          loadVouchers('expired', keyword, 0, true);
         }
       });
     });
 
     // Function to load vouchers based on tab and search keyword
     function loadVouchers(status, keyword = '', page = 0, showPagination = false) {
-      const tableBodyElement = status === 'valid' ? '#validTableBody' : '#expiredTableBody';
+      const tableBodyElement = status === 'valid' ? '#voucher-table-body-valid' : '#voucher-table-body-expired';
       if (!tableBodyElement) {
         console.error("Table body element NOT FOUND for status:", status);
         return;
@@ -388,17 +418,17 @@
           size: 10
         },
         beforeSend: function () {
-          $(tableBodyElement).html('<tr><td colspan="7" class="text-center"><i class="fa fa-spinner fa-spin"></i> Đang tải...</td></tr>');
+          $(tableBodyElement).html('<tr><td colspan="7" class="text-center"><i class="fa fa-spinner fa-spin"></i> Loading...</td></tr>');
         },
         success: function (data) {
           $(tableBodyElement).html(data);
-          updateStats(status, data);
+          // Không cập nhật stats khi search
           if (showPagination) {
             getPaginationInfo(status, keyword, page);
           }
         },
         error: function (xhr, status, error) {
-          $(tableBodyElement).html('<tr><td colspan="7" class="text-center text-danger">Có lỗi xảy ra khi tải dữ liệu!</td></tr>');
+          $(tableBodyElement).html('<tr><td colspan="7" class="text-center text-danger">An error occurred while loading data!</td></tr>');
         }
       });
     }
@@ -414,11 +444,11 @@
           size: 10
         },
         success: function (paginationHtml) {
-          $('#voucherPaginationContainer').html(paginationHtml);
+          $('.voucher-pagination-valid').html(paginationHtml);
         },
         error: function (xhr, status, error) {
           console.error("Error getting pagination info:", error);
-          $('#voucherPaginationContainer').html('<div class="text-center text-danger">Error loading pagination</div>');
+          $('.voucher-pagination-valid').html('<div class="text-center text-danger">Error loading pagination</div>');
         }
       });
     }
@@ -448,7 +478,7 @@
               .then(data => {
                 let html = '';
                 if (data.length === 0) {
-                  html = '<div class="text-center text-muted">Không có khóa học hợp lệ cho voucher này.</div>';
+                  html = '<div class="text-center text-muted">There are no eligible courses for this voucher.</div>';
                 } else {
                   html = '<ul class="list-group">';
                   data.forEach(title => {
@@ -465,10 +495,19 @@
     function toggleCourseSelect() {
       var isGlobal = document.getElementById('isGlobal').value;
       var courseDiv = document.getElementById('courseSelectDiv');
+      var courseCheckboxes = document.querySelectorAll('input[name="selectedCourses"]');
+      var hasPublishCourse = /*[[${hasPublishCourse}]]*/ false;
       if (isGlobal === 'false') {
         courseDiv.style.display = 'block';
+        if (hasPublishCourse) {
+          courseCheckboxes.forEach(cb => cb.disabled = false);
+        } else {
+          courseCheckboxes.forEach(cb => cb.disabled = true);
+        }
       } else {
         courseDiv.style.display = 'none';
+        // Uncheck and disable all checkboxes
+        courseCheckboxes.forEach(cb => { cb.checked = false; cb.disabled = true; });
       }
     }
 
@@ -488,22 +527,23 @@
       var limitation = document.getElementById('limitation').value;
       var isGlobal = document.getElementById('isGlobal').value;
       var isPublic = document.querySelector('input[name="isPublic"]:checked').value;
+      var hasPublishCourse = /*[[${hasPublishCourse}]]*/ false;
 
       // Kiểm tra mã voucher
       if (code === '') {
-        alert('Vui lòng nhập mã voucher!');
+        alert('Please enter a voucher code!');
         return false;
       }
 
       // Kiểm tra phần trăm giảm giá
       if (discount === '' || discount <= 0 || discount > 100) {
-        alert('Phần trăm giảm giá phải từ 1% đến 100%!');
+        alert('Discount percentage must be between 1% and 100%!');
         return false;
       }
 
       // Kiểm tra ngày hết hạn
       if (expiryDate === '') {
-        alert('Vui lòng chọn ngày hết hạn!');
+        alert('Please select an expiration date!');
         return false;
       }
 
@@ -511,36 +551,31 @@
       var now = new Date();
       now.setHours(0, 0, 0, 0); // Set to start of day for comparison
       if (selectedDate <= now) {
-        alert('Ngày hết hạn phải trong tương lai!');
+        alert('Expiration date must be in the future!');
         return false;
       }
 
       // Kiểm tra số lượt sử dụng
       if (limitation === '' || limitation <= 0) {
-        alert('Số lượt sử dụng phải lớn hơn 0!');
+        alert('Usage limit must be greater than 0!');
         return false;
       }
 
-      // Kiểm tra nếu không phải global thì phải chọn ít nhất 1 khóa học
+      // Nếu không có course publish thì báo lỗi
+      if (!hasPublishCourse) {
+        alert('You have no published courses!');
+        return false;
+      }
+
+      // Chỉ kiểm tra chọn course nếu KHÔNG phải global
       if (isGlobal === 'false') {
         var selectedCourses = document.querySelectorAll('input[name="selectedCourses"]:checked');
         if (selectedCourses.length === 0) {
-          alert('Vui lòng chọn ít nhất một khóa học!');
+          alert('Please select at least one course!');
           return false;
         }
       }
-
-      // Kiểm tra công khai voucher
-      if (isPublic === 'true') {
-        // If it's public, we don't need to check for specific courses
-      } else { // If it's not public, we must select at least one course
-        var selectedCourses = document.querySelectorAll('input[name="selectedCourses"]:checked');
-        if (selectedCourses.length === 0) {
-          alert('Vui lòng chọn ít nhất một khóa học!');
-          return false;
-        }
-      }
-
+      // Nếu là global, bỏ qua kiểm tra chọn course
       return true;
     }
 
@@ -561,7 +596,7 @@
           } else {
             // Reload vouchers after successful creation
             setTimeout(function() {
-              const keyword = $('#searchInput').val().trim();
+              const keyword = $('#voucher-search').val().trim();
               loadVouchers(currentTab, keyword, currentPage, true);
             }, 1000);
           }
@@ -575,4 +610,16 @@
       });
     });
   </script>
+  <!-- Import voucherFilter.js cho filter voucher instructor dashboard -->
+
+  <script>
+    // Kích hoạt tooltip cho các nút action
+    document.addEventListener('DOMContentLoaded', function() {
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+        new bootstrap.Tooltip(tooltipTriggerEl);
+      });
+    });
+  </script>
+  <script th:src="@{/js/instructorDashboard/instructorDashboard/voucherFilter.js}"></script>
 </div>

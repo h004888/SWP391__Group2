@@ -55,7 +55,8 @@ public class OrdersServiceImpl implements OrdersService {
 
     @Autowired
     private CoinTransactionRepository coinTransactionRepository;
-
+    @Autowired
+    private CourseRepository courseRepository;
     @Autowired
     private NotificationRepository notificationRepository;
 
@@ -526,6 +527,13 @@ public class OrdersServiceImpl implements OrdersService {
         List<OrderDetail> orderDetails = orderDetailRepository.findByOrder(order);
         if (orderDetails == null || orderDetails.isEmpty()) return;
 
+        // Handle course publication orders
+        if ("course_public".equals(order.getOrderType())) {
+            processCoursePublicationOrder(order, orderDetails);
+            return;
+        }
+
+        // Handle course purchase orders (existing logic)
         for (OrderDetail orderDetail : orderDetails) {
             boolean alreadyEnrolled = enrollmentRepository.existsByUser_UserIdAndCourse_CourseId(user.getUserId(), orderDetail.getCourse().getCourseId());
             if (!alreadyEnrolled) {
@@ -548,14 +556,14 @@ public class OrdersServiceImpl implements OrdersService {
                 double coursePrice = orderDetail.getUnitPrice();
                 CoinTransaction studentTransaction = new CoinTransaction();
                 studentTransaction.setUser(user);
-                studentTransaction.setAmount(java.math.BigDecimal.valueOf(-coursePrice));
+                studentTransaction.setAmount(-coursePrice);
                 studentTransaction.setStatus("PAID");
                 studentTransaction.setCreatedAt(java.time.LocalDateTime.now());
                 studentTransaction.setOrder(order);
                 studentTransaction.setTransactionType("course_purchase");
                 studentTransaction.setNote("Purchase course via SePay");
                 coinTransactionRepository.save(studentTransaction);
-                user.setCoin(user.getCoin() - (long) coursePrice);
+                user.setCoin(user.getCoin() - coursePrice);
 
                 Notification notificationuser = new Notification();
                 notificationuser.setUser(user);
@@ -569,14 +577,14 @@ public class OrdersServiceImpl implements OrdersService {
                 if (instructor != null) {
                     CoinTransaction instructorTransaction = new CoinTransaction();
                     instructorTransaction.setUser(instructor);
-                    instructorTransaction.setAmount(java.math.BigDecimal.valueOf(coursePrice));
+                    instructorTransaction.setAmount(coursePrice);
                     instructorTransaction.setStatus("PAID");
                     instructorTransaction.setCreatedAt(java.time.LocalDateTime.now());
                     instructorTransaction.setOrder(null);
                     instructorTransaction.setTransactionType("course_purchase");
                     instructorTransaction.setNote("students buy courses");
                     coinTransactionRepository.save(instructorTransaction);
-                    instructor.setCoin(instructor.getCoin() + (long) coursePrice);
+                    instructor.setCoin(instructor.getCoin() + coursePrice);
                     userRepository.save(instructor);
                 }
                 Notification notification = new Notification();
@@ -608,6 +616,78 @@ public class OrdersServiceImpl implements OrdersService {
         }
     }
 
+    private void processCoursePublicationOrder(Order order, List<OrderDetail> orderDetails) {
+        User instructor = order.getUser();
+
+        for (OrderDetail orderDetail : orderDetails) {
+            Course course = orderDetail.getCourse();
+            if (course != null) {
+                course.setStatus("publish");
+                course.setUpdatedAt(java.time.LocalDateTime.now());
+                courseRepository.save(course);
+
+                // Add coins to instructor (from payment)
+                double publicationFee = orderDetail.getUnitPrice();
+                instructor.setCoin(instructor.getCoin() + publicationFee);
+                userRepository.save(instructor);
+
+                // Create coin transaction for instructor (top up from payment)
+                CoinTransaction instructorTransaction = new CoinTransaction();
+                instructorTransaction.setUser(instructor);
+                instructorTransaction.setAmount(publicationFee);
+                instructorTransaction.setStatus("PAID");
+                instructorTransaction.setCreatedAt(java.time.LocalDateTime.now());
+                instructorTransaction.setOrder(order);
+                instructorTransaction.setTransactionType("top_up");
+                instructorTransaction.setNote("Course publication payment top up");
+                coinTransactionRepository.save(instructorTransaction);
+
+                // Deduct coins from instructor for publication fee
+                instructor.setCoin(instructor.getCoin() - publicationFee);
+                userRepository.save(instructor);
+
+                CoinTransaction publicationTransaction = new CoinTransaction();
+                publicationTransaction.setUser(instructor);
+                publicationTransaction.setAmount(-publicationFee);
+                publicationTransaction.setStatus("PAID");
+                publicationTransaction.setCreatedAt(java.time.LocalDateTime.now());
+                publicationTransaction.setOrder(null);
+                publicationTransaction.setTransactionType("course_publication");
+                publicationTransaction.setNote("Course publication fee for: " + course.getTitle());
+                coinTransactionRepository.save(publicationTransaction);
+
+                // Add coins to admin (assuming admin has ID 1)
+                User admin = userRepository.findById(1L).orElse(null);
+                if (admin != null) {
+                    admin.setCoin(admin.getCoin() + publicationFee);
+                    userRepository.save(admin);
+
+                    CoinTransaction adminTransaction = new CoinTransaction();
+                    adminTransaction.setUser(admin);
+                    adminTransaction.setAmount(publicationFee);
+                    adminTransaction.setStatus("PAID");
+                    adminTransaction.setCreatedAt(java.time.LocalDateTime.now());
+                    adminTransaction.setOrder(null);
+                    adminTransaction.setTransactionType("course_publication");
+                    adminTransaction.setNote("Course publication fee received from instructor: " + instructor.getUserId());
+                    coinTransactionRepository.save(adminTransaction);
+                }
+
+                // Send notification to instructor
+                Notification notification = new Notification();
+                notification.setUser(instructor);
+                notification.setCourse(course);
+                notification.setMessage("Your course '" + course.getTitle() + "' has been successfully published!");
+                notification.setType("COURSE_PUBLISHED");
+                notification.setStatus("failed");
+                notification.setSentAt(java.time.LocalDateTime.now());
+                notificationRepository.save(notification);
+            }
+        }
+    }
+
+
+
     @Override
     public String getOrderStatusById(Long orderId) {
         Optional<Order> optionalOrder = ordersRepository.findById(orderId);
@@ -615,12 +695,11 @@ public class OrdersServiceImpl implements OrdersService {
     }
 
     @Override
-    public Order createOrder(User user, double amount, String orderType, String description) {
+    public Order createOrder(User user, double amount, String orderType) {
         Order order = new Order();
         order.setUser(user);
         order.setAmount(amount);
         order.setOrderType(orderType);
-        order.setDescription(description);
         order.setStatus("PENDING");
         order.setOrderDate(java.time.LocalDateTime.now());
         Order savedOrder = ordersRepository.save(order);
@@ -640,5 +719,10 @@ public class OrdersServiceImpl implements OrdersService {
     @Override
     public void saveOrderDetail(OrderDetail orderDetail) {
         orderDetailRepository.save(orderDetail);
+    }
+    
+    @Override
+    public boolean hasPaidPublicationOrder(Long userId) {
+        return ordersRepository.existsByUserUserIdAndOrderTypeAndStatus(userId, "course_public", "PAID");
     }
 }

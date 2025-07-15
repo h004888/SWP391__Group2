@@ -59,56 +59,6 @@ public class CoinTransactionServiceImpl implements CoinTransactionService {
         return new PageImpl<>(transactionDTOs, pageableWithSort, transactionPage.getTotalElements());
     }
 
-    @Override
-    @Transactional
-    public CoinTransaction saveDepositTransactionAfterPayment(Long userId, BigDecimal amount, String transactionId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
-
-        CoinTransaction transaction = new CoinTransaction();
-        transaction.setUser(user);
-        transaction.setAmount(amount);
-        transaction.setTransactionType("top_up");
-        transaction.setStatus("PAID");
-        transaction.setNote("VNPay TransactionId: " + transactionId);
-        transaction.setCreatedAt(LocalDateTime.now());
-        transaction.setOrder(null);
-
-        user.setCoin(user.getCoin() + amount.doubleValue());
-        userRepository.save(user);
-
-        return coinTransactionRepository.save(transaction);
-    }
-
-    @Override
-    @Transactional
-    public CoinTransaction processWithdrawal(Long userId, BigDecimal amount) {
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Withdrawal amount must be positive");
-        }
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
-
-        if (user.getCoin() < amount.doubleValue()) {
-            throw new IllegalArgumentException("Insufficient balance");
-        }
-
-        CoinTransaction transaction = new CoinTransaction();
-        transaction.setUser(user);
-        transaction.setAmount(amount.negate());
-        transaction.setTransactionType("withdraw");
-        transaction.setStatus("PAID");
-        transaction.setNote("Withdrawal processed");
-        transaction.setCreatedAt(LocalDateTime.now());
-        transaction.setOrder(null);
-
-        // Update user's coin balance
-        user.setCoin(user.getCoin() - amount.doubleValue());
-        userRepository.save(user);
-
-        return coinTransactionRepository.save(transaction);
-    }
 
     @Override
     @Transactional
@@ -163,7 +113,7 @@ public class CoinTransactionServiceImpl implements CoinTransactionService {
 
     public Page<CoinTransactionDTO> getUserCoursePurchaseTransactions(Long userId, String courseName, String status, String startDate, String endDate, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        String transactionType = "course_purchase";
+        String transactionType = "COURSE_PURCHASE";
         Page<CoinTransaction> transactionPage;
         LocalDateTime start = null, end = null;
         if (startDate != null && !startDate.trim().isEmpty() && endDate != null && !endDate.trim().isEmpty()) {
@@ -179,7 +129,6 @@ public class CoinTransactionServiceImpl implements CoinTransactionService {
         } else {
             transactionPage = coinTransactionRepository.findByUserUserIdAndTransactionType(userId, transactionType, pageable);
         }
-        // Lọc theo tên khóa học nếu có
         List<CoinTransactionDTO> dtos = transactionPage.getContent().stream()
             .map(coinTransactionMapper::toDTO)
             .filter(dto -> courseName == null || courseName.isEmpty() || (dto.getCourseName() != null && dto.getCourseName().toLowerCase().contains(courseName.toLowerCase())))
@@ -188,16 +137,16 @@ public class CoinTransactionServiceImpl implements CoinTransactionService {
     }
 
     // Thống kê tổng chi tiêu và số lượng khóa học đã mua
-    public BigDecimal getTotalSpent(Long userId) {
-        String transactionType = "course_purchase";
+    public Double getTotalSpent(Long userId) {
+        String transactionType = "COURSE_PURCHASE";
         List<CoinTransaction> transactions = coinTransactionRepository.findByUserUserIdAndTransactionType(userId, transactionType, Pageable.unpaged()).getContent();
         return transactions.stream()
-            .filter(t -> t.getAmount() != null && t.getAmount().signum() < 0)
-            .map(t -> t.getAmount().abs())
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
+            .filter(t -> t.getAmount() != null && t.getAmount() < 0)
+            .map(t -> Math.abs(t.getAmount()))
+            .reduce(0.0, Double::sum);
     }
     public long getTotalCoursesPurchased(Long userId) {
-        String transactionType = "course_purchase";
+        String transactionType = "COURSE_PURCHASE";
         List<CoinTransaction> transactions = coinTransactionRepository.findByUserUserIdAndTransactionType(userId, transactionType, Pageable.unpaged()).getContent();
         return transactions.stream().map(coinTransactionMapper::toDTO).map(CoinTransactionDTO::getCourseName).distinct().count();
     }

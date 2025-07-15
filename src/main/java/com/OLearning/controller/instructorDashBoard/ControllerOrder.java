@@ -45,12 +45,10 @@ public class ControllerOrder {
         // Default to PAID status for initial load
         Page<InstructorOrderDTO> ordersPage = ordersService.filterAndSortInstructorOrders(
                 username, amountDirection, orderType, startDate, endDate, "PAID", page, size, instructorId);
-        // Fetch maintenance payments for this instructor
-        List<CourseMaintenance> maintenancePayments = courseMaintenanceService.getMaintenancesByInstructorId(instructorId);
+
         //ok
         model.addAttribute("accNamePage", "Management Orders");
         model.addAttribute("orders", ordersPage.getContent());
-        model.addAttribute("maintenancePayments", maintenancePayments);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", ordersPage.getTotalPages());
         model.addAttribute("totalItems", ordersPage.getTotalElements());

@@ -207,4 +207,56 @@ $(document).ready(function () {
         e.preventDefault();
         resetAndFilter();
     });
-}); 
+});
+
+$(document).ready(function () {
+    // Filter form submission
+    $('#filterForm').on('submit', function (e) {
+        e.preventDefault();
+        applyFilters();
+    });
+
+    // Month/Year filter change
+    $('#filterMonthYear').on('change', function () {
+        applyFilters();
+    });
+
+    // Course name search with debounce
+    let searchTimer;
+    $('#filterCourseName').on('input', function () {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(applyFilters, 500);
+    });
+
+    // Function to apply filters
+    function applyFilters() {
+        const courseName = $('#filterCourseName').val() || '';
+        const monthYear = $('#filterMonthYear').val() || '';
+
+        // Build URL with current parameters
+        let url = '/instructor/maintenance?';
+        if (courseName) url += 'courseName=' + encodeURIComponent(courseName) + '&';
+        if (monthYear) url += 'monthYear=' + encodeURIComponent(monthYear) + '&';
+
+        // Remove trailing '&' if present
+        if (url.endsWith('&')) {
+            url = url.slice(0, -1);
+        }
+
+        // Navigate to filtered URL
+        window.location.href = url;
+    }
+
+    // Clear filters
+    function clearFilters() {
+        $('#filterCourseName').val('');
+        $('#filterMonthYear').val('');
+        window.location.href = '/instructor/maintenance';
+    }
+
+    // Add clear filters button functionality if needed
+    $(document).on('click', '.clear-filters', function (e) {
+        e.preventDefault();
+        clearFilters();
+    });
+});

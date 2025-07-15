@@ -8,6 +8,8 @@ import com.OLearning.service.order.OrdersService;
 import com.OLearning.service.payment.VietQRService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -18,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 @Controller
@@ -35,41 +39,55 @@ public class CourseInstructorMaintenanceController {
     public String getAllMaintenances(Model model,
                                      @RequestParam(value = "page", defaultValue = "0") int page,
                                      @RequestParam(value = "size", defaultValue = "10") int size,
-                                     @RequestParam(value = "username", required = false) String username,
-                                     @RequestParam(value = "amountDirection", required = false) String amountDirection,
-                                     @RequestParam(value = "orderType", required = false) String orderType,
-                                     @RequestParam(value = "startDate", required = false) String startDate,
-                                     @RequestParam(value = "endDate", required = false) String endDate,
+                                     @RequestParam(value = "courseName", required = false) String courseName,
+                                     @RequestParam(value = "monthYear", required = false) String monthYear,
                                      @RequestParam(value = "error", required = false) String error) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long instructorId = userDetails.getUserId();
-        // Default to PAID status for initial load
-        Page<InstructorOrderDTO> ordersPage = ordersService.filterAndSortInstructorOrders(
-                username, amountDirection, orderType, startDate, endDate, "PAID", page, size, instructorId);
-        // Fetch maintenance payments for this instructor
-        List<CourseMaintenance> maintenancePayments = courseMaintenanceService.getMaintenancesByInstructorId(instructorId);
-        // Tách thành 2 list theo trạng thái
-        List<CourseMaintenance> pendingPayments = maintenancePayments.stream()
+        
+        // Parse monthYear if provided
+        LocalDate monthYearDate = null;
+        if (monthYear != null && !monthYear.isEmpty()) {
+            try {
+                YearMonth ym = YearMonth.parse(monthYear);
+                monthYearDate = ym.atEndOfMonth();
+            } catch (Exception e) {
+                // If parsing fails, ignore the filter
+                monthYearDate = null;
+            }
+        }
+        
+        // Create pageable for pagination
+        Pageable pageable = PageRequest.of(page, size);
+        
+        // Get paginated maintenance payments for this instructor with filtering
+        Page<CourseMaintenance> maintenancePage = courseMaintenanceService.filterMaintenancesByInstructor(
+                instructorId, courseName, monthYearDate, pageable);
+        
+        // Separate pending and paid payments
+        List<CourseMaintenance> pendingPayments = maintenancePage.getContent().stream()
                 .filter(m -> !"PAID".equalsIgnoreCase(m.getStatus()))
                 .toList();
-        List<CourseMaintenance> paidPayments = maintenancePayments.stream()
+        List<CourseMaintenance> paidPayments = maintenancePage.getContent().stream()
                 .filter(m -> "PAID".equalsIgnoreCase(m.getStatus()))
                 .toList();
+        
         model.addAttribute("pendingPayments", pendingPayments);
         model.addAttribute("paidPayments", paidPayments);
-        model.addAttribute("maintenancePayments", maintenancePayments); // giữ lại nếu cần
-        //ok
-        model.addAttribute("accNamePage", "Management Orders");
+        model.addAttribute("maintenancePayments", maintenancePage.getContent());
+        
+        // Pagination attributes
         model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", ordersPage.getTotalPages());
-        model.addAttribute("totalItems", ordersPage.getTotalElements());
+        model.addAttribute("totalPages", maintenancePage.getTotalPages());
+        model.addAttribute("totalItems", maintenancePage.getTotalElements());
         model.addAttribute("pageSize", size);
-        model.addAttribute("username", username);
-        model.addAttribute("amountDirection", amountDirection);
-        model.addAttribute("orderType", orderType);
-        model.addAttribute("startDate", startDate);
-        model.addAttribute("endDate", endDate);
+        
+        // Filter attributes
+        model.addAttribute("courseName", courseName);
+        model.addAttribute("monthYear", monthYear);
+        
+        model.addAttribute("accNamePage", "Management Maintenance");
         model.addAttribute("fragmentContent", "instructorDashBoard/fragments/courseInstructorMaintainceContent :: maintenanceContent");
 
         // Add error message if present
@@ -78,7 +96,6 @@ public class CourseInstructorMaintenanceController {
         }
         return "instructorDashboard/indexUpdate";
     }
-
 
     @GetMapping("/pay/{maintenanceId}")
     public String payMaintenance(@PathVariable("maintenanceId") Long maintenanceId, Model model, RedirectAttributes redirectAttributes) {

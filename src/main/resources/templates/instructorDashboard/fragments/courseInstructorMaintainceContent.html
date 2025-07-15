@@ -22,33 +22,19 @@
                 <!-- Search bar -->
                 <div class="col-md-4">
                     <form id="filterForm" class="rounded position-relative">
-                        <input class="form-control bg-body" type="search" id="filterUsername" name="username" th:value="${username}" placeholder="Search by username..." aria-label="Search">
+                        <input class="form-control bg-body" type="search" id="filterCourseName" name="courseName" th:value="${courseName}" placeholder="Search by course name..." aria-label="Search">
                         <button class="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset" type="submit">
                             <i class="fas fa-search fs-6"></i>
                         </button>
                     </form>
                 </div>
 
-                <!-- Select options -->
-                <div class="col-md-8">
-                    <div class="d-flex gap-4">
-                        <select class="form-select js-choice border-0 z-index-9 bg-transparent" name="amountDirection" id="filterAmount">
-                            <option value="" th:selected="${amountDirection == null or amountDirection == ''}">All Amounts</option>
-                            <option value="asc" th:selected="${amountDirection == 'asc'}">Low to High</option>
-                            <option value="desc" th:selected="${amountDirection == 'desc'}">High to Low</option>
-                        </select>
-                        <select class="form-select js-choice border-0 z-index-9 bg-transparent" name="orderType" id="filterOrderType">
-                            <option value="" th:selected="${orderType == null or orderType == ''}">All Types</option>
-                            <option value="course_purchase" th:selected="${orderType == 'course_purchase'}">Course Purchase</option>
-                            <option value="creation_fee" th:selected="${orderType == 'creation_fee'}">Creation Fee</option>
-                        </select>
-                        <div class="d-flex align-items-center gap-4">
-                            <input class="form-control" type="date" id="filterStartDate" name="startDate"
-                                   th:value="${startDate != null ? startDate : #temporals.format(#temporals.createNow().withDayOfYear(1), 'yyyy-MM-dd')}">
-                            <span>To</span>
-                            <input class="form-control" type="date" id="filterEndDate" name="endDate"
-                                   th:value="${endDate != null ? endDate : #temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">
-                        </div>
+                <!-- Month/Year filter -->
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <label for="filterMonthYear" class="form-label mb-0">Month/Year:</label>
+                        <input class="form-control" type="month" id="filterMonthYear" name="monthYear"
+                               th:value="${monthYear != null ? monthYear : ''}">
                     </div>
                 </div>
             </div>
@@ -150,12 +136,40 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Pagination -->
+            <div th:if="${totalPages > 1}" class="d-flex justify-content-center mt-4">
+                <nav aria-label="Maintenance pagination">
+                    <ul class="pagination">
+                        <!-- Previous button -->
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                            <a class="page-link" th:href="@{/instructor/maintenance(page=${currentPage - 1}, size=${pageSize}, courseName=${courseName}, monthYear=${monthYear})}" 
+                               th:unless="${currentPage == 0}">Previous</a>
+                            <span class="page-link" th:if="${currentPage == 0}">Previous</span>
+                        </li>
+                        
+                        <!-- Page numbers -->
+                        <li class="page-item" th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"
+                            th:classappend="${pageNum == currentPage} ? 'active'">
+                            <a class="page-link" th:href="@{/instructor/maintenance(page=${pageNum}, size=${pageSize}, courseName=${courseName}, monthYear=${monthYear})}"
+                               th:text="${pageNum + 1}"></a>
+                        </li>
+                        
+                        <!-- Next button -->
+                        <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                            <a class="page-link" th:href="@{/instructor/maintenance(page=${currentPage + 1}, size=${pageSize}, courseName=${courseName}, monthYear=${monthYear})}"
+                               th:unless="${currentPage == totalPages - 1}">Next</a>
+                            <span class="page-link" th:if="${currentPage == totalPages - 1}">Next</span>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
         </div>
         <!-- Card body END -->
     </div>
     <!-- Main card END -->
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script th:src="@{/js/instructor/ordersJS.js}"></script>
+    <script th:src="@{/js/instructorDashboard/ordersJS.js}"></script>
 </div>
 
