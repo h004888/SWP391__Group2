@@ -326,7 +326,7 @@ public class CartServiceImpl implements CartService {
                 notificationinstructor.setUser(instructor);
                 notificationinstructor.setCourse(course);
                 notificationinstructor.setMessage("You have received a payment of " + coursePrice + " VND for your course " + course.getTitle());
-                notificationinstructor.setType("PAYMENT_RECEIVED");
+                notificationinstructor.setType("course_purchase");
                 notificationinstructor.setStatus("failed");
                 notificationinstructor.setSentAt(LocalDateTime.now());
                 notificationRepository.save(notification);

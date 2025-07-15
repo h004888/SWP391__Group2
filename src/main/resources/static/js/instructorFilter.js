@@ -149,7 +149,7 @@ function upToPublic(courseId, hasPaidPublicationFee) {
     } else {
         // Nếu chưa trả phí publication
         showConfirmActionModalPublic(
-            'Bạn có chắc chắn muốn công khai khóa học này? Phí công khai sẽ là 100000, các lần sau sẽ không mất phí',
+            'Bạn có chắc chắn muốn công khai khóa học này? Phí công khai sẽ là 100,000 các lần sau sẽ không mất phí',
             '/instructor/courses/uptopublic',
             courseId,
             null

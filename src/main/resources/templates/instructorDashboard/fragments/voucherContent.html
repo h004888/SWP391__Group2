@@ -465,10 +465,15 @@
     function toggleCourseSelect() {
       var isGlobal = document.getElementById('isGlobal').value;
       var courseDiv = document.getElementById('courseSelectDiv');
+      var courseCheckboxes = document.querySelectorAll('input[name="selectedCourses"]');
       if (isGlobal === 'false') {
         courseDiv.style.display = 'block';
+        // Enable all checkboxes
+        courseCheckboxes.forEach(cb => cb.disabled = false);
       } else {
         courseDiv.style.display = 'none';
+        // Uncheck and disable all checkboxes
+        courseCheckboxes.forEach(cb => { cb.checked = false; cb.disabled = true; });
       }
     }
 
@@ -521,7 +526,7 @@
         return false;
       }
 
-      // Kiểm tra nếu không phải global thì phải chọn ít nhất 1 khóa học
+      // Chỉ kiểm tra chọn course nếu KHÔNG phải global
       if (isGlobal === 'false') {
         var selectedCourses = document.querySelectorAll('input[name="selectedCourses"]:checked');
         if (selectedCourses.length === 0) {
@@ -529,18 +534,7 @@
           return false;
         }
       }
-
-      // Kiểm tra công khai voucher
-      if (isPublic === 'true') {
-        // If it's public, we don't need to check for specific courses
-      } else { // If it's not public, we must select at least one course
-        var selectedCourses = document.querySelectorAll('input[name="selectedCourses"]:checked');
-        if (selectedCourses.length === 0) {
-          alert('Vui lòng chọn ít nhất một khóa học!');
-          return false;
-        }
-      }
-
+      // Nếu là global, bỏ qua kiểm tra chọn course
       return true;
     }
 

@@ -248,7 +248,7 @@ public class ControlllerAddCourse {
         
         if (isFirstPublication) {
             // First publication - requires payment
-            double publicationFee = 10000.0;
+            double publicationFee = 100000.0;
             
             if (instructor.getCoin() >= publicationFee) {
                 // User has enough coins
