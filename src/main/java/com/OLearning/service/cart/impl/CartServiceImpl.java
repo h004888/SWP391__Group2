@@ -236,7 +236,7 @@ public class CartServiceImpl implements CartService {
                 })
                 .sum();
 
-        order.setOrderType("course_purchase");
+        order.setOrderType("COURSE_PURCHASE");
         order.setStatus("PAID");
         order.setOrderDate(LocalDateTime.now());
         order.setRefCode(refCode != null ? refCode : UUID.randomUUID().toString());
@@ -248,7 +248,7 @@ public class CartServiceImpl implements CartService {
         notification.setUser(user);
         notification.setCourse(null);
         notification.setMessage("You have received a payment of " + totalPrice + " VND");
-        notification.setType("PAYMENT_RECEIVED");
+        notification.setType("COURSE_PURCHASE");
         notification.setStatus("failed");
         notification.setSentAt(java.time.LocalDateTime.now());
         notificationRepository.save(notification);
@@ -316,7 +316,7 @@ public class CartServiceImpl implements CartService {
                 instructorTransaction.setStatus("PAID");
                 instructorTransaction.setCreatedAt(LocalDateTime.now());
                 instructorTransaction.setOrder(null);
-                instructorTransaction.setTransactionType("course_purchase");
+                instructorTransaction.setTransactionType("COURSE_PURCHASE");
                 instructorTransaction.setNote("students buy courses");
                 coinTransactionRepository.save(instructorTransaction);
                 instructor.setCoin(instructor.getCoin() + coursePrice);
@@ -326,7 +326,7 @@ public class CartServiceImpl implements CartService {
                 notificationinstructor.setUser(instructor);
                 notificationinstructor.setCourse(course);
                 notificationinstructor.setMessage("You have received a payment of " + coursePrice + " VND for your course " + course.getTitle());
-                notificationinstructor.setType("course_purchase");
+                notificationinstructor.setType("COURSE_PURCHASE");
                 notificationinstructor.setStatus("failed");
                 notificationinstructor.setSentAt(LocalDateTime.now());
                 notificationRepository.save(notification);

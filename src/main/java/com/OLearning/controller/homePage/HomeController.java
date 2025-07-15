@@ -209,7 +209,6 @@ public class HomeController {
                     }
                 }
 
-                // Kiểm tra user đã đăng ký course chưa
                 boolean isEnrolled = false;
                 if (userDetails != null) {
                     User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
@@ -273,7 +272,7 @@ public class HomeController {
         }
         String mainCartEncoded = getCartCookie(request, getUserIdFromUserDetails(userDetails));
         if (cartService.isCourseInCart(mainCartEncoded, courseId, userDetails.getUsername())) {
-            redirectAttributes.addFlashAttribute("info", "This course is already in your cart. Please proceed to checkout from your cart.");
+            redirectAttributes.addFlashAttribute("error", "This course is already in your cart. Please proceed to checkout from your cart.");
             return "redirect:/home/course-detail?id=" + courseId;
         }
 
@@ -316,7 +315,6 @@ public class HomeController {
                 order.setAmount(totalAmount);
                 cartService.processCheckout(cartJson, request.getRemoteAddr(), userDetails.getUsername());
                 cartService.completeCheckout(cart, order, true, null);
-                // Update voucher usage if applied
                 if (voucherId != null) {
                     voucherService.useVoucherForUserAndCourse(voucherId, userId);
                 }
@@ -356,7 +354,7 @@ public class HomeController {
                 return "redirect:" + vnPayService.createOrder(request);
             }
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("message", "Purchase error: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Purchase error: " + e.getMessage());
             return "redirect:/home/course-detail?id=" + courseId;
         }
     }
@@ -368,29 +366,29 @@ public class HomeController {
                                   @AuthenticationPrincipal UserDetails userDetails,
                                   RedirectAttributes redirectAttributes) {
         if (userDetails == null) {
-            redirectAttributes.addFlashAttribute("message", "Bạn cần đăng nhập để đánh giá.");
+            redirectAttributes.addFlashAttribute("error", "Bạn cần đăng nhập để đánh giá.");
             return "redirect:/home/course-detail?id=" + courseId;
         }
         User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
         if (user == null) {
-            redirectAttributes.addFlashAttribute("message", "Không tìm thấy người dùng.");
+            redirectAttributes.addFlashAttribute("error", "Không tìm thấy người dùng.");
             return "redirect:/home/course-detail?id=" + courseId;
         }
         Course course = courseRepository.findById(courseId).orElse(null);
         if (course == null) {
-            redirectAttributes.addFlashAttribute("message", "Không tìm thấy khóa học.");
+            redirectAttributes.addFlashAttribute("error", "Không tìm thấy khóa học.");
             return "redirect:/home/course-detail?id=" + courseId;
         }
         // Kiểm tra đã đăng ký khóa học chưa
         boolean isEnrolled = enrollmentService.findFirstByUserAndCourseOrderByEnrollmentDateDesc(user, course).isPresent();
         if (!isEnrolled) {
-            redirectAttributes.addFlashAttribute("message", "Bạn cần đăng ký khóa học để đánh giá.");
+            redirectAttributes.addFlashAttribute("error", "Bạn cần đăng ký khóa học để đánh giá.");
             return "redirect:/home/course-detail?id=" + courseId;
         }
         // Kiểm tra đã review chưa (nếu chỉ cho review 1 lần)
         Long userReviewCount = courseReviewService.countByUserIdAndCourseId(user.getUserId(), courseId);
         if (userReviewCount != null && userReviewCount > 0) {
-            redirectAttributes.addFlashAttribute("message", "Bạn đã đánh giá khóa học này rồi.");
+            redirectAttributes.addFlashAttribute("error", "Bạn đã đánh giá khóa học này rồi.");
             return "redirect:/home/course-detail?id=" + courseId;
         }
         // Tạo review mới
@@ -461,7 +459,6 @@ public class HomeController {
 
                 cartService.completeCheckout(cart, order, false, transactionId);
 
-                // Update voucher usage if applied (for buy now)
                 if (cart != null) {
                     List<Map<String, Object>> items = (List<Map<String, Object>>) cart.get("items");
                     if (items != null && !items.isEmpty()) {
@@ -480,14 +477,14 @@ public class HomeController {
                     return "redirect:/home";
                 }
             } catch (CartServiceImpl.CourseAlreadyPurchasedException e) {
-                redirectAttributes.addFlashAttribute("message", e.getMessage());
+                redirectAttributes.addFlashAttribute("error", e.getMessage());
                 if (courseId != null) {
                     return "redirect:/home/course-detail?id=" + courseId;
                 } else {
                     return "redirect:/home";
                 }
             } catch (Exception e) {
-                redirectAttributes.addFlashAttribute("message", "VNPay success but internal error: " + e.getMessage());
+                redirectAttributes.addFlashAttribute("error", "VNPay success but internal error: " + e.getMessage());
                 if (courseId != null) {
                     return "redirect:/home/course-detail?id=" + courseId;
                 } else {
@@ -495,7 +492,7 @@ public class HomeController {
                 }
             }
         } else {
-            redirectAttributes.addFlashAttribute("message", "VNPay payment failed.");
+            redirectAttributes.addFlashAttribute("error", "VNPay payment failed.");
             if (courseId != null) {
                 return "redirect:/home/course-detail?id=" + courseId;
             } else {

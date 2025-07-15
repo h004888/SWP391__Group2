@@ -14,12 +14,6 @@ public class VietQRService {
 
 
 
-    /**
-     * Tạo URL QR code SePay cho thanh toán
-     * @param amount Số tiền
-     * @param description Nội dung chuyển khoản (mã đơn hàng)
-     * @return link QR SePay
-     */
     public String generateSePayQRUrl(double amount, String description) {
         return String.format("https://qr.sepay.vn/img?acc=%s&bank=%s&amount=%d&des=%s&template=compact2&download=0",
                 accountNumber, bankCode, (int)amount, description);

@@ -113,7 +113,7 @@ public class CoinTransactionServiceImpl implements CoinTransactionService {
 
     public Page<CoinTransactionDTO> getUserCoursePurchaseTransactions(Long userId, String courseName, String status, String startDate, String endDate, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        String transactionType = "course_purchase";
+        String transactionType = "COURSE_PURCHASE";
         Page<CoinTransaction> transactionPage;
         LocalDateTime start = null, end = null;
         if (startDate != null && !startDate.trim().isEmpty() && endDate != null && !endDate.trim().isEmpty()) {
@@ -138,7 +138,7 @@ public class CoinTransactionServiceImpl implements CoinTransactionService {
 
     // Thống kê tổng chi tiêu và số lượng khóa học đã mua
     public Double getTotalSpent(Long userId) {
-        String transactionType = "course_purchase";
+        String transactionType = "COURSE_PURCHASE";
         List<CoinTransaction> transactions = coinTransactionRepository.findByUserUserIdAndTransactionType(userId, transactionType, Pageable.unpaged()).getContent();
         return transactions.stream()
             .filter(t -> t.getAmount() != null && t.getAmount() < 0)
@@ -146,7 +146,7 @@ public class CoinTransactionServiceImpl implements CoinTransactionService {
             .reduce(0.0, Double::sum);
     }
     public long getTotalCoursesPurchased(Long userId) {
-        String transactionType = "course_purchase";
+        String transactionType = "COURSE_PURCHASE";
         List<CoinTransaction> transactions = coinTransactionRepository.findByUserUserIdAndTransactionType(userId, transactionType, Pageable.unpaged()).getContent();
         return transactions.stream().map(coinTransactionMapper::toDTO).map(CoinTransactionDTO::getCourseName).distinct().count();
     }

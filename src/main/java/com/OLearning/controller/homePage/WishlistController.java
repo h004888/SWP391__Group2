@@ -101,7 +101,7 @@ public class WishlistController {
         Map<String, Object> result = new HashMap<>();
         if (userDetails == null) {
             result.put("success", false);
-            result.put("error", "Bạn cần đăng nhập!");
+            result.put("error", "You need to login!");
             return result;
         }
         

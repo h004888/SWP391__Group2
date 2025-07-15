@@ -1,13 +1,16 @@
 <main th:fragment="historyContent">
     <!-- Notification System -->
     <div th:if="${message}" th:attr="data-message=${message}" id="server-message" style="display: none;"></div>
+    <div th:if="${error}" th:attr="data-message=${error}" id="server-error" style="display: none;"></div>
     <script>
-      // Check for server messages on page load
       document.addEventListener('DOMContentLoaded', function() {
+        const errorDiv = document.getElementById('server-error');
+        if (errorDiv && errorDiv.getAttribute('data-message')) {
+          showNotification(errorDiv.getAttribute('data-message'), 'error');
+        }
         const serverMessage = document.getElementById('server-message');
         if (serverMessage && serverMessage.getAttribute('data-message')) {
-          const message = serverMessage.getAttribute('data-message');
-          showNotification(message, 'success');
+          showNotification(serverMessage.getAttribute('data-message'), 'success');
         }
       });
     </script>
@@ -16,12 +19,12 @@
       <!-- Breadcrumb -->
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="/home">Trang chủ</a></li>
-          <li class="breadcrumb-item active" >Lịch sử mua hàng</li>
+          <li class="breadcrumb-item"><a href="/home">Home page</a></li>
+          <li class="breadcrumb-item active" >Purchase history</li>
         </ol>
       </nav>
       <!-- Title -->
-      <h2 class="mb-4 text-center">Lịch sử <b>mua hàng</b></h2>
+      <h2 class="mb-4 text-center">History <b>purchase</b></h2>
       <!-- Statistics Cards -->
       <div class="row mb-4 justify-content-center">
         <div class="col-md-4 mb-3">
@@ -30,7 +33,7 @@
               <div class="mb-2">
                 <i class="fa fa-money-bill-wave fa-2x text-success"></i>
               </div>
-              <h5 class="card-title">Tổng chi tiêu</h5>
+              <h5 class="card-title">Total spending</h5>
               <p class="card-text h4" th:text="${#numbers.formatDecimal(totalSpent, 0, 'COMMA', 0, 'POINT')} + ' VND'"></p>
             </div>
           </div>
@@ -41,7 +44,7 @@
               <div class="mb-2">
                 <i class="fa fa-graduation-cap fa-2x text-primary"></i>
               </div>
-              <h5 class="card-title">Khóa học đã mua</h5>
+              <h5 class="card-title">Purchased course</h5>
               <p class="card-text h4" th:text="${totalCoursesPurchased}"></p>
             </div>
           </div>
@@ -51,11 +54,11 @@
       <div class="row mb-3">
         <div class="col-md-6"></div>
         <div class="col-md-6 d-flex justify-content-end align-items-center">
-          <form class="d-flex" id="filterForm" method="get" th:action="@{/history}">
-            <input type="text" name="courseName" th:value="${courseName}" class="form-control me-2" placeholder="Tìm kiếm khóa học...">
-            <input type="date" name="startDate" th:value="${startDate}" class="form-control me-2">
-            <input type="date" name="endDate" th:value="${endDate}" class="form-control me-2">
-            <button type="submit" class="btn btn-primary">Lọc</button>
+          <form class="d-flex" id="filterForm" method="get" th:action="@{/history}" onsubmit="return false;">
+            <input type="text" name="courseName" th:value="${courseName}" class="form-control me-2" placeholder="Search for courses..." id="courseNameInput">
+            <input type="date" name="startDate" th:value="${startDate}" class="form-control me-2" id="startDateInput">
+            <input type="date" name="endDate" th:value="${endDate}" class="form-control me-2" id="endDateInput">
+            <!-- Remove filter button -->
           </form>
         </div>
       </div>
@@ -67,11 +70,11 @@
               <thead class="table-light">
               <tr>
                 <th class="text-center">#</th>
-                <th class="text-center">Ngày mua</th>
-                <th class="text-center">Khóa học</th>
-                <th class="text-center">Giá tiền</th>
-                <th class="text-center">Trạng thái</th>
-                <th class="text-center">Hành động</th>
+                <th class="text-center">Date of purchase</th>
+                <th class="text-center">Course</th>
+                <th class="text-center">Price</th>
+                <th class="text-center">Status</th>
+                <th class="text-center">Action</th>
               </tr>
               </thead>
               <tbody id="transactionTable">
@@ -84,15 +87,15 @@
                 </td>
                 <td th:text="${#numbers.formatDecimal(transaction.discountedPrice, 0, 'COMMA', 0, 'POINT')} + ' VND'" class="fw-bold text-center"></td>
                 <td class="text-center">
-                  <span th:if="${transaction.status == 'PAID'}" class="badge bg-success">Đã thanh toán</span>
-                  <span th:if="${transaction.status == 'PENDING'}" class="badge bg-warning text-dark">Chờ thanh toán</span>
-                  <span th:if="${transaction.status == 'cancelled'}" class="badge bg-danger">Đã hủy</span>
+                  <span th:if="${transaction.status == 'PAID'}" class="badge bg-success">Paid</span>
+                  <span th:if="${transaction.status == 'PENDING'}" class="badge bg-warning text-dark">Pending</span>
+                  <span th:if="${transaction.status == 'CANCELLED'}" class="badge bg-danger">Canceled</span>
                 </td>
                 <td class="text-center">
-                  <button class="btn btn-link text-primary transaction-detail-btn" th:attr="data-id=${transaction.transactionId}">Xem chi tiết</button>
+                  <button class="btn btn-link text-primary transaction-detail-btn" th:attr="data-id=${transaction.transactionId}">View</button>
                 </td>
               </tr>
-              <tr th:if="${transactions.size() == 0}"><td colspan="6" class="text-center text-muted">Không có giao dịch nào</td></tr>
+              <tr th:if="${transactions.size() == 0}"><td colspan="6" class="text-center text-muted">No transactions</td></tr>
               </tbody>
             </table>
           </div>
@@ -101,7 +104,7 @@
       <!-- Pagination -->
       <div class="d-flex justify-content-between align-items-center mt-3">
         <div th:if="${totalItems > 0}">
-          <span class="text-muted">Hiển thị <span th:text="${currentPage * pageSize + 1}"></span> đến <span th:text="${(currentPage * pageSize) + pageSize > totalItems ? totalItems : (currentPage * pageSize) + pageSize}"></span> trong tổng số <span th:text="${totalItems}"></span> kết quả</span>
+          <span class="text-muted">Show <span th:text="${currentPage * pageSize + 1}"></span> to <span th:text="${(currentPage * pageSize) + pageSize > totalItems ? totalItems : (currentPage * pageSize) + pageSize}"></span> in total <span th:text="${totalItems}"></span> result</span>
         </div>
         <nav th:if="${totalPages > 1}">
           <ul class="pagination mb-0">
@@ -122,59 +125,59 @@
         <div class="modal-dialog modal-dialog-centered modal-lg">
           <div class="modal-content shadow rounded-4">
             <div class="modal-header border-bottom-0 pb-0">
-              <h3 class="modal-title fs-5 fw-bold text-primary" id="transactionModalLabel">Chi tiết giao dịch</h3>
+              <h3 class="modal-title fs-5 fw-bold text-primary" id="transactionModalLabel">Transaction details</h3>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
               <div class="mb-4">
-                <h4 class="fs-6 fw-semibold text-dark mb-3">Thông tin giao dịch</h4>
+                <h4 class="fs-6 fw-semibold text-dark mb-3">Transaction information</h4>
                 <div class="bg-light rounded-3 p-3 mb-3">
                   <div class="row mb-2">
-                    <div class="col-6 text-secondary">Mã giao dịch:</div>
+                    <div class="col-6 text-secondary">Transaction code:</div>
                     <div class="col-6 fw-semibold text-dark" id="modal-refCode"></div>
                   </div>
                   <div class="row mb-2">
-                    <div class="col-6 text-secondary">Ngày tạo:</div>
+                    <div class="col-6 text-secondary">Creation date:</div>
                     <div class="col-6 fw-semibold text-dark" id="modal-createdAt"></div>
                   </div>
                   <div class="row mb-2">
-                    <div class="col-6 text-secondary">Phương thức thanh toán:</div>
+                    <div class="col-6 text-secondary">Payment method:</div>
                     <div class="col-6 fw-semibold text-dark" id="modal-paymentMethod"></div>
                   </div>
                 </div>
               </div>
               <div>
-                <h4 class="fs-6 fw-semibold text-dark mb-3">Thông tin khóa học</h4>
+                <h4 class="fs-6 fw-semibold text-dark mb-3">Course information</h4>
                 <div class="bg-light rounded-3 p-3">
                   <div class="row mb-2">
-                    <span class="col-6 text-secondary">Tên khóa học:</span>
+                    <span class="col-6 text-secondary">Course name:</span>
                     <div class="col-6 fw-semibold text-dark mt-1" id="modal-courseName"></div>
                   </div>
                   <div class="row mb-2">
-                    <div class="col-6 text-secondary">Giảng viên:</div>
+                    <div class="col-6 text-secondary">Lecturer:</div>
                     <div class="col-6 fw-semibold text-dark" id="modal-instructorName"></div>
                   </div>
                   <div class="row mb-2">
-                    <div class="col-6 text-secondary">Giá gốc:</div>
+                    <div class="col-6 text-secondary">Original price:</div>
                     <div class="col-6 text-decoration-line-through text-secondary" id="modal-originalPrice"></div>
                   </div>
                   <div class="row mb-2">
-                    <div class="col-6 text-secondary">Giá sau giảm:</div>
+                    <div class="col-6 text-secondary">Price after reduction:</div>
                     <div class="col-6 fw-semibold text-dark" id="modal-discountedPrice"></div>
                   </div>
                   <div class="row mb-2">
-                    <div class="col-6 text-secondary">Trạng thái:</div>
+                    <div class="col-6 text-secondary">Status:</div>
                     <div class="col-6 fw-semibold text-dark" id="modal-status"></div>
                   </div>
                   <div class="row">
-                    <div class="col-6 text-secondary">Ghi chú:</div>
+                    <div class="col-6 text-secondary">Note:</div>
                     <div class="col-6 fw-semibold text-dark" id="modal-note"></div>
                   </div>
                 </div>
               </div>
             </div>
             <div class="modal-footer border-top-0 pt-0 d-flex justify-content-end">
-              <button type="button" class="btn btn-primary px-4" data-bs-dismiss="modal">Đóng</button>
+              <button type="button" class="btn btn-primary px-4" data-bs-dismiss="modal">Close</button>
             </div>
           </div>
         </div>
@@ -183,6 +186,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
       // Modal logic đẹp như mẫu
+      // Modal logic as beautiful as the template
       $(document).ready(function () {
         $(document).on('click', '.transaction-detail-btn', function () {
           var id = $(this).data('id');
@@ -196,12 +200,49 @@
               // $('#modal-courseDuration').text(data.courseDuration || '');
               $('#modal-originalPrice').text(data.originalPrice ? data.originalPrice.toLocaleString('vi-VN') + ' VND' : '');
               $('#modal-discountedPrice').text(data.discountedPrice ? data.discountedPrice.toLocaleString('vi-VN') + ' VND' : '');
-              $('#modal-status').text(data.status === 'PAID' ? 'Đã thanh toán' : (data.status === 'pending' ? 'Chờ thanh toán' : 'Đã hủy'));
+              $('#modal-status').text(data.status === 'PAID' ? 'Paid' : (data.status === 'pending' ? 'Pending' : 'Canceled'));
               $('#modal-note').text(data.note || '');
               var modal = new bootstrap.Modal(document.getElementById('transactionModal'));
               modal.show();
             }
           });
+        });
+        // AJAX filter logic
+        function fetchHistory(page = 0) {
+          const courseName = $('#courseNameInput').val();
+          const startDate = $('#startDateInput').val();
+          const endDate = $('#endDateInput').val();
+          $.ajax({
+            url: '/history',
+            type: 'GET',
+            data: {
+              courseName: courseName,
+              startDate: startDate,
+              endDate: endDate,
+              page: page
+            },
+            success: function (data) {
+              // Lấy fragment content từ response (nếu trả về html fragment)
+              // Get fragment content from response (if returning html fragment)
+              const html = $(data);
+              const newTable = html.find('#transactionTable').parent().parent().parent().html();
+              $('#transactionTable').parent().parent().parent().html(newTable);
+              // Cập nhật phân trang nếu có
+              // Update pagination if available
+              const newPagination = html.find('.pagination').parent().html();
+              $('.pagination').parent().html(newPagination);
+            }
+          });
+        }
+        $('#courseNameInput, #startDateInput, #endDateInput').on('input change', function () {
+          fetchHistory();
+        });
+        // Xử lý phân trang ajax
+        // Handle ajax pagination
+        $(document).on('click', '.pagination .page-link', function (e) {
+          e.preventDefault();
+          const page = $(this).text() - 1;
+          fetchHistory(page);
         });
       });
     </script>

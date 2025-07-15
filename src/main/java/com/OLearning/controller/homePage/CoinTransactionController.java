@@ -17,6 +17,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.math.BigDecimal;
 
@@ -26,9 +28,6 @@ public class CoinTransactionController {
 
     @Autowired
     private CoinTransactionService coinTransactionService;
-
-    @Autowired
-    private VNPayService vnPayService;
 
     @Autowired
     private UserRepository userRepository;
@@ -42,7 +41,7 @@ public class CoinTransactionController {
             @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "startDate", required = false) String startDate,
             @RequestParam(value = "endDate", required = false) String endDate,
-            Model model) {
+            Model model, HttpServletRequest request) {
         if (userDetails == null || !(userDetails instanceof CustomUserDetails)) {
             return "redirect:/login";
         }
@@ -65,6 +64,10 @@ public class CoinTransactionController {
         model.addAttribute("currentUserId", userId);
         model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderDefault");
         model.addAttribute("fragmentContent", "homePage/fragments/historyContent :: historyContent");
+        String requestedWith = request.getHeader("X-Requested-With");
+        if (requestedWith != null && requestedWith.equalsIgnoreCase("XMLHttpRequest")) {
+            return "homePage/fragments/historyContent :: historyContent";
+        }
         return "homePage/index";
     }
 

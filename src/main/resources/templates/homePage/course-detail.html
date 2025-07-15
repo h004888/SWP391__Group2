@@ -14,44 +14,19 @@
 	<!-- **************** MAIN CONTENT START **************** -->
 	<main>
 		<div th:replace="~{homePage/fragments/notification :: notification}"></div>
-		<!-- Notification (copied from voucherContent.html) -->
-		<div id="notification" class="position-fixed top-0 end-0 p-5" style="z-index: 1050; transform: translateX(200%); transition: transform 0.5s ease;">
-			<div id="notification-alert" class="alert d-flex align-items-center mb-0" role="alert" style="min-width: 250px;">
-				<i id="notification-icon" class="me-2"></i>
-				<span id="notification-message"></span>
-			</div>
-		</div>
-		<script>
-		// Function to show notification (copied from voucherContent.html)
-		function showNotification(message, type) {
-			const notification = document.getElementById('notification');
-			const notificationAlert = document.getElementById('notification-alert');
-			const notificationIcon = document.getElementById('notification-icon');
-			const notificationMessage = document.getElementById('notification-message');
-			notificationAlert.classList.remove('alert-success', 'alert-danger');
-			notificationMessage.textContent = message;
-			if (type === 'success') {
-				notificationAlert.classList.add('alert-success');
-				notificationIcon.className = 'fas fa-check-circle me-2';
-			} else {
-				notificationAlert.classList.add('alert-danger');
-				notificationIcon.className = 'fas fa-exclamation-circle me-2';
-			}
-			notification.style.transform = 'translateX(0)';
-			setTimeout(() => {
-				notification.style.transform = 'translateX(200%)';
-			}, 5000);
-		}
-		</script>
 		<!-- Notification System -->
 		<div th:if="${message}" th:attr="data-message=${message}" id="server-message" style="display: none;"></div>
+		<div th:if="${error}" th:attr="data-message=${error}" id="server-error" style="display: none;"></div>
 		<script>
 			// Check for server messages on page load
 			document.addEventListener('DOMContentLoaded', function() {
+				const errorDiv = document.getElementById('server-error');
+				if (errorDiv && errorDiv.getAttribute('data-message')) {
+					showNotification(errorDiv.getAttribute('data-message'), 'error');
+				}
 				const serverMessage = document.getElementById('server-message');
 				if (serverMessage && serverMessage.getAttribute('data-message')) {
-					const message = serverMessage.getAttribute('data-message');
-					showNotification(message, 'success');
+					showNotification(serverMessage.getAttribute('data-message'), 'success');
 				}
 			});
 		</script>

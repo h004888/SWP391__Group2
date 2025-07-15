@@ -71,7 +71,6 @@ public class SePayWebhookController {
                 if (Character.isDigit(c)) {
                     orderIdBuilder.append(c);
                 } else {
-                    // Dừng lại khi gặp ký tự không phải số
                     break;
                 }
             }
@@ -83,7 +82,6 @@ public class SePayWebhookController {
     }
 
     private Long extractMaintenanceId(String rawContent) {
-        // Tìm kiếm chuỗi "MAINTENANCE" và trích xuất số sau đó
         String prefix = "MAINTENANCE";
         int startIndex = rawContent.indexOf(prefix);
         if (startIndex != -1) {

@@ -49,13 +49,16 @@
 
         <!-- Notification System -->
         <div th:if="${message}" th:attr="data-message=${message}" id="server-message" style="display: none;"></div>
+        <div th:if="${error}" th:attr="data-message=${error}" id="server-error" style="display: none;"></div>
         <script>
-          // Check for server messages on page load
           document.addEventListener('DOMContentLoaded', function() {
+            const errorDiv = document.getElementById('server-error');
+            if (errorDiv && errorDiv.getAttribute('data-message')) {
+              showNotification(errorDiv.getAttribute('data-message'), 'error');
+            }
             const serverMessage = document.getElementById('server-message');
             if (serverMessage && serverMessage.getAttribute('data-message')) {
-              const message = serverMessage.getAttribute('data-message');
-              showNotification(message, 'success');
+              showNotification(serverMessage.getAttribute('data-message'), 'success');
             }
           });
         </script>

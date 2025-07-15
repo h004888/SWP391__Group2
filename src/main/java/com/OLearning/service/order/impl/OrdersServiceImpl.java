@@ -723,7 +723,6 @@ public class OrdersServiceImpl implements OrdersService {
     
     @Override
     public boolean hasPaidPublicationOrder(Long userId) {
-        // Check if user has any PAID order with type "course_public"
         return ordersRepository.existsByUserUserIdAndOrderTypeAndStatus(userId, "course_public", "PAID");
     }
 }
