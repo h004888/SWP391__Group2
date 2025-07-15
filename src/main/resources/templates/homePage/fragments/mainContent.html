@@ -1,5 +1,5 @@
 <!-- **************** MAIN CONTENT START **************** -->
-<main th:fragment="mainContent">
+<main th:fragment="mainContent" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
     <div id="notification" class="position-fixed top-0 end-0 p-5" style="z-index: 1050; top: 80px; transform: translateX(200%); transition: transform 0.5s ease;">
         <div id="notification-alert" class="alert d-flex align-items-center mb-0" role="alert" style="min-width: 250px;">
@@ -488,7 +488,7 @@ Action box START -->
             </figure>
             <!-- SVG decoration END -->
 
-            <div class="row">
+            <div class="row" sec:authorize="hasRole('USER')">
                 <div class="col-12">
                     <div class="bg-info p-4 p-sm-5 rounded-3">
                         <div class="row position-relative">
@@ -511,7 +511,7 @@ Action box START -->
                                     </div>
                                     <!-- Content and input -->
                                     <div class="col-lg-5 text-lg-end">
-                                        <a href="#" class="btn btn-outline-warning mb-0">Start Teaching Today</a>
+                                        <a th:href="@{/become-instructor}" class="btn btn-outline-warning mb-0">Start Teaching Today</a>
                                     </div>
                                 </div>
                             </div>

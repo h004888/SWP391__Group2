@@ -192,49 +192,60 @@
 
                 <!-- Wishlist START -->
                 <li class="nav-item ms-0 ms-sm-2 d-none d-sm-block">
-                    <a class="btn btn-light btn-round mb-0" href="#"> <i class="bi bi-heart fa-fw"></i></a>
+                    <div class="me-2 me-md-3 dropdown">
+                        <!-- Wishlist button -->
+                        <a class="btn btn-light btn-round mb-0" th:href="@{/wishlist}">
+                            <i class="bi bi-heart fa-fw"></i>
+                        </a>
+                        <!-- badge -->
+                        <span id="wishlistTotalBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-danger mt-xl-2 ms-n1" th:text="${wishlistTotal != null ? wishlistTotal : 0}">
+                <span class="visually-hidden">items in wishlist</span>
+                </span>
+                    </div>
                 </li>
                 <!-- Wishlist END -->
 
-                <!-- Notification page button START -->
-
-                <!-- Notification page button END -->
+                <!-- Cart page button START -->
+                <li class="nav-item ms-0 ms-sm-0 d-none d-sm-block">
+                    <div class="me-2 me-md-3 dropdown">
+                        <!-- Cart button -->
+                        <a class="btn btn-light btn-round mb-0" th:href="@{/cart}">
+                            <i class="bi bi-cart3 fa-fw"></i>
+                        </a>
+                        <!-- badge -->
+                        <span id="cartTotalBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-dark mt-xl-2 ms-n1" th:text="${cartTotal != null ? cartTotal : 0}">
+                <span class="visually-hidden">items in cart</span>
+                </span>
+                    </div>
+                </li>
+                <!-- Cart page button END -->
 
                 <!-- Notification dropdown START -->
-                <li class="nav-item ms-2 ms-md-3 dropdown">
-                    <!-- Notification button -->
-                    <a class="btn btn-light btn-round mb-0" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
-                    <a class="btn btn-light btn-round mb-0" href="#" role="button" data-bs-toggle="dropdown"
-                        aria-expanded="false" data-bs-auto-close="outside">
-                        <i class="bi bi-bell fa-fw"></i>
-                    </a>
-                    <!-- Notification dote -->
-                    <span id="userNotificationBadge" th:if="${unreadCount > 0}" class="notif-badge animation-blink"></span>
-
-                    <!-- Notification dropdown menu START -->
-                    <div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0">
-                    <div
-                        class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0">
-                        <div class="card bg-transparent">
-                            <div class="card-header bg-transparent border-bottom py-4 d-flex justify-content-between align-items-center">
-                                <h6 class="m-0">Notifications <span id="userNotificationCount" class="badge bg-danger bg-opacity-10 text-danger ms-2">0 new</span></h6>
-                                <a class="small" href="#" onclick="markAllAsRead(); return false;">Clear all</a>
-                            <div
-                                class="card-header bg-transparent border-bottom py-4 d-flex justify-content-between align-items-center">
-                                <h6 class="m-0">Notifications <span
-                                        class="badge bg-danger bg-opacity-10 text-danger ms-2">2 new</span></h6>
-                                <a class="small" href="#">Clear all</a>
-                            </div>
-                            <div class="card-body p-0">
-                                <ul id="userNotificationList" class="list-group list-unstyled list-group-flush">
-                                    <!-- Notifications will be loaded here by JS -->
-                                </ul>
-                            </div>
-                            <!-- Button -->
-                            <div class="card-footer bg-transparent border-0 py-3 text-center position-relative">
-                                <a th:href="@{/user/notifications}" class="stretched-link">See all incoming activity</a>
+                <li class="nav-item ms-0 ms-md-2 dropdown">
+                    <div class="nav-item ms-2 dropdown" sec:authorize="isAuthenticated()">
+                        <a class="btn btn-light btn-round mb-0 position-relative notification-btn-home" href="#" role="button" data-bs-toggle="dropdown"
+                           aria-expanded="false" data-bs-auto-close="outside" title="Notifications">
+                            <i class="bi bi-bell fa-fw"></i>
+                            <span id="userNotificationBadge" th:if="${unreadCount > 0}" class="notif-badge animation-blink"></span>
+                        </a>
+                        <!-- Notification dropdown menu START -->
+                        <div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0" style="width:220px;min-width:220px;max-width:220px;border:1px solid #ddd;">
+                            <div class="card bg-transparent">
+                                <div class="card-header bg-transparent border-bottom py-4 d-flex justify-content-between align-items-center">
+                                    <h6 class="m-0">Unread Notifications <span id="userNotificationCount" class="badge bg-danger bg-opacity-10 text-danger ms-2">0 new</span></h6>
+                                </div>
+                                <div class="card-body p-0">
+                                    <ul id="userNotificationList" class="list-group list-unstyled list-group-flush">
+                                        <!-- Notifications will be loaded here -->
+                                    </ul>
+                                </div>
+                                <!-- Button -->
+                                <div class="card-footer bg-transparent border-0 py-3 text-center position-relative" style="padding-top:0;">
+                                    <a th:href="@{/user/notifications}" class="stretched-link">View all notifications</a>
+                                </div>
                             </div>
                         </div>
+                        <!-- Notification dropdown menu END -->
                     </div>
                     <!-- Notification dropdown menu END -->
                 </li>
@@ -246,7 +257,9 @@
                     <a class="avatar avatar-sm p-0" href="#" id="profileDropdown" role="button"
                        data-bs-auto-close="outside" data-bs-display="static" data-bs-toggle="dropdown"
                        aria-expanded="false">
-                        <img class="avatar-img rounded-circle" src="assets/images/avatar/01.jpg" alt="avatar">
+                        <img class="avatar-img rounded-circle" th:src="${#authentication.principal.profilePicture != null} ?
+                                                                                             ${#authentication.principal.profilePicture} :
+                                                                                             @{/img/undraw_profile.svg}" alt="avatar">
                     </a>
 
                     <!-- Profile dropdown START -->
@@ -257,7 +270,9 @@
                             <div class="d-flex align-items-center">
                                 <!-- Avatar -->
                                 <div class="avatar me-3">
-                                    <img class="avatar-img rounded-circle shadow" src="assets/images/avatar/01.jpg"
+                                    <img class="avatar-img rounded-circle shadow" th:src="${#authentication.principal.profilePicture != null} ?
+                                                                                             ${#authentication.principal.profilePicture} :
+                                                                                             @{/img/undraw_profile.svg}"
                                         alt="avatar">
                                 </div>
                                 <div>
@@ -271,11 +286,11 @@
                         <li>
                             <hr class="dropdown-divider">
                         </li>
+                        <li><a class="dropdown-item" sec:authorize="hasRole('INSTRUCTOR')"
+                               th:href="@{/instructor}"><i class="bi bi-gear fa-fw me-2"></i>DashBoard</a></li>
                         <li><a class="dropdown-item" th:href="@{/profile}"><i class="bi bi-person fa-fw me-2"></i>Profile</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-gear fa-fw me-2"></i>Account
-                                Settings</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle fa-fw me-2"></i>Help</a>
-                        </li>
+                        <li><a class="dropdown-item" th:href="@{/history}"><i class="fas fa-history me-2"></i>History</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle fa-fw me-2"></i>Help</a></li>
                         <li>
                             <a class="dropdown-item bg-danger-soft-hover" th:href="@{/logout}">
                                 <i class="bi bi-power fa-fw me-2"></i>

@@ -22,6 +22,8 @@ import com.OLearning.entity.TermsAndCondition;
 import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.Collections;
 import java.util.List;
+import com.OLearning.service.cloudinary.UploadFile;
+import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 public class BecomeInstructorController {
@@ -31,6 +33,9 @@ public class BecomeInstructorController {
 
     @Autowired
     private TermsAndConditionService termsAndConditionService;
+
+    @Autowired
+    private UploadFile uploadFile;
 
     @GetMapping("/become-instructor")
     public String showBecomeInstructorPage(Model model, @RequestParam(value = "success", required = false) String success) {
@@ -93,6 +98,54 @@ public class BecomeInstructorController {
             model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderDefault");
             model.addAttribute("fragmentContent", "homePage/fragments/becomeInstructorContent :: becomeInstructorContent");
             return "homePage/index";
+        }
+        // Xử lý upload file
+        MultipartFile file = instructorRequestDTO.getInstructorFile();
+        if (file != null && !file.isEmpty()) {
+            String filename = file.getOriginalFilename();
+            long maxSize = 5 * 1024 * 1024; // 5MB
+            String[] allowedExts = {".docx", ".jpg", ".jpeg", ".png"};
+            boolean validExt = false;
+            if (filename != null) {
+                String lower = filename.toLowerCase();
+                for (String ext : allowedExts) {
+                    if (lower.endsWith(ext)) {
+                        validExt = true;
+                        break;
+                    }
+                }
+            }
+            if (!validExt) {
+                model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderDefault");
+                model.addAttribute("fragmentContent", "homePage/fragments/becomeInstructorContent :: becomeInstructorContent");
+                model.addAttribute("instructorRequestDTO", instructorRequestDTO);
+                model.addAttribute("termsError", "Chỉ cho phép file ảnh (.jpg, .jpeg, .png) hoặc .docx!");
+                return "homePage/index";
+            }
+            if (file.getSize() > maxSize) {
+                model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderDefault");
+                model.addAttribute("fragmentContent", "homePage/fragments/becomeInstructorContent :: becomeInstructorContent");
+                model.addAttribute("instructorRequestDTO", instructorRequestDTO);
+                model.addAttribute("termsError", "File quá lớn (tối đa 5MB). Vui lòng chọn file nhỏ hơn!");
+                return "homePage/index";
+            }
+            if (filename != null && filename.toLowerCase().endsWith(".pdf")) {
+                model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderDefault");
+                model.addAttribute("fragmentContent", "homePage/fragments/becomeInstructorContent :: becomeInstructorContent");
+                model.addAttribute("instructorRequestDTO", instructorRequestDTO);
+                model.addAttribute("termsError", "Không hỗ trợ gửi file PDF. Vui lòng chọn file khác!");
+                return "homePage/index";
+            }
+            try {
+                String url = uploadFile.uploadFile(file, "raw");
+                instructorRequestDTO.setFileUrl(url);
+            } catch (Exception e) {
+                model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderDefault");
+                model.addAttribute("fragmentContent", "homePage/fragments/becomeInstructorContent :: becomeInstructorContent");
+                model.addAttribute("instructorRequestDTO", instructorRequestDTO);
+                model.addAttribute("termsError", "Lỗi upload file: " + e.getMessage());
+                return "homePage/index";
+            }
         }
         InstructorRequest request = InstructorRequestMapper.mapToEntity(instructorRequestDTO, user);
         instructorRequestService.save(request);

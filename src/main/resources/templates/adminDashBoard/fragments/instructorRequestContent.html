@@ -195,6 +195,11 @@
                     <span class="small">Personal Skills:</span>
                     <p class="text-dark mb-2" id="requestPersonalSkills">Loading...</p>
 
+                    <!-- File đính kèm -->
+                    <span class="small">File đính kèm:</span>
+                    <div class="mb-3" id="requestFileUrl">Loading...</div>
+                    <div id="docxPreviewModalContainer"></div>
+
                     <!-- Note (admin response) -->
                     <span class="small">Admin Response (Note):</span>
                     <p class="text-dark mb-2" id="requestNote">Loading...</p>
@@ -297,6 +302,20 @@
                             document.getElementById('requestStatus').textContent = data.status || 'PENDING';
                             document.getElementById('requestPersonalSkills').textContent = data.personalSkill || 'No personal skills provided.';
                             document.getElementById('requestNote').textContent = data.note || 'No admin response provided.';
+                            // Hiển thị fileUrl nếu có
+                            if (data.fileUrl) {
+                                const imgExts = ['.jpg', '.jpeg', '.png'];
+                                const lowerUrl = data.fileUrl.toLowerCase();
+                                if (imgExts.some(ext => lowerUrl.endsWith(ext))) {
+                                    document.getElementById('requestFileUrl').innerHTML = `<img src='${data.fileUrl}' alt='Ảnh đính kèm' style='max-width:150px;max-height:150px;display:block;margin-bottom:8px;border-radius:6px;border:1px solid #ccc;'/><a href='${data.fileUrl}' target='_blank'>Xem ảnh lớn</a>`;
+                                } else if (lowerUrl.endsWith('.docx')) {
+                                    document.getElementById('requestFileUrl').innerHTML = `<a class='btn btn-outline-primary btn-sm' href='https://docs.google.com/gview?url=${data.fileUrl}&embedded=true' target='_blank'>Xem file đính kèm</a>`;
+                                } else {
+                                    document.getElementById('requestFileUrl').innerHTML = `<a href="${data.fileUrl}" target="_blank">Xem file đính kèm</a>`;
+                                }
+                            } else {
+                                document.getElementById('requestFileUrl').innerHTML = '<span class="text-muted">Không có file đính kèm</span>';
+                            }
                             // Show/hide action buttons based on status
                             const actionButtons = document.getElementById('actionButtons');
                             if (data.status === null || data.status === 'PENDING') {

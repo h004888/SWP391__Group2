@@ -15,6 +15,7 @@ public class InstructorRequestMapper {
         entity.setPersonalSkill(dto.getPersonalSkill());
         entity.setDecisionDate(dto.getDecisionDate());
         entity.setUser(user);
+        entity.setFileUrl(dto.getFileUrl());
         return entity;
     }
 
@@ -26,6 +27,7 @@ public class InstructorRequestMapper {
         dto.setPersonalSkill(entity.getPersonalSkill());
         dto.setNote(entity.getNote());
         dto.setDecisionDate(entity.getDecisionDate());
+        dto.setFileUrl(entity.getFileUrl());
         if (entity.getUser() != null) {
             dto.setName(entity.getUser().getFullName());
             dto.setEmail(entity.getUser().getEmail());

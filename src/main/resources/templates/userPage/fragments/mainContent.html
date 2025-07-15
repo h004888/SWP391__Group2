@@ -1,4 +1,4 @@
-<main th:fragment="mainContent">
+<main th:fragment="mainContent" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
     <section class="pt-0 pt-lg-5">
         <div class="container">
             <!-- Title -->
@@ -218,7 +218,7 @@ Instructor END -->
 
     <!-- =======================
 Action box START -->
-    <section class="py-5 pt-lg-5">
+    <section class="py-5 pt-lg-5" sec:authorize="hasRole('USER')">
         <div class="container">
             <div class="row">
                 <div class="col-12 position-relative z-index-1">
@@ -266,7 +266,7 @@ Action box START -->
                             </div>
                             <!-- Button -->
                             <div class="col-md-6 col-lg-3 text-md-end">
-                                <a href="#" class="btn btn-white mb-0">Get Started Now!</a>
+                                <a th:href="@{/become-instructor}" class="btn btn-white mb-0">Get Started Now!</a>
                             </div>
                         </div> <!-- Row END -->
                     </div>

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.time.LocalDateTime;
+import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
@@ -33,4 +34,7 @@ public class InstructorRequestDTO {
     private String personalSkill;
 
     private String note;
+
+    private MultipartFile instructorFile;
+    private String fileUrl;
 } 
