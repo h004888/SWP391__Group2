@@ -1,0 +1,33 @@
+<div th:fragment="profileSidebar">
+    <div class="profile-sidebar-dark min-vh-100 h-100 px-0 sidebar-full-height" style="background:#111;">
+        <ul class="nav flex-column nav-pills nav-pills-dark gap-2 py-4 px-2">
+            <li class="nav-item"><a class="nav-link" th:href="@{/profile}"><i class="bi bi-person me-2"></i>Profile</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/learning/my-courses}"><i class="bi bi-journal-bookmark me-2"></i>My Courses</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/user/notifications}"><i class="bi bi-clock-history me-2"></i>Notification</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/profile/edit}"><i class="bi bi-pencil-square me-2"></i>Edit Profile</a></li>
+        </ul>
+    </div>
+</div>
+<style>
+    .profile-sidebar-dark {
+        background: #111;
+        color: #fff;
+    }
+    .profile-sidebar-dark .nav-link {
+        color: #fff;
+    }
+    .profile-sidebar-dark .nav-link.active {
+        background: #0d6efd;
+        color: #fff;
+    }
+    .profile-sidebar-dark .nav-link:hover {
+        background: #222;
+        color: #fff;
+    }
+    .sidebar-full-height {
+        min-height: 100vh;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+</style> 

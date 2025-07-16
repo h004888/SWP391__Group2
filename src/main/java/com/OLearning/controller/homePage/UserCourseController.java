@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.HashMap;
 
 import com.OLearning.dto.course.CourseViewDTO;
 import com.OLearning.dto.lessonCompletion.LessonCompletionDTO;
@@ -361,5 +363,85 @@ public class UserCourseController {
             // Nếu chưa đăng ký, redirect đến trang public
             return "redirect:/learning/course/" + courseId + "/public";
         }
+    }
+
+    @GetMapping("/my-courses")
+    public String showUserCourses(
+            Principal principal,
+            Model model,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String filter // thêm filter
+    ) {
+        if (principal == null) {
+            return "redirect:/login";
+        }
+        User currentUser = extractCurrentUser(principal);
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+        List<Course> allCourses = enrollmentService.getCoursesByUserId(currentUser.getUserId());
+        List<Course> filteredCourses = allCourses;
+        if (search != null && !search.isBlank()) {
+            filteredCourses = filteredCourses.stream()
+                .filter(c -> c.getTitle().toLowerCase().contains(search.toLowerCase()))
+                .toList();
+        }
+        // Tính progress cho tất cả course để filter
+        Map<Long, Integer> allProgressMap = new HashMap<>();
+        for (Course c : filteredCourses) {
+            Double progressObj = lessonCompletionService.getOverallProgressOfUser(currentUser.getUserId(), c.getCourseId());
+            int progress = progressObj != null ? progressObj.intValue() : 0;
+            allProgressMap.put(c.getCourseId(), progress);
+        }
+        // Lọc theo filter trạng thái hoàn thành
+        if ("completed".equals(filter)) {
+            filteredCourses = filteredCourses.stream()
+                .filter(c -> allProgressMap.getOrDefault(c.getCourseId(), 0) == 100)
+                .toList();
+        } else if ("incomplete".equals(filter)) {
+            filteredCourses = filteredCourses.stream()
+                .filter(c -> allProgressMap.getOrDefault(c.getCourseId(), 0) < 100)
+                .toList();
+        }
+        int totalCourses = filteredCourses.size();
+        int totalPages = (int) Math.ceil((double) totalCourses / size);
+        int fromIndex = Math.max(0, (page - 1) * size);
+        int toIndex = Math.min(fromIndex + size, totalCourses);
+        List<Course> pagedCourses = filteredCourses.subList(fromIndex, toIndex);
+        Map<Long, Integer> courseProgressMap = new HashMap<>();
+        Map<Long, Integer> totalLecturesMap = new HashMap<>();
+        Map<Long, Integer> completedLecturesMap = new HashMap<>();
+        for (Course c : pagedCourses) {
+            int progress = 0;
+            Double progressObj = lessonCompletionService.getOverallProgressOfUser(currentUser.getUserId(), c.getCourseId());
+            if (progressObj != null) progress = progressObj.intValue();
+            courseProgressMap.put(c.getCourseId(), progress);
+            int totalLectures = 0;
+            if (c.getListOfChapters() != null) {
+                for (Chapter chapter : c.getListOfChapters()) {
+                    if (chapter.getLessons() != null) {
+                        totalLectures += chapter.getLessons().size();
+                    }
+                }
+            }
+            totalLecturesMap.put(c.getCourseId(), totalLectures);
+            int completedLectures = lessonCompletionService.getNumberOfCompletedLessons(currentUser.getUserId(), c.getCourseId());
+            completedLecturesMap.put(c.getCourseId(), completedLectures);
+        }
+        model.addAttribute("courses", pagedCourses);
+        model.addAttribute("courseProgressMap", courseProgressMap);
+        model.addAttribute("totalLecturesMap", totalLecturesMap);
+        model.addAttribute("completedLecturesMap", completedLecturesMap);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("search", search);
+        model.addAttribute("filter", filter); // truyền filter vào model
+        model.addAttribute("user", currentUser);
+        long unreadCount = notificationService.countUnreadByUserId(currentUser.getUserId());
+        model.addAttribute("unreadCount", unreadCount);
+        model.addAttribute("fragmentContent", "homePage/fragments/myCourseContent :: myCourseContent");
+        return "homePage/index";
     }
 }
