@@ -100,7 +100,9 @@ public class UserCourseController {
                         .filter(progress -> !progress.getCourseId().equals(courseViewDTO.getCourseId()))
                         .collect(Collectors.toList()));
         model.addAttribute("lsInstructor", userService.getUsersByRole(2L));
-        model.addAttribute("totalEnrollments", courseViewDTO);
+        model.addAttribute("totalEnrollments",
+                enrollmentService.getTotalEnrollmentOfInstructor(userService.getUsersByRole(2L)));
+
         return "userPage/LearningDashboard";
     }
 

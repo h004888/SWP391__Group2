@@ -6,7 +6,9 @@ import org.springframework.stereotype.Component;
 
 import com.OLearning.entity.Quiz;
 import com.OLearning.service.course.CourseService;
+import com.OLearning.service.enrollment.EnrollmentService;
 import com.OLearning.service.quizQuestion.QuizQuestionService;
+import com.OLearning.service.user.UserService;
 
 @Component
 public class ServiceTestRunner implements CommandLineRunner {
@@ -17,6 +19,10 @@ public class ServiceTestRunner implements CommandLineRunner {
     private QuizQuestionService quizQuestionService;
     @Autowired
     private CourseService courseService;
+    @Autowired
+    private EnrollmentService enrollmentService;
+    @Autowired
+    private UserService userService;
 
     @Override
     public void run(String... args) throws Exception {
@@ -39,6 +45,9 @@ public class ServiceTestRunner implements CommandLineRunner {
         });
 
         System.out.println("Course Service Test:" + courseService.getCourseByUserId(16L).get(0).getTitle());
+
+        System.out.println(enrollmentService.getTotalEnrollmentOfInstructor(userService.getUsersByRole(2L)));
+                
 
     }
 

@@ -115,6 +115,11 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    public boolean existsById(Long id) {
+        return courseRepository.existsById(id);
+    }
+
+    @Override
     public CourseViewDTO getCourseById(Long id) {
         return courseRepository.findById(id)
                 .map(CourseMapper::toCourseViewDTO)

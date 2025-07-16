@@ -21,6 +21,8 @@ public interface CourseService {
 
         List<CourseViewDTO> getTopCourses();
 
+        boolean existsById(Long id);
+
         List<CourseViewDTO> getCoursesByCategoryId(Long categoryId);
 
         Page<CourseViewDTO> searchCoursesGrid(

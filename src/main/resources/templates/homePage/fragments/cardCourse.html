@@ -8,7 +8,8 @@
             <div class="col-sm-6 col-lg-4 col-xl-3" th:each="course : ${courses}">
                 <div class="card shadow h-100">
                     <!-- Image -->
-                    <img src="assets/images/courses/4by3/08.jpg" class="card-img-top" alt="course image">
+                    <img th:src="@{${course.courseImg} ? ${course.courseImg} : '/assets/images/courses/4by3/01.jpg'}"
+                         class="card-img-top" style="height: 250px; object-fit: contain;" alt="course image">
                     <!-- Card body -->
                     <div class="card-body pb-0">
                         <!-- Badge and favorite -->
@@ -35,6 +36,7 @@
                                 th:text="|${#numbers.formatDecimal(course.averageRating, 1, 'POINT', 1, 'POINT')}/5.0|">4.0/5.0</li>
                         </ul>
                     </div>
+
                     <!-- Card footer -->
                     <div class="card-footer pt-0 pb-3">
                         <hr>

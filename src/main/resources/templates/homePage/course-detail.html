@@ -26,9 +26,9 @@ Page intro START -->
 							Marketing</h6>
 						<!-- Title -->
 						<h1 th:text="${course.title}">The Complete Digital Marketing Course - 12 Courses in 1</h1>
-						<p th:utext="${course.description}">Satisfied conveying a dependent contented he gentleman
+						<!-- <p th:utext="${course.description}">Satisfied conveying a dependent contented he gentleman
 							agreeable do be. Warrant private blushes removed an in equally totally if. Delivered
-							dejection necessary objection do Mr prevailed. Mr feeling does chiefly cordial in do.</p>
+							dejection necessary objection do Mr prevailed. Mr feeling does chiefly cordial in do.</p> -->
 						<!-- Content -->
 						<ul class="list-inline mb-0">
 							<li class="list-inline-item h6 me-3 mb-1 mb-sm-0"><i
@@ -117,69 +117,8 @@ Page content START -->
 								<div class="tab-content pt-2" id="course-pills-tabContent">
 									<!-- Content START -->
 									<div class="tab-pane fade show active" id="course-pills-1" role="tabpanel"
-										aria-labelledby="course-pills-tab-1">
-										<!-- Course detail START -->
-										<h5 class="mb-3">Course Description</h5>
-										<p class="mb-3">Welcome to the <strong> Digital Marketing Ultimate Course Bundle
-												- 12 Courses in 1 (Over 36 hours of content)</strong></p>
-										<p class="mb-3">In this practical hands-on training, you’re going to learn to
-											become a digital marketing expert with this <strong> ultimate course bundle
-												that includes 12 digital marketing courses in 1!</strong></p>
-										<p class="mb-3">If you wish to find out the skills that should be covered in a
-											basic digital marketing course syllabus in India or anywhere around the
-											world, then reading this blog will help. Before we delve into the advanced
-											<strong><a href="#" class="text-reset text-decoration-underline">digital
-													marketing course</a></strong> syllabus, let’s look at the scope of
-											digital marketing and what the future holds.
-										</p>
-										<p class="mb-0">We focus a great deal on the understanding of behavioral
-											psychology and influence triggers which are crucial for becoming a well
-											rounded Digital Marketer. We understand that theory is important to build a
-											solid foundation, we understand that theory alone isn’t going to get the job
-											done so that’s why this course is packed with practical hands-on examples
-											that you can follow step by step.</p>
+										aria-labelledby="course-pills-tab-1" th:utext="${course.description}">
 
-										<!-- List content -->
-										<h5 class="mt-4">What you’ll learn</h5>
-										<ul class="list-group list-group-borderless mb-3">
-											<li class="list-group-item h6 fw-light d-flex mb-0"><i
-													class="fas fa-check-circle text-success me-2"></i>Digital marketing
-												course introduction</li>
-											<li class="list-group-item h6 fw-light d-flex mb-0"><i
-													class="fas fa-check-circle text-success me-2"></i>Customer Life
-												cycle</li>
-											<li class="list-group-item h6 fw-light d-flex mb-0"><i
-													class="fas fa-check-circle text-success me-2"></i>What is Search
-												engine optimization(SEO)</li>
-											<li class="list-group-item h6 fw-light d-flex mb-0"><i
-													class="fas fa-check-circle text-success me-2"></i>Facebook ADS</li>
-											<li class="list-group-item h6 fw-light d-flex mb-0"><i
-													class="fas fa-check-circle text-success me-2"></i>Facebook Messenger
-												Chatbot</li>
-											<li class="list-group-item h6 fw-light d-flex mb-0"><i
-													class="fas fa-check-circle text-success me-2"></i>Search engine
-												optimization tools</li>
-											<li class="list-group-item h6 fw-light d-flex mb-0"><i
-													class="fas fa-check-circle text-success me-2"></i>Why SEO</li>
-											<li class="list-group-item h6 fw-light d-flex mb-0"><i
-													class="fas fa-check-circle text-success me-2"></i>URL Structure</li>
-											<li class="list-group-item h6 fw-light d-flex mb-0"><i
-													class="fas fa-check-circle text-success me-2"></i>Featured Snippet
-											</li>
-											<li class="list-group-item h6 fw-light d-flex mb-0"><i
-													class="fas fa-check-circle text-success me-2"></i>SEO tips and
-												tricks</li>
-											<li class="list-group-item h6 fw-light d-flex mb-0"><i
-													class="fas fa-check-circle text-success me-2"></i>Google tag manager
-											</li>
-										</ul>
-
-										<p class="mb-0">As it so contrasted oh estimating instrument. Size like body
-											someone had. Are conduct viewing boy minutes warrant the expense? Tolerably
-											behavior may admit daughters offending her ask own. Praise effect wishes
-											change way and any wanted. Lively use looked latter regard had. Do he it
-											part more last in. </p>
-										<!-- Course detail END -->
 
 									</div>
 									<!-- Content END -->
@@ -219,7 +158,10 @@ Page content START -->
 																	class="position-relative d-flex align-items-center">
 																	<a href="#"
 																		class="btn btn-danger-soft btn-round btn-sm mb-0 stretched-link position-static">
-																		<i class="fas fa-play me-0"></i>
+																		<i th:if="${lesson.contentType == 'video'}"
+																			class="fas fa-play me-0"></i>
+																		<i th:if="${lesson.contentType != 'video'}"
+																			class="fas fa-question-circle me-0"></i>
 																	</a>
 																	<span
 																		class="d-inline-block text-truncate ms-2 mb-0 h6 fw-light w-100px w-sm-200px w-md-400px"
@@ -1025,21 +967,24 @@ Page content START -->
 							<div class="col-md-6 col-lg-12">
 								<!-- Video START -->
 								<div class="card shadow p-2 mb-4 z-index-9">
-									<div class="overflow-hidden rounded-3">
-										<img src="assets/images/courses/4by3/01.jpg" class="card-img"
-											alt="course image">
-										<!-- Overlay -->
-										<div class="bg-overlay bg-dark opacity-6"></div>
-										<div class="card-img-overlay d-flex align-items-start flex-column p-3">
-											<!-- Video button and link -->
-											<div class="m-auto">
-												<a href="https://www.youtube.com/embed/tXHviS-4ygo"
-													class="btn btn-lg text-danger btn-round btn-white-shadow mb-0"
-													data-glightbox="" data-gallery="course-video">
-													<i class="fas fa-play"></i>
-												</a>
-											</div>
-										</div>
+									<div class="video-player rounded-3">
+										<video controls crossorigin="anonymous" playsinline
+											poster="/assets/images/videos/poster.jpg">
+											<source
+												th:src="@{/api/video/stream/video/{videoURL}(videoURL=${course.videoUrlPreview})}"
+												size="360">
+											<source
+												th:src="@{/api/video/stream/video/{videoURL}(videoURL=${course.videoUrlPreview})}"
+												size="720">
+											<source
+												th:src="@{/api/video/stream/video/{videoURL}(videoURL=${course.videoUrlPreview})}"
+												size="1080">
+											<!-- Caption files -->
+											<track kind="captions" label="English" srclang="en"
+												src="/assets/images/videos/en.vtt" default>
+											<track kind="captions" label="French" srclang="fr"
+												src="/assets/images/videos/fr.vtt">
+										</video>
 									</div>
 
 									<!-- Card body -->
@@ -1222,8 +1167,13 @@ Listed courses START -->
 								<div class="card p-2 border">
 									<div class="rounded-top overflow-hidden">
 										<div class="card-overlay-hover">
-											<img src="assets/images/courses/4by3/17.jpg" class="card-img-top"
-												alt="course image">
+											<img th:if="${course.courseImg == null}"
+												src="/assets/images/courses/4by3/17.jpg"
+												style="height: 200px; width: 100%; object-fit: contain;"
+												class="card-img-top" alt="course image">
+											<img th:unless="${course.courseImg == null}" th:src="@{${course.courseImg}}"
+												class="card-img-top" alt="course image"
+												style="height: 200px; width: 100%; object-fit: contain;">
 										</div>
 										<!-- Hover element -->
 										<div class="card-img-overlay">

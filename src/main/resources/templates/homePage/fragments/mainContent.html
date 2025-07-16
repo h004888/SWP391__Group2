@@ -516,8 +516,7 @@ Trending courses START -->
                         <div th:each="course : ${topCourses}">
                             <div class="card action-trigger-hover border bg-transparent" style="height: 580px;">
                                 <!-- Image -->
-                                <img th:if="${course.courseImg != null}" th:src="${course.courseImg}"
-                                    src="assets/images/courses/4by3/14.jpg" class="card-img-top" alt="course image"
+                                <img th:src="@{${course.courseImg} ? ${course.courseImg} : '/assets/images/courses/4by3/01.jpg'}" class="card-img-top" alt="course image"
                                     style="height: 300px; object-fit: contain; background: #f8f9fa;">
                                 <!-- Ribbon -->
 

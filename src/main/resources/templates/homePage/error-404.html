@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<div th:replace="~{homePage/fragments/header :: header}"></div>
+
+<body>
+
+<!-- Header START -->
+<header  th:replace="~{homePage/fragments/navHeader :: navHeader}"></header>
+<!-- Header END -->
+
+<!-- **************** MAIN CONTENT START **************** -->
+<main>
+<section class="pt-5">
+	<div class="container">
+		<div class="row">
+			<div class="col-12 text-center">
+				<!-- Image -->
+				<img src="assets/images/element/error404-01.svg" class="h-200px h-md-400px mb-4" alt="">
+				<!-- Title -->
+				<h1 class="display-1 text-danger mb-0">404</h1>
+				<!-- Subtitle -->
+				<h2>Oh no, something went wrong!</h2>
+				<!-- info -->
+				<p class="mb-4">Either something went wrong or this page doesn't exist anymore.</p>
+				<!-- Button -->
+				<a th:href="@{/home}" class="btn btn-primary mb-0">Take me to Homepage</a>
+			</div>
+		</div>
+	</div>
+</section>
+</main>
+<!-- **************** MAIN CONTENT END **************** -->
+
+<!-- =======================
+Footer START -->
+<footer th:replace="~{homePage/fragments/footer :: footer}"></footer>
+<!-- =======================
+Footer END -->
+
+<!-- Back to top -->
+<div class="back-top"><i class="bi bi-arrow-up-short position-absolute top-50 start-50 translate-middle"></i></div>
+
+<!-- Bootstrap JS -->
+<script src="assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Template Functions -->
+<script src="assets/js/functions.js"></script>
+
+</body>
+
+<!-- Mirrored from stackbros.in/eduport/landing/error-404.html by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 06 Jun 2025 07:32:45 GMT -->
+</html>

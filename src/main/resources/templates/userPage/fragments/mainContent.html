@@ -167,7 +167,7 @@ Instructor START -->
                         data-items="4" data-items-lg="3" data-items-md="2" data-items-xs="1">
 
                         <!-- Card item START -->
-                        <div class="card bg-transparent" th:each="instructor : ${lsInstructor}">
+                        <div class="card bg-transparent" th:each="instructor,iterStat : ${lsInstructor}">
                             <div class="position-relative">
                                 <!-- Image -->
                                 <img th:src="${instructor.profilePicture != null} ? @{${instructor.profilePicture}} : @{/assets/images/instructor/02.jpg}"
@@ -177,7 +177,7 @@ Instructor START -->
                                     <div class="w-100 mt-auto text-end">
                                         <!-- Card category -->
                                         <a href="#" class="badge text-bg-info rounded-1"><i
-                                                class="fas fa-user-graduate me-2"></i>25</a>
+                                                class="fas fa-user-graduate me-2"></i><span th:text="${totalEnrollments[iterStat.index]}"></span></a>
                                         <a href="#" class="badge text-bg-orange rounded-1"><i
                                                 class="fas fa-clipboard-list me-2"></i>15</a>
                                     </div>
@@ -188,21 +188,8 @@ Instructor START -->
                                 <!-- Title -->
                                 <h5 class="card-title"><a href="#" th:text="${instructor.fullName}">Jacqueline
                                         Miller</a></h5>
-                                <p class="mb-2">Computer Teacher</p>
-                                <!-- Rating -->
-                                <ul class="list-inline hstack justify-content-center">
-                                    <li class="list-inline-item ms-2 h6 fw-light mb-0">4.5/5.0</li>
-                                    <li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i>
-                                    </li>
-                                    <li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i>
-                                    </li>
-                                    <li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i>
-                                    </li>
-                                    <li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i>
-                                    </li>
-                                    <li class="list-inline-item me-0 small"><i
-                                            class="fas fa-star-half-alt text-warning"></i></li>
-                                </ul>
+
+
                             </div>
                         </div>
                         <!-- Card item END -->

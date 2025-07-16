@@ -85,17 +85,9 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
     @Query(value = "UPDATE Enrollments SET Status = 'completed' WHERE Status = 'on going' AND UserID = :userId AND CourseID = :courseId", nativeQuery = true)
     int updateStatusCompleted(@Param("userId") Long userId, @Param("courseId") Long courseId);
 
-    @Query("""
-
-
-            SELECT
-
-                COUNT(*) AS TotalEnrollments
-            FROM
-                Courses c
-                INNER JOIN Enrollments e ON c.CourseID = e.CourseID
-            WHERE
-                c.InstructorID = :instructorId;
-            """)
+    @Query(value = "SELECT COUNT(*) AS TotalEnrollments " +
+            "FROM Courses c " +
+            "INNER JOIN Enrollments e ON c.CourseID = e.CourseID " +
+            "WHERE c.InstructorID = :instructorId", nativeQuery = true)
     Long countTotalEnrollmentByUserId(@Param("instructorId") Long instructorId);
 }

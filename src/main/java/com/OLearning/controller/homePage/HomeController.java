@@ -1,5 +1,6 @@
 package com.OLearning.controller.homePage;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -62,7 +63,13 @@ public class HomeController {
         }
 
         @GetMapping("/course-detail")
-        public String courseDetail(@RequestParam("id") Long id, Model model) {
+        public String courseDetail(@RequestParam("id") Long id, Model model ) {
+                boolean flag = courseService.existsById(id);
+                if (!flag) {
+                        model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderDefault");
+                        return "homePage/error-404";
+                }
+
                 CourseViewDTO course = courseService.getCourseById(id);
 
                 model.addAttribute("totalStudents", course.getEnrollments().size());
