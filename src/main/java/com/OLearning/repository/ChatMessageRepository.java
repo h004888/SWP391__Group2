@@ -17,4 +17,6 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
     List<ChatMessage> findByUserIdOrderByCreatedAtDesc(@Param("userId") Long userId);
     
     void deleteBySessionId(String sessionId);
+
+    List<ChatMessage> findBySessionIdAndUser_UserIdOrderByCreatedAtAsc(String sessionId, Long userId);
 } 

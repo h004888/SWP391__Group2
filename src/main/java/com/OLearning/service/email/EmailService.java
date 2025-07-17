@@ -21,7 +21,7 @@ public class EmailService {
     @Autowired
     private TemplateEngine templateEngine;
 
-    public void sendAccountStatusEmail(User user, boolean isLocked) throws MessagingException {
+    public void sendAccountStatusEmail(User user, boolean isLocked, String reason) throws MessagingException {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
@@ -32,6 +32,9 @@ public class EmailService {
         context.setVariable("user", user);
         context.setVariable("isLocked", isLocked);
         context.setVariable("supportEmail", "support@olearning.com");
+        if (reason != null && !reason.isBlank()) {
+            context.setVariable("blockReason", reason);
+        }
 
         // Render HTML template
         String htmlContent = templateEngine.process("email/account-status", context);

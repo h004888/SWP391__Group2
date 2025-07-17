@@ -11,4 +11,5 @@ public interface ChatService {
     List<ChatMessage> getChatHistory(String sessionId);
     List<ChatMessage> getUserChatHistory(Long userId);
     void clearChatHistory(String sessionId);
+    List<ChatMessage> getChatHistory(String sessionId, Long userId);
 } 
