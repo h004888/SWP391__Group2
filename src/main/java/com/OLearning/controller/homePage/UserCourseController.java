@@ -5,9 +5,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.ArrayList;
-import java.util.*;
 import java.util.stream.Collectors;
-
+import java.util.Map;
+import java.util.HashMap;
 import com.OLearning.dto.chapter.ChapterProgress;
 import com.OLearning.dto.course.CourseViewDTO;
 import com.OLearning.dto.lessonCompletion.LessonCompletionDTO;
@@ -215,8 +215,8 @@ public class UserCourseController {
         model.addAttribute("chapters", course.getListOfChapters());
 
         // Load comments for the specific lesson only (Rating = null)
+
         Course courseEntity = courseService.findCourseById(courseId);
-        // Since we only support lesson-specific comments now, load comments for current lesson
         List<CourseReview> parentComments = courseReviewRepository.findByLessonAndRatingIsNullAndParentReviewIsNull(currentLesson);
         List<CommentDTO> comments = new ArrayList<>();
 
@@ -243,7 +243,7 @@ public class UserCourseController {
 
     @GetMapping("course/{courseId}/lesson/{lessonId}")
     public String showUserLessonDetail(Principal principal, Model model, @PathVariable("lessonId") Long lessonId,
-            @PathVariable("courseId") Long courseId) {
+            @PathVariable("courseId") Long courseId, @RequestParam(value = "commentId", required = false) Long commentId) {
         User user = extractCurrentUser(principal);
         if (user == null) {
             return "redirect:/login";
@@ -267,10 +267,10 @@ public class UserCourseController {
 
         Lesson nextAvailableLesson = lessonService.getNextLessonAfterCompleted(user.getUserId(), courseId).orElse(null);
 
-        // Chỉ cho phép truy cập nếu bài đã hoàn thành hoặc là bài tiếp theo có thể học
         boolean canAccess = isInstructor ||
                 completedLessonIds.contains(lessonId) ||
-                (nextAvailableLesson != null && nextAvailableLesson.getLessonId().equals(lessonId));
+                (nextAvailableLesson != null && nextAvailableLesson.getLessonId().equals(lessonId)) ||
+                commentId != null;
 
         if (!canAccess) {
             return "redirect:/learning/course/view?courseId=" + courseId;
@@ -279,10 +279,13 @@ public class UserCourseController {
         Lesson nextLesson = lessonService.getNextLesson(courseId, lessonId);
         CourseViewDTO courseView = courseService.getCourseById(courseId);
 
-        // Xác định các bài có thể truy cập
+
         Set<Long> accessibleLessonIds = new HashSet<>(completedLessonIds);
         if (nextAvailableLesson != null) {
             accessibleLessonIds.add(nextAvailableLesson.getLessonId());
+        }
+        if (commentId != null) {
+            accessibleLessonIds.add(lessonId);
         }
         if ("quiz".equalsIgnoreCase(currentLesson.getContentType())) {
             Quiz quiz = quizTestService.getQuizByLessonId(currentLesson.getLessonId());
@@ -322,14 +325,15 @@ public class UserCourseController {
         // QUAN TRỌNG: currentLessonId bây giờ là bài đang được xem (lessonId từ URL)
         model.addAttribute("lessonVideoURL", currentLesson.getVideo().getVideoUrl());
         model.addAttribute("currentLessonId", lessonId);
+        model.addAttribute("currentLessonId", lessonId);
         model.addAttribute("currentLesson", currentLesson);
         model.addAttribute("nextLesson", nextLesson);
         model.addAttribute("course", courseView);
         model.addAttribute("chapters", courseView.getListOfChapters());
 
         // Load comments for the specific lesson only (Rating = null)
+
         Course courseEntity = courseService.findCourseById(courseId);
-        // Since we only support lesson-specific comments now, load comments for current lesson
         List<CourseReview> parentComments = courseReviewRepository.findByLessonAndRatingIsNullAndParentReviewIsNull(currentLesson);
         List<CommentDTO> comments = new ArrayList<>();
 
@@ -365,13 +369,12 @@ public class UserCourseController {
             return "redirect:/learning";
         }
 
-        // Since we only support lesson-specific comments now, no comments to load for course-level
         List<CommentDTO> comments = new ArrayList<>();
         model.addAttribute("comments", comments);
         model.addAttribute("course", course);
         model.addAttribute("user", currentUser);
-        model.addAttribute("currentLesson", null); // Đảm bảo fragment nhận biết là trang public
-        // Add unread notification count if user is logged in
+        model.addAttribute("currentLesson", null);
+
         if (currentUser != null) {
             long unreadCount = notificationService.countUnreadByUserId(currentUser.getUserId());
             model.addAttribute("unreadCount", unreadCount);
@@ -402,4 +405,105 @@ public class UserCourseController {
 //            return "redirect:/learning/course/" + courseId + "/public";
 //        }
 //    }
+    @GetMapping("/course/feedback")
+    public String showCourseView(Principal principal, Model model, @RequestParam("courseId") Long courseId) {
+        User currentUser = null;
+        if (principal != null) {
+            currentUser = extractCurrentUser(principal);
+        }
+
+
+        boolean isEnrolled = false;
+        if (currentUser != null) {
+            isEnrolled = enrollmentService.hasEnrolled(currentUser.getUserId(), courseId);
+        }
+
+        if (isEnrolled) {
+
+            return "redirect:/learning/course/" + courseId + "/detail";
+        } else {
+
+            return "redirect:/learning/course/" + courseId + "/public";
+        }
+    }
+
+    @GetMapping("/my-courses")
+    public String showUserCourses(
+            Principal principal,
+            Model model,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String filter
+    ) {
+        if (principal == null) {
+            return "redirect:/login";
+        }
+        User currentUser = extractCurrentUser(principal);
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+        List<Course> allCourses = enrollmentService.getCoursesByUserId(currentUser.getUserId());
+        List<Course> filteredCourses = allCourses;
+        if (search != null && !search.isBlank()) {
+            filteredCourses = filteredCourses.stream()
+                .filter(c -> c.getTitle().toLowerCase().contains(search.toLowerCase()))
+                .toList();
+        }
+        // Tính progress cho tất cả course để filter
+        Map<Long, Integer> allProgressMap = new HashMap<>();
+        for (Course c : filteredCourses) {
+            Double progressObj = lessonCompletionService.getOverallProgressOfUser(currentUser.getUserId(), c.getCourseId());
+            int progress = progressObj != null ? progressObj.intValue() : 0;
+            allProgressMap.put(c.getCourseId(), progress);
+        }
+
+        if ("completed".equals(filter)) {
+            filteredCourses = filteredCourses.stream()
+                .filter(c -> allProgressMap.getOrDefault(c.getCourseId(), 0) == 100)
+                .toList();
+        } else if ("incomplete".equals(filter)) {
+            filteredCourses = filteredCourses.stream()
+                .filter(c -> allProgressMap.getOrDefault(c.getCourseId(), 0) < 100)
+                .toList();
+        }
+        int totalCourses = filteredCourses.size();
+        int totalPages = (int) Math.ceil((double) totalCourses / size);
+        int fromIndex = Math.max(0, (page - 1) * size);
+        int toIndex = Math.min(fromIndex + size, totalCourses);
+        List<Course> pagedCourses = filteredCourses.subList(fromIndex, toIndex);
+        Map<Long, Integer> courseProgressMap = new HashMap<>();
+        Map<Long, Integer> totalLecturesMap = new HashMap<>();
+        Map<Long, Integer> completedLecturesMap = new HashMap<>();
+        for (Course c : pagedCourses) {
+            int progress = 0;
+            Double progressObj = lessonCompletionService.getOverallProgressOfUser(currentUser.getUserId(), c.getCourseId());
+            if (progressObj != null) progress = progressObj.intValue();
+            courseProgressMap.put(c.getCourseId(), progress);
+            int totalLectures = 0;
+            if (c.getListOfChapters() != null) {
+                for (Chapter chapter : c.getListOfChapters()) {
+                    if (chapter.getLessons() != null) {
+                        totalLectures += chapter.getLessons().size();
+                    }
+                }
+            }
+            totalLecturesMap.put(c.getCourseId(), totalLectures);
+            int completedLectures = lessonCompletionService.getNumberOfCompletedLessons(currentUser.getUserId(), c.getCourseId());
+            completedLecturesMap.put(c.getCourseId(), completedLectures);
+        }
+        model.addAttribute("courses", pagedCourses);
+        model.addAttribute("courseProgressMap", courseProgressMap);
+        model.addAttribute("totalLecturesMap", totalLecturesMap);
+        model.addAttribute("completedLecturesMap", completedLecturesMap);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("search", search);
+        model.addAttribute("filter", filter); // truyền filter vào model
+        model.addAttribute("user", currentUser);
+        long unreadCount = notificationService.countUnreadByUserId(currentUser.getUserId());
+        model.addAttribute("unreadCount", unreadCount);
+        model.addAttribute("fragmentContent", "homePage/fragments/myCourseContent :: myCourseContent");
+        return "homePage/index";
+    }
 }

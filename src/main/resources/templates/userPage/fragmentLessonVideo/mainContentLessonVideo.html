@@ -1,4 +1,8 @@
 <main th:fragment="mainContentLessonVideo">
+    <!-- Hidden inputs for JavaScript -->
+    <input type="hidden" name="courseId" th:value="${course.courseId}" />
+    <input type="hidden" name="lessonId" th:value="${currentLesson.lessonId}" />
+    
     <!-- =======================
     Page banner video START -->
 
@@ -80,7 +84,12 @@
                                         <!-- Comment START -->
                                         <div class="row mb-4" th:if="${currentLesson != null and course != null}">
                                             <div class="col-12">
-                                                <div th:replace="userPage/fragmentLessonVideo/commentLessonVideoFragment :: commentLessonVideoFragment(comments=${comments}, currentLesson=${currentLesson}, user=${user})"></div>
+                                                <!-- Message display area -->
+                                                <div id="commentMessage"></div>
+                                                <!-- Comments list container -->
+                                                <div id="commentsList">
+                                                    <div th:replace="userPage/fragmentLessonVideo/commentLessonVideoFragment :: commentLessonVideoFragment(comments=${comments}, currentLesson=${currentLesson}, user=${user})"></div>
+                                                </div>
                                             </div>
                                         </div>
                                         <!-- Comment END -->
@@ -274,6 +283,9 @@
 
 <!-- JavaScript for comment functionality -->
 <script th:inline="javascript">
+    // Set current user ID for comment functionality
+    window.currentUserId = /*[[${user.userId}]]*/ null;
+    
     // Load comments when page loads
     document.addEventListener('DOMContentLoaded', function() {
         const courseId = document.querySelector('input[name="courseId"]').value;
@@ -290,6 +302,9 @@
         
         // Load comments for this specific lesson
         loadComments(courseId, lessonId);
+        
+        // Add event listeners for initial elements
+        addCommentEventListeners();
     });
 
     // Load comments function - chỉ theo lesson
@@ -305,7 +320,13 @@
             .then(comments => {
                 console.log('Comments loaded:', comments);
                 const commentsList = document.getElementById('commentsList');
+                // Clear existing content and add new comments
+                commentsList.innerHTML = '';
                 commentsList.innerHTML = renderComments(comments);
+                
+                // Add event listeners for newly created elements
+                addCommentEventListeners();
+                
                 // Scroll tới cuối danh sách comment để thấy reply mới
                 commentsList.scrollIntoView({ behavior: 'smooth', block: 'end' });
                 // --- Scroll to comment if commentId param exists ---
@@ -338,12 +359,29 @@
 
     // Render comments HTML
     function renderComments(comments) {
+        const courseId = document.querySelector('input[name="courseId"]').value;
+        const lessonId = document.querySelector('input[name="lessonId"]').value;
+        const currentUserId = window.currentUserId;
+
+        let html = `
+            <!-- Form bình luận mới lên đầu -->
+            <form id="commentForm" action="/api/course/${courseId}/comment" method="post" class="mb-4">
+                <input type="hidden" name="courseId" value="${courseId}" />
+                <input type="hidden" name="lessonId" value="${lessonId}" />
+                <div class="input-group">
+                    <input type="text" name="comment" class="form-control" placeholder="Nhập bình luận..." required />
+                    <button class="btn btn-success" type="submit">Bình luận</button>
+                </div>
+            </form>
+        `;
+
         if (!comments || comments.length === 0) {
-            return '<p class="text-muted">No comments yet. Be the first to comment!</p>';
+            html += '<p class="text-muted">No comments yet. Be the first to comment!</p>';
+            return html;
         }
 
-        return comments.map(comment => `
-            <div class="border p-2 p-sm-4 rounded-3 mb-4">
+        html += comments.map(comment => `
+            <div class="border p-2 p-sm-4 rounded-3 mb-4" id="comment-${comment.reviewId}">
                 <ul class="list-unstyled mb-0">
                     <li class="comment-item">
                         <div class="d-flex mb-3">
@@ -366,27 +404,39 @@
                                 </div>
                                 <ul class="nav nav-divider py-2 small">
                                     <li class="nav-item">
-                                        <a class="text-primary-hover" href="#" onclick="replyToComment(${comment.reviewId})">Reply</a>
+                                        <a class="text-primary-hover reply-link" href="#" data-comment-id="${comment.reviewId}" data-reply-form-id="reply-form-${comment.reviewId}">Reply</a>
                                     </li>
-                                    ${comment.user && comment.user.userId === window.currentUserId ? `
+                                    ${comment.user && comment.user.userId === currentUserId ? `
                                         <li class="nav-item">
-                                            <a class="text-primary-hover" href="#" onclick="editComment(${comment.reviewId})">Edit</a>
+                                            <a class="text-primary-hover edit-link" href="#" data-comment-id="${comment.reviewId}">Edit</a>
                                         </li>
                                         <li class="nav-item">
-                                            <a class="text-danger-hover" href="#" onclick="deleteComment(${comment.reviewId})">Delete</a>
+                                            <a class="text-danger-hover delete-link" href="#" data-comment-id="${comment.reviewId}">Delete</a>
                                         </li>
                                     ` : `
                                         <li class="nav-item">
-                                            <a class="text-warning-hover" href="#" onclick="reportComment(${comment.reviewId})">Report</a>
+                                            <a class="text-warning-hover report-link" href="#" data-comment-id="${comment.reviewId}">Report</a>
                                         </li>
                                     `}
                                 </ul>
                             </div>
                         </div>
+                        
+                        <!-- Form sửa bình luận ẩn -->
+                        <form action="/api/course/${courseId}/comment/${comment.reviewId}/edit" method="post" class="edit-form editCommentForm ms-5 mt-2 d-none" id="edit-form-${comment.reviewId}">
+                            <input type="hidden" name="courseId" value="${courseId}" />
+                            <input type="hidden" name="lessonId" value="${lessonId}" />
+                            <div class="input-group">
+                                <input type="text" name="comment" class="form-control form-control-sm" value="${comment.comment}" required />
+                                <button class="btn btn-success btn-sm" type="submit">Lưu</button>
+                                <button class="btn btn-outline-secondary btn-sm cancel-edit" type="button">Hủy</button>
+                            </div>
+                        </form>
+                        
                         ${comment.children && comment.children.length > 0 ? `
                             <ul class="list-unstyled ms-4">
                                 ${comment.children.map(reply => `
-                                    <li class="comment-item">
+                                    <li class="comment-item" id="comment-${reply.reviewId}">
                                         <div class="d-flex">
                                             <div class="avatar avatar-xs flex-shrink-0">
                                                 <a href="#"><img class="avatar-img rounded-circle"
@@ -406,29 +456,54 @@
                                                     </div>
                                                 </div>
                                                 <ul class="nav nav-divider py-2 small">
-                                                    ${reply.user && reply.user.userId === window.currentUserId ? `
+                                                    ${reply.user && reply.user.userId === currentUserId ? `
                                                         <li class="nav-item">
-                                                            <a class="text-primary-hover" href="#" onclick="editReply(${reply.reviewId})">Edit</a>
+                                                            <a class="text-primary-hover edit-link" href="#" data-comment-id="${reply.reviewId}">Edit</a>
                                                         </li>
                                                         <li class="nav-item">
-                                                            <a class="text-danger-hover" href="#" onclick="deleteComment(${reply.reviewId})">Delete</a>
+                                                            <a class="text-danger-hover delete-link" href="#" data-comment-id="${reply.reviewId}">Delete</a>
                                                         </li>
                                                     ` : `
                                                         <li class="nav-item">
-                                                            <a class="text-warning-hover" href="#" onclick="reportComment(${reply.reviewId})">Report</a>
+                                                            <a class="text-warning-hover report-link" href="#" data-comment-id="${reply.reviewId}">Report</a>
                                                         </li>
                                                     `}
                                                 </ul>
                                             </div>
                                         </div>
+                                        
+                                        <!-- Form sửa reply ẩn -->
+                                        <form action="/api/course/${courseId}/comment/${reply.reviewId}/edit" method="post" class="edit-form editCommentForm ms-5 mt-2 d-none" id="edit-form-${reply.reviewId}">
+                                            <input type="hidden" name="courseId" value="${courseId}" />
+                                            <input type="hidden" name="lessonId" value="${lessonId}" />
+                                            <div class="input-group">
+                                                <input type="text" name="comment" class="form-control form-control-sm" value="${reply.comment}" required />
+                                                <button class="btn btn-success btn-sm" type="submit">Lưu</button>
+                                                <button class="btn btn-outline-secondary btn-sm cancel-edit" type="button">Hủy</button>
+                                            </div>
+                                        </form>
                                     </li>
                                 `).join('')}
                             </ul>
                         ` : ''}
+                        
+                        <!-- Form trả lời ẩn cho comment gốc -->
+                        <form class="reply-form replyCommentForm ms-5 mt-2 d-none" id="reply-form-${comment.reviewId}">
+                            <input type="hidden" name="lessonId" value="${lessonId}" />
+                            <input type="hidden" name="parentId" value="${comment.reviewId}" />
+                            <input type="hidden" name="replyToUserName" value="${comment.user ? comment.user.fullName : 'Unknown User'}" />
+                            <input type="hidden" name="courseId" value="${courseId}" />
+                            <div class="input-group">
+                                <input type="text" name="comment" class="form-control form-control-sm" placeholder="Nhập trả lời..." required />
+                                <button class="btn btn-primary btn-sm" type="submit">Gửi</button>
+                            </div>
+                        </form>
                     </li>
                 </ul>
             </div>
         `).join('');
+        
+        return html;
     }
 
     // Generate star rating HTML
@@ -444,225 +519,256 @@
         return stars.join('');
     }
 
-    // Add comment
-    document.addEventListener('submit', function(e) {
-        if (e.target && e.target.id === 'commentForm') {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const comment = formData.get('comment');
-            const courseId = formData.get('courseId');
-            const lessonId = formData.get('lessonId');
-            
-            console.log('Submitting comment:', { comment, courseId, lessonId });
-            
-            // Validate lessonId is present - bắt buộc
-            if (!lessonId) {
-                showMessage('Lỗi: Không tìm thấy thông tin bài học. Comment phải thuộc về một bài học cụ thể.', 'error');
-                return;
-            }
-            
-            fetch(`/api/course/${courseId}/comment`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    comment: comment,
-                    courseId: courseId,
-                    lessonId: parseInt(lessonId) // lessonId bắt buộc
+
+
+
+
+
+
+    // Add event listeners for comment elements
+    function addCommentEventListeners() {
+        // Comment form
+        const commentForm = document.getElementById('commentForm');
+        if (commentForm) {
+            commentForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const comment = formData.get('comment');
+                const courseId = formData.get('courseId');
+                const lessonId = formData.get('lessonId');
+                
+                console.log('Submitting comment:', { comment, courseId, lessonId });
+                
+                // Validate lessonId is present - bắt buộc
+                if (!lessonId) {
+                    showMessage('Lỗi: Không tìm thấy thông tin bài học. Comment phải thuộc về một bài học cụ thể.', 'error');
+                    return;
+                }
+                
+                fetch(`/api/course/${courseId}/comment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        comment: comment,
+                        courseId: courseId,
+                        lessonId: parseInt(lessonId) // lessonId bắt buộc
+                    })
                 })
-            })
-            .then(response => {
-                console.log('Comment submit response status:', response.status);
-                return response.json();
-            })
-            .then(data => {
-                console.log('Comment submit response:', data);
-                if (data.success) {
-                    showMessage('Thao tác thành công!', 'success');
-                    e.target.reset && e.target.reset();
-                    loadComments(courseId, lessonId);
-                } else {
-                    showMessage(data.error || 'Có lỗi xảy ra', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error submitting comment:', error);
-                showMessage('Error posting comment', 'error');
-            });
-        }
-    });
-
-    // Reply to comment
-    function replyToComment(commentId) {
-        const replyForm = document.getElementById('replyForm' + commentId);
-        replyForm.style.display = 'block';
-    }
-
-    function cancelReply(commentId) {
-        const replyForm = document.getElementById('replyForm' + commentId);
-        replyForm.style.display = 'none';
-        replyForm.querySelector('textarea').value = '';
-    }
-
-    // Edit comment
-    function editComment(commentId) {
-        const editForm = document.getElementById('editForm' + commentId);
-        editForm.style.display = 'block';
-    }
-
-    function cancelEdit(commentId) {
-        const editForm = document.getElementById('editForm' + commentId);
-        editForm.style.display = 'none';
-    }
-
-    // Delete comment
-    function deleteComment(commentId) {
-        if (confirm('Are you sure you want to delete this comment?')) {
-            const courseId = document.querySelector('input[name="courseId"]').value;
-            const lessonId = document.querySelector('input[name="lessonId"]').value;
-            
-            fetch(`/api/course/${courseId}/comment/${commentId}/delete`, {
-                method: 'DELETE'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showMessage('Thao tác thành công!', 'success');
-                    loadComments(courseId, lessonId);
-                } else {
-                    showMessage(data.error || 'Error deleting comment', 'error');
-                }
-            })
-            .catch(error => {
-                showMessage('Error deleting comment', 'error');
-            });
-        }
-    }
-
-    // Report comment
-    function reportComment(commentId) {
-        const reason = prompt('Please provide a reason for reporting this comment:');
-        if (reason && reason.trim()) {
-            const courseId = document.querySelector('input[name="courseId"]').value;
-            
-            fetch(`/api/course/${courseId}/comment/${commentId}/report`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    reason: reason.trim()
+                .then(response => {
+                    console.log('Comment submit response status:', response.status);
+                    return response.json();
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showMessage('Thao tác thành công!', 'success');
-                } else {
-                    showMessage(data.error || 'Error reporting comment', 'error');
-                }
-            })
-            .catch(error => {
-                showMessage('Error reporting comment', 'error');
+                .then(data => {
+                    console.log('Comment submit response:', data);
+                    if (data.success) {
+                        showMessage('Thao tác thành công!', 'success');
+                        this.reset();
+                        loadComments(courseId, lessonId);
+                    } else {
+                        showMessage(data.error || 'Có lỗi xảy ra', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error submitting comment:', error);
+                    showMessage('Error posting comment', 'error');
+                });
             });
         }
+
+        // Reply links
+        document.querySelectorAll('.reply-link').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                var formId = this.getAttribute('data-reply-form-id');
+                var form = document.getElementById(formId);
+                if (form) {
+                    form.classList.toggle('d-none');
+                    form.querySelector('input[name="comment"]').focus();
+                }
+            });
+        });
+
+        // Edit links
+        document.querySelectorAll('.edit-link').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                var commentId = this.getAttribute('data-comment-id');
+                var form = document.getElementById('edit-form-' + commentId);
+                if (form) {
+                    form.classList.toggle('d-none');
+                    form.querySelector('input[name="comment"]').focus();
+                }
+            });
+        });
+
+        // Cancel edit buttons
+        document.querySelectorAll('.cancel-edit').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                this.closest('.edit-form').classList.add('d-none');
+            });
+        });
+
+        // Delete links
+        document.querySelectorAll('.delete-link').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (confirm('Bạn có chắc muốn xóa bình luận này?')) {
+                    var commentId = this.getAttribute('data-comment-id');
+                    var courseId = document.querySelector('input[name="courseId"]').value;
+                    var lessonId = document.querySelector('input[name="lessonId"]').value;
+                    
+                    fetch(`/api/course/${courseId}/comment/${commentId}/delete`, { method: 'DELETE' })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                showMessage('Thao tác thành công!', 'success');
+                                loadComments(courseId, lessonId);
+                            } else {
+                                showMessage(data.error || 'Error deleting comment', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            showMessage('Error deleting comment', 'error');
+                        });
+                }
+            });
+        });
+
+        // Report links
+        document.querySelectorAll('.report-link').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                var commentId = this.getAttribute('data-comment-id');
+                var reason = prompt('Please provide a reason for reporting this comment:');
+                if (reason && reason.trim()) {
+                    var courseId = document.querySelector('input[name="courseId"]').value;
+                    
+                    fetch(`/api/course/${courseId}/comment/${commentId}/report`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            reason: reason.trim()
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showMessage('Thao tác thành công!', 'success');
+                        } else {
+                            showMessage(data.error || 'Error reporting comment', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        showMessage('Error reporting comment', 'error');
+                    });
+                }
+            });
+        });
+
+        // Reply forms
+        document.querySelectorAll('.replyCommentForm').forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const comment = this.querySelector('input[name="comment"]').value;
+                const courseId = this.querySelector('input[name="courseId"]').value;
+                const parentId = this.querySelector('input[name="parentId"]').value;
+                const lessonId = this.querySelector('input[name="lessonId"]').value;
+                const replyToUserNameInput = this.querySelector('input[name="replyToUserName"]');
+                const replyToUserName = replyToUserNameInput ? replyToUserNameInput.value : null;
+
+                fetch(`/api/course/${courseId}/comment/reply`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        comment: comment,
+                        courseId: courseId,
+                        parentId: parentId,
+                        lessonId: lessonId ? parseInt(lessonId) : null,
+                        replyToUserName: replyToUserName
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('Thao tác thành công!', 'success');
+                        // Ẩn form trả lời và reset input
+                        this.classList.add('d-none');
+                        // Reset input
+                        const input = this.querySelector('input[name="comment"]');
+                        if (input) input.value = '';
+                        this.reset && this.reset();
+                        // Gọi lại loadComments để cập nhật danh sách
+                        loadComments(courseId, lessonId);
+                    } else {
+                        showMessage(data.error || 'Error posting reply', 'error');
+                    }
+                })
+                .catch(error => {
+                    showMessage('Error posting reply', 'error');
+                });
+            });
+        });
+
+        // Edit forms
+        document.querySelectorAll('.editCommentForm').forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const comment = formData.get('comment');
+                const courseId = formData.get('courseId');
+                const lessonId = formData.get('lessonId');
+                // Lấy commentId từ action URL
+                const action = this.getAttribute('action') || this.action;
+                const match = action.match(/comment\/(\d+)\/edit/);
+                const commentId = match ? match[1] : null;
+                if (!commentId) {
+                    showMessage('Không xác định được comment cần sửa!', 'error');
+                    return;
+                }
+                fetch(`/api/course/${courseId}/comment/${commentId}/edit`, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('Thao tác thành công!', 'success');
+                        this.classList.add('d-none');
+                        loadComments(courseId, lessonId);
+                    } else {
+                        showMessage(data.error || 'Có lỗi xảy ra', 'error');
+                    }
+                })
+                .catch(error => {
+                    showMessage('Error updating comment', 'error');
+                });
+            });
+        });
     }
-
-    // Handle reply form submission
-    document.addEventListener('submit', function(e) {
-        if (e.target.classList.contains('replyCommentForm')) {
-            e.preventDefault();
-            // Lấy giá trị trực tiếp từ input, không dùng FormData
-            const comment = e.target.querySelector('input[name="comment"]').value;
-            const courseId = e.target.querySelector('input[name="courseId"]') ? e.target.querySelector('input[name="courseId"]').value : document.querySelector('input[name="courseId"]').value;
-            const parentId = e.target.querySelector('input[name="parentId"]').value;
-            const lessonId = e.target.querySelector('input[name="lessonId"]').value;
-            const replyToUserNameInput = e.target.querySelector('input[name="replyToUserName"]');
-            const replyToUserName = replyToUserNameInput ? replyToUserNameInput.value : null;
-
-            fetch(`/api/course/${courseId}/comment/reply`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    comment: comment,
-                    courseId: courseId,
-                    parentId: parentId,
-                    lessonId: lessonId ? parseInt(lessonId) : null,
-                    replyToUserName: replyToUserName
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showMessage('Thao tác thành công!', 'success');
-                    // Ẩn form trả lời và reset input
-                    e.target.classList.add('d-none');
-                    // Reset input
-                    const input = e.target.querySelector('input[name="comment"]');
-                    if (input) input.value = '';
-                    e.target.reset && e.target.reset();
-                    // Gọi lại loadComments để cập nhật danh sách
-                    loadComments(courseId, lessonId);
-                } else {
-                    showMessage(data.error || 'Error posting reply', 'error');
-                }
-            })
-            .catch(error => {
-                showMessage('Error posting reply', 'error');
-            });
-        }
-    });
-
-    // Handle edit form submission
-    document.addEventListener('submit', function(e) {
-        if (e.target.classList.contains('editCommentForm')) {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const comment = formData.get('comment');
-            const courseId = formData.get('courseId');
-            const commentId = e.target.dataset.commentId;
-            const lessonId = document.querySelector('input[name="lessonId"]').value;
-            
-            fetch(`/api/course/${courseId}/comment/${commentId}/edit`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    comment: comment,
-                    courseId: courseId,
-                    lessonId: lessonId ? parseInt(lessonId) : null
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showMessage('Thao tác thành công!', 'success');
-                    loadComments(courseId, lessonId);
-                } else {
-                    showMessage(data.error || 'Error updating comment', 'error');
-                }
-            })
-            .catch(error => {
-                showMessage('Error updating comment', 'error');
-            });
-        }
-    });
 
     // Show message function
     function showMessage(message, type) {
         const messageDiv = document.getElementById('commentMessage');
-        messageDiv.innerHTML = `<div class="alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show" role="alert">
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>`;
-        
-        // Auto hide after 5 seconds
-        setTimeout(() => {
-            messageDiv.innerHTML = '';
-        }, 5000);
+        if (messageDiv) {
+            messageDiv.innerHTML = `<div class="alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>`;
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                messageDiv.innerHTML = '';
+            }, 5000);
+        } else {
+            // Fallback: use alert if message div doesn't exist
+            alert(message);
+        }
     }
 </script>

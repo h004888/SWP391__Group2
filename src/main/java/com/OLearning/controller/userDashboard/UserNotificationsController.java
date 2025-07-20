@@ -32,15 +32,18 @@ public class UserNotificationsController {
     @GetMapping
     public String viewNotifications(Authentication authentication, Model model,
                                    @RequestParam(value = "page", defaultValue = "0") int page,
-                                   @RequestParam(value = "size", defaultValue = "10") int size,
+                                   @RequestParam(value = "size", defaultValue = "5") int size,
                                    @RequestParam(value = "type", required = false) List<String> types,
                                    @RequestParam(value = "status", required = false) String status,
                                    @RequestParam(value = "search", required = false) String search) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
         Pageable pageable = PageRequest.of(page, size);
-        if (types == null || types.isEmpty()) {
-            types = List.of("ENROLLMENT", "COURSE_COMPLETION", "QUIZ_RESULT", "CERTIFICATE", "PAYMENT_SUCCESS", "PAYMENT_FAILED", "COMMENT", "COMMENT_HIDDEN","INSTRUCTOR_REQUEST");
+        if (types == null || types.isEmpty() || (types.size() == 1 && (types.get(0) == null || types.get(0).isBlank()))) {
+            types = List.of("ENROLLMENT", "COURSE_COMPLETION", "QUIZ_RESULT", "CERTIFICATE", "PAYMENT_SUCCESS", "PAYMENT_FAILED", "COMMENT", "COMMENT_HIDDEN");
+        }
+        if (status != null && status.isBlank()) {
+            status = null;
         }
         Page<NotificationDTO> notificationPage;
         if (search != null && !search.isBlank()) {
@@ -58,7 +61,6 @@ public class UserNotificationsController {
         long unreadCount = notificationService.countUnreadByUserId(userId);
         model.addAttribute("unreadCount", unreadCount);
         model.addAttribute("user", userDetails.getUser());
-        // --- Thêm map notificationId -> lessonId cho notification comment ---
         java.util.Map<Long, Long> lessonIdMap = new java.util.HashMap<>();
         for (var n : notificationPage.getContent()) {
             if ("COMMENT".equals(n.getType()) && n.getCommentId() != null) {
@@ -71,6 +73,7 @@ public class UserNotificationsController {
         model.addAttribute("lessonIdMap", lessonIdMap);
         model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderCategory");
         model.addAttribute("fragmentContent", "homePage/fragments/notificationsContent :: notificationsContent");
+        model.addAttribute("isSearch", search != null && !search.isBlank());
         return "homePage/index";
     }
 
@@ -105,7 +108,6 @@ public class UserNotificationsController {
             Long userId = userDetails.getUserId();
             var notificationOpt = notificationService.findById(id);
             if (notificationOpt.isPresent() && notificationOpt.get().getUser().getUserId().equals(userId)) {
-                // Mark as read if not already
                 if (!"sent".equals(notificationOpt.get().getStatus())) {
                     notificationService.markAsRead(id);
                 }
@@ -115,7 +117,7 @@ public class UserNotificationsController {
                 notificationDTO.setMessage(notification.getMessage());
                 notificationDTO.setSentAt(notification.getSentAt());
                 notificationDTO.setType(notification.getType());
-                notificationDTO.setStatus("sent"); // ensure status is 'sent' for view
+                notificationDTO.setStatus("sent");
                 notificationDTO.setUser(notification.getUser());
                 notificationDTO.setCourse(notification.getCourse());
                 notificationDTO.setCommentId(notification.getCommentId());
@@ -154,7 +156,12 @@ public class UserNotificationsController {
         }
     }
 
-    // API endpoint để lấy 5 thông báo chưa đọc cho dropdown
+    @PostMapping("/{id}/delete")
+    public String deleteNotification(@PathVariable Long id) {
+        notificationService.deleteNotification(id);
+        return "redirect:/user/notifications";
+    }
+
     @GetMapping("/api/latest")
     @ResponseBody
     public ResponseEntity<?> getLatestNotifications(Authentication authentication) {
@@ -165,7 +172,6 @@ public class UserNotificationsController {
             List<String> types = List.of("ENROLLMENT", "COURSE_COMPLETION", "QUIZ_RESULT", "CERTIFICATE", "PAYMENT_SUCCESS", "PAYMENT_FAILED", "COMMENT", "COMMENT_HIDDEN");
             Page<NotificationDTO> notificationPage = notificationService.getUnreadNotificationsByUserId(userId, types, pageable);
             long unreadCount = notificationService.countUnreadByUserId(userId);
-            // Chuyển sang NotificationDropdownDTO, rút gọn message chỉ 25 ký tự
             List<NotificationDropdownDTO> dropdownList = notificationPage.getContent().stream()
                 .map(n -> {
                     String msg = n.getMessage();
@@ -173,12 +179,24 @@ public class UserNotificationsController {
                         msg = msg.split("\\r?\\n")[0]; // chỉ lấy dòng đầu tiên
                         if (msg.length() > 25) msg = msg.substring(0, 25) + "...";
                     }
+
+                    Long lessonId = null;
+                    if ("COMMENT".equals(n.getType()) && n.getCommentId() != null) {
+                        var commentOpt = courseReviewRepository.findById(n.getCommentId());
+                        if (commentOpt.isPresent() && commentOpt.get().getLesson() != null) {
+                            lessonId = commentOpt.get().getLesson().getLessonId();
+                        }
+                    }
+
                     return new NotificationDropdownDTO(
                         n.getNotificationId(),
                         msg,
                         n.getType(),
                         n.getStatus(),
-                        n.getSentAt()
+                        n.getSentAt(),
+                        n.getCommentId(),
+                        n.getCourse() != null ? n.getCourse().getCourseId() : null,
+                        lessonId
                     );
                 }).toList();
             return ResponseEntity.ok(Map.of(

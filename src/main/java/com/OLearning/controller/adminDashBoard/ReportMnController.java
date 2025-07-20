@@ -5,6 +5,8 @@ import com.OLearning.repository.ReportRepository;
 import com.OLearning.repository.CourseReviewRepository;
 import com.OLearning.service.comment.CommentService;
 import com.OLearning.entity.CourseReview;
+import com.OLearning.repository.NotificationRepository;
+import com.OLearning.entity.Notification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,13 +31,15 @@ public class ReportMnController {
     private CourseReviewRepository courseReviewRepository;
     @Autowired
     private CommentService commentService;
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     @GetMapping
     public String listReports(@RequestParam(required = false) String type,
                              @RequestParam(required = false) String status,
                              @RequestParam(required = false) String keyword,
                              @RequestParam(value = "page", defaultValue = "0") int page,
-                             @RequestParam(value = "size", defaultValue = "10") int size,
+                             @RequestParam(value = "size", defaultValue = "5") int size,
                              Model model) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Report> reportPage;
@@ -63,10 +67,20 @@ public class ReportMnController {
     public String viewReport(@PathVariable Long id, Model model) {
         Report report = reportRepository.findById(id).orElse(null);
         model.addAttribute("report", report);
-        // Nếu là report comment, truyền thêm comment bị report
+        // Nếu là report comment, truyền thêm  nội dung comment
         if (report != null && "COMMENT".equalsIgnoreCase(report.getReportType()) && report.getCommentId() != null) {
             CourseReview comment = courseReviewRepository.findById(report.getCommentId()).orElse(null);
             model.addAttribute("reportedComment", comment);
+        }
+        //  notification phản hồi instructor
+        if (report != null && report.getCourse() != null) {
+            Notification reply = notificationRepository.findAll().stream()
+                .filter(n -> "INSTRUCTOR_RESPONSE".equals(n.getType())
+                    && n.getCourse() != null && n.getCourse().getCourseId().equals(report.getCourse().getCourseId())
+                    && n.getUser() != null && report.getCourse().getInstructor() != null
+                    && n.getUser().getUserId().equals(report.getCourse().getInstructor().getUserId()))
+                .findFirst().orElse(null);
+            model.addAttribute("instructorReplyNotification", reply);
         }
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/reportDetailContent :: reportDetailContent");
         model.addAttribute("accNamePage", "Chi tiết báo cáo");
@@ -90,5 +104,73 @@ public class ReportMnController {
         boolean hidden = Boolean.parseBoolean(payload.get("hidden").toString());
         commentService.setCommentHidden(reviewId, hidden);
         return "success";
+    }
+
+    @GetMapping("/filter")
+    public String filterReports(@RequestParam(required = false) String type,
+                               @RequestParam(required = false) String status,
+                               @RequestParam(required = false) String keyword,
+                               @RequestParam(value = "page", defaultValue = "0") int page,
+                               @RequestParam(value = "size", defaultValue = "5") int size,
+                               Model model) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Report> reportPage;
+        if (type != null && !type.isEmpty() && status != null && !status.isEmpty()) {
+            reportPage = reportRepository.findByReportTypeAndStatus(type, status, pageable);
+        } else if (type != null && !type.isEmpty()) {
+            reportPage = reportRepository.findByReportType(type, pageable);
+        } else if (status != null && !status.isEmpty()) {
+            reportPage = reportRepository.findByStatus(status, pageable);
+        } else {
+            reportPage = reportRepository.findAll(pageable);
+        }
+        model.addAttribute("reports", reportPage.getContent());
+        return "adminDashBoard/fragments/reportTableRowContent :: reportTableRowContent";
+    }
+
+    @GetMapping("/pagination")
+    public String getPagination(@RequestParam(required = false) String type,
+                                @RequestParam(required = false) String status,
+                                @RequestParam(required = false) String keyword,
+                                @RequestParam(value = "page", defaultValue = "0") int page,
+                                @RequestParam(value = "size", defaultValue = "5") int size,
+                                Model model) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Report> reportPage;
+        if (type != null && !type.isEmpty() && status != null && !status.isEmpty()) {
+            reportPage = reportRepository.findByReportTypeAndStatus(type, status, pageable);
+        } else if (type != null && !type.isEmpty()) {
+            reportPage = reportRepository.findByReportType(type, pageable);
+        } else if (status != null && !status.isEmpty()) {
+            reportPage = reportRepository.findByStatus(status, pageable);
+        } else {
+            reportPage = reportRepository.findAll(pageable);
+        }
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", reportPage.getTotalPages());
+        model.addAttribute("totalItems", reportPage.getTotalElements());
+        model.addAttribute("pageSize", size);
+        model.addAttribute("type", type);
+        model.addAttribute("status", status);
+        return "adminDashBoard/fragments/reportPagination :: reportPagination";
+    }
+
+    @GetMapping("/count")
+    @ResponseBody
+    public long getReportCount(@RequestParam(required = false) String type,
+                               @RequestParam(required = false) String status,
+                               @RequestParam(required = false) String keyword) {
+        Pageable pageable = PageRequest.of(0, 1);
+        Page<Report> reportPage;
+        if (type != null && !type.isEmpty() && status != null && !status.isEmpty()) {
+            reportPage = reportRepository.findByReportTypeAndStatus(type, status, pageable);
+        } else if (type != null && !type.isEmpty()) {
+            reportPage = reportRepository.findByReportType(type, pageable);
+        } else if (status != null && !status.isEmpty()) {
+            reportPage = reportRepository.findByStatus(status, pageable);
+        } else {
+            reportPage = reportRepository.findAll(pageable);
+        }
+        return reportPage.getTotalElements();
     }
 }

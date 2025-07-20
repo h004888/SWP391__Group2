@@ -1,11 +1,19 @@
 <div th:fragment="adminNotificationDetailContent">
     <style>
         .notification-detail-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: #111;
+            color: #fff;
             border-radius: 15px;
             padding: 2rem;
             margin-bottom: 2rem;
+        }
+        .notification-detail-card h4,
+        .notification-detail-card p,
+        .notification-detail-card i {
+            color: #fff !important;
+        }
+        .notification-detail-card .status-badge {
+            /* Giữ nguyên màu cho badge */
         }
 
         .notification-content-card {

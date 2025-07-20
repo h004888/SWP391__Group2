@@ -43,6 +43,15 @@
                     <span th:text="${report.status}"></span>
                 </dd>
 
+                <!-- Hiển thị phản hồi của instructor nếu có -->
+                <th:block th:if="${instructorReplyNotification != null}">
+                    <dt class="col-sm-3">Phản hồi từ Instructor</dt>
+                    <dd class="col-sm-9">
+                        <div class="border rounded p-2 mb-2 bg-light" th:text="${instructorReplyNotification.message}"></div>
+                        <span class="badge bg-secondary me-2" th:text="'Instructor: ' + ${instructorReplyNotification.user.fullName}"></span>
+                        <span class="badge bg-info" th:text="${#temporals.format(instructorReplyNotification.sentAt, 'dd/MM/yyyy HH:mm')}"></span>
+                    </dd>
+                </th:block>
                 <!-- Hiển thị nội dung comment bị report nếu là report comment -->
                 <th:block th:if="${report.reportType == 'COMMENT' and reportedComment != null}">
                     <dt class="col-sm-3">Nội dung bình luận bị báo cáo</dt>
