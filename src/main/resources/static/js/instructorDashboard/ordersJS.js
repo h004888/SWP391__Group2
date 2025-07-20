@@ -28,7 +28,7 @@ function getFilterValues() {
 }
 
 // Helper function to create AJAX data object
-function createAjaxData(page = 0, size = 10) {
+function createAjaxData(page = 0, size = 5) {
     const filters = getFilterValues();
     return {
         username: filters.username || null,
@@ -68,42 +68,26 @@ function handleAjaxError(error, tableBody, paginationContainer) {
     paginationContainer.html('');
 }
 
-function filterInvoices(page = 0, size = 10) {
+function filterInvoices(page = 0, size = 5) {
     const tableBody = getTableBodyElement();
     const paginationContainer = getPaginationElement();
 
-    // Update current page
     currentPage = page;
-
-    // Show loading state
     tableBody.html('<tr><td colspan="6" class="text-center">Loading...</td></tr>');
 
     const ajaxData = createAjaxData(page, size);
 
-    // Load table data and pagination simultaneously
-    Promise.all([
-        // Load table rows
-        $.ajax({
-            url: '/instructor/orders/filter',
-            method: 'GET',
-            data: ajaxData
-        }),
-        // Load pagination
-        $.ajax({
-            url: '/instructor/orders/pagination',
-            method: 'GET',
-            data: ajaxData
-        }),
-        // Load total count for badge
-        $.ajax({
-            url: '/instructor/orders/count',
-            method: 'GET',
-            data: { ...ajaxData, page: 0, size: 1 }
-        })
-    ]).then(function ([tableData, paginationData, countData]) {
-        handleAjaxResponse(tableData, paginationData, countData, tableBody, paginationContainer);
-    }).catch(function (error) {
-        handleAjaxError(error, tableBody, paginationContainer);
+    $.ajax({
+        url: '/instructor/orders/filter',
+        method: 'GET',
+        data: ajaxData,
+        success: function (data) {
+            tableBody.html(data.table);
+            paginationContainer.html(data.pagination);
+        },
+        error: function (error) {
+            handleAjaxError(error, tableBody, paginationContainer);
+        }
     });
 }
 
@@ -119,27 +103,80 @@ function updateCountBadge(totalCount) {
 }
 
 function loadInvoices(page = 0) {
-    filterInvoices(page);
+    filterInvoices(page, 5);
+}
+
+function loadStatistics() {
+    $.ajax({
+        url: '/instructor/orders/statistics',
+        method: 'GET',
+        data: {},
+        success: function (data) {
+            // Đổ bảng doanh thu từng khóa
+            let tableHtml = '';
+            if (data.courseSales && data.courseSales.length > 0) {
+                data.courseSales.forEach(cs => {
+                    tableHtml += `<tr>
+                        <td>${cs.courseName}</td>
+                        <td>${cs.sold}</td>
+                        <td>${cs.revenue.toLocaleString()}</td>
+                    </tr>`;
+                });
+            } else {
+                tableHtml = '<tr><td colspan="3" class="text-center">No data</td></tr>';
+            }
+            $('#courseSalesTable').html(tableHtml);
+
+            // Best seller, least seller
+            $('#bestSeller').text(data.bestSeller ? data.bestSeller.courseName + ' (' + data.bestSeller.sold + ')' : 'N/A');
+            $('#leastSeller').text(data.leastSeller ? data.leastSeller.courseName + ' (' + data.leastSeller.sold + ')' : 'N/A');
+
+            // Biểu đồ doanh thu theo tháng
+            if (window.courseMonthlyChartInstance) {
+                window.courseMonthlyChartInstance.destroy();
+            }
+            const ctx = document.getElementById('courseMonthlyChart').getContext('2d');
+            const labels = Object.keys(data.monthlyRevenue || {});
+            const values = Object.values(data.monthlyRevenue || {});
+            window.courseMonthlyChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Revenue',
+                        data: values,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+    });
 }
 
 // Helper function to reset pagination and filter
 function resetAndFilter() {
     currentPage = 0;
-    filterInvoices(0);
+    filterInvoices(0, 5);
 }
 
 // Event handler for pagination clicks
 $(document).on('click', '.pagination .page-link', function (e) {
+    console.log('Clicked page link', $(this).data('page'), $(this).parent().attr('class'));
     e.preventDefault();
     const page = parseInt($(this).data('page'));
     if (!isNaN(page) && page >= 0) {
-        filterInvoices(page);
+        filterInvoices(page, 5);
     }
 });
 
 $(document).ready(function () {
     // Load initial data for invoice tab
     loadInvoices(0);
+    loadStatistics();
 
     // Tab change event
     $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
@@ -154,6 +191,7 @@ $(document).ready(function () {
     filterSelectors.forEach(selector => {
         $(selector).on('change', function () {
             resetAndFilter();
+            loadStatistics();
         });
     });
 
@@ -163,6 +201,7 @@ $(document).ready(function () {
         clearTimeout(searchTimer);
         searchTimer = setTimeout(() => {
             resetAndFilter();
+            loadStatistics();
         }, 400);
     });
 }); 

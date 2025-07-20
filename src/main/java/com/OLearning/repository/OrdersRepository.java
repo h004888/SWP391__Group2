@@ -269,4 +269,7 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
     @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
     @Query("SELECT DISTINCT o FROM Order o JOIN o.orderDetails od WHERE od.course.instructor.userId = :instructorId ORDER BY o.amount DESC")
     Page<Order> findByInstructorIdOrderByAmountDesc(@Param("instructorId") Long instructorId, Pageable pageable);
+
+    @Query("SELECT MONTH(o.orderDate), COUNT(DISTINCT o), SUM(o.amount) FROM Order o JOIN o.orderDetails od WHERE od.course.instructor.userId = :instructorId GROUP BY MONTH(o.orderDate) ORDER BY MONTH(o.orderDate)")
+    List<Object[]> getOrderStatsByInstructor(@Param("instructorId") Long instructorId);
 }

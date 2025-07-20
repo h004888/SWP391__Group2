@@ -80,12 +80,6 @@ public class ControlllerAddCourse {
     @Autowired
     private TermsAndConditionService termsAndConditionService;
 
-    //dashhboard
-    @GetMapping()
-    public String dashboard(Model model) {
-        model.addAttribute("fragmentContent", "instructorDashboard/fragments/content :: contentMain");
-        return "instructorDashboard/indexUpdate";
-    }
 
     //viewAllCourses
     @GetMapping("/courses")

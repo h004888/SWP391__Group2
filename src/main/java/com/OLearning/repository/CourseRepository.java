@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Pageable;
 
 @Repository
@@ -20,6 +22,8 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
      List<Course> findAllOrderByStudentCountDesc();
 
     Page<Course> findByInstructorUserId(Long userId, Pageable pageable);
+
+    Optional<Course> findByVideoUrlPreview(String videoPreview);
 
     Page<Course> findAll(Pageable pageable);
 

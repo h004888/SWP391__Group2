@@ -1,5 +1,64 @@
-<!-- Simplified enrolledContent.html: Only student list and AJAX pagination, no block/unblock/message -->
-<div class="container enrolled-fragment" th:fragment="enrollment">
+<!-- Fragment lớn: Bao gồm biểu đồ + list -->
+<div th:fragment="enrollmentPage">
+    <!-- Card biểu đồ -->
+    <div class="card mb-4">
+        <div class="card-header bg-light border-bottom">
+            <h5 class="mb-0">Enrollment Statistics</h5>
+        </div>
+        <div class="card-body">
+            <canvas id="enrollmentStatsChart" height="120"></canvas>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        function renderEnrollmentChart() {
+            fetch('/instructor/enrolled/statistics')
+                .then(res => res.json())
+                .then(data => {
+                    const labels = data.map(stat => stat.courseTitle);
+                    const totalEnroll = data.map(stat => stat.totalEnroll);
+                    const completedEnroll = data.map(stat => stat.completedEnroll);
+                    const ctx = document.getElementById('enrollmentStatsChart').getContext('2d');
+                    if (window.enrollmentChart) window.enrollmentChart.destroy();
+                    window.enrollmentChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [
+                                {
+                                    label: 'Total Enrolled',
+                                    data: totalEnroll,
+                                    backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                                },
+                                {
+                                    label: 'Completed',
+                                    data: completedEnroll,
+                                    backgroundColor: 'rgba(75, 192, 192, 0.7)'
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { position: 'top' },
+                                title: { display: true, text: 'Enrollment per Course' }
+                            },
+                            scales: {
+                                x: { title: { display: true, text: 'Course' }, ticks: { autoSkip: false, maxRotation: 45, minRotation: 0 } },
+                                y: { title: { display: true, text: 'Number of Students' }, beginAtZero: true }
+                            }
+                        }
+                    });
+                });
+        }
+        document.addEventListener('DOMContentLoaded', renderEnrollmentChart);
+    </script>
+    <!-- Fragment nhỏ: bảng + phân trang -->
+    <div th:replace="instructorDashboard/fragments/enrolledContent :: enrollmentList"></div>
+</div>
+
+<!-- Fragment nhỏ: chỉ chứa bảng, phân trang, modal, script AJAX -->
+<div class="container enrolled-fragment" th:fragment="enrollmentList">
     <div class="row">
         <div class="col-12">
             <div class="card border bg-transparent rounded-3">
@@ -31,12 +90,16 @@
                                 </td>
                                 <td class="text-center text-sm-start">
                                     <div class="overflow-hidden">
-                                        <h6 class="mb-0" th:text="${enrollment.progress + '%'}"></h6>
-                                        <div class="progress progress-sm bg-primary bg-opacity-10">
-                                            <div class="progress-bar bg-primary aos" role="progressbar" 
-                                                 th:style="'width: ' + ${enrollment.progress} + '%'" 
-                                                 th:aria-valuenow="${enrollment.progress}" 
-                                                 aria-valuemin="0" aria-valuemax="100">
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress w-100" style="height: 20px; background-color: #e9ecef;">
+                                                <div class="progress-bar"
+                                                     th:classappend="${enrollment.progress >= 100} ? 'bg-success' : (${enrollment.progress >= 50} ? 'bg-info' : 'bg-warning')"
+                                                     role="progressbar"
+                                                     th:style="'width: ' + ${enrollment.progress} + '%'"
+                                                     th:aria-valuenow="${enrollment.progress}"
+                                                     aria-valuemin="0" aria-valuemax="100">
+                                                    <span th:text="${#numbers.formatDecimal(enrollment.progress, 0, 'POINT', 0, 'POINT')} + '%'" style="color: #fff; font-weight: bold;"></span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -137,6 +200,7 @@
         </div>
       </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         function attachEnrolledPaginationAjax() {
             document.querySelectorAll('.pagination .page-link').forEach(function(link) {

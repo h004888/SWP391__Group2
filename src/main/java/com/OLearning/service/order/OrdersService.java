@@ -3,6 +3,8 @@ package com.OLearning.service.order;
 import com.OLearning.dto.order.OrdersDTO;
 import com.OLearning.dto.order.InstructorOrderDTO;
 import com.OLearning.entity.OrderDetail;
+import com.OLearning.dto.course.CourseSalesDTO;
+import com.OLearning.dto.order.OrderStatsDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -27,4 +29,8 @@ public interface OrdersService {
     
     Map<String, Double> getRevenuePerMonth();
     Map<String, Double> getRevenueByDateRange(LocalDate startDate, LocalDate endDate);
+    // Thống kê doanh thu cho instructor
+    List<CourseSalesDTO> getCourseSalesForInstructor(Long instructorId, String startDate, String endDate);
+    Map<String, Double> getMonthlyRevenueForInstructor(Long instructorId, String startDate, String endDate);
+    List<OrderStatsDTO> getStatsForInstructor(Long instructorId);
 }

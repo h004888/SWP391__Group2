@@ -22,6 +22,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import com.OLearning.dto.course.CourseSalesDTO;
+import java.time.format.DateTimeFormatter;
+import com.OLearning.dto.order.OrderStatsDTO;
+import java.util.ArrayList;
 
 @Service
 public class OrdersServiceImpl implements OrdersService {
@@ -471,5 +475,58 @@ public class OrdersServiceImpl implements OrdersService {
     private Page<InstructorOrderDTO> filterWithoutDateRangeInstructorNew(String username, String orderType, String status, Pageable pageable, Long instructorId) {
         Page<Order> ordersPage = getOrdersWithoutDateRangeInstructor(username, orderType, status, pageable, instructorId);
         return ordersPage.map(order -> instructorOrderMapper.toInstructorDTO(order, instructorId));
+    }
+
+    @Override
+    public List<CourseSalesDTO> getCourseSalesForInstructor(Long instructorId, String startDate, String endDate) {
+        // Không filter theo ngày ở đây, chỉ lấy tất cả các khóa đã bán của instructor
+        List<Object[]> raw = orderDetailRepository.findCourseSalesAndRevenueByInstructor(instructorId);
+        List<CourseSalesDTO> result = new java.util.ArrayList<>();
+        for (Object[] row : raw) {
+            String courseName = (String) row[0];
+            int sold = ((Number) row[1]).intValue();
+            double revenue = row[2] != null ? ((Number) row[2]).doubleValue() : 0.0;
+            result.add(new CourseSalesDTO(courseName, sold, revenue));
+        }
+        return result;
+    }
+
+    @Override
+    public Map<String, Double> getMonthlyRevenueForInstructor(Long instructorId, String startDate, String endDate) {
+        // Nếu không truyền ngày, lấy mặc định 1 năm gần nhất
+        java.time.LocalDateTime start;
+        java.time.LocalDateTime end;
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        if (startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
+            start = java.time.LocalDate.parse(startDate, fmt).atStartOfDay();
+            end = java.time.LocalDate.parse(endDate, fmt).atTime(23,59,59);
+        } else {
+            end = java.time.LocalDateTime.now();
+            start = end.minusYears(1).withDayOfMonth(1).withMonth(1).withHour(0).withMinute(0).withSecond(0);
+        }
+        List<Object[]> raw = orderDetailRepository.findRevenueByMonth(instructorId, start, end);
+        Map<String, Double> result = new java.util.LinkedHashMap<>();
+        for (Object[] row : raw) {
+            int year = ((Number) row[0]).intValue();
+            int month = ((Number) row[1]).intValue();
+            double revenue = row[2] != null ? ((Number) row[2]).doubleValue() : 0.0;
+            String key = String.format("%d-%02d", year, month);
+            result.put(key, revenue);
+        }
+        return result;
+    }
+
+    @Override
+    public List<OrderStatsDTO> getStatsForInstructor(Long instructorId) {
+        List<Object[]> rawStats = ordersRepository.getOrderStatsByInstructor(instructorId);
+        List<OrderStatsDTO> stats = new ArrayList<>();
+        for (Object[] row : rawStats) {
+            OrderStatsDTO dto = new OrderStatsDTO();
+            dto.setMonth((Integer) row[0]);
+            dto.setOrderCount(((Number) row[1]).intValue());
+            dto.setTotalAmount(((Number) row[2]).doubleValue());
+            stats.add(dto);
+        }
+        return stats;
     }
 }
