@@ -426,7 +426,7 @@ public class HomeController {
         }
 
         courseReviewService.deleteReview(reviewId);
-        redirectAttributes.addFlashAttribute("successMessage", "Đánh giá đã được xóa thành công.");
+        redirectAttributes.addFlashAttribute("successMessage", "Đánh giá đã được xóa  thành công.");
         return "redirect:/home/course-detail?id=" + courseId;
     }
 

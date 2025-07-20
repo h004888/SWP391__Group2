@@ -504,6 +504,7 @@ public class UserCourseController {
         long unreadCount = notificationService.countUnreadByUserId(currentUser.getUserId());
         model.addAttribute("unreadCount", unreadCount);
         model.addAttribute("fragmentContent", "homePage/fragments/myCourseContent :: myCourseContent");
+        model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderDefault");
         return "homePage/index";
     }
 }
