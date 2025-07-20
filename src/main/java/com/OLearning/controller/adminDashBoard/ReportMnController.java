@@ -67,12 +67,12 @@ public class ReportMnController {
     public String viewReport(@PathVariable Long id, Model model) {
         Report report = reportRepository.findById(id).orElse(null);
         model.addAttribute("report", report);
-        // Nếu là report comment, truyền thêm comment bị report
+        // Nếu là report comment, truyền thêm  nội dung comment
         if (report != null && "COMMENT".equalsIgnoreCase(report.getReportType()) && report.getCommentId() != null) {
             CourseReview comment = courseReviewRepository.findById(report.getCommentId()).orElse(null);
             model.addAttribute("reportedComment", comment);
         }
-        // Lấy notification phản hồi instructor nếu có
+        //  notification phản hồi instructor
         if (report != null && report.getCourse() != null) {
             Notification reply = notificationRepository.findAll().stream()
                 .filter(n -> "INSTRUCTOR_RESPONSE".equals(n.getType())
@@ -111,7 +111,7 @@ public class ReportMnController {
                                @RequestParam(required = false) String status,
                                @RequestParam(required = false) String keyword,
                                @RequestParam(value = "page", defaultValue = "0") int page,
-                               @RequestParam(value = "size", defaultValue = "10") int size,
+                               @RequestParam(value = "size", defaultValue = "5") int size,
                                Model model) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Report> reportPage;
@@ -133,7 +133,7 @@ public class ReportMnController {
                                 @RequestParam(required = false) String status,
                                 @RequestParam(required = false) String keyword,
                                 @RequestParam(value = "page", defaultValue = "0") int page,
-                                @RequestParam(value = "size", defaultValue = "10") int size,
+                                @RequestParam(value = "size", defaultValue = "5") int size,
                                 Model model) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Report> reportPage;

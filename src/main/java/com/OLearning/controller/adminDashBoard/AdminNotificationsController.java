@@ -123,14 +123,9 @@ public class AdminNotificationsController {
     }
 
     @PostMapping("/{id}/delete")
-    @ResponseBody
-    public ResponseEntity<?> deleteNotification(@PathVariable Long id) {
-        try {
-            notificationService.deleteNotification(id);
-            return ResponseEntity.ok("Notification deleted");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete");
-        }
+    public String deleteNotification(@PathVariable Long id) {
+        notificationService.deleteNotification(id);
+        return "redirect:/admin/notifications";
     }
 
     @PostMapping("/delete-read")
@@ -141,7 +136,6 @@ public class AdminNotificationsController {
         return "redirect:/admin/notifications";
     }
 
-    //  lấy 5 thông báo chưa đọc cho dropdown
     @GetMapping("/api/latest")
     @ResponseBody
     public ResponseEntity<?> getLatestNotifications(Authentication authentication) {
@@ -155,8 +149,7 @@ public class AdminNotificationsController {
             Page<NotificationDTO> notificationPage = notificationService.getUnreadNotificationsByUserId(userId, types, pageable);
             
             long unreadCount = notificationService.countUnreadByUserId(userId);
-            
-            // Chuyển sang NotificationDropdownDTO, rút gọn message chỉ 25 ký tự
+
             List<NotificationDropdownDTO> dropdownList = notificationPage.getContent().stream()
                 .map(n -> {
                     String msg = n.getMessage();

@@ -1,4 +1,4 @@
-<tbody th:fragment="reportTableRowContent">
+<div th:fragment="reportTableRowContent">
 <tr th:each="report : ${reports}">
     <td>[[${report.id}]]</td>
     <td>[[${report.reportType != null ? report.reportType : '-'}]]</td>
@@ -23,4 +23,4 @@
 <tr th:if="${#lists.isEmpty(reports)}">
     <td colspan="7" class="text-center text-muted">No reports found.</td>
 </tr>
-</tbody> 
+</div>

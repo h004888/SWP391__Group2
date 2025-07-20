@@ -179,10 +179,8 @@ public class UserCourseController {
         CourseViewDTO course = courseService.getCourseById(courseId);
         model.addAttribute("course", course);
         model.addAttribute("chapters", course.getListOfChapters());
-        
-        // Load comments for the specific lesson only (Rating = null)
+
         Course courseEntity = courseService.findCourseById(courseId);
-        // Since we only support lesson-specific comments now, load comments for current lesson
         List<CourseReview> parentComments = courseReviewRepository.findByLessonAndRatingIsNullAndParentReviewIsNull(currentLesson);
         List<CommentDTO> comments = new ArrayList<>();
         
@@ -232,15 +230,10 @@ public class UserCourseController {
 
         Lesson nextAvailableLesson = lessonService.getNextLessonAfterCompleted(user.getUserId(), courseId).orElse(null);
 
-        // Cho phép truy cập nếu:
-        // 1. Là instructor
-        // 2. Bài đã hoàn thành
-        // 3. Là bài tiếp theo có thể học
-        // 4. Có commentId (từ notification) - cho phép xem comment
         boolean canAccess = isInstructor ||
                 completedLessonIds.contains(lessonId) ||
                 (nextAvailableLesson != null && nextAvailableLesson.getLessonId().equals(lessonId)) ||
-                commentId != null; // Cho phép truy cập nếu có commentId từ notification
+                commentId != null;
 
         if (!canAccess) {
             return "redirect:/learning/course/view?courseId=" + courseId;
@@ -249,12 +242,11 @@ public class UserCourseController {
         Lesson nextLesson = lessonService.getNextLesson(courseId, lessonId);
         CourseViewDTO courseView = courseService.getCourseById(courseId);
 
-        // Xác định các bài có thể truy cập
+
         Set<Long> accessibleLessonIds = new HashSet<>(completedLessonIds);
         if (nextAvailableLesson != null) {
             accessibleLessonIds.add(nextAvailableLesson.getLessonId());
         }
-        // Nếu có commentId (từ notification), cho phép truy cập lesson hiện tại
         if (commentId != null) {
             accessibleLessonIds.add(lessonId);
         }
@@ -284,16 +276,13 @@ public class UserCourseController {
 
         model.addAttribute("completedLessonIds", completedLessonIds);
         model.addAttribute("accessibleLessonIds", accessibleLessonIds);
-        // QUAN TRỌNG: currentLessonId bây giờ là bài đang được xem (lessonId từ URL)
-        model.addAttribute("currentLessonId", lessonId); // Thay đổi từ currentLesson.getLessonId() thành lessonId
+        model.addAttribute("currentLessonId", lessonId);
         model.addAttribute("currentLesson", currentLesson);
         model.addAttribute("nextLesson", nextLesson);
         model.addAttribute("course", courseView);
         model.addAttribute("chapters", courseView.getListOfChapters());
-        
-        // Load comments for the specific lesson only (Rating = null)
+
         Course courseEntity = courseService.findCourseById(courseId);
-        // Since we only support lesson-specific comments now, load comments for current lesson
         List<CourseReview> parentComments = courseReviewRepository.findByLessonAndRatingIsNullAndParentReviewIsNull(currentLesson);
         List<CommentDTO> comments = new ArrayList<>();
         
@@ -309,8 +298,7 @@ public class UserCourseController {
         
         model.addAttribute("comments", comments);
         model.addAttribute("user", user);
-        
-        // Add unread notification count
+
         long unreadCount = notificationService.countUnreadByUserId(user.getUserId());
         model.addAttribute("unreadCount", unreadCount);
         
@@ -329,13 +317,13 @@ public class UserCourseController {
             return "redirect:/learning";
         }
 
-        // Since we only support lesson-specific comments now, no comments to load for course-level
+
         List<CommentDTO> comments = new ArrayList<>();
         model.addAttribute("comments", comments);
         model.addAttribute("course", course);
         model.addAttribute("user", currentUser);
-        model.addAttribute("currentLesson", null); // Đảm bảo fragment nhận biết là trang public
-        // Add unread notification count if user is logged in
+        model.addAttribute("currentLesson", null);
+
         if (currentUser != null) {
             long unreadCount = notificationService.countUnreadByUserId(currentUser.getUserId());
             model.addAttribute("unreadCount", unreadCount);
@@ -350,17 +338,17 @@ public class UserCourseController {
             currentUser = extractCurrentUser(principal);
         }
 
-        // Kiểm tra xem user đã đăng ký khóa học chưa
+
         boolean isEnrolled = false;
         if (currentUser != null) {
             isEnrolled = enrollmentService.hasEnrolled(currentUser.getUserId(), courseId);
         }
 
         if (isEnrolled) {
-            // Nếu đã đăng ký, redirect đến trang detail
+
             return "redirect:/learning/course/" + courseId + "/detail";
         } else {
-            // Nếu chưa đăng ký, redirect đến trang public
+
             return "redirect:/learning/course/" + courseId + "/public";
         }
     }
@@ -372,7 +360,7 @@ public class UserCourseController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "5") int size,
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) String filter // thêm filter
+            @RequestParam(required = false) String filter
     ) {
         if (principal == null) {
             return "redirect:/login";
@@ -395,7 +383,7 @@ public class UserCourseController {
             int progress = progressObj != null ? progressObj.intValue() : 0;
             allProgressMap.put(c.getCourseId(), progress);
         }
-        // Lọc theo filter trạng thái hoàn thành
+
         if ("completed".equals(filter)) {
             filteredCourses = filteredCourses.stream()
                 .filter(c -> allProgressMap.getOrDefault(c.getCourseId(), 0) == 100)

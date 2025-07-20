@@ -139,14 +139,14 @@ public class HomeController {
                 CourseViewDTO course = courseService.getCourseById(id);
                 Course courseEntity = courseRepository.findById(id).orElse(null);
                 
-                // Lấy danh sách review của course (chỉ những review có rating)
+                // Lấy danh sách review của course
                 List<CourseReview> reviews = new ArrayList<>();
                 double averageRating = 0.0;
                 Map<Integer, Long> ratingDistribution = new HashMap<>();
                 if (courseEntity != null) {
                     reviews = courseReviewService.getReviewsByCourseWithUser(courseEntity);
                     
-                    // Filter theo sao
+
                     if (star > 0 && star <= 5) {
                         reviews = reviews.stream()
                                 .filter(review -> review.getRating() == star)
@@ -166,7 +166,7 @@ public class HomeController {
                     }
                 }
                 
-                // Kiểm tra user đã đăng ký course chưa
+
                 boolean isEnrolled = false;
                 if (userDetails != null) {
                     User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
@@ -307,13 +307,12 @@ public class HomeController {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy khóa học.");
             return "redirect:/home/course-detail?id=" + courseId;
         }
-        // Kiểm tra đã đăng ký khóa học chưa
         boolean isEnrolled = enrollmentService.findFirstByUserAndCourseOrderByEnrollmentDateDesc(user, course).isPresent();
         if (!isEnrolled) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn cần đăng ký khóa học để đánh giá.");
             return "redirect:/home/course-detail?id=" + courseId;
         }
-        // Cho phép review nhiều lần - không cần kiểm tra số lượng review trước đó
+        // Cho phép review nhiều lần
         // Tạo review mới
         CourseReview review = new CourseReview();
         review.setCourse(course);
@@ -349,14 +348,12 @@ public class HomeController {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy đánh giá.");
             return "redirect:/home/course-detail?id=" + courseId;
         }
-        
-        // Kiểm tra quyền xóa (chỉ user tạo review mới được xóa)
+
         if (review.getEnrollment() == null || !review.getEnrollment().getUser().getUserId().equals(user.getUserId())) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền xóa đánh giá này.");
             return "redirect:/home/course-detail?id=" + courseId;
         }
-        
-        // Xóa review
+
         courseReviewService.deleteReview(reviewId);
         redirectAttributes.addFlashAttribute("successMessage", "Đánh giá đã được xóa thành công.");
         return "redirect:/home/course-detail?id=" + courseId;

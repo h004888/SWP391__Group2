@@ -42,7 +42,6 @@ public class UserNotificationsController {
         if (types == null || types.isEmpty() || (types.size() == 1 && (types.get(0) == null || types.get(0).isBlank()))) {
             types = List.of("ENROLLMENT", "COURSE_COMPLETION", "QUIZ_RESULT", "CERTIFICATE", "PAYMENT_SUCCESS", "PAYMENT_FAILED", "COMMENT", "COMMENT_HIDDEN");
         }
-        // Xử lý status khi chọn "All"
         if (status != null && status.isBlank()) {
             status = null;
         }
@@ -62,7 +61,6 @@ public class UserNotificationsController {
         long unreadCount = notificationService.countUnreadByUserId(userId);
         model.addAttribute("unreadCount", unreadCount);
         model.addAttribute("user", userDetails.getUser());
-        // --- Thêm map notificationId -> lessonId cho notification comment ---
         java.util.Map<Long, Long> lessonIdMap = new java.util.HashMap<>();
         for (var n : notificationPage.getContent()) {
             if ("COMMENT".equals(n.getType()) && n.getCommentId() != null) {
@@ -109,7 +107,6 @@ public class UserNotificationsController {
             Long userId = userDetails.getUserId();
             var notificationOpt = notificationService.findById(id);
             if (notificationOpt.isPresent() && notificationOpt.get().getUser().getUserId().equals(userId)) {
-                // Mark as read if not already
                 if (!"sent".equals(notificationOpt.get().getStatus())) {
                     notificationService.markAsRead(id);
                 }
@@ -119,7 +116,7 @@ public class UserNotificationsController {
                 notificationDTO.setMessage(notification.getMessage());
                 notificationDTO.setSentAt(notification.getSentAt());
                 notificationDTO.setType(notification.getType());
-                notificationDTO.setStatus("sent"); // ensure status is 'sent' for view
+                notificationDTO.setStatus("sent");
                 notificationDTO.setUser(notification.getUser());
                 notificationDTO.setCourse(notification.getCourse());
                 notificationDTO.setCommentId(notification.getCommentId());
@@ -157,7 +154,12 @@ public class UserNotificationsController {
         }
     }
 
-    // API endpoint để lấy 5 thông báo chưa đọc cho dropdown
+    @PostMapping("/{id}/delete")
+    public String deleteNotification(@PathVariable Long id) {
+        notificationService.deleteNotification(id);
+        return "redirect:/user/notifications";
+    }
+
     @GetMapping("/api/latest")
     @ResponseBody
     public ResponseEntity<?> getLatestNotifications(Authentication authentication) {
@@ -168,7 +170,6 @@ public class UserNotificationsController {
             List<String> types = List.of("ENROLLMENT", "COURSE_COMPLETION", "QUIZ_RESULT", "CERTIFICATE", "PAYMENT_SUCCESS", "PAYMENT_FAILED", "COMMENT", "COMMENT_HIDDEN");
             Page<NotificationDTO> notificationPage = notificationService.getUnreadNotificationsByUserId(userId, types, pageable);
             long unreadCount = notificationService.countUnreadByUserId(userId);
-            // Chuyển sang NotificationDropdownDTO, rút gọn message chỉ 25 ký tự
             List<NotificationDropdownDTO> dropdownList = notificationPage.getContent().stream()
                 .map(n -> {
                     String msg = n.getMessage();
@@ -176,8 +177,7 @@ public class UserNotificationsController {
                         msg = msg.split("\\r?\\n")[0]; // chỉ lấy dòng đầu tiên
                         if (msg.length() > 25) msg = msg.substring(0, 25) + "...";
                     }
-                    
-                    // Lấy lessonId nếu là notification comment
+
                     Long lessonId = null;
                     if ("COMMENT".equals(n.getType()) && n.getCommentId() != null) {
                         var commentOpt = courseReviewRepository.findById(n.getCommentId());

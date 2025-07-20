@@ -247,6 +247,12 @@
                                title="View Details">
                                 <i class="fas fa-eye"></i>
                             </a>
+                            <!-- Nút xóa notification -->
+                            <form th:action="@{/user/notifications/{id}/delete(id=${n.notificationId})}" method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-outline-danger btn-sm action-btn" title="Delete" onclick="return confirm('Delete this notification?');">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
                         </td>
                     </tr>
                     </tbody>

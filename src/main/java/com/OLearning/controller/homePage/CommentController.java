@@ -65,8 +65,6 @@ public class CommentController {
 
         dto.setUserId(user.getUserId());
         dto.setCourseId(courseId);
-
-        // Validate comment
         if (dto.getComment() == null || dto.getComment().trim().isEmpty()) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "Bình luận không được để trống"));
@@ -114,8 +112,6 @@ public class CommentController {
 
         dto.setUserId(user.getUserId());
         dto.setCourseId(courseId);
-
-        // Validate comment
         if (dto.getComment() == null || dto.getComment().trim().isEmpty()) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "Bình luận không được để trống"));
@@ -174,7 +170,6 @@ public class CommentController {
         Course course = courseRepo.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy khóa học"));
 
-        // Kiểm tra xem user có phải là instructor của khóa học không
         if (!course.getInstructor().getUserId().equals(user.getUserId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of("error", "Bạn không phải là giảng viên của khóa học này"));
@@ -212,8 +207,6 @@ public class CommentController {
         dto.setReviewId(commentId);
         dto.setUserId(user.getUserId());
         dto.setCourseId(courseId);
-
-        // Validate comment
         if (dto.getComment() == null || dto.getComment().trim().isEmpty()) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "Bình luận không được để trống"));
@@ -230,15 +223,7 @@ public class CommentController {
         }
     }
 
-    @PutMapping("/{courseId}/comment/{commentId}/update")
-    @ResponseBody
-    public ResponseEntity<?> updateComment(@PathVariable Long courseId,
-                                         @PathVariable Long commentId,
-                                         @RequestBody CommentDTO dto,
-                                         Principal principal) {
-        // Alias for editComment to maintain backward compatibility
-        return editComment(courseId, commentId, dto, principal);
-    }
+
 
     @DeleteMapping("/{courseId}/comment/{commentId}/delete")
     @ResponseBody
@@ -338,7 +323,6 @@ public class CommentController {
         }
     }
 
-    // New endpoint to get comments for a specific lesson
     @GetMapping("/{courseId}/lesson/{lessonId}/comments")
     @ResponseBody
     public ResponseEntity<?> getLessonComments(@PathVariable Long courseId,
@@ -349,8 +333,7 @@ public class CommentController {
             
             Lesson lesson = lessonRepo.findById(lessonId)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy bài học"));
-            
-            // Load comments (Rating = null) for the specific lesson only
+
             List<CourseReview> parentComments = reviewRepo.findByLessonAndRatingIsNullAndParentReviewIsNull(lesson)
                 .stream().filter(c -> !c.isHidden())
                 .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt())) // MỚI NHẤT LÊN TRÊN
@@ -359,8 +342,7 @@ public class CommentController {
             
             for (CourseReview parentComment : parentComments) {
                 CommentDTO commentDTO = commentMapper.toDTO(parentComment);
-                
-                // Load replies for this comment
+
                 List<CourseReview> replies = reviewRepo.findByParentReviewOrderByCreatedAtDesc(parentComment)
                     .stream().filter(r -> !r.isHidden())
                     .collect(Collectors.toList());

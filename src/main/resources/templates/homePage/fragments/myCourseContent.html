@@ -75,7 +75,7 @@
                                         <td th:text="${totalLecturesMap[course.courseId]}"></td>
                                         <td th:text="${completedLecturesMap[course.courseId]}"></td>
                                         <td>
-                                            <a th:href="@{'/learning/course/' + ${course.courseId}}" class="btn btn-primary btn-sm">Continue</a>
+                                            <a th:href="@{/learning/course/view(courseId=${course.courseId})}" class="btn btn-primary btn-sm">Continue</a>
                                         </td>
                                     </tr>
                                 </tbody>
