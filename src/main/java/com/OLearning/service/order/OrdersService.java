@@ -51,5 +51,5 @@ public interface OrdersService {
 
     void saveOrderDetail(OrderDetail orderDetail);
     
-    boolean hasPaidPublicationOrder(Long userId);
+    boolean hasPaidPublicationOrder(Long userId, Long courseId);
 }

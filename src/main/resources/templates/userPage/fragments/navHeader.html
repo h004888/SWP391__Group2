@@ -194,7 +194,7 @@
                 <li class="nav-item ms-0 ms-sm-2 d-none d-sm-block">
                     <div class="me-2 me-md-3 dropdown">
                         <!-- Wishlist button -->
-                        <a class="btn btn-light btn-round mb-0" th:href="@{/wishlist}">
+                        <a class="btn btn-light btn-round mb-0" th:href="@{/home/wishlist}">
                             <i class="bi bi-heart fa-fw"></i>
                         </a>
                         <!-- badge -->
@@ -209,7 +209,7 @@
                 <li class="nav-item ms-0 ms-sm-0 d-none d-sm-block">
                     <div class="me-2 me-md-3 dropdown">
                         <!-- Cart button -->
-                        <a class="btn btn-light btn-round mb-0" th:href="@{/cart}">
+                        <a class="btn btn-light btn-round mb-0" th:href="@{/home/cart}">
                             <i class="bi bi-cart3 fa-fw"></i>
                         </a>
                         <!-- badge -->
@@ -289,7 +289,7 @@
                         <li><a class="dropdown-item" sec:authorize="hasRole('INSTRUCTOR')"
                                th:href="@{/instructor}"><i class="bi bi-gear fa-fw me-2"></i>DashBoard</a></li>
                         <li><a class="dropdown-item" th:href="@{/profile}"><i class="bi bi-person fa-fw me-2"></i>Profile</a></li>
-                        <li><a class="dropdown-item" th:href="@{/history}"><i class="fas fa-history me-2"></i>History</a></li>
+                        <li><a class="dropdown-item" th:href="@{/home/history}"><i class="fas fa-history me-2"></i>History</a></li>
                         <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle fa-fw me-2"></i>Help</a></li>
                         <li>
                             <a class="dropdown-item bg-danger-soft-hover" th:href="@{/logout}">

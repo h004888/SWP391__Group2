@@ -84,8 +84,10 @@ public class SecurityConfig {
 
                         // Root path redirect
                         .requestMatchers("/home/**").permitAll()
-                        .requestMatchers("/vouchers").permitAll()
-                        .requestMatchers("/cart").authenticated()
+                        .requestMatchers("/home/vouchers").permitAll()
+                        .requestMatchers("/home/vouchers/voucher/*/courses").permitAll()
+                        .requestMatchers("/home/cart").authenticated()
+                        .requestMatchers("/home/wishlist").authenticated()
                         .requestMatchers("/api/sepay/**", "/api/order/status").permitAll() // Thêm lại /api/sepay/**
                         // Chỉ admin mới được truy cập /admin/**
                         .requestMatchers("/admin/**").hasRole("ADMIN")

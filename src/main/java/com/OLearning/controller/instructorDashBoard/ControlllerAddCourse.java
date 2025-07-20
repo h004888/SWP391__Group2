@@ -50,10 +50,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 @RequestMapping("/instructor")
@@ -129,8 +126,7 @@ public class ControlllerAddCourse {
         modelMap.put("size", size);
         model.addAttribute("categories", categoryService.findAll());
         
-        // Thêm thông tin hasPaidPublicationFee vào model
-        boolean hasPaidPublicationFee = ordersService.hasPaidPublicationOrder(userId);
+        boolean hasPaidPublicationFee = ordersService.hasPaidPublicationOrder(userId, null);
         model.addAttribute("hasPaidPublicationFee", hasPaidPublicationFee);
         
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/coursesContent :: listsCourseContent");
@@ -181,7 +177,7 @@ public class ControlllerAddCourse {
         model.addAttribute("size", size);
         
         // Thêm thông tin hasPaidPublicationFee vào model
-        boolean hasPaidPublicationFee = ordersService.hasPaidPublicationOrder(userId);
+        boolean hasPaidPublicationFee = ordersService.hasPaidPublicationOrder(userId, null);
         model.addAttribute("hasPaidPublicationFee", hasPaidPublicationFee);
 
         // Trả về fragment table row cho tbody
@@ -242,18 +238,28 @@ public class ControlllerAddCourse {
             redirectAttributes.addFlashAttribute("errorMessage", "Instructor not found.");
             return "redirect:../courses";
         }
-        
-        // Check if this is the first publication (no previous PAID course_public order)
-        boolean isFirstPublication = !ordersService.hasPaidPublicationOrder(userId);
+
+        boolean isFirstPublication = !ordersService.hasPaidPublicationOrder(userId, courseId);
         
         if (isFirstPublication) {
             // First publication - requires payment
             double publicationFee = 100000.0;
             
             if (instructor.getCoin() >= publicationFee) {
-                // User has enough coins
+                Order order = ordersService.createOrder(instructor, publicationFee, "course_public");
+                String description = "Thanh toan phi cong bo khoa hoc voi coin";
+                order.setStatus("PAID");
+                order.setDescription(description);
+                order.setRefCode(UUID.randomUUID().toString());
+                ordersService.saveOrder(order);
                 instructor.setCoin(instructor.getCoin() - (long) publicationFee);
                 userRepository.save(instructor);
+
+                OrderDetail orderDetail = new OrderDetail();
+                orderDetail.setOrder(order);
+                orderDetail.setCourse(course);
+                orderDetail.setUnitPrice(publicationFee);
+                ordersService.saveOrderDetail(orderDetail);
                 
                 courseService.submitCourse(courseId, "publish");
                 redirectAttributes.addFlashAttribute("successMessage", "Course published successfully!");
@@ -261,7 +267,7 @@ public class ControlllerAddCourse {
             } else {
                 // Create order for publication fee payment
                 Order order = ordersService.createOrder(instructor, publicationFee, "course_public");
-                String description = "Thanh toan phi cong bo khoa hoc " + course.getTitle() + " - ORDER" + order.getOrderId();
+                String description = "Thanh toan phi cong bo khoa hoc - ORDER" + order.getOrderId();
                 order.setDescription(description);
                 ordersService.saveOrder(order);
                 

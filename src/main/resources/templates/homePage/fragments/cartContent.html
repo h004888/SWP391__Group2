@@ -184,8 +184,8 @@
             <h1 class="m-0">My Cart</h1>
             <nav aria-label="breadcrumb" class="d-flex justify-content-center">
               <ol class="breadcrumb breadcrumb-dots mb-0">
-                <li class="breadcrumb-item"><a href="/">Home</a></li>
-                <li class="breadcrumb-item"><a href="/courses">Courses</a></li>
+                <li class="breadcrumb-item"><a href="/home">Home</a></li>
+                <li class="breadcrumb-item"><a href="/home/coursesGrid">Courses</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Cart</li>
               </ol>
             </nav>
@@ -248,7 +248,7 @@
                     </div>
                   </td>
                   <td class="text-end">
-                    <a th:href="@{'/cart/remove/' + ${item.id}}"
+                    <a th:href="@{'/home/cart/remove/' + ${item.id}}"
                        class="btn btn-sm btn-danger-soft px-2 mb-0"
                        onclick="return confirm('Are you sure you want to remove this item from your cart?')">
                       <i class="fas fa-fw fa-times"></i>
@@ -261,7 +261,7 @@
 
             <!-- Clear Cart Button -->
             <div class="text-end mt-3">
-              <form th:action="@{/cart/clear}" method="post" style="display: inline;">
+              <form th:action="@{/home/cart/clear}" method="post" style="display: inline;">
                 <button type="submit"
                         class="btn btn-sm btn-outline-danger"
                         onclick="return confirm('Are you sure you want to clear your entire cart?')">
@@ -289,7 +289,7 @@
               </li>
             </ul>
             <div class="d-flex justify-content-center">
-              <form th:action="@{/cart/checkout}" method="post" id="checkout-form">
+              <form th:action="@{/home/cart/checkout}" method="post" id="checkout-form">
                 <input type="hidden" id="voucherMapping" name="voucherMapping" />
                 <input type="hidden" id="paymentMethod-hidden" name="paymentMethod" />
                 <button type="button" class="btn btn-lg btn-success" id="checkout-btn-modal">
@@ -404,14 +404,18 @@
         const discountedPriceEl = document.getElementById('discounted-price-' + courseId);
         const appliedVoucherEl = document.getElementById('applied-voucher-' + courseId);
         if (originalPriceEl) {
-          if (data && data.discountedPrice) {
+          if (data && typeof data.discountedPrice !== 'undefined' && data.discountedPrice !== null && Number(data.discountedPrice) < Number(originalPriceEl.textContent.replace(/[^\d]/g, ''))) {
             originalPriceEl.classList.add('original-price-strike');
           } else {
             originalPriceEl.classList.remove('original-price-strike');
           }
         }
         if (discountedPriceEl) {
-          discountedPriceEl.textContent = data && data.discountedPrice ? ' ' + voucherJS.formatNumberWithCommas(Number(data.discountedPrice)) + ' đ' : '';
+          if (data && typeof data.discountedPrice !== 'undefined' && data.discountedPrice !== null) {
+            discountedPriceEl.textContent = ' ' + voucherJS.formatNumberWithCommas(Number(data.discountedPrice)) + ' đ';
+          } else {
+            discountedPriceEl.textContent = '';
+          }
         }
       },
       updateCartTotal: function() {

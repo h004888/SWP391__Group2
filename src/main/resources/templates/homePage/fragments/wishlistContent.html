@@ -39,7 +39,7 @@
             </p>
           </div>
           <div class="text-end">
-            <form th:action="@{/wishlist/clear}" method="post" style="display: inline;">
+            <form th:action="@{/home/wishlist/clear}" method="post" style="display: inline;">
               <button type="submit" class="btn btn-danger-soft mb-0" onclick="return confirm('Are you sure you want to clear all items from wishlist?')">
                 <i class="fas fa-trash me-2"></i>Remove all
               </button>
@@ -145,7 +145,7 @@
               <ul class="pagination pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
                 <!-- Previous button -->
                 <li class="page-item mb-0" th:classappend="${!hasPrevious} ? 'disabled'">
-                  <a class="page-link" th:href="@{/wishlist(page=${currentPage - 1})}" th:if="${hasPrevious}">
+                  <a class="page-link" th:href="@{/home/wishlist(page=${currentPage - 1})}" th:if="${hasPrevious}">
                     <i class="fas fa-angle-left"></i>
                   </a>
                   <span class="page-link" th:unless="${hasPrevious}">
@@ -155,7 +155,7 @@
 
                 <!-- Page numbers -->
                 <li class="page-item mb-0" th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}">
-                  <a class="page-link" th:href="@{/wishlist(page=${pageNum})}"
+                  <a class="page-link" th:href="@{/home/wishlist(page=${pageNum})}"
                      th:text="${pageNum + 1}"
                      th:classappend="${pageNum == currentPage} ? 'active'">
                     1
@@ -164,7 +164,7 @@
 
                 <!-- Next button -->
                 <li class="page-item mb-0" th:classappend="${!hasNext} ? 'disabled'">
-                  <a class="page-link" th:href="@{/wishlist(page=${currentPage + 1})}" th:if="${hasNext}">
+                  <a class="page-link" th:href="@{/home/wishlist(page=${currentPage + 1})}" th:if="${hasNext}">
                     <i class="fas fa-angle-right"></i>
                   </a>
                   <span class="page-link" th:unless="${hasNext}">

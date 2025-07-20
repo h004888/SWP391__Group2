@@ -22,12 +22,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import com.OLearning.service.voucher.VoucherService;
 import com.OLearning.dto.voucher.VoucherStatsDTO;
 import java.util.Map;
-import java.util.HashMap;
-import com.OLearning.entity.Voucher;
 import jakarta.validation.Valid;
 import org.springframework.validation.BindingResult;
-import java.util.stream.Collectors;
-import org.springframework.data.domain.Page;
 
 @Controller
 @RequestMapping("/instructor/voucher")
@@ -49,7 +45,6 @@ public class ControllerCreateVoucher {
         if (instructor == null) return "redirect:/login";
 
         VoucherStatsDTO stats = voucherService.getVoucherStatsForInstructor(instructor.getUserId(), search);
-        // Chỉ lấy course của instructor có status publish
         List<Course> courses = courseRepository.findByInstructorUserIdAndStatus(instructor.getUserId(), "publish");
         model.addAttribute("stats", stats);
         model.addAttribute("courses", courses);
@@ -60,8 +55,8 @@ public class ControllerCreateVoucher {
     }
 
     @PostMapping("/create")
-    public String createVoucher(@ModelAttribute @Valid VoucherDTO voucherDTO,
-                               BindingResult bindingResult, // Đặt ngay sau @Valid
+    public String createVoucher(@Valid @ModelAttribute VoucherDTO voucherDTO,
+                               BindingResult bindingResult,
                                @AuthenticationPrincipal UserDetails userDetails,
                                @RequestParam(value = "selectedCourses", required = false) List<Long> selectedCourses,
                                RedirectAttributes redirectAttributes,
@@ -99,14 +94,13 @@ public class ControllerCreateVoucher {
         return voucherService.getValidCourseTitlesForVoucher(voucherId);
     }
 
-    // Filter with AJAX - returns HTML fragment
     @GetMapping("/filter")
     public String filterVouchers(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false, defaultValue = "valid") String status,
             @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "5") int size,
             Model model) {
         if (userDetails == null) {
             model.addAttribute("vouchers", List.of());
@@ -140,14 +134,13 @@ public class ControllerCreateVoucher {
         return "instructorDashboard/fragments/voucherTableRows :: voucherTableRows";
     }
 
-    // Get pagination fragment
     @GetMapping("/pagination")
     public String getPaginationFragment(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false, defaultValue = "valid") String tabType,
             @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "5") int size,
             Model model) {
         if (userDetails == null) {
             model.addAttribute("currentPage", 0);

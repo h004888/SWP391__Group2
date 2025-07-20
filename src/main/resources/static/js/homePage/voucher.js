@@ -50,7 +50,7 @@ window.voucherJS = (function() {
             document.querySelectorAll('.voucher-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const courseId = this.getAttribute('data-course-id');
-                    fetch(`/vouchers/course/${courseId}/user/${userId}`, {
+                    fetch(`/home/vouchers/course/${courseId}/user/${userId}`, {
                         credentials: 'include'
                     })
                         .then(res => res.json())
@@ -117,7 +117,7 @@ window.voucherJS = (function() {
             window.selectedVouchers[courseId] = voucherId;
             saveSelectedVouchers();
             
-            fetch('/cart/apply-voucher', {
+            fetch('/home/cart/apply-voucher', {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
@@ -178,7 +178,7 @@ window.voucherJS = (function() {
                     continue;
                 }
                 
-                fetch('/cart/apply-voucher', {
+                fetch('/home/cart/apply-voucher', {
                     method: 'POST',
                     credentials: 'include',
                     headers: {
@@ -231,7 +231,7 @@ window.voucherJS = (function() {
         });
 
         // Khi xóa course khỏi cart, cũng xóa khỏi selectedVouchers và localStorage
-        document.querySelectorAll('a[href^="/cart/remove/"]').forEach(btn => {
+        document.querySelectorAll('a[href^="/home/cart/remove/"]').forEach(btn => {
             btn.addEventListener('click', function() {
                 const tr = this.closest('tr');
                 if (tr) {
@@ -285,7 +285,7 @@ window.voucherJS = (function() {
         function initializeVoucherButton() {
             document.querySelectorAll('.voucher-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    fetch(`/vouchers/course/${courseId}/user/${userId}`, {
+                    fetch(`/home/vouchers/course/${courseId}/user/${userId}`, {
                         credentials: 'include'
                     })
                         .then(res => res.json())
@@ -339,7 +339,7 @@ window.voucherJS = (function() {
             saveSelectedVoucher();
             if (typeof options.syncVoucherToBuyNowForm === 'function') options.syncVoucherToBuyNowForm();
             
-            fetch('/cart/apply-voucher', {
+            fetch('/home/cart/apply-voucher', {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
@@ -408,6 +408,44 @@ window.voucherJS = (function() {
             }
         });
     }
+
+    // Lắng nghe sự kiện click vào nút View voucher public
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.view-voucher-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const voucherId = btn.getAttribute('data-voucher-id');
+                fetch(`/home/vouchers/voucher/${voucherId}/courses`, {
+                    credentials: 'include'
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        let html = '';
+                        if (!Array.isArray(data) || !data || data.length === 0) {
+                            html = '<p class="text-muted">No courses available for this voucher.</p>';
+                        } else {
+                            data.forEach(course => {
+                                html += `<div class='border rounded p-2 mb-2 d-flex justify-content-between align-items-center'>
+                                    <div>
+                                        <strong>${course.title}</strong><br>
+                                        <span class='text-muted'>${course.instructorName || ''}</span>
+                                    </div>
+                                    ${window.userId && window.userId !== 0 ? `<button class='btn btn-success btn-sm apply-voucher-course-btn' data-course-id='${course.courseId}' data-voucher-id='${voucherId}'>Apply</button>` : ''}
+                                </div>`;
+                            });
+                        }
+                        document.getElementById('voucher-courses-list').innerHTML = html;
+                        const modal = new bootstrap.Modal(document.getElementById('voucherCoursesModal'));
+                        modal.show();
+                    })
+                    .catch(() => {
+                        document.getElementById('voucher-courses-list').innerHTML = '<p class="text-danger">Unable to get course list. Please try again or check your connection.</p>';
+                        const modal = new bootstrap.Modal(document.getElementById('voucherCoursesModal'));
+                        modal.show();
+                    });
+            });
+        });
+    });
 
     // Xóa voucher khỏi giao diện khi đã sử dụng
     function removeVoucherFromList(voucherId) {

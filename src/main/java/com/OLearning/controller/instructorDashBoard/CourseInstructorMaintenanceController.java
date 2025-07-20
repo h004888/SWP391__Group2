@@ -22,6 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Controller
@@ -45,27 +46,22 @@ public class CourseInstructorMaintenanceController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long instructorId = userDetails.getUserId();
-        
-        // Parse monthYear if provided
+
         LocalDate monthYearDate = null;
         if (monthYear != null && !monthYear.isEmpty()) {
             try {
                 YearMonth ym = YearMonth.parse(monthYear);
                 monthYearDate = ym.atEndOfMonth();
             } catch (Exception e) {
-                // If parsing fails, ignore the filter
                 monthYearDate = null;
             }
         }
-        
-        // Create pageable for pagination
+
         Pageable pageable = PageRequest.of(page, size);
-        
-        // Get paginated maintenance payments for this instructor with filtering
+
         Page<CourseMaintenance> maintenancePage = courseMaintenanceService.filterMaintenancesByInstructor(
                 instructorId, courseName, monthYearDate, pageable);
-        
-        // Separate pending and paid payments
+
         List<CourseMaintenance> pendingPayments = maintenancePage.getContent().stream()
                 .filter(m -> !"PAID".equalsIgnoreCase(m.getStatus()))
                 .toList();
@@ -76,21 +72,15 @@ public class CourseInstructorMaintenanceController {
         model.addAttribute("pendingPayments", pendingPayments);
         model.addAttribute("paidPayments", paidPayments);
         model.addAttribute("maintenancePayments", maintenancePage.getContent());
-        
-        // Pagination attributes
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", maintenancePage.getTotalPages());
         model.addAttribute("totalItems", maintenancePage.getTotalElements());
         model.addAttribute("pageSize", size);
-        
-        // Filter attributes
         model.addAttribute("courseName", courseName);
         model.addAttribute("monthYear", monthYear);
-        
-        model.addAttribute("accNamePage", "Management Maintenance");
+        model.addAttribute("accNamePage", "My Maintenance");
         model.addAttribute("fragmentContent", "instructorDashBoard/fragments/courseInstructorMaintainceContent :: maintenanceContent");
 
-        // Add error message if present
         if ("access_denied".equals(error)) {
             model.addAttribute("errorMessage", "You don't have permission to view this order.");
         }
@@ -106,7 +96,8 @@ public class CourseInstructorMaintenanceController {
             redirectAttributes.addFlashAttribute("errorMessage", "Maintenance fee not found!");
             return "redirect:/instructor/orders";
         }
-        String description = "thanh toan bao tri thang "+ maintenance.getMonthYear() + "MAINTENANCE" + maintenance.getMaintenanceId();
+        String monthYearStr = maintenance.getMonthYear().format(DateTimeFormatter.ofPattern("MM/yyyy"));
+        String description = "thanh toan bao tri thang " + monthYearStr + " MAINTENANCE" + maintenance.getMaintenanceId();
         double amount = maintenance.getFee() != null ? maintenance.getFee().getMaintenanceFee() : 0.0;
         String qrUrl = vietQRService.generateSePayQRUrl(amount, description);
         model.addAttribute("maintenanceId", maintenance.getMaintenanceId());
