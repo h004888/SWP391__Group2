@@ -124,7 +124,7 @@ Page content START -->
 									<!-- Content END -->
 
 									<!-- Content START -->
-									<div class="tab-pane fade show active" id="course-pills-2" role="tabpanel"
+									<div class="tab-pane fade show " id="course-pills-2" role="tabpanel"
 										aria-labelledby="course-pills-tab-2">
 										<!-- Accordion START -->
 										<div class="accordion accordion-icon accordion-bg-light" id="accordionExample2">
@@ -167,7 +167,8 @@ Page content START -->
 																		class="d-inline-block text-truncate ms-2 mb-0 h6 fw-light w-100px w-sm-200px w-md-400px"
 																		th:text="${lesson.title}">Lesson Title</span>
 																</div>
-																<p class="mb-0" th:text="${lesson.duration + ' min'}">
+																<p class="mb-0"
+																	th:text="${lesson.duration/60 + ' min'}">
 																	10m</p>
 															</div>
 															<hr />

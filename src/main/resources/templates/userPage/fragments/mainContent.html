@@ -17,7 +17,8 @@
                     <div class="card p-2 bg-transparent border">
                         <div class="row g-0">
                             <div class="col-md-3">
-                                <img src="assets/images/courses/4by3/01.jpg" class="rounded-2" alt="Card image">
+                                <img th:src="@{${course.courseImg} ? ${course.courseImg} : '/assets/images/courses/4by3/01.jpg'}"
+                                    style="height: 200px; object-fit: contain;" class="rounded-2" alt="Card image">
                             </div>
                             <div class="col-md-9">
                                 <div class="card-body">
@@ -177,7 +178,8 @@ Instructor START -->
                                     <div class="w-100 mt-auto text-end">
                                         <!-- Card category -->
                                         <a href="#" class="badge text-bg-info rounded-1"><i
-                                                class="fas fa-user-graduate me-2"></i><span th:text="${totalEnrollments[iterStat.index]}"></span></a>
+                                                class="fas fa-user-graduate me-2"></i><span
+                                                th:text="${totalEnrollments[iterStat.index]}"></span></a>
                                         <a href="#" class="badge text-bg-orange rounded-1"><i
                                                 class="fas fa-clipboard-list me-2"></i>15</a>
                                     </div>

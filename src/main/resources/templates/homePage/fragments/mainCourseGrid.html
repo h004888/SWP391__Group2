@@ -3,7 +3,8 @@
     <div class="row g-4">
         <div class="col-sm-6 col-xl-4" th:each="course : ${courses}">
             <div class="card shadow h-100">
-                <img th:src="@{/assets/images/courses/4by3/01.jpg}" class="card-img-top" alt="course image">
+                <img th:src="@{${course.courseImg} ? ${course.courseImg} : '/assets/images/courses/4by3/01.jpg'}"
+                    style="height: 250px; object-fit: contain;" class="card-img-top" alt="course image">
                 <div class="card-body pb-0">
                     <div class="d-flex justify-content-between mb-2">
                         <a href="#" class="badge bg-purple bg-opacity-10 text-purple"
