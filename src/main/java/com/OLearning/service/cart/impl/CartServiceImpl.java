@@ -43,6 +43,9 @@ public class CartServiceImpl implements CartService {
     @Autowired
     private CoinTransactionRepository coinTransactionRepository;
 
+    @Autowired
+    private VoucherRepository voucherRepository;
+
     public static class CourseAlreadyPurchasedException extends RuntimeException {
         public CourseAlreadyPurchasedException(String message) {
             super(message);
@@ -202,7 +205,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public String processCheckout(String encodedCartJson, String ipAddr, String userEmail) {
+    public String processCheckout(String encodedCartJson, String userEmail) {
         Map<String, Object> cart = getCartDetails(encodedCartJson, userEmail);
         List<Map<String, Object>> items = (List<Map<String, Object>>) cart.getOrDefault("items", new ArrayList<>());
         if (items.isEmpty()) {
@@ -276,6 +279,14 @@ public class CartServiceImpl implements CartService {
             orderDetail.setOrder(order);
             orderDetail.setCourse(course);
             orderDetail.setUnitPrice(((Number) item.get("price")).doubleValue());
+            if (item.containsKey("appliedVoucherId")) {
+                Long voucherId = Long.valueOf(item.get("appliedVoucherId").toString());
+                Voucher voucher = null;
+                try {
+                    voucher = voucherRepository.findById(voucherId).orElse(null);
+                } catch (Exception ignored) {}
+                orderDetail.setVoucher(voucher);
+            }
             orderDetailRepository.save(orderDetail);
 
             Enrollment enrollment = new Enrollment();

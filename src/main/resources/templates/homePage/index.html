@@ -40,6 +40,10 @@ Footer END -->
 	<script src="js/homePage/wishlist.js"></script>
 	<script src="js/homePage/addtocart.js"></script>
 
+	<script th:inline="javascript">
+		window.userId = /*[[${currentUserId}]]*/ 0;
+	</script>
+
 	<script>
 		function toggleMoreCategories(event) {
 			event.preventDefault();

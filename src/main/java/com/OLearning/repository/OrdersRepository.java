@@ -277,4 +277,8 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT MONTH(o.orderDate), COUNT(DISTINCT o), SUM(o.amount) FROM Order o JOIN o.orderDetails od WHERE od.course.instructor.userId = :instructorId GROUP BY MONTH(o.orderDate) ORDER BY MONTH(o.orderDate)")
     List<Object[]> getOrderStatsByInstructor(@Param("instructorId") Long instructorId);
+
+    // Check if user has any PAID order with specific order type and courseId
+    @Query("SELECT CASE WHEN COUNT(o) > 0 THEN true ELSE false END FROM Order o JOIN o.orderDetails od WHERE o.user.userId = :userId AND o.orderType = :orderType AND o.status = :status AND od.course.courseId = :courseId")
+    boolean existsByUserUserIdAndOrderTypeAndStatusAndCourseId(Long userId, String orderType, String status, Long courseId);
 }

@@ -52,12 +52,13 @@ public interface OrdersService {
     void saveOrder(Order order);
 
     void saveOrderDetail(OrderDetail orderDetail);
-    
-    boolean hasPaidPublicationOrder(Long userId);
+
     // Thống kê doanh thu cho instructor
     List<CourseSalesDTO> getCourseSalesForInstructor(Long instructorId, String startDate, String endDate);
 
     Map<String, Double> getMonthlyRevenueForInstructor(Long instructorId, String startDate, String endDate);
 
     List<OrderStatsDTO> getStatsForInstructor(Long instructorId);
+
+    boolean hasPaidPublicationOrder(Long userId, Long courseId);
 }

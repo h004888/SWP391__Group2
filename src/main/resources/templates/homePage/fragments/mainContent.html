@@ -644,7 +644,7 @@ Trending courses START -->
                                                 </button>
                                             </div>
                                             <a th:if="${topCoursesEnrolledMap[course.courseId] != null and topCoursesEnrolledMap[course.courseId]}"
-                                               th:href="@{/learning/course/view/{courseId}(courseId=${course.courseId})}"
+                                               th:href="@{/learning/course/view(courseId=${course.courseId})}"
                                                class="btn btn-sm btn-primary-soft mb-0">Continue</a>
                                         </div>
                                     </div>

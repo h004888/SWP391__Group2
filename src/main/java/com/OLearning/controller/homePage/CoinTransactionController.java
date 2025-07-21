@@ -23,7 +23,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.math.BigDecimal;
 
 @Controller
-@RequestMapping("/history")
+@RequestMapping("/home/history")
 public class CoinTransactionController {
 
     @Autowired

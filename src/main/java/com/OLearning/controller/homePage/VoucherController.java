@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.stream.Collectors;
 
 @Controller
-@RequestMapping("/vouchers")
+@RequestMapping("/home/vouchers")
 public class VoucherController {
 
     @Autowired
@@ -36,24 +36,21 @@ public class VoucherController {
     public String showVoucherPage(@AuthenticationPrincipal UserDetails userDetails, 
                                   Model model,
                                   @RequestParam(defaultValue = "0") int page,
-                                  @RequestParam(defaultValue = "6") int size) {
+                                  @RequestParam(defaultValue = "8") int size) {
         Long userId = userDetails != null ? getUserIdFromUserDetails(userDetails) : 0L;
         List<UserVoucherDTO> userVouchers = userDetails != null ? voucherService.getUserVouchersSortedByLatest(userId) : List.of();
         List<VoucherDTO> publicVouchers = voucherService.getPublicVouchers();
 
-        // Filter out public vouchers that the user already has
         List<VoucherDTO> filteredPublicVouchers = publicVouchers.stream()
                 .filter(publicVoucher -> userVouchers.stream()
                         .noneMatch(userVoucher -> userVoucher.getVoucherId().equals(publicVoucher.getVoucherId())))
                 .collect(Collectors.toList());
-        
-        // Tính toán phân trang
+
         int totalItems = userVouchers.size();
         int totalPages = (int) Math.ceil((double) totalItems / size);
         int startIndex = page * size;
         int endIndex = Math.min(startIndex + size, totalItems);
-        
-        // Lấy items cho trang hiện tại
+
         List<UserVoucherDTO> pageVouchers = userVouchers.isEmpty() ? List.of() : userVouchers.subList(startIndex, endIndex);
         
         model.addAttribute("userVouchers", pageVouchers);
@@ -83,7 +80,6 @@ public class VoucherController {
         Long userId = getUserIdFromUserDetails(userDetails);
         try {
             VoucherDTO voucher = voucherService.applyVoucher(code, userId);
-            // Tạo UserVoucherDTO trả về cho JS
             UserVoucherDTO userVoucherDTO = new UserVoucherDTO();
             userVoucherDTO.setVoucherId(voucher.getVoucherId());
             userVoucherDTO.setVoucherCode(voucher.getCode());
@@ -149,12 +145,10 @@ public class VoucherController {
     @ResponseBody
     public List<UserVoucherDTO> getValidVouchersForCourseAndUser(@PathVariable Long courseId, @PathVariable Long userId) {
         try {
-            // Kiểm tra user có tồn tại không
             if (!userRepository.existsById(userId)) {
                 return List.of();
             }
-            
-            // Kiểm tra course có tồn tại không
+
             if (!courseRepository.existsById(courseId)) {
                 return List.of();
             }

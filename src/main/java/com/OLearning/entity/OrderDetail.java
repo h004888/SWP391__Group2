@@ -23,6 +23,10 @@ public class OrderDetail {
     @JoinColumn(name = "courseID", nullable = false)
     private Course course;
 
+    @ManyToOne
+    @JoinColumn(name = "VoucherID")
+    private Voucher voucher;
+
     @Column(name = "UnitPrice")
     private Double unitPrice;
 

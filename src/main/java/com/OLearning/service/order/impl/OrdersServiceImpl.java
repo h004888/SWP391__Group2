@@ -23,11 +23,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.Optional;
 import com.OLearning.service.cart.CartService;
-import jakarta.servlet.http.Cookie;
-import org.springframework.beans.factory.annotation.Value;
-import java.util.ArrayList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.OLearning.service.voucher.VoucherService;
 import com.OLearning.dto.course.CourseSalesDTO;
 import java.time.format.DateTimeFormatter;
@@ -36,8 +31,6 @@ import java.util.ArrayList;
 
 @Service
 public class OrdersServiceImpl implements OrdersService {
-
-    private static final Logger logger = LoggerFactory.getLogger(OrdersServiceImpl.class);
 
     @Autowired
     private OrdersRepository ordersRepository;
@@ -440,7 +433,6 @@ public class OrdersServiceImpl implements OrdersService {
     @Override
     public Map<String, Double> getRevenuePerMonth() {
         Map<String, Double> revenuePerMonth = new HashMap<>();
-        // Initialize all months with 0
         LocalDate now = LocalDate.now();
         for (int i = 1; i <= 12; i++) {
             String monthKey = String.format("%d-%02d", now.getYear(), i);
@@ -482,8 +474,7 @@ public class OrdersServiceImpl implements OrdersService {
     @Override
     public List<OrderDetail> getInstructorOrderDetailsByOrderId(Long orderId, Long instructorId) {
         List<OrderDetail> allOrderDetails = orderDetailRepository.findByOrderOrderId(orderId);
-        
-        // Filter only order details for instructor's courses
+
         return allOrderDetails.stream()
                 .filter(detail -> detail.getCourse() != null && 
                         detail.getCourse().getInstructor() != null && 
@@ -501,7 +492,6 @@ public class OrdersServiceImpl implements OrdersService {
             Page<Order> ordersPage = getOrdersWithDateRangeInstructor(username, orderType, status, startDateTime, endDateTime, pageable, instructorId);
             return ordersPage.map(order -> instructorOrderMapper.toInstructorDTO(order, instructorId));
         } catch (Exception e) {
-            // If date parsing fails, fall back to filtering without date range
             return filterWithoutDateRangeInstructorNew(username, orderType, status, pageable, instructorId);
         }
     }
@@ -531,13 +521,11 @@ public class OrdersServiceImpl implements OrdersService {
         List<OrderDetail> orderDetails = orderDetailRepository.findByOrder(order);
         if (orderDetails == null || orderDetails.isEmpty()) return;
 
-        // Handle course publication orders
         if ("course_public".equals(order.getOrderType())) {
             processCoursePublicationOrder(order, orderDetails);
             return;
         }
 
-        // Handle course purchase orders (existing logic)
         for (OrderDetail orderDetail : orderDetails) {
             boolean alreadyEnrolled = enrollmentRepository.existsByUser_UserIdAndCourse_CourseId(user.getUserId(), orderDetail.getCourse().getCourseId());
             if (!alreadyEnrolled) {
@@ -552,7 +540,6 @@ public class OrdersServiceImpl implements OrdersService {
             }
         }
 
-        // 2. Cộng/trừ coin cho user và instructor
         Pageable pageable = PageRequest.of(0, 1);
         boolean hasStudentTransaction = coinTransactionRepository.findByUserUserIdAndTransactionTypeAndStatus(user.getUserId(), "course_purchase", "completed", pageable).hasContent();
         if (!hasStudentTransaction) {
@@ -606,17 +593,10 @@ public class OrdersServiceImpl implements OrdersService {
         cartService.clearCart(user.getEmail());
 
         for (OrderDetail orderDetail : orderDetails) {
-            try {
-                Field voucherField = orderDetail.getClass().getDeclaredField("voucherId");
-                voucherField.setAccessible(true);
-                Object voucherIdObj = voucherField.get(orderDetail);
-                if (voucherIdObj != null) {
-                    Long voucherId = (Long) voucherIdObj;
-                    if (voucherId != null) {
-                        voucherService.useVoucherForUserAndCourse(voucherId, userId);
-                    }
-                }
-            } catch (NoSuchFieldException | IllegalAccessException ignored) {}
+            Voucher voucher = orderDetail.getVoucher();
+            if (voucher != null) {
+                voucherService.useVoucherForUserAndCourse(voucher.getVoucherId(), userId);
+            }
         }
     }
 
@@ -630,12 +610,10 @@ public class OrdersServiceImpl implements OrdersService {
                 course.setUpdatedAt(java.time.LocalDateTime.now());
                 courseRepository.save(course);
 
-                // Add coins to instructor (from payment)
                 double publicationFee = orderDetail.getUnitPrice();
                 instructor.setCoin(instructor.getCoin() + publicationFee);
                 userRepository.save(instructor);
 
-                // Create coin transaction for instructor (top up from payment)
                 CoinTransaction instructorTransaction = new CoinTransaction();
                 instructorTransaction.setUser(instructor);
                 instructorTransaction.setAmount(publicationFee);
@@ -646,7 +624,6 @@ public class OrdersServiceImpl implements OrdersService {
                 instructorTransaction.setNote("Course publication payment top up");
                 coinTransactionRepository.save(instructorTransaction);
 
-                // Deduct coins from instructor for publication fee
                 instructor.setCoin(instructor.getCoin() - publicationFee);
                 userRepository.save(instructor);
 
@@ -660,7 +637,6 @@ public class OrdersServiceImpl implements OrdersService {
                 publicationTransaction.setNote("Course publication fee for: " + course.getTitle());
                 coinTransactionRepository.save(publicationTransaction);
 
-                // Add coins to admin (assuming admin has ID 1)
                 User admin = userRepository.findById(1L).orElse(null);
                 if (admin != null) {
                     admin.setCoin(admin.getCoin() + publicationFee);
@@ -677,7 +653,6 @@ public class OrdersServiceImpl implements OrdersService {
                     coinTransactionRepository.save(adminTransaction);
                 }
 
-                // Send notification to instructor
                 Notification notification = new Notification();
                 notification.setUser(instructor);
                 notification.setCourse(course);
@@ -726,8 +701,8 @@ public class OrdersServiceImpl implements OrdersService {
     }
     
     @Override
-    public boolean hasPaidPublicationOrder(Long userId) {
-        return ordersRepository.existsByUserUserIdAndOrderTypeAndStatus(userId, "course_public", "PAID");
+    public boolean hasPaidPublicationOrder(Long userId, Long courseId) {
+        return ordersRepository.existsByUserUserIdAndOrderTypeAndStatusAndCourseId(userId, "course_public", "PAID", courseId);
     }
 
     @Override

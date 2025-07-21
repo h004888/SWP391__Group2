@@ -109,20 +109,20 @@
 </head>
 <body>
     <div class="qr-container">
-        <h2><i class="fas fa-qrcode me-2"></i>Quét mã QR để thanh toán</h2>
+        <h2><i class="fas fa-qrcode me-2"></i>Scan QR code to pay</h2>
         <img class="qr-img" id="qrImg" th:src="${qrUrl}" alt="QR Code" />
         <div class="info-row">
             <i class="fas fa-money-bill-wave"></i>
-            <span class="info-label">Số tiền:</span>
-            <span class="info-value" th:text="${amount}"></span>
+            <span class="info-label">Amount:</span>
+            <span class="info-value" th:text="${#numbers.formatDecimal(amount, 0, 'COMMA', 0, 'POINT')}"></span>
         </div>
         <div class="desc-box">
             <i class="fas fa-info-circle"></i>
-            Nội dung chuyển khoản: <b style="margin-left: 0.5rem;" th:text="${description}"></b>
+            Transfer content: <b style="margin-left: 0.5rem;" th:text="${description}"></b>
         </div>
         <div class="info-row">
             <i class="fas fa-shield-check"></i>
-            <span class="info-label">Trạng thái:</span>
+            <span class="info-label">Status:</span>
             <span class="info-value" id="status"></span>
         </div>
         <a href="javascript:void(0)" class="btn-back-cart" onclick="
@@ -132,7 +132,7 @@
                 window.location.href = '/home';
             }
 "       >
-            <i class="fas fa-arrow-left"></i> Quay lại
+            <i class="fas fa-arrow-left"></i> Back
         </a>
     </div>
     <script th:inline="javascript">
@@ -157,9 +157,9 @@
                     })
                     .then(data => {
                         if (data.status === 'PAID') {
-                            document.getElementById('status').innerHTML = '<b style="color: green;">Đã thanh toán thành công! Đang chuyển hướng...</b>';
+                            document.getElementById('status').innerHTML = '<b style="color: green;">Payment successful! Redirecting...</b>';
                             clearInterval(pollingInterval);
-                            fetch('/cart/clear-cookie').then(() => {
+                            fetch('/home/cart/clear-cookie').then(() => {
                                 setTimeout(function() {
                                     window.location.href = document.referrer && document.referrer !== window.location.href
                                         ? document.referrer
@@ -167,7 +167,7 @@
                                 }, 2500);
                             });
                         } else if (data.status === 'failed' || data.status === 'cancelled') {
-                            document.getElementById('status').innerHTML = '<b style="color: red;">Thanh toán thất bại hoặc đã hủy! Vui lòng thử lại.</b>';
+                            document.getElementById('status').innerHTML = '<b style="color: red;">Payment failed or cancelled! Please try again.</b>';
                             clearInterval(pollingInterval);
                             setTimeout(function() {
                                 window.location.href = document.referrer && document.referrer !== window.location.href
@@ -175,7 +175,7 @@
                                     : '/home';
                             }, 2500);
                         } else {
-                            document.getElementById('status').innerHTML = '<span style="color:#858796;">Đang chờ thanh toán...</span>';
+                            document.getElementById('status').innerHTML = '<span style="color:#858796;">Waiting for payment...</span>';
                         }
                     })
                     .catch(error => {
