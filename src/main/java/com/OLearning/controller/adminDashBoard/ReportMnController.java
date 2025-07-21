@@ -75,7 +75,7 @@ public class ReportMnController {
         //  notification phản hồi instructor
         if (report != null && report.getCourse() != null) {
             Notification reply = notificationRepository.findAll().stream()
-                .filter(n -> "INSTRUCTOR_RESPONSE".equals(n.getType())
+                .filter(n -> "INSTRUCTOR_REPLY_BLOCK".equals(n.getType())
                     && n.getCourse() != null && n.getCourse().getCourseId().equals(report.getCourse().getCourseId())
                     && n.getUser() != null && report.getCourse().getInstructor() != null
                     && n.getUser().getUserId().equals(report.getCourse().getInstructor().getUserId()))

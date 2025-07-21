@@ -186,16 +186,28 @@ public class NotificationsController {
         var notificationOpt = notificationRepository.findById(notificationId);
         if (notificationOpt.isPresent()) {
             var notification = notificationOpt.get();
-            var admins = userRepository.findByRole_RoleId(1L);
+            var admins = userRepository.findByRole_RoleId(1L); // Giả sử roleId=1 là ADMIN
             for (var admin : admins) {
                 var adminNoti = new com.OLearning.entity.Notification();
                 adminNoti.setUser(admin);
                 adminNoti.setCourse(notification.getCourse());
                 adminNoti.setType("INSTRUCTOR_REPLY_BLOCK");
-                adminNoti.setMessage(replyContent);
+                adminNoti.setMessage(replyContent); // Nội dung instructor nhập
                 adminNoti.setStatus("failed");
                 adminNoti.setSentAt(java.time.LocalDateTime.now());
                 notificationRepository.save(adminNoti);
+            }
+            // Lưu notification cho instructor để phục vụ hiển thị report detail
+            var instructor = notification.getCourse().getInstructor();
+            if (instructor != null) {
+                var instructorNoti = new com.OLearning.entity.Notification();
+                instructorNoti.setUser(instructor);
+                instructorNoti.setCourse(notification.getCourse());
+                instructorNoti.setType("INSTRUCTOR_REPLY_BLOCK");
+                instructorNoti.setMessage(replyContent);
+                instructorNoti.setStatus("sent");
+                instructorNoti.setSentAt(java.time.LocalDateTime.now());
+                notificationRepository.save(instructorNoti);
             }
         }
         model.addAttribute("success", "Phản hồi của bạn đã được gửi thành công!");
