@@ -1089,7 +1089,9 @@ Page content START -->
 									<div class="row gx-3 mb-3" th:each="course : ${courseByInstructor}">
 										<!-- Image -->
 										<div class="col-4">
-											<img class="rounded" src="assets/images/courses/4by3/21.jpg" alt="">
+											<img class="rounded"
+												th:src="@{${course.courseImg} ? ${course.courseImg} : '/assets/images/courses/4by3/01.jpg'}"
+												alt="">
 										</div>
 										<!-- Info -->
 										<div class="col-8">

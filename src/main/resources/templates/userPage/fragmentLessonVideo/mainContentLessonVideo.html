@@ -8,7 +8,8 @@
             <!-- Course video START -->
             <div class="col-lg-9">
                 <div class="video-player rounded-3">
-                    <video controls crossorigin="anonymous" playsinline poster="/assets/images/videos/poster.jpg">
+                    <video controls crossorigin="anonymous" playsinline
+                        th:poster="@{${course.courseImg} ? ${course.courseImg} : '/assets/images/courses/4by3/01.jpg'}">
                         <source th:src="@{/api/video/stream/video/{videoURL}(videoURL=${lessonVideoURL})}" size="360">
                         <source th:src="@{/api/video/stream/video/{videoURL}(videoURL=${lessonVideoURL})}" size="720">
                         <source th:src="@{/api/video/stream/video/{videoURL}(videoURL=${lessonVideoURL})}" size="1080">
@@ -932,7 +933,7 @@
                 <!-- Responsive offcanvas body END -->
 
                 <!-- Tags START -->
-                <div class="mt-4">
+                <!-- <div class="mt-4">
                     <h4 class="mb-3">Tags</h4>
                     <ul class="list-inline mb-0">
                         <li class="list-inline-item"><a class="btn btn-outline-light btn-sm" href="#">blog</a></li>
@@ -949,7 +950,7 @@
                         <li class="list-inline-item"><a class="btn btn-outline-light btn-sm" href="#">machine
                                 learning</a></li>
                     </ul>
-                </div>
+                </div> -->
                 <!-- Tags END -->
             </div>
             <!-- Right sidebar END -->
