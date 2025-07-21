@@ -206,15 +206,16 @@
                                                    th:if="${lesson.video != null and lesson.video.videoUrl != null}"
                                                    th:attr="data-videoid=${lesson.video.videoUrl}"
                                                    onclick="handleLessonClick(event, this)">
-                                                    <span th:text="'Lesson ' + ${lesson.orderNumber} + ': ' + ${lesson.title}"></span>
+                                                    <span th:text="'Lesson ' + ${lesson.orderNumber} + ': '"></span>
                                                 </a>
                                                 <a href="javascript:void(0)"
                                                    class="lesson-title-link"
                                                    th:if="${lesson.quiz != null}"
                                                    th:attr="data-quizid=${lesson.quiz.id}"
                                                    onclick="handleLessonClick(event, this)">
-                                                    <span th:text="'Lesson ' + ${lesson.orderNumber} + ': ' + ${lesson.title}"></span>
+                                                    <span th:text="'Lesson ' + ${lesson.orderNumber} + ': '"></span>
                                                 </a>
+                                                <span th:utext="${lesson.title}"></span>
                                                 <span th:if="${lesson.isFree}" class="badge bg-success ms-2">Free</span>
                                                 <span th:if="${!lesson.isFree}" class="badge bg-danger ms-2">Premium</span>
                                             </h6>
@@ -279,8 +280,7 @@
                                         <div class="d-flex align-items-center gap-2">
                                             <i class="bi bi-play-circle-fill text-primary"></i>
                                             <a href="#" class="text-decoration-none lesson-video-link"
-                                               th:attr="data-videoid=${lesson.video.videoUrl}"
-                                               onclick="playVideo(this)">
+                                               th:attr="data-videoid=${lesson.video.videoUrl}">
                                                 <span th:text="${lesson.title}"></span>
                                             </a>
                                             <span class="text-muted" th:text="'(' + ${lesson.duration} + ' min)'"></span>

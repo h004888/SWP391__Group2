@@ -1,8 +1,10 @@
 package com.OLearning.controller.instructorDashBoard;
 
 import com.OLearning.dto.enrollment.EnrollmentDTO;
+import com.OLearning.dto.enrollment.CourseEnrollmentStatsDTO;
 import com.OLearning.security.CustomUserDetails;
 import com.OLearning.service.enrollment.EnrollmentService;
+import com.OLearning.service.enrollment.EnrollmentStatisticsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
@@ -14,12 +16,18 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import com.OLearning.entity.Enrollment;
+import com.OLearning.entity.User;
+import java.util.List;
 
 @Controller
 @RequestMapping("/instructor/enrolled")
 public class ControllerEnrolled {
     @Autowired
     private EnrollmentService enrollmentService;
+    @Autowired
+    private EnrollmentStatisticsService enrollmentStatisticsService;
 
     // Only keep the paging endpoint
     @GetMapping()
@@ -41,9 +49,31 @@ public class ControllerEnrolled {
         modelMap.put("size", size);
 
         if ("XMLHttpRequest".equals(requestedWith)) {
-            return "instructorDashboard/fragments/enrolledContent :: enrollment";
+            return "instructorDashboard/fragments/enrolledContent :: enrollmentList";
         }
-        model.addAttribute("fragmentContent", "instructorDashboard/fragments/enrolledContent :: enrollment");
+        model.addAttribute("fragmentContent", "instructorDashboard/fragments/enrolledContent :: enrollmentPage");
         return "instructorDashboard/indexUpdate";
+    }
+
+    @GetMapping("/detail")
+    public String getEnrollmentDetail(@RequestParam("enrollmentId") int enrollmentId, Model model) {
+        Enrollment enrollment = enrollmentService.getEnrollmentById(enrollmentId);
+        if (enrollment == null) {
+            model.addAttribute("errorMessage", "Enrollment not found");
+            return "instructorDashboard/fragments/enrollmentDetailModalContent :: errorContent";
+        }
+        User user = enrollment.getUser();
+        model.addAttribute("user", user);
+        model.addAttribute("enrollment", enrollment);
+        return "instructorDashboard/fragments/enrollmentDetailModalContent :: modalContent";
+    }
+
+    @GetMapping("/statistics")
+    @ResponseBody
+    public List<CourseEnrollmentStatsDTO> getEnrollmentStatistics() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long userId = userDetails.getUserId();
+        return enrollmentStatisticsService.getStatsForInstructor(userId);
     }
 }

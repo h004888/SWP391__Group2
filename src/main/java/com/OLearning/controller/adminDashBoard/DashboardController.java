@@ -75,7 +75,7 @@ public class DashboardController {
             @RequestParam("endDate") String endDateStr) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate startDate = LocalDate.parse(startDateStr, formatter);
-        LocalDate endDate = LocalDate.parse(endDateStr, formatter);
+        LocalDate endDate = LocalDate.parse(endDateStr, formatter).plusDays(1);
         return ordersService.getRevenueByDateRange(startDate, endDate);
     }
 
