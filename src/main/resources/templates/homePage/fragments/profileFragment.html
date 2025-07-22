@@ -1,4 +1,51 @@
 <div th:fragment="profile">
+    <section class="pt-0">
+        <div class="container-fluid px-0">
+            <div class="card bg-blue h-100px h-md-200px rounded-0" style="background:url('/assets/images/pattern/04.png') no-repeat center center; background-size:cover;"></div>
+        </div>
+        <div class="container mt-n4">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card bg-transparent card-body pb-0 px-0 mt-2 mt-sm-0">
+                        <div class="row d-sm-flex justify-sm-content-between mt-2 mt-md-0">
+                            <!-- Avatar -->
+                            <div class="col-auto">
+                                <div class="avatar avatar-xxl position-relative mt-n3">
+                                    <img class="avatar-img rounded-circle border border-white border-3 shadow" th:src="${profile.avatarUrl != null ? profile.avatarUrl : '/assets/images/avatar/01.jpg'}" alt="Avatar">
+
+                                </div>
+                            </div>
+                            <!-- Profile info -->
+                            <div class="col d-sm-flex justify-content-between align-items-center">
+                                <!-- <div>
+                                  <h1 class="my-1 fs-4" th:text="${profile.fullName}">User Name</h1>
+                                  <ul class="list-inline mb-0">
+                                    <li class="list-inline-item me-3 mb-1 mb-sm-0">
+                                      <span class="h6" th:text="${profile.points}">0</span>
+                                      <span class="text-body fw-light">points</span>
+                                    </li>
+                                    <li class="list-inline-item me-3 mb-1 mb-sm-0">
+                                      <span class="h6" th:text="${profile.completedCourses}">0</span>
+                                      <span class="text-body fw-light">Completed courses</span>
+                                    </li>
+                                    <li class="list-inline-item me-3 mb-1 mb-sm-0">
+                                      <span class="h6" th:text="${profile.completedLessons}">0</span>
+                                      <span class="text-body fw-light">Completed lessons</span>
+                                    </li>
+                                  </ul>
+                                </div> -->
+                                <div class="mt-2 mt-sm-0">
+                                    <a th:href="@{/learning/my-courses}" class="btn btn-outline-primary mb-0">View my courses</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr class="d-xl-none">
+                </div>
+            </div>
+        </div>
+    </section>
+<!-- Main content section follows here -->
     <style>
         .profile-sidebar-dark {
             background: #111;

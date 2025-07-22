@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
 public class CourseMaintenance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,10 +27,6 @@ public class CourseMaintenance {
     @JoinColumn(name = "FeeID")
     private Fee fee;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "OrderID")
-    private Order orders;
-
     @Column(name = "MonthYear")
     private LocalDate monthYear;
     
@@ -40,6 +35,12 @@ public class CourseMaintenance {
     
     @Column(name = "Status")
     private String status;
+
+    @Column(name = "RefCode")
+    private String refCode;
+
+    @Column(name = "Description")
+    private String description;
 
     @Column(name = "DueDate")
     private LocalDate dueDate;

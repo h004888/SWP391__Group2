@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
 public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,6 +30,9 @@ public class Notification {
     private String status;
     @Column(name = "CommentID")
     private Long commentId;
+
+    @Column(name = "EvidenceLink", nullable = true)
+    private String evidenceLink; // Link ảnh/video bằng chứng, có thể null
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "UserID", nullable = false)

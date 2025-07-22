@@ -24,6 +24,9 @@ public interface CourseMaintenanceService {
 
     Page<CourseMaintenance> filterMaintenances(String username, String status, LocalDate monthYear, Pageable pageable);
 
+    // New method for filtering maintenance payments by instructor
+    Page<CourseMaintenance> filterMaintenancesByInstructor(Long instructorId, String courseName, LocalDate monthYear, Pageable pageable);
+
     void checkOverdueMaintenance();
 
     List<Fee> getListFees();
@@ -33,4 +36,10 @@ public interface CourseMaintenanceService {
     void deleteFee(Long feeId);
 
     void addFee(Long minEnrollments, Long maxEnrollments, Long maintenanceFee);
+
+    List<CourseMaintenance> getMaintenancesByInstructorId(Long instructorId);
+
+    boolean processMaintenancePayment(Long maintenanceId, String refCode);
+
+    String getMaintenanceStatusById(Long maintenanceId);
 }

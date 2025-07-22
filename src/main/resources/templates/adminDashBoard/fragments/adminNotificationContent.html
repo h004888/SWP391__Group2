@@ -186,9 +186,11 @@
                         <label class="form-label mb-1 fw-bold text-primary">Notification type:</label>
                         <select name="type" class="form-select border-primary bg-light text-dark" style="min-width: 160px;">
                             <option value="">All</option>
-                            <option value="REPORT_COURSE" th:selected="${selectedTypes != null and selectedTypes.contains('REPORT_COURSE')}">Report Course</option>
-                            <option value="INSTRUCTOR_REPLY_BLOCK" th:selected="${selectedTypes != null and selectedTypes.contains('INSTRUCTOR_REPLY_BLOCK')}">Instructor Reply Block</option>
-                            <option value="REPORT_COMMENT" th:selected="${selectedTypes != null and selectedTypes.contains('REPORT_COMMENT')}">Report Comment</option>
+                            <option th:each="type : ${allTypes}"
+                                    th:value="${type}"
+                                    th:text="${type}"
+                                    th:selected="${selectedTypes != null and selectedTypes.contains(type)}">
+                            </option>
                         </select>
                     </div>
                     <div class="col-md-2 d-flex flex-column justify-content-end h-100">

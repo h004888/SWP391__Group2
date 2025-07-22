@@ -6,7 +6,7 @@
             <div class="d-flex align-items-center position-relative">
                 <!-- Image -->
                 <div class="avatar avatar-md">
-                    <img th:src="${u.profilePicture}" class="rounded-circle" alt="">
+                    <img th:src="${u.profilePicture != null and u.profilePicture != ''} ? ${u.profilePicture} : @{/img/undraw_profile.svg}" class="rounded-circle" alt="">
                 </div>
                 <div class="mb-0 ms-2">
                     <!-- Title -->
@@ -63,12 +63,33 @@
                 <i class="fas fa-unlock"></i>
             </a>
             <a th:if="${u.roleName=='Admin'}"
-               th:href="@{/admin/account/delete/{userId}(userId=${u.userId})}"
+               href="#"
                class="btn btn-danger-soft btn-round me-1 mb-1 mb-md-0"
-               onclick="return confirm('Bạn có chắc chắn muốn xóa nhân viên này không?')"
+               data-bs-toggle="modal"
+               th:attr="data-bs-target='#deleteEmployeeModal' + ${u.userId}"
                title="Delete">
                 <i class="fas fa-trash"></i>
             </a>
+            <!-- Modal xác nhận xóa employee (Admin) -->
+            <div class="modal fade" th:id="'deleteEmployeeModal' + ${u.userId}" tabindex="-1" aria-labelledby="deleteEmployeeModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form th:action="@{/admin/account/delete/{userId}(userId=${u.userId})}" method="post">
+                            <div class="modal-header bg-danger text-white">
+                                <h5 class="modal-title" id="deleteEmployeeModalLabel">Xác nhận xóa nhân viên</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Bạn có chắc chắn muốn xóa nhân viên này không?</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                <button type="submit" class="btn btn-danger">Xóa</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
             <a href="#" class="btn btn-success-soft btn-round me-1 mb-1 mb-md-0"
                data-bs-placement="top" title="Message"
                data-bs-toggle="modal"

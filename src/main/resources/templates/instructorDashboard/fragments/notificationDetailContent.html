@@ -153,7 +153,7 @@
                 <h1 class="h3 mb-0 text-gray-800">
                     <i class="fas fa-bell me-2"></i>Notification Details
                 </h1>
-                <a th:href="@{/instructordashboard/notifications}" class="btn btn-outline-secondary">
+                <a th:href="@{/instructor/notifications}" class="btn btn-outline-secondary">
                     <i class="fas fa-arrow-left me-1"></i>Back to Notifications
                 </a>
             </div>
@@ -241,7 +241,7 @@
                             <h6 class="mb-3">
                                 <i class="fas fa-book me-2"></i>Course Information
                             </h6>
-                            <p class="mb-2"><strong th:text="${notification.course.title}"></strong></p>
+                            <p class="mb-2"><strong th:text="${notification.course.title != null ? notification.course.title : 'N/A'}"></strong></p>
                             <small class="text-muted">Course ID: <span th:text="${notification.course.courseId}"></span></small>
                         </div>
                     </div>
@@ -252,7 +252,7 @@
             <div class="d-flex gap-3 justify-content-center">
                 <!-- Mark as read if unread -->
                 <form th:if="${notification.status != 'sent'}"
-                      th:action="@{/instructordashboard/notifications/mark-read(id=${notification.notificationId})}"
+                      th:action="@{/instructor/notifications/mark-read(id=${notification.notificationId})}"
                       method="post">
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-check me-2"></i>Mark as Read
@@ -261,7 +261,7 @@
 
                 <!-- View course for REPORT_COURSE (block course) notification -->
                 <a th:if="${notification.type == 'COURSE_BLOCKED'}"
-                   th:href="@{/instructordashboard/courses/view/{id}(id=${notification.course.courseId})}"
+                   th:href="@{/instructor/courses/view/{id}(id=${notification.course.courseId})}"
                    class="btn btn-success">
                     <i class="fas fa-book-open me-2"></i>Xem chi tiết khóa học
                 </a>
@@ -272,11 +272,15 @@
                 <h6 class="mb-3">
                     <i class="fas fa-reply me-2"></i>Phản hồi về quyết định khóa khóa học
                 </h6>
-                <form th:action="@{/instructordashboard/courses/reply-block}" method="post">
+                <form th:action="@{/instructor/courses/reply-block}" method="post" enctype="multipart/form-data">
                     <input type="hidden" name="courseId" th:value="${notification.course.courseId}" />
                     <input type="hidden" name="notificationId" th:value="${notification.notificationId}" />
                     <div class="mb-3">
                         <textarea name="replyContent" required class="form-control" rows="3" placeholder="Nhập phản hồi của bạn..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="evidenceFile" class="form-label">Tải lên ảnh hoặc video làm bằng chứng (tùy chọn):</label>
+                        <input type="file" class="form-control" id="evidenceFile" name="evidenceFile" accept="image/*,video/*">
                     </div>
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary">

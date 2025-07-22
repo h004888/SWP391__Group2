@@ -1,12 +1,14 @@
 let currentPage = 0;
 let pageSize = 5;
 
+
+
 function getFilterValues() {
     const name = $('#filterUsername').val()?.trim() || '';
     const sort = $('#sortSelect').val() || '';
-    
+
     console.log('Filter values:', { name, sort });
-    
+
     return {
         name: name,
         sort: sort
@@ -21,9 +23,9 @@ function createAjaxData(page = 0, size = pageSize) {
         page: page,
         size: size
     };
-    
+
     console.log('AJAX data:', data);
-    
+
     return data;
 }
 
@@ -41,7 +43,7 @@ function handleAjaxResponse(tableData, paginationData, tableBody, paginationCont
     } else {
         paginationContainer.html('');
     }
-    
+
     // Re-attach event handlers for new elements
     attachEventHandlers();
 }
@@ -115,24 +117,30 @@ function attachEventHandlers() {
         const categoryName = $(this).text().trim();
         loadCourseDetails(categoryId, categoryName);
     });
-    
+
     // Re-attach delete category events
     $('.delete-category').off('click').on('click', function() {
         const categoryId = $(this).data('id');
-        if (confirm('Are you sure you want to delete this category?')) {
-            $.ajax({
-                url: '/admin/category/delete/' + categoryId,
-                method: 'DELETE',
-                success: function(response) {
-                    // Reload current page after successful deletion
-                    filterCategories(currentPage, pageSize);
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error deleting category:', error);
-                    alert('Error deleting category. Please try again.');
-                }
-            });
-        }
+        $.ajax({
+            url: '/admin/category/delete/' + categoryId,
+            method: 'DELETE',
+            success: function(response) {
+                // Reload current page after successful deletion
+                filterCategories(currentPage, pageSize);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error deleting category:', error);
+                alert('Error deleting category. Please try again.');
+            }
+        });
+    });
+
+    // Re-attach edit category events
+    $('.edit-category-btn').off('click').on('click', function() {
+        const categoryId = $(this).data('id');
+        const categoryName = $(this).data('name');
+        $('#editCategoryId').val(categoryId);
+        $('#editCategoryName').val(categoryName);
     });
 }
 
@@ -146,13 +154,13 @@ function showAlert(message, type) {
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     `;
-    
+
     // Remove existing alerts
     $('.alert').remove();
-    
+
     // Add new alert
     $('body').append(alertHtml);
-    
+
     // Auto-hide after 5 seconds
     setTimeout(function() {
         $('.alert').fadeOut('slow');
@@ -169,7 +177,7 @@ $(document).on('click', '.pagination .page-link', function (e) {
 
 $(document).ready(function () {
     console.log('Document ready - initializing category management');
-    
+
     // Initial load
     filterCategories(0, pageSize);
 
@@ -208,14 +216,14 @@ $(document).ready(function () {
     // Add category form submission
     $('#categoryForm').on('submit', function(e) {
         e.preventDefault();
-        
+
         const formData = $(this).serialize();
         const submitBtn = $(this).find('button[type="submit"]');
         const originalText = submitBtn.html();
-        
+
         // Disable button and show loading
         submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Adding...');
-        
+
         $.ajax({
             url: $(this).attr('action'),
             method: 'POST',
@@ -224,10 +232,10 @@ $(document).ready(function () {
                 // Close modal and reset form
                 $('#categoryModal').modal('hide');
                 $('#categoryForm')[0].reset();
-                
+
                 // Reload categories
                 filterCategories(0, pageSize);
-                
+
                 // Show success message
                 showAlert('Category added successfully!', 'success');
             },
@@ -237,6 +245,70 @@ $(document).ready(function () {
             },
             complete: function() {
                 // Re-enable button
+                submitBtn.prop('disabled', false).html(originalText);
+            }
+        });
+    });
+
+    // Delete Category Modal - Fill data when modal opens
+    $('.delete-category').on('click', function() {
+        const categoryId = $(this).data('id');
+        const categoryName = $(this).data('name');
+        $('#deleteCategoryId').val(categoryId);
+        $('#deleteCategoryName').text(categoryName);
+    });
+
+    // Edit Category Modal - Fill data when modal opens
+    $('.edit-category-btn').on('click', function() {
+        const categoryId = $(this).data('id');
+        const categoryName = $(this).data('name');
+        $('#editCategoryId').val(categoryId);
+        $('#editCategoryName').val(categoryName);
+    });
+
+    // Edit Category form submission via AJAX
+    $('#editCategoryForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = $(this).serialize();
+        const submitBtn = $(this).find('button[type="submit"]');
+        const originalText = submitBtn.html();
+        
+        // Disable button and show loading
+        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Saving...');
+        
+        $.ajax({
+            url: $(this).attr('action'),
+            method: 'POST',
+            data: formData,
+            success: function(response) {
+                // Kiểm tra response JSON từ server
+                if (response.success) {
+                    // Thành công
+                    $('#editCategoryModal').modal('hide');
+                    $('#editCategoryForm')[0].reset();
+                    filterCategories(0, pageSize);
+                    showAlert(response.success, 'success');
+                } else if (response.error) {
+                    // Có lỗi từ server
+                    showAlert(response.error, 'error');
+                } else {
+                    // Fallback
+                    showAlert('Category updated successfully!', 'success');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error updating category:', error);
+                let errorMessage = 'Error updating category. Please try again.';
+                
+                // Cố gắng parse JSON error response
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMessage = xhr.responseJSON.error;
+                }
+                
+                showAlert(errorMessage, 'error');
+            },
+            complete: function() {
                 submitBtn.prop('disabled', false).html(originalText);
             }
         });

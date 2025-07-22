@@ -2,13 +2,10 @@ package com.OLearning.service.user;
 
 import com.OLearning.dto.user.UserDTO;
 import com.OLearning.dto.user.UserDetailDTO;
-import com.OLearning.dto.course.CourseDTO;
-import com.OLearning.dto.login.RegisterDTO;
+import com.OLearning.dto.user.UserProfileUpdateDTO;import com.OLearning.dto.login.RegisterDTO;
 import com.OLearning.dto.user.UserProfileEditDTO;
 import com.OLearning.entity.Role;
 import com.OLearning.entity.User;
-
-import org.mapstruct.control.MappingControl.Use;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -43,7 +40,7 @@ public interface UserService {
 
     boolean deleteAcc(Long id);
 
-    boolean changStatus(Long id);
+    boolean changStatus(Long id, String reason);
 
 //    List<UserDTO> searchByName(String keyword, Long roleId);
 
@@ -73,5 +70,10 @@ public interface UserService {
 
     Optional<UserProfileEditDTO> getProfileByUsername(String username);
     void updateProfileByUsername(String username, UserProfileEditDTO profileEditDTO);
+
+    // Profile management methods
+    User updateProfile(Long userId, UserProfileUpdateDTO profileUpdateDTO);
+
+    User updateProfilePicture(Long userId, String newProfilePictureUrl);
 
 }

@@ -28,4 +28,5 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     Page<Report> findByReportTypeAndStatus(String reportType, String status, Pageable pageable);
     Page<Report> findByReportType(String reportType, Pageable pageable);
     Page<Report> findByStatus(String status, Pageable pageable);
+    Report findFirstByCourse_CourseIdAndNotification_NotificationId(Long courseId, Long notificationId);
 } 

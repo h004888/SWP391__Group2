@@ -17,8 +17,8 @@ function getTableBodyElement(status) {
             return $('#approvedTableBody');
         case 'rejected':
             return $('#rejectedTableBody');
-        case 'resubmit':
-            return $('#resubmitTableBody');
+        case 'publish':
+            return $('#publishTableBody');
         default:
             return $('#pendingTableBody');
     }
@@ -34,8 +34,8 @@ function getPaginationElement(status) {
             return $('#approvedPagination');
         case 'rejected':
             return $('#rejectedPagination');
-        case 'resubmit':
-            return $('#resubmitPagination');
+        case 'publish':
+            return $('#publishPagination');
         default:
             return $('#pendingPagination');
     }
@@ -131,7 +131,8 @@ function updateStatusCountBadge(status, totalCount) {
         'approved': 'approveCount',
         'rejected': 'rejectCount',
         'resubmit': 'resubmitCount',
-        'draft': 'draftCount'
+        'draft': 'draftCount',
+        'publish': 'publishCount'
     };
 
     const badgeId = statusMap[status];
@@ -164,7 +165,7 @@ $(document).on('click', '.pagination .page-link', function (e) {
 
 $(document).ready(function () {
     // Load initial data for all tabs
-    const statuses = ['pending', 'draft', 'approved', 'rejected', 'resubmit'];
+    const statuses = ['pending', 'draft', 'approved', 'rejected', 'resubmit', 'publish'];
     statuses.forEach(status => {
         loadCourses(status, 0);
     });

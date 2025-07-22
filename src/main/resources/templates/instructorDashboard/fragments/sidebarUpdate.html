@@ -2,7 +2,7 @@
 
   <!-- Navbar brand for xl START -->
   <div class="d-flex align-items-center">
-    <a class="navbar-brand" th:href="@{/instructordashboard}">
+    <a class="navbar-brand" th:href="@{/instructor}">
       <img class="navbar-brand-item" th:src="@{/assets/images/logo-light.svg}" alt="">
     </a>
   </div>
@@ -16,7 +16,7 @@
       <ul class="navbar-nav flex-column" id="navbar-sidebar">
 
         <!-- Menu item 1 -->
-        <li class="nav-item"><a th:href="@{/instructordashboard}" class="nav-link active"><i
+        <li class="nav-item"><a th:href="@{/instructor}" class="nav-link active"><i
                 class="bi bi-house fa-fw me-2"></i>Dashboard</a></li>
 
         <!-- Title -->
@@ -28,13 +28,13 @@
 
 
         <!-- Menu item 4 -->
-        <li class="nav-item"><a class="nav-link" th:href="@{/instructordashboard/courses}">
+        <li class="nav-item"><a class="nav-link" th:href="@{/instructor/courses}">
           <i class="fas fa-fw fa-trophy"></i>
           <span>Courses</span>
         </a></li>
 
         <li class="nav-item">
-          <a class="nav-link" th:href="@{/instructordashboard/enrolled}">
+          <a class="nav-link" th:href="@{/instructor/enrolled}">
             <i class="fas fa-user-graduate fa-fw me-1"></i>
             <span>Students</span>
           </a>
@@ -42,17 +42,30 @@
 
         <!-- Menu item 5 -->
         <li class="nav-item">
-          <a class="nav-link" th:href="@{/instructordashboard}">
+          <a class="nav-link" th:href="@{/instructor/orders}">
             <i class="fas fa-fw fa-credit-card"></i>
             <span>Orders & Payments</span>
           </a>
         </li>
 
-        <!-- Menu item 6 -->
         <li class="nav-item">
-          <a class="nav-link" th:href="@{/instructordashboard}">
+          <a class="nav-link" th:href="@{/instructor/maintenance}">
             <i class="fas fa-fw fa-receipt"></i>
             <span>CourseMaintenance</span>
+          </a>
+        </li>
+        
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/instructor/profile}">
+            <i class="fas fa-fw fa-user"></i>
+            <span>Profile</span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/instructor/voucher}">
+            <i class="fa fa-ticket-alt"></i>
+            <span>Voucher</span>
           </a>
         </li>
 

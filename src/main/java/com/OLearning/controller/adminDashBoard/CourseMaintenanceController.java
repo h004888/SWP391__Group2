@@ -173,7 +173,7 @@ public class CourseMaintenanceController {
     public String updateFee(
             @RequestParam Long feeId,
             @RequestParam Long minEnrollments,
-            @RequestParam Long maxEnrollments,
+            @RequestParam(required = false) Long maxEnrollments,
             @RequestParam Long maintenanceFee,
             RedirectAttributes redirectAttributes) {
         try {
@@ -201,7 +201,7 @@ public class CourseMaintenanceController {
     @PostMapping("/fees/add")
     public String addFee(
             @RequestParam Long minEnrollments,
-            @RequestParam Long maxEnrollments,
+            @RequestParam(required = false) Long maxEnrollments,
             @RequestParam Long maintenanceFee,
             RedirectAttributes redirectAttributes) {
         try {

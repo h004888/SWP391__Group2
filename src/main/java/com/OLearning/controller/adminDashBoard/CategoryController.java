@@ -1,11 +1,14 @@
 package com.OLearning.controller.adminDashBoard;
 
 import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import com.OLearning.entity.Category;
@@ -42,7 +45,7 @@ public class CategoryController {
                                    @RequestParam(value = "name", required = false) String name,
                                    @RequestParam(value = "sort", required = false) String sort) {
         
-        // Clean up parameters - ensure empty string is treated as null for sort
+        //ensure empty string is treated as null for sort
         String cleanName = (name != null && !name.trim().isEmpty()) ? name.trim() : null;
         String cleanSort = (sort != null && !sort.trim().isEmpty()) ? sort.trim() : null;
         
@@ -121,55 +124,32 @@ public class CategoryController {
         }
     }
 
-    // Edit category functionality
-    @GetMapping("/category/edit/{id}")
-    public String editCategory(@PathVariable Long id, Model model,
-                              @RequestParam(value = "page", defaultValue = "0") int page,
-                              @RequestParam(value = "sort", required = false) String sort,
-                              @RequestParam(value = "name", required = false) String search) {
-        
-        Category category = categoryService.findById(id).orElse(null);
-        if (category == null) {
-            return "redirect:/admin/category";
-        }
-        
-        model.addAttribute("category", category);
-        model.addAttribute("currentPage", page);
-        model.addAttribute("sort", sort);
-        model.addAttribute("name", search);
-        model.addAttribute("fragmentContent", "adminDashBoard/fragments/category :: editCategory");
-        return "adminDashBoard/index";
-    }
-
     @PostMapping("/category/edit")
-    public String updateCategory(@RequestParam Long id,
-                                @RequestParam String name,
-                                @RequestParam(value = "page", defaultValue = "0") int page,
-                                @RequestParam(value = "sort", required = false) String sort,
-                                @RequestParam(value = "search", required = false) String search,
-                                RedirectAttributes redirectAttributes) {
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> updateCategory(@RequestParam Long id,
+                                                             @RequestParam String name) {
         try {
             Category category = categoryService.findById(id).orElse(null);
             if (category == null) {
-                redirectAttributes.addFlashAttribute("errorMessage", ERROR_CATEGORY_NOT_FOUND);
-                return "redirect:/admin/category";
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", ERROR_CATEGORY_NOT_FOUND));
             }
             
             // Check if name already exists for other categories
             if (categoryService.existsByNameAndIdNot(name, id)) {
-                redirectAttributes.addFlashAttribute("errorMessage", ERROR_CATEGORY_NAME_EXISTS);
-                return "redirect:/admin/category/edit/" + id + "?page=" + page + "&sort=" + sort + "&name=" + search;
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("error", ERROR_CATEGORY_NAME_EXISTS));
             }
             
             category.setName(name);
             categoryService.save(category);
-            redirectAttributes.addFlashAttribute("successMessage", SUCCESS_CATEGORY_UPDATED);
+            
+            return ResponseEntity.ok(Map.of("success", SUCCESS_CATEGORY_UPDATED));
             
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", ERROR_CATEGORY_UPDATE + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", ERROR_CATEGORY_UPDATE + e.getMessage()));
         }
-        
-        return "redirect:/admin/category?page=" + page + "&sort=" + sort + "&name=" + search;
     }
 
     // Add category functionality

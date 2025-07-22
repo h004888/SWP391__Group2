@@ -12,8 +12,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
+
 import java.util.UUID;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -30,7 +31,8 @@ public class UploadFileImpl implements UploadFile {
         return uploadVideoSeFile(file);
     }
 
-    private String uploadFile(MultipartFile file, String resourceType) throws IOException {
+    @Override
+    public String uploadFile(MultipartFile file, String resourceType) throws IOException {
         assert file.getOriginalFilename() != null;
         String publicValue = generatePublicValue(file.getOriginalFilename());
         String extension = getFileName(file.getOriginalFilename())[1];//jpg, png
@@ -49,6 +51,28 @@ public class UploadFileImpl implements UploadFile {
         }
     }
 
+    @Override
+    public String uploadFileRaw(MultipartFile file, String resourceType) throws IOException {
+        assert file.getOriginalFilename() != null;
+        String publicValue = generatePublicValue(file.getOriginalFilename());
+        String extension = getFileName(file.getOriginalFilename())[1];//jpg, png
+        File fileUpload = convert(file, publicValue, extension);
+        try {
+            Map uploadResult = cloudinary.uploader().upload(
+                fileUpload,
+                ObjectUtils.asMap(
+                    "public_id", publicValue,
+                    "resource_type", resourceType
+                )
+            );
+            // Lấy URL trả về từ Cloudinary
+            Object url = uploadResult.get("secure_url");
+            return url != null ? url.toString() : null;
+        } finally {
+            cleanDisk(fileUpload);
+        }
+    }
+//upload return video duoi dang publicId
     private String uploadVideoSeFile(MultipartFile file) throws IOException {
         assert file.getOriginalFilename() != null;
         String originalFilename = file.getOriginalFilename();
@@ -97,19 +121,12 @@ public class UploadFileImpl implements UploadFile {
             log.error("Error deleting file: {}", file.getName(), e);
         }
     }
-
+    //generate tu publicId sang Signed de co the phat
     @Override
-    public String generateSignedVideoUrl(String publicId, int expireSeconds, String ResourceType) {
-        long timestamp = System.currentTimeMillis() / 1000L;
-        long expireAt = timestamp + expireSeconds;
-        Map options = ObjectUtils.asMap(
-                "resource_type", ResourceType,
-                "type", "private",
-                "sign_url", true,
-                "expires_at", expireAt
-        );
+    public String generateSignedVideoUrl(String publicId, String resourceType) {
+        // Không tự thêm extension, chỉ trả về đúng publicId như lưu trên Cloudinary
         return cloudinary.url()
-                .resourceType(ResourceType)
+                .resourceType(resourceType)
                 .type("private")
                 .signed(true)
                 .generate(publicId);

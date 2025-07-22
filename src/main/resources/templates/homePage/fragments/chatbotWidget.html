@@ -1,5 +1,5 @@
 <!-- Chatbot Widget Fragment -->
-<div th:fragment="chatbotWidget" class="chatbot-widget-container">
+<div th:fragment="chatbotWidget" class="chatbot-widget-container" xmlns:sec="http://www.w3.org/1999/xhtml">
     <!-- Chatbot Toggle Button -->
     <div class="chatbot-toggle-btn" onclick="toggleChatbot()" id="chatbotToggleBtn">
         <i class="fas fa-robot"></i>
@@ -12,12 +12,9 @@
         <div class="chatbot-header">
             <div class="chatbot-title">
                 <i class="fas fa-robot me-2"></i>
-                <span>OLearning AI Assistant</span>
+                <span>OLearning AI </span>
             </div>
             <div class="chatbot-actions">
-                <button class="btn btn-sm btn-outline-warning" onclick="clearChatbotHistory()" title="Xóa lịch sử">
-                    <i class="fas fa-trash"></i>
-                </button>
                 <button class="btn btn-sm btn-outline-danger" onclick="closeChatbot()" title="Đóng">
                     <i class="fas fa-times"></i>
                 </button>
@@ -31,14 +28,20 @@
                         <i class="fas fa-robot"></i>
                     </div>
                     <div class="message-content">
-                        <p>Xin chào! Tôi là trợ lý AI của OLearning. Tôi có thể giúp bạn:</p>
-                        <ul>
-                            <li>Tìm hiểu về các khóa học</li>
-                            <li>Hướng dẫn học tập</li>
-                            <li>Giải đáp thắc mắc</li>
-                            <li>Hỗ trợ kỹ thuật</li>
-                        </ul>
-                        <p>Hãy bắt đầu cuộc trò chuyện!</p>
+                        <th:block sec:authorize="isAuthenticated()">
+                            <p>Xin chào! Tôi là trợ lý AI của OLearning. Tôi có thể giúp bạn:</p>
+                            <ul>
+                                <li>Tìm hiểu về các khóa học</li>
+                                <li>Hướng dẫn học tập</li>
+                                <li>Giải đáp thắc mắc</li>
+                            </ul>
+                            <p>Hãy bắt đầu cuộc trò chuyện!</p>
+                        </th:block>
+                        <th:block sec:authorize="isAnonymous()">
+                            <p>
+                                Bạn cần <a href="/login" style="color:#4e73df;text-decoration:underline;">đăng nhập</a> để sử dụng chatbot.
+                            </p>
+                        </th:block>
                         <small class="message-time">Bây giờ</small>
                     </div>
                 </div>
@@ -54,7 +57,7 @@
             <span>AI đang nhập...</span>
         </div>
         
-        <div class="chatbot-input">
+        <div class="chatbot-input" sec:authorize="isAuthenticated()">
             <input type="text" id="chatbotMessageInput" placeholder="Nhập tin nhắn..." onkeypress="handleChatbotKeyPress(event)">
             <button id="chatbotSendBtn" onclick="sendChatbotMessage()">
                 <i class="fas fa-paper-plane"></i>

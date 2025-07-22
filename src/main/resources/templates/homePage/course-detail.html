@@ -3,278 +3,33 @@
 
 <!-- Mirrored from stackbros.in/eduport/landing/course-detail.html by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 06 Jun 2025 07:32:06 GMT -->
 
-<head>
-	<title>Eduport - LMS, Education and Course Theme</title>
-
-	<!-- Meta Tags -->
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<meta name="author" content="StackBros">
-	<meta name="description" content="Eduport- LMS, Education and Course Theme">
-
-	<!-- Dark mode -->
-	<script>
-		const storedTheme = localStorage.getItem('theme')
-
-		const getPreferredTheme = () => {
-			if (storedTheme) {
-				return storedTheme
-			}
-			return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'light'
-		}
-
-		const setTheme = function (theme) {
-			if (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-				document.documentElement.setAttribute('data-bs-theme', 'dark')
-			} else {
-				document.documentElement.setAttribute('data-bs-theme', theme)
-			}
-		}
-
-		setTheme(getPreferredTheme())
-
-		window.addEventListener('DOMContentLoaded', () => {
-			var el = document.querySelector('.theme-icon-active');
-			if (el != 'undefined' && el != null) {
-				const showActiveTheme = theme => {
-					const activeThemeIcon = document.querySelector('.theme-icon-active use')
-					const btnToActive = document.querySelector(`[data-bs-theme-value="${theme}"]`)
-					const svgOfActiveBtn = btnToActive.querySelector('.mode-switch use').getAttribute('href')
-
-					document.querySelectorAll('[data-bs-theme-value]').forEach(element => {
-						element.classList.remove('active')
-					})
-
-					btnToActive.classList.add('active')
-					activeThemeIcon.setAttribute('href', svgOfActiveBtn)
-				}
-
-				window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-					if (storedTheme !== 'light' || storedTheme !== 'dark') {
-						setTheme(getPreferredTheme())
-					}
-				})
-
-				showActiveTheme(getPreferredTheme())
-
-				document.querySelectorAll('[data-bs-theme-value]')
-					.forEach(toggle => {
-						toggle.addEventListener('click', () => {
-							const theme = toggle.getAttribute('data-bs-theme-value')
-							localStorage.setItem('theme', theme)
-							setTheme(theme)
-							showActiveTheme(theme)
-						})
-					})
-
-			}
-		})
-
-	</script>
-
-	<!-- Favicon -->
-	<link rel="shortcut icon" href="assets/images/favicon.ico">
-
-	<!-- Google Font -->
-	<link rel="preconnect" href="https://fonts.googleapis.com/">
-	<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
-	<link rel="stylesheet"
-		href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&amp;family=Roboto:wght@400;500;700&amp;display=swap">
-
-	<!-- Plugins CSS -->
-	<link rel="stylesheet" type="text/css" href="assets/vendor/font-awesome/css/all.min.css">
-	<link rel="stylesheet" type="text/css" href="assets/vendor/bootstrap-icons/bootstrap-icons.css">
-	<link rel="stylesheet" type="text/css" href="assets/vendor/tiny-slider/tiny-slider.css">
-	<link rel="stylesheet" type="text/css" href="assets/vendor/glightbox/css/glightbox.css">
-	<link rel="stylesheet" type="text/css" href="assets/vendor/choices/css/choices.min.css">
-
-	<!-- Theme CSS -->
-	<link rel="stylesheet" type="text/css" href="assets/css/style.css">
-
-</head>
+<head th:replace="~{homePage/fragments/header :: header}"></head>
 
 <body>
 
 	<!-- Header START -->
-	<header class="navbar-light navbar-sticky">
-		<!-- Logo Nav START -->
-		<nav class="navbar navbar-expand-xl">
-			<div class="container">
-				<!-- Logo START -->
-				<a class="navbar-brand" th:href="@{/home}">
-					<img class="light-mode-item navbar-brand-item" src="assets/images/logo.svg" alt="logo">
-					<img class="dark-mode-item navbar-brand-item" src="assets/images/logo-light.svg" alt="logo">
-				</a>
-				<!-- Logo END -->
-
-				<!-- Responsive navbar toggler -->
-				<button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse"
-					data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false"
-					aria-label="Toggle navigation">
-					<span class="navbar-toggler-animation">
-						<span></span>
-						<span></span>
-						<span></span>
-					</span>
-				</button>
-
-				<!-- Main navbar START -->
-				<div class="navbar-collapse w-100 collapse" id="navbarCollapse">
-
-					<!-- Nav Main menu START -->
-					<ul class="navbar-nav navbar-nav-scroll mx-auto">
-						<!-- Nav item 1 Demos -->
-						<li class="nav-item dropdown">
-							<a class="nav-link " th:href="@{/home/coursesGrid}" id="demoMenu" aria-haspopup="true"
-								aria-expanded="false">Courses</a>
-
-						</li>
-						<li class="nav-item dropdown">
-							<a class="nav-link " th:href="@{/learning}" aria-haspopup="true"
-								aria-expanded="false">Education</a>
-
-						</li>
-						<li class="nav-item dropdown">
-							<a class="nav-link " href="#" aria-haspopup="true" aria-expanded="false">About</a>
-
-						</li>
-						<li class="nav-item dropdown">
-							<a class="nav-link " href="#" aria-haspopup="true" aria-expanded="false">Contact</a>
-
-						</li>
-						<li class="nav-item dropdown">
-							<a class="nav-link " href="#"
-							   aria-haspopup="true" aria-expanded="false">Wishlist</a>
-
-						</li>
-					</ul>
-					<!-- Nav Main menu END -->
-
-					<!-- Nav Search START -->
-					<div class="nav my-3 my-xl-0 px-4 flex-nowrap align-items-center">
-						<div class="nav-item w-100">
-							<form class="position-relative">
-								<input class="form-control pe-5 bg-transparent" type="search" placeholder="Search"
-									aria-label="Search">
-								<button
-									class="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset"
-									type="submit">
-									<i class="fas fa-search fs-6 "></i>
-								</button>
-							</form>
-						</div>
-					</div>
-					<!-- Nav Search END -->
-				</div>
-				<!-- Main navbar END -->
-
-				<!-- Profile START -->
-				<div class="dropdown ms-1 ms-lg-0" sec:authorize="isAuthenticated()">
-					<a class="avatar avatar-sm p-0" href="#" id="profileDropdown" role="button"
-						data-bs-auto-close="outside" data-bs-display="static" data-bs-toggle="dropdown"
-						aria-expanded="false">
-						<img class="avatar-img rounded-circle" src="assets/images/avatar/01.jpg" alt="avatar">
-					</a>
-					<ul class="dropdown-menu dropdown-animation dropdown-menu-end shadow pt-3"
-						aria-labelledby="profileDropdown">
-						<!-- Profile info -->
-						<li class="px-3 mb-3">
-							<div class="d-flex align-items-center">
-								<!-- Avatar -->
-								<div class="avatar me-3">
-									<img class="avatar-img rounded-circle shadow" src="assets/images/avatar/01.jpg"
-										alt="avatar">
-								</div>
-								<div>
-									<a class="h6" href="#"
-										th:text="${currentUser != null ? currentUser.username : 'User'}">Lori
-										Ferguson</a>
-									<p class="small m-0" th:text="${currentUser != null ? currentUser.email : 'example@gmail.com'}">
-										example@gmail.com</p>
-								</div>
-							</div>
-						</li>
-						<li>
-							<hr class="dropdown-divider">
-						</li>
-						<!-- Links -->
-						<li><a class="dropdown-item" href="#"><i class="bi bi-person fa-fw me-2"></i>Edit Profile</a>
-						</li>
-						<li><a class="dropdown-item" href="#"><i class="bi bi-gear fa-fw me-2"></i>Account Settings</a>
-						</li>
-						<li><a class="dropdown-item" href="#"><i class="bi bi-info-circle fa-fw me-2"></i>Help</a></li>
-						<li>
-							<a class="dropdown-item bg-danger-soft-hover" th:href="@{/logout}">
-								<i class="bi bi-power fa-fw me-2"></i>
-								Sign Out
-							</a>
-						</li>
-
-						<hr class="dropdown-divider">
-						</li>
-						<!-- Dark mode options START -->
-						<li>
-							<div
-								class="bg-light dark-mode-switch theme-icon-active d-flex align-items-center p-1 rounded mt-2">
-								<button type="button" class="btn btn-sm mb-0" data-bs-theme-value="light">
-									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-										class="bi bi-sun fa-fw mode-switch" viewBox="0 0 16 16">
-										<path
-											d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z" />
-										<use href="#"></use>
-									</svg> Light
-								</button>
-								<button type="button" class="btn btn-sm mb-0" data-bs-theme-value="dark">
-									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-										class="bi bi-moon-stars fa-fw mode-switch" viewBox="0 0 16 16">
-										<path
-											d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278zM4.858 1.311A7.269 7.269 0 0 0 1.025 7.71c0 4.02 3.279 7.276 7.319 7.276a7.316 7.316 0 0 0 5.205-2.162c-.337.042-.68.063-1.029.063-4.61 0-8.343-3.714-8.343-8.29 0-1.167.242-2.278.681-3.286z" />
-										<path
-											d="M10.794 3.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387a1.734 1.734 0 0 0-1.097 1.097l-.387 1.162a.217.217 0 0 1-.412 0l-.387-1.162A1.734 1.734 0 0 0 9.31 6.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387a1.734 1.734 0 0 0 1.097-1.097l.387-1.162zM13.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.156 1.156 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.156 1.156 0 0 0-.732-.732l-.774-.258a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732L13.863.1z" />
-										<use href="#"></use>
-									</svg> Dark
-								</button>
-								<button type="button" class="btn btn-sm mb-0 active" data-bs-theme-value="auto">
-									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-										class="bi bi-circle-half fa-fw mode-switch" viewBox="0 0 16 16">
-										<path d="M8 15A7 7 0 1 0 8 1v14zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16z" />
-										<use href="#"></use>
-									</svg> Auto
-								</button>
-							</div>
-						</li>
-						<!-- Dark mode options END-->
-					</ul>
-				</div>
-				<!-- Profile START -->
-			</div>
-		</nav>
-		<!-- Logo Nav END -->
-	</header>
+	<div th:replace="~{homePage/fragments/navHeader :: navHeader }"></div>
 	<!-- Header END -->
 
 	<!-- **************** MAIN CONTENT START **************** -->
 	<main>
-
-		<!-- Flash Messages -->
-		<div class="container mt-3">
-			<div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
-				<span th:text="${message}"></span>
-				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-			</div>
-			<div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
-				<span th:text="${success}"></span>
-				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-			</div>
-			<div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-				<span th:text="${error}"></span>
-				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-			</div>
-			<div th:if="${info}" class="alert alert-info alert-dismissible fade show" role="alert">
-				<span th:text="${info}"></span>
-				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-			</div>
-		</div>
+		<div th:replace="~{homePage/fragments/notification :: notification}"></div>
+		<!-- Notification System -->
+		<div th:if="${message}" th:attr="data-message=${message}" id="server-message" style="display: none;"></div>
+		<div th:if="${error}" th:attr="data-message=${error}" id="server-error" style="display: none;"></div>
+		<script>
+			// Check for server messages on page load
+			document.addEventListener('DOMContentLoaded', function() {
+				const errorDiv = document.getElementById('server-error');
+				if (errorDiv && errorDiv.getAttribute('data-message')) {
+					showNotification(errorDiv.getAttribute('data-message'), 'error');
+				}
+				const serverMessage = document.getElementById('server-message');
+				if (serverMessage && serverMessage.getAttribute('data-message')) {
+					showNotification(serverMessage.getAttribute('data-message'), 'success');
+				}
+			});
+		</script>
 
 		<!-- =======================
 Page intro START -->
@@ -288,7 +43,7 @@ Page intro START -->
 							Marketing</h6>
 						<!-- Title -->
 						<h1 th:text="${course.title}">The Complete Digital Marketing Course - 12 Courses in 1</h1>
-						<p th:text="${course.description}">Satisfied conveying a dependent contented he gentleman
+						<p th:utext="${course.description}">Satisfied conveying a dependent contented he gentleman
 							agreeable do be. Warrant private blushes removed an in equally totally if. Delivered
 							dejection necessary objection do Mr prevailed. Mr feeling does chiefly cordial in do.</p>
 						<!-- Content -->
@@ -310,7 +65,7 @@ Page intro START -->
 							</li>
 							<li class="list-inline-item h6 mb-0"><i class="fas fa-globe text-info me-2"></i>English</li>
 						</ul>
-						
+
 						<!-- Report Button -->
 						<div class="mt-3">
 							<button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#reportCourseModal">
@@ -381,25 +136,25 @@ Page content START -->
 										<h5 class="mb-3">Course Description</h5>
 										<p class="mb-3">Welcome to the <strong> Digital Marketing Ultimate Course Bundle
 												- 12 Courses in 1 (Over 36 hours of content)</strong></p>
-										<p class="mb-3">In this practical hands-on training, you’re going to learn to
+										<p class="mb-3">In this practical hands-on training, you're going to learn to
 											become a digital marketing expert with this <strong> ultimate course bundle
 												that includes 12 digital marketing courses in 1!</strong></p>
 										<p class="mb-3">If you wish to find out the skills that should be covered in a
 											basic digital marketing course syllabus in India or anywhere around the
 											world, then reading this blog will help. Before we delve into the advanced
 											<strong><a href="#" class="text-reset text-decoration-underline">digital
-													marketing course</a></strong> syllabus, let’s look at the scope of
+													marketing course</a></strong> syllabus, let's look at the scope of
 											digital marketing and what the future holds.
 										</p>
 										<p class="mb-0">We focus a great deal on the understanding of behavioral
 											psychology and influence triggers which are crucial for becoming a well
 											rounded Digital Marketer. We understand that theory is important to build a
-											solid foundation, we understand that theory alone isn’t going to get the job
-											done so that’s why this course is packed with practical hands-on examples
+											solid foundation, we understand that theory alone isn't going to get the job
+											done so that's why this course is packed with practical hands-on examples
 											that you can follow step by step.</p>
 
 										<!-- List content -->
-										<h5 class="mt-4">What you’ll learn</h5>
+										<h5 class="mt-4">What you'll learn</h5>
 										<ul class="list-group list-group-borderless mb-3">
 											<li class="list-group-item h6 fw-light d-flex mb-0"><i
 													class="fas fa-check-circle text-success me-2"></i>Digital marketing
@@ -658,13 +413,13 @@ Page content START -->
 												<div class="row align-items-center">
 													<!-- Progress bar and Rating -->
 													<div class="col-6 col-sm-8">
-																											<!-- Progress item -->
-													<div class="progress progress-sm bg-warning bg-opacity-15">
-														<div class="progress-bar bg-warning" role="progressbar"
-															th:style="'width: ' + ${reviews.size() > 0 ? (ratingDistribution.get(5) != null ? (ratingDistribution.get(5) * 100 / reviews.size()) : 0) : 0} + '%'"
-															th:aria-valuenow="${reviews.size() > 0 ? (ratingDistribution.get(5) != null ? (ratingDistribution.get(5) * 100 / reviews.size()) : 0) : 0}"
-															aria-valuemin="0" aria-valuemax="100"></div>
-													</div>
+														<!-- Progress item -->
+														<div class="progress progress-sm bg-warning bg-opacity-15">
+															<div class="progress-bar bg-warning" role="progressbar"
+																 th:style="'width: ' + ${reviews.size() > 0 ? (ratingDistribution.get(5) != null ? (ratingDistribution.get(5) * 100 / reviews.size()) : 0) : 0} + '%'"
+																 th:aria-valuenow="${reviews.size() > 0 ? (ratingDistribution.get(5) != null ? (ratingDistribution.get(5) * 100 / reviews.size()) : 0) : 0}"
+																 aria-valuemin="0" aria-valuemax="100"></div>
+														</div>
 													</div>
 
 													<div class="col-6 col-sm-4">
@@ -688,9 +443,9 @@ Page content START -->
 														<!-- Progress item -->
 														<div class="progress progress-sm bg-warning bg-opacity-15">
 															<div class="progress-bar bg-warning" role="progressbar"
-																th:style="'width: ' + ${reviews.size() > 0 ? (ratingDistribution.get(4) != null ? (ratingDistribution.get(4) * 100 / reviews.size()) : 0) : 0} + '%'"
-																th:aria-valuenow="${reviews.size() > 0 ? (ratingDistribution.get(4) != null ? (ratingDistribution.get(4) * 100 / reviews.size()) : 0) : 0}"
-																aria-valuemin="0" aria-valuemax="100"></div>
+																 th:style="'width: ' + ${reviews.size() > 0 ? (ratingDistribution.get(4) != null ? (ratingDistribution.get(4) * 100 / reviews.size()) : 0) : 0} + '%'"
+																 th:aria-valuenow="${reviews.size() > 0 ? (ratingDistribution.get(4) != null ? (ratingDistribution.get(4) * 100 / reviews.size()) : 0) : 0}"
+																 aria-valuemin="0" aria-valuemax="100"></div>
 														</div>
 													</div>
 
@@ -715,9 +470,9 @@ Page content START -->
 														<!-- Progress item -->
 														<div class="progress progress-sm bg-warning bg-opacity-15">
 															<div class="progress-bar bg-warning" role="progressbar"
-																th:style="'width: ' + ${reviews.size() > 0 ? (ratingDistribution.get(3) != null ? (ratingDistribution.get(3) * 100 / reviews.size()) : 0) : 0} + '%'"
-																th:aria-valuenow="${reviews.size() > 0 ? (ratingDistribution.get(3) != null ? (ratingDistribution.get(3) * 100 / reviews.size()) : 0) : 0}"
-																aria-valuemin="0" aria-valuemax="100"></div>
+																 th:style="'width: ' + ${reviews.size() > 0 ? (ratingDistribution.get(3) != null ? (ratingDistribution.get(3) * 100 / reviews.size()) : 0) : 0} + '%'"
+																 th:aria-valuenow="${reviews.size() > 0 ? (ratingDistribution.get(3) != null ? (ratingDistribution.get(3) * 100 / reviews.size()) : 0) : 0}"
+																 aria-valuemin="0" aria-valuemax="100"></div>
 														</div>
 													</div>
 
@@ -742,9 +497,9 @@ Page content START -->
 														<!-- Progress item -->
 														<div class="progress progress-sm bg-warning bg-opacity-15">
 															<div class="progress-bar bg-warning" role="progressbar"
-																th:style="'width: ' + ${reviews.size() > 0 ? (ratingDistribution.get(2) != null ? (ratingDistribution.get(2) * 100 / reviews.size()) : 0) : 0} + '%'"
-																th:aria-valuenow="${reviews.size() > 0 ? (ratingDistribution.get(2) != null ? (ratingDistribution.get(2) * 100 / reviews.size()) : 0) : 0}"
-																aria-valuemin="0" aria-valuemax="100"></div>
+																 th:style="'width: ' + ${reviews.size() > 0 ? (ratingDistribution.get(2) != null ? (ratingDistribution.get(2) * 100 / reviews.size()) : 0) : 0} + '%'"
+																 th:aria-valuenow="${reviews.size() > 0 ? (ratingDistribution.get(2) != null ? (ratingDistribution.get(2) * 100 / reviews.size()) : 0) : 0}"
+																 aria-valuemin="0" aria-valuemax="100"></div>
 														</div>
 													</div>
 
@@ -769,9 +524,9 @@ Page content START -->
 														<!-- Progress item -->
 														<div class="progress progress-sm bg-warning bg-opacity-15">
 															<div class="progress-bar bg-warning" role="progressbar"
-																th:style="'width: ' + ${reviews.size() > 0 ? (ratingDistribution.get(1) != null ? (ratingDistribution.get(1) * 100 / reviews.size()) : 0) : 0} + '%'"
-																th:aria-valuenow="${reviews.size() > 0 ? (ratingDistribution.get(1) != null ? (ratingDistribution.get(1) * 100 / reviews.size()) : 0) : 0}"
-																aria-valuemin="0" aria-valuemax="100"></div>
+																 th:style="'width: ' + ${reviews.size() > 0 ? (ratingDistribution.get(1) != null ? (ratingDistribution.get(1) * 100 / reviews.size()) : 0) : 0} + '%'"
+																 th:aria-valuenow="${reviews.size() > 0 ? (ratingDistribution.get(1) != null ? (ratingDistribution.get(1) * 100 / reviews.size()) : 0) : 0}"
+																 aria-valuemin="0" aria-valuemax="100"></div>
 														</div>
 													</div>
 
@@ -819,13 +574,13 @@ Page content START -->
 													<!-- Info -->
 													<p class="small mb-2" th:text="${#temporals.format(review.createdAt, 'dd MMM yyyy')}">Date</p>
 													<p class="mb-2" th:text="${review.comment}">Review comment</p>
-													
+
 													<!-- Delete button for user's own review -->
 													<div th:if="${currentUser != null and review.enrollment.user.userId == currentUser.userId}" class="mt-2">
 														<form th:action="@{/home/course-review/delete}" method="post" style="display: inline;">
 															<input type="hidden" name="courseId" th:value="${course.courseId}" />
 															<input type="hidden" name="reviewId" th:value="${review.reviewId}" />
-															<button type="submit" class="btn btn-danger btn-sm" 
+															<button type="submit" class="btn btn-danger btn-sm"
 																	onclick="return confirm('Bạn có chắc chắn muốn xóa đánh giá này?')">
 																<i class="fas fa-trash me-1"></i>
 															</button>
@@ -841,7 +596,7 @@ Page content START -->
 											<hr>
 										</div>
 										<!-- Student review END -->
-										
+
 										<!-- No reviews message -->
 										<div class="row" th:if="${reviews.isEmpty()}">
 											<div class="col-12">
@@ -868,15 +623,32 @@ Page content START -->
 												<input type="hidden" name="courseId" th:value="${course.courseId}"/>
 												<!-- Rating -->
 												<div class="col-12 bg-light-input">
-													<select name="rating" id="inputState2" class="form-select js-choice" required>
-														<option value="">Chọn đánh giá</option>
-														<option value="5">★★★★★ (5/5)</option>
-														<option value="4">★★★★☆ (4/5)</option>
-														<option value="3">★★★☆☆ (3/5)</option>
-														<option value="2">★★☆☆☆ (2/5)</option>
-														<option value="1">★☆☆☆☆ (1/5)</option>
-													</select>
+													<div class="d-flex align-items-center mb-2">
+														<span class="me-2" style="font-weight:500;">Select rating:</span>
+														<div class="star-rating" style="font-size:2rem; direction: rtl; display: flex; justify-content: flex-start;">
+															<input type="radio" id="star5" name="rating" value="5" required/><label for="star5" title="5 stars">★</label>
+															<input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4 stars">★</label>
+															<input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="3 stars">★</label>
+															<input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="2 stars">★</label>
+															<input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="1 star">★</label>
+														</div>
+													</div>
 												</div>
+												<style>
+												.star-rating input[type="radio"] {
+													display: none;
+												}
+												.star-rating label {
+													color: #ddd;
+													cursor: pointer;
+													transition: color 0.2s;
+												}
+												.star-rating input[type="radio"]:checked ~ label,
+												.star-rating label:hover,
+												.star-rating label:hover ~ label {
+													color: #ffc700;
+												}
+												</style>
 												<!-- Message -->
 												<div class="col-12 bg-light-input">
 													<textarea class="form-control" name="comment" id="exampleFormControlTextarea1"
@@ -888,7 +660,7 @@ Page content START -->
 												</div>
 											</form>
 										</div>
-										
+
 										<!-- Not enrolled message -->
 										<div class="mt-2" th:unless="${isEnrolled}">
 											<div class="alert alert-info">
@@ -899,16 +671,6 @@ Page content START -->
 										<!-- Leave Review END -->
 
 									</div>
-									<!-- Content END -->
-
-									<!-- Content START -->
-
-									<!-- Content END -->
-
-									<!-- Content START -->
-
-									<!-- Content END -->
-
 								</div>
 							</div>
 							<!-- Tab contents END -->
@@ -949,10 +711,13 @@ Page content START -->
 												<div class="d-flex align-items-center">
 													<h3 class="fw-bold mb-0 me-2" id="original-price" th:text="${course.price} + ' ₫'">$150</h3>
 													<span class="discounted-price text-danger fw-bold" id="discounted-price"></span>
+													<!-- Voucher button - chỉ hiển thị khi user đã đăng nhập -->
+													<div th:if="${currentUser != null}" class="ms-2">
+														<button type="button" class="btn btn-sm voucher-btn" th:attr="data-course-id=${course.courseId}">
+															<i class="fas fa-ticket-alt"></i>
+														</button>
+													</div>
 												</div>
-												<button type="button" class="btn voucher-btn mt-1" th:attr="data-course-id=${course.courseId}">
-													<i class="fas fa-ticket-alt"></i>
-												</button>
 												<div class="mt-1">
 													<span class="applied-voucher" id="applied-voucher"></span>
 												</div>
@@ -990,7 +755,7 @@ Page content START -->
 										<!-- Buttons -->
 										<div class="mt-3 d-sm-flex justify-content-sm-between">
 											<th:block th:if="${isEnrolled}">
-												<a th:href="@{/learning/course/view(courseId=${course.courseId})}" class="btn btn-sm btn-primary-soft mb-0">Continue</a>
+												<a th:href="@{/learning/course/view/{courseId}(courseId=${course.courseId})}" class="btn btn-sm btn-primary-soft mb-0">Continue</a>
 											</th:block>
 											<th:block th:unless="${isEnrolled}">
 												<button type="button"
@@ -1008,7 +773,6 @@ Page content START -->
 									</div>
 								</div>
 								<!-- Video END -->
-
 								<!-- Course info START -->
 								<div class="card card-body shadow p-4 mb-4">
 									<!-- Title -->
@@ -1467,7 +1231,12 @@ Footer END -->
 	  </div>
 	</div>
 
+	<!-- Đảm bảo userId global trước khi load voucher.js -->
+	<script th:inline="javascript">
+		window.userId = /*[[${currentUser != null ? currentUser.userId : 0}]]*/ 0;
+	</script>
 	<script src="/js/homePage/voucher.js"></script>
+
 	<!-- Modal Report Course -->
 	<div class="modal fade" id="reportCourseModal" tabindex="-1" aria-hidden="true">
 		<div class="modal-dialog modal-dialog-centered">
@@ -1482,9 +1251,9 @@ Footer END -->
 					<div class="modal-body">
 						<input type="hidden" name="courseId" th:value="${course.courseId}"/>
 						<input type="hidden" name="userId" th:value="${currentUser != null ? currentUser.userId : ''}"/>
-						
+
 						<p class="mb-3">Vui lòng chọn lý do báo cáo khóa học này:</p>
-						
+
 						<div class="form-check mb-2">
 							<input class="form-check-input" type="radio" id="reason1" name="reason" value="Nội dung không phù hợp" required>
 							<label class="form-check-label" for="reason1">Nội dung không phù hợp</label>
@@ -1509,12 +1278,12 @@ Footer END -->
 							<input class="form-check-input" type="radio" id="reasonOther" name="reason" value="Khác" required>
 							<label class="form-check-label" for="reasonOther">Khác (vui lòng mô tả):</label>
 						</div>
-						
+
 						<div class="mb-3">
-							<textarea class="form-control" id="otherReasonText" name="otherReason" 
+							<textarea class="form-control" id="otherReasonText" name="otherReason"
 								placeholder="Nhập lý do báo cáo của bạn..." rows="3" disabled></textarea>
 						</div>
-						
+
 						<div id="reportCourseMessage"></div>
 					</div>
 					<div class="modal-footer">
@@ -1530,8 +1299,8 @@ Footer END -->
 
 	<script th:inline="javascript">
 	  voucherJS.initDetailVoucher({
-		userId: /*[[${currentUser != null ? currentUser.userId : 0}]]*/ 1,
 		courseId: /*[[${course.courseId}]]*/ 1,
+		isEnrolled: /*[[${isEnrolled}]]*/ false,
 		updatePriceUI: function(data) {
 		  const originalPriceEl = document.getElementById('original-price');
 		  const discountedPriceEl = document.getElementById('discounted-price');
@@ -1564,7 +1333,7 @@ Footer END -->
 			// Handle "Other" reason selection
 			const otherRadio = document.getElementById('reasonOther');
 			const otherInput = document.getElementById('otherReasonText');
-			
+
 			if (otherRadio && otherInput) {
 				otherRadio.addEventListener('change', function() {
 					otherInput.disabled = !this.checked;
@@ -1573,27 +1342,27 @@ Footer END -->
 					}
 				});
 			}
-			
+
 			// Handle form submission
 			const reportForm = document.getElementById('reportCourseForm');
 			if (reportForm) {
 				reportForm.addEventListener('submit', function(e) {
 					e.preventDefault();
-					
+
 					// Check if user is logged in
 					const userId = document.querySelector('input[name="userId"]').value;
 					if (!userId) {
 						alert('Vui lòng đăng nhập để báo cáo khóa học.');
 						return;
 					}
-					
+
 					// Validate reason selection
 					const selectedReason = document.querySelector('input[name="reason"]:checked');
 					if (!selectedReason) {
 						alert('Vui lòng chọn lý do báo cáo.');
 						return;
 					}
-					
+
 					// Validate "Other" reason text
 					if (selectedReason.value === 'Khác') {
 						const otherText = document.getElementById('otherReasonText').value.trim();
@@ -1602,21 +1371,21 @@ Footer END -->
 							return;
 						}
 					}
-					
+
 					// Prepare form data
 					const formData = new FormData(reportForm);
 					const data = {};
 					formData.forEach((value, key) => {
 						data[key] = value;
 					});
-					
+
 					// Use the selected reason or custom text
 					if (selectedReason.value === 'Khác') {
 						data.reason = document.getElementById('otherReasonText').value.trim();
 					} else {
 						data.reason = selectedReason.value;
 					}
-					
+
 					// Send report
 					fetch('/api/course/' + data.courseId + '/report', {
 						method: 'POST',
@@ -1637,7 +1406,7 @@ Footer END -->
 							`;
 							reportForm.reset();
 							otherInput.disabled = true;
-							
+
 							// Close modal after 2 seconds
 							setTimeout(() => {
 								const modal = bootstrap.Modal.getInstance(document.getElementById('reportCourseModal'));
@@ -1665,6 +1434,151 @@ Footer END -->
 			}
 		});
 	</script>
+
+	<!-- Modal chọn phương thức thanh toán cho Buy Now -->
+	<div class="modal fade" id="buyNowPaymentModal" tabindex="-1" aria-labelledby="buyNowPaymentModalLabel" aria-hidden="true">
+	  <div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<h5 class="modal-title" id="buyNowPaymentModalLabel">
+			  <i class="fas fa-credit-card me-2"></i>Chọn phương thức thanh toán
+			</h5>
+			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closeBuyNowPaymentModal()"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="row g-3">
+			  <!-- QR Option -->
+			  <div class="col-12">
+				<div class="card payment-option-card" id="buyNow-qr-card" onclick="selectBuyNowPaymentMethod('qr')">
+				  <div class="card-body d-flex align-items-center">
+					<div class="payment-icon me-3">
+					  <i class="fas fa-qrcode text-primary fa-2x"></i>
+					</div>
+					<div class="flex-grow-1">
+					  <h6 class="mb-1">QR Banking</h6>
+					  <p class="mb-0 text-muted small">Thanh toán qua chuyển khoản ngân hàng với mã QR</p>
+					</div>
+					<div class="payment-radio">
+					  <input type="radio" name="buyNowPaymentMethodModal" value="qr" id="buyNow-qr-radio">
+					  <label for="buyNow-qr-radio"></label>
+					</div>
+				  </div>
+				</div>
+			  </div>
+			  <!-- VNPay Option -->
+			  <div class="col-12">
+				<div class="card payment-option-card" id="buyNow-vnpay-card" onclick="selectBuyNowPaymentMethod('vnpay')">
+				  <div class="card-body d-flex align-items-center">
+					<div class="payment-icon me-3">
+					  <i class="fas fa-credit-card text-success fa-2x"></i>
+					</div>
+					<div class="flex-grow-1">
+					  <h6 class="mb-1">VNPay</h6>
+					  <p class="mb-0 text-muted small">Thanh toán qua thẻ ngân hàng nội địa</p>
+					</div>
+					<div class="payment-radio">
+					  <input type="radio" name="buyNowPaymentMethodModal" value="vnpay" id="buyNow-vnpay-radio">
+					  <label for="buyNow-vnpay-radio"></label>
+					</div>
+				  </div>
+				</div>
+			  </div>
+			</div>
+		  </div>
+		  <div class="modal-footer">
+			<button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="closeBuyNowPaymentModal()">Hủy</button>
+			<button type="button" class="btn btn-primary" onclick="proceedBuyNowCheckout()" disabled id="buyNow-proceed-btn">
+			  <i class="fas fa-arrow-right me-2"></i>Tiếp tục
+			</button>
+		  </div>
+		</div>
+	  </div>
+	</div>
+
+	<style>
+	  .payment-option-card { cursor: pointer; border: 2px solid #e3e6f0; transition: border-color 0.2s, box-shadow 0.2s; }
+	  .payment-option-card.selected { border-color: #4e73df; box-shadow: 0 0 0 0.2rem rgba(78,115,223,.15); background: #f8f9fc; }
+	  .payment-radio input[type="radio"] { accent-color: #4e73df; width: 18px; height: 18px; }
+	  .payment-icon { min-width: 40px; text-align: center; }
+	</style>
+
+	<script>
+	  // Mở modal khi bấm Buy Now
+	  document.addEventListener('DOMContentLoaded', function() {
+		var buyNowBtn = document.querySelector('#buy-now-form button[type="submit"]');
+		if (buyNowBtn) {
+		  buyNowBtn.type = 'button';
+		  buyNowBtn.onclick = function(e) {
+			e.preventDefault();
+			  if (!window.userId || window.userId == 0) {
+				  window.location.href = '/login'; // Đổi lại nếu URL login khác
+				  return;
+			  }
+			if (window.bootstrap && bootstrap.Modal) {
+			  const modal = new bootstrap.Modal(document.getElementById('buyNowPaymentModal'));
+			  modal.show();
+			  window._buyNowPaymentModalInstance = modal;
+			} else {
+			  document.getElementById('buyNowPaymentModal').style.display = 'block';
+			}
+		  };
+		}
+	  });
+	  // Chọn phương thức thanh toán
+	  function selectBuyNowPaymentMethod(method) {
+		document.getElementById('buyNow-qr-card').classList.remove('selected');
+		document.getElementById('buyNow-vnpay-card').classList.remove('selected');
+		document.getElementById('buyNow-qr-radio').checked = false;
+		document.getElementById('buyNow-vnpay-radio').checked = false;
+		if (method === 'qr') {
+		  document.getElementById('buyNow-qr-card').classList.add('selected');
+		  document.getElementById('buyNow-qr-radio').checked = true;
+		} else if (method === 'vnpay') {
+		  document.getElementById('buyNow-vnpay-card').classList.add('selected');
+		  document.getElementById('buyNow-vnpay-radio').checked = true;
+		}
+		document.getElementById('buyNow-proceed-btn').disabled = false;
+	  }
+	  // Đóng modal
+	  function closeBuyNowPaymentModal() {
+		if (window._buyNowPaymentModalInstance) {
+		  window._buyNowPaymentModalInstance.hide();
+		} else {
+		  document.getElementById('buyNowPaymentModal').style.display = 'none';
+		}
+		document.getElementById('buyNow-qr-card').classList.remove('selected');
+		document.getElementById('buyNow-vnpay-card').classList.remove('selected');
+		document.getElementById('buyNow-qr-radio').checked = false;
+		document.getElementById('buyNow-vnpay-radio').checked = false;
+		document.getElementById('buyNow-proceed-btn').disabled = true;
+	  }
+	  // Khi bấm Tiếp tục
+	  function proceedBuyNowCheckout() {
+		let method = '';
+		const radios = document.getElementsByName('buyNowPaymentMethodModal');
+		for (const r of radios) {
+		  if (r.checked) method = r.value;
+		}
+		if (!method) {
+		  alert('Vui lòng chọn phương thức thanh toán!');
+		  return;
+		}
+		// Thêm input hidden vào form
+		let form = document.getElementById('buy-now-form');
+		let input = form.querySelector('input[name="paymentMethod"]');
+		if (!input) {
+		  input = document.createElement('input');
+		  input.type = 'hidden';
+		  input.name = 'paymentMethod';
+		  form.appendChild(input);
+		}
+		input.value = method;
+		closeBuyNowPaymentModal();
+		form.submit();
+	  }
+	</script>
+
+
 
 </body>
 

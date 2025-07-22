@@ -1,27 +1,31 @@
 <div th:fragment="ordersTableRowContent">
     <tr th:each="order : ${orders}">
-        <td th:text="${order.orderId} ?: 'N/A'"></td>
-        <td th:text="${order.amount != null ? #numbers.formatDecimal(order.amount, 0, 'COMMA', 0, 'POINT') : 'N/A'}"></td>
-        <td th:text="${order.orderType} ?: 'N/A'" class="text-uppercase text-bold "></td>
+        <td th:text="${order.orderId != null ? order.orderId : ''}"></td>
+        <td th:text="${order.amount != null ? order.amount : ''}"></td>
+        <td th:text="${order.orderType != null ? order.orderType : ''}"></td>
         <td>
             <span th:if="${order.status == 'PAID'}" class="badge bg-success">Paid</span>
             <span th:if="${order.status == 'CANCELLED'}" class="badge bg-danger">Cancelled</span>
             <span th:if="${order.status != 'PAID' && order.status != 'CANCELLED'}" 
-                  class="badge bg-secondary" th:text="${order.status} ?: 'N/A'"></span>
+                  class="badge bg-secondary" th:text="${order.status != null ? order.status : ''}"></span>
         </td>
-        <td th:with="formatter=${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}"
-            th:text="${formatter}"></td>
-        <td th:text="${order.refCode} ?: 'N/A'"></td>
-        <td th:text="${order.username} ?: 'N/A'"></td>
+        <td th:text="${order.orderDate != null ? #temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm') : ''}"></td>
+        <td th:text="${order.refCode != null ? order.refCode : ''}"></td>
+        <td th:text="${order.username != null ? order.username : ''}"></td>
         <td>
             <a th:href="@{/admin/orders/view/{orderId}(orderId=${order.orderId})}"
                class="btn btn-info-soft btn-round me-1 mb-1 mb-md-0"
                title="View"><i class="fas fa-eye"></i></a>
         </td>
     </tr>
+
+    <!-- Empty state -->
     <tr th:if="${#lists.isEmpty(orders)}">
-        <td colspan="8" class="text-center text-muted">
-            <i class="fas fa-search me-2"></i>No orders found
+        <td colspan="8" class="text-center align-middle py-5">
+            <div class="d-flex flex-column align-items-center justify-content-center">
+                <i class="fas fa-history fa-3x mb-3 opacity-50"></i>
+                <h5>No orders found</h5>
+            </div>
         </td>
     </tr>
 </div>

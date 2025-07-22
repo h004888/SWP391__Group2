@@ -28,7 +28,7 @@
             </div>
         </div>
 
-        <form th:action="@{/instructordashboard/createcourse/coursecontent}" th:object="${coursestep2}" method="POST" enctype="multipart/form-data">
+        <form th:action="@{/instructor/createcourse/coursecontent}" th:object="${coursestep2}" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="courseId" th:value="${courseId}" />
             <input type="hidden" id="imageUrl" th:value="${imageUrl}">
             <input type="hidden" id="videoUrl" th:value="${videoUrl}">
@@ -128,18 +128,11 @@
 
             function showVideoPreviewFromServer(publicId) {
                 if (!publicId) return;
-                function refreshSignedUrl() {
-                    fetch('/api/video/signed-url?publicId=' + encodeURIComponent(publicId))
-                        .then(res => res.text())
-                        .then(url => {
-                            $("#videoPreview").attr("src", url);
-                            $("#videoPreviewContainer").show();
-                            $("#videoContainer .bi-film").hide();
-                        });
-                }
-                refreshSignedUrl();
+                $("#videoPreview").attr("src", '/api/video/stream/video/' + encodeURIComponent(publicId));
+                $("#videoPreviewContainer").show();
+                $("#videoContainer .bi-film").hide();
+                // Không cần interval refresh vì backend proxy luôn cấp link hợp lệ
                 if (videoRefreshInterval) clearInterval(videoRefreshInterval);
-                videoRefreshInterval = setInterval(refreshSignedUrl, 4 * 60 * 1000);
             }
 
             function showVideoPreviewFromLocal(file) {

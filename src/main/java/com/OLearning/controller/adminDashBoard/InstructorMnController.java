@@ -31,6 +31,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import com.OLearning.dto.instructorRequest.InstructorRequestDTO;
+import com.OLearning.mapper.instructorRequest.InstructorRequestMapper;
 
 @Controller
 @RequestMapping("/admin/mnInstructors")
@@ -89,7 +91,9 @@ public class InstructorMnController {
         //paging
         Optional<UserDetailDTO> userDetailDTO = userService.getInfoUser(id);
         Page<CourseDTO> listCourses = courseService.findCourseByUserId(id, coursePage, courseSize);
+        if (listCourses == null) listCourses = Page.empty();
         Page<CourseReview> listReview = courseReviewService.getCourseReviewsByInstructorId(id, reviewPage, reviewSize);
+        if (listReview == null) listReview = Page.empty();
 
         // Get enrollment data for current year
         int year = java.time.LocalDate.now().getYear();
@@ -126,12 +130,12 @@ public class InstructorMnController {
         // Add pagination information to model
         model.addAttribute("listReview", listReview.getContent());
         model.addAttribute("reviewCurrentPage", reviewPage);
-        model.addAttribute("reviewTotalPages", listReview.getTotalPages());
+        model.addAttribute("reviewTotalPages", listReview != null && listReview.getTotalPages() > 0 ? listReview.getTotalPages() : 1);
         model.addAttribute("reviewTotalItems", listReview.getTotalElements());
 
         model.addAttribute("listCourses", listCourses.getContent());
         model.addAttribute("courseCurrentPage", coursePage);
-        model.addAttribute("courseTotalPages", listCourses.getTotalPages());
+        model.addAttribute("courseTotalPages", listCourses != null && listCourses.getTotalPages() > 0 ? listCourses.getTotalPages() : 1);
         model.addAttribute("courseTotalItems", listCourses.getTotalElements());
 
         model.addAttribute("userId", id);
@@ -220,9 +224,10 @@ public class InstructorMnController {
     }
 
     @GetMapping("/request/details/{id}")
-    public ResponseEntity<InstructorRequest> getRequestDetails(@PathVariable Long id) {
+    @ResponseBody
+    public InstructorRequestDTO getRequestDetails(@PathVariable Long id) {
         InstructorRequest request = instructorRequestService.getRequestById(id);
-        return ResponseEntity.ok(request);
+        return InstructorRequestMapper.mapToDTO(request);
     }
 
     @PostMapping("/request/accept/{id}")

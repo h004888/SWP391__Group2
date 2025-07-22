@@ -14,10 +14,16 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class CoinTransactionDTO {
     private Long transactionId;
-    @NotBlank
-    private BigDecimal amount;
+    private Double amount;
     private String transactionType;
     private String status;
     private String note;
     private LocalDateTime createdAt;
+    private String refCode;
+    private String courseName;
+    private String instructorName;
+    private String courseDuration;
+    private Double originalPrice;
+    private Double discountedPrice;
+    private String paymentMethod;
 }

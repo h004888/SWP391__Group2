@@ -4,11 +4,8 @@ import com.OLearning.dto.course.AddCourseStep1DTO;
 import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.course.CourseDetailDTO;
 import com.OLearning.dto.course.CourseMediaDTO;
-import com.OLearning.entity.Category;
+import com.OLearning.entity.*;
 import com.OLearning.dto.course.CourseViewDTO;
-import com.OLearning.entity.Chapter;
-import com.OLearning.entity.Course;
-import com.OLearning.entity.User;
 import com.OLearning.mapper.course.CourseDetailMapper;
 import com.OLearning.mapper.course.CourseMapper;
 import com.OLearning.repository.*;
@@ -16,6 +13,7 @@ import com.OLearning.security.CustomUserDetails;
 import com.OLearning.service.cloudinary.UploadFile;
 import com.OLearning.service.course.CourseService;
 import com.OLearning.service.email.EmailService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -33,7 +31,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class CourseServiceImpl implements CourseService {
+public class CourseServiceImpl  implements CourseService {
     @Autowired
     private UploadFile uploadFile;
     @Autowired
@@ -166,11 +164,17 @@ public class CourseServiceImpl implements CourseService {
         courseRepository.deleteById(courseId);}
 
     @Override
+    public CourseViewDTO getCourseRecentIncomplete(Long userId) {
+        return CourseMapper.toCourseViewDTO(courseRepository.findMostRecentIncompleteCourse(userId));
+    }
+
+    @Override
     public List<CourseViewDTO> getTopCourses() {
-        return courseRepository.findAllOrderByStudentCountDesc().stream()
+        return courseRepository.findAllPublishedOrderByStudentCountDesc().stream()
                 .map(CourseMapper::toCourseViewDTO)
                 .collect(Collectors.toList());
     }
+
     @Override
     public Optional<CourseDetailDTO> getDetailCourse(Long id) {
         return courseRepository.findById(id).map(courseDetailMapper::toDTO);
@@ -233,31 +237,60 @@ public class CourseServiceImpl implements CourseService {
         Page<Course> coursePage = courseRepository.filterCourses(
                 searchKeyword, category, price, status, pageable
         );
-        return coursePage.map(courseMapper::MapCourseDTO);
+        return coursePage.map(course -> mapCourseToDTO(course));
     }
-
 
     @Override
-    public Page<CourseDTO> filterCoursesInstructorManage(Long userId, Long categoryId, String status, String price, int page, int size) {
+    public Page<CourseDTO> filterCoursesInstructorManage(Long userId, Long categoryId, String status, String price, String title, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Course> coursePage;
-
-        if (categoryId != null || (status != null && !status.isEmpty()) || (price != null && !price.isEmpty())) {
-            coursePage = courseRepository.findCoursesByFilters(userId, categoryId, status, price, pageable);
-        } else {
-            coursePage = courseRepository.findByInstructorUserId(userId, pageable);
-        }
-
-        return coursePage.map(course -> {
-            CourseDTO dto = courseMapper.MapCourseDTO(course);
-
-            if (course.getCategory() != null) {
-                dto.setCategoryName(course.getCategory().getName());
-            }
-            return dto;
-        });
+        // Đồng bộ status publish -> published
+        Page<Course> coursePage = courseRepository.findCoursesByFilters(userId, categoryId, status, price, title, pageable);
+        return coursePage.map(course -> mapCourseToDTO(course));
     }
 
+    // Helper method để map Course sang CourseDTO với đầy đủ thông tin
+    private CourseDTO mapCourseToDTO(Course course) {
+        CourseDTO dto = courseMapper.MapCourseDTO(course);
+
+        // Map category name
+        if (course.getCategory() != null) {
+            dto.setCategoryName(course.getCategory().getName());
+        } else {
+            dto.setCategoryName("Not Found");
+        }
+
+        // Map course level
+        dto.setCourseLevel(course.getCourseLevel());
+
+        // Map course image
+        dto.setCourseImg(course.getCourseImg());
+
+        // Map price
+        dto.setPrice(course.getPrice());
+
+        // Map status
+        dto.setStatus(course.getStatus());
+
+        // Đếm số lượng học viên enrollment
+        Long enrollmentCount = courseRepository.countEnrollmentsByCourseId(course.getCourseId());
+        dto.setTotalStudentEnrolled(enrollmentCount != null ? enrollmentCount.intValue() : 0);
+
+        // Đếm số lượng lesson
+        Long lessonCount = courseRepository.countLessonsByCourseId(course.getCourseId());
+        dto.setTotalLessons(lessonCount != null ? lessonCount.intValue() : 0);
+
+        // Map isFree
+        dto.setIsFree(course.getPrice() != null && course.getPrice() == 0);
+
+        // Map instructor
+        dto.setInstructor(course.getInstructor());
+
+        // Map timestamps
+        dto.setCreatedAt(course.getCreatedAt());
+        dto.setUpdatedAt(course.getUpdatedAt());
+
+        return dto;
+    }
 
     @Override
     public AddCourseStep1DTO draftCourseStep1(Course course) {
@@ -274,7 +307,7 @@ public class CourseServiceImpl implements CourseService {
                         courseRepository.save(course);
                         // Gửi notification cho instructor
                         if (course.getInstructor() != null) {
-                            com.OLearning.entity.Notification notification = new com.OLearning.entity.Notification();
+                            Notification notification = new Notification();
                             notification.setUser(course.getInstructor());
                             notification.setCourse(course);
                             notification.setMessage("Khóa học '" + course.getTitle() + "' của bạn đã được admin phê duyệt.");
@@ -297,6 +330,17 @@ public class CourseServiceImpl implements CourseService {
                         course.setStatus("rejected");
                         course.setUpdatedAt(LocalDateTime.now());
                         courseRepository.save(course);
+                        // Gửi notification cho instructor
+                        if (course.getInstructor() != null) {
+                            Notification notification = new Notification();
+                            notification.setUser(course.getInstructor());
+                            notification.setCourse(course);
+                            notification.setMessage("Khóa học '" + course.getTitle() + "' của bạn đã bị admin từ chối.");
+                            notification.setType("COURSE_REJECTED");
+                            notification.setStatus("failed");
+                            notification.setSentAt(LocalDateTime.now());
+                            notificationRepository.save(notification);
+                        }
                         return true;
                     }
                     return false;
@@ -324,6 +368,7 @@ public class CourseServiceImpl implements CourseService {
     }
     }
 
+
     @Override
     public void saveCourse(Long courseId) {
         Course course = (courseId == null) ? new Course() : findCourseById(courseId);
@@ -346,8 +391,16 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public List<CourseViewDTO> getCoursesByCategoryId(int categoryId) {
-        return courseRepository.findByCategoryId(categoryId).stream()
+    public List<CourseViewDTO> getCoursesByCategoryId(Long categoryId) {
+        return courseRepository.findByCategoryIdAndStatusIgnoreCase(categoryId, "publish").stream()
+                .map(CourseMapper::toCourseViewDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public List<CourseViewDTO> getCourseByUserId(Long userId) {
+        return courseRepository.findCoursesByUserId(userId).stream()
                 .map(CourseMapper::toCourseViewDTO)
                 .collect(Collectors.toList());
     }
@@ -356,7 +409,16 @@ public class CourseServiceImpl implements CourseService {
     public Course findById(Long courseId) {
         return courseRepository.findById(courseId).orElseThrow();
     }
+    @Override
+    public int countByInstructorAndStatus(Long userId, String status) {
+        return courseRepository.countByInstructorUserIdAndStatus(userId, status);
+    }
 
+    public int countByInstructorAndStatusWithFilter(Long userId, String status, Long categoryId, String price, String title) {
+        return courseRepository.countByFilters(userId, categoryId, status, price, title);
+    }
+
+    // Lưu course entity
     public void setPendingBlock(Long courseId) {
         Course course = courseRepository.findById(courseId).orElseThrow();
         course.setStatus("pending_block");

@@ -20,6 +20,10 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import com.OLearning.repository.UserRepository;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import com.OLearning.security.BlockedAccountFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -38,6 +42,10 @@ public class SecurityConfig {
 //                return NoOpPasswordEncoder.getInstance();
                  return new BCryptPasswordEncoder();
         }
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring().requestMatchers("/api/payment/sepay/webhook");
+    }
 
     @Bean
     public AuthenticationSuccessHandler authenticationSuccessHandler() {
@@ -77,12 +85,14 @@ public class SecurityConfig {
 
                         // Root path redirect
                         .requestMatchers("/home/**").permitAll()
-
+                        .requestMatchers("/vouchers").permitAll()
+                        .requestMatchers("/cart").authenticated()
+                        .requestMatchers("/api/sepay/**", "/api/order/status").permitAll() 
                         // Chỉ admin mới được truy cập /admin/**
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
-                        // Cho phép cả ADMIN và INSTRUCTOR truy cập /instructordashboard/**
-                        .requestMatchers("/instructordashboard/**").hasAnyRole("ADMIN", "INSTRUCTOR")
+                        // Chỉ instructor mới được truy cập /instructor/**
+                        .requestMatchers("/instructor/**").hasAnyRole( "INSTRUCTOR")
 
                         .requestMatchers("/terms/user").permitAll()
 
@@ -142,6 +152,15 @@ public class SecurityConfig {
         registration.setFilter(filter);
         registration.addUrlPatterns("/*");
         registration.setOrder(2); // sau security filter
+        return registration;
+    }
+
+    @Bean
+    public FilterRegistrationBean<BlockedAccountFilter> blockedAccountFilterRegistration(BlockedAccountFilter filter) {
+        FilterRegistrationBean<BlockedAccountFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(filter);
+        registration.addUrlPatterns("/*");
+        registration.setOrder(3); // sau security filter và admin filter
         return registration;
     }
 }

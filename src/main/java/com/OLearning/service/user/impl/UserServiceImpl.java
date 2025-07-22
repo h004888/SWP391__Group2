@@ -2,12 +2,13 @@ package com.OLearning.service.user.impl;
 
 import com.OLearning.dto.user.UserDTO;
 import com.OLearning.dto.user.UserDetailDTO;
+import com.OLearning.dto.user.UserProfileUpdateDTO;
 import com.OLearning.dto.login.RegisterDTO;
 import com.OLearning.dto.course.CourseDTO;
-import com.OLearning.entity.Course;
 import com.OLearning.entity.Enrollment;
 import com.OLearning.entity.Role;
 import com.OLearning.entity.User;
+import com.OLearning.entity.Notification;
 import com.OLearning.mapper.course.CourseMapper;
 import com.OLearning.mapper.user.UserDetailMapper;
 import com.OLearning.mapper.user.UserMapper;
@@ -17,6 +18,7 @@ import com.OLearning.repository.RoleRepository;
 import com.OLearning.repository.UserRepository;
 import com.OLearning.service.email.EmailService;
 import com.OLearning.service.user.UserService;
+import com.OLearning.service.notification.NotificationService;
 import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -51,6 +54,8 @@ public class UserServiceImpl implements UserService {
     private EnrollmentRepository enrollmentRepository;
     @Autowired
     private CourseMapper courseMapper;
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     public Page<UserDTO> getAllUsers(Pageable page) {
@@ -122,17 +127,29 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean changStatus(Long id) {
+    public boolean changStatus(Long id, String reason) {
         if (userRepository.existsById(id)) {
-            Optional<User> user = userRepository.findById(id);
+            Optional<User> userOpt = userRepository.findById(id);
+            if (userOpt.isEmpty()) return false;
+            User user = userOpt.get();
+            boolean oldStatus = user.getStatus();
             try {
-                emailService.sendAccountStatusEmail(user.get(), user.get().getStatus());
+                emailService.sendAccountStatusEmail(user, oldStatus, reason);
             } catch (MessagingException e) {
                 throw new RuntimeException(e);
             }
-            user.get().setStatus(!user.get().getStatus());
-            userRepository.save(user.get());
-
+            user.setStatus(!oldStatus);
+            userRepository.save(user);
+            // Nếu chuyển từ active sang block thì gửi notification
+            if (oldStatus && !user.getStatus()) {
+                Notification notification = new Notification();
+                notification.setUser(user);
+                notification.setMessage("Tài khoản của bạn đã bị block." + (reason != null && !reason.isBlank() ? (" Lý do: " + reason) : ""));
+                notification.setType("ACCOUNT_BLOCKED");
+                notification.setStatus("failed");
+                notification.setSentAt(LocalDateTime.now());
+                notificationService.sendMess(notification);
+            }
             return true;
         }
         return false;
@@ -194,6 +211,10 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Role not found: " + userDTO.getRoleName());
         }
         User user = userMapper.toUser(userDTO, roleOpt.get());
+        // Set default avatar if not provided
+        if (user.getProfilePicture() == null || user.getProfilePicture().trim().isEmpty()) {
+            user.setProfilePicture("/img/undraw_profile.svg");
+        }
         //Default password
         String encodedPassword = new BCryptPasswordEncoder().encode("123");
         user.setPassword(encodedPassword);
@@ -334,6 +355,69 @@ public class UserServiceImpl implements UserService {
         user.setAddress(profileEditDTO.getAddress());
         user.setPersonalSkill(profileEditDTO.getPersonalSkill());
         userRepository.save(user);
+    }
+
+    @Override
+    public User updateProfile(Long userId, UserProfileUpdateDTO profileUpdateDTO) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+
+        // Validate that user can only update their own profile
+        if (!userId.equals(profileUpdateDTO.getUserId())) {
+            throw new IllegalArgumentException("You can only update your own profile");
+        }
+
+        // Update profile information with validation
+        if (profileUpdateDTO.getFullName() != null && !profileUpdateDTO.getFullName().trim().isEmpty()) {
+            user.setFullName(profileUpdateDTO.getFullName().trim());
+        }
+
+        if (profileUpdateDTO.getPhone() != null && !profileUpdateDTO.getPhone().trim().isEmpty()) {
+            // Validate phone format
+            if (!profileUpdateDTO.getPhone().matches("^[0-9]{10,15}$")) {
+                throw new IllegalArgumentException("Invalid phone number format");
+            }
+            user.setPhone(profileUpdateDTO.getPhone().trim());
+        }
+
+        if (profileUpdateDTO.getBirthDay() != null) {
+            // Validate birthday is in the past
+            if (profileUpdateDTO.getBirthDay().isAfter(java.time.LocalDate.now())) {
+                throw new IllegalArgumentException("Birthday must be in the past");
+            }
+            user.setBirthDay(profileUpdateDTO.getBirthDay());
+        }
+
+        if (profileUpdateDTO.getAddress() != null) {
+            user.setAddress(profileUpdateDTO.getAddress().trim());
+        }
+
+        if (profileUpdateDTO.getPersonalSkill() != null) {
+            user.setPersonalSkill(profileUpdateDTO.getPersonalSkill().trim());
+        }
+
+        if (profileUpdateDTO.getProfilePicture() != null) {
+            user.setProfilePicture(profileUpdateDTO.getProfilePicture());
+            // Đánh dấu đây là ảnh custom, không phải từ Google
+            user.setIsGooglePicture(false);
+        }
+
+        try {
+            return userRepository.save(user);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update profile: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public User updateProfilePicture(Long userId, String newProfilePictureUrl) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+
+        user.setProfilePicture(newProfilePictureUrl);
+        // Đánh dấu đây là ảnh custom, không phải từ Google
+        user.setIsGooglePicture(false);
+        return userRepository.save(user);
     }
 
 }

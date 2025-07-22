@@ -25,9 +25,22 @@ public class OrdersMapper {
         return dto;
     }
 
+    public OrdersDTO toInstructorDTO(Order orders) {
+        OrdersDTO dto = new OrdersDTO();
+        dto.setOrderId(orders.getOrderId());
+        dto.setOrderDate(orders.getOrderDate());
+        dto.setOrderType(orders.getOrderType());
+        dto.setUsername(orders.getUser() != null ? orders.getUser().getUsername() : null);
+        dto.setAmount(orders.getAmount());
+        dto.setStatus(orders.getStatus());
+        return dto;
+    }
+
+
     public List<OrdersDTO> toDTOList(List<Order> orders) {
         return orders.stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
+
 }

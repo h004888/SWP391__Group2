@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="voucherPagination">
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <nav th:if="${totalPages > 1}">
+            <ul class="pagination pagination-sm mb-0">
+                <!-- Previous button -->
+                <li class="page-item" th:classappend="${!hasPrevious} ? 'disabled'">
+                    <a class="page-link" href="#" th:if="${hasPrevious}" 
+                       th:onclick="|loadVouchers('${tabType}', '${keyword}', ${currentPage - 1}, true)|">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                    <span class="page-link" th:if="${!hasPrevious}">
+                        <i class="fas fa-chevron-left"></i>
+                    </span>
+                </li>
+                
+                <!-- Page numbers -->
+                <li class="page-item" th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"
+                    th:classappend="${pageNum == currentPage} ? 'active'">
+                    <a class="page-link" href="#" 
+                       th:onclick="|loadVouchers('${tabType}', '${keyword}', ${pageNum}, true)|"
+                       th:text="${pageNum + 1}">1</a>
+                </li>
+                
+                <!-- Next button -->
+                <li class="page-item" th:classappend="${!hasNext} ? 'disabled'">
+                    <a class="page-link" href="#" th:if="${hasNext}" 
+                       th:onclick="|loadVouchers('${tabType}', '${keyword}', ${currentPage + 1}, true)|">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                    <span class="page-link" th:if="${!hasNext}">
+                        <i class="fas fa-chevron-right"></i>
+                    </span>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+</html> 

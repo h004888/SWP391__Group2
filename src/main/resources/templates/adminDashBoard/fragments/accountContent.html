@@ -233,8 +233,12 @@
                                         aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <h6>Are you sure you want to block this account?</h6>
+                                <h6 id="blockModalMessage">Are you sure you want to block this account?</h6>
                                 <p class="text-warning">This action cannot be undone !!</p>
+                                <div id="blockReasonWrapper" style="display:none;">
+                                    <label for="blockReason" class="form-label">Lý do block tài khoản</label>
+                                    <textarea class="form-control" id="blockReason" name="reason" rows="3" placeholder="Nhập lý do block..." required></textarea>
+                                </div>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

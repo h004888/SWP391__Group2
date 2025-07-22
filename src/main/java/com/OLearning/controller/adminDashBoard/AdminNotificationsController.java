@@ -43,8 +43,12 @@ public class AdminNotificationsController {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
         Pageable pageable = PageRequest.of(page, size);
+        List<String> allTypes = notificationService.getAllNotificationTypesByUserId(userId);
         if (types == null || types.isEmpty()) {
-            types = List.of("REPORT_COURSE", "INSTRUCTOR_REPLY_BLOCK", "REPORT_COMMENT");
+            types = allTypes;
+        }
+        if (status == null || status.isBlank() || "All".equalsIgnoreCase(status)) {
+            status = null;
         }
         Page<NotificationDTO> notificationPage = notificationService.getNotificationsByUserId(userId, types, status, pageable);
         model.addAttribute("notifications", notificationPage.getContent());
@@ -57,6 +61,7 @@ public class AdminNotificationsController {
         model.addAttribute("isSearch", false);
         long unreadCount = notificationService.countUnreadByUserId(userId);
         model.addAttribute("unreadCount", unreadCount);
+        model.addAttribute("allTypes", allTypes);
         return "adminDashBoard/index";
     }
 

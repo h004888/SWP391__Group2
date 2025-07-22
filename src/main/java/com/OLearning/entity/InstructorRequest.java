@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
 @Entity
 @Table(name = "InstructorRequests")
 public class InstructorRequest {
@@ -29,6 +28,12 @@ public class InstructorRequest {
     
     @Column(name = "DecisionDate")
     private LocalDateTime decisionDate;
+
+    @Column(name = "Personal_skill", columnDefinition = "NVARCHAR(MAX)")
+    private String personalSkill;
+
+    @Column(name = "FileUrl", columnDefinition = "NVARCHAR(1000)")
+    private String fileUrl;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "UserID", nullable = false)

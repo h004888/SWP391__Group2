@@ -59,54 +59,7 @@ public class CoinTransactionServiceImpl implements CoinTransactionService {
         return new PageImpl<>(transactionDTOs, pageableWithSort, transactionPage.getTotalElements());
     }
 
-    @Override
-    @Transactional
-    public CoinTransaction saveDepositTransactionAfterPayment(Long userId, BigDecimal amount, String transactionId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-        CoinTransaction transaction = new CoinTransaction();
-        transaction.setUser(user);
-        transaction.setAmount(amount);
-        transaction.setTransactionType("top_up");
-        transaction.setStatus("completed");
-        transaction.setNote("VNPay TransactionId: " + transactionId);
-        transaction.setCreatedAt(LocalDateTime.now());
-
-        user.setCoin(user.getCoin() + amount.doubleValue());
-        userRepository.save(user);
-
-        return coinTransactionRepository.save(transaction);
-    }
-
-    @Override
-    @Transactional
-    public CoinTransaction processWithdrawal(Long userId, BigDecimal amount) {
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Withdrawal amount must be positive");
-        }
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
-
-        if (user.getCoin() < amount.doubleValue()) {
-            throw new IllegalArgumentException("Insufficient balance");
-        }
-
-        CoinTransaction transaction = new CoinTransaction();
-        transaction.setUser(user);
-        transaction.setAmount(amount.negate());
-        transaction.setTransactionType("withdraw");
-        transaction.setStatus("completed");
-        transaction.setNote("Withdrawal processed");
-        transaction.setCreatedAt(LocalDateTime.now());
-
-        // Update user's coin balance
-        user.setCoin(user.getCoin() - amount.doubleValue());
-        userRepository.save(user);
-
-        return coinTransactionRepository.save(transaction);
-    }
     @Override
     @Transactional
     public Page<CoinTransactionDTO> filterAndSortTransactions(Long userId, String transactionType, String startDate, String endDate, int page, int size) {
@@ -156,5 +109,52 @@ public class CoinTransactionServiceImpl implements CoinTransactionService {
         }
 
         return transactionPage.map(coinTransactionMapper::toDTO);
+    }
+
+    public Page<CoinTransactionDTO> getUserCoursePurchaseTransactions(Long userId, String courseName, String status, String startDate, String endDate, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        String transactionType = "COURSE_PURCHASE";
+        Page<CoinTransaction> transactionPage;
+        LocalDateTime start = null, end = null;
+        if (startDate != null && !startDate.trim().isEmpty() && endDate != null && !endDate.trim().isEmpty()) {
+            start = LocalDate.parse(startDate).atStartOfDay();
+            end = LocalDate.parse(endDate).plusDays(1).atStartOfDay().minusSeconds(1);
+        }
+        if (status != null && !status.trim().isEmpty() && start != null && end != null) {
+            transactionPage = coinTransactionRepository.findByUserUserIdAndTransactionTypeAndStatusAndCreatedAtBetween(userId, transactionType, status, start, end, pageable);
+        } else if (status != null && !status.trim().isEmpty()) {
+            transactionPage = coinTransactionRepository.findByUserUserIdAndTransactionTypeAndStatus(userId, transactionType, status, pageable);
+        } else if (start != null && end != null) {
+            transactionPage = coinTransactionRepository.findByUserUserIdAndTransactionTypeAndCreatedAtBetween(userId, transactionType, start, end, pageable);
+        } else {
+            transactionPage = coinTransactionRepository.findByUserUserIdAndTransactionType(userId, transactionType, pageable);
+        }
+        List<CoinTransactionDTO> dtos = transactionPage.getContent().stream()
+            .map(coinTransactionMapper::toDTO)
+            .filter(dto -> courseName == null || courseName.isEmpty() || (dto.getCourseName() != null && dto.getCourseName().toLowerCase().contains(courseName.toLowerCase())))
+            .toList();
+        return new PageImpl<>(dtos, pageable, transactionPage.getTotalElements());
+    }
+
+    // Thống kê tổng chi tiêu và số lượng khóa học đã mua
+    public Double getTotalSpent(Long userId) {
+        String transactionType = "COURSE_PURCHASE";
+        List<CoinTransaction> transactions = coinTransactionRepository.findByUserUserIdAndTransactionType(userId, transactionType, Pageable.unpaged()).getContent();
+        return transactions.stream()
+            .filter(t -> t.getAmount() != null && t.getAmount() < 0)
+            .map(t -> Math.abs(t.getAmount()))
+            .reduce(0.0, Double::sum);
+    }
+    public long getTotalCoursesPurchased(Long userId) {
+        String transactionType = "COURSE_PURCHASE";
+        List<CoinTransaction> transactions = coinTransactionRepository.findByUserUserIdAndTransactionType(userId, transactionType, Pageable.unpaged()).getContent();
+        return transactions.stream().map(coinTransactionMapper::toDTO).map(CoinTransactionDTO::getCourseName).distinct().count();
+    }
+
+    // Lấy chi tiết giao dịch
+    public CoinTransactionDTO getTransactionDetail(Long transactionId) {
+        CoinTransaction transaction = coinTransactionRepository.findById(transactionId).orElse(null);
+        if (transaction == null) return null;
+        return coinTransactionMapper.toDTO(transaction);
     }
 }

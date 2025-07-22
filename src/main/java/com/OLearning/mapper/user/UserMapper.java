@@ -35,6 +35,7 @@ public class UserMapper {
         user.setProfilePicture(dto.getProfilePicture());
         user.setCourses(dto.getCourse());
         user.setStatus(true);
+        user.setFullName(dto.getFullName());
         return user;
     }
 }

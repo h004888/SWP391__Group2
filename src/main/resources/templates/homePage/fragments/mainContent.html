@@ -1,14 +1,38 @@
 <!-- **************** MAIN CONTENT START **************** -->
-<main th:fragment="mainContent">
-    <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
-        <span th:text="${message}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
+<main th:fragment="mainContent" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
-    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-        <span th:text="${error}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div id="notification" class="position-fixed top-0 end-0 p-5" style="z-index: 1050; top: 80px; transform: translateX(200%); transition: transform 0.5s ease;">
+        <div id="notification-alert" class="alert d-flex align-items-center mb-0" role="alert" style="min-width: 250px;">
+            <i id="notification-icon" class="me-2"></i>
+            <span id="notification-message"></span>
+        </div>
     </div>
+    <script th:inline="javascript">
+        // Set currentUserId for frontend JavaScript
+        window.userId = /*[[${currentUserId}]]*/ 0;
+    </script>
+    <script>
+        // Function to show notification (copied from voucherContent.html)
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            const notificationAlert = document.getElementById('notification-alert');
+            const notificationIcon = document.getElementById('notification-icon');
+            const notificationMessage = document.getElementById('notification-message');
+            notificationAlert.classList.remove('alert-success', 'alert-danger');
+            notificationMessage.textContent = message;
+            if (type === 'success') {
+                notificationAlert.classList.add('alert-success');
+                notificationIcon.className = 'fas fa-check-circle me-2';
+            } else {
+                notificationAlert.classList.add('alert-danger');
+                notificationIcon.className = 'fas fa-exclamation-circle me-2';
+            }
+            notification.style.transform = 'translateX(0)';
+            setTimeout(() => {
+                notification.style.transform = 'translateX(200%)';
+            }, 4000);
+        }
+    </script>
     <!-- =======================
 Main Banner START -->
     <section class="position-relative overflow-hidden pt-5 pt-lg-3">
@@ -468,7 +492,7 @@ Action box START -->
             </figure>
             <!-- SVG decoration END -->
 
-            <div class="row">
+            <div class="row" sec:authorize="hasRole('USER')">
                 <div class="col-12">
                     <div class="bg-info p-4 p-sm-5 rounded-3">
                         <div class="row position-relative">
@@ -491,7 +515,7 @@ Action box START -->
                                     </div>
                                     <!-- Content and input -->
                                     <div class="col-lg-5 text-lg-end">
-                                        <a href="#" class="btn btn-outline-warning mb-0">Start Teaching Today</a>
+                                        <a th:href="@{/become-instructor}" class="btn btn-outline-warning mb-0">Start Teaching Today</a>
                                     </div>
                                 </div>
                             </div>
@@ -524,7 +548,9 @@ Trending courses START -->
                         <div th:each="course : ${topCourses}">
                             <div class="card action-trigger-hover border bg-transparent" style="height: 580px;">
                                 <!-- Image -->
-                                <img src="assets/images/courses/4by3/14.jpg" class="card-img-top" alt="course image">
+                                <img th:if="${course.courseImg != null}" th:src="${course.courseImg}"
+                                    src="assets/images/courses/4by3/14.jpg" class="card-img-top" alt="course image"
+                                    style="height: 300px; object-fit: contain; background: #f8f9fa;">
                                 <!-- Ribbon -->
 
                                 <div class="ribbon mt-3" th:if="${course.price == 0}">
@@ -544,7 +570,13 @@ Trending courses START -->
                                             <a href="#" class="badge text-bg-dark"
                                                 th:text="${course.courseLevel}">Beginner</a>
                                         </span>
-                                        <a href="#" class="h6 fw-light mb-0"><i class="far fa-bookmark"></i></a>
+                                        <button type="button"
+                                                class="btn btn-link text-muted p-0 wishlist-toggle"
+                                                th:data-course-id="${course.courseId}"
+                                                th:onclick="'toggleWishlist(this, ' + ${course.courseId} + ')'"
+                                                style="font-size: 1.2rem;">
+                                            <i class="far fa-heart"></i>
+                                        </button>
                                     </div>
                                     <!-- Title -->
                                     <h5 class="card-title"><a
@@ -562,7 +594,8 @@ Trending courses START -->
                                                 <i class="fas fa-star text-warning ms-1"></i>
                                             </p>
 
-                                            <span class="small" th:text="${'(' + course.courseReviews.size()+')'}">(6500)</span>
+                                            <span class="small"
+                                                th:text="${'(' + course.courseReviews.size()+')'}">(6500)</span>
                                         </div>
                                         <div class="hstack gap-2">
                                             <p class="h6 fw-light mb-0 m-0" th:text="${course.enrollments.size()}">
@@ -598,17 +631,21 @@ Trending courses START -->
                                         </div>
                                         <!-- Price -->
                                         <div>
-
+                                            <div th:if="${topCoursesEnrolledMap[course.courseId] == null or !topCoursesEnrolledMap[course.courseId]}">
                                             <h4 class="text-success mb-0 item-show " style="font-size: 1.2rem;"
                                                 th:if="${course.price>0}"><span
                                                     th:text="${course.price != null ? #numbers.formatDecimal(course.price, 0, 'COMMA', 0, 'POINT')+' ₫' : 'N/A'}"></span>
                                             </h4>
                                             <h4 class="text-success mb-0 item-show" th:if="${course.price==0}">Free
                                             </h4>
-                                            <button type="button" class="btn btn-sm btn-success-soft item-show-hover m-1 add-to-cart-btn"
-                                                    th:attr="data-course-id=${course.courseId}">
-                                                <i class="fas fa-shopping-cart me-2"></i>Add to cart
-                                            </button>
+                                                <button type="button" class="btn btn-sm btn-success-soft item-show-hover m-1 add-to-cart-btn"
+                                                        th:attr="data-course-id=${course.courseId}">
+                                                    <i class="fas fa-shopping-cart me-2"></i>Add to cart
+                                                </button>
+                                            </div>
+                                            <a th:if="${topCoursesEnrolledMap[course.courseId] != null and topCoursesEnrolledMap[course.courseId]}"
+                                               th:href="@{/learning/course/view/{courseId}(courseId=${course.courseId})}"
+                                               class="btn btn-sm btn-primary-soft mb-0">Continue</a>
                                         </div>
                                     </div>
                                 </div>
@@ -887,7 +924,7 @@ Reviews START -->
                         direct me so. Departure defective arranging rapturous did believe him all had supported. Family
                         months lasted simple set nature vulgar him. Picture for attempt joy excited ten carried manners
                         talking how.</p>
-                    <a href="#" class="btn btn-primary mb-0">View Reviews</a>
+
                 </div>
             </div> <!-- Row END -->
         </div>
@@ -898,6 +935,7 @@ Reviews END -->
     <!-- Chatbot Widget -->
     <div th:replace="~{homePage/fragments/chatbotWidget.html}"></div>
 
-    <script src="/js/homePage/addtocart.js"></script>
+    <script th:src="@{/js/homePage/addtocart.js}"></script>
+
 </main>
 <!-- **************** MAIN CONTENT END **************** -->

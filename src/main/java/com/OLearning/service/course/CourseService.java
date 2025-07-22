@@ -6,8 +6,6 @@ import com.OLearning.dto.course.CourseViewDTO;
 import com.OLearning.entity.Chapter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import com.OLearning.entity.Chapter;
-
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,14 +26,13 @@ public interface CourseService {
 
     Page<CourseDTO> filterCoursesWithPagination(String keyword, Long category, String price, String status, int page, int size);
 
-    Page<CourseDTO> filterCoursesInstructorManage(Long userId, Long categoryId, String status, String price, int page, int size);
+    Page<CourseDTO> filterCoursesInstructorManage(Long userId, Long categoryId, String status, String price, String title, int page, int size);
 
     void deleteCourse(Long courseId);
 
     Course findCourseById(Long courseId);
 
     Course createCourseStep1(Long courseId, AddCourseStep1DTO addCourseStep1DTO);
-
 
     AddCourseStep1DTO draftCourseStep1(Course course);
 
@@ -57,7 +54,7 @@ public interface CourseService {
 
     List<CourseViewDTO> getTopCourses();
 
-    List<CourseViewDTO> getCoursesByCategoryId(int categoryId);
+    List<CourseViewDTO> getCoursesByCategoryId(Long categoryId);
 
     Page<CourseViewDTO> searchCoursesGrid(
             List<Long> categoryIds,
@@ -73,5 +70,13 @@ public interface CourseService {
     void setPendingBlock(Long courseId);
 
     Course findById(Long courseId);
+
+    int countByInstructorAndStatus(Long userId, String status);
+
+    CourseViewDTO getCourseRecentIncomplete (Long userId);
+
+    int countByInstructorAndStatusWithFilter(Long userId, String status, Long categoryId, String price, String title);
+
+    List<CourseViewDTO> getCourseByUserId(Long userId);
 
 }

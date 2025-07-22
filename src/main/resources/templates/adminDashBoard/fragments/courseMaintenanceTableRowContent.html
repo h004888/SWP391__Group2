@@ -28,9 +28,13 @@
             </a>
         </td>
     </tr>
+    <!-- Empty state -->
     <tr th:if="${#lists.isEmpty(courseMaintenances)}">
-        <td colspan="9" class="text-center text-muted">
-            <i class="fas fa-search me-2"></i>No maintenance records found
+        <td colspan="8" class="text-center align-middle py-5">
+            <div class="d-flex flex-column align-items-center justify-content-center">
+                <i class="fas fa-receipt fa-3x mb-3 opacity-50"></i>
+                <h5>No maintenance records found</h5>
+            </div>
         </td>
     </tr>
 </div>
@@ -41,9 +45,6 @@
             Showing <span th:text="${currentPage * 10 + 1}">1</span> to
             <span th:text="${(currentPage * 10) + 10 > totalItems ? totalItems : (currentPage * 10) + 10}">10</span> of
             <span th:text="${totalItems}">20</span> entries
-        </p>
-        <p class="mb-0 text-center text-sm-start" th:if="${totalItems == 0}">
-            No entries found
         </p>
     </div>
     <nav class="d-flex justify-content-center mb-0" aria-label="navigation" th:if="${totalPages > 0}">

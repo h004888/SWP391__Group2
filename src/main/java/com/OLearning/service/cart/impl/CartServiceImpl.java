@@ -35,6 +35,9 @@ public class CartServiceImpl implements CartService {
     private OrderDetailRepository orderDetailRepository;
 
     @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
     private EnrollmentRepository enrollmentRepository;
 
     @Autowired
@@ -50,6 +53,13 @@ public class CartServiceImpl implements CartService {
         public CourseAlreadyInCartException(String message) {
             super(message);
         }
+    }
+
+    private Long getLongValue(Object value) {
+        if (value instanceof Number) {
+            return ((Number) value).longValue();
+        }
+        throw new IllegalStateException("Value is not a number: " + (value != null ? value.getClass().getName() : "null"));
     }
 
     @Override
@@ -85,6 +95,22 @@ public class CartServiceImpl implements CartService {
                 emptyCart.put("total", 0L);
                 emptyCart.put("items", new ArrayList<>());
                 return emptyCart;
+            }
+            // Bổ sung instructorName cho từng item
+            List<Map<String, Object>> items = (List<Map<String, Object>>) cart.getOrDefault("items", new ArrayList<>());
+            for (Map<String, Object> item : items) {
+                Object courseIdObj = item.get("courseId");
+                if (courseIdObj != null) {
+                    Long courseId = getLongValue(courseIdObj);
+                    Course course = courseRepository.findById(courseId).orElse(null);
+                    if (course != null && course.getInstructor() != null) {
+                        item.put("instructorName", course.getInstructor().getFullName());
+                    } else {
+                        item.put("instructorName", "N/A");
+                    }
+                } else {
+                    item.put("instructorName", "N/A");
+                }
             }
             return cart;
         } catch (Exception e) {
@@ -202,32 +228,42 @@ public class CartServiceImpl implements CartService {
 
         List<Map<String, Object>> items = (List<Map<String, Object>>) cart.getOrDefault("items", new ArrayList<>());
 
-        BigDecimal totalPrice = items.stream()
+        double totalPrice = items.stream()
                 .filter(Objects::nonNull)
-                .map(item -> {
+                .mapToDouble(item -> {
                     Object price = item.get("price");
-                    return price != null ? BigDecimal.valueOf(((Number) price).doubleValue()) : BigDecimal.ZERO;
+                    return price != null ? ((Number) price).doubleValue() : 0.0;
                 })
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .sum();
 
-        order.setOrderType("course_purchase");
-        order.setStatus("completed");
+        order.setOrderType("COURSE_PURCHASE");
+        order.setStatus("PAID");
         order.setOrderDate(LocalDateTime.now());
         order.setRefCode(refCode != null ? refCode : UUID.randomUUID().toString());
-        order.setAmount(totalPrice.doubleValue());
-
+        order.setAmount(totalPrice);
+        order.setDescription("Buy Course OLearning - ORDER" + order.getOrderId());
         ordersRepository.save(order);
+
+        Notification notification = new Notification();
+        notification.setUser(user);
+        notification.setCourse(null);
+        notification.setMessage("You have received a payment of " + totalPrice + " VND");
+        notification.setType("COURSE_PURCHASE");
+        notification.setStatus("failed");
+        notification.setSentAt(java.time.LocalDateTime.now());
+        notificationRepository.save(notification);
 
         if (!useCoins) {
             CoinTransaction transaction = new CoinTransaction();
             transaction.setUser(user);
             transaction.setAmount(totalPrice);
-            transaction.setStatus("completed");
+            transaction.setStatus("PAID");
             transaction.setTransactionType("top_up");
             transaction.setCreatedAt(LocalDateTime.now());
-            transaction.setNote("VNPay payment received - Order: " + order.getRefCode());
+            transaction.setNote("VNPay payment"+ refCode);
+            transaction.setOrder(null);
             coinTransactionRepository.save(transaction);
-            user.setCoin(user.getCoin() + totalPrice.longValue());
+            user.setCoin(user.getCoin() + totalPrice);
         }
 
         for (Map<String, Object> item : items) {
@@ -251,46 +287,49 @@ public class CartServiceImpl implements CartService {
             enrollment.setOrder(order);
             enrollmentRepository.save(enrollment);
 
-            BigDecimal coursePrice = BigDecimal.valueOf(((Number) item.get("price")).doubleValue());
+            double coursePrice = ((Number) item.get("price")).doubleValue();
 
             CoinTransaction studentTransaction = new CoinTransaction();
             studentTransaction.setUser(user);
-            studentTransaction.setAmount(coursePrice.negate());
-            studentTransaction.setStatus("completed");
+            studentTransaction.setAmount(-coursePrice);
+            studentTransaction.setStatus("PAID");
             studentTransaction.setCreatedAt(LocalDateTime.now());
+            studentTransaction.setOrder(order);
 
             if (useCoins) {
                 studentTransaction.setTransactionType("course_purchase");
-                studentTransaction.setNote("Purchase course with coins: " + course.getTitle());
+                studentTransaction.setNote("Purchase course with coins");
             } else {
                 studentTransaction.setTransactionType("course_purchase");
-                studentTransaction.setNote("Purchase course via VNPay: " + course.getTitle() + " - Order: " + order.getRefCode());
+                studentTransaction.setNote("Purchase course via VNPay");
             }
 
             coinTransactionRepository.save(studentTransaction);
 
-            user.setCoin(user.getCoin() - coursePrice.longValue());
+            user.setCoin(user.getCoin() - coursePrice);
 
             User instructor = course.getInstructor();
             if (instructor != null) {
                 CoinTransaction instructorTransaction = new CoinTransaction();
                 instructorTransaction.setUser(instructor);
                 instructorTransaction.setAmount(coursePrice);
-                instructorTransaction.setStatus("completed");
+                instructorTransaction.setStatus("PAID");
                 instructorTransaction.setCreatedAt(LocalDateTime.now());
-
-                if (useCoins) {
-                    instructorTransaction.setTransactionType("course_purchase");
-                    instructorTransaction.setNote("Earned from coin purchase: " + course.getTitle());
-                } else {
-                    instructorTransaction.setTransactionType("course_purchase");
-                    instructorTransaction.setNote("Earned from VNPay purchase: " + course.getTitle() + " - Order: " + order.getRefCode());
-                }
-
+                instructorTransaction.setOrder(null);
+                instructorTransaction.setTransactionType("COURSE_PURCHASE");
+                instructorTransaction.setNote("students buy courses");
                 coinTransactionRepository.save(instructorTransaction);
-
-                instructor.setCoin(instructor.getCoin() + coursePrice.longValue());
+                instructor.setCoin(instructor.getCoin() + coursePrice);
                 userRepository.save(instructor);
+
+                Notification notificationinstructor = new Notification();
+                notificationinstructor.setUser(instructor);
+                notificationinstructor.setCourse(course);
+                notificationinstructor.setMessage("You have received a payment of " + coursePrice + " VND for your course " + course.getTitle());
+                notificationinstructor.setType("COURSE_PURCHASE");
+                notificationinstructor.setStatus("failed");
+                notificationinstructor.setSentAt(LocalDateTime.now());
+                notificationRepository.save(notification);
             }
         }
 
@@ -308,12 +347,5 @@ public class CartServiceImpl implements CartService {
         if (coursePurchased) {
             throw new CourseAlreadyPurchasedException("Course '" + courseTitle + "' has already been purchased.");
         }
-    }
-
-    private Long getLongValue(Object value) {
-        if (value instanceof Number) {
-            return ((Number) value).longValue();
-        }
-        throw new IllegalStateException("Value is not a number: " + (value != null ? value.getClass().getName() : "null"));
     }
 }

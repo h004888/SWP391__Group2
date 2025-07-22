@@ -19,6 +19,8 @@ public interface NotificationService {
     Page<NotificationDTO> getUnreadNotificationsByUserId(Long userId, List<String> types, Pageable pageable);
     public List<NotificationDTO> searchNotificationsByUser(String keyword, Long userId);
     Page<NotificationDTO> searchNotificationsByUser(String keyword, Long userId, Pageable pageable);
+    List<String> getAllNotificationTypes();
+    List<String> getAllNotificationTypesByUserId(Long userId);
 
     //    NotificationsDTO getNotificationDetail(Long notificationId, Long userId);
     void markAsRead(Long notificationId);

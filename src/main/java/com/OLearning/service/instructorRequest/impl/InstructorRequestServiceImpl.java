@@ -1,6 +1,7 @@
 package com.OLearning.service.instructorRequest.impl;
 
 import com.OLearning.entity.InstructorRequest;
+import com.OLearning.entity.Notification;
 import com.OLearning.entity.Role;
 import com.OLearning.entity.User;
 import com.OLearning.repository.InstructorRequestRepository;
@@ -8,6 +9,7 @@ import com.OLearning.repository.RoleRepository;
 import com.OLearning.repository.UserRepository;
 import com.OLearning.service.email.EmailService;
 import com.OLearning.service.instructorRequest.InstructorRequestService;
+import com.OLearning.service.notification.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +32,8 @@ public class InstructorRequestServiceImpl implements InstructorRequestService {
     private RoleRepository roleRepository;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     public Page<InstructorRequest> getAllInstructorRequests(Pageable pageable) {
@@ -53,16 +57,25 @@ public class InstructorRequestServiceImpl implements InstructorRequestService {
         request.setStatus("APPROVED");
         request.setDecisionDate(LocalDateTime.now());
         request.setAdmin(admin);
-        
+        request.setNote("Yêu cầu trở thành giảng viên đã được duyệt");
+
         // Update user role to instructor
         User user = request.getUser();
-        Role instructorRole = roleRepository.findById(2L) // Assuming 2L is the instructor role ID
+        Role instructorRole = roleRepository.findById(2L) // 2L is the instructor role ID
                 .orElseThrow(() -> new RuntimeException("Instructor role not found"));
         user.setRole(instructorRole);
         userRepository.save(user);
 
 //        send mail
         emailService.sendBecomeInstructorEmail(user, true);
+        // send notification
+        Notification notification = new Notification();
+        notification.setUser(user);
+        notification.setMessage("Yêu cầu trở thành giảng viên của bạn đã được duyệt. Bạn đã trở thành giảng viên!");
+        notification.setType("INSTRUCTOR_REQUEST");
+        notification.setStatus("failed");
+        notification.setSentAt(LocalDateTime.now());
+        notificationService.sendMess(notification);
         return instructorRequestRepository.save(request);
     }
     
@@ -81,6 +94,14 @@ public class InstructorRequestServiceImpl implements InstructorRequestService {
 
         //send mail
         emailService.sendBecomeInstructorEmail(request.getUser(), false);
+        // send notification
+        Notification notification = new Notification();
+        notification.setUser(request.getUser());
+        notification.setMessage("Yêu cầu trở thành giảng viên của bạn đã bị từ chối. Lý do: " + rejectionReason);
+        notification.setType("INSTRUCTOR_REQUEST");
+        notification.setStatus("failed");
+        notification.setSentAt(LocalDateTime.now());
+        notificationService.sendMess(notification);
         
         return instructorRequestRepository.save(request);
     }
@@ -96,5 +117,15 @@ public class InstructorRequestServiceImpl implements InstructorRequestService {
             status != null ? status.trim() : "",
             pageable
         );
+    }
+
+    @Override
+    public InstructorRequest save(InstructorRequest request) {
+        return instructorRequestRepository.save(request);
+    }
+
+    @Override
+    public InstructorRequest findLatestByUserId(Long userId) {
+        return instructorRequestRepository.findTopByUser_UserIdOrderByRequestDateDesc(userId);
     }
 }

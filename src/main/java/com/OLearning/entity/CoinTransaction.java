@@ -12,19 +12,18 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
 public class CoinTransaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "TransactionID")
     private Long transactionId;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "UserID", nullable = false)
     private User user;
 
     @Column(name = "Amount")
-    private BigDecimal amount;
+    private Double amount;
 
     @Column(name = "TransactionType")
     private String transactionType;
@@ -37,4 +36,8 @@ public class CoinTransaction {
 
     @Column(name = "CreatedAt")
     private LocalDateTime createdAt;
+
+    @ManyToOne
+    @JoinColumn(name = "OrderID", nullable = true)
+    private Order order;
 } 

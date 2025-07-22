@@ -91,7 +91,7 @@ public class CourseMapper {
         // Calculate total duration
         dtoView.setDuration(course.getListOfChapters().stream()
                 .flatMap(chapter -> chapter.getLessons().stream())
-                .mapToInt(lesson -> lesson.getDuration())
+                .mapToInt(lesson -> lesson.getDuration() != null ? lesson.getDuration() : 0)
                 .sum());
         // Calculate total lessons
             dtoView.setTotalLessons(course.getListOfChapters().stream()

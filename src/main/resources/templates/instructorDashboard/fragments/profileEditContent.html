@@ -1,0 +1,304 @@
+<th:block th:fragment="profileEditContent">
+    <!-- Title -->
+    <div class="row">
+        <div class="col-12 mb-3">
+            <h1 class="h3 mb-2 mb-sm-0">Edit Profile</h1>
+        </div>
+    </div>
+
+    <!-- Error Messages -->
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="row g-4">
+        <!-- Edit Profile Form -->
+        <div class="col-xxl-8">
+            <div class="card bg-transparent border rounded-3 h-100">
+                <!-- Card header -->
+                <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="card-header-title mb-0">Edit Personal Information</h5>
+                    <a th:href="@{/instructor/profile}" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Profile
+                    </a>
+                </div>
+
+                <!-- Card body -->
+                <div class="card-body">
+                    <form th:action="@{/instructor/profile/update}" method="POST" th:object="${profileUpdateDTO}">
+                        <input type="hidden" name="userId" th:value="${userDetail.userId}">
+                        
+                        <!-- Profile Picture Upload -->
+                        <div class="text-center mb-4">
+                            <div class="avatar avatar-xxl mx-auto mb-3 position-relative">
+                                <img class="avatar-img rounded-circle border border-white border-3 shadow"
+                                     id="profilePicturePreview"
+                                     th:src="${userDetail.profilePicture != null ? userDetail.profilePicture : '/assets/images/avatar/01.jpg'}" 
+                                     alt="Profile Picture">
+                                <div class="position-absolute bottom-0 end-0">
+                                    <label for="profilePictureFile" class="btn btn-sm btn-primary rounded-circle">
+                                        <i class="bi bi-camera"></i>
+                                    </label>
+                                    <input type="file" id="profilePictureFile" accept="image/*" style="display: none;">
+                                </div>
+                            </div>
+                            <input type="hidden" name="profilePicture" id="profilePictureUrl" th:value="${userDetail.profilePicture}">
+                            <!-- Show image source info -->
+                            <div class="small text-muted mt-2">
+                                <i class="bi bi-info-circle me-1"></i>
+                                <span th:if="${userDetail.isGooglePicture}" class="text-primary">Google Profile Picture</span>
+                                <span th:unless="${userDetail.isGooglePicture}" class="text-success">Custom Uploaded Picture</span>
+                            </div>
+                            
+                            <!-- Test button for debugging -->
+                        </div>
+
+                        <div class="row g-3">
+                            <!-- Full Name -->
+                            <div class="col-md-6">
+                                <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="fullName" 
+                                       th:field="*{fullName}" 
+                                       th:value="${userDetail.fullName}"
+                                       th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid' : ''"
+                                       required>
+                                <div th:if="${#fields.hasErrors('fullName')}" class="invalid-feedback">
+                                    <span th:errors="*{fullName}"></span>
+                                </div>
+                            </div>
+
+                            <!-- Username -->
+                            <div class="col-md-6">
+                                <label class="form-label">Username</label>
+                                <input type="text" class="form-control" name="username" 
+                                       th:field="*{username}"
+                                       th:value="${userDetail.username}" 
+                                       th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''"
+                                       readonly>
+                                <small class="form-text text-muted">Username cannot be changed</small>
+                                <div th:if="${#fields.hasErrors('username')}" class="invalid-feedback">
+                                    <span th:errors="*{username}"></span>
+                                </div>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="col-md-6">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" name="email" 
+                                       th:field="*{email}"
+                                       th:value="${userDetail.email}" 
+                                       th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
+                                       readonly>
+                                <small class="form-text text-muted">Email cannot be changed</small>
+                                <div th:if="${#fields.hasErrors('email')}" class="invalid-feedback">
+                                    <span th:errors="*{email}"></span>
+                                </div>
+                            </div>
+
+                            <!-- Phone -->
+                            <div class="col-md-6">
+                                <label class="form-label">Phone</label>
+                                <input type="tel" class="form-control" name="phone" 
+                                       th:field="*{phone}"
+                                       th:value="${userDetail.phone}"
+                                       th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid' : ''"
+                                       placeholder="Enter phone number">
+                                <div th:if="${#fields.hasErrors('phone')}" class="invalid-feedback">
+                                    <span th:errors="*{phone}"></span>
+                                </div>
+                            </div>
+
+                            <!-- Birthday -->
+                            <div class="col-md-6">
+                                <label class="form-label">Birthday</label>
+                                <input type="date" class="form-control" name="birthDay" 
+                                       th:field="*{birthDay}"
+                                       th:value="${userDetail.birthDay != null ? #temporals.format(userDetail.birthDay, 'yyyy-MM-dd') : ''}"
+                                       th:classappend="${#fields.hasErrors('birthDay')} ? 'is-invalid' : ''">
+                                <div th:if="${#fields.hasErrors('birthDay')}" class="invalid-feedback">
+                                    <span th:errors="*{birthDay}"></span>
+                                </div>
+                            </div>
+
+                            <!-- Address -->
+                            <div class="col-md-6">
+                                <label class="form-label">Address</label>
+                                <input type="text" class="form-control" name="address" 
+                                       th:field="*{address}"
+                                       th:value="${userDetail.address}"
+                                       th:classappend="${#fields.hasErrors('address')} ? 'is-invalid' : ''"
+                                       placeholder="Enter your address">
+                                <div th:if="${#fields.hasErrors('address')}" class="invalid-feedback">
+                                    <span th:errors="*{address}"></span>
+                                </div>
+                            </div>
+
+                            <!-- Personal Skills -->
+                            <div class="col-12">
+                                <label class="form-label">Professional Skills</label>
+                                <textarea class="form-control" name="personalSkill" rows="3" 
+                                          th:field="*{personalSkill}"
+                                          th:classappend="${#fields.hasErrors('personalSkill')} ? 'is-invalid' : ''"
+                                          placeholder="Describe your professional skills and expertise..."
+                                          th:text="${userDetail.personalSkill}"></textarea>
+                                <small class="form-text text-muted">This will be displayed on your instructor profile</small>
+                                <div th:if="${#fields.hasErrors('personalSkill')}" class="invalid-feedback">
+                                    <span th:errors="*{personalSkill}"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary" id="saveProfileBtn" disabled>
+                                <i class="bi bi-check-circle me-1"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Help Card -->
+        <div class="col-xxl-4">
+            <div class="card bg-transparent border rounded-3 h-100">
+                <!-- Card header -->
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="card-header-title mb-0">Profile Tips</h5>
+                </div>
+
+                <!-- Card body -->
+                <div class="card-body">
+                    <div class="d-flex mb-3">
+                        <div class="icon-sm bg-primary text-white rounded-circle me-3">
+                            <i class="bi bi-lightbulb"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-1">Complete Your Profile</h6>
+                            <p class="small text-muted mb-0">A complete profile helps students trust and connect with you better.</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex mb-3">
+                        <div class="icon-sm bg-success text-white rounded-circle me-3">
+                            <i class="bi bi-camera"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-1">Professional Photo</h6>
+                            <p class="small text-muted mb-0">Use a clear, professional headshot for your profile picture.</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex mb-3">
+                        <div class="icon-sm bg-warning text-white rounded-circle me-3">
+                            <i class="bi bi-pencil"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-1">Skills Description</h6>
+                            <p class="small text-muted mb-0">Describe your expertise and what students can expect from your courses.</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex">
+                        <div class="icon-sm bg-info text-white rounded-circle me-3">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-1">Privacy</h6>
+                            <p class="small text-muted mb-0">Your personal information is secure and only visible to you.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript for Profile Picture Upload -->
+    <script>
+        const saveBtn = document.getElementById('saveProfileBtn');
+
+        document.getElementById('profilePictureFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Disable nút Save khi upload
+                saveBtn.disabled = true;
+
+                // Show loading state
+                const previewImg = document.getElementById('profilePicturePreview');
+                const originalSrc = previewImg.src;
+                previewImg.style.opacity = '0.5';
+                
+                // Show preview immediately
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    previewImg.style.opacity = '1';
+                };
+                reader.readAsDataURL(file);
+
+                // Upload to server
+                const formData = new FormData();
+                formData.append('file', file);
+
+                fetch('/instructor/profile/upload-picture', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.text())
+                .then(result => {
+                    if (result.startsWith('error:')) {
+                        alert('Error uploading image: ' + result.substring(6));
+                        // Nếu lỗi, vẫn disable nút Save
+                    } else {
+                        document.getElementById('profilePictureUrl').value = result;
+                        // Upload thành công, enable lại nút Save
+                        saveBtn.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    alert('Error uploading image: ' + error.message);
+                    // Nếu lỗi, vẫn disable nút Save
+                });
+            }
+        });
+        
+        // Test function for debugging
+        function testUpload() {
+            const fileInput = document.getElementById('profilePictureFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a file first');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            console.log('Testing upload with file:', file.name);
+            
+            fetch('/instructor/profile/test-upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                console.log('Test response status:', response.status);
+                return response.text();
+            })
+            .then(result => {
+                console.log('Test result:', result);
+                alert('Test result: ' + result);
+            })
+            .catch(error => {
+                console.error('Test error:', error);
+                alert('Test error: ' + error.message);
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            saveBtn.disabled = false;
+        });
+    </script>
+</th:block> 

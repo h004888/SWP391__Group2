@@ -1,14 +1,180 @@
+<div th:replace="~{homePage/fragments/notification :: notification}"></div>
 <main th:fragment="cartContent">
-  <!-- Display success/error messages -->
-  <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
-    <span th:text="${message}"></span>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
-
-  <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-    <span th:text="${error}"></span>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
+  <style>
+    .original-price-strike {
+      text-decoration: line-through !important;
+      color: #888 !important;
+      font-size: 0.9em !important;
+      opacity: 0.8;
+      transition: all 0.2s;
+    }
+    /* Voucher Modal Styles */
+    .voucher-modal-dialog {
+      margin: 10vh auto;
+      max-width: 500px;
+      width: 95vw;
+    }
+    .voucher-modal-content {
+      border-radius: 18px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      border: none;
+      overflow: hidden;
+      background: #fff;
+      animation: fadeInModal 0.25s;
+    }
+    .voucher-modal-header {
+      background: #f8f9fc;
+      color: #212529;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid #e3e6f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .voucher-modal-title {
+      font-weight: 700;
+      font-size: 1.15rem;
+      margin: 0;
+      color: #4e73df;
+      display: flex;
+      align-items: center;
+    }
+    .voucher-modal-title .fa-ticket-alt {
+      color: #1cc88a;
+      font-size: 1.3rem;
+      margin-right: 0.5rem;
+    }
+    .voucher-modal-close {
+      background: transparent;
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #adb5bd;
+      font-size: 1.5rem;
+      transition: background 0.2s, color 0.2s;
+      margin-left: 0.5rem;
+    }
+    .voucher-modal-close:hover {
+      background: #e3e6f0;
+      color: #495057;
+    }
+    .voucher-modal-body {
+      padding: 1.5rem;
+      background: #f8f9fc;
+      min-height: 120px;
+      max-height: 350px;
+      overflow-y: auto;
+    }
+    @media (max-width: 500px) {
+      .voucher-modal-dialog {
+        max-width: 98vw;
+        margin: 5vh auto;
+      }
+      .voucher-modal-body {
+        padding: 1rem;
+      }
+    }
+    @keyframes fadeInModal {
+      from { transform: translateY(40px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .payment-option-card {
+      cursor: pointer;
+      border: 2px solid #e3e6f0;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .payment-option-card.selected {
+      border-color: #4e73df;
+      box-shadow: 0 0 0 0.2rem rgba(78,115,223,.15);
+      background: #f8f9fc;
+    }
+    .payment-radio input[type="radio"] {
+      accent-color: #4e73df;
+      width: 18px;
+      height: 18px;
+    }
+    .payment-icon {
+      min-width: 40px;
+      text-align: center;
+    }
+    .voucher-card-cart {
+      border: 2px solid #e3e6f0;
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(78,115,223,0.06);
+      margin-bottom: 1rem;
+      padding: 1rem 1.2rem;
+      display: flex;
+      align-items: center;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+    .voucher-card-cart.selected, .voucher-card-cart:hover {
+      border-color: #4e73df;
+      box-shadow: 0 0 0 0.2rem rgba(78,115,223,.12);
+      background: #f0f4fa;
+    }
+    .voucher-card-cart .voucher-icon {
+      font-size: 2rem;
+      color: #1cc88a;
+      margin-right: 1rem;
+    }
+    .voucher-card-cart .voucher-info {
+      flex: 1;
+    }
+    .voucher-card-cart .voucher-title {
+      font-weight: 600;
+      color: #4e73df;
+      margin-bottom: 0.2rem;
+      font-size: 1.05rem;
+    }
+    .voucher-card-cart .voucher-discount {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #e74a3b;
+      margin-right: 0.7rem;
+    }
+    .voucher-card-cart .voucher-expiry {
+      font-size: 0.95rem;
+      color: #858796;
+    }
+    .voucher-card-cart .voucher-apply-btn {
+      margin-left: 1rem;
+      min-width: 90px;
+      font-size: 0.95rem;
+    }
+    .voucher-btn {
+      background: #f8f9fc;
+      border: 1px solid #4e73df;
+      color: #4e73df;
+      border-radius: 8px;
+      padding: 0.3rem 0.7rem;
+      transition: background 0.2s, color 0.2s;
+    }
+    .voucher-btn:hover, .voucher-btn:focus {
+      background: #4e73df;
+      color: #fff;
+    }
+  </style>
+  <!-- Notification System -->
+  <div th:if="${message}" th:attr="data-message=${message}" id="server-message" style="display: none;"></div>
+  <div th:if="${error}" th:attr="data-message=${error}" id="server-error" style="display: none;"></div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const errorDiv = document.getElementById('server-error');
+      if (errorDiv && errorDiv.getAttribute('data-message')) {
+        showNotification(errorDiv.getAttribute('data-message'), 'error');
+      }
+      const serverMessage = document.getElementById('server-message');
+      if (serverMessage && serverMessage.getAttribute('data-message')) {
+        showNotification(serverMessage.getAttribute('data-message'), 'success');
+      }
+    });
+  </script>
 
   <section class="py-0">
     <div class="container">
@@ -50,7 +216,7 @@
         <!-- Main Content START -->
         <div class="col-lg-8 mb-4 mb-sm-0">
           <div class="card card-body p-4 shadow">
-            <div class="table-responsive border-0 rounded-3">
+            <div class="table-responsive border-0 rounded-3" style="max-height: 400px; overflow-y: auto;">
               <table class="table align-middle p-4 mb-0">
                 <tbody class="border-top-0">
                 <tr th:each="item : ${cartItems}" th:attr="data-course-id=${item.courseId}" class="cart-row">
@@ -58,10 +224,14 @@
                     <div class="d-lg-flex align-items-center">
                       <div class="ms-lg-3 mt-2 mt-lg-0">
                         <h6 class="mb-0">
-                          <a th:href="@{'/courses/' + ${item.courseId}}"
+                          <a th:href="@{'/home/course-detail?id=' + ${item.courseId}}"
                              th:text="${item.courseTitle} ?: 'Course ID: ' + ${item.courseId}"
-                             class="text-decoration-none">Course Title</a>
+                             class="text-decoration-none text-dark fw-bold" style="font-size: 1.1rem;">Course Title</a>
                         </h6>
+                        <div class="small mt-1">
+                          <span class="text-secondary">Giáo viên: </span>
+                          <span class="text-primary fw-semibold" th:text="${item.instructorName != null ? item.instructorName : 'N/A'}">N/A</span>
+                        </div>
                       </div>
                     </div>
                   </td>
@@ -70,7 +240,7 @@
                       <span th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')+ ' đ'}">Price</span>
                     </span>
                     <span class="discounted-price text-danger fw-bold" th:id="'discounted-price-' + ${item.courseId}"></span>
-                    <button type="button" class="btn voucher-btn mt-1" th:attr="data-course-id=${item.courseId}">
+                    <button type="button" class="btn btn-sm voucher-btn" th:attr="data-course-id=${item.courseId}">
                       <i class="fas fa-ticket-alt"></i>
                     </button>
                     <div class="mt-1">
@@ -121,16 +291,12 @@
             <div class="d-flex justify-content-center">
               <form th:action="@{/cart/checkout}" method="post" id="checkout-form">
                 <input type="hidden" id="voucherMapping" name="voucherMapping" />
-                <button type="submit" class="btn btn-lg btn-success"
-                        onclick="return confirm('Are you sure you want to check out?')">
+                <input type="hidden" id="paymentMethod-hidden" name="paymentMethod" />
+                <button type="button" class="btn btn-lg btn-success" id="checkout-btn-modal">
                   Checkout
                 </button>
               </form>
             </div>
-            <p class="small mb-0 mt-2 text-center">
-              By completing your purchase, you agree to these
-              <a href="#" class="text-decoration-none"><strong>Terms of Service</strong></a>
-            </p>
           </div>
 
           <!-- Continue Shopping Card -->
@@ -143,34 +309,92 @@
             </div>
           </div>
         </div>
-        <!-- Right Sidebar END -->
       </div>
     </div>
   </section>
 
   <!-- Modal chọn voucher -->
   <div class="modal" id="voucherModal" tabindex="-1" style="display:none; background:rgba(0,0,0,0.3); position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:9999;">
-    <div class="modal-dialog" style="margin:10vh auto; max-width:400px;">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Chọn voucher cho khóa học</h5>
-          <button type="button" class="btn-close" onclick="voucherJS.closeVoucherModal()"></button>
+    <div class="modal-dialog voucher-modal-dialog">
+      <div class="modal-content voucher-modal-content">
+        <div class="modal-header voucher-modal-header">
+          <h5 class="modal-title voucher-modal-title"><i class="fas fa-ticket-alt me-2"></i>Select voucher for course</h5>
+          <button type="button" class="voucher-modal-close" onclick="voucherJS.closeVoucherModal()" aria-label="Đóng">
+            <i class="fas fa-times"></i>
+          </button>
         </div>
-        <div class="modal-body" id="voucher-list"></div>
+        <div class="modal-body voucher-modal-body" id="voucher-list">
+          <!-- Voucher cards sẽ được render bằng JS -->
+        </div>
       </div>
     </div>
   </div>
 
-  <style>
-    .original-price-strike {
-      text-decoration: line-through !important;
-      color: #888 !important;
-      font-size: 0.9em !important;
-      opacity: 0.8;
-      transition: all 0.2s;
-    }
-  </style>
+  <!-- Modal chọn phương thức thanh toán -->
+  <div class="modal fade" id="paymentMethodModal" tabindex="-1" aria-labelledby="paymentMethodModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="paymentMethodModalLabel">
+            <i class="fas fa-credit-card me-2"></i>Select payment method
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closePaymentModal()"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-3">
+            <!-- QR Option -->
+            <div class="col-12">
+              <div class="card payment-option-card" id="qr-card" onclick="selectPaymentMethod('qr')">
+                <div class="card-body d-flex align-items-center">
+                  <div class="payment-icon me-3">
+                    <i class="fas fa-qrcode text-primary fa-2x"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <h6 class="mb-1">QR Banking</h6>
+                    <p class="mb-0 text-muted small">Payment via bank transfer with QR code</p>
+                  </div>
+                  <div class="payment-radio">
+                    <input type="radio" name="paymentMethodModal" value="qr" id="qr-radio">
+                    <label for="qr-radio"></label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- VNPay Option -->
+            <div class="col-12">
+              <div class="card payment-option-card" id="vnpay-card" onclick="selectPaymentMethod('vnpay')">
+                <div class="card-body d-flex align-items-center">
+                  <div class="payment-icon me-3">
+                    <i class="fas fa-credit-card text-success fa-2x"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <h6 class="mb-1">VNPay</h6>
+                    <p class="mb-0 text-muted small">Payment by domestic bank card</p>
+                  </div>
+                  <div class="payment-radio">
+                    <input type="radio" name="paymentMethodModal" value="vnpay" id="vnpay-radio">
+                    <label for="vnpay-radio"></label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="closePaymentModal()">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="proceedToCheckout()" disabled id="proceed-btn">
+            <i class="fas fa-arrow-right me-2"></i>Continue
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
+
+
+  <script th:inline="javascript">
+    window.userId = /*[[${currentUserId}]]*/ 1;
+  </script>
   <script src="/js/homePage/voucher.js"></script>
   <script th:inline="javascript">
     voucherJS.initCartVoucher({
@@ -224,5 +448,76 @@
         }
       }
     });
+  </script>
+  <script>
+    // Hiển thị modal Bootstrap khi bấm Checkout
+    document.addEventListener('DOMContentLoaded', function() {
+      const checkoutBtn = document.getElementById('checkout-btn-modal');
+      if (checkoutBtn) {
+        checkoutBtn.onclick = function(e) {
+          e.preventDefault();
+          // Dùng Bootstrap modal nếu có, fallback nếu không
+          if (window.bootstrap && bootstrap.Modal) {
+            const modal = new bootstrap.Modal(document.getElementById('paymentMethodModal'));
+            modal.show();
+            window._paymentModalInstance = modal;
+          } else {
+            document.getElementById('paymentMethodModal').style.display = 'block';
+          }
+        };
+      }
+    });
+    // Chọn phương thức thanh toán
+    function selectPaymentMethod(method) {
+      // Bỏ chọn tất cả
+      document.getElementById('qr-card').classList.remove('selected');
+      document.getElementById('vnpay-card').classList.remove('selected');
+      document.getElementById('qr-radio').checked = false;
+      document.getElementById('vnpay-radio').checked = false;
+      // Chọn card và radio tương ứng
+      if (method === 'qr') {
+        document.getElementById('qr-card').classList.add('selected');
+        document.getElementById('qr-radio').checked = true;
+      } else if (method === 'vnpay') {
+        document.getElementById('vnpay-card').classList.add('selected');
+        document.getElementById('vnpay-radio').checked = true;
+      }
+      // Bật nút tiếp tục
+      document.getElementById('proceed-btn').disabled = false;
+    }
+    // Đóng modal
+    function closePaymentModal() {
+      if (window._paymentModalInstance) {
+        window._paymentModalInstance.hide();
+      } else {
+        document.getElementById('paymentMethodModal').style.display = 'none';
+      }
+      // Reset chọn
+      document.getElementById('qr-card').classList.remove('selected');
+      document.getElementById('vnpay-card').classList.remove('selected');
+      document.getElementById('qr-radio').checked = false;
+      document.getElementById('vnpay-radio').checked = false;
+      document.getElementById('proceed-btn').disabled = true;
+    }
+    // Khi bấm Tiếp tục
+    function proceedToCheckout() {
+      // Cập nhật voucherMapping trước khi submit
+      const voucherMappingInput = document.getElementById('voucherMapping');
+      if (voucherMappingInput) {
+        voucherMappingInput.value = JSON.stringify(window.selectedVouchers);
+      }
+      let method = '';
+      const radios = document.getElementsByName('paymentMethodModal');
+      for (const r of radios) {
+        if (r.checked) method = r.value;
+      }
+      if (!method) {
+        alert('Vui lòng chọn phương thức thanh toán!');
+        return;
+      }
+      document.getElementById('paymentMethod-hidden').value = method;
+      closePaymentModal();
+      document.getElementById('checkout-form').submit();
+    }
   </script>
 </main>

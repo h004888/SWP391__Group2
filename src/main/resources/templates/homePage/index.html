@@ -1,19 +1,17 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
-
 <div th:replace="~{homePage/fragments/header :: header}"></div>
 
 <body>
-
 	<!-- Header START -->
 	<div th:replace="~{homePage/fragments/navHeader :: navHeader}"></div>
 	<!-- Header END -->
 
 	<!-- **************** MAIN CONTENT START **************** -->
+
 	<div th:replace="~{__${fragmentContent}__}"></div>
 	<!-- **************** MAIN CONTENT END **************** -->
-
 
 	<!-- =======================
 Footer START -->
@@ -28,17 +26,17 @@ Footer END -->
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 	<!-- Bootstrap JS -->
-	<script src="assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+	<script th:src="@{/assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js}"></script>
 
 	<!-- Các vendor khác -->
-	<script src="assets/vendor/tiny-slider/tiny-slider.js"></script>
-	<script src="assets/vendor/glightbox/js/glightbox.js"></script>
-	<script src="assets/vendor/purecounterjs/dist/purecounter_vanilla.js"></script>
+	<script th:src="@{/assets/vendor/tiny-slider/tiny-slider.js}"></script>
+	<script th:src="@{/assets/vendor/glightbox/js/glightbox.js}"></script>
+	<script th:src="@{/assets/vendor/purecounterjs/dist/purecounter_vanilla.js}"></script>
 
 	<!-- Template Functions -->
-	<script src="assets/js/functions.js"></script>
-
-
+	<script th:src="@{/assets/js/functions.js}"></script>
+	<script th:src="@{/js/homePage/wishlist.js}"></script>
+	<script th:src="@{/js/homePage/addtocart.js}"></script>
 
 	<script>
 		function toggleMoreCategories(event) {
@@ -58,6 +56,8 @@ Footer END -->
 					},
 					success: function (data) {
 						$('#course-pills-tabContent').html(data);
+						// Trigger custom event to update wishlist status
+						document.dispatchEvent(new CustomEvent('courses-loaded'));
 					},
 					error: function () {
 						console.error('Lỗi khi tải dữ liệu');
@@ -105,10 +105,6 @@ Footer END -->
 		});
 	</script>
 
-
-
 </body>
-
-
 
 </html>

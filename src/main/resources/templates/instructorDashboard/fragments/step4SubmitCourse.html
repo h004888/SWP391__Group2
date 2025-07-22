@@ -28,7 +28,7 @@
             </div>
         </div>
 
-        <form th:action="@{/instructordashboard/createcourse/savecourse}" method="post">
+        <form th:action="@{/instructor/createcourse/savecourse}" method="post">
             <div class="card border-0 shadow-sm mb-4 rounded-3">
                 <div class="card-body p-4">
                     <h3 class="mb-4 fw-semibold text-dark">Preview & Publish</h3>
@@ -36,24 +36,11 @@
                         <!-- Course preview will be generated here -->
                     </div>
 
-                    <!-- Terms and Conditions (always visible) -->
-                    <div class="content-card mb-3" style="background: #f8fafc; border: 1px solid #e3e6ea;">
-                        <div class="terms-of-service">
-                            <h3 class="mb-3">📄 Terms of Service for the Course</h3>
-                            <ol>
-                                <li><strong>Account Use</strong><br />You are responsible for maintaining the confidentiality of your account. Sharing your login information with others is strictly prohibited.</li>
-                                <li><strong>Course Access</strong><br />Access to the course is granted for personal use only. You may not copy, distribute, or share course content without prior written permission.</li>
-                                <li><strong>Refund Policy</strong><br />All payments are final. Refunds will only be issued under exceptional circumstances as determined by the course provider.</li>
-                                <li><strong>Content Updates</strong><br />The course provider reserves the right to update, modify, or remove content at any time without prior notice.</li>
-                                <li><strong>Code of Conduct</strong><br />You agree to interact respectfully with instructors and other students. Any form of harassment or inappropriate behavior may result in removal from the course.</li>
-                            </ol>
-                        </div>
-                    </div>
-
+                    <!-- Terms and Conditions Modal Trigger (new version) -->
                     <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" id="agreeTerms">
+                        <input class="form-check-input" type="checkbox" id="agreeTerms" name="agreeTerms">
                         <label class="form-check-label" for="agreeTerms">
-                            I have read and agree to the Terms of Service.
+                            I have read and agree to the <a href="#" id="openBusinessRules" style="color:#0d6efd; text-decoration:underline;">Term of Service</a>
                         </label>
                     </div>
                 </div>
@@ -75,13 +62,48 @@
             </div>
         </form>
     </div>
+    <!-- Business Rules Modal -->
+    <div class="modal fade" id="businessRulesModal" tabindex="-1" aria-labelledby="businessRulesModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="businessRulesModalLabel">BẢN ĐIỀU KHOẢN SỬ DỤNG DÀNH CHO GIẢNG VIÊN</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div id="clausesContainerModal">
+                <div th:each="term,iterStat : ${termsAndConditions}" class="clause mb-3" style="padding:1.5rem;border:1px solid #e9ecef;border-radius:8px;">
+                    <div class="clause-header" style="display:flex;align-items:center;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid #e9ecef;">
+                        <div class="clause-number" style="font-size:1.3rem;font-weight:bold;color:#3498db;margin-right:1rem;">Điều <span th:text="${iterStat.index + 1}"></span></div>
+                        <div class="clause-title" style="font-size:1.1rem;font-weight:bold;color:#2c3e50;flex-grow:1;" th:text="${term.sectionTitle}"></div>
+                    </div>
+                    <div class="clause-content" style="font-size:1rem;line-height:1.8;color:#2c3e50;text-align:justify;" th:utext="${term.content}"></div>
+                </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const checkbox = document.getElementById('agreeTerms');
+            const openBusinessRules = document.getElementById('openBusinessRules');
+            if (openBusinessRules) {
+                openBusinessRules.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const modal = new bootstrap.Modal(document.getElementById('businessRulesModal'));
+                    modal.show();
+                });
+            }
+            // Enable submit only if checkbox is checked
+            const agreeTerms = document.getElementById('agreeTerms');
             const submitBtn = document.getElementById('finalPublishBtn');
-            if (checkbox && submitBtn) {
-                submitBtn.disabled = !checkbox.checked;
-                checkbox.addEventListener('change', function() {
+            if (agreeTerms && submitBtn) {
+                // Initial state
+                submitBtn.disabled = !agreeTerms.checked;
+                agreeTerms.addEventListener('change', function() {
                     submitBtn.disabled = !this.checked;
                 });
             }

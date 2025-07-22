@@ -10,9 +10,12 @@ import com.OLearning.mapper.notification.NotificationMapper;
 import com.OLearning.repository.CourseReviewRepository;
 import com.OLearning.repository.NotificationRepository;
 import com.OLearning.repository.UserRepository;
+import com.OLearning.repository.ReportRepository;
+import com.OLearning.entity.Report;
 import com.OLearning.security.CustomUserDetails;
 import com.OLearning.service.notification.NotificationService;
 import com.OLearning.service.course.CourseService;
+import com.OLearning.service.cloudinary.UploadFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,10 +27,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 public class NotificationsController {
@@ -46,8 +52,12 @@ public class NotificationsController {
     private UserRepository userRepository;
     @Autowired
     private CourseService courseService;
+    @Autowired
+    private UploadFile uploadFile;
+    @Autowired
+    private ReportRepository reportRepository;
 
-    @GetMapping("/instructordashboard/notifications")
+    @GetMapping("/instructor/notifications")
     public String viewNotifications(Authentication authentication, Model model,
                                    @RequestParam(value = "page", defaultValue = "0") int page,
                                    @RequestParam(value = "size", defaultValue = "5") int size,
@@ -56,8 +66,18 @@ public class NotificationsController {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
         Pageable pageable = PageRequest.of(page, size);
+        List<String> allTypes = notificationService.getAllNotificationTypesByUserId(userId);
+        if (allTypes == null || allTypes.isEmpty()) {
+            allTypes = notificationService.getAllNotificationTypes();
+        }
         if (types == null || types.isEmpty()) {
-            types = List.of("COURSE_BLOCKED", "comment", "COURSE_UNBLOCKED", "COURSE_REJECTION", "COURSE_APPROVED", "MAINTENANCE_FEE", "COURSE_CREATED", "SUCCESSFULLY");
+            types = allTypes;
+        }
+        if (types == null || types.isEmpty()) {
+            types = List.of(""); // Đảm bảo không null để Thymeleaf render đúng
+        }
+        if (status == null || status.isBlank() || "All".equalsIgnoreCase(status)) {
+            status = null;
         }
         Page<NotificationDTO> notificationPage = notificationService.getNotificationsByUserId(userId, types, status, pageable);
         model.addAttribute("notifications", notificationPage.getContent());
@@ -65,15 +85,18 @@ public class NotificationsController {
         model.addAttribute("totalPages", notificationPage.getTotalPages());
         model.addAttribute("pageSize", size);
         model.addAttribute("selectedTypes", types);
+        String typeQuery = types.stream().map(t -> "type=" + t).collect(Collectors.joining("&"));
+        model.addAttribute("typeQuery", typeQuery);
         model.addAttribute("selectedStatus", status);
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/notificationContent :: notificationContent");
         model.addAttribute("isSearch", false);
         long unreadCount = notificationService.countUnreadByUserId(userId);
         model.addAttribute("unreadCount", unreadCount);
+        model.addAttribute("allTypes", allTypes);
         return "instructorDashboard/indexUpdate";
     }
 
-    @GetMapping("/instructordashboard/notifications/search")
+    @GetMapping("/instructor/notifications/search")
     public String searchNotifications(@RequestParam("keyword") String keyword,
                                       @RequestParam(value = "page", defaultValue = "0") int page,
                                       @RequestParam(value = "size", defaultValue = "5") int size,
@@ -97,7 +120,7 @@ public class NotificationsController {
         return "instructorDashboard/indexUpdate";
     }
 
-    @PostMapping("/instructordashboard/notifications/{id}/mark-read")
+    @PostMapping("/instructor/notifications/{id}/mark-read")
     @ResponseBody
     public ResponseEntity<?> markAsRead(@PathVariable Long id) {
         try {
@@ -108,15 +131,15 @@ public class NotificationsController {
         }
     }
 
-    @PostMapping("/instructordashboard/notifications/mark-all-read")
+    @PostMapping("/instructor/notifications/mark-all-read")
     public String markAllAsRead(Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
         notificationService.markAllAsRead(userId);
-        return "redirect:/instructordashboard/notifications";
+        return "redirect:/instructor/notifications";
     }
 
-    @GetMapping("/instructordashboard/notifications/view/{id}")
+    @GetMapping("/instructor/notifications/view/{id}")
     public String viewNotificationDetail(@PathVariable("id") Long notificationId, Model model) {
         Optional<Notification> notificationOpt = notificationService.findById(notificationId);
         if (notificationOpt.isPresent()) {
@@ -144,7 +167,7 @@ public class NotificationsController {
             model.addAttribute("fragmentContent", "instructorDashboard/fragments/notificationDetailContent :: notificationDetailContent");
             return "instructorDashboard/indexUpdate";
         } else {
-            return "redirect:/instructordashboard/notifications";
+            return "redirect:/instructor/notifications";
         }
     }
 
@@ -178,11 +201,29 @@ public class NotificationsController {
         }
     }
 
-    @PostMapping("/instructordashboard/courses/reply-block")
+    @PostMapping("/instructor/courses/reply-block")
     public String replyBlockCourse(@RequestParam("courseId") Long courseId,
                                    @RequestParam("notificationId") Long notificationId,
                                    @RequestParam("replyContent") String replyContent,
+                                   @RequestParam(value = "evidenceFile", required = false) MultipartFile evidenceFile,
                                    Model model) {
+        String evidenceLink = null;
+        if (evidenceFile != null && !evidenceFile.isEmpty()) {
+            try {
+                String contentType = evidenceFile.getContentType();
+                if (contentType != null && contentType.startsWith("image/")) {
+                    evidenceLink = uploadFile.uploadImageFile(evidenceFile);
+                } else if (contentType != null && contentType.startsWith("video/")) {
+                    evidenceLink = uploadFile.uploadVideoFile(evidenceFile);
+                } else {
+                    model.addAttribute("error", "Chỉ hỗ trợ upload ảnh hoặc video.");
+                    return "redirect:/instructor/notifications";
+                }
+            } catch (IOException e) {
+                model.addAttribute("error", "Lỗi upload file: " + e.getMessage());
+                return "redirect:/instructor/notifications";
+            }
+        }
         var notificationOpt = notificationRepository.findById(notificationId);
         if (notificationOpt.isPresent()) {
             var notification = notificationOpt.get();
@@ -195,6 +236,7 @@ public class NotificationsController {
                 adminNoti.setMessage(replyContent); // Nội dung instructor nhập
                 adminNoti.setStatus("failed");
                 adminNoti.setSentAt(java.time.LocalDateTime.now());
+                adminNoti.setEvidenceLink(evidenceLink);
                 notificationRepository.save(adminNoti);
             }
             // Lưu notification cho instructor để phục vụ hiển thị report detail
@@ -207,36 +249,43 @@ public class NotificationsController {
                 instructorNoti.setMessage(replyContent);
                 instructorNoti.setStatus("sent");
                 instructorNoti.setSentAt(java.time.LocalDateTime.now());
+                instructorNoti.setEvidenceLink(evidenceLink);
                 notificationRepository.save(instructorNoti);
+            }
+            // Cập nhật evidenceLink vào report liên quan
+            Report report = reportRepository.findFirstByCourse_CourseIdAndNotification_NotificationId(courseId, notificationId);
+            if (report != null && evidenceLink != null) {
+                report.setEvidenceLink(evidenceLink);
+                reportRepository.save(report);
             }
         }
         model.addAttribute("success", "Phản hồi của bạn đã được gửi thành công!");
-        return "redirect:/instructordashboard/notifications";
+        return "redirect:/instructor/notifications";
     }
 
-    @GetMapping("/instructordashboard/courses/view/{id}")
+    @GetMapping("/instructor/courses/view/{id}")
     public String viewCourseDetail(Model model, @PathVariable("id") Long id) {
         var optionalDetail = courseService.getDetailCourse(id);
         if (optionalDetail.isEmpty()) {
-            return "redirect:/instructordashboard/notifications";
+            return "redirect:/instructor/notifications";
         }
         model.addAttribute("detailCourse", optionalDetail.get());
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/courseDetailContent :: courseDetailContent");
         return "instructorDashboard/indexUpdate";
     }
 
-    @PostMapping("/instructordashboard/notifications/{id}/delete")
+    @PostMapping("/instructor/notifications/{id}/delete")
     public String deleteNotification(@PathVariable Long id) {
         notificationService.deleteNotification(id);
-        return "redirect:/instructordashboard/notifications";
+        return "redirect:/instructor/notifications";
     }
 
-    @PostMapping("/instructordashboard/notifications/delete-read")
+    @PostMapping("/instructor/notifications/delete-read")
     public String deleteAllReadNotifications(Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
         notificationService.deleteAllReadNotifications(userId);
-        return "redirect:/instructordashboard/notifications";
+        return "redirect:/instructor/notifications";
     }
 
     @GetMapping("/api/instructor/latest")

@@ -66,11 +66,26 @@
           <li class="nav-item ms-2 ms-md-3 dropdown">
             <!-- Notification button -->
             <a class="btn btn-light btn-round mb-0 position-relative" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside" title="Notifications" style="width:48px;height:48px;">
-                <i class="bi bi-bell fa-fw" style="font-size:2rem;line-height:48px;"></i>
-                <span id="instructorNotificationBadge" th:if="${unreadCount > 0}" class="notif-badge animation-blink" style="width:14px;height:14px;top:6px;right:6px;"></span>
+              <i class="bi bi-bell fa-fw" style="font-size:2rem;line-height:48px;"></i>
+              <span id="instructorNotificationBadge" th:if="${unreadCount > 0}" class="notif-badge animation-blink" style="width:14px;height:14px;top:6px;right:6px;"></span>
             </a>
 
             <!-- Notification dropdown menu START -->
+            <div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0">
+              <div class="card bg-transparent">
+                <div class="card-header bg-transparent border-bottom py-4 d-flex justify-content-between align-items-center">
+                  <h6 class="m-0">Unread Notifications <span id="instructorNotificationCount" class="badge bg-danger bg-opacity-10 text-danger ms-2">0 new</span></h6>
+                </div>
+                <div class="card-body p-0">
+                  <ul id="instructorNotificationList" class="list-group list-unstyled list-group-flush">
+                    <!-- Notifications will be loaded here -->
+                  </ul>
+                </div>
+                <!-- Button -->
+                <div class="card-footer bg-transparent border-0 py-3 text-center position-relative">
+                  <a th:href="@{/instructor/notifications}" class="stretched-link">View all notifications</a>
+                </div>
+              </div>
             <div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0" style="width:220px;min-width:220px;max-width:220px;border:1px solid #ddd;">
                 <div class="card bg-transparent">
                     <div class="card-header bg-transparent border-bottom py-4 d-flex justify-content-between align-items-center">
@@ -83,7 +98,7 @@
                     </div>
                     <!-- Button -->
                     <div class="card-footer bg-transparent border-0 py-3 text-center position-relative" style="padding-top:0;">
-                        <a th:href="@{/instructordashboard/notifications}" class="stretched-link">View all notifications</a>
+                        <a th:href="@{/instructor/notifications}" class="stretched-link">View all notifications</a>
                     </div>
                 </div>
             </div>
@@ -98,7 +113,9 @@
                data-bs-auto-close="outside" data-bs-display="static" data-bs-toggle="dropdown"
                aria-expanded="false">
               <img class="avatar-img rounded-circle"
-                   th:src="${#authentication != null and #authentication.principal.profilePicture != null} ? ${#authentication.principal.profilePicture} : '/assets/images/avatar/01.jpg'"
+                   th:src="${#authentication.principal.profilePicture != null} ?
+                          ${#authentication.principal.profilePicture} :
+                          @{/img/undraw_profile.svg}"
                    alt="avatar">
             </a>
 
@@ -112,14 +129,16 @@
                   <!-- Avatar -->
                   <div class="avatar me-3 mb-3">
                     <img class="avatar-img rounded-circle shadow"
-                         th:src="${#authentication != null and #authentication.principal.profilePicture != null} ? ${#authentication.principal.profilePicture} : '/assets/images/avatar/01.jpg'"
+                         th:src="${#authentication.principal.profilePicture != null} ?
+                          ${#authentication.principal.profilePicture} :
+                          @{/img/undraw_profile.svg}"
                          alt="avatar">
 
                   </div>
                   <div>
-                    <p class="h6 mt-2 mt-sm-0">Lori
+                    <p class="h6 mt-2 mt-sm-0" th:text="${#authentication.principal.fullName}">Lori
                       Ferguson</p>
-                    <p class="small m-0">
+                    <p class="small m-0" th:text="${#authentication.principal.email}">
                       example@gmail.com</p>
                   </div>
                 </div>
@@ -128,17 +147,14 @@
                 <hr class="dropdown-divider">
               </li>
               <!-- Links -->
-              <li><a class="dropdown-item" th:href="@{/profile}"><i class="bi bi-person fa-fw me-2"></i>Profile</a></li>
-              <li><a class="dropdown-item" href="#"><i class="bi bi-gear fa-fw me-2"></i>Account Settings</a>
+              <li><a class="dropdown-item" th:href="@{/home}"><i class="bi bi-gear fa-fw me-1"></i>DashBoard</a></li>
+              <li><a class="dropdown-item" th:href="@{/instructor/profile}"><i class="fas fa-fw fa-user me-1"></i>View Profile</a>
               </li>
-              <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle fa-fw me-2"></i>Help</a>
-              </li>
-              <li><a class="dropdown-item bg-danger-soft-hover" th:href="@{/logout}"><i
+              <li><a class="dropdown-item bg-danger-soft-hover" data-bs-toggle="modal" data-bs-target="#logoutModal"><i
                       class="bi bi-power fa-fw me-2"></i>Sign Out</a></li>
               <li>
                 <hr class="dropdown-divider">
               </li>
-
               <!-- Dark mode options START -->
               <li>
                 <div class="bg-light dark-mode-switch theme-icon-active d-flex align-items-center p-1 rounded mt-2">
@@ -184,6 +200,27 @@
     </div>
   </div>
 
+  <!-- Logout Modal-->
+  <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+       aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
+
+          <form th:action="@{/logout}" method="post" style="display: inline;">
+            <button type="submit" class="btn btn-primary">Logout</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
       <!-- Notification JavaScript -->
     <script>
         // Manual test function
@@ -219,7 +256,7 @@
                         console.error('Error loading notifications:', data.error);
                         return;
                     }
-                    
+
                     updateInstructorNotificationBadge(data.unreadCount);
                     updateInstructorNotificationList(data.notifications);
                 })
@@ -232,7 +269,7 @@
             console.log('Updating instructor notification badge with count:', unreadCount);
             const badge = document.getElementById('instructorNotificationBadge');
             const countSpan = document.getElementById('instructorNotificationCount');
-            
+
             if (unreadCount > 0) {
                 if (!badge) {
                     const newBadge = document.createElement('span');
@@ -257,12 +294,12 @@
           console.log('Updating instructor notification list with:', notifications.length, 'notifications');
           const list = document.getElementById('instructorNotificationList');
           list.innerHTML = '';
-          
+
                       if (notifications.length === 0) {
                 list.innerHTML = '<li class="p-3 text-center text-muted">No unread notifications</li>';
                 return;
             }
-          
+
           notifications.forEach(notification => {
               console.log('Processing instructor notification (update):', notification);
               const li = document.createElement('li');
@@ -272,10 +309,10 @@
                     li.style.backgroundColor = '#f8f9fa';
                     li.style.borderLeft = '3px solid #0d6efd';
                 }
-              
+
               const timeAgo = getTimeAgo(notification.sentAt);
               const typeIcon = getNotificationTypeIcon(notification.type);
-              
+
               li.innerHTML = `
                   <div class="me-3">
                       <div class="avatar avatar-md">
@@ -288,11 +325,11 @@
                       <small class="text-body">${timeAgo}</small>
                   </div>
               `;
-              
+
               li.addEventListener('click', function() {
-                  window.location.href = `/instructordashboard/notifications/view/${notification.notificationId}`;
+                  window.location.href = `/instructor/notifications/view/${notification.notificationId}`;
               });
-              
+
               list.appendChild(li);
           });
       }
@@ -301,13 +338,13 @@
           const now = new Date();
           const sent = new Date(sentAt);
           const diffInMinutes = Math.floor((now - sent) / (1000 * 60));
-          
+
           if (diffInMinutes < 1) return 'Just now';
           if (diffInMinutes < 60) return `${diffInMinutes} min ago`;
-          
+
           const diffInHours = Math.floor(diffInMinutes / 60);
           if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
-          
+
           const diffInDays = Math.floor(diffInHours / 24);
           return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
       }

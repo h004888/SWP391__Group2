@@ -7,5 +7,7 @@ import java.io.IOException;
 public interface UploadFile {
     String uploadImageFile(MultipartFile file) throws IOException;
     String uploadVideoFile(MultipartFile file) throws IOException;
-    String generateSignedVideoUrl(String publicId, int expireSeconds, String ResourceType);
+    String generateSignedVideoUrl(String publicId,  String ResourceType);
+    String uploadFile(MultipartFile file, String resourceType) throws IOException;
+    String uploadFileRaw(MultipartFile file, String resourceType) throws IOException;
 }

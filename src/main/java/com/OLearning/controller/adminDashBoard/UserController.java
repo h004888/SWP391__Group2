@@ -4,7 +4,10 @@ import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.enrollment.EnrollmentDTO;
 import com.OLearning.dto.user.UserDTO;
 import com.OLearning.dto.user.UserDetailDTO;
+import com.OLearning.entity.Notification;
+import com.OLearning.entity.User;
 import com.OLearning.service.enrollment.EnrollmentService;
+import com.OLearning.service.notification.NotificationService;
 import com.OLearning.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -17,6 +20,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,16 +29,14 @@ import java.util.Optional;
 @Controller
 @RequestMapping("/admin")
 public class UserController {
-    // Các biến constant dùng cho model attribute (gán giá trị thực tế)
     private static final String ACC_NAME_PAGE_MANAGEMENT = "Management Account";
-    private static final String ACC_NAME_PAGE_DETAIL = "Detail Account";
-    private static final String ERROR_MESSAGE_USER_ADD = "User added successfully";
-    private static final String ERROR_MESSAGE_UNEXPECTED = "Unexpected error: ";
-    private static final String SUCCESS_MESSAGE_RESET_PASS = "Reset password successfully";
     private static final String SUCCESS_MESSAGE_DELETE_STAFF = "Delete staff successfully";
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @GetMapping("/account")
     public String getAccountPage(
@@ -51,7 +53,7 @@ public class UserController {
 
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/accountContent :: accountContent");
         model.addAttribute("listU", listUser);
-        model.addAttribute("accNamePage", "Management Account");
+        model.addAttribute("accNamePage", ACC_NAME_PAGE_MANAGEMENT);
         model.addAttribute("addAccount", new UserDTO());
         model.addAttribute("listRole", userService.getListRole());
         return "adminDashBoard/index";
@@ -105,7 +107,6 @@ public class UserController {
             }
         }
 
-        //Add pagination information to model
         model.addAttribute("listU", userPage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", userPage.getTotalPages());
@@ -117,7 +118,6 @@ public class UserController {
         return "adminDashBoard/fragments/userTableRowContent :: userTableRows";
     }
 
-    // New endpoint to get pagination fragment
     @GetMapping("/account/pagination")
     public String getPaginationFragment(
             @RequestParam(required = false) String keyword,
@@ -216,10 +216,10 @@ public class UserController {
         return counts;
     }
 
-    @GetMapping("/account/block/{userId}")
-    public String blockAccount(Model model, @PathVariable("userId") long id) {
+    @PostMapping("/account/block/{userId}")
+    public String blockAccount(Model model, @PathVariable("userId") long id, @RequestParam(value = "reason", required = false) String reason, RedirectAttributes redirectAttributes) {
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/accountContent :: accountContent");
-        userService.changStatus(id);
+         userService.changStatus(id, reason);
         return "redirect:/admin/account";
     }
 
@@ -231,7 +231,7 @@ public class UserController {
         return "redirect:/admin/account";
     }
 
-    @GetMapping("/account/delete/{userId}")
+    @PostMapping("/account/delete/{userId}")
     public String deleteAccount(Model model, @PathVariable("userId") long id,RedirectAttributes redirectAttributes) {
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/accountContent :: accountContent");
         redirectAttributes.addFlashAttribute("successMessage", SUCCESS_MESSAGE_DELETE_STAFF);
