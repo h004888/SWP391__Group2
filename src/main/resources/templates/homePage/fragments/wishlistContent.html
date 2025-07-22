@@ -68,7 +68,7 @@
           <div th:each="item : ${wishlistItems}" class="col-sm-6 col-lg-4 col-xl-3">
             <div class="card shadow h-100">
               <!-- Image -->
-              <img th:src="@{assets/images/courses/4by3/02.jpg}"
+              <img th:src="${item.courseImage != null && !#strings.isEmpty(item.courseImage) ? item.courseImage : '@{/assets/images/courses/4by3/02.jpg}'}"
                    class="card-img-top" alt="course image" style="height: 200px; object-fit: cover;">
               <div class="card-body pb-0">
                 <!-- Badge and favorite -->
