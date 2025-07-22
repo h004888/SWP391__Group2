@@ -370,7 +370,7 @@
         </div>
     </nav>
     <!-- Category Nav link END -->
-
+    <script th:src="@{/js/totalcart.js}"></script>
 </header>
 <!-- Header END -->
 
@@ -447,7 +447,13 @@
             contentHtml += `<small class=\"text-body\">${timeAgo}</small></div>`;
             li.innerHTML = avatarHtml + contentHtml;
             li.addEventListener('click', function() {
-                window.location.href = `/user/notifications/view/${notification.notificationId}`;
+                // Nếu là comment notification và có đủ thông tin, chuyển đến comment
+                if (notification.type === 'COMMENT' && notification.commentId && notification.courseId && notification.lessonId) {
+                    window.location.href = `/learning/course/${notification.courseId}/lesson/${notification.lessonId}?commentId=${notification.commentId}`;
+                } else {
+                    // Các notification khác chuyển đến trang view notification
+                    window.location.href = `/user/notifications/view/${notification.notificationId}`;
+                }
             });
             list.appendChild(li);
         });
@@ -525,10 +531,11 @@
 
                 updateUserNotificationBadge(data.unreadCount);
                 updateUserNotificationList(data.notifications);
-                updateNotificationPageButton(data.unreadCount); // Update page button tooltip
+                updateNotificationPageButton(data.unreadCount);
             })
             .catch(error => {
                 console.error('Error loading notifications:', error);
             });
     }
+
 </script>

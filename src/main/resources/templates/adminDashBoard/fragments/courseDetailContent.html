@@ -259,7 +259,7 @@
                                     <div class="overflow-hidden position-relative" style="width:100%;">
                                         <video id="previewVideo"
                                                class="card-img"
-                                               style="width:100%; object-fit:cover; background:#000; filter: blur(8px); border-radius:0;"
+                                               style="width:100%; aspect-ratio:16/9; object-fit:cover; background:#000; border-radius:0;"
                                                muted
                                                playsinline
                                                th:poster="@{${detailCourse.courseImg}}">
@@ -269,7 +269,8 @@
                                             class="btn btn-lg btn-round btn-white-shadow mb-0 position-absolute top-50 start-50 translate-middle"
                                             id="playVideoBtn"
                                             th:attr="data-publicid=${detailCourse.videoUrlPreview}"
-                                            style="background:rgba(200,200,200,0.85); border-radius:50%; width:64px; height:64px; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.2); z-index:2;">
+                                            style="background:rgba(200,200,200,0.85); border-radius:50%; width:64px; height:64px; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.2); z-index:2;"
+                                        >
                                             <i class="fas fa-play" style="font-size:2rem; color: #555;"></i>
                                         </button>
                                     </div>

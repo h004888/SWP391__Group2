@@ -582,7 +582,7 @@ Page content START -->
 															<input type="hidden" name="reviewId" th:value="${review.reviewId}" />
 															<button type="submit" class="btn btn-danger btn-sm"
 																	onclick="return confirm('Bạn có chắc chắn muốn xóa đánh giá này?')">
-																<i class="fas fa-trash me-1"></i>Xóa đánh giá
+																<i class="fas fa-trash me-1"></i>
 															</button>
 														</form>
 														<small class="text-muted d-block mt-1">
@@ -614,13 +614,8 @@ Page content START -->
 										<div class="mt-2" th:if="${isEnrolled}">
 											<div class="d-flex justify-content-between align-items-center mb-4">
 												<h5 class="mb-0">Leave a Review</h5>
-												<div th:if="${currentUser != null and userReviewCount != null}">
-													<small class="text-muted">
-														Bạn đã đánh giá <span th:text="${userReviewCount}"></span> lần cho khóa học này
-													</small>
-												</div>
 											</div>
-											<div th:if="${currentUser != null and userReviewCount != null and userReviewCount > 0}" class="alert alert-info mb-3">
+											<div class="alert alert-info mb-3">
 												<i class="fas fa-info-circle me-2"></i>
 												Bạn có thể đánh giá nhiều lần để chia sẻ trải nghiệm học tập của mình!
 											</div>
@@ -743,7 +738,7 @@ Page content START -->
 										<!-- Buttons -->
 										<div class="mt-3 d-sm-flex justify-content-sm-between">
 											<th:block th:if="${isEnrolled}">
-												<a th:href="@{/learning/course/view/{courseId}(courseId=${course.courseId})}" class="btn btn-sm btn-primary-soft mb-0">Continue</a>
+												<a th:href="@{/learning/course/view(courseId=${course.courseId})}" class="btn btn-sm btn-primary-soft mb-0">Continue</a>
 											</th:block>
 											<th:block th:unless="${isEnrolled}">
 												<button type="button"

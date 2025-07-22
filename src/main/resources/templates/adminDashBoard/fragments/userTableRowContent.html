@@ -62,14 +62,14 @@
                title="Activate">
                 <i class="fas fa-unlock"></i>
             </a>
-            <a th:if="${u.roleName=='Admin'}"
-               href="#"
-               class="btn btn-danger-soft btn-round me-1 mb-1 mb-md-0"
-               data-bs-toggle="modal"
-               th:attr="data-bs-target='#deleteEmployeeModal' + ${u.userId}"
-               title="Delete">
-                <i class="fas fa-trash"></i>
-            </a>
+<!--            <a th:if="${u.roleName=='Admin'}"-->
+<!--               href="#"-->
+<!--               class="btn btn-danger-soft btn-round me-1 mb-1 mb-md-0"-->
+<!--               data-bs-toggle="modal"-->
+<!--               th:attr="data-bs-target='#deleteEmployeeModal' + ${u.userId}"-->
+<!--               title="Delete">-->
+<!--                <i class="fas fa-trash"></i>-->
+<!--            </a>-->
             <!-- Modal xác nhận xóa employee (Admin) -->
             <div class="modal fade" th:id="'deleteEmployeeModal' + ${u.userId}" tabindex="-1" aria-labelledby="deleteEmployeeModalLabel" aria-hidden="true">
                 <div class="modal-dialog">

@@ -50,13 +50,12 @@ public class NotificationsController {
     @GetMapping("/instructor/notifications")
     public String viewNotifications(Authentication authentication, Model model,
                                    @RequestParam(value = "page", defaultValue = "0") int page,
-                                   @RequestParam(value = "size", defaultValue = "10") int size,
+                                   @RequestParam(value = "size", defaultValue = "5") int size,
                                    @RequestParam(value = "type", required = false) List<String> types,
                                    @RequestParam(value = "status", required = false) String status) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
         Pageable pageable = PageRequest.of(page, size);
-        // Nếu không truyền type thì lấy mặc định cho instructor
         if (types == null || types.isEmpty()) {
             types = List.of("COURSE_BLOCKED", "comment", "COURSE_UNBLOCKED", "COURSE_REJECTION", "COURSE_APPROVED", "MAINTENANCE_FEE", "COURSE_CREATED", "SUCCESSFULLY");
         }
@@ -77,7 +76,7 @@ public class NotificationsController {
     @GetMapping("/instructor/notifications/search")
     public String searchNotifications(@RequestParam("keyword") String keyword,
                                       @RequestParam(value = "page", defaultValue = "0") int page,
-                                      @RequestParam(value = "size", defaultValue = "10") int size,
+                                      @RequestParam(value = "size", defaultValue = "5") int size,
                                       Model model) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -111,16 +110,9 @@ public class NotificationsController {
 
     @PostMapping("/instructor/notifications/mark-all-read")
     public String markAllAsRead(Authentication authentication) {
-        // Ép kiểu để lấy ra CustomUserDetails
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-
-        // Lấy userId từ CustomUserDetails
         Long userId = userDetails.getUserId();
-
-        // Gọi service để đánh dấu tất cả thông báo là đã đọc
         notificationService.markAllAsRead(userId);
-
-        // Redirect về trang thông báo (không cần truyền userId)
         return "redirect:/instructor/notifications";
     }
 
@@ -131,16 +123,13 @@ public class NotificationsController {
             Notification notification = notificationOpt.get();
             if (!"sent".equals(notification.getStatus())) {
                 notificationService.markAsRead(notificationId);
-                notification.setStatus("sent"); // update status for view
+                notification.setStatus("sent");
             }
             
             NotificationDTO notificationDTO = notificationMapper.toDTO(notification);
             model.addAttribute("notification", notificationDTO);
-            
-            // If this is a comment notification, get the comment details
             if ("comment".equalsIgnoreCase(notification.getType()) && notification.getCommentId() != null) {
                 try {
-                    // Tạm thời dùng findById thay vì findByIdWithUser để kiểm tra lỗi
                     Optional<CourseReview> commentOpt = courseReviewRepository.findById(notification.getCommentId());
                     if (commentOpt.isPresent()) {
                         CourseReview comment = commentOpt.get();
@@ -148,7 +137,6 @@ public class NotificationsController {
                         model.addAttribute("comment", commentDTO);
                     }
                 } catch (Exception e) {
-                    // Log error but don't break the page
                     System.err.println("Error loading comment for notification: " + e.getMessage());
                 }
             }
@@ -195,18 +183,16 @@ public class NotificationsController {
                                    @RequestParam("notificationId") Long notificationId,
                                    @RequestParam("replyContent") String replyContent,
                                    Model model) {
-        // 1. KHÔNG cập nhật notification gốc
-        // 2. Gửi thông báo cho admin với nội dung phản hồi
         var notificationOpt = notificationRepository.findById(notificationId);
         if (notificationOpt.isPresent()) {
             var notification = notificationOpt.get();
-            var admins = userRepository.findByRole_RoleId(1L); // Giả sử roleId=1 là ADMIN
+            var admins = userRepository.findByRole_RoleId(1L);
             for (var admin : admins) {
                 var adminNoti = new com.OLearning.entity.Notification();
                 adminNoti.setUser(admin);
                 adminNoti.setCourse(notification.getCourse());
                 adminNoti.setType("INSTRUCTOR_REPLY_BLOCK");
-                adminNoti.setMessage(replyContent); // Nội dung instructor nhập
+                adminNoti.setMessage(replyContent);
                 adminNoti.setStatus("failed");
                 adminNoti.setSentAt(java.time.LocalDateTime.now());
                 notificationRepository.save(adminNoti);
@@ -228,14 +214,9 @@ public class NotificationsController {
     }
 
     @PostMapping("/instructor/notifications/{id}/delete")
-    @ResponseBody
-    public ResponseEntity<?> deleteNotification(@PathVariable Long id) {
-        try {
-            notificationService.deleteNotification(id);
-            return ResponseEntity.ok("Notification deleted");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete");
-        }
+    public String deleteNotification(@PathVariable Long id) {
+        notificationService.deleteNotification(id);
+        return "redirect:/instructor/notifications";
     }
 
     @PostMapping("/instructor/notifications/delete-read")
@@ -246,7 +227,6 @@ public class NotificationsController {
         return "redirect:/instructor/notifications";
     }
 
-    // API endpoint để lấy 5 thông báo chưa đọc cho dropdown
     @GetMapping("/api/instructor/latest")
     @ResponseBody
     public ResponseEntity<?> getLatestNotifications(Authentication authentication) {
@@ -257,7 +237,6 @@ public class NotificationsController {
             List<String> types = List.of("COURSE_BLOCKED", "comment", "COURSE_UNBLOCKED", "COURSE_REJECTION", "COURSE_APPROVED", "MAINTENANCE_FEE", "COURSE_CREATED", "SUCCESSFULLY");
             Page<NotificationDTO> notificationPage = notificationService.getUnreadNotificationsByUserId(userId, types, pageable);
             long unreadCount = notificationService.countUnreadByUserId(userId);
-            // Chuyển sang NotificationDropdownDTO, rút gọn message chỉ 25 ký tự
             List<NotificationDropdownDTO> dropdownList = notificationPage.getContent().stream()
                 .map(n -> {
                     String msg = n.getMessage();
@@ -265,12 +244,25 @@ public class NotificationsController {
                         msg = msg.split("\\r?\\n")[0]; // chỉ lấy dòng đầu tiên
                         if (msg.length() > 25) msg = msg.substring(0, 25) + "...";
                     }
+                    
+                    // Lấy lessonId nếu là notification comment
+                    Long lessonId = null;
+                    if ("comment".equalsIgnoreCase(n.getType()) && n.getCommentId() != null) {
+                        var commentOpt = courseReviewRepository.findById(n.getCommentId());
+                        if (commentOpt.isPresent() && commentOpt.get().getLesson() != null) {
+                            lessonId = commentOpt.get().getLesson().getLessonId();
+                        }
+                    }
+                    
                     return new NotificationDropdownDTO(
                         n.getNotificationId(),
                         msg,
                         n.getType(),
                         n.getStatus(),
-                        n.getSentAt()
+                        n.getSentAt(),
+                        n.getCommentId(),
+                        n.getCourse() != null ? n.getCourse().getCourseId() : null,
+                        lessonId
                     );
                 }).toList();
             return ResponseEntity.ok(Map.of(

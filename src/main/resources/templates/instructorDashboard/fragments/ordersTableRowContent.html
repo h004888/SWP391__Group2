@@ -1,16 +1,10 @@
-<div th:fragment="ordersTableRowContent">
+<th:block th:fragment="ordersTableRowContent">
     <tr th:each="order : ${orders}">
         <td th:text="${order.orderId} ?: 'N/A'"></td>
         <td>
             <span th:text="${order.instructorAmount != null ? #numbers.formatDecimal(order.instructorAmount, 0, 'COMMA', 0, 'POINT') : 'N/A'}"></span>
         </td>
         <td th:text="${order.orderType} ?: 'N/A'" class="text-uppercase text-bold "></td>
-        <td>
-            <span th:if="${order.status == 'PAID'}" class="badge bg-success">Paid</span>
-            <span th:if="${order.status == 'CANCELLED'}" class="badge bg-danger">Cancelled</span>
-            <span th:if="${order.status != 'PAID' && order.status != 'CANCELLED'}" 
-                  class="badge bg-secondary" th:text="${order.status} ?: 'N/A'"></span>
-        </td>
         <td th:with="formatter=${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}"
             th:text="${formatter}"></td>
         <td th:text="${order.username} ?: 'N/A'"></td>
@@ -20,13 +14,13 @@
                title="View"><i class="fas fa-eye"></i></a>
         </td>
     </tr>
-</div>
+</th:block>
 
 <div th:fragment="ordersPagination" class="d-sm-flex justify-content-sm-between align-items-sm-center mt-2">
     <div class="mb-0 text-center text-sm-start">
         <p class="mb-0 text-center text-sm-start" th:if="${totalItems > 0}">
-            Showing <span th:text="${currentPage * 10 + 1}">1</span> to
-            <span th:text="${(currentPage * 10) + 10 > totalItems ? totalItems : (currentPage * 10) + 10}">10</span> of
+            Showing <span th:text="${currentPage * pageSize + 1}">1</span> to
+            <span th:text="${(currentPage * pageSize) + pageSize > totalItems ? totalItems : (currentPage * pageSize) + pageSize}">10</span> of
             <span th:text="${totalItems}">20</span> entries
         </p>
         <p class="mb-0 text-center text-sm-start" th:if="${totalItems == 0}">

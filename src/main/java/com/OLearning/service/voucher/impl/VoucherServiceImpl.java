@@ -56,9 +56,6 @@ public class VoucherServiceImpl implements VoucherService {
     private EnrollmentRepository enrollmentRepository;
 
     @Autowired
-    private CourseMapper courseMapper;
-
-    @Autowired
     private VoucherCourseRepository voucherCourseRepository;
 
     @Autowired
@@ -382,7 +379,8 @@ public class VoucherServiceImpl implements VoucherService {
 
         List<Long> courseIdsToApply;
         if (Boolean.TRUE.equals(voucher.getIsGlobal())) {
-            courseIdsToApply = courseRepository.findByInstructorUserId(instructorId)
+            // Chỉ lấy các course đang publish
+            courseIdsToApply = courseRepository.findByInstructorUserIdAndStatus(instructorId, "publish")
                     .stream().map(Course::getCourseId).toList();
         } else {
             courseIdsToApply = selectedCourses != null ? selectedCourses : List.of();

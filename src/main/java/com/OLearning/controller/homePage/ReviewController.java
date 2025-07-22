@@ -29,7 +29,6 @@ public class ReviewController {
     private final CourseReviewRepository reviewRepo;
     private final CommentMapper commentMapper;
 
-    // Get reviews for a course (Rating != null)
     @GetMapping("/{courseId}/reviews")
     @ResponseBody
     public ResponseEntity<?> getCourseReviews(@PathVariable Long courseId) {
@@ -37,14 +36,14 @@ public class ReviewController {
             Course course = courseRepo.findById(courseId)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy khóa học"));
             
-            // Load reviews (Rating != null) for the course
+
             List<CourseReview> parentReviews = reviewRepo.findReviewsByCourseAndLessonOrNullAndParentReviewIsNull(course, null);
             List<CommentDTO> reviews = new ArrayList<>();
             
             for (CourseReview parentReview : parentReviews) {
                 CommentDTO reviewDTO = commentMapper.toDTO(parentReview);
                 
-                // Load replies for this review
+
                 List<CourseReview> replies = reviewRepo.findByParentReviewOrderByCreatedAtDesc(parentReview);
                 List<CommentDTO> replyDTOs = replies.stream()
                         .map(reply -> commentMapper.toDTO(reply))
@@ -63,38 +62,5 @@ public class ReviewController {
         }
     }
 
-    // Get reviews for a specific lesson (Rating != null)
-    @GetMapping("/{courseId}/lesson/{lessonId}/reviews")
-    @ResponseBody
-    public ResponseEntity<?> getLessonReviews(@PathVariable Long courseId,
-                                            @PathVariable Long lessonId) {
-        try {
-            Course course = courseRepo.findById(courseId)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy khóa học"));
-            
-            // Load reviews (Rating != null) for the lesson
-            List<CourseReview> parentReviews = reviewRepo.findReviewsByCourseAndLessonOrNullAndParentReviewIsNull(course, null);
-            List<CommentDTO> reviews = new ArrayList<>();
-            
-            for (CourseReview parentReview : parentReviews) {
-                CommentDTO reviewDTO = commentMapper.toDTO(parentReview);
-                
-                // Load replies for this review
-                List<CourseReview> replies = reviewRepo.findByParentReviewOrderByCreatedAtDesc(parentReview);
-                List<CommentDTO> replyDTOs = replies.stream()
-                        .map(reply -> commentMapper.toDTO(reply))
-                        .collect(Collectors.toList());
-                reviewDTO.setChildren(replyDTOs);
-                
-                reviews.add(reviewDTO);
-            }
-            
-            return ResponseEntity.ok(reviews);
-        } catch (RuntimeException e) {
-            System.err.println("Error getting lesson reviews: " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", "Lỗi khi lấy đánh giá: " + e.getMessage()));
-        }
-    }
+
 }

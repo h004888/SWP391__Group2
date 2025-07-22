@@ -474,7 +474,7 @@
             var publicId = this.getAttribute('data-publicid');
             if (!publicId) return;
             var video = document.getElementById('modalVideo');
-            video.src = '/api/video/stream/video/' + encodeURIComponent(publicId);
+            video.src = '/api/video/stream/videopreview/' + encodeURIComponent(publicId);
             var modal = new bootstrap.Modal(document.getElementById('videoModal'));
             modal.show();
             video.play();

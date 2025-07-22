@@ -455,7 +455,7 @@
         <div th:if="${successMessage}"
              class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-4 shadow"
              role="alert" id="success-alert" style="z-index: 1055; min-width: 300px;">
-            <strong th:text="${successMessage}">Thành công!</strong>
+            <strong th:text="${successMessage}">Success!</strong>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
 
@@ -464,10 +464,10 @@
             <!-- Document Header -->
             <div class="document-header">
                 <div class="document-title editable-content" onclick="makeEditable(this)">
-                    BẢN ĐIỀU KHOẢN SỬ DỤNG
+                    TERMS OF USE
                 </div>
                 <div class="document-subtitle editable-content" onclick="makeEditable(this)">
-                    HỆ THỐNG QUẢN LÝ KHÓA HỌC
+                    COURSE MANAGEMENT SYSTEM
                 </div>
                 <div class="document-date">
                     Effective Date: <span class="editable-content" onclick="makeEditable(this)">January 15, 2024</span>
@@ -479,10 +479,7 @@
                 <!-- Preamble -->
                 <div class="preamble">
                     <div class="editable-content" onclick="makeEditable(this)">
-                        Hợp đồng Quy tắc Kinh doanh này thiết lập các nguyên tắc cơ bản, quy định và
-                        hướng dẫn hoạt động chi phối các quy trình kinh doanh và khuôn khổ ra quyết định trong
-                        tổ chức của chúng tôi. Các quy tắc này đảm bảo tính nhất quán, tuân thủ và hiệu suất tối ưu trên tất cả
-                        hoạt động kinh doanh.
+                        This Business Rules Contract establishes the fundamental principles, regulations, and guidelines governing the business processes and decision-making framework within our organization. These rules ensure consistency, compliance, and optimal performance across all business activities.
                     </div>
                 </div>
 
@@ -493,7 +490,7 @@
                             <div class="status-indicator" ></div>
                             <div class="clause-header">
                                 <div class="d-flex align-items-center flex-grow-1">
-                                    <div class="clause-number">Điều <span th:text="${iterStat.index + 1}"></span></div>
+                                    <div class="clause-number">Clause <span th:text="${iterStat.index + 1}"></span></div>
                                     <div class="clause-title" th:text="${clause.sectionTitle}"></div>
                                 </div>
                                 <div class="clause-actions">
@@ -522,8 +519,7 @@
                 <!-- Signature Section -->
                 <div class="signature-section">
                     <h4>Approval and Authorization</h4>
-                    <p>By signing below, the parties acknowledge that they have read, understood, and agree to be bound
-                        by the terms and conditions set forth in this Business Rules Contract.</p>
+                    <p>By signing below, the parties acknowledge that they have read, understood, and agree to be bound by the terms and conditions set forth in this Business Rules Contract.</p>
 
                     <div class="signature-block">
                         <div class="signature-line">
@@ -625,13 +621,13 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header-rule">
-                    <h5 class="modal-title text-white">Xác nhận xóa điều khoản</h5>
+                    <h5 class="modal-title text-white">Confirm Delete Clause</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form th:action="@{/admin/businessRule/delete}" method="post">
                     <div class="modal-body">
                         <input type="hidden" name="id" id="deleteClauseId" />
-                        <p>Bạn có chắc chắn muốn xóa điều khoản này không?</p>
+                        <p>Are you sure you want to delete this clause?</p>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -716,7 +712,7 @@
                 console.error(error);
             });
 
-        // Đồng bộ nội dung CKEditor vào textarea khi submit
+        // Sync CKEditor content to textarea on submit
         document.querySelector('#clauseModal form').addEventListener('submit', function(e) {
             if (ckeditorInstance) {
                 document.querySelector('#clauseContent').value = ckeditorInstance.getData();
@@ -728,7 +724,7 @@
             }
         });
 
-        // CKEditor cho edit modal
+        // CKEditor for edit modal
         let editCkeditorInstance;
         let editEditorReady = false;
         ClassicEditor
@@ -753,7 +749,7 @@
                 console.error(error);
             });
 
-        // Fill dữ liệu vào modal Edit khi bấm Edit
+        // Fill data into Edit modal when clicking Edit
         document.querySelectorAll('.btn-edit-clause').forEach(btn => {
             btn.addEventListener('click', function() {
                 const id = this.getAttribute('data-id');
@@ -762,7 +758,7 @@
                 const role = this.getAttribute('data-role');
                 document.getElementById('editClauseId').value = id;
                 document.getElementById('editClauseTitle').value = title;
-                // Đợi CKEditor sẵn sàng mới setData
+                // Wait for CKEditor to be ready before setData
                 if (editEditorReady && editCkeditorInstance) {
                     editCkeditorInstance.setData(content);
                 } else {
@@ -771,7 +767,7 @@
                 document.getElementById('editClauseRole').value = role;
             });
         });
-        // Đồng bộ nội dung CKEditor vào textarea khi submit edit
+        // Sync CKEditor content to textarea on edit submit
         document.querySelector('#editClauseModal form').addEventListener('submit', function(e) {
             if (editCkeditorInstance) {
                 document.querySelector('#editClauseContent').value = editCkeditorInstance.getData();
@@ -783,7 +779,7 @@
             }
         });
 
-        // Xử lý truyền id vào modal xóa
+        // Handle passing id to delete modal
         document.querySelectorAll('.btn-delete-clause').forEach(btn => {
             btn.addEventListener('click', function() {
                 const id = this.getAttribute('data-id');

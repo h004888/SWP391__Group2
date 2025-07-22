@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Pageable;
 
 @Repository
@@ -23,6 +25,8 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
   List<Course> findAllPublishedOrderByStudentCountDesc();
 
     Page<Course> findByInstructorUserId(Long userId, Pageable pageable);
+
+    Optional<Course> findByVideoUrlPreview(String videoPreview);
 
     Page<Course> findAll(Pageable pageable);
 
@@ -50,7 +54,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
             "(:price = 'mid' AND c.price BETWEEN 50 AND 100) OR " +
             "(:price = 'high' AND c.price > 100)) AND " +
             "((:status IS NULL OR :status = '') OR " +
-            "(:status = 'draft' AND c.status IS NULL) OR " +
+            "(:status = 'draft' AND (c.status IS NULL OR c.status = 'draft')) OR " +
             "(:status != 'draft' AND :status != '' AND c.status = :status))")
     Page<Course> filterCourses(@Param("keyword") String keyword,
                                @Param("categoryId") Long categoryId,

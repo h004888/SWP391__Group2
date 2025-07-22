@@ -173,7 +173,6 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
         List<Course> courses = courseRepository.findAll();
 
         for (Course course : courses) {
-            // Kiểm tra nếu đã tồn tại thì bỏ qua
             if (courseMaintenanceRepository.existsByCourseCourseIdAndDueDate(course.getCourseId(), dueDate)) {
                 continue;
             }

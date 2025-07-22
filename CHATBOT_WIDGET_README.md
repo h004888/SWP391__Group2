@@ -10,20 +10,35 @@ Chatbot Widget là một tính năng AI trợ lý được tích hợp trực ti
 - Nút này luôn hiển thị và dễ truy cập nhất
 
 ### 2. Tương tác với Chatbot
-- **Gửi tin nhắn**: Nhập câu hỏi vào ô input và nhấn Enter hoặc nút gửi
+- **Gửi tin nhắn**: Nhập câu hỏi vào ô input và nhấn Enter hoặc nút gửi (chỉ khi đã đăng nhập)
 - **Thu nhỏ**: Nhấn nút "-" để thu nhỏ widget
 - **Phóng to**: Nhấn nút "↗" để phóng to widget từ trạng thái thu nhỏ
 - **Đóng**: Nhấn nút "×" để đóng hoàn toàn
-- **Xóa lịch sử**: Nhấn nút "🗑" để xóa toàn bộ lịch sử chat
 
 ### 3. Tính năng
 - **Chat thời gian thực**: Tương tác trực tiếp với Google AI
-- **Lưu lịch sử**: Tự động lưu lịch sử chat theo session
-- **Hỗ trợ đa người dùng**: Hoạt động cho cả user đã đăng nhập và khách
+- **Lưu lịch sử**: Tự động lưu lịch sử chat theo session và user
+- **Chỉ hỗ trợ user đã đăng nhập**: Khách chưa đăng nhập chỉ xem được thông báo yêu cầu đăng nhập
 - **Responsive**: Tương thích với mọi thiết bị
 - **Thông báo**: Hiển thị badge thông báo khi có tin nhắn mới
 
-## API Endpoints
+## Luồng hoạt động & xác thực
+
+1. **Giao diện**
+   - Khi mở widget:
+     - Nếu **đã đăng nhập**: Hiện lời chào AI, cho phép nhập và gửi tin nhắn.
+     - Nếu **chưa đăng nhập**: Hiện thông báo yêu cầu đăng nhập, ẩn ô nhập tin nhắn.
+2. **Gửi tin nhắn**
+   - Gửi POST `/chat/send` với `{ message, sessionId }`.
+   - Backend kiểm tra xác thực qua session/cookie (Spring Security).
+   - Nếu chưa đăng nhập, trả về 401 và thông báo "Bạn cần đăng nhập để sử dụng chatbot.".
+   - Nếu đã đăng nhập, backend lấy userId, lưu lịch sử, gọi Google AI, trả về response.
+3. **Lịch sử chat**
+   - Lưu theo sessionId và userId.
+   - Khi mở widget, tự động load lịch sử chat nếu đã đăng nhập.
+   - Có thể xóa toàn bộ lịch sử chat theo session.
+
+## API Endpoints (chuẩn theo code hiện tại)
 
 ### 1. Gửi tin nhắn
 ```
@@ -35,31 +50,36 @@ Content-Type: application/json
     "sessionId": "session-id"
 }
 ```
+- **Yêu cầu xác thực:** Có (phải login)
+- **Response:**
+  - 200: `{ message, sessionId, timestamp, success: true, error: null }`
+  - 401: `{ message: null, sessionId, timestamp, success: false, error: "Bạn cần đăng nhập để sử dụng chatbot." }`
 
 ### 2. Lấy lịch sử chat theo session
 ```
 GET /chat/history/{sessionId}
 ```
+- **Yêu cầu xác thực:** Có (phải login)
+- **Response:** List<ChatMessage>
 
 ### 3. Lấy lịch sử chat của user
 ```
 GET /chat/user-history
 ```
+- **Yêu cầu xác thực:** Có (phải login)
+- **Response:** List<ChatMessage>
 
 ### 4. Xóa lịch sử chat
 ```
 DELETE /chat/clear/{sessionId}
 ```
-
-### 5. Kiểm tra trạng thái
-```
-GET /chat/status
-```
+- **Yêu cầu xác thực:** Có (phải login)
+- **Response:** "Chat history cleared successfully" hoặc lỗi
 
 ## Cấu trúc dữ liệu
 
 ### ChatRequestDTO
-```java
+```json
 {
     "message": "String",
     "sessionId": "String"
@@ -67,7 +87,7 @@ GET /chat/status
 ```
 
 ### ChatResponseDTO
-```java
+```json
 {
     "message": "String",
     "sessionId": "String", 
@@ -78,7 +98,7 @@ GET /chat/status
 ```
 
 ### ChatMessage Entity
-```java
+```json
 {
     "id": "Long",
     "sessionId": "String",
@@ -109,7 +129,7 @@ Tự động tạo bảng `chat_messages` khi khởi động ứng dụng.
 - Hỗ trợ cuộc hội thoại liên tục
 
 ### 2. User Authentication
-- Tự động liên kết chat với user đã đăng nhập
+- Chỉ user đã đăng nhập mới sử dụng được chatbot
 - Lưu lịch sử chat theo user ID
 
 ### 3. Session Management
@@ -119,7 +139,7 @@ Tự động tạo bảng `chat_messages` khi khởi động ứng dụng.
 ### 4. Error Handling
 - Xử lý lỗi API gracefully
 - Hiển thị thông báo lỗi thân thiện
-- Retry mechanism cho network issues
+- Nếu chưa đăng nhập, mọi request gửi tin nhắn sẽ trả về 401 Unauthorized
 
 ## Troubleshooting
 
@@ -128,7 +148,7 @@ Tự động tạo bảng `chat_messages` khi khởi động ứng dụng.
 - Đảm bảo file chatbotWidget.html được include trong mainContent.html
 
 ### 2. Không gửi được tin nhắn
-- Kiểm tra kết nối internet
+- Kiểm tra đã đăng nhập
 - Kiểm tra Google AI API key có hợp lệ không
 - Xem log server để debug
 
