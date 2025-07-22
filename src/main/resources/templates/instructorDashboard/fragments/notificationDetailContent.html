@@ -272,11 +272,15 @@
                 <h6 class="mb-3">
                     <i class="fas fa-reply me-2"></i>Phản hồi về quyết định khóa khóa học
                 </h6>
-                <form th:action="@{/instructor/courses/reply-block}" method="post">
+                <form th:action="@{/instructor/courses/reply-block}" method="post" enctype="multipart/form-data">
                     <input type="hidden" name="courseId" th:value="${notification.course.courseId}" />
                     <input type="hidden" name="notificationId" th:value="${notification.notificationId}" />
                     <div class="mb-3">
                         <textarea name="replyContent" required class="form-control" rows="3" placeholder="Nhập phản hồi của bạn..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="evidenceFile" class="form-label">Tải lên ảnh hoặc video làm bằng chứng (tùy chọn):</label>
+                        <input type="file" class="form-control" id="evidenceFile" name="evidenceFile" accept="image/*,video/*">
                     </div>
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary">

@@ -327,7 +327,68 @@
                     </div>
                 </div>
 
-                <!-- Keep existing Reviews tab -->
+                <!-- Reviews Tab -->
+                <div class="tab-pane fade" id="reviews" role="tabpanel">
+                    <div class="content-card bg-white rounded-4 shadow-sm p-4">
+                        <h3 class="mb-4">All Reviews</h3>
+                        <div class="table-responsive border-0">
+                            <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                                <thead>
+                                <tr>
+                                    <th scope="col" class="border-0">Student Name</th>
+                                    <th scope="col" class="border-0">Comment</th>
+                                    <th scope="col" class="border-0">Rating</th>
+                                    <th scope="col" class="border-0">Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="review : ${listReview}" th:if="${review.rating != null}">
+                                    <td>
+                                        <div class="d-flex align-items-center position-relative">
+                                            <div class="avatar avatar-xs mb-2 mb-md-0">
+                                                <img th:src="${review.enrollment.user.profilePicture}" class="rounded-circle" alt="">
+                                            </div>
+                                            <div class="mb-0 ms-2">
+                                                <h6 class="mb-0" th:text="${review.enrollment.user.fullName}"></h6>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td th:text="${review.comment}"></td>
+                                    <td>
+                                        <ul class="list-inline mb-0">
+                                            <li class="list-inline-item me-0 small" th:each="i : ${#numbers.sequence(1, review.rating != null ? review.rating : 0)}">
+                                                <i class="fas fa-star text-warning"></i>
+                                            </li>
+                                            <li class="list-inline-item me-0 small" th:each="i : ${#numbers.sequence(1, 5 - (review.rating != null ? review.rating : 0))}" th:if="${review.rating == null || review.rating < 5}">
+                                                <i class="fas fa-star text-secondary"></i>
+                                            </li>
+                                        </ul>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-info-soft mb-0" data-bs-toggle="modal" data-bs-target="#reviewDetailModal"
+                                            th:attr="data-review-id=${review.reviewId},
+                                                    data-fullname=${review.enrollment.user.fullName},
+                                                    data-email=${review.enrollment.user.email},
+                                                    data-phone=${review.enrollment.user.phone},
+                                                    data-date=${#temporals.format(review.createdAt, 'yyyy-MM-dd''T''HH:mm:ss')},
+                                                    data-comment=${review.comment}">
+                                            View
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(listReview)}">
+                                    <td colspan="3" class="text-center align-middle py-5">
+                                        <div class="d-flex flex-column align-items-center justify-content-center">
+                                            <i class="fas fa-comment-dots fa-3x mb-3 opacity-50"></i>
+                                            <h5>No Review found</h5>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -341,6 +402,33 @@
                 </div>
                 <div class="modal-body p-0">
                     <video id="modalVideo" style="width:100%;border-radius:0 0 1rem 1rem;" controls></video>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Review Detail Modal -->
+    <div class="modal fade" id="reviewDetailModal" tabindex="-1" aria-labelledby="reviewDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-dark">
+                    <h5 class="modal-title text-white" id="reviewDetailModalLabel">Review details</h5>
+                    <button type="button" class="btn btn-sm btn-light mb-0 ms-auto" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-x-lg"></i></button>
+                </div>
+                <div class="modal-body p-5">
+                    <span class="small">Name:</span>
+                    <h6 class="mb-3" id="reviewerName">Loading...</h6>
+                    <span class="small">Email:</span>
+                    <h6 class="mb-3" id="reviewerEmail">Loading...</h6>
+                    <span class="small">Phone number:</span>
+                    <h6 class="mb-3" id="reviewerPhone">Loading...</h6>
+                    <span class="small">Date:</span>
+                    <h6 class="mb-3" id="reviewDate">Loading...</h6>
+                    <span class="small">Note:</span>
+                    <p class="text-dark mb-2" id="reviewComment">Loading...</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger-soft my-0" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -507,4 +595,18 @@
             }
         });
         </script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener('click', function(e) {
+            if (e.target && e.target.getAttribute('data-bs-target') === '#reviewDetailModal') {
+                const btn = e.target;
+                document.getElementById('reviewerName').textContent = btn.getAttribute('data-fullname') || 'N/A';
+                document.getElementById('reviewerEmail').textContent = btn.getAttribute('data-email') || 'N/A';
+                document.getElementById('reviewerPhone').textContent = btn.getAttribute('data-phone') || 'N/A';
+                document.getElementById('reviewDate').textContent = btn.getAttribute('data-date') || 'N/A';
+                document.getElementById('reviewComment').textContent = btn.getAttribute('data-comment') || 'No note provided.';
+            }
+        });
+        /*]]>*/
+    </script>
 </div>

@@ -1,4 +1,4 @@
-package com.OLearning.controller.instructorDashBoard;
+package com.OLearning.controller.instructorDashboard;
 
 import com.OLearning.dto.order.InstructorOrderDTO;
 import com.OLearning.entity.OrderDetail;

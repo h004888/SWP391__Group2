@@ -11,8 +11,10 @@
                             <!-- Avatar -->
                             <div class="col-auto">
                                 <div class="avatar avatar-xxl position-relative mt-n3">
-                                    <img class="avatar-img rounded-circle border border-white border-3 shadow" th:src="${profile.avatarUrl != null ? profile.avatarUrl : '/assets/images/avatar/01.jpg'}" alt="Avatar">
-                                    <span class="badge text-bg-success rounded-pill position-absolute top-50 start-100 translate-middle mt-4 mt-md-5 ms-n3 px-md-3">Pro</span>
+                                    <img class="avatar-img rounded-circle border border-white border-3 shadow" th:src="${#authentication.principal.profilePicture != null} ?
+                                                                                             ${#authentication.principal.profilePicture} :
+                                                                                             @{/img/undraw_profile.svg}" alt="Avatar">
+
                                 </div>
                             </div>
                             <!-- Profile info -->
@@ -75,7 +77,8 @@
                 <div class="card shadow border-0 rounded-4 mx-auto" style="max-width: 900px;">
                     <div class="card-body p-5 text-center">
                         <div class="mb-4">
-                            <img th:src="${profile.avatarUrl != null ? profile.avatarUrl : '/assets/images/avatar/01.jpg'}" alt="Avatar" class="rounded-circle shadow" style="width: 140px; height: 140px; object-fit: cover; border: 4px solid #fff; box-shadow: 0 0 20px rgba(6,106,201,0.15);">
+                            <img th:src="${#authentication.principal.profilePicture != null} ?
+                                          ${#authentication.principal.profilePicture} : @{/img/undraw_profile.svg}" alt="Avatar" class="rounded-circle shadow" style="width: 140px; height: 140px; object-fit: cover; border: 4px solid #fff; box-shadow: 0 0 20px rgba(6,106,201,0.15);">
                         </div>
                         <h2 class="mb-1" th:text="${profile.fullName}">Full Name</h2>
                         <p class="text-primary mb-2" th:text="${profile.username}">Username</p>

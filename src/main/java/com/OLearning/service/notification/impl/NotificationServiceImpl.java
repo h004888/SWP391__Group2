@@ -142,4 +142,14 @@ public class NotificationServiceImpl implements NotificationService {
     public long countUnreadByUserId(Long userId) {
         return notificationRepository.countUnreadByUserId(userId);
     }
+
+    @Override
+    public List<String> getAllNotificationTypes() {
+        return notificationRepository.findAllNotificationTypes();
+    }
+
+    @Override
+    public List<String> getAllNotificationTypesByUserId(Long userId) {
+        return notificationRepository.findAllNotificationTypesByUserId(userId);
+    }
 }

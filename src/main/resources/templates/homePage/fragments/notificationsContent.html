@@ -11,8 +11,10 @@
               <!-- Avatar -->
               <div class="col-auto">
                 <div class="avatar avatar-xxl position-relative mt-n3">
-                  <img class="avatar-img rounded-circle border border-white border-3 shadow"  src="/assets/images/avatar/01.jpg" alt="Avatar">
-                  <span class="badge text-bg-success rounded-pill position-absolute top-50 start-100 translate-middle mt-4 mt-md-5 ms-n3 px-md-3">Pro</span>
+                    <img class="avatar-img rounded-circle border border-white border-3 shadow" th:src="${#authentication.principal.profilePicture != null} ?
+                                                                                             ${#authentication.principal.profilePicture} :
+                                                                                             @{/img/undraw_profile.svg}" alt="Avatar">
+
                 </div>
               </div>
               <!-- Profile info -->
@@ -37,9 +39,9 @@
                 <div class="mt-2 mt-sm-0">
                   <a th:href="@{/learning/my-courses}" class="btn btn-outline-primary mb-0">View my courses</a>
                 </div>
-              </div>
             </div>
-          </div>
+            </div>
+            </div>
           <hr class="d-xl-none">
         </div>
       </div>
@@ -57,193 +59,191 @@
         <div class="card bg-transparent border rounded-3">
           <div class="card-header bg-transparent border-bottom">
             <h3 class="mb-0"><i class="fas fa-bell me-2"></i>Notifications</h3>
+            <div class="d-flex gap-2 mt-3">
+              <button class="btn btn-outline-primary" onclick="markAllAsRead()"><i class="fas fa-check-double me-1"></i>Mark All as Read</button>
+              <button class="btn btn-outline-danger" onclick="deleteAllRead()"><i class="fas fa-trash me-1"></i>Delete All Read</button>
+            </div>
           </div>
           <div class="card-body">
             <!-- Search/filter -->
             <div class="row g-3 align-items-center justify-content-between mb-4">
-              <div class="col-md-3">
+                <div class="col-md-3">
                 <form th:action="@{/user/notifications}" method="get">
-                  <select class="form-select" id="type" name="type">
-                    <option value="" th:selected="${selectedTypes == null or #lists.isEmpty(selectedTypes) or #lists.size(selectedTypes) == 8}">All</option>
-                    <option th:value="ENROLLMENT" th:selected="${selectedTypes != null and selectedTypes.contains('ENROLLMENT') and #lists.size(selectedTypes) == 1}">Enrollment</option>
-                    <option th:value="COURSE_COMPLETION" th:selected="${selectedTypes != null and selectedTypes.contains('COURSE_COMPLETION') and #lists.size(selectedTypes) == 1}">Course Completion</option>
-                    <option th:value="QUIZ_RESULT" th:selected="${selectedTypes != null and selectedTypes.contains('QUIZ_RESULT') and #lists.size(selectedTypes) == 1}">Quiz Results</option>
-                    <option th:value="CERTIFICATE" th:selected="${selectedTypes != null and selectedTypes.contains('CERTIFICATE') and #lists.size(selectedTypes) == 1}">Certificates</option>
-                    <option th:value="PAYMENT_SUCCESS" th:selected="${selectedTypes != null and selectedTypes.contains('PAYMENT_SUCCESS') and #lists.size(selectedTypes) == 1}">Payment Success</option>
-                    <option th:value="PAYMENT_FAILED" th:selected="${selectedTypes != null and selectedTypes.contains('PAYMENT_FAILED') and #lists.size(selectedTypes) == 1}">Payment Failed</option>
-                    <option th:value="COMMENT" th:selected="${selectedTypes != null and selectedTypes.contains('COMMENT') and #lists.size(selectedTypes) == 1}">Comment</option>
-                  </select>
+                    <select class="form-select" id="type" name="type">
+                    <option value="" th:selected="${selectedTypes == null or #lists.isEmpty(selectedTypes)}">All</option>
+                    <option th:each="type : ${allTypes}"
+                            th:value="${type}"
+                            th:text="${type}"
+                            th:selected="${selectedTypes != null and selectedTypes.contains(type) and #lists.size(selectedTypes) == 1}">
+                    </option>
+                    </select>
                 </form>
-              </div>
-              <div class="col-md-3">
+                </div>
+                <div class="col-md-3">
                 <form th:action="@{/user/notifications}" method="get">
-                  <select class="form-select" id="status" name="status">
-                    <option value="" th:selected="${selectedStatus == null}">All</option>
-                    <option th:value="failed" th:selected="${selectedStatus == 'failed'}">Unread</option>
-                    <option th:value="sent" th:selected="${selectedStatus == 'sent'}">Read</option>
-                  </select>
+                    <select class="form-select" id="status" name="status">
+                        <option value="" th:selected="${selectedStatus == null}">All</option>
+                        <option th:value="failed" th:selected="${selectedStatus == 'failed'}">Unread</option>
+                        <option th:value="sent" th:selected="${selectedStatus == 'sent'}">Read</option>
+                    </select>
                 </form>
-              </div>
-              <div class="col-md-4">
+                </div>
+                <div class="col-md-4">
                 <form th:action="@{/user/notifications}" method="get">
-                  <input type="text" class="form-control" id="search" name="search" placeholder="Search notifications..." th:value="${search != null ? search : ''}">
+                    <input type="text" class="form-control" id="search" name="search" placeholder="Search notifications..." th:value="${search != null ? search : ''}">
                 </form>
-              </div>
-              <div class="col-md-2 d-flex gap-2">
-                <button class="btn btn-outline-primary w-100" onclick="markAllAsRead()"><i class="fas fa-check-double me-1"></i>Mark All as Read</button>
-                <button class="btn btn-outline-danger w-100" onclick="deleteAllRead()"><i class="fas fa-trash me-1"></i>Delete All Read</button>
-              </div>
+                </div>
             </div>
             <!-- Table -->
             <div class="table-responsive border-0">
               <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
-                <thead>
-                  <tr>
-                    <th width="5%"><i class="fas fa-hashtag"></i></th>
-                    <th width="30%"><i class="fas fa-envelope me-1"></i>Message</th>
-                    <th width="12%"><i class="fas fa-tag me-1"></i>Type</th>
-                    <th width="18%"><i class="fas fa-book me-1"></i>Course</th>
-                    <th width="10%"><i class="fas fa-eye me-1"></i>Status</th>
-                    <th width="10%"><i class="fas fa-cog me-1"></i>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr th:each="n,iter : ${notifications}"
-                      th:class="'notification-row ' + (${n.status} == 'sent' ? 'notification-read' : 'notification-unread')">
-                    <td><strong th:text="${iter.index + 1}"></strong></td>
-                    <td><div class="notification-message" th:title="${n.message}" th:text="${n.message}"></div></td>
-                    <td>
-                      <span th:class="'badge notification-type-badge'" th:switch="${n.type}">
-                        <span th:case="'ENROLLMENT'" th:class="'badge notification-type-badge bg-success'">
-                          <span th:text="${n.type}"></span>
-                        </span>
-                        <span th:case="'COURSE_COMPLETION'" th:class="'badge notification-type-badge bg-info'">
-                          <span th:text="${n.type}"></span>
-                        </span>
-                        <span th:case="'QUIZ_RESULT'" th:class="'badge notification-type-badge bg-warning'">
-                          <span th:text="${n.type}"></span>
-                        </span>
-                        <span th:case="'CERTIFICATE'" th:class="'badge notification-type-badge bg-primary'">
-                          <span th:text="${n.type}"></span>
-                        </span>
-                        <span th:case="'PAYMENT_SUCCESS'" th:class="'badge notification-type-badge bg-success'">
-                          <span th:text="${n.type}"></span>
-                        </span>
-                        <span th:case="'COMMENT'" th:class="'badge notification-type-badge bg-secondary'">
-                          <span th:text="${n.type}"></span>
-                        </span>
-                        <span th:case="*" th:class="'badge notification-type-badge bg-danger'">
-                          <span th:text="${n.type}"></span>
-                        </span>
-                      </span>
-                    </td>
-                    <td>
-                      <strong th:text="${n.course != null ? n.course.title : '-'}"></strong>
-                    </td>
-                    <td>
-                      <span th:class="${n.status} == 'sent' ? 'status-indicator status-read' : 'status-indicator status-unread'">
-                        <i th:class="${n.status} == 'sent' ? 'fas fa-check-circle' : 'fas fa-circle'"></i>
-                        <span th:text="${n.status} == 'sent' ? 'Read' : 'Unread'"></span>
-                      </span>
-                    </td>
-                    <td>
-                      <a th:if="${n.type == 'COMMENT' and n.commentId != null and n.course != null and n.course.courseId != null and lessonIdMap[n.notificationId] != null}"
-                         th:href="@{'/learning/course/' + ${n.course.courseId} + '/lesson/' + ${lessonIdMap[n.notificationId]} + '?commentId=' + ${n.commentId}}"
-                         class="btn btn-outline-success btn-sm action-btn"
-                         title="Xem bình luận">
-                        <i class="fas fa-comment"></i>
-                      </a>
-                      <a th:if="${!(n.type == 'COMMENT' and n.commentId != null and n.course != null and n.course.courseId != null and lessonIdMap[n.notificationId] != null)}"
-                         th:href="@{/user/notifications/view/{id}(id=${n.notificationId})}"
-                         class="btn btn-outline-primary btn-sm action-btn"
-                         title="View Details">
-                        <i class="fas fa-eye"></i>
-                      </a>
+                    <thead>
+                    <tr>
+                        <th width="5%"><i class="fas fa-hashtag"></i></th>
+                        <th width="30%"><i class="fas fa-envelope me-1"></i>Message</th>
+                        <th width="12%"><i class="fas fa-tag me-1"></i>Type</th>
+                        <th width="18%"><i class="fas fa-book me-1"></i>Course</th>
+                        <th width="10%"><i class="fas fa-eye me-1"></i>Status</th>
+                        <th width="10%"><i class="fas fa-cog me-1"></i>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="n,iter : ${notifications}"
+                        th:class="'notification-row ' + (${n.status} == 'sent' ? 'notification-read' : 'notification-unread')">
+                        <td><strong th:text="${iter.index + 1}"></strong></td>
+                        <td><div class="notification-message" th:title="${n.message}" th:text="${n.message}"></div></td>
+                        <td>
+                                <span th:class="'badge notification-type-badge'" th:switch="${n.type}">
+                                    <span th:case="'ENROLLMENT'" th:class="'badge notification-type-badge bg-success'">
+                                        <span th:text="${n.type}"></span>
+                                    </span>
+                                    <span th:case="'COURSE_COMPLETION'" th:class="'badge notification-type-badge bg-info'">
+                                        <span th:text="${n.type}"></span>
+                                    </span>
+                                    <span th:case="'QUIZ_RESULT'" th:class="'badge notification-type-badge bg-warning'">
+                                        <span th:text="${n.type}"></span>
+                                    </span>
+                                    <span th:case="'CERTIFICATE'" th:class="'badge notification-type-badge bg-primary'">
+                                        <span th:text="${n.type}"></span>
+                                    </span>
+                                    <span th:case="'PAYMENT_SUCCESS'" th:class="'badge notification-type-badge bg-success'">
+                                        <span th:text="${n.type}"></span>
+                                    </span>
+                                    <span th:case="'COMMENT'" th:class="'badge notification-type-badge bg-secondary'">
+                                        <span th:text="${n.type}"></span>
+                                    </span>
+                                    <span th:case="*" th:class="'badge notification-type-badge bg-danger'">
+                                        <span th:text="${n.type}"></span>
+                                    </span>
+                                </span>
+                        </td>
+                        <td>
+                            <strong th:text="${n.course != null ? n.course.title : '-'}"></strong>
+                        </td>
+                        <td>
+                                <span th:class="${n.status} == 'sent' ? 'status-indicator status-read' : 'status-indicator status-unread'">
+                                    <i th:class="${n.status} == 'sent' ? 'fas fa-check-circle' : 'fas fa-circle'"></i>
+                                    <span th:text="${n.status} == 'sent' ? 'Read' : 'Unread'"></span>
+                                </span>
+                        </td>
+                        <td>
+                            <a th:if="${n.type == 'COMMENT' and n.commentId != null and n.course != null and n.course.courseId != null and lessonIdMap[n.notificationId] != null}"
+                               th:href="@{'/learning/course/' + ${n.course.courseId} + '/lesson/' + ${lessonIdMap[n.notificationId]} + '?commentId=' + ${n.commentId}}"
+                               class="btn btn-outline-success btn-sm action-btn"
+                               title="Xem bình luận">
+                                <i class="fas fa-comment"></i>
+                            </a>
+                            <a th:if="${!(n.type == 'COMMENT' and n.commentId != null and n.course != null and n.course.courseId != null and lessonIdMap[n.notificationId] != null)}"
+                               th:href="@{/user/notifications/view/{id}(id=${n.notificationId})}"
+                               class="btn btn-outline-primary btn-sm action-btn"
+                               title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </a>
                       <form th:action="@{/user/notifications/{id}/delete(id=${n.notificationId})}" method="post" style="display:inline;">
                         <button type="submit" class="btn btn-outline-danger btn-sm action-btn" title="Delete" onclick="return confirm('Delete this notification?');">
                           <i class="fas fa-trash"></i>
                         </button>
                       </form>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
             <!-- Empty state -->
             <div th:if="${notifications == null or #lists.isEmpty(notifications)}" class="text-center py-5">
-              <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
-              <h5 class="text-muted">No notifications found</h5>
-              <p class="text-muted">You're all caught up! Check back later for new notifications.</p>
-            </div>
-            <!-- Pagination -->
-            <div th:if="${totalPages != null and totalPages > 1}" class="d-flex justify-content-center mt-4">
-              <nav aria-label="Notification pagination">
+                <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No notifications found</h5>
+                <p class="text-muted">You're all caught up! Check back later for new notifications.</p>
+        </div>
+        <!-- Pagination -->
+        <div th:if="${totalPages != null and totalPages > 1}" class="d-flex justify-content-center mt-4">
+            <nav aria-label="Notification pagination">
                 <ul class="pagination">
-                  <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                    <a class="page-link" th:if="${isSearch}" th:href="@{/user/notifications(page=${currentPage - 1}, size=${pageSize}, type=${selectedTypes}, status=${selectedStatus}, search=${search})}" aria-label="Previous">
-                      <span aria-hidden="true">&laquo;</span>
-                    </a>
-                    <a class="page-link" th:unless="${isSearch}" th:href="@{/user/notifications(page=${currentPage - 1}, size=${pageSize}, type=${selectedTypes}, status=${selectedStatus})}" aria-label="Previous">
-                      <span aria-hidden="true">&laquo;</span>
-                    </a>
-                  </li>
-                  <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${i == currentPage} ? 'active'">
-                    <a class="page-link" th:if="${isSearch}" th:href="@{/user/notifications(page=${i}, size=${pageSize}, type=${selectedTypes}, status=${selectedStatus}, search=${search})}" th:text="${i + 1}"></a>
-                    <a class="page-link" th:unless="${isSearch}" th:href="@{/user/notifications(page=${i}, size=${pageSize}, type=${selectedTypes}, status=${selectedStatus})}" th:text="${i + 1}"></a>
-                  </li>
-                  <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
-                    <a class="page-link" th:if="${isSearch}" th:href="@{/user/notifications(page=${currentPage + 1}, size=${pageSize}, type=${selectedTypes}, status=${selectedStatus}, search=${search})}" aria-label="Next">
-                      <span aria-hidden="true">&raquo;</span>
-                    </a>
-                    <a class="page-link" th:unless="${isSearch}" th:href="@{/user/notifications(page=${currentPage + 1}, size=${pageSize}, type=${selectedTypes}, status=${selectedStatus})}" aria-label="Next">
-                      <span aria-hidden="true">&raquo;</span>
-                    </a>
-                  </li>
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" th:if="${isSearch}" th:href="@{/user/notifications(page=${currentPage - 1}, size=${pageSize}, type=${selectedTypes}, status=${selectedStatus}, search=${search})}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                        <a class="page-link" th:unless="${isSearch}" th:href="@{/user/notifications(page=${currentPage - 1}, size=${pageSize}, type=${selectedTypes}, status=${selectedStatus})}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${i == currentPage} ? 'active'">
+                        <a class="page-link" th:if="${isSearch}" th:href="@{/user/notifications(page=${i}, size=${pageSize}, type=${selectedTypes}, status=${selectedStatus}, search=${search})}" th:text="${i + 1}"></a>
+                        <a class="page-link" th:unless="${isSearch}" th:href="@{/user/notifications(page=${i}, size=${pageSize}, type=${selectedTypes}, status=${selectedStatus})}" th:text="${i + 1}"></a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                        <a class="page-link" th:if="${isSearch}" th:href="@{/user/notifications(page=${currentPage + 1}, size=${pageSize}, type=${selectedTypes}, status=${selectedStatus}, search=${search})}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                        <a class="page-link" th:unless="${isSearch}" th:href="@{/user/notifications(page=${currentPage + 1}, size=${pageSize}, type=${selectedTypes}, status=${selectedStatus})}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
                 </ul>
-              </nav>
+            </nav>
             </div>
           </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
-</section>
-<script>
-  function markAllAsRead() {
-    if (confirm('Mark all notifications as read?')) {
-      fetch('/user/notifications/mark-all-read', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+    </section>
+    <script>
+        function markAllAsRead() {
+            if (confirm('Mark all notifications as read?')) {
+                fetch('/user/notifications/mark-all-read', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            location.reload();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error marking all as read:', error);
+                    });
+            }
         }
-      })
-        .then(response => {
-          if (response.ok) {
-            location.reload();
-          }
-        })
-        .catch(error => {
-          console.error('Error marking all as read:', error);
-        });
-    }
-  }
-  function deleteAllRead() {
-    if (confirm('Delete all read notifications? This action cannot be undone.')) {
-      fetch('/user/notifications/delete-all-read', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+        function deleteAllRead() {
+            if (confirm('Delete all read notifications? This action cannot be undone.')) {
+                fetch('/user/notifications/delete-all-read', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            location.reload();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error deleting all read notifications:', error);
+                    });
+            }
         }
-      })
-        .then(response => {
-          if (response.ok) {
-            location.reload();
-          }
-        })
-        .catch(error => {
-          console.error('Error deleting all read notifications:', error);
-        });
-    }
-  }
-</script>
+    </script>
 </div>

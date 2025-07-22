@@ -28,17 +28,17 @@ Footer END -->
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 	<!-- Bootstrap JS -->
-	<script src="assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+	<script th:src="@{/assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js}"></script>
 
 	<!-- Các vendor khác -->
-	<script src="assets/vendor/tiny-slider/tiny-slider.js"></script>
-	<script src="assets/vendor/glightbox/js/glightbox.js"></script>
-	<script src="assets/vendor/purecounterjs/dist/purecounter_vanilla.js"></script>
+	<script th:src="@{/assets/vendor/tiny-slider/tiny-slider.js}"></script>
+	<script th:src="@{/assets/vendor/glightbox/js/glightbox.js}"></script>
+	<script th:src="@{/assets/vendor/purecounterjs/dist/purecounter_vanilla.js}"></script>
 
 	<!-- Template Functions -->
-	<script src="assets/js/functions.js"></script>
-	<script src="js/homePage/wishlist.js"></script>
-	<script src="js/homePage/addtocart.js"></script>
+	<script th:src="@{/assets/js/functions.js}"></script>
+	<script th:src="@{/js/homePage/wishlist.js}"></script>
+	<script th:src="@{/js/homePage/addtocart.js}"></script>
 
 	<script th:inline="javascript">
 		window.userId = /*[[${currentUserId}]]*/ 0;

@@ -1,4 +1,4 @@
-package com.OLearning.controller.instructorDashBoard;
+package com.OLearning.controller.instructorDashboard;
 
 import com.OLearning.dto.user.UserDetailDTO;
 import com.OLearning.dto.user.UserProfileUpdateDTO;

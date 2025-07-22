@@ -25,6 +25,11 @@ import com.OLearning.service.quiz.QuizService;
 import com.OLearning.service.termsAndCondition.TermsAndConditionService;
 import com.OLearning.service.user.UserService;
 import com.OLearning.service.video.VideoService;
+import com.OLearning.service.termsAndCondition.TermsAndConditionService;
+import com.OLearning.service.order.OrdersService;
+import com.OLearning.service.payment.VietQRService;
+import com.OLearning.service.courseReview.CourseReviewService;
+import com.OLearning.entity.CourseReview;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -87,6 +92,8 @@ public class ControlllerAddCourse {
     private OrdersService ordersService;
     @Autowired
     private VietQRService vietQRService;
+    @Autowired
+    private CourseReviewService courseReviewService;
 
     //viewAllCourses
     @GetMapping("/courses")
@@ -346,7 +353,9 @@ public class ControlllerAddCourse {
         modelMap.put("totalElements", enrollmentPage.getTotalElements());
         modelMap.put("size", size);
         model.addAttribute("courseId", courseId);
-
+        // Bổ sung truyền list review của khóa học
+        List<CourseReview> listReview = courseReviewService.getCourseReviewsByCourseWithUser(course);
+        model.addAttribute("listReview", listReview);
         if ("XMLHttpRequest".equals(requestedWith)) {
             // Nếu là AJAX, chỉ trả về fragment nhỏ
             return "instructorDashboard/fragments/courseDetailEnrollmentTable :: course-detail-table";

@@ -32,6 +32,9 @@ public class Notification {
     @Column(name = "CommentID")
     private Long commentId;
 
+    @Column(name = "EvidenceLink", nullable = true)
+    private String evidenceLink; // Link ảnh/video bằng chứng, có thể null
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "UserID", nullable = false)
     private User user;;

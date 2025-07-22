@@ -580,10 +580,10 @@ Page content START -->
 														<form th:action="@{/home/course-review/delete}" method="post" style="display: inline;">
 															<input type="hidden" name="courseId" th:value="${course.courseId}" />
 															<input type="hidden" name="reviewId" th:value="${review.reviewId}" />
-															<button type="submit" class="btn btn-danger btn-sm"
+															<a type="submit" class="small text-danger"
 																	onclick="return confirm('Bạn có chắc chắn muốn xóa đánh giá này?')">
-																<i class="fas fa-trash me-1"></i>
-															</button>
+																<i>delete</i>
+															</a>
 														</form>
 														<small class="text-muted d-block mt-1">
 															Đánh giá của bạn - <span th:text="${#temporals.format(review.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
@@ -623,15 +623,32 @@ Page content START -->
 												<input type="hidden" name="courseId" th:value="${course.courseId}"/>
 												<!-- Rating -->
 												<div class="col-12 bg-light-input">
-													<select name="rating" id="inputState2" class="form-select js-choice" required>
-														<option value="">Chọn đánh giá</option>
-														<option value="5">★★★★★ (5/5)</option>
-														<option value="4">★★★★☆ (4/5)</option>
-														<option value="3">★★★☆☆ (3/5)</option>
-														<option value="2">★★☆☆☆ (2/5)</option>
-														<option value="1">★☆☆☆☆ (1/5)</option>
-													</select>
+													<div class="d-flex align-items-center mb-2">
+														<span class="me-2" style="font-weight:500;">Select rating:</span>
+														<div class="star-rating" style="font-size:2rem; direction: rtl; display: flex; justify-content: flex-start;">
+															<input type="radio" id="star5" name="rating" value="5" required/><label for="star5" title="5 stars">★</label>
+															<input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4 stars">★</label>
+															<input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="3 stars">★</label>
+															<input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="2 stars">★</label>
+															<input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="1 star">★</label>
+														</div>
+													</div>
 												</div>
+												<style>
+												.star-rating input[type="radio"] {
+													display: none;
+												}
+												.star-rating label {
+													color: #ddd;
+													cursor: pointer;
+													transition: color 0.2s;
+												}
+												.star-rating input[type="radio"]:checked ~ label,
+												.star-rating label:hover,
+												.star-rating label:hover ~ label {
+													color: #ffc700;
+												}
+												</style>
 												<!-- Message -->
 												<div class="col-12 bg-light-input">
 													<textarea class="form-control" name="comment" id="exampleFormControlTextarea1"

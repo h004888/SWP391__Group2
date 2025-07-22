@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import com.OLearning.repository.CourseReviewRepository;
 import com.OLearning.dto.notification.NotificationDropdownDTO;
+import com.OLearning.service.user.UserService;
+import com.OLearning.dto.user.UserProfileEditDTO;
 
 @Controller
 @RequestMapping("/user/notifications")
@@ -29,6 +31,9 @@ public class UserNotificationsController {
     @Autowired
     private CourseReviewRepository courseReviewRepository;
 
+    @Autowired
+    private UserService userService;
+
     @GetMapping
     public String viewNotifications(Authentication authentication, Model model,
                                    @RequestParam(value = "page", defaultValue = "0") int page,
@@ -38,11 +43,15 @@ public class UserNotificationsController {
                                    @RequestParam(value = "search", required = false) String search) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
+        // Lấy profile và truyền vào model
+        java.util.Optional<UserProfileEditDTO> profileOpt = userService.getProfileByUsername(userDetails.getUsername());
+        model.addAttribute("profile", profileOpt.orElse(new UserProfileEditDTO()));
         Pageable pageable = PageRequest.of(page, size);
+        List<String> allTypes = notificationService.getAllNotificationTypesByUserId(userId);
         if (types == null || types.isEmpty() || (types.size() == 1 && (types.get(0) == null || types.get(0).isBlank()))) {
-            types = List.of("ENROLLMENT", "COURSE_COMPLETION", "QUIZ_RESULT", "CERTIFICATE", "PAYMENT_SUCCESS", "PAYMENT_FAILED", "COMMENT", "COMMENT_HIDDEN");
+            types = allTypes;
         }
-        if (status != null && status.isBlank()) {
+        if (status == null || status.isBlank() || "All".equalsIgnoreCase(status)) {
             status = null;
         }
         Page<NotificationDTO> notificationPage;
@@ -74,6 +83,7 @@ public class UserNotificationsController {
         model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderCategory");
         model.addAttribute("fragmentContent", "homePage/fragments/notificationsContent :: notificationsContent");
         model.addAttribute("isSearch", search != null && !search.isBlank());
+        model.addAttribute("allTypes", allTypes);
         return "homePage/index";
     }
 
