@@ -116,4 +116,7 @@ public interface LessonRepository extends JpaRepository<Lesson, Long> {
     void deleteByChapterId(Long chapterId);
 
     void deleteByLessonId(Long lessonId);
+
+    @Query("SELECT l FROM Lesson l WHERE l.chapter.course.courseId = :courseId")
+    List<Lesson> findLessonsByCourseId(@Param("courseId") Long courseId);
 }

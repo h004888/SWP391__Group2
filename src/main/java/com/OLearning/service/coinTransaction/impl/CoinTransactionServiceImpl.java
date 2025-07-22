@@ -136,7 +136,6 @@ public class CoinTransactionServiceImpl implements CoinTransactionService {
         return new PageImpl<>(dtos, pageable, transactionPage.getTotalElements());
     }
 
-    // Thống kê tổng chi tiêu và số lượng khóa học đã mua
     public Double getTotalSpent(Long userId) {
         String transactionType = "COURSE_PURCHASE";
         List<CoinTransaction> transactions = coinTransactionRepository.findByUserUserIdAndTransactionType(userId, transactionType, Pageable.unpaged()).getContent();

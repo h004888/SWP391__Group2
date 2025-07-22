@@ -190,7 +190,6 @@ public class HomeController {
                 if (courseEntity != null) {
                     reviews = courseReviewService.getReviewsByCourseWithUser(courseEntity);
 
-                    // Filter theo sao nếu có
                     if (star > 0 && star <= 5) {
                         reviews = reviews.stream()
                                 .filter(review -> review.getRating() == star)
@@ -380,18 +379,12 @@ public class HomeController {
             redirectAttributes.addFlashAttribute("error", "Không tìm thấy khóa học.");
             return "redirect:/home/course-detail?id=" + courseId;
         }
-        // Kiểm tra đã đăng ký khóa học chưa
         boolean isEnrolled = enrollmentService.findFirstByUserAndCourseOrderByEnrollmentDateDesc(user, course).isPresent();
         if (!isEnrolled) {
             redirectAttributes.addFlashAttribute("error", "Bạn cần đăng ký khóa học để đánh giá.");
             return "redirect:/home/course-detail?id=" + courseId;
         }
-        // Kiểm tra đã review chưa (nếu chỉ cho review 1 lần)
-        Long userReviewCount = courseReviewService.countByUserIdAndCourseId(user.getUserId(), courseId);
-        if (userReviewCount != null && userReviewCount > 0) {
-            redirectAttributes.addFlashAttribute("error", "Bạn đã đánh giá khóa học này rồi.");
-            return "redirect:/home/course-detail?id=" + courseId;
-        }
+        // Cho phép review nhiều lần
         // Tạo review mới
         CourseReview review = new CourseReview();
         review.setCourse(course);
@@ -403,6 +396,38 @@ public class HomeController {
         review.setEnrollment(enrollment);
         courseReviewService.save(review);
         redirectAttributes.addFlashAttribute("message", "Đánh giá của bạn đã được ghi nhận.");
+        return "redirect:/home/course-detail?id=" + courseId;
+    }
+
+    @PostMapping("/course-review/delete")
+    public String deleteCourseReview(@RequestParam("courseId") Long courseId,
+                                     @RequestParam("reviewId") Long reviewId,
+                                     @AuthenticationPrincipal UserDetails userDetails,
+                                     RedirectAttributes redirectAttributes) {
+        if (userDetails == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Bạn cần đăng nhập để xóa đánh giá.");
+            return "redirect:/home/course-detail?id=" + courseId;
+        }
+
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
+        if (user == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy người dùng.");
+            return "redirect:/home/course-detail?id=" + courseId;
+        }
+
+        CourseReview review = courseReviewService.findById(reviewId).orElse(null);
+        if (review == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy đánh giá.");
+            return "redirect:/home/course-detail?id=" + courseId;
+        }
+
+        if (review.getEnrollment() == null || !review.getEnrollment().getUser().getUserId().equals(user.getUserId())) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền xóa đánh giá này.");
+            return "redirect:/home/course-detail?id=" + courseId;
+        }
+
+        courseReviewService.deleteReview(reviewId);
+        redirectAttributes.addFlashAttribute("successMessage", "Đánh giá đã được xóa  thành công.");
         return "redirect:/home/course-detail?id=" + courseId;
     }
 

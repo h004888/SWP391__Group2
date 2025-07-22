@@ -362,15 +362,6 @@
       </div>
     </div>
 
-    <!-- Overlay loading -->
-    <div id="formLoadingOverlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:2000;background:rgba(255,255,255,0.7);align-items:center;justify-content:center;display:flex;">
-        <div style="text-align:center;">
-            <div class="spinner-border text-primary" style="width:3rem;height:3rem;" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-            <div style="margin-top:12px;font-weight:500;">Đang gửi, vui lòng chờ...</div>
-        </div>
-    </div>
 
     <script th:inline="javascript">
         /*<![CDATA[*/
@@ -414,15 +405,7 @@
             }
         });
         /*]]>*/
-        document.addEventListener('DOMContentLoaded', function() {
-            var form = document.querySelector('form');
-            var overlay = document.getElementById('formLoadingOverlay');
-            if (form && overlay) {
-                form.addEventListener('submit', function(e) {
-                    overlay.style.display = 'flex';
-                });
-            }
-        });
+
         function previewInstructorFile() {
             const input = document.getElementById('instructorFileInput');
             const preview = document.getElementById('instructorFilePreview');

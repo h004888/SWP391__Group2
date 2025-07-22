@@ -10,31 +10,21 @@
                 <i class="fas fa-filter me-2"></i>Filter Reports
             </div>
             <div class="card-body">
-                <form method="get" th:action="@{/admin/reports}" class="row g-3 align-items-end">
-                    <div class="col-md-3">
+                <form id="reportFilterForm" class="row g-3 align-items-end">
+                    <div class="col-md-4">
                         <label class="form-label">Type</label>
-                        <select class="form-select" name="type">
-                            <option value="" th:selected="${type == null or type == ''}">All</option>
-                            <option value="BLOCK_COURSE" th:selected="${type == 'REPORT_COURSE'}"> Course</option>
-                            <option value="COMMENT" th:selected="${type == 'REPORT_COMMENT'}">Comment</option>
-         
-                    </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Status</label>
-                        <select class="form-select" name="status">
-                            <option value="" th:selected="${status == null or status == ''}">All</option>
-                            <option value="pending" th:selected="${status == 'pending'}">Pending</option>
-                            <option value="processed" th:selected="${status == 'processed'}">Processed</option>
-                           
+                        <select class="form-select" name="type" id="filterType">
+                            <option value="">All</option>
+                            <option value="REPORT_COURSE">Course</option>
+                            <option value="REPORT_COMMENT">Comment</option>
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <label class="form-label">Keyword</label>
-                        <input type="text" class="form-control" name="keyword" placeholder="Search...">
+                        <input type="text" class="form-control" name="keyword" id="searchInput" placeholder="Search...">
                     </div>
-                    <div class="col-md-3">
-                        <button type="submit" class="btn btn-primary-soft w-100 text-primary">
+                    <div class="col-md-4">
+                        <button type="button" class="btn btn-primary-soft w-100 text-primary" id="searchBtn">
                             <i class="fas fa-search me-2"></i>Search
                         </button>
                     </div>
@@ -46,105 +36,70 @@
                 <i class="fas fa-list me-2"></i>Report List
             </div>
             <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-dark text-white">
-                            <tr>
-                                <th>ID</th>
-                                <th>Type</th>
-                                <th>Course</th>
-                                <th>User</th>
-                                <th>Status</th>
-                                <th>Created At</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="report : ${reports}">
-                                <td th:text="${report.id}"></td>
-                                <td th:text="${report.reportType}"></td>
-                                <td th:text="${report.course != null ? report.course.title : '-'}"></td>
-                                <td th:text="${report.user != null ? report.user.username : '-'}"></td>
-                                <td>
-                                    <span th:if="${report.status == 'processed'}" class="badge bg-success-soft text-success"><i ></i>processed</span>
-                                    <span th:if="${report.status == 'pending'}" class="badge bg-warning-soft text-warning"><i ></i>pending</span>
-                                    <span th:if="${report.status != 'processed' and report.status != 'pending'}" class="badge bg-secondary-soft text-secondary"><i class="fas fa-question"></i></span>
-                                </td>
-                                <td th:text="${#temporals.format(report.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
-                                <td>
-                                    <a th:href="@{/admin/reports/view/{id}(id=${report.id})}" class="btn btn-sm btn-info-soft text-info">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <form th:if="${report.status != 'processed'}" th:action="@{/admin/reports/process/{id}(id=${report.id})}" method="post" style="display:inline">
-                                        <button type="submit" class="btn btn-success-soft btn-sm text-success"><i class="fas fa-check"></i></button>
-                                    </form>
-                                </td>
-                            </tr>
-                            <tr th:if="${#lists.isEmpty(reports)}">
-                                <td colspan="7" class="text-center text-muted">No reports found.</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <!-- Tabs for status -->
+                <ul class="nav nav-tabs" id="reportTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="pending-tab" data-bs-toggle="tab"
+                                data-bs-target="#pending" type="button" role="tab" data-status="pending">
+                            Pending <span class="badge bg-light text-dark ms-2" id="pendingCount">0</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="processed-tab" data-bs-toggle="tab"
+                                data-bs-target="#processed" type="button" role="tab" data-status="processed">
+                            Processed <span class="badge bg-light text-dark ms-2" id="processedCount">0</span>
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content p-0" id="reportTabsContent">
+                    <!-- Pending Tab -->
+                    <div class="tab-pane fade show active" id="pending" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-dark text-white">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Type</th>
+                                        <th>Course</th>
+                                        <th>User</th>
+                                        <th>Status</th>
+                                        <th>Created At</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pendingTableBody">
+                                <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="pendingPagination" class="pagination-container"></div>
+                    </div>
+                    <!-- Processed Tab -->
+                    <div class="tab-pane fade" id="processed" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-dark text-white">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Type</th>
+                                        <th>Course</th>
+                                        <th>User</th>
+                                        <th>Status</th>
+                                        <th>Created At</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="processedTableBody">
+                                <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="processedPagination" class="pagination-container"></div>
+                    </div>
                 </div>
             </div>
         </div>
-        <!-- Pagination -->
-        <nav th:if="${totalPages > 1}" aria-label="Page navigation">
-            <ul class="pagination justify-content-center mt-3">
-                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                    <a class="page-link" th:href="@{/admin/reports(page=${currentPage - 1},size=${pageSize},type=${type},status=${status})}">Previous</a>
-                </li>
-                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages-1)}" th:classappend="${i == currentPage} ? 'active'">
-                    <a class="page-link" th:href="@{/admin/reports(page=${i},size=${pageSize},type=${type},status=${status})}" th:text="${i+1}"></a>
-                </li>
-                <li class="page-item" th:classappend="${currentPage == totalPages-1} ? 'disabled'">
-                    <a class="page-link" th:href="@{/admin/reports(page=${currentPage + 1},size=${pageSize},type=${type},status=${status})}">Next</a>
-                </li>
-            </ul>
-        </nav>
-        <!-- End Pagination -->
     </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script th:src="@{/js/reportJS.js}"></script>
 </div>
-<script th:inline="javascript">
-    document.addEventListener('DOMContentLoaded', function() {
-        const typeSelect = document.querySelector('select[name="type"]');
-        const statusSelect = document.querySelector('select[name="status"]');
-        const pageSize = /*[[${pageSize}]]*/ 10;
-        function fetchReports(page = 0) {
-            const type = typeSelect.value;
-            const status = statusSelect.value;
-            const url = `/admin/reports?page=${page}&size=${pageSize}` + (type ? `&type=${type}` : '') + (status ? `&status=${status}` : '');
-            fetch(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
-                .then(res => res.text())
-                .then(html => {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    const newTable = doc.querySelector('.card');
-                    const newPagination = doc.querySelector('nav[aria-label="Page navigation"]');
-                    document.querySelector('.card').replaceWith(newTable);
-                    const oldPag = document.querySelector('nav[aria-label="Page navigation"]');
-                    if (oldPag && newPagination) {
-                        oldPag.replaceWith(newPagination);
-                    } else if (oldPag) {
-                        oldPag.remove();
-                    } else if (newPagination) {
-                        document.querySelector('.container-fluid').appendChild(newPagination);
-                    }
-                    attachPaginationEvents();
-                });
-        }
-        function attachPaginationEvents() {
-            document.querySelectorAll('ul.pagination a.page-link').forEach(a => {
-                a.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const url = new URL(a.href, window.location.origin);
-                    const page = url.searchParams.get('page') || 0;
-                    fetchReports(page);
-                });
-            });
-        }
-        typeSelect.addEventListener('change', () => fetchReports(0));
-        statusSelect.addEventListener('change', () => fetchReports(0));
-        attachPaginationEvents();
-    });
-</script>

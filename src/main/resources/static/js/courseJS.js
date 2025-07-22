@@ -3,7 +3,7 @@ let currentPages = {
     pending: 0,
     approved: 0,
     rejected: 0,
-    resubmit: 0,
+    publish: 0,
     draft: 0
 };
 
@@ -17,8 +17,8 @@ function getTableBodyElement(status) {
             return $('#approvedTableBody');
         case 'rejected':
             return $('#rejectedTableBody');
-        case 'resubmit':
-            return $('#resubmitTableBody');
+        case 'publish':
+            return $('#publishTableBody');
         default:
             return $('#pendingTableBody');
     }
@@ -34,8 +34,8 @@ function getPaginationElement(status) {
             return $('#approvedPagination');
         case 'rejected':
             return $('#rejectedPagination');
-        case 'resubmit':
-            return $('#resubmitPagination');
+        case 'publish':
+            return $('#publishPagination');
         default:
             return $('#pendingPagination');
     }
@@ -101,6 +101,11 @@ function filterCourses(status, page = 0, size = 5) {
         })
     ]).then(function ([tableData, paginationData, countData]) {
 
+        // Log dữ liệu trả về từ API để kiểm tra
+        console.log("tableData for status:", status, "=", tableData);
+        console.log("paginationData for status:", status, "=", paginationData);
+        console.log("countData for status:", status, "=", countData);
+
         // Update table
         if (tableData && tableData.trim() !== '') {
             tableBody.html(tableData);
@@ -131,7 +136,8 @@ function updateStatusCountBadge(status, totalCount) {
         'approved': 'approveCount',
         'rejected': 'rejectCount',
         'resubmit': 'resubmitCount',
-        'draft': 'draftCount'
+        'draft': 'draftCount',
+        'publish': 'publishCount'
     };
 
     const badgeId = statusMap[status];
@@ -164,7 +170,7 @@ $(document).on('click', '.pagination .page-link', function (e) {
 
 $(document).ready(function () {
     // Load initial data for all tabs
-    const statuses = ['pending', 'draft', 'approved', 'rejected', 'resubmit'];
+    const statuses = ['pending', 'approved', 'rejected', 'draft', 'publish'];
     statuses.forEach(status => {
         loadCourses(status, 0);
     });

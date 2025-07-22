@@ -8,6 +8,7 @@ import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.entity.Enrollment;
 import com.OLearning.entity.Role;
 import com.OLearning.entity.User;
+import com.OLearning.entity.Notification;
 import com.OLearning.mapper.course.CourseMapper;
 import com.OLearning.mapper.user.UserDetailMapper;
 import com.OLearning.mapper.user.UserMapper;
@@ -17,6 +18,7 @@ import com.OLearning.repository.RoleRepository;
 import com.OLearning.repository.UserRepository;
 import com.OLearning.service.email.EmailService;
 import com.OLearning.service.user.UserService;
+import com.OLearning.service.notification.NotificationService;
 import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -51,6 +54,8 @@ public class UserServiceImpl implements UserService {
     private EnrollmentRepository enrollmentRepository;
     @Autowired
     private CourseMapper courseMapper;
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     public Page<UserDTO> getAllUsers(Pageable page) {
@@ -122,17 +127,29 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean changStatus(Long id) {
+    public boolean changStatus(Long id, String reason) {
         if (userRepository.existsById(id)) {
-            Optional<User> user = userRepository.findById(id);
+            Optional<User> userOpt = userRepository.findById(id);
+            if (userOpt.isEmpty()) return false;
+            User user = userOpt.get();
+            boolean oldStatus = user.getStatus();
             try {
-                emailService.sendAccountStatusEmail(user.get(), user.get().getStatus());
+                emailService.sendAccountStatusEmail(user, oldStatus, reason);
             } catch (MessagingException e) {
                 throw new RuntimeException(e);
             }
-            user.get().setStatus(!user.get().getStatus());
-            userRepository.save(user.get());
-
+            user.setStatus(!oldStatus);
+            userRepository.save(user);
+            // Nếu chuyển từ active sang block thì gửi notification
+            if (oldStatus && !user.getStatus()) {
+                Notification notification = new Notification();
+                notification.setUser(user);
+                notification.setMessage("Tài khoản của bạn đã bị block." + (reason != null && !reason.isBlank() ? (" Lý do: " + reason) : ""));
+                notification.setType("ACCOUNT_BLOCKED");
+                notification.setStatus("failed");
+                notification.setSentAt(LocalDateTime.now());
+                notificationService.sendMess(notification);
+            }
             return true;
         }
         return false;

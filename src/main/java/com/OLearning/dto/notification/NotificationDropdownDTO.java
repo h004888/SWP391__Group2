@@ -8,6 +8,9 @@ public class NotificationDropdownDTO {
     private String type;
     private String status;
     private LocalDateTime sentAt;
+    private Long commentId;
+    private Long courseId;
+    private Long lessonId;
 
     public NotificationDropdownDTO() {}
 
@@ -17,6 +20,17 @@ public class NotificationDropdownDTO {
         this.type = type;
         this.status = status;
         this.sentAt = sentAt;
+    }
+
+    public NotificationDropdownDTO(Long notificationId, String message, String type, String status, LocalDateTime sentAt, Long commentId, Long courseId, Long lessonId) {
+        this.notificationId = notificationId;
+        this.message = message;
+        this.type = type;
+        this.status = status;
+        this.sentAt = sentAt;
+        this.commentId = commentId;
+        this.courseId = courseId;
+        this.lessonId = lessonId;
     }
 
     public Long getNotificationId() { return notificationId; }
@@ -29,4 +43,10 @@ public class NotificationDropdownDTO {
     public void setStatus(String status) { this.status = status; }
     public LocalDateTime getSentAt() { return sentAt; }
     public void setSentAt(LocalDateTime sentAt) { this.sentAt = sentAt; }
+    public Long getCommentId() { return commentId; }
+    public void setCommentId(Long commentId) { this.commentId = commentId; }
+    public Long getCourseId() { return courseId; }
+    public void setCourseId(Long courseId) { this.courseId = courseId; }
+    public Long getLessonId() { return lessonId; }
+    public void setLessonId(Long lessonId) { this.lessonId = lessonId; }
 } 

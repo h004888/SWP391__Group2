@@ -61,16 +61,13 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public ChatResponseDTO sendMessage(ChatRequestDTO request, Long userId) {
         try {
-            // Lấy lịch sử chat để tạo context
-            List<ChatMessage> chatHistory = getChatHistory(request.getSessionId());
+            List<ChatMessage> chatHistory = getChatHistory(request.getSessionId(), userId);
 
-            // Phân tích chủ đề câu hỏi
             ChatTopic topic = detectTopic(request.getMessage());
             StringBuilder contextData = new StringBuilder();
 
             switch (topic) {
                 case COURSE -> {
-                    // Lấy top 5 khóa học
                     List<Course> topCourses = getTopCourses();
                     contextData.append("Top 5 khóa học nổi bật hiện có trên OLearning:\n");
                     for (Course c : topCourses) {
@@ -80,7 +77,6 @@ public class ChatServiceImpl implements ChatService {
                     }
                 }
                 case INSTRUCTOR -> {
-                    // Lấy top 5 giảng viên (theo số khóa học)
                     List<User> instructors = searchInstructors(""); // lấy tất cả instructor
                     contextData.append("Một số giảng viên tiêu biểu trên OLearning:\n");
                     instructors.stream().limit(5).forEach(i -> {
@@ -90,7 +86,6 @@ public class ChatServiceImpl implements ChatService {
                     });
                 }
                 case CATEGORY -> {
-                    // Lấy top 5 danh mục
                     List<Category> categories = getTopCategories();
                     contextData.append("Các danh mục khóa học phổ biến:\n");
                     for (Category cat : categories) {
@@ -102,7 +97,6 @@ public class ChatServiceImpl implements ChatService {
                     contextData.append("Hiện tại OLearning có tổng cộng khoảng ").append(total).append(" học viên đang theo học.\n");
                 }
                 default -> {
-                    // Không thêm gì nếu không xác định được chủ đề
                 }
             }
 
@@ -113,10 +107,9 @@ public class ChatServiceImpl implements ChatService {
             }
             fullPrompt += buildPromptWithContext(request.getMessage(), chatHistory);
 
-            // Gọi Google AI API
+            // Call Google AI API
             String aiResponse = callGoogleAI(fullPrompt);
 
-            // Lưu tin nhắn vào database
             User user = userRepository.findById(userId).orElse(null);
             ChatMessage chatMessage = new ChatMessage();
             chatMessage.setSessionId(request.getSessionId());
@@ -152,6 +145,12 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
+    public List<ChatMessage> getChatHistory(String sessionId, Long userId) {
+        if (userId == null) return List.of();
+        return chatMessageRepository.findBySessionIdAndUser_UserIdOrderByCreatedAtAsc(sessionId, userId);
+    }
+
+    @Override
     public List<ChatMessage> getUserChatHistory(Long userId) {
         return chatMessageRepository.findByUserIdOrderByCreatedAtDesc(userId);
     }
@@ -165,7 +164,6 @@ public class ChatServiceImpl implements ChatService {
         StringBuilder prompt = new StringBuilder();
         prompt.append(SYSTEM_PROMPT).append("\n\n");
         
-        // Thêm lịch sử chat gần đây (tối đa 10 tin nhắn)
         int historyLimit = Math.min(chatHistory.size(), 10);
         for (int i = Math.max(0, chatHistory.size() - historyLimit); i < chatHistory.size(); i++) {
             ChatMessage msg = chatHistory.get(i);
@@ -181,7 +179,6 @@ public class ChatServiceImpl implements ChatService {
 
     private String callGoogleAI(String prompt) {
         try {
-            // Tạo request body
             GoogleAIRequestDTO request = new GoogleAIRequestDTO();
             GoogleAIRequestDTO.Content content = new GoogleAIRequestDTO.Content();
             GoogleAIRequestDTO.Part part = new GoogleAIRequestDTO.Part();
@@ -189,7 +186,6 @@ public class ChatServiceImpl implements ChatService {
             content.setParts(List.of(part));
             request.setContents(List.of(content));
 
-            // Gọi API
             GoogleAIResponseDTO response = webClient.post()
                     .uri("?key=" + googleAIConfig.getApiKey())
                     .bodyValue(request)
@@ -215,7 +211,6 @@ public class ChatServiceImpl implements ChatService {
         }
     }
 
-    // Lấy danh sách khóa học theo từ khóa (title)
     public List<Course> searchCourses(String keyword) {
         if (keyword == null || keyword.isBlank()) return courseRepository.findAll();
         return courseRepository.findAll().stream()
@@ -223,38 +218,32 @@ public class ChatServiceImpl implements ChatService {
             .toList();
     }
 
-    // Lấy top 5 khóa học nhiều học viên nhất
     public List<Course> getTopCourses() {
         return courseRepository.findAllOrderByStudentCountDesc().stream().limit(5).toList();
     }
 
-    // Lấy danh mục phổ biến nhất
     public List<Category> getTopCategories() {
         Pageable top5 = org.springframework.data.domain.PageRequest.of(0, 5);
         return categoryRepository.findTopCategoriesByCourseCount(top5);
     }
 
-    // Lấy thông tin giảng viên theo tên (roleId = 2 là instructor)
     public List<User> searchInstructors(String keyword) {
         Long instructorRoleId = 2L;
         return userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleId(keyword, instructorRoleId, org.springframework.data.domain.Pageable.unpaged()).getContent();
     }
 
-    // Lấy đánh giá của một khóa học
     public List<CourseReview> getCourseReviews(Long courseId) {
         return courseReviewRepository.findAll().stream()
             .filter(r -> r.getCourse() != null && r.getCourse().getCourseId().equals(courseId))
             .toList();
     }
 
-    // Lấy số lượng học viên của một khóa học
     public long getStudentCountOfCourse(Long courseId) {
         return enrollmentRepository.findAll().stream()
             .filter(e -> e.getCourse() != null && e.getCourse().getCourseId().equals(courseId))
             .count();
     }
 
-    // Lấy số lượng học viên toàn hệ thống
     public long getTotalStudentCount() {
         return enrollmentRepository.countTotalStudents();
     }

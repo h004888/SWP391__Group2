@@ -1,0 +1,57 @@
+<div th:fragment="profileSidebar">
+  <div class="offcanvas-xl offcanvas-end" tabindex="-1" id="offcanvasSidebar">
+    <div class="offcanvas-header bg-light">
+      <h5 class="offcanvas-title">My profile</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#offcanvasSidebar"></button>
+    </div>
+    <div class="offcanvas-body p-3 p-xl-0">
+      <div class="bg-dark border rounded-3 p-3 w-100">
+        <div class="list-group list-group-dark list-group-borderless collapse-list">
+          <a class="list-group-item" th:href="@{/profile}"><i class="bi bi-person me-2"></i>Profile</a>
+          <a class="list-group-item" th:href="@{/learning/my-courses}"><i class="bi bi-journal-bookmark me-2"></i>My Courses</a>
+          <a class="list-group-item" th:href="@{/user/notifications}"><i class="bi bi-clock-history me-2"></i>Notification</a>
+          <a class="list-group-item" th:href="@{/profile/edit}"><i class="bi bi-pencil-square me-2"></i>Edit Profile</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+  .list-group-dark .list-group-item {
+    background: #111;
+    color: #fff;
+    border: none;
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+    transition: background 0.2s;
+  }
+  .list-group-dark .list-group-item.active,
+  .list-group-dark .list-group-item:focus,
+  .list-group-dark .list-group-item:hover {
+    background: #0d6efd;
+    color: #fff;
+  }
+  .bg-dark {
+    background: #111 !important;
+  }
+  @media (min-width: 1200px) {
+    .offcanvas-xl {
+      position: static;
+      z-index: auto;
+      display: block !important;
+      visibility: visible !important;
+      background: none;
+      border: none;
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      transform: none !important;
+    }
+    .offcanvas-xl .offcanvas-header {
+      display: none;
+    }
+    .offcanvas-xl .offcanvas-body {
+      padding: 0 !important;
+    }
+  }
+</style>

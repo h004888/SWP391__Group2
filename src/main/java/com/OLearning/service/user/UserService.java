@@ -40,7 +40,7 @@ public interface UserService {
 
     boolean deleteAcc(Long id);
 
-    boolean changStatus(Long id);
+    boolean changStatus(Long id, String reason);
 
 //    List<UserDTO> searchByName(String keyword, Long roleId);
 

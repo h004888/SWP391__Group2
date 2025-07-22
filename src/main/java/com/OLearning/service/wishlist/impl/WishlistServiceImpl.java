@@ -15,6 +15,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.Base64;
 import java.nio.charset.StandardCharsets;
+import com.OLearning.repository.LessonRepository;
+import com.OLearning.repository.CourseReviewRepository;
+import com.OLearning.entity.Lesson;
+import com.OLearning.entity.CourseReview;
 
 @Service
 public class WishlistServiceImpl implements WishlistService {
@@ -30,6 +34,11 @@ public class WishlistServiceImpl implements WishlistService {
 
     @Autowired
     private EnrollmentService enrollmentService;
+
+    @Autowired
+    private LessonRepository lessonRepository;
+    @Autowired
+    private CourseReviewRepository courseReviewRepository;
 
     public static class CourseAlreadyInWishlistException extends RuntimeException {
         public CourseAlreadyInWishlistException(String message) {
@@ -71,7 +80,7 @@ public class WishlistServiceImpl implements WishlistService {
                 emptyWishlist.put("items", new ArrayList<>());
                 return emptyWishlist;
             }
-            // Add enrolled status for each item
+            // Add enrolled status and extra info for each item
             List<Map<String, Object>> items = (List<Map<String, Object>>) wishlist.get("items");
             for (Map<String, Object> item : items) {
                 Object courseIdObj = item.get("courseId");
@@ -82,6 +91,28 @@ public class WishlistServiceImpl implements WishlistService {
                 if (courseId != null) {
                     boolean enrolled = enrollmentService.hasEnrolled(userId, courseId);
                     item.put("enrolled", enrolled);
+                    // Bổ sung các trường mới
+                    Course course = courseRepository.findById(courseId).orElse(null);
+                    if (course != null) {
+                        item.put("courseLevel", course.getCourseLevel());
+                        item.put("description", course.getDescription());
+                        // Rating
+                        List<CourseReview> reviews = course.getCourseReviews();
+                        int ratingCount = 0;
+                        double averageRating = 0;
+                        if (reviews != null && !reviews.isEmpty()) {
+                            ratingCount = (int) reviews.stream().filter(r -> r.getRating() != null).count();
+                            averageRating = reviews.stream().filter(r -> r.getRating() != null).mapToInt(CourseReview::getRating).average().orElse(0);
+                        }
+                        item.put("ratingCount", ratingCount);
+                        item.put("averageRating", averageRating);
+                        // Duration & Lessons
+                        List<Lesson> lessons = lessonRepository.findLessonsByCourseId(courseId);
+                        int totalLessons = lessons != null ? lessons.size() : 0;
+                        int duration = lessons != null ? lessons.stream().filter(l -> l.getDuration() != null).mapToInt(Lesson::getDuration).sum() : 0;
+                        item.put("totalLessons", totalLessons);
+                        item.put("duration", duration);
+                    }
                 } else {
                     item.put("enrolled", false);
                 }

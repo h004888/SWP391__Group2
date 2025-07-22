@@ -4,6 +4,7 @@ import com.OLearning.entity.CourseReview;
 import com.OLearning.entity.Course;
 import com.OLearning.entity.Enrollment;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 
 import com.OLearning.repository.CourseReviewRepository;
@@ -31,7 +32,12 @@ public class CourseReviewServiceImpl implements CourseReviewService {
     @Override
     public Page<CourseReview> getCourseReviewsByInstructorId(Long instructorId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return courseReviewRepository.findByInstructorId(instructorId, pageable);
+        // Lấy tất cả review theo instructorId, sau đó filter rating != null
+        Page<CourseReview> allReviews = courseReviewRepository.findByInstructorId(instructorId, pageable);
+        List<CourseReview> filtered = allReviews.getContent().stream()
+            .filter(r -> r.getRating() != null)
+            .toList();
+        return new PageImpl<>(filtered, pageable, filtered.size());
     }
 
     @Override

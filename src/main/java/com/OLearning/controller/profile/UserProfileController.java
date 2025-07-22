@@ -45,7 +45,7 @@ public class UserProfileController {
         boolean isInstructor = userDetails.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_INSTRUCTOR"));
         
-        // Add unread notification count for students
+        // dem notification chua doc
         if (!isAdmin && !isInstructor) {
             userRepository.findByUsername(userDetails.getUsername()).ifPresent(user -> {
                 long unreadCount = notificationService.countUnreadByUserId(user.getUserId());
@@ -78,7 +78,7 @@ public class UserProfileController {
         boolean isStudent = userDetails.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_STUDENT"));
         
-        // Add unread notification count for students
+
         if (isStudent) {
             userRepository.findByUsername(userDetails.getUsername()).ifPresent(user -> {
                 long unreadCount = notificationService.countUnreadByUserId(user.getUserId());
@@ -112,13 +112,12 @@ public class UserProfileController {
                 String imageUrl = uploadFile.uploadImageFile(avatarFile);
                 profileEditDTO.setAvatarUrl(imageUrl);
             } else {
-                // Nếu không chọn ảnh mới, giữ lại link cũ
+                // Nếu không chọn ảnh mới giữ lại link cũ
                 Optional<UserProfileEditDTO> oldProfile = userService.getProfileByUsername(userDetails.getUsername());
                 oldProfile.ifPresent(old -> profileEditDTO.setAvatarUrl(old.getAvatarUrl()));
             }
             
             userService.updateProfileByUsername(userDetails.getUsername(), profileEditDTO);
-            // Sau khi lưu thành công, redirect về trang profile
             return "redirect:/profile";
         } catch (IOException e) {
             model.addAttribute("error", "Không thể tải lên ảnh. Vui lòng thử lại.");

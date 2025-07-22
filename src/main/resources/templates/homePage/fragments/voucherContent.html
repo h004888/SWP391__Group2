@@ -1,10 +1,5 @@
 <main th:fragment="voucherContent">
-    <div id="notification" class="position-fixed top-0 end-0 p-5" style="z-index: 1050; transform: translateX(200%); transition: transform 0.5s ease;">
-        <div id="notification-alert" class="alert d-flex align-items-center mb-0" role="alert" style="min-width: 250px;">
-            <i id="notification-icon" class="me-2"></i>
-            <span id="notification-message"></span>
-        </div>
-    </div>
+    <div th:replace="~{homePage/fragments/notification :: notification}"></div>
     <!-- Main Content -->
     <main class="pt-5">
         <div class="container">
@@ -199,32 +194,7 @@
         </div>
     </div>
     <script th:inline="javascript">
-        // Function to show notification
-        function showNotification(message, type) {
-            const notification = document.getElementById('notification');
-            const notificationAlert = document.getElementById('notification-alert');
-            const notificationIcon = document.getElementById('notification-icon');
-            const notificationMessage = document.getElementById('notification-message');
-
-            // Reset alert state
-            notificationAlert.classList.remove('alert-success', 'alert-danger');
-
-            // Set message and icon
-            notificationMessage.textContent = message;
-            if (type === 'success') {
-                notificationAlert.classList.add('alert-success');
-                notificationIcon.className = 'fas fa-check-circle me-2';
-            } else {
-                notificationAlert.classList.add('alert-danger');
-                notificationIcon.className = 'fas fa-exclamation-circle me-2';
-            }
-
-            notification.style.transform = 'translateX(0)';
-            setTimeout(() => {
-                notification.style.transform = 'translateX(200%)';
-            }, 3000);
-        }
-
+        // Không cần định nghĩa lại showNotification, đã có trong notification.html
         // Handle form submission
         document.getElementById('voucher-form').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -288,11 +258,11 @@
             const successMessage = document.getElementById('server-success-message');
             const errorMessage = document.getElementById('server-error-message');
             if (successMessage && successMessage.textContent.trim()) {
-                showNotification(successMessage.textContent.trim(), 'success');
-            }
+                        showNotification(successMessage.textContent.trim(), 'success');
+                    }
             if (errorMessage && errorMessage.textContent.trim()) {
-                showNotification(errorMessage.textContent.trim(), 'error');
-            }
+                        showNotification(errorMessage.textContent.trim(), 'error');
+                    }
 
             // Auto focus vào input field
             const codeInput = document.getElementById('voucher-code');
