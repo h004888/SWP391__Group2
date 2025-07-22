@@ -5,11 +5,19 @@ let totalPages = 0;
 let currentStatus = 'true'; // Default to active status
 
 $(document).ready(function () {
-    // Load data for all tabs but only show pagination for admin tab initially
-    [1, 2, 3].forEach(roleId => {
-        loadUsers(roleId,'', 0, roleId === 1); // Only show pagination for admin tab (roleId === 1)
+    // Xác định vai trò ban đầu từ tab đang active
+    const initialActiveTab = $('#accountTabs .nav-link.active');
+    if (initialActiveTab.length) {
+        currentRole = parseInt(initialActiveTab.data('role'));
+    }
+
+    // Tải dữ liệu cho tất cả các tab có thể nhìn thấy
+    $('#accountTabs .nav-link').each(function() {
+        const roleId = parseInt($(this).data('role'));
+        const isActive = $(this).hasClass('active');
+        loadUsers(roleId, '', 0, isActive); // Chỉ hiển thị pagination cho tab active
     });
-    
+
     // Load initial counts
     updateAllCounts();
     
@@ -300,6 +308,8 @@ function getTableBodyElement(roleId) {
             return document.getElementById('instructorTableBody');
         case 3:
             return document.getElementById('userTableBody');
+        case 4:
+            return document.getElementById('adminTableBody');
         default:
             return null;
     }

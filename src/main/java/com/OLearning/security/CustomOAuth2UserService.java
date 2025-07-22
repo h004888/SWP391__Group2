@@ -56,7 +56,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             user.setIsGooglePicture(true);
 
             // Default ROLE_USER
-            Role roleUser = roleRepository.findRoleByName("User")
+            Role roleUser = roleRepository.findRoleByNameIsIgnoreCase("User")
                     .orElseThrow(() -> new RuntimeException("ROLE_USER not found"));
             user.setRole(roleUser);
 

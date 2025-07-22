@@ -22,17 +22,17 @@ public class AdminAccessFilter implements Filter {
 
         String uri = request.getRequestURI();
 
-        // Bỏ qua filter cho webhook của SePay
         if (uri.equals("/api/payment/sepay/webhook")) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        boolean isAdmin = auth != null && auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        boolean isAdminOrStaff = auth != null && auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_STAFF"));
 
-        if (isAdmin) {
-            // Nếu vào /home 
+        if (isAdminOrStaff) {
+            // Nếu vào /home
             if (uri.startsWith("/home")) {
                 if (session != null) {
                     session.setAttribute("admin_visited_home", true);

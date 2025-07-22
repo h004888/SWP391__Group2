@@ -19,10 +19,10 @@ public class RegisterMapper {
         user.setFullName(registerDTO.getFirstName() + " " + registerDTO.getLastName());
         user.setEmail(registerDTO.getEmail());
         user.setPassword(new BCryptPasswordEncoder().encode(registerDTO.getPassword()));
-        Role roleUser = roleRepository.findRoleByName("User")
+        Role roleUser = roleRepository.findRoleByNameIsIgnoreCase("User")
                 .orElseThrow(() -> new RuntimeException("ROLE_USER not found"));
         user.setRole(roleUser);
-
+        user.setStatus(true); 
         return user;
     }
 

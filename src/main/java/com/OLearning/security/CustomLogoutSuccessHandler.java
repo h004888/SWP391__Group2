@@ -16,7 +16,7 @@ public class CustomLogoutSuccessHandler implements LogoutSuccessHandler {
             response.sendRedirect("/login?logout=true");
         }
         else if (authentication != null &&
-                 authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+                 authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")|| a.getAuthority().equals("ROLE_STAFF"))) {
             response.sendRedirect("/dashboard_login?logout=true");
         }
         else {

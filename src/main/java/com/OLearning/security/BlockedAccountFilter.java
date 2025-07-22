@@ -30,7 +30,7 @@ public class BlockedAccountFilter implements Filter {
 
         if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
             User user = userRepository.findByEmail(auth.getName()).orElse(null);
-            if (user != null && !user.getStatus()) {
+            if (user != null && !Boolean.TRUE.equals(user.getStatus())) {
                 String uri = request.getRequestURI();
                 if (!uri.equals("/account-blocked") && !uri.equals("/logout") && !uri.startsWith("/account-blocked/appeal")) {
                     response.sendRedirect("/account-blocked");

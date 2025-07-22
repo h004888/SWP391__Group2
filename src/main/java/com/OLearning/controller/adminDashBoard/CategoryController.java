@@ -113,15 +113,11 @@ public class CategoryController {
         return categoryPage.getTotalElements();
     }
 
-    @DeleteMapping("/category/delete/{id}")
-    @ResponseBody
-    public String deleteCategory(@PathVariable Long id) {
-        try {
-            categoryService.deleteById(id);
-            return "success";
-        } catch (Exception e) {
-            return "error";
-        }
+    @GetMapping("/category/delete/{id}")
+    public String deleteCategory(@PathVariable Long id,Model model) {
+        model.addAttribute("fragmentContent", "adminDashBoard/fragments/category :: categoryList");
+        categoryService.deleteById(id);
+        return "adminDashBoard/index";
     }
 
     @PostMapping("/category/edit")

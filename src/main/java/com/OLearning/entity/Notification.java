@@ -28,6 +28,7 @@ public class Notification {
 
     @Column(name = "Status")
     private String status;
+
     @Column(name = "CommentID")
     private Long commentId;
 
