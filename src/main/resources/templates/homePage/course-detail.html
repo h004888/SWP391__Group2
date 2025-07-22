@@ -580,10 +580,10 @@ Page content START -->
 														<form th:action="@{/home/course-review/delete}" method="post" style="display: inline;">
 															<input type="hidden" name="courseId" th:value="${course.courseId}" />
 															<input type="hidden" name="reviewId" th:value="${review.reviewId}" />
-															<button type="submit" class="btn btn-danger btn-sm"
+															<a type="submit" class="small text-danger"
 																	onclick="return confirm('Bạn có chắc chắn muốn xóa đánh giá này?')">
-																<i class="fas fa-trash me-1"></i>
-															</button>
+																<i>delete</i>
+															</a>
 														</form>
 														<small class="text-muted d-block mt-1">
 															Đánh giá của bạn - <span th:text="${#temporals.format(review.createdAt, 'dd/MM/yyyy HH:mm')}"></span>

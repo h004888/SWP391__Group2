@@ -71,7 +71,7 @@
                                     </span>
                                     <span th:if="${user != null and reply.user != null and user.userId == reply.user.userId}">
                                         <a href="#" class="edit-link small text-success me-2" th:attr="data-comment-id=${reply.reviewId}">Sửa</a>
-                                        <a href="#" class="delete-link small text-secondary" th:attr="data-comment-id=${reply.reviewId}">Xóa</a>
+                                        <a href="#" class="delete-link small text-danger" th:attr="data-comment-id=${reply.reviewId}">Xóa</a>
                                     </span>
                                 </div>
                             </div>
