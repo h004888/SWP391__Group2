@@ -247,6 +247,7 @@ public class CartServiceImpl implements CartService {
         order.setDescription("Buy Course OLearning - ORDER" + order.getOrderId());
         ordersRepository.save(order);
 
+
         if (!useCoins) {
             CoinTransaction transaction = new CoinTransaction();
             transaction.setUser(user);
@@ -324,14 +325,14 @@ public class CartServiceImpl implements CartService {
                 instructor.setCoin(instructor.getCoin() + coursePrice);
                 userRepository.save(instructor);
 
-                Notification notificationInstructor = new Notification();
-                notificationInstructor.setUser(instructor);
-                notificationInstructor.setCourse(course);
-                notificationInstructor.setMessage("You have received a payment of " + coursePrice + " VND for your course " + course.getTitle());
-                notificationInstructor.setType("COURSE_PURCHASE");
-                notificationInstructor.setStatus("failed");
-                notificationInstructor.setSentAt(LocalDateTime.now());
-                notificationRepository.save(notificationInstructor);
+                Notification notificationinstructor = new Notification();
+                notificationinstructor.setUser(instructor);
+                notificationinstructor.setCourse(course);
+                notificationinstructor.setMessage("You have received a payment of " + coursePrice + " VND for your course " + course.getTitle());
+                notificationinstructor.setType("COURSE_PURCHASE");
+                notificationinstructor.setStatus("failed");
+                notificationinstructor.setSentAt(LocalDateTime.now());
+                notificationRepository.save(notificationinstructor);
             }
         }
 

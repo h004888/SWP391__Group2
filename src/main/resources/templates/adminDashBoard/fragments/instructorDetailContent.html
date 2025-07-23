@@ -24,9 +24,8 @@
                     <!-- Profile picture -->
                     <div class="avatar avatar-xl mb-3">
                         <img class="avatar-img rounded-circle border border-white border-3 shadow"
-                             th:src="${userDetail.profilePicture}" alt="">
+                             th:src="${userDetail.profilePicture != null ? userDetail.profilePicture :'/img/undraw_profile.svg'}" alt="">
                     </div>
-
                     <!-- Information START -->
                     <div class="row">
 
@@ -161,7 +160,7 @@
                                     <tr th:each="course : ${listCourses}">
                                         <td th:text="${course.courseId}">1</td>
                                         <td class="d-flex align-items-center position-relative">
-                                            <div class="w-60px"><img th:src="${course.courseImg}" class="rounded" alt=""></div>
+                                            <div class="w-60px"><img th:src="${course.courseImg }" class="rounded" alt=""></div>
                                             <h6 class="table-responsive-title mb-0 ms-2">
                                                 <a th:href="@{/admin/course/detail/{courseId}(courseId=${course.courseId})}"
                                                    class="stretched-link" th:text="${course.title}">Course Title</a>
@@ -266,7 +265,7 @@
                                     <div class="d-flex align-items-center position-relative">
                                         <!-- Image -->
                                         <div class="avatar avatar-xs mb-2 mb-md-0">
-                                            <img th:src="${review.enrollment.user.profilePicture}" class="rounded-circle" alt="">
+                                            <img th:src="${review.enrollment.user.profilePicture != null ? review.enrollment.user.profilePicture :'/img/undraw_profile.svg'}" class="rounded-circle" alt="">
                                         </div>
                                         <div class="mb-0 ms-2">
                                             <!-- Title -->

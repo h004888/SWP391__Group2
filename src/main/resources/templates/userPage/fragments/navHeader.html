@@ -370,7 +370,7 @@
         </div>
     </nav>
     <!-- Category Nav link END -->
-
+    <script th:src="@{/js/totalcart.js}"></script>
 </header>
 <style>
 /* Ép width dropdown thông báo user luôn là 320px */
@@ -539,11 +539,12 @@
 
                 updateUserNotificationBadge(data.unreadCount);
                 updateUserNotificationList(data.notifications);
-                updateNotificationPageButton(data.unreadCount); // Update page button tooltip
+                updateNotificationPageButton(data.unreadCount);
             })
             .catch(error => {
                 console.error('Error loading notifications:', error);
             });
     }
+
 </script>
 </div>

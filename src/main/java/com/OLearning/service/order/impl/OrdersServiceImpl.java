@@ -549,7 +549,7 @@ public class OrdersServiceImpl implements OrdersService {
                 studentTransaction.setUser(user);
                 studentTransaction.setAmount(-coursePrice);
                 studentTransaction.setStatus("PAID");
-                studentTransaction.setCreatedAt(java.time.LocalDateTime.now());
+                studentTransaction.setCreatedAt(LocalDateTime.now());
                 studentTransaction.setOrder(order);
                 studentTransaction.setTransactionType("course_purchase");
                 studentTransaction.setNote("Purchase course via SePay");
@@ -560,7 +560,7 @@ public class OrdersServiceImpl implements OrdersService {
                 notificationuser.setUser(user);
                 notificationuser.setCourse(orderDetail.getCourse());
                 notificationuser.setMessage("You have purchased a course: " + orderDetail.getCourse().getTitle());
-                notificationuser.setSentAt(java.time.LocalDateTime.now());
+                notificationuser.setSentAt(LocalDateTime.now());
                 notificationuser.setStatus("failed");
                 notificationRepository.save(notificationuser);
 
@@ -570,7 +570,7 @@ public class OrdersServiceImpl implements OrdersService {
                     instructorTransaction.setUser(instructor);
                     instructorTransaction.setAmount(coursePrice);
                     instructorTransaction.setStatus("PAID");
-                    instructorTransaction.setCreatedAt(java.time.LocalDateTime.now());
+                    instructorTransaction.setCreatedAt(LocalDateTime.now());
                     instructorTransaction.setOrder(null);
                     instructorTransaction.setTransactionType("course_purchase");
                     instructorTransaction.setNote("students buy courses");
@@ -584,7 +584,7 @@ public class OrdersServiceImpl implements OrdersService {
                 notification.setMessage("You have received a payment of " + coursePrice + " VND for your course " + orderDetail.getCourse().getTitle());
                 notification.setType("PAYMENT_RECEIVED");
                 notification.setStatus("failed");
-                notification.setSentAt(java.time.LocalDateTime.now());
+                notification.setSentAt(LocalDateTime.now());
                 notificationRepository.save(notification);
             }
             userRepository.save(user);
@@ -607,7 +607,7 @@ public class OrdersServiceImpl implements OrdersService {
             Course course = orderDetail.getCourse();
             if (course != null) {
                 course.setStatus("publish");
-                course.setUpdatedAt(java.time.LocalDateTime.now());
+                course.setUpdatedAt(LocalDateTime.now());
                 courseRepository.save(course);
 
                 double publicationFee = orderDetail.getUnitPrice();
@@ -618,7 +618,7 @@ public class OrdersServiceImpl implements OrdersService {
                 instructorTransaction.setUser(instructor);
                 instructorTransaction.setAmount(publicationFee);
                 instructorTransaction.setStatus("PAID");
-                instructorTransaction.setCreatedAt(java.time.LocalDateTime.now());
+                instructorTransaction.setCreatedAt(LocalDateTime.now());
                 instructorTransaction.setOrder(order);
                 instructorTransaction.setTransactionType("top_up");
                 instructorTransaction.setNote("Course publication payment top up");
@@ -631,7 +631,7 @@ public class OrdersServiceImpl implements OrdersService {
                 publicationTransaction.setUser(instructor);
                 publicationTransaction.setAmount(-publicationFee);
                 publicationTransaction.setStatus("PAID");
-                publicationTransaction.setCreatedAt(java.time.LocalDateTime.now());
+                publicationTransaction.setCreatedAt(LocalDateTime.now());
                 publicationTransaction.setOrder(null);
                 publicationTransaction.setTransactionType("course_publication");
                 publicationTransaction.setNote("Course publication fee for: " + course.getTitle());
@@ -646,7 +646,7 @@ public class OrdersServiceImpl implements OrdersService {
                     adminTransaction.setUser(admin);
                     adminTransaction.setAmount(publicationFee);
                     adminTransaction.setStatus("PAID");
-                    adminTransaction.setCreatedAt(java.time.LocalDateTime.now());
+                    adminTransaction.setCreatedAt(LocalDateTime.now());
                     adminTransaction.setOrder(null);
                     adminTransaction.setTransactionType("course_publication");
                     adminTransaction.setNote("Course publication fee received from instructor: " + instructor.getUserId());
@@ -659,7 +659,7 @@ public class OrdersServiceImpl implements OrdersService {
                 notification.setMessage("Your course '" + course.getTitle() + "' has been successfully published!");
                 notification.setType("COURSE_PUBLISHED");
                 notification.setStatus("failed");
-                notification.setSentAt(java.time.LocalDateTime.now());
+                notification.setSentAt(LocalDateTime.now());
                 notificationRepository.save(notification);
             }
         }
@@ -680,7 +680,7 @@ public class OrdersServiceImpl implements OrdersService {
         order.setAmount(amount);
         order.setOrderType(orderType);
         order.setStatus("PENDING");
-        order.setOrderDate(java.time.LocalDateTime.now());
+        order.setOrderDate(LocalDateTime.now());
         Order savedOrder = ordersRepository.save(order);
         return savedOrder;
     }
@@ -722,14 +722,14 @@ public class OrdersServiceImpl implements OrdersService {
     @Override
     public Map<String, Double> getMonthlyRevenueForInstructor(Long instructorId, String startDate, String endDate) {
         // Nếu không truyền ngày, lấy mặc định 1 năm gần nhất
-        java.time.LocalDateTime start;
-        java.time.LocalDateTime end;
+        LocalDateTime start;
+        LocalDateTime end;
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         if (startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
-            start = java.time.LocalDate.parse(startDate, fmt).atStartOfDay();
-            end = java.time.LocalDate.parse(endDate, fmt).atTime(23,59,59);
+            start = LocalDate.parse(startDate, fmt).atStartOfDay();
+            end = LocalDate.parse(endDate, fmt).atTime(23,59,59);
         } else {
-            end = java.time.LocalDateTime.now();
+            end = LocalDateTime.now();
             start = end.minusYears(1).withDayOfMonth(1).withMonth(1).withHour(0).withMinute(0).withSecond(0);
         }
         List<Object[]> raw = orderDetailRepository.findRevenueByMonth(instructorId, start, end);

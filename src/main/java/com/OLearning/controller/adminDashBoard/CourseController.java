@@ -252,8 +252,7 @@ public class CourseController {
             Course course = courseRepository.findById(courseId)
                     .orElseThrow(() -> new RuntimeException("Course not found"));
 
-            // Mở khóa course bằng cách set status = "approved"
-            course.setStatus("approved");
+            course.setStatus("publish");
             courseRepository.save(course);
 
             // Gửi thông báo cho instructor

@@ -1,4 +1,4 @@
-package com.OLearning.controller.instructorDashboard;
+package com.OLearning.controller.instructorDashBoard;
 
 import com.OLearning.dto.chapter.ChapterDTO;
 import com.OLearning.dto.course.AddCourseStep1DTO;
@@ -218,70 +218,75 @@ public class ControlllerAddCourse {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
 
-        // Find course and instructor
-        Course course = courseService.findCourseById(courseId);
-        if (course == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Course not found.");
-            return "redirect:../courses";
-        }
+        try {
+            // Find course and instructor
+            Course course = courseService.findCourseById(courseId);
+            if (course == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Course not found.");
+                return "redirect:../courses";
+            }
 
-        User instructor = userService.findById(userId);
-        if (instructor == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Instructor not found.");
-            return "redirect:../courses";
-        }
+            User instructor = userService.findById(userId);
+            if (instructor == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Instructor not found.");
+                return "redirect:../courses";
+            }
 
-        boolean isFirstPublication = !ordersService.hasPaidPublicationOrder(userId, courseId);
+            boolean isFirstPublication = !ordersService.hasPaidPublicationOrder(userId, courseId);
 
-        if (isFirstPublication) {
-            // First publication - requires payment
-            double publicationFee = 100000.0;
+            if (isFirstPublication) {
+                // First publication - requires payment
+                double publicationFee = 100000.0;
 
-            if (instructor.getCoin() >= publicationFee) {
-                Order order = ordersService.createOrder(instructor, publicationFee, "course_public");
-                String description = "Thanh toan phi cong bo khoa hoc voi coin";
-                order.setStatus("PAID");
-                order.setDescription(description);
-                order.setRefCode(UUID.randomUUID().toString());
-                ordersService.saveOrder(order);
-                instructor.setCoin(instructor.getCoin() - (long) publicationFee);
-                userRepository.save(instructor);
+                if (instructor.getCoin() >= publicationFee) {
+                    Order order = ordersService.createOrder(instructor, publicationFee, "course_public");
+                    String description = "Thanh toan phi cong bo khoa hoc voi coin";
+                    order.setStatus("PAID");
+                    order.setDescription(description);
+                    order.setRefCode(UUID.randomUUID().toString());
+                    ordersService.saveOrder(order);
+                    instructor.setCoin(instructor.getCoin() - (long) publicationFee);
+                    userRepository.save(instructor);
 
-                OrderDetail orderDetail = new OrderDetail();
-                orderDetail.setOrder(order);
-                orderDetail.setCourse(course);
-                orderDetail.setUnitPrice(publicationFee);
-                ordersService.saveOrderDetail(orderDetail);
+                    OrderDetail orderDetail = new OrderDetail();
+                    orderDetail.setOrder(order);
+                    orderDetail.setCourse(course);
+                    orderDetail.setUnitPrice(publicationFee);
+                    ordersService.saveOrderDetail(orderDetail);
 
+                    courseService.submitCourse(courseId, "publish");
+                    redirectAttributes.addFlashAttribute("successMessage", "Course published successfully!");
+                    return "redirect:../courses";
+                } else {
+                    // Create order for publication fee payment
+                    Order order = ordersService.createOrder(instructor, publicationFee, "course_public");
+                    String description = "Thanh toan phi cong bo khoa hoc - ORDER" + order.getOrderId();
+                    order.setDescription(description);
+                    ordersService.saveOrder(order);
+
+                    // Create order detail
+                    OrderDetail orderDetail = new OrderDetail();
+                    orderDetail.setOrder(order);
+                    orderDetail.setCourse(course);
+                    orderDetail.setUnitPrice(publicationFee);
+                    ordersService.saveOrderDetail(orderDetail);
+
+                    String qrUrl = vietQRService.generateSePayQRUrl(order.getAmount(), order.getDescription());
+
+                    model.addAttribute("orderId", order.getOrderId());
+                    model.addAttribute("amount", order.getAmount());
+                    model.addAttribute("description", order.getDescription());
+                    model.addAttribute("qrUrl", qrUrl);
+
+                    return "homePage/qr_checkout";
+                }
+            } else {
                 courseService.submitCourse(courseId, "publish");
                 redirectAttributes.addFlashAttribute("successMessage", "Course published successfully!");
                 return "redirect:../courses";
-            } else {
-                // Create order for publication fee payment
-                Order order = ordersService.createOrder(instructor, publicationFee, "course_public");
-                String description = "Thanh toan phi cong bo khoa hoc - ORDER" + order.getOrderId();
-                order.setDescription(description);
-                ordersService.saveOrder(order);
-
-                // Create order detail
-                OrderDetail orderDetail = new OrderDetail();
-                orderDetail.setOrder(order);
-                orderDetail.setCourse(course);
-                orderDetail.setUnitPrice(publicationFee);
-                ordersService.saveOrderDetail(orderDetail);
-
-                String qrUrl = vietQRService.generateSePayQRUrl(order.getAmount(), order.getDescription());
-
-                model.addAttribute("orderId", order.getOrderId());
-                model.addAttribute("amount", order.getAmount());
-                model.addAttribute("description", order.getDescription());
-                model.addAttribute("qrUrl", qrUrl);
-
-                return "homePage/qr_checkout";
             }
-        } else {
-            courseService.submitCourse(courseId, "publish");
-            redirectAttributes.addFlashAttribute("successMessage", "Course published successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Publish course failed: " + e.getMessage());
             return "redirect:../courses";
         }
     }

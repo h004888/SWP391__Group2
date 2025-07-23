@@ -89,22 +89,27 @@ public class CourseInstructorMaintenanceController {
 
     @GetMapping("/pay/{maintenanceId}")
     public String payMaintenance(@PathVariable("maintenanceId") Long maintenanceId, Model model, RedirectAttributes redirectAttributes) {
-        CourseMaintenance maintenance = courseMaintenanceService.getAllCourseMaintenances().stream()
-                .filter(cm -> cm.getMaintenanceId().equals(maintenanceId))
-                .findFirst().orElse(null);
-        if (maintenance == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Maintenance fee not found!");
-            return "redirect:/instructor/orders";
+        try {
+            CourseMaintenance maintenance = courseMaintenanceService.getAllCourseMaintenances().stream()
+                    .filter(cm -> cm.getMaintenanceId().equals(maintenanceId))
+                    .findFirst().orElse(null);
+            if (maintenance == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Maintenance fee not found!");
+                return "redirect:/instructor/orders";
+            }
+            String monthYearStr = maintenance.getMonthYear().format(DateTimeFormatter.ofPattern("MM/yyyy"));
+            String description = "thanh toan bao tri thang " + monthYearStr + " MAINTENANCE" + maintenance.getMaintenanceId();
+            double amount = maintenance.getFee() != null ? maintenance.getFee().getMaintenanceFee() : 0.0;
+            String qrUrl = vietQRService.generateSePayQRUrl(amount, description);
+            model.addAttribute("maintenanceId", maintenance.getMaintenanceId());
+            model.addAttribute("isMaintenance", true);
+            model.addAttribute("amount", amount);
+            model.addAttribute("description", description);
+            model.addAttribute("qrUrl", qrUrl);
+            return "homePage/qr_checkout";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error processing maintenance payment: " + e.getMessage());
+            return "redirect:/instructor/maintenance";
         }
-        String monthYearStr = maintenance.getMonthYear().format(DateTimeFormatter.ofPattern("MM/yyyy"));
-        String description = "thanh toan bao tri thang " + monthYearStr + " MAINTENANCE" + maintenance.getMaintenanceId();
-        double amount = maintenance.getFee() != null ? maintenance.getFee().getMaintenanceFee() : 0.0;
-        String qrUrl = vietQRService.generateSePayQRUrl(amount, description);
-        model.addAttribute("maintenanceId", maintenance.getMaintenanceId());
-        model.addAttribute("isMaintenance", true);
-        model.addAttribute("amount", amount);
-        model.addAttribute("description", description);
-        model.addAttribute("qrUrl", qrUrl);
-        return "homePage/qr_checkout";
     }
 }
