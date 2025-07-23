@@ -123,8 +123,11 @@
                                 <span th:case="'rejected'" class="badge bg-danger">
                                     <i class="fas fa-times"></i> Rejected
                                 </span>
-                                <span th:case="'resubmit'" class="badge bg-warning text-dark">
-                                    <i class="fas fa-exclamation-triangle"></i> ReSubmit
+                                <span th:case="'publish'" class="badge bg-success">
+                                    <i class="fas fa-check"></i> Publish
+                                </span>
+                                <span th:case="'pending_block'" class="badge bg-danger">
+                                    <i class="fas fa-times"></i> Pending_Block
                                 </span>
                             </span>
                         </div>
@@ -321,9 +324,12 @@
                                                     <span th:case="'rejected'" class="badge bg-danger">
                                                         <i class="fas fa-times"></i> Rejected
                                                     </span>
-                                                    <span th:case="'resubmit'" class="badge bg-warning text-dark">
-                                                        <i class="fas fa-exclamation-triangle"></i> ReSubmit
-                                                    </span>
+                                                    <span th:case="'publish'" class="badge bg-success">
+                                                        <i class="fas fa-check"></i> Publish
+                                                        </span>
+                                                    <span th:case="'pending_block'" class="badge bg-danger">
+                                                         <i class="fas fa-times"></i> Pending_Block
+                                                     </span>
                                                 </span>
                                             </div>
                                         </div>

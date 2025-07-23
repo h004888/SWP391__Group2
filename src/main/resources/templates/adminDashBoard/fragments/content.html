@@ -12,6 +12,13 @@
         </div>
     </div>
 
+    <!-- Error Alert for AJAX -->
+    <div id="ajax-error-alert" class="alert alert-danger alert-dismissible fade show position-fixed top-0 end-0 m-4 shadow d-none"
+         role="alert" style="z-index: 1055; min-width: 300px;">
+        <strong id="ajax-error-message">An error occurred!</strong>
+        <button type="button" class="btn-close" onclick="hideAjaxError()" aria-label="Close"></button>
+    </div>
+
     <!-- Counter boxes START -->
     <div class="row g-4 mb-4">
         <!-- Counter item -->
@@ -21,7 +28,7 @@
                     <!-- Digit -->
                     <div>
                         <h2 class="mb-0 fw-bold" th:text="${completedEnrollments}">0</h2>
-                        <span class="mb-0 h6 fw-light">Khóa Học Đã Hoàn Thành</span>
+                        <span class="mb-0 h6 fw-light">Completed Courses</span>
                     </div>
                     <!-- Icon -->
                     <div class="icon-lg rounded-circle bg-warning text-white mb-0"><i class="fas fa-tv fa-fw"></i></div>
@@ -36,7 +43,7 @@
                     <!-- Digit -->
                     <div>
                         <h2 class="mb-0 fw-bold" th:text="${totalStudents}">0</h2>
-                        <span class="mb-0 h6 fw-light">Tổng Số Học Viên</span>
+                        <span class="mb-0 h6 fw-light">Total Students</span>
                     </div>
                     <!-- Icon -->
                     <div class="icon-lg rounded-circle bg-purple text-white mb-0"><i class="fas fa-user-tie fa-fw"></i>
@@ -52,7 +59,7 @@
                     <!-- Digit -->
                     <div>
                         <h2 class="mb-0 fw-bold" th:text="${totalEnrollment}">0</h2>
-                        <span class="mb-0 h6 fw-light">Tổng Số Khóa Học Đăng Ký</span>
+                        <span class="mb-0 h6 fw-light">Total Enrollments</span>
                     </div>
                     <!-- Icon -->
                     <div class="icon-lg rounded-circle bg-primary text-white mb-0"><i
@@ -60,7 +67,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Counter item -->
         <!--        <div class="col-md-6 col-xxl-3">-->
         <!--            <div class="card card-body bg-success bg-opacity-10 p-4 h-100">-->
@@ -92,13 +98,13 @@
                 <!-- Card header -->
                 <div class="card-header">
                     <div class="d-flex flex-column gap-3">
-                        <h5 class="card-title">Thống Kê</h5>
+                        <h5 class="card-title">Statistics</h5>
                         <div class="d-flex gap-2 align-items-center">
                             <div class="d-flex gap-2">
                                 <input type="date" id="startDate" class="form-control" style="width: 200px;"/>
                                 <input type="date" id="endDate" class="form-control" style="width: 200px;"/>
                             </div>
-                            <button class="btn btn-primary" onclick="updateCharts()">Xem</button>
+                            <button class="btn btn-primary" onclick="updateCharts()">View</button>
                         </div>
                     </div>
                 </div>
@@ -109,7 +115,7 @@
                         <div class="col-12">
                             <div class="card">
                                 <div class="card-header">
-                                    <h5 class="card-title">Doanh Thu Khóa Học</h5>
+                                    <h5 class="card-title">Course Revenue</h5>
                                 </div>
                                 <div class="card-body">
                                     <div id="ChartPayoutOfYear"></div>
@@ -127,12 +133,12 @@
             <div class="card shadow h-100">
                 <!-- Card header -->
                 <div class="card-header border-bottom d-flex flex-column gap-3 p-4">
-                    <h5 class="card-header-title">Số Lượng Học Viên Theo Danh Mục</h5>
+                    <h5 class="card-header-title">Number of Students by Category</h5>
                     <div class="d-flex gap-2">
                         <input type="date" id="enrollmentStartDate" class="form-control w-50"
                                style="min-width: 100px;"/>
                         <input type="date" id="enrollmentEndDate" class="form-control w-50" style="min-width: 100px;"/>
-                        <button class="btn btn-primary" onclick="updateEnrollmentChart()">Xem</button>
+                        <button class="btn btn-primary" onclick="updateEnrollmentChart()">View</button>
                     </div>
                 </div>
 
@@ -157,11 +163,11 @@
 
                 <!-- Card header -->
                 <div class="card-header border-bottom d-flex justify-content-between align-items-center p-4">
-                    <h5 class="card-header-title">Doanh Thu Bảo Trì Khóa Học</h5>
+                    <h5 class="card-header-title">Course Maintenance Revenue</h5>
                     <div class="d-flex gap-2">
                         <input type="date" id="maintenanceStartDate" class="form-control" style="width: 150px;"/>
                         <input type="date" id="maintenanceEndDate" class="form-control" style="width: 150px;"/>
-                        <button class="btn btn-primary" onclick="updateMaintenanceChart()">Xem</button>
+                        <button class="btn btn-primary" onclick="updateMaintenanceChart()">View</button>
                     </div>
                 </div>
 
@@ -273,91 +279,153 @@
             });
         }
 
+        function showAjaxError(msg) {
+            const alertDiv = document.getElementById('ajax-error-alert');
+            const msgSpan = document.getElementById('ajax-error-message');
+            msgSpan.textContent = msg || 'An error occurred!';
+            alertDiv.classList.remove('d-none');
+        }
+        function hideAjaxError() {
+            document.getElementById('ajax-error-alert').classList.add('d-none');
+        }
+
+        function isDateRangeValid(start, end) {
+            if (!start || !end) return false;
+            return new Date(start) <= new Date(end);
+        }
+
         function updateCharts() {
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
-
             if (!startDate || !endDate) {
-                alert('Vui lòng chọn khoảng thời gian');
+                showAjaxError('Please select a date range');
                 return;
             }
-
-            // Update revenue chart
+            if (!isDateRangeValid(startDate, endDate)) {
+                showAjaxError('End date must be after or equal to start date');
+                return;
+            }
             fetch(`/admin/revenue?startDate=${startDate}&endDate=${endDate}`)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => { throw err; });
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     window.revenuePerMonth = data;
                     if (typeof e !== 'undefined') {
                         e.dashboardChart();
                     }
+                    hideAjaxError();
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(error => {
+                    showAjaxError(error.error || 'Error updating revenue chart');
+                });
         }
 
         function updateEnrollmentChart() {
             const startDate = document.getElementById('enrollmentStartDate').value;
             const endDate = document.getElementById('enrollmentEndDate').value;
-
             if (!startDate || !endDate) {
-                alert('Vui lòng chọn khoảng thời gian');
+                showAjaxError('Please select a date range');
                 return;
             }
-
-            // Update enrollment chart
+            if (!isDateRangeValid(startDate, endDate)) {
+                showAjaxError('End date must be after or equal to start date');
+                return;
+            }
             fetch(`/admin/enrollments?startDate=${startDate}&endDate=${endDate}`)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => { throw err; });
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     window.enrollmentsByCategory = data;
                     if (typeof e !== 'undefined') {
                         e.earningChart();
                     }
+                    hideAjaxError();
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(error => {
+                    showAjaxError(error.error || 'Error updating enrollment chart');
+                });
         }
 
         function updateMaintenanceChart() {
             const startDate = document.getElementById('maintenanceStartDate').value;
             const endDate = document.getElementById('maintenanceEndDate').value;
-
             if (!startDate || !endDate) {
-                alert('Vui lòng chọn khoảng thời gian');
+                showAjaxError('Please select a date range');
                 return;
             }
-
+            if (!isDateRangeValid(startDate, endDate)) {
+                showAjaxError('End date must be after or equal to start date');
+                return;
+            }
             fetch(`/admin/maintenance-revenue?startDate=${startDate}&endDate=${endDate}`)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => { throw err; });
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     window.maintenanceRevenue = data;
                     if (typeof e !== 'undefined') {
                         e.maintenanceChart();
                     }
+                    hideAjaxError();
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(error => {
+                    showAjaxError(error.error || 'Error updating maintenance chart');
+                });
         }
 
         function exportAllToExcel() {
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
-
             if (!startDate || !endDate) {
-                alert('Vui lòng chọn khoảng thời gian');
+                showAjaxError('Please select a date range');
                 return;
             }
-
-            // Tạo URL để tải file Excel tổng hợp
+            if (!isDateRangeValid(startDate, endDate)) {
+                showAjaxError('End date must be after or equal to start date');
+                return;
+            }
+            // Create URL to download the combined Excel file
             const url = `/admin/export-excel-charts?startDate=${startDate}&endDate=${endDate}`;
             window.location.href = url;
         }
 
-        // Khởi tạo biểu đồ ngay khi script được load
+        // Initialize charts as soon as the script is loaded
         if (typeof e !== 'undefined') {
             e.dashboardChart();
             e.earningChart();
             e.maintenanceChart();
         }
 
+        // Ràng buộc endDate không được nhỏ hơn startDate
+        function bindDateRange(startId, endId) {
+            const startInput = document.getElementById(startId);
+            const endInput = document.getElementById(endId);
+            if (!startInput || !endInput) return;
+            startInput.addEventListener('change', function () {
+                endInput.min = startInput.value;
+                // Nếu endDate hiện tại < startDate thì reset endDate
+                if (endInput.value && endInput.value < startInput.value) {
+                    endInput.value = startInput.value;
+                }
+            });
+        }
         document.addEventListener('DOMContentLoaded', function () {
             initializeCharts();
+            // Áp dụng cho tất cả các cặp date filter
+            bindDateRange('startDate', 'endDate');
+            bindDateRange('enrollmentStartDate', 'enrollmentEndDate');
+            bindDateRange('maintenanceStartDate', 'maintenanceEndDate');
         });
 
         setTimeout(function () {

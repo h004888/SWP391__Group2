@@ -46,7 +46,9 @@
                                     <div class="d-flex align-items-center">
                                         <!-- Avatar image -->
                                         <div class="avatar avatar-lg">
-                                            <img class="avatar-img rounded-circle" src="/assets/images/avatar/05.jpg"
+                                            <img class="avatar-img rounded-circle" th:src="${course.instructor.profilePicture != null} ?
+                                                                                             ${course.instructor.profilePicture} :
+                                                                                             @{/img/undraw_profile.svg}"
                                                 alt="avatar">
                                         </div>
                                         <div class="ms-3">

@@ -76,7 +76,6 @@ public class CourseMaintenanceController {
         return "adminDashBoard/index";
     }
 
-    //Filter with ajax for tab functionality
     @GetMapping("/filter")
     public String filterMaintenances(
             @RequestParam(required = false) String username,
@@ -87,8 +86,7 @@ public class CourseMaintenanceController {
             Model model) {
         
         Pageable pageable = PageRequest.of(page, size);
-        
-        // Parse monthYear string to LocalDate if provided
+
         LocalDate monthYearDate = null;
         if (monthYear != null && !monthYear.isEmpty()) {
             try {
@@ -109,7 +107,7 @@ public class CourseMaintenanceController {
         return "adminDashBoard/fragments/courseMaintenanceTableRowContent :: maintenanceTableRowContent";
     }
 
-    // New endpoint for pagination only
+
     @GetMapping("/pagination")
     public String getPagination(
             @RequestParam(required = false) String username,
@@ -144,7 +142,6 @@ public class CourseMaintenanceController {
         return "adminDashBoard/fragments/courseMaintenanceTableRowContent :: maintenancePagination";
     }
 
-    // New endpoint to get total count for badge
     @GetMapping("/count")
     @ResponseBody
     public long getMaintenanceCount(

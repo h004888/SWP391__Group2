@@ -71,6 +71,12 @@
                             Publish<span class="badge bg-light text-dark ms-2" id="publishCount">0</span>
                         </button>
                     </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pending_block-tab" data-bs-toggle="tab"
+                                data-bs-target="#pending_block" type="button" role="tab" data-status="pending_block">
+                            Pending_Block<span class="badge bg-light text-dark ms-2" id="pendingBlockCount">0</span>
+                        </button>
+                    </li>
                 </ul>
 
                 <div class="tab-content p-0" id="courseTabsContent">
@@ -209,7 +215,32 @@
                             <!-- Pagination will be loaded here -->
                         </div>
                     </div>
-
+                    <!-- pending_block Tab -->
+                    <div class="tab-pane fade" id="pending_block" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table course-table">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Price</th>
+                                    <th>Total Lessons</th>
+                                    <th>Created At</th>
+                                    <th>Updated At</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody id="pendingBlockTableBody">
+                                <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination for pending_block -->
+                        <div id="pendingBlockPagination" class="pagination-container">
+                            <!-- Pagination will be loaded here -->
+                        </div>
+                    </div>
                 </div>
             </div>
 

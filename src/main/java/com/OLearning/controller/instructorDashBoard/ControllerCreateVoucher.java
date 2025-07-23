@@ -1,4 +1,4 @@
-package com.OLearning.controller.instructorDashboard;
+package com.OLearning.controller.instructorDashBoard;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -64,7 +64,7 @@
                             <th>Course Name</th>
                             <th>Image</th>
                             <th>Unit Price</th>
-                            <th>Discount</th>
+<!--                            <th>Discount</th>-->
                             <th>Final Price</th>
                             <th>Instructor</th>
                         </tr>
@@ -76,8 +76,8 @@
                             <td>
                                 <img th:src="${detail.course.courseImg}" alt="Course Image" style="width:60px;height:40px;object-fit:cover;" class="rounded">
                             </td>
-                            <td th:text="${detail.unitPrice != null ? #numbers.formatDecimal(detail.unitPrice, 0, 'COMMA', 0, 'POINT') : 'N/A'}"></td>
-                            <td th:text="${detail.course.discount != null ? detail.course.discount + '%' : '0%'}"></td>
+                            <td th:text="${detail.course.price != null ? #numbers.formatDecimal(detail.course.price, 0, 'COMMA', 0, 'POINT') : 'N/A'}"></td>
+<!--                            <td th:text="${detail.course.discount != null ? detail.course.discount + '%' : '0%'}"></td>-->
                             <td th:text="${detail.unitPrice != null && detail.course.discount != null ? #numbers.formatDecimal(detail.unitPrice * (1 - detail.course.discount/100), 0, 'COMMA', 0, 'POINT') : detail.unitPrice}"></td>
                             <td th:text="${detail.course.instructor != null ? detail.course.instructor.fullName : 'N/A'}"></td>
                         </tr>

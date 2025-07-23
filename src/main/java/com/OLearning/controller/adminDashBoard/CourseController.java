@@ -205,7 +205,6 @@ public class CourseController {
             try {
                 Course course = courseRepository.findById(courseId)
                         .orElseThrow(() -> new RuntimeException("Course not found"));
-                // Chuyển trạng thái sang pending_block
                 course.setStatus("pending_block");
                 courseRepository.save(course);
                 // KHÔNG block ngay, chỉ gửi email cho instructor
