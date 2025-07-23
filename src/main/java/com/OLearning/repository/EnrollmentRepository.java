@@ -158,4 +158,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
 
     @Query("SELECT e.course.courseId, e.course.title, COUNT(e), SUM(CASE WHEN e.status = 'completed' THEN 1 ELSE 0 END) FROM Enrollment e WHERE e.course.instructor.userId = :instructorId GROUP BY e.course.courseId, e.course.title")
     List<Object[]> getEnrollmentStatsByInstructor(@Param("instructorId") Long instructorId);
+
+    @Query("SELECT e FROM Enrollment e WHERE e.user.userId = :userId AND e.course.courseId = :courseId")
+    Enrollment findByUserIdAndCourseId(@Param("userId") Long userId, @Param("courseId") Long courseId);
 }

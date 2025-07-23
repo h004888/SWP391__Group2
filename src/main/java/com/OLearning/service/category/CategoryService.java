@@ -20,6 +20,7 @@ public interface CategoryService {
     Page<Category> findAll(Pageable pageable);
 
     void deleteById(Long id);
+    List<CategoryDTO> getAllCategory();
 
     List<Category> getListCategories();
 

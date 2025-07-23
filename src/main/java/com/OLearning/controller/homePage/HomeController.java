@@ -17,9 +17,9 @@ import com.OLearning.service.cart.CartService;
 import com.OLearning.service.cart.impl.CartServiceImpl;
 import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.course.CourseService;
-import com.OLearning.service.user.UserService;
 
 import com.OLearning.service.courseReview.CourseReviewService;
+import com.OLearning.service.user.UserService;
 import com.OLearning.service.voucher.VoucherService;
 import com.OLearning.service.payment.VNPayService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -67,6 +67,9 @@ public class HomeController {
     private ObjectMapper objectMapper;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private CartServiceImpl cartServiceImpl;
 
     @Autowired
@@ -94,7 +97,9 @@ public class HomeController {
     private NotificationService notificationService;
 
     @GetMapping()
-        public String getMethodName(Model model) {
+        public String getMethodName(Model model ,
+                @AuthenticationPrincipal UserDetails userDetails,
+                HttpServletRequest request) {
         // chia làm 2 danh sách:
         List<CategoryDTO> firstFive = categoryService.getAllCategory().stream().limit(5).toList();
         List<CategoryDTO> nextFive = categoryService.getAllCategory().stream().skip(5).limit(5).toList();
@@ -103,7 +108,7 @@ public class HomeController {
         model.addAttribute("topCategories", categoryService.findTop5ByOrderByIdAsc());
         model.addAttribute("firstFive", firstFive);
         model.addAttribute("nextFive", nextFive);
-        addUserHomePageAttributes(model, userDetails, request, topCourses);
+        addUserHomePageAttributes(model, userDetails, request, courseService.getTopCourses());
         model.addAttribute("totalCourseIsPublish", courseService.countCourseIsPublish());
         model.addAttribute("totalInstructor", userService.countInstructor());
         model.addAttribute("totalStudent", userService.countStudent());
