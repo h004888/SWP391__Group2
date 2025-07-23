@@ -21,7 +21,6 @@ public class SePayWebhookController {
 
     @PostMapping("/api/payment/sepay/webhook")
     public String handleWebhook(@RequestBody Map<String, Object> payload) {
-        // Sử dụng trường 'content' hoặc 'description' từ payload của SePay
         String rawContent = (String) payload.get("content");
         if (rawContent == null) {
             rawContent = (String) payload.get("description");
@@ -30,7 +29,6 @@ public class SePayWebhookController {
             return "error: missing content or description";
         }
         try {
-            // Nếu là ORDER
             if (rawContent.contains("ORDER")) {
                 Long orderId = extractOrderId(rawContent);
                 if (orderId != null) {
@@ -40,7 +38,6 @@ public class SePayWebhookController {
                     return "success";
                 }
             }
-            // Nếu là MAINTENANCE
             if (rawContent.contains("MAINTENANCE")) {
                 Long maintenanceId = extractMaintenanceId(rawContent);
                 if (maintenanceId != null) {
@@ -59,11 +56,9 @@ public class SePayWebhookController {
     }
 
     private Long extractOrderId(String rawContent) {
-        // Tìm kiếm chuỗi "ORDER" và trích xuất số sau đó
         String orderPrefix = "ORDER";
         int startIndex = rawContent.indexOf(orderPrefix);
         if (startIndex != -1) {
-            // Bắt đầu từ sau chuỗi "ORDER"
             int numStartIndex = startIndex + orderPrefix.length();
             StringBuilder orderIdBuilder = new StringBuilder();
             for (int i = numStartIndex; i < rawContent.length(); i++) {

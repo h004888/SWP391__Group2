@@ -15,7 +15,6 @@ import java.util.List;
 @Entity
 @Table(name = "Users")
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "UserID")
@@ -57,6 +56,9 @@ public class User {
     
     @Column(name = "Status")
     private Boolean status;//new
+
+    @Column(name = "email_verified")
+    private Boolean emailVerified = false;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "RoleID")

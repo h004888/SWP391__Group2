@@ -297,7 +297,7 @@ public class CourseController {
     public String cancelBlockCourse(@PathVariable("courseId") Long courseId, RedirectAttributes redirectAttributes) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("Course not found"));
-        course.setStatus("approved");
+        course.setStatus("publish");
         courseRepository.save(course);
 
         redirectAttributes.addFlashAttribute("message", "Đã hủy thao tác block.");

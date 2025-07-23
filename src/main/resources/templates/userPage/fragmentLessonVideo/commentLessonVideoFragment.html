@@ -3,7 +3,6 @@
     <div class="comments-section mt-4">
         <h5>Bình luận</h5>
         <!-- Message display area -->
-        <div id="commentMessage"></div>
         <!-- Form bình luận mới lên đầu -->
         <form id="commentForm" th:action="@{/api/course/{courseId}/comment(courseId=${course.courseId})}" method="post" class="mb-4">
             <input type="hidden" name="courseId" th:value="${course.courseId}" />

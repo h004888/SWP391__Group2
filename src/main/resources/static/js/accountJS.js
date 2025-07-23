@@ -5,14 +5,22 @@ let totalPages = 0;
 let currentStatus = 'true'; // Default to active status
 
 $(document).ready(function () {
-    // Load data for all tabs but only show pagination for admin tab initially
-    [1, 2, 3].forEach(roleId => {
-        loadUsers(roleId,'', 0, roleId === 1); // Only show pagination for admin tab (roleId === 1)
+    // Xác định vai trò ban đầu từ tab đang active
+    const initialActiveTab = $('#accountTabs .nav-link.active');
+    if (initialActiveTab.length) {
+        currentRole = parseInt(initialActiveTab.data('role'));
+    }
+
+    // Tải dữ liệu cho tất cả các tab có thể nhìn thấy
+    $('#accountTabs .nav-link').each(function () {
+        const roleId = parseInt($(this).data('role'));
+        const isActive = $(this).hasClass('active');
+        loadUsers(roleId, '', 0, isActive); // Chỉ hiển thị pagination cho tab active
     });
-    
+
     // Load initial counts
     updateAllCounts();
-    
+
     function toggleAddButton(tabId) {
         if (tabId === "#admin") {
             $("#addAccountBtnContainer").show();
@@ -58,13 +66,13 @@ $(document).ready(function () {
 
         clearTimeout(searchTimer);
         searchTimer = setTimeout(function () {
-            currentPage = 0; 
+            currentPage = 0;
             loadUsers(currentRole, keyword, 0, true);
         }, 300);
     });
 
     // Status filter change event
-    $('#statusFilter').on('change', function() {
+    $('#statusFilter').on('change', function () {
         currentStatus = $(this).val();
         currentPage = 0;
         const keyword = $('#searchInput').val().trim();
@@ -185,18 +193,18 @@ function loadUsers(roleId, keyword = '', page = 0, showPagination = false) {
         },
         beforeSend: function () {
             console.log("=== AJAX SENDING ===");
-            console.log("Data:", {keyword: keyword || null, role: roleId, page: page, status: statusParam});
+            console.log("Data:", { keyword: keyword || null, role: roleId, page: page, status: statusParam });
         },
         success: function (data) {
-            
+
             if (typeof data === 'object' && data.tableContent && data.pagination) {
-                
+
                 $(tableBodyElement).html(data.tableContent);
                 if (showPagination) {
                     totalPages = data.pagination.totalPages;
                 }
             } else {
-                
+
                 $(tableBodyElement).html(data);
                 if (showPagination) {
                     getPaginationInfo(roleId, keyword, page);
@@ -300,6 +308,8 @@ function getTableBodyElement(roleId) {
             return document.getElementById('instructorTableBody');
         case 3:
             return document.getElementById('userTableBody');
+        case 4:
+            return document.getElementById('adminTableBody');
         default:
             return null;
     }

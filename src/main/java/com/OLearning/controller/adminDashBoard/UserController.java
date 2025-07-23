@@ -25,6 +25,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import com.OLearning.security.CustomUserDetails;
 
 @Controller
 @RequestMapping("/admin")
@@ -38,6 +41,17 @@ public class UserController {
     @Autowired
     private NotificationService notificationService;
 
+    private Long getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getName())) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof CustomUserDetails) {
+                return ((CustomUserDetails) principal).getUserId();
+            }
+        }
+        return null;
+    }
+
     @GetMapping("/account")
     public String getAccountPage(
             Model model,
@@ -46,6 +60,11 @@ public class UserController {
         Pageable prs = PageRequest.of(page, 5);
         Page<UserDTO> listU = userService.getAllUsers(prs);
         List<UserDTO> listUser = listU.getContent();
+
+        final Long currentUserId = getCurrentUserId();
+        if (currentUserId != null) {
+            listUser = listUser.stream().filter(u -> !currentUserId.equals(u.getUserId())).toList();
+        }
 
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", listU.getTotalPages());
@@ -63,7 +82,7 @@ public class UserController {
     public String addUser(@ModelAttribute("addAccount") UserDTO userDTO, RedirectAttributes redirectAttributes) {
         try {
             userService.createNewStaff(userDTO);
-            redirectAttributes.addFlashAttribute("successMessage", "User added successfully");
+            redirectAttributes.addFlashAttribute("successMessage", "Staff added successfully");
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         } catch (Exception e) {
@@ -92,22 +111,29 @@ public class UserController {
 
         Pageable pageable = PageRequest.of(page, size);
         Page<UserDTO> userPage;
+        List<Long> roleIds = (roleId == 1) ? List.of(1L, 4L) : List.of(roleId);
 
         if (keyword != null && !keyword.trim().isEmpty()) {
             if (status != null) {
-                userPage = userService.searchByNameAndStatusWithPagination(keyword.trim(), roleId, status, pageable);
+                userPage = userService.searchByNameAndStatusWithPagination(keyword.trim(), roleIds, status, pageable);
             } else {
-                userPage = userService.searchByNameWithPagination(keyword.trim(), roleId, pageable);
+                userPage = userService.searchByNameWithPagination(keyword.trim(), roleIds, pageable);
             }
         } else {
             if (status != null) {
-                userPage = userService.getUsersByRoleAndStatusWithPagination(roleId, status, pageable);
+                userPage = userService.getUsersByRolesAndStatusWithPagination(roleIds, status, pageable);
             } else {
-                userPage = userService.getUsersByRoleWithPagination(roleId, pageable);
+                userPage = userService.getUsersByRolesWithPagination(roleIds, pageable);
             }
         }
 
-        model.addAttribute("listU", userPage.getContent());
+        List<UserDTO> listUser = userPage.getContent();
+        final Long currentUserId = getCurrentUserId();
+        if (currentUserId != null) {
+            listUser = listUser.stream().filter(u -> !currentUserId.equals(u.getUserId())).toList();
+        }
+
+        model.addAttribute("listU", listUser);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", userPage.getTotalPages());
         model.addAttribute("totalItems", userPage.getTotalElements());
@@ -137,22 +163,29 @@ public class UserController {
 
         Pageable pageable = PageRequest.of(page, size);
         Page<UserDTO> userPage;
+        List<Long> roleIds = (roleId == 1) ? List.of(1L, 4L) : List.of(roleId);
 
         if (keyword != null && !keyword.trim().isEmpty()) {
             if (status != null) {
-                userPage = userService.searchByNameAndStatusWithPagination(keyword.trim(), roleId, status, pageable);
+                userPage = userService.searchByNameAndStatusWithPagination(keyword.trim(), roleIds, status, pageable);
             } else {
-                userPage = userService.searchByNameWithPagination(keyword.trim(), roleId, pageable);
+                userPage = userService.searchByNameWithPagination(keyword.trim(), roleIds, pageable);
             }
         } else {
             if (status != null) {
-                userPage = userService.getUsersByRoleAndStatusWithPagination(roleId, status, pageable);
+                userPage = userService.getUsersByRolesAndStatusWithPagination(roleIds, status, pageable);
             } else {
-                userPage = userService.getUsersByRoleWithPagination(roleId, pageable);
+                userPage = userService.getUsersByRolesWithPagination(roleIds, pageable);
             }
         }
 
-        model.addAttribute("listU", userPage.getContent());
+        List<UserDTO> listUser = userPage.getContent();
+        final Long currentUserId = getCurrentUserId();
+        if (currentUserId != null) {
+            listUser = listUser.stream().filter(u -> !currentUserId.equals(u.getUserId())).toList();
+        }
+
+        model.addAttribute("listU", listUser);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", userPage.getTotalPages());
         model.addAttribute("totalItems", userPage.getTotalElements());
@@ -193,23 +226,24 @@ public class UserController {
     public Map<String, Long> getAccountCounts(
             @RequestParam(required = false) String keyword) {
         Map<String, Long> counts = new HashMap<>();
-        for (long roleId = 1; roleId <= 3; roleId++) {
+        for (long roleId = 1; roleId <= 4; roleId++) {
             Pageable pageable = PageRequest.of(0, 1);
+            List<Long> roleIds = (roleId == 1) ? List.of(1L, 4L) : List.of(roleId);
             // Active
             Page<UserDTO> activePage;
             if (keyword != null && !keyword.trim().isEmpty()) {
-                activePage = userService.searchByNameAndStatusWithPagination(keyword.trim(), roleId, true, pageable);
+                activePage = userService.searchByNameAndStatusWithPagination(keyword.trim(), roleIds, true, pageable);
             } else {
-                activePage = userService.getUsersByRoleAndStatusWithPagination(roleId, true, pageable);
+                activePage = userService.getUsersByRolesAndStatusWithPagination(roleIds, true, pageable);
             }
             // Inactive
             Page<UserDTO> inactivePage;
             if (keyword != null && !keyword.trim().isEmpty()) {
-                inactivePage = userService.searchByNameAndStatusWithPagination(keyword.trim(), roleId, false, pageable);
+                inactivePage = userService.searchByNameAndStatusWithPagination(keyword.trim(), roleIds, false, pageable);
             } else {
-                inactivePage = userService.getUsersByRoleAndStatusWithPagination(roleId, false, pageable);
+                inactivePage = userService.getUsersByRolesAndStatusWithPagination(roleIds, false, pageable);
             }
-            String roleKey = roleId == 1 ? "admin" : roleId == 2 ? "instructor" : "user";
+            String roleKey = (roleId == 1 || roleId == 4) ? "admin" : roleId == 2 ? "instructor" : "user";
             counts.put(roleKey + "Active", activePage.getTotalElements());
             counts.put(roleKey + "Inactive", inactivePage.getTotalElements());
         }
@@ -238,7 +272,5 @@ public class UserController {
         userService.deleteAcc(id);
         return "redirect:/admin/account";
     }
-
-
 
 }

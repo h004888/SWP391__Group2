@@ -58,8 +58,8 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
             boolean isAdminLoginForm = referer != null && referer.contains("/dashboard_login");
 
             if ("admin".equals(loginType) || isAdminLoginForm) {
-                // Đăng nhập từ form admin - chỉ cho phép ADMIN
-                if (hasRole(authentication, "ROLE_ADMIN")) {
+                // Đăng nhập từ form admin - chỉ cho phép ADMIN và STAFF
+                if (hasRole(authentication, "ROLE_ADMIN") || hasRole(authentication, "ROLE_STAFF")) {
                     response.sendRedirect(request.getContextPath() + "/admin");
                     return;
                 } else {
@@ -87,7 +87,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         String redirectURL = request.getContextPath();
 
         if (hasRole(authentication, "ROLE_INSTRUCTOR")) {
-            redirectURL += "/instructor";
+            redirectURL += "/instructor/courses";
         } else if (hasRole(authentication, "ROLE_USER")) {
             redirectURL += "/home";
         } else {

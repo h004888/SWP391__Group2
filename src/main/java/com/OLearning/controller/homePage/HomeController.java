@@ -35,6 +35,7 @@ import com.OLearning.service.wishlist.WishlistService;
 import com.OLearning.service.order.OrdersService;
 import com.OLearning.service.payment.VietQRService;
 import com.OLearning.service.notification.NotificationService;
+import com.OLearning.service.payment.CartServiceUtil;
 
 @Controller
 @RequestMapping("/home")
@@ -123,10 +124,10 @@ public class HomeController {
         }
         // Add wishlist total
         if (userDetails != null) {
-            Long userIdForWishlist = getUserIdFromUserDetails(userDetails);
-            String encodedWishlistJson = getWishlistCookie(request, userIdForWishlist);
+            Long userIdForWishlist = CartServiceUtil.getUserIdFromUserDetails(userDetails, userRepository);
+            String encodedWishlistJson = CartServiceUtil.getWishlistCookie(request, userIdForWishlist);
             Map<String, Object> wishlist = wishlistService.getWishlistDetails(encodedWishlistJson, userDetails.getUsername());
-            model.addAttribute("wishlistTotal", getLongValue(wishlist.getOrDefault("total", 0L)));
+            model.addAttribute("wishlistTotal", CartServiceUtil.getLongValue(wishlist.getOrDefault("total", 0L)));
         } else {
             model.addAttribute("wishlistTotal", 0L);
         }
@@ -269,14 +270,14 @@ public class HomeController {
         if (userDetails == null) {
             return "redirect:/login";
         }
-        String mainCartEncoded = getCartCookie(request, getUserIdFromUserDetails(userDetails));
+        String mainCartEncoded = CartServiceUtil.getCartCookie(request, CartServiceUtil.getUserIdFromUserDetails(userDetails, userRepository));
         if (cartService.isCourseInCart(mainCartEncoded, courseId, userDetails.getUsername())) {
             redirectAttributes.addFlashAttribute("error", "This course is already in your cart. Please proceed to checkout from your cart.");
             return "redirect:/home/course-detail?id=" + courseId;
         }
 
         try {
-            Long userId = getUserIdFromUserDetails(userDetails);
+            Long userId = CartServiceUtil.getUserIdFromUserDetails(userDetails, userRepository);
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new EntityNotFoundException("User not found"));
             Course course = courseRepository.findById(courseId)
@@ -296,7 +297,7 @@ public class HomeController {
                 var voucherOpt = voucherRepository.findById(voucherId);
                 if (voucherOpt.isPresent()) {
                     double discount = voucherOpt.get().getDiscount() != null ? voucherOpt.get().getDiscount() : 0.0;
-                    price = Math.round(price * (1 - discount / 100.0));
+                    price = discount >= 100.0 ? 0 : Math.round(price * (1 - discount / 100.0));
                     item.put("appliedVoucherId", voucherId);
                 }
             }
@@ -312,7 +313,7 @@ public class HomeController {
                 Order order = new Order();
                 order.setUser(user);
                 order.setAmount(totalAmount);
-                cartService.processCheckout(cartJson, request.getRemoteAddr(), userDetails.getUsername());
+                cartService.processCheckout(cartJson, userDetails.getUsername());
                 cartService.completeCheckout(cart, order, true, null);
                 if (voucherId != null) {
                     voucherService.useVoucherForUserAndCourse(voucherId, userId);
@@ -426,7 +427,7 @@ public class HomeController {
         }
 
         courseReviewService.deleteReview(reviewId);
-        redirectAttributes.addFlashAttribute("successMessage", "Đánh giá đã được xóa thành công.");
+        redirectAttributes.addFlashAttribute("successMessage", "Đánh giá đã được xóa  thành công.");
         return "redirect:/home/course-detail?id=" + courseId;
     }
 
@@ -439,9 +440,9 @@ public class HomeController {
             return "redirect:/login";
         }
 
-        Long userId = getUserIdFromUserDetails(userDetails);
-        String encodedBuyNowJson = getBuyNowCookie(request);
-        String encodedCartJson = getCartCookie(request, userId);
+        Long userId = CartServiceUtil.getUserIdFromUserDetails(userDetails, userRepository);
+        String encodedBuyNowJson = CartServiceUtil.getBuyNowCookie(request);
+        String encodedCartJson = CartServiceUtil.getCartCookie(request, userId);
         Long courseId = null;
         Map<String, Object> cart = null;
         try {
@@ -465,7 +466,6 @@ public class HomeController {
         if (paymentStatus == 1) {
             try {
                 String transactionId = request.getParameter("vnp_TransactionNo");
-                String ipAddr = request.getRemoteAddr();
                 String amount = request.getParameter("vnp_Amount");
                 double totalAmount = Double.parseDouble(amount) / 100;
 
@@ -476,10 +476,10 @@ public class HomeController {
                 order.setRefCode(transactionId);
 
                 if (encodedBuyNowJson != null) {
-                    clearBuyNowCookie(response);
+                    CartServiceUtil.clearBuyNowCookie(response);
                 } else if (encodedCartJson != null && !encodedCartJson.isEmpty()) {
-                    cartService.processCheckout(encodedCartJson, ipAddr, userDetails.getUsername());
-                    updateCartCookie(cartService.clearCart(userDetails.getUsername()), response, userId);
+                    cartService.processCheckout(encodedCartJson, userDetails.getUsername());
+                    CartServiceUtil.updateCartCookie(cartService.clearCart(userDetails.getUsername()), response, userId, objectMapper);
                 }
 
                 cartService.completeCheckout(cart, order, false, transactionId);
@@ -524,70 +524,5 @@ public class HomeController {
                 return "redirect:/home";
             }
         }
-    }
-
-    private void updateCartCookie(Map<String, Object> cart, HttpServletResponse response, Long userId) throws Exception {
-        String cartJson = objectMapper.writeValueAsString(cart);
-        String encodedCartJson = Base64.getEncoder().encodeToString(cartJson.getBytes(StandardCharsets.UTF_8));
-        Cookie cartCookie = new Cookie("cart_" + userId, encodedCartJson);
-        cartCookie.setPath("/");
-        cartCookie.setMaxAge(7 * 24 * 60 * 60);
-        cartCookie.setHttpOnly(true);
-        response.addCookie(cartCookie);
-    }
-
-    private Long getUserIdFromUserDetails(UserDetails userDetails) {
-        String email = userDetails.getUsername();
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
-        return user.getUserId();
-    }
-
-    private String getCartCookie(HttpServletRequest request, Long userId) {
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if (cookie.getName().equals("cart_" + userId)) {
-                    return cookie.getValue();
-                }
-            }
-        }
-        return "";
-    }
-
-    private String getBuyNowCookie(HttpServletRequest request) {
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if (cookie.getName().equals("buy_now")) {
-                    return cookie.getValue();
-                }
-            }
-        }
-        return null;
-    }
-
-    private void clearBuyNowCookie(HttpServletResponse response) {
-        Cookie cookie = new Cookie("buy_now", null);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        cookie.setHttpOnly(true);
-        response.addCookie(cookie);
-    }
-
-    private String getWishlistCookie(HttpServletRequest request, Long userId) {
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if (cookie.getName().equals("wishlist_" + userId)) {
-                    return cookie.getValue();
-                }
-            }
-        }
-        return "";
-    }
-
-    private Long getLongValue(Object value) {
-        if (value instanceof Number) {
-            return ((Number) value).longValue();
-        }
-        throw new IllegalStateException("Value is not a number: " + (value != null ? value.getClass().getName() : "null"));
     }
 }

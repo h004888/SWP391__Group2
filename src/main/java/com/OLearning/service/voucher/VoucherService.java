@@ -28,4 +28,6 @@ public interface VoucherService {
     List<VoucherDTO> getPublicVouchers();
     void claimPublicVoucher(Long voucherId, Long userId);
     List<CourseDTO> getCoursesForVoucher(Long voucherId);
+
+    Map<String, Object> applyVoucherToCourse(Long userId, Long courseId, Long voucherId);
 }

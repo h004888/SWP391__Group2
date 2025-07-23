@@ -59,10 +59,10 @@ public class NotificationsController {
 
     @GetMapping("/instructor/notifications")
     public String viewNotifications(Authentication authentication, Model model,
-                                   @RequestParam(value = "page", defaultValue = "0") int page,
-                                   @RequestParam(value = "size", defaultValue = "5") int size,
-                                   @RequestParam(value = "type", required = false) List<String> types,
-                                   @RequestParam(value = "status", required = false) String status) {
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "5") int size,
+            @RequestParam(value = "type", required = false) List<String> types,
+            @RequestParam(value = "status", required = false) String status) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
         Pageable pageable = PageRequest.of(page, size);
@@ -79,7 +79,8 @@ public class NotificationsController {
         if (status == null || status.isBlank() || "All".equalsIgnoreCase(status)) {
             status = null;
         }
-        Page<NotificationDTO> notificationPage = notificationService.getNotificationsByUserId(userId, types, status, pageable);
+        Page<NotificationDTO> notificationPage = notificationService.getNotificationsByUserId(userId, types, status,
+                pageable);
         model.addAttribute("notifications", notificationPage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", notificationPage.getTotalPages());
@@ -88,7 +89,8 @@ public class NotificationsController {
         String typeQuery = types.stream().map(t -> "type=" + t).collect(Collectors.joining("&"));
         model.addAttribute("typeQuery", typeQuery);
         model.addAttribute("selectedStatus", status);
-        model.addAttribute("fragmentContent", "instructorDashboard/fragments/notificationContent :: notificationContent");
+        model.addAttribute("fragmentContent",
+                "instructorDashboard/fragments/notificationContent :: notificationContent");
         model.addAttribute("isSearch", false);
         long unreadCount = notificationService.countUnreadByUserId(userId);
         model.addAttribute("unreadCount", unreadCount);
@@ -98,15 +100,16 @@ public class NotificationsController {
 
     @GetMapping("/instructor/notifications/search")
     public String searchNotifications(@RequestParam("keyword") String keyword,
-                                      @RequestParam(value = "page", defaultValue = "0") int page,
-                                      @RequestParam(value = "size", defaultValue = "5") int size,
-                                      Model model) {
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "5") int size,
+            Model model) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             Long userId = userDetails.getUserId();
             Pageable pageable = PageRequest.of(page, size);
-            Page<NotificationDTO> notificationsPage = notificationService.searchNotificationsByUser(keyword, userId, pageable);
+            Page<NotificationDTO> notificationsPage = notificationService.searchNotificationsByUser(keyword, userId,
+                    pageable);
             model.addAttribute("notifications", notificationsPage.getContent());
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", notificationsPage.getTotalPages());
@@ -116,7 +119,11 @@ public class NotificationsController {
             model.addAttribute("notifications", List.of());
         }
         model.addAttribute("keyword", keyword);
-        model.addAttribute("fragmentContent", "instructorDashboard/fragments/notificationContent :: notificationContent");
+        model.addAttribute("selectedStatus", null);
+        model.addAttribute("selectedTypes", null);
+        model.addAttribute("isSearch", true);
+        model.addAttribute("fragmentContent",
+                "instructorDashboard/fragments/notificationContent :: notificationContent");
         return "instructorDashboard/indexUpdate";
     }
 
@@ -148,7 +155,7 @@ public class NotificationsController {
                 notificationService.markAsRead(notificationId);
                 notification.setStatus("sent");
             }
-            
+
             NotificationDTO notificationDTO = notificationMapper.toDTO(notification);
             model.addAttribute("notification", notificationDTO);
             if ("comment".equalsIgnoreCase(notification.getType()) && notification.getCommentId() != null) {
@@ -163,8 +170,9 @@ public class NotificationsController {
                     System.err.println("Error loading comment for notification: " + e.getMessage());
                 }
             }
-            
-            model.addAttribute("fragmentContent", "instructorDashboard/fragments/notificationDetailContent :: notificationDetailContent");
+
+            model.addAttribute("fragmentContent",
+                    "instructorDashboard/fragments/notificationDetailContent :: notificationDetailContent");
             return "instructorDashboard/indexUpdate";
         } else {
             return "redirect:/instructor/notifications";
@@ -179,9 +187,10 @@ public class NotificationsController {
             Optional<Notification> notificationOpt = notificationService.findById(notificationId);
             if (notificationOpt.isPresent()) {
                 Notification notification = notificationOpt.get();
-                
+
                 if ("comment".equals(notification.getType()) && notification.getCommentId() != null) {
-                    Optional<CourseReview> commentOpt = courseReviewRepository.findByIdWithUser(notification.getCommentId());
+                    Optional<CourseReview> commentOpt = courseReviewRepository
+                            .findByIdWithUser(notification.getCommentId());
                     if (commentOpt.isPresent()) {
                         CourseReview comment = commentOpt.get();
                         CommentDTO commentDTO = commentMapper.toDTO(comment);
@@ -190,7 +199,8 @@ public class NotificationsController {
                         return ResponseEntity.notFound().build();
                     }
                 } else {
-                    return ResponseEntity.badRequest().body(Map.of("error", "This notification is not a comment notification"));
+                    return ResponseEntity.badRequest()
+                            .body(Map.of("error", "This notification is not a comment notification"));
                 }
             } else {
                 return ResponseEntity.notFound().build();
@@ -203,10 +213,10 @@ public class NotificationsController {
 
     @PostMapping("/instructor/courses/reply-block")
     public String replyBlockCourse(@RequestParam("courseId") Long courseId,
-                                   @RequestParam("notificationId") Long notificationId,
-                                   @RequestParam("replyContent") String replyContent,
-                                   @RequestParam(value = "evidenceFile", required = false) MultipartFile evidenceFile,
-                                   Model model) {
+            @RequestParam("notificationId") Long notificationId,
+            @RequestParam("replyContent") String replyContent,
+            @RequestParam(value = "evidenceFile", required = false) MultipartFile evidenceFile,
+            Model model) {
         String evidenceLink = null;
         if (evidenceFile != null && !evidenceFile.isEmpty()) {
             try {
@@ -239,21 +249,10 @@ public class NotificationsController {
                 adminNoti.setEvidenceLink(evidenceLink);
                 notificationRepository.save(adminNoti);
             }
-            // Lưu notification cho instructor để phục vụ hiển thị report detail
-            var instructor = notification.getCourse().getInstructor();
-            if (instructor != null) {
-                var instructorNoti = new com.OLearning.entity.Notification();
-                instructorNoti.setUser(instructor);
-                instructorNoti.setCourse(notification.getCourse());
-                instructorNoti.setType("INSTRUCTOR_REPLY_BLOCK");
-                instructorNoti.setMessage(replyContent);
-                instructorNoti.setStatus("sent");
-                instructorNoti.setSentAt(java.time.LocalDateTime.now());
-                instructorNoti.setEvidenceLink(evidenceLink);
-                notificationRepository.save(instructorNoti);
-            }
+            // Không gửi notification cho instructor nữa
             // Cập nhật evidenceLink vào report liên quan
-            Report report = reportRepository.findFirstByCourse_CourseIdAndNotification_NotificationId(courseId, notificationId);
+            Report report = reportRepository.findFirstByCourse_CourseIdAndNotification_NotificationId(courseId,
+                    notificationId);
             if (report != null && evidenceLink != null) {
                 report.setEvidenceLink(evidenceLink);
                 reportRepository.save(report);
@@ -270,7 +269,8 @@ public class NotificationsController {
             return "redirect:/instructor/notifications";
         }
         model.addAttribute("detailCourse", optionalDetail.get());
-        model.addAttribute("fragmentContent", "instructorDashboard/fragments/courseDetailContent :: courseDetailContent");
+        model.addAttribute("fragmentContent",
+                "instructorDashboard/fragments/courseDetailContent :: courseDetailContent");
         return "instructorDashboard/indexUpdate";
     }
 
@@ -295,41 +295,42 @@ public class NotificationsController {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             Long userId = userDetails.getUserId();
             Pageable pageable = PageRequest.of(0, 5);
-            List<String> types = List.of("COURSE_BLOCKED", "comment", "COURSE_UNBLOCKED", "COURSE_REJECTION", "COURSE_APPROVED", "MAINTENANCE_FEE", "COURSE_CREATED", "SUCCESSFULLY");
-            Page<NotificationDTO> notificationPage = notificationService.getUnreadNotificationsByUserId(userId, types, pageable);
+            List<String> types = List.of("COURSE_BLOCKED", "comment", "COURSE_UNBLOCKED", "COURSE_REJECTION",
+                    "COURSE_APPROVED", "MAINTENANCE_FEE", "COURSE_CREATED", "SUCCESSFULLY");
+            Page<NotificationDTO> notificationPage = notificationService.getUnreadNotificationsByUserId(userId, types,
+                    pageable);
             long unreadCount = notificationService.countUnreadByUserId(userId);
             List<NotificationDropdownDTO> dropdownList = notificationPage.getContent().stream()
-                .map(n -> {
-                    String msg = n.getMessage();
-                    if (msg != null) {
-                        msg = msg.split("\\r?\\n")[0]; // chỉ lấy dòng đầu tiên
-                        if (msg.length() > 25) msg = msg.substring(0, 25) + "...";
-                    }
-                    
-                    // Lấy lessonId nếu là notification comment
-                    Long lessonId = null;
-                    if ("comment".equalsIgnoreCase(n.getType()) && n.getCommentId() != null) {
-                        var commentOpt = courseReviewRepository.findById(n.getCommentId());
-                        if (commentOpt.isPresent() && commentOpt.get().getLesson() != null) {
-                            lessonId = commentOpt.get().getLesson().getLessonId();
+                    .map(n -> {
+                        String msg = n.getMessage();
+                        if (msg != null) {
+                            msg = msg.split("\\r?\\n")[0]; // chỉ lấy dòng đầu tiên
+                            if (msg.length() > 25)
+                                msg = msg.substring(0, 25) + "...";
                         }
-                    }
-                    
-                    return new NotificationDropdownDTO(
-                        n.getNotificationId(),
-                        msg,
-                        n.getType(),
-                        n.getStatus(),
-                        n.getSentAt(),
-                        n.getCommentId(),
-                        n.getCourse() != null ? n.getCourse().getCourseId() : null,
-                        lessonId
-                    );
-                }).toList();
+
+                        // Lấy lessonId nếu là notification comment
+                        Long lessonId = null;
+                        if ("comment".equalsIgnoreCase(n.getType()) && n.getCommentId() != null) {
+                            var commentOpt = courseReviewRepository.findById(n.getCommentId());
+                            if (commentOpt.isPresent() && commentOpt.get().getLesson() != null) {
+                                lessonId = commentOpt.get().getLesson().getLessonId();
+                            }
+                        }
+
+                        return new NotificationDropdownDTO(
+                                n.getNotificationId(),
+                                msg,
+                                n.getType(),
+                                n.getStatus(),
+                                n.getSentAt(),
+                                n.getCommentId(),
+                                n.getCourse() != null ? n.getCourse().getCourseId() : null,
+                                lessonId);
+                    }).toList();
             return ResponseEntity.ok(Map.of(
-                "notifications", dropdownList,
-                "unreadCount", unreadCount
-            ));
+                    "notifications", dropdownList,
+                    "unreadCount", unreadCount));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Error loading notifications: " + e.getMessage()));

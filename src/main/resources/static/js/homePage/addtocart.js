@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             const courseId = btn.getAttribute('data-course-id');
-            fetch('/cart/add/' + courseId, {
+            fetch('/home/cart/add/' + courseId, {
                 method: 'POST',
                 credentials: 'include',
                 headers: {

@@ -755,7 +755,7 @@ Page content START -->
 										<!-- Buttons -->
 										<div class="mt-3 d-sm-flex justify-content-sm-between">
 											<th:block th:if="${isEnrolled}">
-												<a th:href="@{/learning/course/view/{courseId}(courseId=${course.courseId})}" class="btn btn-sm btn-primary-soft mb-0">Continue</a>
+												<a th:href="@{/learning/course/view(courseId=${course.courseId})}" class="btn btn-sm btn-primary-soft mb-0">Continue</a>
 											</th:block>
 											<th:block th:unless="${isEnrolled}">
 												<button type="button"
@@ -1306,7 +1306,7 @@ Footer END -->
 		  const discountedPriceEl = document.getElementById('discounted-price');
 		  const appliedVoucherEl = document.getElementById('applied-voucher');
 		  if (originalPriceEl) {
-			if (data && data.discountedPrice) {
+			if (data && typeof data.discountedPrice !== 'undefined' && data.discountedPrice !== null && Number(data.discountedPrice) < Number(originalPriceEl.textContent.replace(/[^\d]/g, ''))) {
 			  originalPriceEl.style.textDecoration = 'line-through';
 			  originalPriceEl.style.color = '#888';
 			} else {
@@ -1315,7 +1315,11 @@ Footer END -->
 			}
 		  }
 		  if (discountedPriceEl) {
-			discountedPriceEl.textContent = data && data.discountedPrice ? ' ' + voucherJS.formatNumberWithCommas(Number(data.discountedPrice)) + ' đ' : '';
+			if (data && typeof data.discountedPrice !== 'undefined' && data.discountedPrice !== null) {
+			  discountedPriceEl.textContent = ' ' + voucherJS.formatNumberWithCommas(Number(data.discountedPrice)) + ' đ';
+			} else {
+			  discountedPriceEl.textContent = '';
+			}
 		  }
 		},
 		syncVoucherToBuyNowForm: function() {

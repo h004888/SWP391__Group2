@@ -513,6 +513,9 @@ Footer END -->
 
 	<script src="assets/js/functions.js"></script>
 	<script th:src="@{/js/homePage/wishlist.js}"></script>
+    <script th:inline="javascript">
+        window.userId = /*[[${currentUserId}]]*/ 0;
+    </script>
     <script>
         $(document).ready(function () {
 

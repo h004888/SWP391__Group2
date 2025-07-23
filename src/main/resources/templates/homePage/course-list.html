@@ -223,10 +223,10 @@
 										<li> <a class="dropdown-item" href="shop.html">Shop grid</a></li>
 										<li> <a class="dropdown-item" href="shop-product-detail.html">Product detail</a>
 										</li>
-										<li> <a class="dropdown-item" href="/cart">Cart</a></li>
+										<li> <a class="dropdown-item" href="/home/cart">Cart</a></li>
 										<li> <a class="dropdown-item" href="checkout.html">Checkout</a></li>
 										<li> <a class="dropdown-item" href="empty-cart.html">Empty Cart</a></li>
-										<li> <a class="dropdown-item" href="/wishlist">Wishlist</a></li>
+										<li> <a class="dropdown-item" href="/home/wishlist">Wishlist</a></li>
 									</ul>
 								</li>
 
@@ -449,7 +449,7 @@
             <!-- Main navbar END -->
             <div class="me-2 me-md-3 dropdown">
                 <!-- Cart button -->
-                <a class="btn btn-light btn-round mb-0" th:href="@{/cart}">
+                <a class="btn btn-light btn-round mb-0" th:href="@{/home/cart}">
                     <i class="bi bi-cart3 fa-fw"></i>
                 </a>
                 <!-- badge -->
@@ -1019,6 +1019,10 @@ Footer END -->
 	<!-- Template Functions -->
 	<script src="assets/js/functions.js"></script>
 	<script src="/js/homePage/wishlist.js"></script>
+
+	<script th:inline="javascript">
+    window.userId = /*[[${currentUserId}]]*/ 0;
+</script>
 
 	<script>
 		// Hàm gọi AJAX để tải dữ liệu theo filter và trang

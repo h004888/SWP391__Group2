@@ -36,7 +36,8 @@ public interface EnrollmentService {
     // Đếm số lượng enrollment theo instructor, năm, tháng
     Long countEnrollmentsByInstructorAndMonth(long instructorId, int year, int month);
 
-    Long countEnrollmentsByInstructorAndDateRange(long instructorId, java.time.LocalDate start, java.time.LocalDate end);
+    Long countEnrollmentsByInstructorAndDateRange(long instructorId, java.time.LocalDate start,
+            java.time.LocalDate end);
 
     Page<EnrollmentDTO> getEnrollmentsByInstructorId(Long userId, int page, int size);
 
@@ -50,7 +51,7 @@ public interface EnrollmentService {
 
     Integer getWeeksEnrolled(Long userId, Long courseId);
 
-    void updateProgressByUser( Long userId,  Long courseId);
+    void updateProgressByUser(Long userId, Long courseId);
 
     Optional<Enrollment> findByUserAndCourse(User user, Course course);
 

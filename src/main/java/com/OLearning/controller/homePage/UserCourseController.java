@@ -384,27 +384,6 @@ public class UserCourseController {
         return "userPage/course-detail-min";
     }
 
-//    @GetMapping("/course/view")
-//    public String showCourseView(Principal principal, Model model, @RequestParam("courseId") Long courseId) {
-//        User currentUser = null;
-//        if (principal != null) {
-//            currentUser = extractCurrentUser(principal);
-//        }
-//
-//        // Kiểm tra xem user đã đăng ký khóa học chưa
-//        boolean isEnrolled = false;
-//        if (currentUser != null) {
-//            isEnrolled = enrollmentService.hasEnrolled(currentUser.getUserId(), courseId);
-//        }
-//
-//        if (isEnrolled) {
-//            // Nếu đã đăng ký, redirect đến trang detail
-//            return "redirect:/learning/course/" + courseId + "/detail";
-//        } else {
-//            // Nếu chưa đăng ký, redirect đến trang public
-//            return "redirect:/learning/course/" + courseId + "/public";
-//        }
-//    }
     @GetMapping("/course/feedback")
     public String showCourseView(Principal principal, Model model, @RequestParam("courseId") Long courseId) {
         User currentUser = null;
@@ -506,6 +485,7 @@ public class UserCourseController {
         model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderDefault");
 
         model.addAttribute("fragmentContent", "homePage/fragments/myCourseContent :: myCourseContent");
+        model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderDefault");
         return "homePage/index";
     }
 }

@@ -222,7 +222,7 @@
                             <div class="p-4 p-md-5">
                                 <div class="d-flex align-items-center gap-2 mb-4">
                                     <div class="logo-square"></div>
-                                    <span class="fs-4 fw-semibold">Eduverse</span>
+                                    <span class="fs-4 fw-semibold">Eduport</span>
                                 </div>
 
                                 <!-- Success State (Hidden by default) -->
@@ -246,10 +246,9 @@
                                         <div class="mb-3">
                                             <i class="fas fa-mobile-alt fa-3x text-primary"></i>
                                         </div>
-                                        <h1 class="fs-2 fw-bold mb-3">Verify Your Account</h1>
-                                        <p class="text-muted mb-2">We've sent a 6-digit verification code to</p>
-                                        <p class="fw-bold text-dark" id="emailDisplay" th:text="${email}">
-                                            user@example.com</p>
+                                        <h1 class="fs-2 fw-bold mb-3" th:text="${type} == 'verifyEmail' ? 'Email Verification' : 'Forgot Password Verification'">Verify Your Account</h1>
+                                        <p class="text-muted mb-2" th:text="${type} == 'verifyEmail' ? 'We have sent a verification code to your email to verify your account.' : 'We have sent a verification code to your email to reset your password.'">We've sent a 6-digit verification code to</p>
+                                        <p class="fw-bold text-dark" id="emailDisplay" th:text="${email}">user@example.com</p>
                                     </div>
 
                                     <!-- Hiển thị thông báo lỗi -->
@@ -260,7 +259,7 @@
                                     <!-- OTP Input Form -->
                                     <form action="/otp-verification" method="post" onsubmit="return combineOtp()">
                                         <div class="text-center mb-3">
-                                            <label class="form-label fw-semibold">Enter Verification Code</label>
+                                            <label class="form-label fw-semibold" th:text="${type} == 'verifyEmail' ? 'Enter email verification code' : 'Enter forgot password verification code'">Enter Verification Code</label>
                                         </div>
 
                                         <div class="otp-container">
@@ -273,10 +272,11 @@
                                         </div>
                                         <input type="hidden" name="otp" id="otpFull">
                                         <input type="hidden" name="email" th:value="${email}">
+                                        <input type="hidden" name="type" th:value="${type}">
 
                                         <button type="submit" class="btn btn-primary btn-lg w-100 gradient-btn mb-3"
                                                 id="verifyBtn">
-                                            <span class="btn-text">Verify Code</span>
+                                            <span class="btn-text" th:text="${type} == 'verifyEmail' ? 'Verify Email' : 'Verify OTP'">Verify Code</span>
                                         </button>
                                     </form>
 
@@ -323,8 +323,9 @@
         // Lấy timer state từ sessionStorage hoặc khởi tạo mới
         let timeLeft = parseInt(sessionStorage.getItem('otpTimeLeft')) || 300; // 5 phút
         let timerInterval;
-        let canResend = false;
+        let canResend = true;
         let startTime = parseInt(sessionStorage.getItem('otpStartTime')) || Date.now();
+        let resendCount = parseInt(sessionStorage.getItem('resendCount')) || 0;
 
         // Kiểm tra xem có phải reload do lỗi OTP không
         const urlParams = new URLSearchParams(window.location.search);
@@ -406,14 +407,16 @@
 
         // Hàm resend code
         window.resendCode = function() {
-            if (!canResend) return;
-
+            if (timeLeft > 0 && resendCount >= 2) {
+                alert('You can only resend the code 2 times within 5 minutes. Please wait for the timer to expire.');
+                return;
+            }
             // Lấy email từ URL parameters
             const urlParams = new URLSearchParams(window.location.search);
             const email = urlParams.get('email');
 
             if (!email) {
-                alert('Không tìm thấy email. Vui lòng thử lại!');
+                alert('Email not found. Please try again!');
                 return;
             }
 
@@ -426,9 +429,12 @@
                 startTime = Date.now();
                 sessionStorage.setItem('otpTimeLeft', timeLeft.toString());
                 sessionStorage.setItem('otpStartTime', startTime.toString());
-                
-                canResend = false;
-                $('#resendBtn').addClass('disabled');
+
+                resendCount++;
+                sessionStorage.setItem('resendCount', resendCount.toString());
+
+                canResend = true;
+                $('#resendBtn').removeClass('disabled');
 
                 // Clear OTP inputs
                 $('.otp-input').val('').removeClass('filled error');
@@ -446,9 +452,9 @@
                 window.history.replaceState({}, '', newUrl);
                 window.otpError = false;
 
-                alert('Mã OTP mới đã được gửi đến email của bạn!');
+                alert('A new OTP has been sent to your email!');
             }).fail(function() {
-                alert('Có lỗi xảy ra khi gửi lại mã OTP. Vui lòng thử lại!');
+                alert('An error occurred while resending the OTP. Please try again!');
             });
         };
 
@@ -533,7 +539,9 @@
                     $('#timerDisplay').html('<i class="fas fa-exclamation-triangle me-1"></i>Code has expired');
                     $('#resendBtn').removeClass('disabled');
                     canResend = true;
-                    // Cập nhật sessionStorage
+                    // Reset lại số lần resend
+                    resendCount = 0;
+                    sessionStorage.setItem('resendCount', '0');
                     sessionStorage.setItem('otpTimeLeft', '0');
                 }
             }, 1000);
@@ -574,6 +582,7 @@
             if (!window.otpError) {
                 sessionStorage.removeItem('otpTimeLeft');
                 sessionStorage.removeItem('otpStartTime');
+                sessionStorage.removeItem('resendCount'); // Xóa số lần resend
             }
         });
 
@@ -581,12 +590,14 @@
         $(document).on('click', 'a[href*="/login"], a[href*="/forgot-password"]', function() {
             sessionStorage.removeItem('otpTimeLeft');
             sessionStorage.removeItem('otpStartTime');
+            sessionStorage.removeItem('resendCount'); // Xóa số lần resend
         });
 
         // Hàm chuyển hướng khi thành công
         window.redirectToLogin = function() {
             sessionStorage.removeItem('otpTimeLeft');
             sessionStorage.removeItem('otpStartTime');
+            sessionStorage.removeItem('resendCount'); // Xóa số lần resend
             window.location.href = '/login';
         };
 

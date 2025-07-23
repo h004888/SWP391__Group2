@@ -1,12 +1,10 @@
 package com.OLearning.controller.homePage;
 
-import com.OLearning.entity.User;
 import com.OLearning.repository.UserRepository;
+import com.OLearning.service.payment.CartServiceUtil;
 import com.OLearning.service.wishlist.WishlistService;
 import com.OLearning.service.wishlist.impl.WishlistServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +14,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Controller
-@RequestMapping("/wishlist")
+@RequestMapping("/home/wishlist")
 public class WishlistController {
     
     @Autowired
@@ -41,19 +38,16 @@ public class WishlistController {
         if (userDetails == null) {
             return "redirect:/login";
         }
-        Long userId = getUserIdFromUserDetails(userDetails);
-        String encodedWishlistJson = getWishlistCookie(request, userId);
+        Long userId = CartServiceUtil.getUserIdFromUserDetails(userDetails, userRepository);
+        String encodedWishlistJson = CartServiceUtil.getWishlistCookie(request, userId);
         Map<String, Object> wishlist = wishlistService.getWishlistDetails(encodedWishlistJson, userDetails.getUsername());
         
         List<Map<String, Object>> allItems = (List<Map<String, Object>>) wishlist.getOrDefault("items", List.of());
-        Long totalItems = getLongValue(wishlist.getOrDefault("total", 0L));
-        
-        // Calculate pagination
+        Long totalItems = CartServiceUtil.getLongValue(wishlist.getOrDefault("total", 0L));
+
         int totalPages = (int) Math.ceil((double) totalItems / size);
         int startIndex = page * size;
         int endIndex = Math.min(startIndex + size, allItems.size());
-        
-        // Get items for current page
         List<Map<String, Object>> pageItems = allItems.subList(startIndex, endIndex);
         
         model.addAttribute("wishlistItems", pageItems);
@@ -81,10 +75,10 @@ public class WishlistController {
         }
         
         try {
-            Long userId = getUserIdFromUserDetails(userDetails);
-            String encodedWishlistJson = getWishlistCookie(request, userId);
+            Long userId = CartServiceUtil.getUserIdFromUserDetails(userDetails, userRepository);
+            String encodedWishlistJson = CartServiceUtil.getWishlistCookie(request, userId);
             Map<String, Object> wishlist = wishlistService.getWishlistDetails(encodedWishlistJson, userDetails.getUsername());
-            response.put("total", getLongValue(wishlist.getOrDefault("total", 0L)));
+            response.put("total", CartServiceUtil.getLongValue(wishlist.getOrDefault("total", 0L)));
         } catch (Exception e) {
             response.put("total", 0L);
         }
@@ -105,8 +99,8 @@ public class WishlistController {
             return result;
         }
         
-        Long userId = getUserIdFromUserDetails(userDetails);
-        String encodedWishlistJson = getWishlistCookie(request, userId);
+        Long userId = CartServiceUtil.getUserIdFromUserDetails(userDetails, userRepository);
+        String encodedWishlistJson = CartServiceUtil.getWishlistCookie(request, userId);
         
         try {
             boolean isInWishlist = wishlistService.isCourseInWishlist(encodedWishlistJson, courseId, userDetails.getUsername());
@@ -114,20 +108,20 @@ public class WishlistController {
             if (isInWishlist) {
                 // Remove from wishlist
                 Map<String, Object> wishlist = wishlistService.removeCourseFromWishlist(encodedWishlistJson, courseId, userDetails.getUsername());
-                updateWishlistCookie(wishlist, response, userId);
+                CartServiceUtil.updateWishlistCookie(wishlist, response, userId);
                 result.put("success", true);
                 result.put("action", "removed");
                 result.put("message", "Course removed from wishlist");
             } else {
                 // Add to wishlist
                 Map<String, Object> wishlist = wishlistService.addCourseToWishlist(encodedWishlistJson, courseId, userDetails.getUsername());
-                updateWishlistCookie(wishlist, response, userId);
+                CartServiceUtil.updateWishlistCookie(wishlist, response, userId);
                 result.put("success", true);
                 result.put("action", "added");
                 result.put("message", "Course added to wishlist");
             }
             
-            result.put("total", getLongValue(wishlistService.getWishlistDetails(getWishlistCookie(request, userId), userDetails.getUsername()).getOrDefault("total", 0L)));
+            result.put("total", CartServiceUtil.getLongValue(wishlistService.getWishlistDetails(CartServiceUtil.getWishlistCookie(request, userId), userDetails.getUsername()).getOrDefault("total", 0L)));
             
         } catch (WishlistServiceImpl.CourseAlreadyInWishlistException e) {
             result.put("success", false);
@@ -147,15 +141,15 @@ public class WishlistController {
         if (userDetails == null) {
             return "redirect:/login";
         }
-        Long userId = getUserIdFromUserDetails(userDetails);
+        Long userId = CartServiceUtil.getUserIdFromUserDetails(userDetails, userRepository);
         try {
             Map<String, Object> emptyWishlist = wishlistService.clearWishlist(userDetails.getUsername());
-            updateWishlistCookie(emptyWishlist, response, userId);
+            CartServiceUtil.updateWishlistCookie(emptyWishlist, response, userId);
             model.addAttribute("message", "Wishlist cleared successfully!");
         } catch (Exception e) {
             model.addAttribute("message", "Failed to clear wishlist");
         }
-        return "redirect:/wishlist";
+        return "redirect:/home/wishlist";
     }
 
     @GetMapping("/check/{courseId}")
@@ -169,46 +163,11 @@ public class WishlistController {
             return result;
         }
         
-        Long userId = getUserIdFromUserDetails(userDetails);
-        String encodedWishlistJson = getWishlistCookie(request, userId);
+        Long userId = CartServiceUtil.getUserIdFromUserDetails(userDetails, userRepository);
+        String encodedWishlistJson = CartServiceUtil.getWishlistCookie(request, userId);
         boolean isInWishlist = wishlistService.isCourseInWishlist(encodedWishlistJson, courseId, userDetails.getUsername());
         
         result.put("inWishlist", isInWishlist);
         return result;
-    }
-
-    private void updateWishlistCookie(Map<String, Object> wishlist, HttpServletResponse response, Long userId) throws Exception {
-        String wishlistJson = objectMapper.writeValueAsString(wishlist);
-        String encodedWishlistJson = Base64.getEncoder().encodeToString(wishlistJson.getBytes(StandardCharsets.UTF_8));
-        Cookie wishlistCookie = new Cookie("wishlist_" + userId, encodedWishlistJson);
-        wishlistCookie.setPath("/");
-        wishlistCookie.setMaxAge(30 * 24 * 60 * 60);
-        wishlistCookie.setHttpOnly(true);
-        response.addCookie(wishlistCookie);
-    }
-
-    private Long getUserIdFromUserDetails(UserDetails userDetails) {
-        String email = userDetails.getUsername();
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
-        return user.getUserId();
-    }
-
-    private String getWishlistCookie(HttpServletRequest request, Long userId) {
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if (cookie.getName().equals("wishlist_" + userId)) {
-                    return cookie.getValue();
-                }
-            }
-        }
-        return "";
-    }
-
-    private Long getLongValue(Object value) {
-        if (value instanceof Number) {
-            return ((Number) value).longValue();
-        }
-        throw new IllegalStateException("Value is not a number: " + (value != null ? value.getClass().getName() : "null"));
     }
 }

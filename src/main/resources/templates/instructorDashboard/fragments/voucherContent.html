@@ -358,7 +358,7 @@
       </div>
     </div>
   </div>
-  <script>
+  <script th:inline="javascript">
     let searchTimer;
     let currentTab = 'valid'; // Default to valid vouchers tab
     let currentPage = 0;
@@ -462,7 +462,7 @@
       tempDiv.innerHTML = data;
 
       const rows = tempDiv.querySelectorAll('tr');
-      const rowCount = Array.from(rows).filter(row => !row.textContent.includes("Không có voucher")).length;
+      const rowCount = Array.from(rows).filter(row => !row.textContent.includes("No vouchers")).length;
 
       // Update stats based on tab type
       if (status === 'valid') {
@@ -478,7 +478,7 @@
               .then(data => {
                 let html = '';
                 if (data.length === 0) {
-                  html = '<div class="text-center text-muted">There are no eligible courses for this voucher.</div>';
+                  html = '<div class="text-center text-muted">This voucher is not currently valid for any courses.</div>';
                 } else {
                   html = '<ul class="list-group">';
                   data.forEach(title => {
@@ -489,6 +489,8 @@
                 document.getElementById('coursesList').innerHTML = html;
                 var modal = new bootstrap.Modal(document.getElementById('coursesModal'));
                 modal.show();
+              }).catch(() => {
+                document.getElementById('coursesList').innerHTML = '<div class="text-center text-danger">Unable to get course list. Please try again or check your connection.</div>';
               });
     }
 
@@ -575,7 +577,6 @@
           return false;
         }
       }
-      // Nếu là global, bỏ qua kiểm tra chọn course
       return true;
     }
 

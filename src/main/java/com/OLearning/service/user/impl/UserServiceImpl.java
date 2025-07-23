@@ -17,6 +17,7 @@ import com.OLearning.repository.EnrollmentRepository;
 import com.OLearning.repository.RoleRepository;
 import com.OLearning.repository.UserRepository;
 import com.OLearning.service.email.EmailService;
+import com.OLearning.service.email.PasswordResetService;
 import com.OLearning.service.user.UserService;
 import com.OLearning.service.notification.NotificationService;
 import jakarta.mail.MessagingException;
@@ -56,6 +57,8 @@ public class UserServiceImpl implements UserService {
     private CourseMapper courseMapper;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private PasswordResetService passwordResetService;
 
     @Override
     public Page<UserDTO> getAllUsers(Pageable page) {
@@ -64,21 +67,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<UserDTO> getUsersByRoleWithPagination(Long roleId, Pageable pageable) {
-        Page<User> userPage = userRepository.findByRole_RoleId(roleId, pageable);
-        return userPage.map(userMapper::toDTO);
-    }
-
-    @Override
     public Page<UserDTO> getInstructorsByRoleIdOrderByCourseCountDesc(Long roleId, Pageable pageable) {
         Page<User> userPage = userRepository.findInstructorsByRoleIdOrderByCourseCountDesc(roleId, pageable);
-        return userPage.map(userMapper::toDTO);
-    }
-
-    @Override
-    public Page<UserDTO> searchByNameWithPagination(String keyword, Long roleId, Pageable pageable) {
-        // Sử dụng repository method với pagination
-        Page<User> userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleId(keyword, roleId, pageable);
         return userPage.map(userMapper::toDTO);
     }
 
@@ -97,6 +87,30 @@ public class UserServiceImpl implements UserService {
     @Override
     public Page<UserDTO> searchByNameAndStatusWithPagination(String keyword, Long roleId, boolean status, Pageable pageable) {
         Page<User> userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleIdAndStatus(keyword, roleId, status, pageable);
+        return userPage.map(userMapper::toDTO);
+    }
+
+    @Override
+    public Page<UserDTO> getUsersByRolesWithPagination(List<Long> roleIds, Pageable pageable) {
+        Page<User> userPage = userRepository.findByRole_RoleIdIn(roleIds, pageable);
+        return userPage.map(userMapper::toDTO);
+    }
+
+    @Override
+    public Page<UserDTO> getUsersByRolesAndStatusWithPagination(List<Long> roleIds, boolean status, Pageable pageable) {
+        Page<User> userPage = userRepository.findByRole_RoleIdInAndStatus(roleIds, status, pageable);
+        return userPage.map(userMapper::toDTO);
+    }
+
+    @Override
+    public Page<UserDTO> searchByNameWithPagination(String keyword, List<Long> roleIds, Pageable pageable) {
+        Page<User> userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleIdIn(keyword, roleIds, pageable);
+        return userPage.map(userMapper::toDTO);
+    }
+
+    @Override
+    public Page<UserDTO> searchByNameAndStatusWithPagination(String keyword, List<Long> roleIds, boolean status, Pageable pageable) {
+        Page<User> userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleIdInAndStatus(keyword, roleIds, status, pageable);
         return userPage.map(userMapper::toDTO);
     }
 
@@ -159,9 +173,10 @@ public class UserServiceImpl implements UserService {
     public User registerAccount(RegisterDTO registerDTO) {
         validateRegistrationData(registerDTO);
         User user = registerMapper.toUser(registerDTO);
-
         try {
             User savedUser = userRepository.save(user);
+            // Verify OTP
+            passwordResetService.generateOTP(savedUser.getEmail(), "verifyEmail");
             System.out.println("User saved successfully with ID: " + savedUser.getUserId());
             return savedUser;
         } catch (Exception e) {
@@ -187,7 +202,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        Role role = roleRepository.findRoleByName(roleName)
+        Role role = roleRepository.findRoleByNameIsIgnoreCase(roleName)
                 .orElseThrow(() -> new RuntimeException("Role not found"));
 
         user.setRole(role);
@@ -206,7 +221,7 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsByEmail(userDTO.getEmail())) {
             throw new IllegalArgumentException("Email already exists");
         }
-        Optional<Role> roleOpt = roleRepository.findRoleByName(userDTO.getRoleName());
+        Optional<Role> roleOpt = roleRepository.findRoleByNameIsIgnoreCase(userDTO.getRoleName());
         if (roleOpt.isEmpty()) {
             throw new IllegalArgumentException("Role not found: " + userDTO.getRoleName());
         }
@@ -420,4 +435,13 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
 
+    @Override
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    @Override
+    public User save(User user) {
+        return userRepository.save(user);
+    }
 }

@@ -23,7 +23,7 @@
                             <h2 class="h5 fw-bold text-dark mb-4">
                                 <i class="fas fa-ticket-alt text-primary me-2"></i>Apply Voucher
                             </h2>
-                            <form th:action="@{/vouchers/apply}" method="post" id="voucher-form">
+                            <form th:action="@{/home/vouchers/apply}" method="post" id="voucher-form">
                                 <div class="input-group">
                                     <input type="text" id="voucher-code" name="code" th:value="${voucherCode}" placeholder="Enter voucher code"
                                            class="form-control form-control-lg">
@@ -146,7 +146,7 @@
                                         <ul class="pagination pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
                                             <!-- Previous button -->
                                             <li class="page-item mb-0" th:classappend="${!hasPrevious} ? 'disabled'">
-                                                <a class="page-link" th:href="@{/vouchers(page=${currentPage - 1})}" th:if="${hasPrevious}">
+                                                <a class="page-link" th:href="@{/home/vouchers(page=${currentPage - 1})}" th:if="${hasPrevious}">
                                                     <i class="fas fa-angle-left"></i>
                                                 </a>
                                                 <span class="page-link" th:unless="${hasPrevious}">
@@ -156,7 +156,7 @@
 
                                             <!-- Page numbers -->
                                             <li class="page-item mb-0" th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}">
-                                                <a class="page-link" th:href="@{/vouchers(page=${pageNum})}"
+                                                <a class="page-link" th:href="@{/home/vouchers(page=${pageNum})}"
                                                    th:text="${pageNum + 1}"
                                                    th:classappend="${pageNum == currentPage} ? 'active'">
                                                     1
@@ -165,7 +165,7 @@
 
                                             <!-- Next button -->
                                             <li class="page-item mb-0" th:classappend="${!hasNext} ? 'disabled'">
-                                                <a class="page-link" th:href="@{/vouchers(page=${currentPage + 1})}" th:if="${hasNext}">
+                                                <a class="page-link" th:href="@{/home/vouchers(page=${currentPage + 1})}" th:if="${hasNext}">
                                                     <i class="fas fa-angle-right"></i>
                                                 </a>
                                                 <span class="page-link" th:unless="${hasNext}">
@@ -254,7 +254,7 @@
             const originalText = submitBtn.innerHTML;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
 
-            fetch('/vouchers/apply', {
+            fetch('/home/vouchers/apply', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
@@ -313,9 +313,9 @@
                 const isPublicVoucher = viewBtn.closest('.voucher-card').querySelector('.claim-voucher-btn') !== null;
                 let fetchUrl;
                 if (isPublicVoucher) {
-                    fetchUrl = `/vouchers/voucher/${voucherId}/courses`;
+                    fetchUrl = `/home/vouchers/voucher/${voucherId}/courses`;
                 } else {
-                    fetchUrl = `/vouchers/voucher/${voucherId}/user/${currentUserId}/courses`;
+                    fetchUrl = `/home/vouchers/voucher/${voucherId}/user/${currentUserId}/courses`;
                 }
                 // Gọi API lấy danh sách khóa học hợp lệ
                 fetch(fetchUrl)
@@ -329,10 +329,17 @@
                             data.forEach(course => {
                                 const courseDiv = document.createElement('div');
                                 courseDiv.className = 'd-flex justify-content-between align-items-center border-bottom py-2';
-                                courseDiv.innerHTML = `
-                                    <span class="fw-semibold">${course.title || 'Course #' + course.courseId}</span>
-                                    <button class="btn btn-sm btn-primary apply-voucher-btn" data-course-id="${course.courseId}" data-voucher-id="${voucherId}">Apply</button>
-                                `;
+                                // Nếu là voucher public thì KHÔNG render nút Apply
+                                if (isPublicVoucher) {
+                                    courseDiv.innerHTML = `
+                                        <span class="fw-semibold">${course.title || 'Course #' + course.courseId}</span>
+                                    `;
+                                } else {
+                                    courseDiv.innerHTML = `
+                                        <span class="fw-semibold">${course.title || 'Course #' + course.courseId}</span>
+                                        <button class="btn btn-sm btn-primary apply-voucher-btn" data-course-id="${course.courseId}" data-voucher-id="${voucherId}">Apply</button>
+                                    `;
+                                }
                                 listDiv.appendChild(courseDiv);
                             });
                         }
@@ -369,27 +376,27 @@
                 const voucherId = claimBtn.getAttribute('data-voucher-id');
                 if (!voucherId) return;
 
-                fetch(`/vouchers/claim/${voucherId}`, {
+                fetch(`/home/vouchers/claim/${voucherId}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     }
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showNotification(data.message, 'success');
-                        // Reload the page to update the voucher lists
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 300);
-                    } else {
-                        showNotification(data.message, 'error');
-                    }
-                })
-                .catch(() => {
-                    showNotification('There was an error receiving the voucher, please try again.', 'error');
-                });
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showNotification(data.message, 'success');
+                            // Reload the page to update the voucher lists
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 300);
+                        } else {
+                            showNotification(data.message, 'error');
+                        }
+                    })
+                    .catch(() => {
+                        showNotification('There was an error receiving the voucher, please try again.', 'error');
+                    });
             }
         });
     </script>
