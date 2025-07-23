@@ -146,4 +146,8 @@ public class CourseServiceImpl implements CourseService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public Long countCourseIsPublish() {
+        return courseRepository.countCourseIsPublish();
+    }
 }

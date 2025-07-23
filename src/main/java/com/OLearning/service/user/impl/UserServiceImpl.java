@@ -256,4 +256,13 @@ public class UserServiceImpl implements UserService {
         return userRepository.existsById(userId);
     }
 
+    @Override
+    public Long countInstructor() {
+        return userRepository.countInstructor();
+    }
+
+    @Override
+    public Long countStudent() {
+        return userRepository.countStudent();
+    }
 }

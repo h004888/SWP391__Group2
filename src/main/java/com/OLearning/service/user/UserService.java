@@ -63,4 +63,8 @@ public interface UserService {
     Optional<User> findById(Long userId);
 
     boolean existsById(Long userId);
+
+    Long countInstructor();
+
+    Long countStudent();
 }

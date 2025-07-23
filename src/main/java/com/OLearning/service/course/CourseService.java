@@ -38,4 +38,6 @@ public interface CourseService {
 
         List<CourseViewDTO> getCourseByUserId(Long userId);
 
+        Long countCourseIsPublish();    
+
 }

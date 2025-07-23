@@ -10,6 +10,7 @@ import com.OLearning.entity.Course;
 import com.OLearning.mapper.course.CourseMapper;
 import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.course.CourseService;
+import com.OLearning.service.user.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -24,7 +25,8 @@ public class HomeController {
         private CategoryService categoryService;
         @Autowired
         private CourseService courseService;
-
+        @Autowired
+        private UserService userService;
         @GetMapping()
         public String getMethodName(Model model) {
                 // chia làm 2 danh sách:
@@ -35,6 +37,9 @@ public class HomeController {
                 model.addAttribute("topCategories", categoryService.findTop5ByOrderByIdAsc());
                 model.addAttribute("firstFive", firstFive);
                 model.addAttribute("nextFive", nextFive);
+                model.addAttribute("totalCourseIsPublish", courseService.countCourseIsPublish());
+                model.addAttribute("totalInstructor", userService.countInstructor());
+                model.addAttribute("totalStudent", userService.countStudent());
                 model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderCategory");
                 model.addAttribute("fragmentContent", "homePage/fragments/mainContent :: mainContent");
                 return "homePage/index";
@@ -63,7 +68,7 @@ public class HomeController {
         }
 
         @GetMapping("/course-detail")
-        public String courseDetail(@RequestParam("id") Long id, Model model ) {
+        public String courseDetail(@RequestParam("id") Long id, Model model) {
                 boolean flag = courseService.existsById(id);
                 if (!flag) {
                         model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderDefault");
