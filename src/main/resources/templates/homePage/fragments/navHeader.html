@@ -43,14 +43,13 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link " href="#" aria-haspopup="true" aria-expanded="false">About</a>
                     </li>
-                    <li class="nav-item dropdown"
-                        sec:authorize="hasRole('USER')">
-                        <a class="nav-link" th:href="@{/become-instructor}"
-                           aria-haspopup="true" aria-expanded="false">Become Instructor</a>
+                    <li class="nav-item dropdown" sec:authorize="hasRole('USER')">
+                        <a class="nav-link" th:href="@{/become-instructor}" aria-haspopup="true"
+                            aria-expanded="false">Become Instructor</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link " th:href="@{/home/vouchers}"
-                           aria-haspopup="true" aria-expanded="false">Voucher</a>
+                        <a class="nav-link " th:href="@{/home/vouchers}" aria-haspopup="true"
+                            aria-expanded="false">Voucher</a>
                     </li>
 
                 </ul>
@@ -79,22 +78,28 @@
                     <i class="bi bi-heart fa-fw"></i>
                 </a>
                 <!-- badge -->
-                <span id="wishlistTotalBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-danger mt-xl-2 ms-n1" th:text="${wishlistTotal != null ? wishlistTotal : 0}">
-                <span class="visually-hidden">items in wishlist</span>
+                <span id="wishlistTotalBadge"
+                    class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-danger mt-xl-2 ms-n1"
+                    th:text="${wishlistTotal != null ? wishlistTotal : 0}">
+                    <span class="visually-hidden">items in wishlist</span>
                 </span>
             </div>
             <!-- Notification -->
             <div class="nav-item ms-2 dropdown" sec:authorize="isAuthenticated()">
-                <a class="btn btn-light btn-round mb-0 position-relative notification-btn-home" href="#" role="button" data-bs-toggle="dropdown"
-                   aria-expanded="false" data-bs-auto-close="outside" title="Notifications">
+                <a class="btn btn-light btn-round mb-0 position-relative notification-btn-home" href="#" role="button"
+                    data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside" title="Notifications">
                     <i class="bi bi-bell fa-fw"></i>
-                    <span id="userNotificationBadge" th:if="${unreadCount > 0}" class="notif-badge animation-blink"></span>
+                    <span id="userNotificationBadge" th:if="${unreadCount > 0}"
+                        class="notif-badge animation-blink"></span>
                 </a>
                 <!-- Notification dropdown menu START -->
-                <div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0" style="width:320px;min-width:320px;max-width:320px;border:1px solid #ddd;">
+                <div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0"
+                    style="width:320px;min-width:320px;max-width:320px;border:1px solid #ddd;">
                     <div class="card bg-transparent">
-                        <div class="card-header bg-transparent border-bottom py-4 d-flex justify-content-between align-items-center">
-                            <h6 class="m-0">Unread Notifications <span id="userNotificationCount" class="badge bg-danger bg-opacity-10 text-danger ms-2">0 new</span></h6>
+                        <div
+                            class="card-header bg-transparent border-bottom py-4 d-flex justify-content-between align-items-center">
+                            <h6 class="m-0">Unread Notifications <span id="userNotificationCount"
+                                    class="badge bg-danger bg-opacity-10 text-danger ms-2">0 new</span></h6>
                         </div>
                         <div class="card-body p-0">
                             <ul id="userNotificationList" class="list-group list-unstyled list-group-flush">
@@ -102,7 +107,8 @@
                             </ul>
                         </div>
                         <!-- Button -->
-                        <div class="card-footer bg-transparent border-0 py-3 text-center position-relative" style="padding-top:0;">
+                        <div class="card-footer bg-transparent border-0 py-3 text-center position-relative"
+                            style="padding-top:0;">
                             <a th:href="@{/user/notifications}" class="stretched-link">View all notifications</a>
                         </div>
                     </div>
@@ -115,8 +121,10 @@
                     <i class="bi bi-cart3 fa-fw"></i>
                 </a>
                 <!-- badge -->
-                <span id="cartTotalBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-dark mt-xl-2 ms-n1" th:text="${cartTotal != null ? cartTotal : 0}">
-                <span class="visually-hidden">items in cart</span>
+                <span id="cartTotalBadge"
+                    class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-dark mt-xl-2 ms-n1"
+                    th:text="${cartTotal != null ? cartTotal : 0}">
+                    <span class="visually-hidden">items in cart</span>
                 </span>
             </div>
             <div class="navbar-nav ms-2">
@@ -132,7 +140,8 @@
             <div class="dropdown ms-1 ms-lg-0" sec:authorize="isAuthenticated()">
                 <a class="avatar avatar-sm p-0" href="#" id="profileDropdown" role="button" data-bs-auto-close="outside"
                     data-bs-display="static" data-bs-toggle="dropdown" aria-expanded="false">
-                    <img class="avatar-img rounded-circle" th:src="${#authentication.principal.profilePicture != null} ?
+                    <img class="avatar-img rounded-circle"
+                        th:src="${#authentication.principal.profilePicture != null} ?
                                                                                              ${#authentication.principal.profilePicture} :
                                                                                              @{/img/undraw_profile.svg}" alt="avatar">
                 </a>
@@ -143,10 +152,10 @@
                         <div class="d-flex align-items-center">
                             <!-- Avatar -->
                             <div class="avatar me-3">
-                                <img class="avatar-img rounded-circle shadow" th:src="${#authentication.principal.profilePicture != null} ?
+                                <img class="avatar-img rounded-circle shadow"
+                                    th:src="${#authentication.principal.profilePicture != null} ?
                                                                                              ${#authentication.principal.profilePicture} :
-                                                                                             @{/img/undraw_profile.svg}"
-                                    alt="avatar">
+                                                                                             @{/img/undraw_profile.svg}" alt="avatar">
                             </div>
                             <div>
                                 <a class="h6" href="#" th:text="${#authentication.principal.userEntity.username}">Lori
@@ -278,7 +287,7 @@
             background-color: #f8f9fa;
             border-color: #dee2e6;
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .notification-page-btn .bi-bell-fill {
@@ -313,7 +322,7 @@
 
         .notification-page-btn:active {
             transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .notification-page-btn.loading {
@@ -330,6 +339,7 @@
                 transform: scale(1);
                 opacity: 1;
             }
+
             50% {
                 transform: scale(1.1);
                 opacity: 0.8;
@@ -378,10 +388,10 @@
     <!-- Notification button JavaScript -->
     <script>
         // Add loading effect to notification page button
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const notificationPageBtn = document.querySelector('.notification-page-btn');
             if (notificationPageBtn) {
-                notificationPageBtn.addEventListener('click', function() {
+                notificationPageBtn.addEventListener('click', function () {
                     this.classList.add('loading');
                     // Remove loading class after navigation
                     setTimeout(() => {
@@ -422,7 +432,7 @@
         }
 
         // Load notifications when page loads (only for authenticated users)
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Check if user is authenticated (notification button exists)
             const notificationPageBtn = document.querySelector('.notification-page-btn');
             if (notificationPageBtn) {
@@ -433,10 +443,10 @@
 
     <!-- Add this JS at the end of the file, before </body> -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const notificationDropdown = document.querySelector('a[title="Notifications"][data-bs-toggle="dropdown"]');
             if (notificationDropdown) {
-                notificationDropdown.addEventListener('show.bs.dropdown', function() {
+                notificationDropdown.addEventListener('show.bs.dropdown', function () {
                     loadUserNotifications();
                 });
             }
@@ -491,7 +501,7 @@
                         <small class="text-body">${timeAgo}</small>
                     </div>
                 `;
-                li.addEventListener('click', function() {
+                li.addEventListener('click', function () {
                     window.location.href = `/user/notifications/view/${notification.notificationId}`;
                 });
                 list.appendChild(li);
@@ -509,7 +519,7 @@
             return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
         }
         function getNotificationTypeIcon(type) {
-            switch(type) {
+            switch (type) {
                 case 'ENROLLMENT': return 'fas fa-user-plus';
                 case 'COURSE_COMPLETION': return 'fas fa-graduation-cap';
                 case 'QUIZ_RESULT': return 'fas fa-question-circle';

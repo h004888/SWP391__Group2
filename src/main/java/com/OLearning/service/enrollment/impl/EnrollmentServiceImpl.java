@@ -109,7 +109,6 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         return new PageImpl<>(enrollmentDTOList, pageable, enrollments.getTotalElements());
     }
 
-
     @Override
     public boolean blockEnrollment(int enrollmentId) {
         Optional<Enrollment> enrollmentOpt = enrollmentRepository.findById(enrollmentId);
@@ -145,7 +144,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     public Integer getTotalEnrollment(Long courseId) {
 
         Integer count = enrollmentRepository.findByCourseId(courseId).size();
-        if(count == null){
+        if (count == null) {
             return 0;
         }
         return count;
@@ -238,7 +237,8 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Override
     public void cleanupDuplicateEnrollments(User user, Course course) {
-        List<Enrollment> enrollments = enrollmentRepository.findAllByUserAndCourseOrderByEnrollmentDateDesc(user, course);
+        List<Enrollment> enrollments = enrollmentRepository.findAllByUserAndCourseOrderByEnrollmentDateDesc(user,
+                course);
         if (enrollments.size() > 1) {
             // Giữ lại enrollment đầu tiên (mới nhất), xóa các enrollment còn lại
             for (int i = 1; i < enrollments.size(); i++) {

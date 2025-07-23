@@ -12,7 +12,7 @@ $(document).ready(function () {
     }
 
     // Tải dữ liệu cho tất cả các tab có thể nhìn thấy
-    $('#accountTabs .nav-link').each(function() {
+    $('#accountTabs .nav-link').each(function () {
         const roleId = parseInt($(this).data('role'));
         const isActive = $(this).hasClass('active');
         loadUsers(roleId, '', 0, isActive); // Chỉ hiển thị pagination cho tab active
@@ -20,7 +20,7 @@ $(document).ready(function () {
 
     // Load initial counts
     updateAllCounts();
-    
+
     function toggleAddButton(tabId) {
         if (tabId === "#admin") {
             $("#addAccountBtnContainer").show();
@@ -66,13 +66,13 @@ $(document).ready(function () {
 
         clearTimeout(searchTimer);
         searchTimer = setTimeout(function () {
-            currentPage = 0; 
+            currentPage = 0;
             loadUsers(currentRole, keyword, 0, true);
         }, 300);
     });
 
     // Status filter change event
-    $('#statusFilter').on('change', function() {
+    $('#statusFilter').on('change', function () {
         currentStatus = $(this).val();
         currentPage = 0;
         const keyword = $('#searchInput').val().trim();
@@ -193,18 +193,18 @@ function loadUsers(roleId, keyword = '', page = 0, showPagination = false) {
         },
         beforeSend: function () {
             console.log("=== AJAX SENDING ===");
-            console.log("Data:", {keyword: keyword || null, role: roleId, page: page, status: statusParam});
+            console.log("Data:", { keyword: keyword || null, role: roleId, page: page, status: statusParam });
         },
         success: function (data) {
-            
+
             if (typeof data === 'object' && data.tableContent && data.pagination) {
-                
+
                 $(tableBodyElement).html(data.tableContent);
                 if (showPagination) {
                     totalPages = data.pagination.totalPages;
                 }
             } else {
-                
+
                 $(tableBodyElement).html(data);
                 if (showPagination) {
                     getPaginationInfo(roleId, keyword, page);

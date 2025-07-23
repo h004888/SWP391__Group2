@@ -21,7 +21,7 @@ import java.util.Optional;
 public class UserProfileController {
     @Autowired
     private UserService userService;
-    
+
     @Autowired
     private UploadFile uploadFile;
 
@@ -40,7 +40,7 @@ public class UserProfileController {
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
         boolean isInstructor = userDetails.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_INSTRUCTOR"));
-        
+
         // dem notification chua doc
         if (!isAdmin && !isInstructor) {
             userRepository.findByUsername(userDetails.getUsername()).ifPresent(user -> {
@@ -73,7 +73,6 @@ public class UserProfileController {
                 .anyMatch(a -> a.getAuthority().equals("ROLE_INSTRUCTOR"));
         boolean isStudent = userDetails.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_STUDENT"));
-        
 
         if (isStudent) {
             userRepository.findByUsername(userDetails.getUsername()).ifPresent(user -> {
@@ -87,7 +86,8 @@ public class UserProfileController {
             model.addAttribute("fragmentContent", "adminDashBoard/fragments/editProfileContent :: editProfileContent");
             return "adminDashBoard/index";
         } else if (isInstructor) {
-            model.addAttribute("fragmentContent", "instructorDashboard/fragments/editProfileContent :: editProfileContent");
+            model.addAttribute("fragmentContent",
+                    "instructorDashboard/fragments/editProfileContent :: editProfileContent");
             return "instructorDashboard/indexUpdate";
         } else if (isStudent) {
             model.addAttribute("fragmentContent", "homePage/fragments/editProfileFragment :: editProfile");
@@ -100,9 +100,9 @@ public class UserProfileController {
 
     @PostMapping("/edit")
     public String updateProfile(@AuthenticationPrincipal UserDetails userDetails,
-                                @ModelAttribute("profile") UserProfileEditDTO profileEditDTO,
-                                @RequestParam(value = "avatarFile", required = false) MultipartFile avatarFile,
-                                Model model) {
+            @ModelAttribute("profile") UserProfileEditDTO profileEditDTO,
+            @RequestParam(value = "avatarFile", required = false) MultipartFile avatarFile,
+            Model model) {
         try {
             if (avatarFile != null && !avatarFile.isEmpty()) {
                 String imageUrl = uploadFile.uploadImageFile(avatarFile);
@@ -112,7 +112,7 @@ public class UserProfileController {
                 Optional<UserProfileEditDTO> oldProfile = userService.getProfileByUsername(userDetails.getUsername());
                 oldProfile.ifPresent(old -> profileEditDTO.setAvatarUrl(old.getAvatarUrl()));
             }
-            
+
             userService.updateProfileByUsername(userDetails.getUsername(), profileEditDTO);
             return "redirect:/profile";
         } catch (IOException e) {
@@ -120,7 +120,5 @@ public class UserProfileController {
             return showEditProfile(userDetails, model);
         }
     }
-
-
 
 }

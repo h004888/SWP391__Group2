@@ -1,26 +1,30 @@
 <div th:fragment="reportTableRowContent">
-<tr th:each="report : ${reports}">
-    <td>[[${report.id}]]</td>
-    <td>[[${report.reportType != null ? report.reportType : '-'}]]</td>
-    <td>[[${report.course != null && report.course.title != null ? report.course.title : '-'}]]</td>
-    <td>[[${report.user != null && report.user.username != null ? report.user.username : '-'}]]</td>
-    <td>
-        <span th:if="${report.status == 'processed'}" class="badge bg-success-soft text-success">processed</span>
-        <span th:if="${report.status == 'pending'}" class="badge bg-warning-soft text-warning">pending</span>
-        <span th:if="${report.status != 'processed' and report.status != 'pending'}" class="badge bg-secondary-soft text-secondary"><i class="fas fa-question"></i></span>
-        <span th:if="${report.status == null}">-</span>
-    </td>
-    <td>[[${report.createdAt != null ? #temporals.format(report.createdAt, 'dd/MM/yyyy HH:mm') : '-'}]]</td>
-    <td>
-        <a th:href="@{/admin/reports/view/{id}(id=${report.id})}" class="btn btn-sm btn-info-soft text-info" title="View">
-            <i class="fas fa-eye"></i>
-        </a>
-        <form th:if="${report.status != 'processed'}" th:action="@{/admin/reports/process/{id}(id=${report.id})}" method="post" style="display:inline">
-            <button type="submit" class="btn btn-success-soft btn-sm text-success" title="Mark as processed"><i class="fas fa-check"></i></button>
-        </form>
-    </td>
-</tr>
-<tr th:if="${#lists.isEmpty(reports)}">
-    <td colspan="7" class="text-center text-muted">No reports found.</td>
-</tr>
+    <tr th:each="report : ${reports}">
+        <td>[[${report.id}]]</td>
+        <td>[[${report.reportType != null ? report.reportType : '-'}]]</td>
+        <td>[[${report.course != null && report.course.title != null ? report.course.title : '-'}]]</td>
+        <td>[[${report.user != null && report.user.username != null ? report.user.username : '-'}]]</td>
+        <td>
+            <span th:if="${report.status == 'processed'}" class="badge bg-success-soft text-success">processed</span>
+            <span th:if="${report.status == 'pending'}" class="badge bg-warning-soft text-warning">pending</span>
+            <span th:if="${report.status != 'processed' and report.status != 'pending'}"
+                class="badge bg-secondary-soft text-secondary"><i class="fas fa-question"></i></span>
+            <span th:if="${report.status == null}">-</span>
+        </td>
+        <td>[[${report.createdAt != null ? #temporals.format(report.createdAt, 'dd/MM/yyyy HH:mm') : '-'}]]</td>
+        <td>
+            <a th:href="@{/admin/reports/view/{id}(id=${report.id})}" class="btn btn-sm btn-info-soft text-info"
+                title="View">
+                <i class="fas fa-eye"></i>
+            </a>
+            <form th:if="${report.status != 'processed'}" th:action="@{/admin/reports/process/{id}(id=${report.id})}"
+                method="post" style="display:inline">
+                <button type="submit" class="btn btn-success-soft btn-sm text-success" title="Mark as processed"><i
+                        class="fas fa-check"></i></button>
+            </form>
+        </td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(reports)}">
+        <td colspan="7" class="text-center text-muted">No reports found.</td>
+    </tr>
 </div>

@@ -1,4 +1,4 @@
-package com.OLearning.controller.instructorDashBoard;
+package com.OLearning.controller.instructorDashboard;
 
 import com.OLearning.service.instructor.RevenueStatisticsService;
 import org.springframework.beans.factory.annotation.Autowired;
