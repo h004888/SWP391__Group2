@@ -5,7 +5,7 @@
                 <i class="fas fa-flag me-2"></i>Chi tiết báo cáo
             </h5>
             <a th:href="@{/admin/course/detail/{courseId}(courseId=${report.course.courseId})}"
-               class="btn btn-success btn-sm">
+                class="btn btn-success btn-sm">
                 <i class="fas fa-book-open me-1"></i>Xem chi tiết khóa học
             </a>
         </div>
@@ -13,7 +13,8 @@
             <dl class="row">
                 <dt class="col-sm-3">Loại báo cáo</dt>
                 <dd class="col-sm-9">
-                    <span th:text="${report.reportType == 'REPORT_COURSE' ? 'Báo cáo khóa học' : 'Báo cáo bình luận'}"></span>
+                    <span
+                        th:text="${report.reportType == 'REPORT_COURSE' ? 'Báo cáo khóa học' : 'Báo cáo bình luận'}"></span>
                 </dd>
 
                 <dt class="col-sm-3">Người báo cáo</dt>
@@ -34,7 +35,20 @@
 
                 <dt class="col-sm-3">Link/chứng cứ</dt>
                 <dd class="col-sm-9">
-                    <a th:if="${report.evidenceLink != null}" th:href="${report.evidenceLink}" target="_blank" th:text="${report.evidenceLink}"></a>
+                    <th:block th:if="${report.evidenceLink != null}">
+                        <th:block
+                            th:if="${#strings.contains(report.evidenceLink, 'image') || report.evidenceLink.matches('.*\\.(jpg|jpeg|png|gif)$')}">
+                            <img th:src="${report.evidenceLink}" alt="Bằng chứng ảnh"
+                                style="max-width: 300px; max-height: 200px; display: block; margin-top: 8px;" />
+                        </th:block>
+                        <th:block
+                            th:if="${#strings.contains(report.evidenceLink, 'video') || report.evidenceLink.matches('.*\\.(mp4|webm|ogg)$')}">
+                            <video th:src="${report.evidenceLink}" controls
+                                style="max-width: 300px; max-height: 200px; display: block; margin-top: 8px;"></video>
+                        </th:block>
+                        <a th:if="${!(#strings.contains(report.evidenceLink, 'image') || report.evidenceLink.matches('.*\\.(jpg|jpeg|png|gif)$') || #strings.contains(report.evidenceLink, 'video') || report.evidenceLink.matches('.*\\.(mp4|webm|ogg)$'))}"
+                            th:href="${report.evidenceLink}" target="_blank" th:text="${report.evidenceLink}"></a>
+                    </th:block>
                     <span th:if="${report.evidenceLink == null}">Không có</span>
                 </dd>
 
@@ -47,18 +61,26 @@
                 <th:block th:if="${instructorReplyNotification != null}">
                     <dt class="col-sm-3">Phản hồi từ Instructor</dt>
                     <dd class="col-sm-9">
-                        <div class="border rounded p-2 mb-2 bg-light" th:text="${instructorReplyNotification.message}"></div>
-                        <span class="badge bg-secondary me-2" th:text="'Instructor: ' + ${instructorReplyNotification.user.fullName}"></span>
-                        <span class="badge bg-info" th:text="${#temporals.format(instructorReplyNotification.sentAt, 'dd/MM/yyyy HH:mm')}"></span>
+                        <div class="border rounded p-2 mb-2 bg-light" th:text="${instructorReplyNotification.message}">
+                        </div>
+                        <span class="badge bg-secondary me-2"
+                            th:text="'Instructor: ' + ${instructorReplyNotification.user.fullName}"></span>
+                        <span class="badge bg-info"
+                            th:text="${#temporals.format(instructorReplyNotification.sentAt, 'dd/MM/yyyy HH:mm')}"></span>
                         <div th:if="${instructorReplyNotification.evidenceLink != null}" class="mt-2">
                             <span class="fw-bold">Bằng chứng:</span>
-                            <th:block th:if="${#strings.contains(instructorReplyNotification.evidenceLink, 'image') || instructorReplyNotification.evidenceLink.matches('.*\\.(jpg|jpeg|png|gif)$')}">
-                                <img th:src="${instructorReplyNotification.evidenceLink}" alt="Bằng chứng ảnh" style="max-width: 300px; max-height: 200px; display: block; margin-top: 8px;"/>
+                            <th:block
+                                th:if="${#strings.contains(instructorReplyNotification.evidenceLink, 'image') || instructorReplyNotification.evidenceLink.matches('.*\\.(jpg|jpeg|png|gif)$')}">
+                                <img th:src="${instructorReplyNotification.evidenceLink}" alt="Bằng chứng ảnh"
+                                    style="max-width: 300px; max-height: 200px; display: block; margin-top: 8px;" />
                             </th:block>
-                            <th:block th:if="${#strings.contains(instructorReplyNotification.evidenceLink, 'video') || instructorReplyNotification.evidenceLink.matches('.*\\.(mp4|webm|ogg)$')}">
-                                <video th:src="${instructorReplyNotification.evidenceLink}" controls style="max-width: 300px; max-height: 200px; display: block; margin-top: 8px;"></video>
+                            <th:block
+                                th:if="${#strings.contains(instructorReplyNotification.evidenceLink, 'video') || instructorReplyNotification.evidenceLink.matches('.*\\.(mp4|webm|ogg)$')}">
+                                <video th:src="${instructorReplyNotification.evidenceLink}" controls
+                                    style="max-width: 300px; max-height: 200px; display: block; margin-top: 8px;"></video>
                             </th:block>
-                            <a th:href="${instructorReplyNotification.evidenceLink}" target="_blank" class="d-block mt-1">Xem file</a>
+                            <a th:href="${instructorReplyNotification.evidenceLink}" target="_blank"
+                                class="d-block mt-1">Xem file</a>
                         </div>
                     </dd>
                 </th:block>
@@ -67,11 +89,15 @@
                     <dt class="col-sm-3">Nội dung bình luận bị báo cáo</dt>
                     <dd class="col-sm-9">
                         <div class="border rounded p-2 mb-2" th:text="${reportedComment.comment}"></div>
-                        <span class="badge bg-secondary me-2" th:text="'Tác giả: ' + ${reportedComment.enrollment.user.fullName}"></span>
-                        <span class="badge bg-info" th:text="${#temporals.format(reportedComment.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+                        <span class="badge bg-secondary me-2"
+                            th:text="'Tác giả: ' + ${reportedComment.enrollment.user.fullName}"></span>
+                        <span class="badge bg-info"
+                            th:text="${#temporals.format(reportedComment.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
                         <div class="mt-2">
-                            <button type="button" class="btn btn-warning btn-sm" th:if="${!reportedComment.hidden}" th:onclick="|hideComment(${reportedComment.reviewId}, true)|">Ẩn bình luận</button>
-                            <button type="button" class="btn btn-success btn-sm" th:if="${reportedComment.hidden}" th:onclick="|hideComment(${reportedComment.reviewId}, false)|">Hiện bình luận</button>
+                            <button type="button" class="btn btn-warning btn-sm" th:if="${!reportedComment.hidden}"
+                                th:onclick="|hideComment(${reportedComment.reviewId}, true)|">Ẩn bình luận</button>
+                            <button type="button" class="btn btn-success btn-sm" th:if="${reportedComment.hidden}"
+                                th:onclick="|hideComment(${reportedComment.reviewId}, false)|">Hiện bình luận</button>
                             <span th:if="${reportedComment.hidden}" class="badge bg-danger ms-2">Đã bị ẩn</span>
                         </div>
                     </dd>
@@ -81,7 +107,8 @@
                     <dd class="col-sm-9 text-danger">Bình luận đã bị xóa hoặc không tồn tại.</dd>
                 </th:block>
             </dl>
-            <form th:if="${report.status != 'processed'}" th:action="@{/admin/reports/process/{id}(id=${report.id})}" method="post">
+            <form th:if="${report.status != 'processed'}" th:action="@{/admin/reports/process/{id}(id=${report.id})}"
+                method="post">
                 <button type="submit" class="btn btn-success">Processed</button>
             </form>
         </div>
@@ -94,21 +121,21 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ reviewId: reviewId, hidden: hidden })
                 })
-                .then(res => res.text())
-                .then(data => {
-                    if (data === 'success') {
-                        // Nếu trang lesson đang mở ở window.opener, reload comment động
-                        if (window.opener && typeof window.opener.loadComments === 'function') {
-                            window.opener.loadComments(
-                                window.opener.document.querySelector('input[name="courseId"]').value,
-                                window.opener.document.querySelector('input[name="lessonId"]').value
-                            );
+                    .then(res => res.text())
+                    .then(data => {
+                        if (data === 'success') {
+                            // Nếu trang lesson đang mở ở window.opener, reload comment động
+                            if (window.opener && typeof window.opener.loadComments === 'function') {
+                                window.opener.loadComments(
+                                    window.opener.document.querySelector('input[name="courseId"]').value,
+                                    window.opener.document.querySelector('input[name="lessonId"]').value
+                                );
+                            }
+                            location.reload();
+                        } else {
+                            alert('Có lỗi xảy ra!');
                         }
-                        location.reload();
-                    } else {
-                        alert('Có lỗi xảy ra!');
-                    }
-                });
+                    });
             }
         </script>
     </div>
