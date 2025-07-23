@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/lesson")

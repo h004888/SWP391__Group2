@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
 public class PasswordResetOTP {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

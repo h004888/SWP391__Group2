@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Account Blocked</title>
+    <link rel="stylesheet" href="/css/sb-admin-2.min.css">
+    <style>
+        html, body {
+            height: 100%;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+        }
+        .blocked-icon {
+            font-size: 3rem;
+            color: #080808;
+            margin-bottom: 1rem;
+        }
+        .pending-badge {
+            font-size: 1rem;
+            padding: 0.5rem 1.5rem;
+            background: #4b4a47b9;
+            color: #ffffff;
+            border-radius: 2rem;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+        .card {
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+        }
+        .card-body {
+            padding: 2.5rem 2rem;
+        }
+        @media (max-width: 576px) {
+            .card-body { padding: 1.5rem 0.5rem; }
+        }
+        .btn-outline-secondary {
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+        .logout-btn {
+            position: absolute;
+            top: 1.2rem;
+            right: 1.5rem;
+            background: #f7f7f7;
+            color: #111;
+            border: none;
+            border-radius: 2rem;
+            padding: 0.7rem 1.7rem 0.7rem 1.3rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background 0.2s;
+        }
+        .logout-btn:hover {
+            background: #ececec;
+            color: #000;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid d-flex align-items-center justify-content-center" style="min-height:100vh;">
+    <div class="row w-100 justify-content-center">
+        <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+            <div class="card shadow">
+                <div class="card-body text-center position-relative">
+                    <a href="/logout" class="logout-btn" title="logout">
+                        <i class="fas fa-arrow-left"></i> Logout
+                    </a>
+                    <div class="blocked-icon">
+                        <i class="fas fa-user-lock"></i>
+                    </div>
+                    <h2 class="text-danger mb-3">Your account has been blocked</h2>
+                    <p class="mb-4">If you believe this is a mistake, please submit a request to the admin below.</p>
+                    <form method="post" action="/account-blocked/appeal">
+                        <div class="mb-3" th:if="${success == null or !success}">
+                            <textarea name="message" class="form-control" rows="4" placeholder="Describe your issue..." required th:disabled="${success}"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100" th:if="${success == null or !success}">Send Appeal</button>
+                        <span class="pending-badge" th:if="${success == true}">Pending admin review</span>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- FontAwesome for icon -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+</body>
+</html> 

@@ -1,0 +1,160 @@
+<th:block th:fragment="accountDetail">
+
+    <!-- Title -->
+    <div class="row">
+        <div class="col-12 mb-3">
+            <h1 class="h3 mb-2 mb-sm-0">Account detail</h1>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Personal information START -->
+        <div class="col-xxl-12">
+            <div class="card bg-transparent border rounded-3 h-100">
+
+                <!-- Card header -->
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="card-header-title mb-0">Personal Information</h5>
+                </div>
+
+                <!-- Card body START -->
+                <div class="card-body">
+                    <!-- Profile picture -->
+                    <div class="avatar avatar-xl mb-3">
+                        <img class="avatar-img rounded-circle border border-white border-3 shadow"
+                           th:src="${userDetail.profilePicture != null} ? ${userDetail.profilePicture} : '/img/undraw_profile.svg'" alt="">
+                    </div>
+
+                    <!-- Information START -->
+                    <div class="row">
+
+                        <!-- Information item -->
+                        <div class="col-md-6">
+                            <ul class="list-group list-group-borderless">
+                                <li class="list-group-item">
+                                    <span>User ID:</span>
+                                    <span class="h6 mb-0" th:text="${userDetail.userId}">1</span>
+                                </li>
+
+                                <li class="list-group-item">
+                                    <span>Full Name:</span>
+                                    <span class="h6 mb-0" th:text="${userDetail.fullName}">Louis Ferguson</span>
+                                </li>
+
+                                <li class="list-group-item">
+                                    <span>User Name:</span>
+                                    <span class="h6 mb-0" th:text="${userDetail.username}">Lousifer</span>
+                                </li>
+
+                                <li class="list-group-item">
+                                    <span>Phone Number:</span>
+                                    <span class="h6 mb-0" th:text="${userDetail.phone}">+123 456 789 10</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Information item -->
+                        <div class="col-md-6">
+                            <ul class="list-group list-group-borderless">
+                                <li class="list-group-item">
+                                    <span>Email:</span>
+                                    <span class="h6 mb-0" th:text="${userDetail.email}">example@gmail.com</span>
+                                </li>
+
+                                <li class="list-group-item">
+                                    <span>Address:</span>
+                                    <span class="h6 mb-0" th:text="${userDetail.address}">California</span>
+                                </li>
+
+                                <li class="list-group-item">
+                                    <span>Role:</span>
+                                    <span class="h6 mb-0" th:text="${userDetail.roleName}">Student</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <!-- Information item -->
+                        <div class="col-md-6">
+                            <ul class="list-group list-group-borderless">
+                                <li class="list-group-item">
+                                    <span>Personal Skill:</span>
+                                    <span class="h6 mb-0" th:text="${userDetail.personalSkill}"></span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- Information END -->
+                </div>
+                <!-- Card body END -->
+            </div>
+        </div>
+        <!-- Personal information END -->
+
+        <!-- Enrolled courses START -->
+        <div class="col-12">
+            <div class="card bg-transparent border h-100">
+
+                <!-- Card header -->
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0">Courses Enrolled</h5>
+                </div>
+
+                <!-- Card body START -->
+                <div class="card-body">
+                    <div class="table-responsive border-0">
+                        <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                            <thead>
+                            <tr>
+                                <th scope="col" class="border-0">Course ID</th>
+                                <th scope="col" class="border-0">Course Name</th>
+                                <th scope="col" class="border-0">Category</th>
+                                <th scope="col" class="border-0">Course Level</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="course : ${userDetail.enrolledCourses}" >
+                                <td th:text="${course.courseId}">1</td>
+                                <td>
+                                    <div class="d-flex  ">
+                                        <div class="w-60px me-2">
+                                            <img th:src="${course.courseImg}" class="rounded" alt="">
+                                        </div>
+                                        <h6 class="table-responsive-title mb-0">
+                                            <a href="#" class="stretched-link" th:text="${course.title}">Course Title</a>
+                                        </h6>
+                                    </div>
+                                </td>
+                                <td th:text="${course.categoryName}">Programming</td>
+                                <td th:text="${course.courseLevel == null ? 'N/A' : course.courseLevel}">Beginner</td>
+                            </tr>
+                            <!-- Empty state -->
+                            <tr th:if="${#lists.isEmpty(userDetail.enrolledCourses)}">
+                                <td colspan="8" class="text-center align-middle py-5">
+                                    <div class="d-flex flex-column align-items-center justify-content-center">
+                                        <i class="fas fa-book fa-3x mb-3 opacity-50"></i>
+                                        <h5>No courses found</h5>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Enrolled courses END -->
+
+    </div> <!-- Row END -->
+
+    <!-- Back button -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="text-end">
+                <a th:href="@{/admin/account}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+
+</th:block>

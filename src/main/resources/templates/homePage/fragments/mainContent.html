@@ -1,6 +1,38 @@
 <!-- **************** MAIN CONTENT START **************** -->
-<main th:fragment="mainContent">
+<main th:fragment="mainContent" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
+    <div id="notification" class="position-fixed top-0 end-0 p-5" style="z-index: 1050; top: 80px; transform: translateX(200%); transition: transform 0.5s ease;">
+        <div id="notification-alert" class="alert d-flex align-items-center mb-0" role="alert" style="min-width: 250px;">
+            <i id="notification-icon" class="me-2"></i>
+            <span id="notification-message"></span>
+        </div>
+    </div>
+    <script th:inline="javascript">
+        // Set currentUserId for frontend JavaScript
+        window.userId = /*[[${currentUserId}]]*/ 0;
+    </script>
+    <script>
+        // Function to show notification (copied from voucherContent.html)
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            const notificationAlert = document.getElementById('notification-alert');
+            const notificationIcon = document.getElementById('notification-icon');
+            const notificationMessage = document.getElementById('notification-message');
+            notificationAlert.classList.remove('alert-success', 'alert-danger');
+            notificationMessage.textContent = message;
+            if (type === 'success') {
+                notificationAlert.classList.add('alert-success');
+                notificationIcon.className = 'fas fa-check-circle me-2';
+            } else {
+                notificationAlert.classList.add('alert-danger');
+                notificationIcon.className = 'fas fa-exclamation-circle me-2';
+            }
+            notification.style.transform = 'translateX(0)';
+            setTimeout(() => {
+                notification.style.transform = 'translateX(200%)';
+            }, 4000);
+        }
+    </script>
     <!-- =======================
 Main Banner START -->
     <section class="position-relative overflow-hidden pt-5 pt-lg-3">
@@ -461,7 +493,7 @@ Action box START -->
             </figure>
             <!-- SVG decoration END -->
 
-            <div class="row">
+            <div class="row" sec:authorize="hasRole('USER')">
                 <div class="col-12">
                     <div class="bg-info p-4 p-sm-5 rounded-3">
                         <div class="row position-relative">
@@ -484,7 +516,7 @@ Action box START -->
                                     </div>
                                     <!-- Content and input -->
                                     <div class="col-lg-5 text-lg-end">
-                                        <a href="#" class="btn btn-outline-warning mb-0">Start Teaching Today</a>
+                                        <a th:href="@{/become-instructor}" class="btn btn-outline-warning mb-0">Start Teaching Today</a>
                                     </div>
                                 </div>
                             </div>
@@ -539,7 +571,13 @@ Trending courses START -->
                                             <a href="#" class="badge text-bg-dark"
                                                 th:text="${course.courseLevel}">Beginner</a>
                                         </span>
-                                        <a href="#" class="h6 fw-light mb-0"><i class="far fa-bookmark"></i></a>
+                                        <button type="button"
+                                                class="btn btn-link text-muted p-0 wishlist-toggle"
+                                                th:data-course-id="${course.courseId}"
+                                                th:onclick="'toggleWishlist(this, ' + ${course.courseId} + ')'"
+                                                style="font-size: 1.2rem;">
+                                            <i class="far fa-heart"></i>
+                                        </button>
                                     </div>
                                     <!-- Title -->
                                     <h5 class="card-title"><a
@@ -594,16 +632,21 @@ Trending courses START -->
                                         </div>
                                         <!-- Price -->
                                         <div>
-
+                                            <div th:if="${topCoursesEnrolledMap[course.courseId] == null or !topCoursesEnrolledMap[course.courseId]}">
                                             <h4 class="text-success mb-0 item-show " style="font-size: 1.2rem;"
                                                 th:if="${course.price>0}"><span
                                                     th:text="${course.price != null ? #numbers.formatDecimal(course.price, 0, 'COMMA', 0, 'POINT')+' ₫' : 'N/A'}"></span>
                                             </h4>
                                             <h4 class="text-success mb-0 item-show" th:if="${course.price==0}">Free
                                             </h4>
-
-                                            <a href="#" class="btn btn-sm btn-success-soft item-show-hover"><i
-                                                    class="fas fa-shopping-cart me-2"></i>Add to cart</a>
+                                                <button type="button" class="btn btn-sm btn-success-soft item-show-hover m-1 add-to-cart-btn"
+                                                        th:attr="data-course-id=${course.courseId}">
+                                                    <i class="fas fa-shopping-cart me-2"></i>Add to cart
+                                                </button>
+                                            </div>
+                                            <a th:if="${topCoursesEnrolledMap[course.courseId] != null and topCoursesEnrolledMap[course.courseId]}"
+                                               th:href="@{/learning/course/view(courseId=${course.courseId})}"
+                                               class="btn btn-sm btn-primary-soft mb-0">Continue</a>
                                         </div>
                                     </div>
                                 </div>
@@ -889,6 +932,9 @@ Reviews START -->
     </section>
     <!-- =======================
 Reviews END -->
+
+
+    <script th:src="@{/js/homePage/addtocart.js}"></script>
 
 </main>
 <!-- **************** MAIN CONTENT END **************** -->

@@ -11,7 +11,6 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
 public class Fee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

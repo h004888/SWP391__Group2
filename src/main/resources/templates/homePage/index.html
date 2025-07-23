@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
-
-
 <div th:replace="~{homePage/fragments/header :: header}"></div>
 
 <body>
-
 	<!-- Header START -->
 	<div th:replace="~{homePage/fragments/navHeader :: navHeader}"></div>
 	<!-- Header END -->
 
 	<!-- **************** MAIN CONTENT START **************** -->
+
 	<div th:replace="~{__${fragmentContent}__}"></div>
 	<!-- **************** MAIN CONTENT END **************** -->
+	<!-- Chatbot Widget -->
+	<div th:replace="~{homePage/fragments/chatbotWidget.html}"></div>
 
 	<!-- =======================
 Footer START -->
@@ -28,17 +28,21 @@ Footer END -->
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 	<!-- Bootstrap JS -->
-	<script src="assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+	<script th:src="@{/assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js}"></script>
 
 	<!-- Các vendor khác -->
-	<script src="assets/vendor/tiny-slider/tiny-slider.js"></script>
-	<script src="assets/vendor/glightbox/js/glightbox.js"></script>
-	<script src="assets/vendor/purecounterjs/dist/purecounter_vanilla.js"></script>
+	<script th:src="@{/assets/vendor/tiny-slider/tiny-slider.js}"></script>
+	<script th:src="@{/assets/vendor/glightbox/js/glightbox.js}"></script>
+	<script th:src="@{/assets/vendor/purecounterjs/dist/purecounter_vanilla.js}"></script>
 
 	<!-- Template Functions -->
-	<script src="assets/js/functions.js"></script>
+	<script th:src="@{/assets/js/functions.js}"></script>
+	<script th:src="@{/js/homePage/wishlist.js}"></script>
+	<script th:src="@{/js/homePage/addtocart.js}"></script>
 
-
+	<script th:inline="javascript">
+		window.userId = /*[[${currentUserId}]]*/ 0;
+	</script>
 
 	<script>
 		function toggleMoreCategories(event) {
@@ -58,6 +62,8 @@ Footer END -->
 					},
 					success: function (data) {
 						$('#course-pills-tabContent').html(data);
+						// Trigger custom event to update wishlist status
+						document.dispatchEvent(new CustomEvent('courses-loaded'));
 					},
 					error: function () {
 						console.error('Lỗi khi tải dữ liệu');
@@ -83,12 +89,28 @@ Footer END -->
 				loadCoursesByCategory(defaultCategoryId);
 			}
 		});
+
+		$(document).ready(function () {
+			// Khi bấm Profile trên dropdown
+			$('#dropdown-profile-btn').on('click', function (e) {
+				e.preventDefault();
+				$.get('/user/profile/fragment', function (data) {
+					$('#profile-container').html(data);
+					// Gắn lại sự kiện cho nút Edit Profile trong fragment
+					$('#btn-edit-profile').on('click', function () {
+						$.get('/user/profile/edit-fragment', function (data) {
+							$('#profile-container').html(data);
+							// Gắn lại sự kiện cho nút Cancel trong form edit
+							$('#btn-cancel-edit').on('click', function () {
+								$('#dropdown-profile-btn').click();
+							});
+						});
+					});
+				});
+			});
+		});
 	</script>
 
-
-
 </body>
-
-
 
 </html>

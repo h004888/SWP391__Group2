@@ -20,7 +20,7 @@ public class Video {
     @Column(name = "VideoID")
     private Long id;
     
-    @Column(name = "VideoURL", nullable = false, length = 1000)
+    @Column(name = "VideoURL", nullable = false, length = 1000 ,columnDefinition ="nvarchar(max)")
     private String videoUrl;
     
     @Column(name = "UploadDate")

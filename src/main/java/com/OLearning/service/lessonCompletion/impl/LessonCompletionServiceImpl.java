@@ -46,7 +46,7 @@ public class LessonCompletionServiceImpl implements LessonCompletionService {
         if (!checkLessonCompletion(userId, lessonId)) {
             LessonCompletion completion = new LessonCompletion();
             completion.setLesson(lessonService.findById(lessonId).orElseThrow());
-            completion.setUser(userService.findById(userId).orElseThrow());
+            completion.setUser(userService.findById(userId));
             completion.setCompletedAt(LocalDateTime.now());
             lessonCompletionRepository.save(completion);
         }

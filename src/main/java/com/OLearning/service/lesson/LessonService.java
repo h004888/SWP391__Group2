@@ -1,11 +1,13 @@
 package com.OLearning.service.lesson;
 
+
 import com.OLearning.entity.Lesson;
-import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public interface LessonService {
     List<Lesson> findAllLessons();
 
@@ -14,6 +16,10 @@ public interface LessonService {
     Lesson saveLesson(Lesson lesson);
 
     void deleteLesson(Long id);
+    List<Lesson> findLessonsByChapterId(Long chapterId);
+    void updateContentType(Long lessonId, String contenType);
+    void autoFillOrderNumbers(Long chapterId);
+
 
     Lesson updateLesson(Long id, Lesson lessonDetails);
 

@@ -1,0 +1,274 @@
+<div id="courseContentContainer" class="container-fluid" th:fragment="listsCourseContent">
+    <div class="table-wrapper">
+        <div class="table-title d-flex justify-content-between align-items-center flex-wrap">
+            <div class="d-flex align-items-center ms-auto" style="gap: 12px;">
+                <div class="search-box" style="min-width: 240px;">
+                    <input id="searchInput" type="text" name="title" class="form-control"
+                           placeholder="Search…"
+                           th:value="${title}">
+                </div>
+                <a href="/instructor/createcourse/coursebasic" class="btn btn-primary d-flex align-items-center" style="height: 40px; min-width: 150px;">
+                    <i class="fas fa-plus me-2"></i> Create Course
+                </a>
+            </div>
+            <form id="filterForm" method="get" class="w-100 mt-3">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h2>My <b>Courses</b></h2>
+                    </div>
+                </div>
+                <div class="col-md-6 d-flex gap-2 mt-4">
+                    <select class="form-control ml-2" name="category" id="filterCategory">
+                        <option value="">All Categories</option>
+                        <option th:each="cate : ${categories}"
+                                th:value="${cate.id}"
+                                th:text="${cate.name}"
+                                th:selected="${cate.id == selectedCategory}"></option>
+                    </select>
+                    <select class="form-control ml-2" name="price" id="filterPrice">
+                        <option value="">All Prices</option>
+                        <option value="free" th:selected="${selectedPrice == 'free'}">Free</option>
+                        <option value="paid" th:selected="${selectedPrice == 'paid'}">Paid</option>
+                        <option value="low" th:selected="${selectedPrice == 'low'}">Below 50,000</option>
+                        <option value="mid" th:selected="${selectedPrice == 'mid'}">50,000 - 100,000</option>
+                        <option value="high" th:selected="${selectedPrice == 'high'}">Above 100,000</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+
+        <!-- Status Tabs -->
+        <div class="custom-tabs mt-4">
+            <ul class="nav nav-tabs" id="courseTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="pending-tab" data-bs-toggle="tab"
+                            data-bs-target="#pending" type="button" role="tab" data-status="pending">
+                        Pending<span class="badge bg-light text-dark ms-2" id="pendingCount">0</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="approved-tab" data-bs-toggle="tab"
+                            data-bs-target="#approved" type="button" role="tab" data-status="approved">
+                        Approved<span class="badge bg-light text-dark ms-2" id="approvedCount">0</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="publish-tab" data-bs-toggle="tab"
+                            data-bs-target="#publish" type="button" role="tab" data-status="publish">
+                        Publish<span class="badge bg-light text-dark ms-2" id="publishCount">0</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="rejected-tab" data-bs-toggle="tab"
+                            data-bs-target="#rejected" type="button" role="tab" data-status="rejected">
+                        Rejected<span class="badge bg-light text-dark ms-2" id="rejectedCount">0</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="hidden-tab" data-bs-toggle="tab"
+                            data-bs-target="#hidden" type="button" role="tab" data-status="hidden">
+                        Hidden<span class="badge bg-light text-dark ms-2" id="hiddenCount">0</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="blocked-tab" data-bs-toggle="tab"
+                            data-bs-target="#blocked" type="button" role="tab" data-status="blocked">
+                        Blocked<span class="badge bg-light text-dark ms-2" id="blockedCount">0</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="draft-tab" data-bs-toggle="tab"
+                            data-bs-target="#draft" type="button" role="tab" data-status="draft">
+                        Draft<span class="badge bg-light text-dark ms-2" id="draftCount">0</span>
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content p-0" id="courseTabsContent">
+                <!-- Draft Tab -->
+                <div class="tab-pane fade" id="draft" role="tabpanel">
+                    <table class="table course-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Total Lessons</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="draftTableBody">
+                        <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                    <div id="draftPagination" class="pagination-container"></div>
+                </div>
+                <!-- Pending Tab -->
+                <div class="tab-pane fade show active" id="pending" role="tabpanel">
+                    <table class="table course-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Total Lessons</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="pendingTableBody">
+                        <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                    <div id="pendingPagination" class="pagination-container"></div>
+                </div>
+                <!-- Approved Tab -->
+                <div class="tab-pane fade" id="approved" role="tabpanel">
+                    <table class="table course-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Total Lessons</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="approvedTableBody">
+                        <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                    <div id="approvedPagination" class="pagination-container"></div>
+                </div>
+                <!-- Publish Tab -->
+                <div class="tab-pane fade" id="publish" role="tabpanel">
+                    <table class="table course-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Total Lessons</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="publishTableBody">
+                        <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                    <div id="publishPagination" class="pagination-container"></div>
+                </div>
+                <!-- Rejected Tab -->
+                <div class="tab-pane fade" id="rejected" role="tabpanel">
+                    <table class="table course-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Total Lessons</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="rejectedTableBody">
+                        <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                    <div id="rejectedPagination" class="pagination-container"></div>
+                </div>
+                <!-- Hidden Tab -->
+                <div class="tab-pane fade" id="hidden" role="tabpanel">
+                    <table class="table course-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Total Lessons</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="hiddenTableBody">
+                        <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                    <div id="hiddenPagination" class="pagination-container"></div>
+                </div>
+                <!-- Blocked Tab -->
+                <div class="tab-pane fade" id="blocked" role="tabpanel">
+                    <table class="table course-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Total Lessons</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="blockedTableBody">
+                        <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                    <div id="blockedPagination" class="pagination-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the course "<span id="courseTitle"></span>"?</p>
+                    <p class="text-danger"><small>This action cannot be undone.</small></p>
+                </div>
+                <div class="modal-footer">
+                    <div class="d-flex gap-2" style="min-width: 300px;">
+                        <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancel</button>
+                        <form id="deleteForm" method="post" action="/instructor/createcourse/deletecourse" style="width: 100%;">
+                            <input type="hidden" name="courseId" id="deleteCourseId">
+                            <button type="submit" class="btn btn-danger w-100">Delete Course</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Action Modal (dùng chung cho Up to Public, Unpublish, Hidden, etc.) -->
+    <div class="modal fade" id="confirmActionModal" tabindex="-1" aria-labelledby="confirmActionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmActionModalLabel">Confirm Action</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirmActionMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <form id="confirmActionForm" method="post">
+                        <input type="hidden" name="courseId" id="confirmActionCourseId">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="confirmActionSubmitBtn">Confirm</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

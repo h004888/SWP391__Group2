@@ -7,13 +7,14 @@ import com.OLearning.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.Random;
 
 @Service
+@Transactional
 public class PasswordResetService {
 
     @Autowired
@@ -32,20 +33,20 @@ public class PasswordResetService {
     private static final int OTP_EXPIRY_MINUTES = 5;
     private static final int MAX_OTP_ATTEMPTS = 3;
 
-    public void generateOTP(String email) {
+    @Transactional
+    public void generateOTP(String email, String type) {
         // Validate email
         if (email == null || email.trim().isEmpty()) {
-            throw new IllegalArgumentException("Email không được để trống");
+            throw new IllegalArgumentException("Email cannot be empty");
         }
 
         User user = userRepository.findByEmail(email.trim().toLowerCase())
-                .orElseThrow(() -> new RuntimeException("Email không tồn tại"));
+                .orElseThrow(() -> new RuntimeException("Email does not exist"));
+
+        deleteExistingOTP(user.getUserId());
 
         // Generate secure OTP
         String otp = generateSecureOTP();
-
-        // Delete existing OTP for this user to prevent multiple active OTPs
-        otpRepository.findByUser(user).ifPresent(otpRepository::delete);
 
         // Create new OTP record
         PasswordResetOTP resetOtp = new PasswordResetOTP();
@@ -58,15 +59,44 @@ public class PasswordResetService {
         otpRepository.save(resetOtp);
 
         // Send OTP via email
-        String subject = "Khôi phục mật khẩu - OTP";
-        String message = OTPEmailMessage(user.getFullName(), otp);
+        String subject;
+        String message;
+        if ("verifyEmail".equals(type)) {
+            subject = "Email Verification - OLearning";
+            message = "Hello " + user.getFullName() + ",\n\n" +
+                    "Thank you for registering at OLearning. Your email verification code is: " + otp + "\n" +
+                    "This code will expire in 5 minutes.\n\n" +
+                    "If you did not request this, please ignore this email.";
+        } else {
+            subject = "Password Reset - OLearning";
+            message = "Hello " + user.getFullName() + ",\n\n" +
+                    "You requested to reset your password. Your OTP code is: " + otp + "\n" +
+                    "This code will expire in 5 minutes.\n\n" +
+                    "If you did not request this, please ignore this email.";
+        }
 
         try {
             emailService.sendOTP(user.getEmail(), subject, message);
         } catch (Exception e) {
             // If email sending fails, delete the OTP record
-            otpRepository.delete(resetOtp);
-            throw new RuntimeException("Không thể gửi email. Vui lòng thử lại sau.");
+            try {
+                otpRepository.delete(resetOtp);
+            } catch (Exception deleteException) {
+                System.err.println("Error deleting OTP after failed email: " + deleteException.getMessage());
+            }
+            throw new RuntimeException("Unable to send email. Please try again later.");
+        }
+    }
+
+    /**
+     * Xóa OTP cũ của user trong transaction riêng biệt
+     */
+    @Transactional
+    public void deleteExistingOTP(Long userId) {
+        try {
+            otpRepository.deleteByUserId(userId);
+        } catch (Exception e) {
+            System.err.println("Lỗi khi xóa OTP cũ cho user " + userId + ": " + e.getMessage());
         }
     }
 

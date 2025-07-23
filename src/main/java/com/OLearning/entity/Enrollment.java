@@ -9,7 +9,6 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.ToString;
 
 @Entity
 @Table(name = "Enrollments")
@@ -18,7 +17,6 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString
 public class Enrollment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

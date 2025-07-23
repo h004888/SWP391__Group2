@@ -1,0 +1,252 @@
+<div id="courseContentContainer" class="container-fluid" th:fragment="courseContent">
+    <div class="table-responsive">
+        <div class="table-wrapper">
+            <div class="table-title">
+                <form id="filterForm" method="get">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h2 th:text="${accNamePage}">Management <b>Course</b></h2>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="search-box">
+                                <i class="material-icons">&#xE8B6;</i>
+                                <input id="searchInput" type="text" name="keyword" class="form-control"
+                                       placeholder="Search&hellip;"
+                                       th:value="${keyword}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 d-flex gap-2 mt-4">
+                        <select class="form-control ml-2" name="category" id="filterCategory">
+                            <option value="">All Categories</option>
+                            <option th:each="cate : ${listCategories}"
+                                    th:value="${cate.id}"
+                                    th:text="${cate.name}"
+                                    th:selected="${cate.id == selectedCategory}"></option>
+                        </select>
+                        <select class="form-control ml-2" name="price" id="filterPrice">
+                            <option value="">All Prices</option>
+                            <option value="free">Free</option>
+                            <option value="paid" th:selected="${selectedPrice == 'paid'}">Paid</option>
+                            <option value="low" th:selected="${selectedPrice == 'low'}">Below $50</option>
+                            <option value="mid" th:selected="${selectedPrice == 'mid'}">50 - 100$</option>
+                            <option value="high" th:selected="${selectedPrice == 'high'}">Above $100</option>
+                        </select>
+                    </div>
+
+                </form>
+            </div>
+
+            <!-- Status Tabs -->
+            <div class="custom-tabs mt-4">
+                <ul class="nav nav-tabs" id="courseTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="pending-tab" data-bs-toggle="tab"
+                                data-bs-target="#pending" type="button" role="tab" data-status="pending">
+                            Pending<span class="badge bg-light text-dark ms-2" id="pendingCount">0</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="approved-tab" data-bs-toggle="tab"
+                                data-bs-target="#approved" type="button" role="tab" data-status="approved">
+                            Approved<span class="badge bg-light text-dark ms-2" id="approveCount">0</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="rejected-tab" data-bs-toggle="tab"
+                                data-bs-target="#rejected" type="button" role="tab" data-status="rejected">
+                            Rejected<span class="badge bg-light text-dark ms-2" id="rejectCount">0</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link " id="draft-tab" data-bs-toggle="tab"
+                                data-bs-target="#draft" type="button" role="tab" data-status="draft">
+                            Draft<span class="badge bg-light text-dark ms-2" id="draftCount">0</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="publish-tab" data-bs-toggle="tab"
+                                data-bs-target="#publish" type="button" role="tab" data-status="publish">
+                            Publish<span class="badge bg-light text-dark ms-2" id="publishCount">0</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pending_block-tab" data-bs-toggle="tab"
+                                data-bs-target="#pending_block" type="button" role="tab" data-status="pending_block">
+                            Pending_Block<span class="badge bg-light text-dark ms-2" id="pendingBlockCount">0</span>
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content p-0" id="courseTabsContent">
+
+                    <!-- Draft Tab -->
+                    <div class="tab-pane fade" id="draft" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table course-table">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Price</th>
+                                    <th>Total Lessons</th>
+                                    <th>Created At</th>
+                                    <th>Updated At</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody id="draftTableBody">
+                                <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination for Draft -->
+                        <div id="draftPagination" class="pagination-container">
+                            <!-- Pagination will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Pending Tab -->
+                    <div class="tab-pane fade show active" id="pending" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table course-table">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Price</th>
+                                    <th>Total Lessons</th>
+                                    <th>Created At</th>
+                                    <th>Updated At</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody id="pendingTableBody">
+                                <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination for Pending -->
+                        <div id="pendingPagination" class="pagination-container">
+                            <!-- Pagination will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Approved Tab -->
+                    <div class="tab-pane fade" id="approved" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table course-table">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Price</th>
+                                    <th>Total Lessons</th>
+                                    <th>Created At</th>
+                                    <th>Updated At</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody id="approvedTableBody">
+                                <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination for Approved -->
+                        <div id="approvedPagination" class="pagination-container">
+                            <!-- Pagination will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Rejected Tab -->
+                    <div class="tab-pane fade" id="rejected" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table course-table">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Price</th>
+                                    <th>Total Lessons</th>
+                                    <th>Created At</th>
+                                    <th>Updated At</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody id="rejectedTableBody">
+                                <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination for Rejected -->
+                        <div id="rejectedPagination" class="pagination-container">
+                            <!-- Pagination will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Publish Tab -->
+                    <div class="tab-pane fade" id="publish" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table course-table">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Price</th>
+                                    <th>Total Lessons</th>
+                                    <th>Created At</th>
+                                    <th>Updated At</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody id="publishTableBody">
+                                <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination for Publish -->
+                        <div id="publishPagination" class="pagination-container">
+                            <!-- Pagination will be loaded here -->
+                        </div>
+                    </div>
+                    <!-- pending_block Tab -->
+                    <div class="tab-pane fade" id="pending_block" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table course-table">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Price</th>
+                                    <th>Total Lessons</th>
+                                    <th>Created At</th>
+                                    <th>Updated At</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody id="pendingBlockTableBody">
+                                <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination for pending_block -->
+                        <div id="pendingBlockPagination" class="pagination-container">
+                            <!-- Pagination will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script th:src="@{/js/courseJS.js}"></script>
+
+</div>

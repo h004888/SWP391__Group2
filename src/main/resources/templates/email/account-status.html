@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${isLocked ? 'Thông báo khóa tài khoản' : 'Thông báo mở khóa tài khoản'}"></title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(0,0,0,0.08);
+            border: 1px solid #ddd;
+        }
+
+        .header {
+            background-color: #2d3e50;
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .logo {
+            max-width: 130px;
+            margin-bottom: 15px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .content {
+            padding: 25px 30px;
+            color: #444;
+            font-size: 15px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 15px 0;
+            background-color: #ccc;
+            color: white;
+            font-size: 13px;
+        }
+
+        .status-locked {
+            background-color: #e74c3c;
+        }
+
+        .status-unlocked {
+            background-color: #2ecc71;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            margin-top: 25px;
+            background-color: #3498db;
+            color: white !important;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .footer {
+            background-color: #f0f0f0;
+            padding: 20px 25px;
+            font-size: 12px;
+            color: #777;
+            text-align: center;
+            border-top: 1px solid #ddd;
+        }
+
+        a {
+            color: #3498db;
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+
+    <div class="header">
+        <img  alt="OLearning Logo" class="logo">
+        <h1 th:text="${isLocked ? 'TÀI KHOẢN BỊ KHÓA' : 'TÀI KHOẢN ĐÃ MỞ KHÓA'}"></h1>
+    </div>
+
+    <div class="content">
+        <p>Xin chào <strong th:text="${user.fullName}">Người dùng</strong>,</p>
+
+        <div class="status-badge" th:classappend="${isLocked} ? ' status-locked' : ' status-unlocked'"
+             th:text="${isLocked ? 'TÀI KHOẢN BỊ KHÓA' : 'TÀI KHOẢN ĐÃ MỞ KHÓA'}">
+        </div>
+
+        <p th:if="${isLocked}">
+            Tài khoản OLearning của bạn đã bị <strong>khóa</strong> do vi phạm điều khoản sử dụng hoặc có hoạt động bất thường.
+        </p>
+
+        <p th:unless="${isLocked}">
+            Chúng tôi vui mừng thông báo rằng tài khoản của bạn đã được <strong>mở khóa</strong>. Bạn có thể đăng nhập và tiếp tục học tập như bình thường.
+        </p>
+
+        <p th:if="${isLocked}">
+            Nếu bạn cho rằng đây là nhầm lẫn hoặc cần hỗ trợ, vui lòng liên hệ với chúng tôi:
+        </p>
+
+        <div th:if="${isLocked}" style="text-align: center;">
+            <a href="mailto:olearningwebsite@gmail.com" class="button">LIÊN HỆ HỖ TRỢ</a>
+        </div>
+
+        <p style="margin-top: 30px;">Trân trọng,<br><strong>Đội ngũ OLearning</strong></p>
+    </div>
+
+    <div class="footer">
+        <p>© 2025 OLearning. All rights reserved.</p>
+        <p>
+            Đây là email tự động. Vui lòng không phản hồi lại. Nếu bạn không thực hiện hành động này, hãy
+            <a href="mailto:olearningwebsite@gmail.com">báo cáo với chúng tôi</a>.
+        </p>
+    </div>
+
+</div>
+</body>
+</html>

@@ -8,110 +8,108 @@ import com.OLearning.service.category.CategoryService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 @Transactional
 public class CategoryServiceImpl implements CategoryService {
+
     @Autowired
-    private CategoryRepository categoriesRepository;
+    private CategoryRepository categoryRepository;
 
     public List<Category> getListCategories() {
-        return categoriesRepository.findAll();
+        return categoryRepository.findAll();
     }
 
     @Override
-    public void delete(Category categories) {
-        categoriesRepository.delete(categories);
-    }
-
-    @Override
-    public void deleteById(int id) {
-        categoriesRepository.deleteById(id);
-    }
-
-    @Override
-    public boolean existsById(int id) {
-        return categoriesRepository.existsById(id);
-    }
-
-    @Override
-    public boolean existsByName(String name) {
-        return categoriesRepository.existsByName(name);
-    }
-
-    @Override
-    public Category findById(int id) {
-        return categoriesRepository.findById(id);
-    }
-
-    @Override
-    public Category findByName(String name) {
-        return categoriesRepository.findByName(name);
-    }
-
-    @Override
-    public Category save(Category categories) {
-        return categoriesRepository.save(categories);
-    }
-
-    @Transactional
-    @Override
-    public void updateCategory(int id, String name) {
-        categoriesRepository.updateCategory(id, name);
-    }
-
-    @Override
-    public List<Category> findByNameContaining(String name) {
-        return categoriesRepository.findByNameContaining(name);
-    }
-
-    @Override
-    public List<Category> filterCategories(String name, String select) {
-        List<Category> categories;
-
-        if (name == null || name.isEmpty()) {
-            categories = categoriesRepository.findAll();
-        } else {
-            categories = categoriesRepository.findByNameContaining(name);
-        }
-
-        if (select != null) {
-            if (select.equals("1")) {
-                categories.sort(Comparator.comparing(Category::getName, String.CASE_INSENSITIVE_ORDER));
-            } else if (select.equals("2")) {
-                categories.sort(Comparator.comparing(Category::getName, String.CASE_INSENSITIVE_ORDER).reversed());
-            }
-        }
-
-        return categories;
-    }
-
-    @Override
-    public Page<Category> findByNameContaining(String name, Pageable pageable) {
-        return categoriesRepository.findByNameContaining(name, pageable);
+    public void deleteById(Long id) {
+        categoryRepository.deleteById(id);
     }
 
     @Override
     public List<Category> findTop5ByOrderByIdAsc() {
-        return categoriesRepository.findTopCategoriesByCourseCount(PageRequest.of(0, 5));
+        return categoryRepository.findTop5ByOrderByIdAsc();
+    }
+
+
+    @Override
+    public List<Category> findAll() {
+        return categoryRepository.findAll();
     }
 
     @Override
-    public List<CategoryDTO> getAllCategory() {
-        List<Category> categories = categoriesRepository.findAll();
-        return categories.stream().map(category -> {
-            CategoryDTO dto = new CategoryDTO();
-            dto.setId(category.getId().intValue());
-            dto.setName(category.getName());
-            return dto;
-        }).collect(Collectors.toList());
+    public Page<Category> findAll(Pageable pageable) {
+        return categoryRepository.findAll(pageable);
     }
 
+
+    @Override
+    public Optional<Category> findById(Long id) {
+        return categoryRepository.findById(id);
+    }
+
+    @Override
+    public Page<Category> filterAndSortCategories(String name, String sort, int page, int size) {
+        Pageable pageable;
+        
+        // Only apply sorting if user explicitly chooses a sort option
+        if (sort != null && !sort.trim().isEmpty()) {
+            if (sort.equalsIgnoreCase("desc")) {
+                pageable = PageRequest.of(page, size, Sort.by("name").descending());
+            } else if (sort.equalsIgnoreCase("asc")) {
+                pageable = PageRequest.of(page, size, Sort.by("name").ascending());
+            } else {
+                // Invalid sort parameter, use default (no sorting)
+                pageable = PageRequest.of(page, size);
+            }
+        } else {
+            // No sorting applied, use default order (by ID)
+            pageable = PageRequest.of(page, size, Sort.by("id").ascending());
+        }
+        
+        Page<Category> categoryPage;
+        if (name != null && !name.trim().isEmpty()) {
+            categoryPage = categoryRepository.findByNameContainingIgnoreCase(name.trim(), pageable);
+        } else {
+            categoryPage = categoryRepository.findAll(pageable);
+        }
+        
+        // Ensure no duplicates and load courses properly
+        List<Category> uniqueCategories = categoryPage.getContent().stream()
+            .distinct()
+            .toList();
+        
+        // Force loading of courses for each category to avoid lazy loading issues
+        uniqueCategories.forEach(category -> {
+            if (category.getCourses() != null) {
+                category.getCourses().size(); // Force loading
+            }
+        });
+        
+        // Create a new Page with unique content
+        return new PageImpl<>(uniqueCategories, pageable, categoryPage.getTotalElements());
+    }
+
+    @Override
+    public Category save(Category category) {
+        return categoryRepository.save(category);
+    }
+
+    @Override
+    public boolean existsByName(String name) {
+        return categoryRepository.existsByName(name);
+    }
+
+    @Override
+    public boolean existsByNameAndIdNot(String name, Long id) {
+        return categoryRepository.existsByNameAndIdNot(name, id);
+    }
 }

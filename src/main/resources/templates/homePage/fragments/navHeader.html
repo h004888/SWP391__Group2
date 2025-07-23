@@ -35,24 +35,21 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link " th:href="@{/home/coursesGrid}" id="demoMenu" aria-haspopup="true"
                             aria-expanded="false">Courses</a>
-
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link " th:href="@{/learning}" aria-haspopup="true"
                             aria-expanded="false">Education</a>
-
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link " href="#" aria-haspopup="true" aria-expanded="false">About</a>
-
+                    </li>
+                    <li class="nav-item dropdown" sec:authorize="hasRole('USER')">
+                        <a class="nav-link" th:href="@{/become-instructor}" aria-haspopup="true"
+                            aria-expanded="false">Become Instructor</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link " href="#" aria-haspopup="true" aria-expanded="false">Contact</a>
-
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link " href="#" aria-haspopup="true" aria-expanded="false">Wishlist</a>
-
+                        <a class="nav-link " th:href="@{/home/vouchers}" aria-haspopup="true"
+                            aria-expanded="false">Voucher</a>
                     </li>
 
                 </ul>
@@ -75,7 +72,61 @@
                 <!-- Nav Search END -->
             </div>
             <!-- Main navbar END -->
-
+            <div class="me-2 me-md-3 dropdown">
+                <!-- Wishlist button -->
+                <a class="btn btn-light btn-round mb-0" th:href="@{/home/wishlist}">
+                    <i class="bi bi-heart fa-fw"></i>
+                </a>
+                <!-- badge -->
+                <span id="wishlistTotalBadge"
+                    class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-danger mt-xl-2 ms-n1"
+                    th:text="${wishlistTotal != null ? wishlistTotal : 0}">
+                    <span class="visually-hidden">items in wishlist</span>
+                </span>
+            </div>
+            <!-- Notification -->
+            <div class="nav-item ms-2 dropdown" sec:authorize="isAuthenticated()">
+                <a class="btn btn-light btn-round mb-0 position-relative notification-btn-home" href="#" role="button"
+                    data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside" title="Notifications">
+                    <i class="bi bi-bell fa-fw"></i>
+                    <span id="userNotificationBadge" th:if="${unreadCount > 0}"
+                        class="notif-badge animation-blink"></span>
+                </a>
+                <!-- Notification dropdown menu START -->
+                <div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0"
+                    style="width:320px;min-width:320px;max-width:320px;border:1px solid #ddd;">
+                    <div class="card bg-transparent">
+                        <div
+                            class="card-header bg-transparent border-bottom py-4 d-flex justify-content-between align-items-center">
+                            <h6 class="m-0">Unread Notifications <span id="userNotificationCount"
+                                    class="badge bg-danger bg-opacity-10 text-danger ms-2">0 new</span></h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <ul id="userNotificationList" class="list-group list-unstyled list-group-flush">
+                                <!-- Notifications will be loaded here -->
+                            </ul>
+                        </div>
+                        <!-- Button -->
+                        <div class="card-footer bg-transparent border-0 py-3 text-center position-relative"
+                            style="padding-top:0;">
+                            <a th:href="@{/user/notifications}" class="stretched-link">View all notifications</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- Notification dropdown menu END -->
+            </div>
+            <div class="me-2 me-md-3 dropdown">
+                <!-- Cart button -->
+                <a class="btn btn-light btn-round mb-0" th:href="@{/home/cart}">
+                    <i class="bi bi-cart3 fa-fw"></i>
+                </a>
+                <!-- badge -->
+                <span id="cartTotalBadge"
+                    class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-dark mt-xl-2 ms-n1"
+                    th:text="${cartTotal != null ? cartTotal : 0}">
+                    <span class="visually-hidden">items in cart</span>
+                </span>
+            </div>
             <div class="navbar-nav ms-2">
                 <button type="button" sec:authorize="isAnonymous()" th:onclick="|window.location='@{/login}'|"
                     class="btn btn-sm btn-dark mb-0">
@@ -89,7 +140,10 @@
             <div class="dropdown ms-1 ms-lg-0" sec:authorize="isAuthenticated()">
                 <a class="avatar avatar-sm p-0" href="#" id="profileDropdown" role="button" data-bs-auto-close="outside"
                     data-bs-display="static" data-bs-toggle="dropdown" aria-expanded="false">
-                    <img class="avatar-img rounded-circle" src="assets/images/avatar/01.jpg" alt="avatar">
+                    <img class="avatar-img rounded-circle"
+                        th:src="${#authentication.principal.profilePicture != null} ?
+                                                                                             ${#authentication.principal.profilePicture} :
+                                                                                             @{/img/undraw_profile.svg}" alt="avatar">
                 </a>
                 <ul class="dropdown-menu dropdown-animation dropdown-menu-end shadow pt-3"
                     aria-labelledby="profileDropdown">
@@ -98,8 +152,10 @@
                         <div class="d-flex align-items-center">
                             <!-- Avatar -->
                             <div class="avatar me-3">
-                                <img class="avatar-img rounded-circle shadow" src="assets/images/avatar/01.jpg"
-                                    alt="avatar">
+                                <img class="avatar-img rounded-circle shadow"
+                                    th:src="${#authentication.principal.profilePicture != null} ?
+                                                                                             ${#authentication.principal.profilePicture} :
+                                                                                             @{/img/undraw_profile.svg}" alt="avatar">
                             </div>
                             <div>
                                 <a class="h6" href="#" th:text="${#authentication.principal.userEntity.username}">Lori
@@ -113,9 +169,10 @@
                         <hr class="dropdown-divider">
                     </li>
                     <!-- Links -->
-                    <li><a class="dropdown-item" href="#"><i class="bi bi-person fa-fw me-2"></i>Edit Profile</a></li>
-                    <li><a class="dropdown-item" href="#"><i class="bi bi-gear fa-fw me-2"></i>Account Settings</a></li>
-                    <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle fa-fw me-2"></i>Help</a></li>
+                    <li><a class="dropdown-item" sec:authorize="hasRole('INSTRUCTOR')"
+                           th:href="@{/instructor}"><i class="bi bi-gear fa-fw me-2"></i>DashBoard</a></li>
+                    <li sec:authorize="hasRole('USER')"><a class="dropdown-item" th:href="@{/profile}"><i class="bi bi-person fa-fw me-2"></i>Profile</a></li>
+                    <li><a class="dropdown-item" th:href="@{/home/history}"><i class="fas fa-history me-2"></i>History</a></li>
                     <li>
                         <a class="dropdown-item bg-danger-soft-hover" th:href="@{/logout}">
                             <i class="bi bi-power fa-fw me-2"></i>
@@ -159,11 +216,332 @@
                     <!-- Dark mode options END-->
                 </ul>
             </div>
-            <!-- Profile START -->
         </div>
     </nav>
     <!-- Nav END -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cartTotalBadge = document.getElementById('cartTotalBadge');
+            const wishlistTotalBadge = document.getElementById('wishlistTotalBadge');
+
+            // Function to fetch and update cart total
+            const updateCartTotal = async () => {
+                try {
+                    const response = await fetch('/home/cart/total', {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    if (!response.ok) throw new Error('Failed to fetch cart total');
+                    const data = await response.json();
+                    if (cartTotalBadge) {
+                        cartTotalBadge.textContent = data.total || 0;
+                    }
+                } catch (error) {
+                    if (cartTotalBadge) {
+                        cartTotalBadge.textContent = '0';
+                    }
+                }
+            };
+
+            // Function to fetch and update wishlist total
+            const updateWishlistTotal = async () => {
+                try {
+                    const response = await fetch('/home/wishlist/total', {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    if (!response.ok) throw new Error('Failed to fetch wishlist total');
+                    const data = await response.json();
+                    if (wishlistTotalBadge) {
+                        wishlistTotalBadge.textContent = data.total || 0;
+                    }
+                } catch (error) {
+                    if (wishlistTotalBadge) {
+                        wishlistTotalBadge.textContent = '0';
+                    }
+                }
+            };
+
+            // Lắng nghe sự kiện custom để cập nhật cartTotal từ bất kỳ nơi nào
+            document.addEventListener('cart-updated', updateCartTotal);
+            document.addEventListener('wishlist-updated', updateWishlistTotal);
+
+            // Initial updates
+            updateCartTotal();
+            updateWishlistTotal();
+        });
+    </script>
+
+    <!-- Notification button styles -->
+    <style>
+        .notification-page-btn {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .notification-page-btn:hover {
+            background-color: #f8f9fa;
+            border-color: #dee2e6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-page-btn .bi-bell-fill {
+            transition: color 0.3s ease;
+        }
+
+        .notification-page-btn:hover .bi-bell-fill {
+            color: #0d6efd !important;
+        }
+
+        .notification-page-btn .notif-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 14px;
+            height: 14px;
+            background-color: #dc3545;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .notification-page-btn.has-notifications {
+            background-color: #fff3cd;
+            border-color: #ffeaa7;
+        }
+
+        .notification-page-btn.has-notifications:hover {
+            background-color: #ffeaa7;
+            border-color: #fdcb6e;
+        }
+
+        .notification-page-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-page-btn.loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .notification-page-btn.loading .bi-bell-fill {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .notification-page-btn .notif-badge {
+                width: 12px;
+                height: 12px;
+                top: -3px;
+                right: -3px;
+            }
+        }
+
+        .notification-btn-home {
+            width: 40px !important;
+            height: 40px !important;
+            padding: 0 !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .notification-btn-home .bi-bell {
+            font-size: 1.2rem !important;
+            line-height: 40px !important;
+        }
+        .notification-btn-home .notif-badge {
+            width: 12px !important;
+            height: 12px !important;
+            top: 4px !important;
+            right: 4px !important;
+        }
+    </style>
+
+    <!-- Notification button JavaScript -->
+    <script>
+        // Add loading effect to notification page button
+        document.addEventListener('DOMContentLoaded', function () {
+            const notificationPageBtn = document.querySelector('.notification-page-btn');
+            if (notificationPageBtn) {
+                notificationPageBtn.addEventListener('click', function () {
+                    this.classList.add('loading');
+                    // Remove loading class after navigation
+                    setTimeout(() => {
+                        this.classList.remove('loading');
+                    }, 1000);
+                });
+            }
+        });
+
+        // Update notification page button tooltip and styling
+        function updateNotificationPageButton(unreadCount) {
+            const notificationPageBtn = document.querySelector('.notification-page-btn');
+            if (notificationPageBtn) {
+                if (unreadCount > 0) {
+                    notificationPageBtn.title = `View All Notifications (${unreadCount} unread)`;
+                    notificationPageBtn.classList.add('has-notifications');
+                } else {
+                    notificationPageBtn.title = 'View All Notifications';
+                    notificationPageBtn.classList.remove('has-notifications');
+                }
+            }
+        }
+
+        // Load notifications count for homepage
+        function loadHomepageNotifications() {
+            fetch('/user/notifications/api/latest')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error('Error loading notifications:', data.error);
+                        return;
+                    }
+                    updateNotificationPageButton(data.unreadCount);
+                })
+                .catch(error => {
+                    console.error('Error loading notifications:', error);
+                });
+        }
+
+        // Load notifications when page loads (only for authenticated users)
+        document.addEventListener('DOMContentLoaded', function () {
+            // Check if user is authenticated (notification button exists)
+            const notificationPageBtn = document.querySelector('.notification-page-btn');
+            if (notificationPageBtn) {
+                loadHomepageNotifications();
+            }
+        });
+    </script>
+
+    <!-- Add this JS at the end of the file, before </body> -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const notificationDropdown = document.querySelector('a[title="Notifications"][data-bs-toggle="dropdown"]');
+            if (notificationDropdown) {
+                notificationDropdown.addEventListener('show.bs.dropdown', function () {
+                    loadUserNotifications();
+                });
+            }
+        });
+        function updateUserNotificationBadge(unreadCount) {
+            const badge = document.getElementById('userNotificationBadge');
+            const countSpan = document.getElementById('userNotificationCount');
+            if (unreadCount > 0) {
+                if (!badge) {
+                    const newBadge = document.createElement('span');
+                    newBadge.id = 'userNotificationBadge';
+                    newBadge.className = 'notif-badge animation-blink';
+                    newBadge.style.cssText = 'width:14px;height:14px;top:6px;right:6px;';
+                    const notificationButton = document.querySelector('a[title="Notifications"][data-bs-toggle="dropdown"]');
+                    if (notificationButton && notificationButton.closest('.nav-item').querySelector('#userNotificationBadge')) {
+                        notificationButton.appendChild(newBadge);
+                    }
+                }
+                countSpan.textContent = unreadCount + ' new';
+            } else {
+                if (badge) {
+                    badge.remove();
+                }
+                countSpan.textContent = '0 new';
+            }
+        }
+        function updateUserNotificationList(notifications) {
+            const list = document.getElementById('userNotificationList');
+            list.innerHTML = '';
+            if (notifications.length === 0) {
+                list.innerHTML = '<li class="p-3 text-center text-muted">No unread notifications</li>';
+                return;
+            }
+            notifications.forEach(notification => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item-action border-0 border-bottom d-flex p-3';
+                if (notification.status === 'failed') {
+                    li.style.backgroundColor = '#f8f9fa';
+                    li.style.borderLeft = '3px solid #0d6efd';
+                }
+                const timeAgo = getTimeAgo(notification.sentAt);
+                const typeIcon = getNotificationTypeIcon(notification.type);
+                li.innerHTML = `
+                    <div class="me-3">
+                        <div class="avatar avatar-md">
+                            <i class="${typeIcon}" style="font-size: 1.5rem; color: #6c757d;"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h6 class="mb-1">${notification.type.replace(/_/g, ' ')}</h6>
+                        <p class="small text-body m-0">${notification.message}</p>
+                        <small class="text-body">${timeAgo}</small>
+                    </div>
+                `;
+                li.addEventListener('click', function () {
+                    window.location.href = `/user/notifications/view/${notification.notificationId}`;
+                });
+                list.appendChild(li);
+            });
+        }
+        function getTimeAgo(sentAt) {
+            const now = new Date();
+            const sent = new Date(sentAt);
+            const diffInMinutes = Math.floor((now - sent) / (1000 * 60));
+            if (diffInMinutes < 1) return 'Just now';
+            if (diffInMinutes < 60) return `${diffInMinutes} min ago`;
+            const diffInHours = Math.floor(diffInMinutes / 60);
+            if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+            const diffInDays = Math.floor(diffInHours / 24);
+            return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+        }
+        function getNotificationTypeIcon(type) {
+            switch (type) {
+                case 'ENROLLMENT': return 'fas fa-user-plus';
+                case 'COURSE_COMPLETION': return 'fas fa-graduation-cap';
+                case 'QUIZ_RESULT': return 'fas fa-question-circle';
+                case 'CERTIFICATE': return 'fas fa-certificate';
+                case 'PAYMENT_SUCCESS': return 'fas fa-check-circle';
+                case 'PAYMENT_FAILED': return 'fas fa-times-circle';
+                default: return 'fas fa-bell';
+            }
+        }
+        function loadUserNotifications() {
+            fetch('/user/notifications/api/latest')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) return;
+                    updateUserNotificationBadge(data.unreadCount);
+                    updateUserNotificationList(data.notifications);
+                });
+        }
+    </script>
+
 </header>
+
 <!-- Header END -->
 
 <ul class="navbar-nav navbar-nav-scroll me-auto" th:fragment="navHeaderCategory">

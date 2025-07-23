@@ -1,0 +1,183 @@
+<main th:fragment="wishlistContent">
+    <!-- =======================
+    Page Banner START -->
+    <section class="py-0">
+      <div class="container">
+        <div class="row">
+          <div class="col-12">
+            <div class="bg-light p-4 text-center rounded-3">
+              <h1 class="m-0">Wishlist</h1>
+              <!-- Breadcrumb -->
+              <div class="d-flex justify-content-center">
+                <nav aria-label="breadcrumb">
+                  <ol class="breadcrumb breadcrumb-dots mb-0">
+                    <li class="breadcrumb-item"><a href="/home">Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Wishlist</li>
+                  </ol>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- =======================
+    Page Banner END -->
+
+    <!-- =======================
+    Page content START -->
+    <section class="pt-5">
+      <div class="container">
+        <!-- Content and button -->
+        <div class="d-sm-flex justify-content-sm-between align-items-center mb-4">
+          <div>
+            <h5 class="mb-2 mb-sm-0">You have <span data-wishlist-count th:text="${wishlistTotal}">0</span> items in wishlist</h5>
+            <p class="text-muted mb-0" th:if="${totalPages > 1}">
+              Showing <span th:text="${currentPage * pageSize + 1}">1</span> to
+              <span th:text="${currentPage * pageSize + #lists.size(wishlistItems)}">8</span> of
+              <span th:text="${wishlistTotal}">0</span> items
+            </p>
+          </div>
+          <div class="text-end">
+            <form th:action="@{/home/wishlist/clear}" method="post" style="display: inline;">
+              <button type="submit" class="btn btn-danger-soft mb-0" onclick="return confirm('Are you sure you want to clear all items from wishlist?')">
+                <i class="fas fa-trash me-2"></i>Remove all
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Notification System -->
+        <div th:if="${message}" th:attr="data-message=${message}" id="server-message" style="display: none;"></div>
+        <div th:if="${error}" th:attr="data-message=${error}" id="server-error" style="display: none;"></div>
+        <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            const errorDiv = document.getElementById('server-error');
+            if (errorDiv && errorDiv.getAttribute('data-message')) {
+              showNotification(errorDiv.getAttribute('data-message'), 'error');
+            }
+            const serverMessage = document.getElementById('server-message');
+            if (serverMessage && serverMessage.getAttribute('data-message')) {
+              showNotification(serverMessage.getAttribute('data-message'), 'success');
+            }
+          });
+        </script>
+
+        <div class="row g-4">
+          <!-- Card item START -->
+          <div th:each="item : ${wishlistItems}" class="col-sm-6 col-lg-4 col-xl-3">
+            <div class="card shadow h-100">
+              <!-- Image -->
+              <img th:src="@{assets/images/courses/4by3/02.jpg}"
+                   class="card-img-top" alt="course image" style="height: 200px; object-fit: cover;">
+              <div class="card-body pb-0">
+                <!-- Badge and favorite -->
+                <div class="d-flex justify-content-between mb-2">
+                  <a href="#" class="badge bg-success bg-opacity-10 text-success">Beginner</a>
+                  <button class="btn btn-link text-danger p-0 wishlist-toggle"
+                          th:data-course-id="${item.courseId}"
+                          th:onclick="'toggleWishlist(this, ' + ${item.courseId} + ')'">
+                    <i class="fas fa-heart"></i>
+                  </button>
+                </div>
+                <!-- Title -->
+                <h5 class="card-title fw-normal">
+                  <a th:href="@{/home/course-detail(id=${item.courseId})}" th:text="${item.courseTitle}">Course Title</a>
+                </h5>
+                <p class="mb-2 text-truncate-2">Course description will be displayed here</p>
+                <!-- Rating star -->
+                <ul class="list-inline mb-0">
+                  <li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
+                  <li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
+                  <li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
+                  <li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
+                  <li class="list-inline-item me-0 small"><i class="fas fa-star-half-alt text-warning"></i></li>
+                  <li class="list-inline-item ms-2 h6 fw-light mb-0">4.5/5.0</li>
+                </ul>
+              </div>
+              <!-- Card footer -->
+              <div class="card-footer pt-0 pb-3">
+                <hr>
+                <div class="d-flex justify-content-between align-items-center">
+                                <span class="h6 fw-light mb-0">
+                                    <i class="far fa-clock text-danger me-2"></i>9h 56m
+                                </span>
+                  <span class="h6 fw-light mb-0">
+                                    <i class="fas fa-table text-orange me-2"></i>65 lectures
+                                </span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                  <th:block th:if="${item.enrolled}">
+                    <a th:href="@{/learning/course/view(courseId=${item.courseId})}"
+                       class="btn btn-sm btn-primary-soft mb-0">Continue</a>
+                  </th:block>
+                  <th:block th:unless="${item.enrolled}">
+                    <span class="h5 fw-bold text-primary mb-0" th:text="${'$' + item.coursePrice}">$99.99</span>
+                    <button type="button"
+                            class="btn btn-primary btn-sm add-to-cart-btn"
+                            th:attr="data-course-id=${item.courseId}">
+                      <i class="fas fa-shopping-cart me-2"></i>Add to Cart
+                    </button>
+                  </th:block>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Card item END -->
+
+          <!-- Empty state -->
+          <div th:if="${#lists.isEmpty(wishlistItems)}" class="col-12 text-center py-5">
+            <div class="empty-wishlist">
+              <i class="fas fa-heart text-muted" style="font-size: 4rem; opacity: 0.3;"></i>
+              <h4 class="mt-3 text-muted">Your wishlist is empty</h4>
+              <p class="text-muted">Start adding courses to your wishlist to keep track of what you want to learn!</p>
+              <a href="/home" class="btn btn-primary">
+                <i class="fas fa-search me-2"></i>Browse Courses
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination START -->
+        <div th:if="${totalPages > 1}" class="row">
+          <div class="col-12">
+            <nav class="mt-4 d-flex justify-content-center" aria-label="navigation">
+              <ul class="pagination pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
+                <!-- Previous button -->
+                <li class="page-item mb-0" th:classappend="${!hasPrevious} ? 'disabled'">
+                  <a class="page-link" th:href="@{/home/wishlist(page=${currentPage - 1})}" th:if="${hasPrevious}">
+                    <i class="fas fa-angle-left"></i>
+                  </a>
+                  <span class="page-link" th:unless="${hasPrevious}">
+                                    <i class="fas fa-angle-left"></i>
+                                </span>
+                </li>
+
+                <!-- Page numbers -->
+                <li class="page-item mb-0" th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}">
+                  <a class="page-link" th:href="@{/home/wishlist(page=${pageNum})}"
+                     th:text="${pageNum + 1}"
+                     th:classappend="${pageNum == currentPage} ? 'active'">
+                    1
+                  </a>
+                </li>
+
+                <!-- Next button -->
+                <li class="page-item mb-0" th:classappend="${!hasNext} ? 'disabled'">
+                  <a class="page-link" th:href="@{/home/wishlist(page=${currentPage + 1})}" th:if="${hasNext}">
+                    <i class="fas fa-angle-right"></i>
+                  </a>
+                  <span class="page-link" th:unless="${hasNext}">
+                                    <i class="fas fa-angle-right"></i>
+                                </span>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+        <!-- Pagination END -->
+      </div>
+    </section>
+    <!-- =======================
+    Page content END -->
+</main>

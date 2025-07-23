@@ -1,0 +1,271 @@
+<!-- Fragment for table rows only - accountContent.html -->
+<div th:fragment="userTableRows">
+
+    <tr th:each="u : ${listU}">
+        <td>
+            <div class="d-flex align-items-center position-relative">
+                <!-- Image -->
+                <div class="avatar avatar-md">
+                    <img th:src="${u.profilePicture != null and u.profilePicture != ''} ? ${u.profilePicture} : @{/img/undraw_profile.svg}" class="rounded-circle" alt="">
+                </div>
+                <div class="mb-0 ms-2">
+                    <!-- Title -->
+                    <h6 class="mb-0" >
+                        <a th:if="${u.roleName == 'Instructor'}"
+                           th:href="@{/admin/mnInstructors/viewInfo/{userId}(userId=${u.userId})}"
+                            class="stretched-link"
+                            th:text="${u.userName}">
+                        </a>
+                        <a th:unless="${u.roleName == 'Instructor'}"
+                           th:href="@{/admin/account/viewInfo/{userId}(userId=${u.userId})}"
+                           class="stretched-link"
+                           th:text="${u.userName}">
+                        </a>
+                    </h6>
+                </div>
+            </div>
+        </td>
+        <td th:text="${u.userName}"></td>
+        <td th:text="${u.email}"></td>
+        <td th:text="${u.roleName}"></td>
+        <td>
+           <span th:class="'badge rounded-pill px-3 py-2 ' + (${u.status} ? 'bg-success' : 'bg-danger')"
+                 th:text="${u.status} ? 'Active' : 'Inactive'">
+           </span>
+        </td>
+
+        </td>
+        <td style="white-space: nowrap;">
+            <a th:if="${u.roleName == 'Instructor'}"
+               th:href="@{/admin/mnInstructors/viewInfo/{userId}(userId=${u.userId})}"
+               class="btn btn-info-soft btn-round me-1 mb-1 mb-md-0"
+               data-bs-toggle="tooltip" data-bs-placement="top" title="View">
+                <i class="bi bi-eye"></i>
+            </a>
+            <a th:unless="${u.roleName == 'Instructor'}"
+               th:href="@{/admin/account/viewInfo/{userId}(userId=${u.userId})}"
+               class="btn btn-info-soft btn-round me-1 mb-1 mb-md-0"
+               data-bs-toggle="tooltip" data-bs-placement="top" title="View">
+                <i class="bi bi-eye"></i>
+            </a>
+            <!-- Nếu đang active thì hiển thị nút block -->
+            <a th:if="${u.status}"
+               th:href="@{/admin/account/block/{userId}(userId=${u.userId})}"
+               class="btn btn-danger-soft btn-round me-1 mb-1 mb-md-0"
+               title="Blocked">
+                <i class="fas fa-lock"></i>
+            </a>
+            <!-- Nếu đang inactive thì hiển thị nút active -->
+            <a th:unless="${u.status}"
+               th:href="@{/admin/account/block/{userId}(userId=${u.userId})}"
+               class="btn btn-danger-soft btn-round me-1 mb-1 mb-md-0"
+               title="Activate">
+                <i class="fas fa-unlock"></i>
+            </a>
+<!--            <a th:if="${u.roleName=='Admin'}"-->
+<!--               href="#"-->
+<!--               class="btn btn-danger-soft btn-round me-1 mb-1 mb-md-0"-->
+<!--               data-bs-toggle="modal"-->
+<!--               th:attr="data-bs-target='#deleteEmployeeModal' + ${u.userId}"-->
+<!--               title="Delete">-->
+<!--                <i class="fas fa-trash"></i>-->
+<!--            </a>-->
+            <!-- Modal xác nhận xóa employee (Admin) -->
+            <div class="modal fade" th:id="'deleteEmployeeModal' + ${u.userId}" tabindex="-1" aria-labelledby="deleteEmployeeModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form th:action="@{/admin/account/delete/{userId}(userId=${u.userId})}" method="post">
+                            <div class="modal-header bg-danger text-white">
+                                <h5 class="modal-title" id="deleteEmployeeModalLabel">Xác nhận xóa nhân viên</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Bạn có chắc chắn muốn xóa nhân viên này không?</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                <button type="submit" class="btn btn-danger">Xóa</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <a href="#" class="btn btn-success-soft btn-round me-1 mb-1 mb-md-0"
+               data-bs-placement="top" title="Message"
+               data-bs-toggle="modal"
+               data-bs-target="#messageModal"
+               th:data-instructor-id="${u.userId}"
+               th:data-instructor-name="${u.userName}">
+                <i class="bi bi-envelope"></i>
+            </a>
+        </td>
+    </tr>
+    
+    <!-- Show message when no data found -->
+    <tr th:if="${#lists.isEmpty(listU)}">
+        <td colspan="7" class="text-center text-muted">
+            <i class="fas fa-search me-2"></i>Không tìm thấy tài khoản nào
+        </td>
+    </tr>
+</div>
+
+<div th:fragment="paginationInfo" xmlns:th="http://www.thymeleaf.org">
+    <div class="d-sm-flex justify-content-sm-between align-items-sm-center mt-2">
+        <p class="mb-0 text-center text-sm-start" th:if="${totalItems > 0}">
+            Showing <span th:text="${currentPage * 5 + 1}">1</span> to 
+            <span th:text="${(currentPage * 5) + 5 > totalItems ? totalItems : (currentPage * 5) + 5}">5</span> of 
+            <span th:text="${totalItems}">20</span> entries
+        </p>
+        <p class="mb-0 text-center text-sm-start" th:if="${totalItems == 0}">
+            No entries found
+        </p>
+        <nav class="d-flex justify-content-center mb-0" aria-label="navigation" th:if="${totalPages > 1}">
+            <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
+                <li class="page-item mb-0" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link" href="#" th:data-page="${currentPage - 1}" th:data-role="${roleId}" th:data-keyword="${keyword}">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </li>
+                <li class="page-item mb-0" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" 
+                    th:classappend="${currentPage == i} ? 'active'">
+                    <a class="page-link" href="#" th:data-page="${i}" th:data-role="${roleId}" th:data-keyword="${keyword}" th:text="${i + 1}"></a>
+                </li>
+                <li class="page-item mb-0" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                    <a class="page-link" href="#" th:data-page="${currentPage + 1}" th:data-role="${roleId}" th:data-keyword="${keyword}">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<div th:fragment="accountPagination">
+    <div class="d-sm-flex justify-content-sm-between align-items-sm-center mt-2" th:if="${totalItems > 0}">
+        <div class="mb-0 text-center text-sm-start">
+            <p class="mb-0 text-center text-sm-start" th:if="${totalItems > 0}">
+                Showing <span th:text="${currentPage * 5 + 1}">1</span> to
+                <span th:text="${(currentPage * 5) + 5 > totalItems ? totalItems : (currentPage * 5) + 5}">5</span>
+                of
+                <span th:text="${totalItems}">20</span> entries
+            </p>
+            <p class="mb-0 text-center text-sm-start" th:if="${totalItems == 0}">
+                No entries found
+            </p>
+        </div>
+        <nav class="d-flex justify-content-center mb-0" aria-label="navigation" th:if="${totalPages > 1}">
+            <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
+                <!-- First Page -->
+                <li class="page-item mb-0" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link" th:data-page="0" href="#" tabindex="-1" title="First">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </li>
+
+                <!-- Page Numbers -->
+                <th:block th:with="startPage=${currentPage - 2 < 0 ? 0 : currentPage - 2},
+                                  endPage=${currentPage + 2 >= totalPages ? totalPages - 1 : currentPage + 2}">
+
+                    <!-- Show first page if not in range -->
+                    <li class="page-item mb-0" th:if="${startPage > 0}">
+                        <a class="page-link" th:data-page="0" th:text="1" href="#"></a>
+                    </li>
+                    <li class="page-item disabled mb-0" th:if="${startPage > 1}">
+                        <span class="page-link">..</span>
+                    </li>
+
+                    <!-- Page range -->
+                    <li class="page-item mb-0"
+                        th:each="i : ${#numbers.sequence(startPage, endPage)}"
+                        th:classappend="${currentPage == i} ? 'active'">
+                        <a class="page-link" th:data-page="${i}" th:text="${i + 1}" href="#"></a>
+                    </li>
+
+                    <!-- Show last page if not in range -->
+                    <li class="page-item disabled mb-0" th:if="${endPage < totalPages - 2}">
+                        <span class="page-link">..</span>
+                    </li>
+                    <li class="page-item mb-0" th:if="${endPage < totalPages - 1}">
+                        <a class="page-link" th:data-page="${totalPages - 1}" th:text="${totalPages}" href="#"></a>
+                    </li>
+                </th:block>
+
+                <!-- Last Page -->
+                <li class="page-item mb-0" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                    <a class="page-link" th:data-page="${totalPages - 1}" href="#" title="Last">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Show message when no data -->
+    <div class="text-center text-muted mt-3" th:if="${totalItems == 0}">
+        <i class="fas fa-search me-2"></i>No entries found
+    </div>
+
+    <!-- Message Modal -->
+    <div class="modal fade" id="messageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="messageForm" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Send Message to <span id="instructorName"></span></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Hidden input for instructor ID -->
+                        <input type="hidden" id="instructorId" name="instructorId"/>
+
+                        <div class="mb-3">
+                            <label class="form-label">Message</label>
+                            <textarea name="message" class="form-control" rows="4"
+                                      placeholder="Type your message here..."
+                                      required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Send Message</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // Handle message modal
+$(document).on('click', '[data-bs-target="#messageModal"]', function () {
+    const instructorId = $(this).data('instructor-id');
+    const instructorName = $(this).data('instructor-name');
+    $('#instructorId').val(instructorId);
+    $('#instructorName').text(instructorName);
+});
+
+// Handle message form submission
+$('#messageForm').on('submit', function (e) {
+    e.preventDefault();
+    const instructorId = $('#instructorId').val();
+    const message = $('textarea[name="message"]').val();
+
+    $.ajax({
+        url: '/admin/mnInstructors/sendMessage',
+        type: 'POST',
+        data: {
+            instructorId: instructorId,
+            message: message
+        },
+        success: function (response) {
+            $('#messageModal').modal('hide');
+            $('textarea[name="message"]').val('');
+
+        },
+        error: function (xhr, status, error) {
+            alert('Error sending message. Please try again.');
+        }
+    });
+});</script>
+</div>

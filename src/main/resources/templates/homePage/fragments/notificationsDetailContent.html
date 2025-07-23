@@ -1,0 +1,151 @@
+<div th:fragment="notificationsDetailContent">
+  <style>
+    .notification-detail-card {
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
+      margin-bottom: 2rem;
+      padding: 2rem 2.5rem;
+    }
+
+    .notifications-header {
+      background: #222;
+      color: #fff;
+      padding: 1rem 1.5rem;
+      border-radius: 10px 10px 0 0;
+      margin-bottom: 2rem;
+    }
+
+    .notifications-header h5,
+    .notifications-header i {
+      color: #fff !important;
+    }
+
+    .notification-type-badge {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.5rem;
+      margin-right: 0.5rem;
+    }
+
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .status-unread {
+      background-color: #e3f2fd;
+      color: #1976d2;
+    }
+
+    .status-read {
+      background-color: #e8f5e8;
+      color: #2e7d32;
+    }
+
+    .notification-message {
+      font-size: 1.1rem;
+      color: #333;
+      margin: 1.5rem 0 2rem 0;
+      line-height: 1.7;
+    }
+
+    .btn-back {
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 5px;
+      text-decoration: none;
+      transition: background 0.3s ease;
+    }
+
+    .btn-back:hover {
+      background: #5a6268;
+      color: white;
+    }
+
+    @media (max-width: 768px) {
+      .notification-detail-card {
+        padding: 1rem;
+      }
+
+      .notifications-header {
+        padding: 1rem;
+      }
+    }
+  </style>
+  <main>
+    <div class="container py-4">
+      <div class="notifications-header mb-4">
+        <h5 class="mb-0">
+          <i class="fas fa-bell me-2"></i>Notification Detail
+        </h5>
+      </div>
+      <div class="notification-detail-card">
+        <div class="d-flex align-items-center mb-3">
+          <span class="notification-type-badge bg-primary bg-opacity-10 text-primary me-2"
+            th:text="${notification.type}"></span>
+          <span
+            th:class="${notification.status} == 'sent' ? 'status-indicator status-read' : 'status-indicator status-unread'">
+            <i th:class="${notification.status} == 'sent' ? 'fas fa-check-circle' : 'fas fa-circle'"></i>
+            <span th:text="${notification.status} == 'sent' ? 'Read' : 'Unread'"></span>
+          </span>
+          <span class="ms-auto text-muted small"
+            th:text="${#temporals.format(notification.sentAt, 'dd/MM/yyyy HH:mm')}"></span>
+        </div>
+        <div class="notification-message" th:text="${notification.message}"></div>
+        <div class="mt-4" th:if="${notification.course != null and notification.course.courseId != null}">
+          <div class="border rounded p-3 bg-light">
+            <h6 class="mb-2"><i class="fas fa-book me-2"></i>Course Information</h6>
+            <div><strong>Course Title:</strong> <span th:text="${notification.course.title}"></span></div>
+            <div><strong>Course ID:</strong> <span th:text="${notification.course.courseId}"></span></div>
+          </div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mt-4">
+          <a th:href="@{/user/notifications}" class="btn btn-back">
+            <i class="fas fa-arrow-left me-1"></i>Back to Notifications
+          </a>
+          <!-- Optional: Add mark as read button if needed -->
+        </div>
+      </div>
+    </div>
+  </main>
+  <script>
+    function markAsRead(notificationId) {
+      fetch(`/user/notifications/${notificationId}/mark-read`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+        .then(response => {
+          if (response.ok) {
+            location.reload();
+          }
+        })
+        .catch(error => {
+          console.error('Error marking as read:', error);
+        });
+    }
+  </script>
+  <script>
+    // AJAX cho form trả lời từ notification
+    const replyForm = document.getElementById('replyFromNotificationForm');
+    if (replyForm) {
+      replyForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        fetch(this.action, {
+          method: 'POST',
+          body: formData
+        }).then(res => res.json()).then(() => location.reload());
+      });
+    }
+  </script>
+</div>

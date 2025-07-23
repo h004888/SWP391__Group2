@@ -2,11 +2,10 @@ package com.OLearning.service.user;
 
 import com.OLearning.dto.user.UserDTO;
 import com.OLearning.dto.user.UserDetailDTO;
-import com.OLearning.dto.login.RegisterDTO;
+import com.OLearning.dto.user.UserProfileUpdateDTO;import com.OLearning.dto.login.RegisterDTO;
+import com.OLearning.dto.user.UserProfileEditDTO;
 import com.OLearning.entity.Role;
 import com.OLearning.entity.User;
-
-import org.mapstruct.control.MappingControl.Use;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,14 +18,9 @@ public interface UserService {
 
     Page<UserDTO> getAllUsers(Pageable pageable);
 
-    Page<UserDTO> getUsersByRoleWithPagination(Long roleId, Pageable pageable);
-
     Page<UserDTO> getInstructorsByRoleIdOrderByCourseCountDesc(Long roleId, Pageable pageable);
 
-    Page<UserDTO> searchByNameWithPagination(String keyword, Long roleId, Pageable pageable);
-
-    Page<UserDTO> getInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(String keyword, Long roleId,
-            Pageable pageable);
+    Page<UserDTO> getInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(String keyword, Long roleId, Pageable pageable);
 
     Page<UserDTO> getUsersByRoleAndStatusWithPagination(Long roleId, boolean status, Pageable pageable);
 
@@ -42,9 +36,9 @@ public interface UserService {
 
     boolean deleteAcc(Long id);
 
-    boolean changStatus(Long id);
+    boolean changStatus(Long id, String reason);
 
-    // List<UserDTO> searchByName(String keyword, Long roleId);
+//    List<UserDTO> searchByName(String keyword, Long roleId);
 
     boolean resetPassword(Long id);
 
@@ -60,11 +54,30 @@ public interface UserService {
 
     Page<UserDTO> filterInstructors(String keyword, Pageable pageable);
 
-    Optional<User> findById(Long userId);
-
     boolean existsById(Long userId);
 
     Long countInstructor();
 
     Long countStudent();
+    User findById(Long id);
+
+    void updatePasswordByEmail(String email, String newPassword);
+
+    void updateProfile(Long userId, UserProfileEditDTO profileEditDTO);
+
+    Optional<UserProfileEditDTO> getProfileByUsername(String username);
+    void updateProfileByUsername(String username, UserProfileEditDTO profileEditDTO);
+
+    // Profile management methods
+    User updateProfile(Long userId, UserProfileUpdateDTO profileUpdateDTO);
+
+    User updateProfilePicture(Long userId, String newProfilePictureUrl);
+
+    Optional<User> findByEmail(String email);
+    User save(User user);
+
+    Page<UserDTO> getUsersByRolesWithPagination(List<Long> roleIds, Pageable pageable);
+    Page<UserDTO> getUsersByRolesAndStatusWithPagination(List<Long> roleIds, boolean status, Pageable pageable);
+    Page<UserDTO> searchByNameWithPagination(String keyword, List<Long> roleIds, Pageable pageable);
+    Page<UserDTO> searchByNameAndStatusWithPagination(String keyword, List<Long> roleIds, boolean status, Pageable pageable);
 }

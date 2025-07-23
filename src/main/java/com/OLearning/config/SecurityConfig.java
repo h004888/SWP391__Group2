@@ -1,8 +1,6 @@
 package com.OLearning.config;
 
-import com.OLearning.security.CustomAuthenticationSuccessHandler;
-import com.OLearning.security.CustomOAuth2UserService;
-import com.OLearning.security.CustomUserDetailsService;
+import com.OLearning.security.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,20 +11,30 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import com.OLearning.repository.UserRepository;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import com.OLearning.security.BlockedAccountFilter;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-        private final CustomUserDetailsService customUserDetailsService;
-        private final CustomOAuth2UserService customOAuth2UserService;
+    private final CustomUserDetailsService customUserDetailsService;
+
+    private final CustomOAuth2UserService customOAuth2UserService;
+
+    private final UserRepository userRepository;
 
         @Bean
         public PasswordEncoder passwordEncoder() {
@@ -34,92 +42,127 @@ public class SecurityConfig {
 //                return NoOpPasswordEncoder.getInstance();
                  return new BCryptPasswordEncoder();
         }
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring().requestMatchers("/api/payment/sepay/webhook");
+    }
 
-        @Bean
-        public AuthenticationSuccessHandler authenticationSuccessHandler() {
-                return new CustomAuthenticationSuccessHandler();
-        }
+    @Bean
+    public AuthenticationSuccessHandler authenticationSuccessHandler() {
+        return new CustomAuthenticationSuccessHandler(userRepository, (BCryptPasswordEncoder) passwordEncoder());
+    }
 
-        @Bean
-        public SessionRegistry sessionRegistry() {
-                return new SessionRegistryImpl();
-        }
+    @Bean
+    public AuthenticationFailureHandler authenticationFailureHandler() {
+        return new CustomAuthenticationFailureHandler();
+    }
 
-        @Bean
-        public HttpSessionEventPublisher httpSessionEventPublisher() {
-                return new HttpSessionEventPublisher();
-        }
+    @Bean
+    public SessionRegistry sessionRegistry() {
+        return new SessionRegistryImpl();
+    }
 
-        // Config to use customUserDetailsService
-        @Bean
-        public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-                return config.getAuthenticationManager();
-        }
+    @Bean
+    public HttpSessionEventPublisher httpSessionEventPublisher() {
+        return new HttpSessionEventPublisher();
+    }
 
-        @Bean
-        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-                http
-                                .authorizeHttpRequests(authz -> authz
-                                                // Cho phép truy cập public resources
-                                                .requestMatchers("/css/**", "/js/**", "/images/**", "/static/**",
-                                                                "/assets/**")
-                                                .permitAll()
-                                                .requestMatchers("/login", "/register", "/select-role", "/assign-role",
-                                                                "/forgot-password", "/reset-password",
-                                                                "/otp-verification")
-                                                .permitAll()
-                                                .requestMatchers("/error", "/403", "/fragments/**", "/myCourses/**")
-                                                .permitAll()
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
 
-                                                // Root path redirect
-                                                .requestMatchers("/home/**").permitAll()
-                                                .requestMatchers("/**").permitAll()
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                .authorizeHttpRequests(authz -> authz
+                        // Cho phép truy cập public resources
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/static/**","/assets/**").permitAll()
+                        .requestMatchers("/login","/dashboard_login", "/register","/forgot-password","/reset-password","/otp-verification").permitAll()
+                        .requestMatchers("/home").permitAll()
+                        .requestMatchers("/error", "/403", "/fragments/**", "/myCourses/**")
+                        .permitAll()
 
-                                                // Chỉ admin mới được truy cập /admin/**
-                                                .requestMatchers("/admin/**").hasRole("ADMIN")
+                        // Root path redirect
+                        .requestMatchers("/home/**").permitAll()
+//                        .requestMatchers("/home/vouchers").permitAll()
+//                        .requestMatchers("/home/vouchers/voucher/*/courses").permitAll()
+                        .requestMatchers("/home/cart").authenticated()
+                        .requestMatchers("/home/wishlist").authenticated()
+                        .requestMatchers("/api/sepay/**", "/api/order/status").permitAll()
+                        // Chỉ admin mới được truy cập /admin/**
+                        .requestMatchers("/admin/**").hasAnyRole("ADMIN", "STAFF")
 
-                                                // Chỉ INSTRUCTOR mới được truy cập /instructordashboard/**
-                                                .requestMatchers("/instructordashboard/**").hasRole("INSTRUCTOR")
+                        // Chỉ instructor mới được truy cập /instructor/**
+                        .requestMatchers("/instructor/**").hasAnyRole( "INSTRUCTOR")
 
-                                                // User có thể truy cập /user/** và /home
-                                                // .requestMatchers("/home").hasAnyRole("USER","INSTRUCTOR")
+                        .requestMatchers("/terms/user").permitAll()
 
-                                                .anyRequest().authenticated())
-                                .formLogin(form -> form
-                                                .loginPage("/login")
-                                                .loginProcessingUrl("/perform_login")
-                                                .usernameParameter("email")
-                                                .passwordParameter("password")
-                                                .successHandler(authenticationSuccessHandler())
-                                                .failureUrl("/login?error=true")
-                                                .permitAll())
-                                .oauth2Login(oauth2 -> oauth2
-                                                .loginPage("/login") // Dùng chung trang login
-                                                .successHandler(authenticationSuccessHandler())
-                                                .failureUrl("/login?error=true")
-                                                .userInfoEndpoint(userInfo -> userInfo
-                                                                .userService(customOAuth2UserService)))
-                                .logout(logout -> logout
-                                                .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                                                .logoutSuccessUrl("/login?logout=true")
-                                                .deleteCookies("JSESSIONID")
-                                                .invalidateHttpSession(true)
-                                                .permitAll())
-                                .exceptionHandling(ex -> ex
-                                                .accessDeniedPage("/403"))
-                                .sessionManagement(session -> session
-                                                .maximumSessions(1)
-                                                .maxSessionsPreventsLogin(true)
-                                                .expiredUrl("/login?expired=true")
-                                                .sessionRegistry(sessionRegistry()))
-                                .rememberMe(remember -> remember
-                                                .key("my-unique-key")
-                                                .rememberMeParameter("remember-me")
-                                                .tokenValiditySeconds(7 * 24 * 60 * 60) // 7days
-                                )
-                                .csrf(csrf -> csrf.disable()); // Disable CSRF
+                        .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .loginProcessingUrl("/perform_login")
+                        .usernameParameter("email")
+                        .passwordParameter("password")
+                        .successHandler(authenticationSuccessHandler())
+                        .failureHandler(authenticationFailureHandler())
+                        .permitAll()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")
+                        .successHandler(authenticationSuccessHandler())
+                        .failureUrl("/login?error=true")
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
+                )
+                .logout(logout -> logout
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                        .logoutSuccessHandler(customLogoutSuccessHandler())
+                        .deleteCookies("JSESSIONID")
+                        .invalidateHttpSession(true)
+                        .permitAll()
+                )
+                .exceptionHandling(ex -> ex
+                        .accessDeniedPage("/403")
+                )
+                .sessionManagement(session -> session
+                        .maximumSessions(1)
+                        .maxSessionsPreventsLogin(true)
+                        .expiredUrl("/login?expired=true")
+                        .sessionRegistry(sessionRegistry())
+                )
+                .rememberMe(remember -> remember
+                        .key("my-unique-key")
+                        .rememberMeParameter("remember-me")
+                        .tokenValiditySeconds(7 * 24 * 60 * 60) // 7days
+                )
+                .csrf(csrf -> csrf.disable());
 
-                return http.build();
-        }
+        return http.build();
+    }
 
+    @Bean
+    public LogoutSuccessHandler customLogoutSuccessHandler() {
+        return new CustomLogoutSuccessHandler();
+    }
+
+    @Bean
+    public FilterRegistrationBean<AdminAccessFilter> adminAccessFilterRegistration(AdminAccessFilter filter) {
+        FilterRegistrationBean<AdminAccessFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(filter);
+        registration.addUrlPatterns("/*");
+        registration.setOrder(2); // sau security filter
+        return registration;
+    }
+
+    @Bean
+    public FilterRegistrationBean<BlockedAccountFilter> blockedAccountFilterRegistration(BlockedAccountFilter filter) {
+        FilterRegistrationBean<BlockedAccountFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(filter);
+        registration.addUrlPatterns("/*");
+        registration.setOrder(3); // sau security filter và admin filter
+        return registration;
+    }
 }

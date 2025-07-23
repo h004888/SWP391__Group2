@@ -1,0 +1,13 @@
+<nav th:fragment="reportPagination" th:if="${totalPages > 1}" aria-label="Page navigation">
+    <ul class="pagination justify-content-center mt-3">
+        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+            <a class="page-link" href="#" th:data-page="${currentPage - 1}">Previous</a>
+        </li>
+        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages-1)}" th:classappend="${i == currentPage} ? 'active'">
+            <a class="page-link" href="#" th:data-page="${i}" th:text="${i+1}"></a>
+        </li>
+        <li class="page-item" th:classappend="${currentPage == totalPages-1} ? 'disabled'">
+            <a class="page-link" href="#" th:data-page="${currentPage + 1}">Next</a>
+        </li>
+    </ul>
+</nav> 

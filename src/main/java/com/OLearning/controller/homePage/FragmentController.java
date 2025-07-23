@@ -2,6 +2,7 @@ package com.OLearning.controller.homePage;
 
 import com.OLearning.dto.category.CategoryDTO;
 import com.OLearning.dto.course.CourseViewDTO;
+import com.OLearning.entity.Category;
 import com.OLearning.mapper.course.CourseMapper;
 import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.course.CourseService;
@@ -26,8 +27,8 @@ public class FragmentController {
     private CourseService courseService;
 
     @GetMapping("/category")
-    public List<CategoryDTO> getAllCategories() {
-        return categoryService.getAllCategory();
+    public List<Category> getAllCategories() {
+        return categoryService.getListCategories();
     }
 
     @GetMapping("/topCourse")

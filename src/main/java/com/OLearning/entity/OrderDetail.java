@@ -9,20 +9,23 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
 public class OrderDetail {
-    @EmbeddedId
-    private OrderDetailId Id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "OrderDetailID")
+    private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("orderId")
-    @JoinColumn(name = "OrderID")
-    private Order orders;
+    @ManyToOne
+    @JoinColumn(name = "orderID", nullable = false)
+    private Order order;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("courseId")
-    @JoinColumn(name = "CourseID")
+    @ManyToOne
+    @JoinColumn(name = "courseID", nullable = false)
     private Course course;
+
+    @ManyToOne
+    @JoinColumn(name = "VoucherID")
+    private Voucher voucher;
 
     @Column(name = "UnitPrice")
     private Double unitPrice;

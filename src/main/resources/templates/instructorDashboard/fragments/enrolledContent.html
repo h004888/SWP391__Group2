@@ -1,0 +1,247 @@
+<!-- Fragment lớn: Bao gồm biểu đồ + list -->
+<div th:fragment="enrollmentPage">
+    <!-- Card biểu đồ -->
+    <div class="card mb-4">
+        <div class="card-header bg-light border-bottom">
+            <h5 class="mb-0">Enrollment Statistics</h5>
+        </div>
+        <div class="card-body">
+            <canvas id="enrollmentStatsChart" height="120"></canvas>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        function renderEnrollmentChart() {
+            fetch('/instructor/enrolled/statistics')
+                .then(res => res.json())
+                .then(data => {
+                    const labels = data.map(stat => stat.courseTitle);
+                    const totalEnroll = data.map(stat => stat.totalEnroll);
+                    const completedEnroll = data.map(stat => stat.completedEnroll);
+                    const ctx = document.getElementById('enrollmentStatsChart').getContext('2d');
+                    if (window.enrollmentChart) window.enrollmentChart.destroy();
+                    window.enrollmentChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [
+                                {
+                                    label: 'Total Enrolled',
+                                    data: totalEnroll,
+                                    backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                                },
+                                {
+                                    label: 'Completed',
+                                    data: completedEnroll,
+                                    backgroundColor: 'rgba(75, 192, 192, 0.7)'
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { position: 'top' },
+                                title: { display: true, text: 'Enrollment per Course' }
+                            },
+                            scales: {
+                                x: { title: { display: true, text: 'Course' }, ticks: { autoSkip: false, maxRotation: 45, minRotation: 0 } },
+                                y: { title: { display: true, text: 'Number of Students' }, beginAtZero: true }
+                            }
+                        }
+                    });
+                });
+        }
+        document.addEventListener('DOMContentLoaded', renderEnrollmentChart);
+    </script>
+    <!-- Fragment nhỏ: bảng + phân trang -->
+    <div th:replace="instructorDashboard/fragments/enrolledContent :: enrollmentList"></div>
+</div>
+
+<!-- Fragment nhỏ: chỉ chứa bảng, phân trang, modal, script AJAX -->
+<div class="container enrolled-fragment" th:fragment="enrollmentList">
+    <div class="row">
+        <div class="col-12">
+            <div class="card border bg-transparent rounded-3">
+                <div class="card-header bg-transparent border-bottom">
+                    <h3 class="mb-0">My Students List</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive border-0">
+                        <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                            <thead>
+                            <tr>
+                                <th scope="col" class="border-0 rounded-start" style="width: 30%">Student name</th>
+                                <th scope="col" class="border-0" style="width: 18%">Progress</th>
+                                <th scope="col" class="border-0" style="width: 30%">Course</th>
+                                <th scope="col" class="border-0" style="width: 15%">Enrolled date</th>
+                                <th scope="col" class="border-0 rounded-end" style="width: 15%">Status</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="enrollment : ${courses}" th:onclick="|showEnrollmentModal(${enrollment.enrollmentId})|" style="cursor:pointer;">
+                                <td>
+                                    <div class="mb-0 ms-2">
+                                        <h6 class="mb-0" th:text="${enrollment.user.fullName}"></h6>
+                                        <span class="text-body small" th:if="${enrollment.user.address != null}">
+                                            <i class="fas fa-fw fa-map-marker-alt me-1 mt-1"></i>
+                                            <span th:text="${enrollment.user.address}"></span>
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="text-center text-sm-start">
+                                    <div class="overflow-hidden">
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress w-100" style="height: 20px; background-color: #e9ecef;">
+                                                <div class="progress-bar"
+                                                     th:classappend="${enrollment.progress >= 100} ? 'bg-success' : (${enrollment.progress >= 50} ? 'bg-info' : 'bg-warning')"
+                                                     role="progressbar"
+                                                     th:style="'width: ' + ${enrollment.progress} + '%'"
+                                                     th:aria-valuenow="${enrollment.progress}"
+                                                     aria-valuemin="0" aria-valuemax="100">
+                                                    <span th:text="${#numbers.formatDecimal(enrollment.progress, 0, 'POINT', 0, 'POINT')} + '%'" style="color: #fff; font-weight: bold;"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a th:href="@{'/instructor/courses/detail/' + ${enrollment.courseId}}" th:text="${enrollment.courseTitle}">Course Title</a>
+                                </td>
+                                <td th:text="${#temporals.format(enrollment.enrollmentDate, 'dd/MM/yyyy')}">01/01/2023</td>
+                                <td>
+                                    <div th:switch="${enrollment.status}">
+                                        <span th:case="'blocked'" class="badge bg-danger">Blocked</span>
+                                        <span th:case="'active'" class="badge bg-success">Active</span>
+                                        <span th:case="'pending'" class="badge bg-warning text-dark">Pending</span>
+                                        <span th:case="*" class="badge bg-secondary">Unknown</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(courses)}">
+                                <td colspan="5" class="text-center py-5">
+                                    <div class="py-4">
+                                        <i class="fas fa-user-graduate fs-1 text-muted mb-3"></i>
+                                        <h6>No students enrolled yet</h6>
+                                        <p class="mb-0">When students enroll in your courses, they will appear here.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Pagination START -->
+                    <div class="d-sm-flex justify-content-sm-between align-items-sm-center mt-4 mt-sm-3" th:if="${totalPages > 0}">
+                        <p class="mb-0 text-center text-sm-start">
+                            Showing <span th:text="${currentPage * size + 1}">1</span> to 
+                            <span th:text="${(currentPage * size) + #lists.size(courses) > totalElements ? totalElements : (currentPage * size) + #lists.size(courses)}">8</span> of 
+                            <span th:text="${totalElements}">20</span> entries
+                        </p>
+                        <nav class="d-flex justify-content-center mb-0" aria-label="navigation">
+                            <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
+                                <!-- Previous page -->
+                                <li class="page-item mb-0" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                                    <a class="page-link" th:href="@{/instructor/enrolled(page=${currentPage > 0 ? currentPage - 1 : 0}, size=${size})}" tabindex="-1">
+                                        <i class="fas fa-angle-left"></i>
+                                    </a>
+                                </li>
+
+                                <!-- First page (always show) -->
+                                <li class="page-item mb-0" th:classappend="${currentPage == 0 ? 'active' : ''}">
+                                    <a class="page-link" th:href="@{/instructor/enrolled(page=0, size=${size})}">1</a>
+                                </li>
+                                <!-- Ellipsis if needed -->
+                                <li class="page-item mb-0 disabled" th:if="${currentPage > 2}">
+                                    <span class="page-link">...</span>
+                                </li>
+                                <!-- Pages around current (not first/last) -->
+                                <li class="page-item mb-0"
+                                    th:each="i : ${#numbers.sequence((currentPage - 1 > 1 ? currentPage - 1 : 1), (currentPage + 1 < totalPages - 2 ? currentPage + 1 : totalPages - 2))}"
+                                    th:if="${i > 0 and i < totalPages - 1}"
+                                    th:classappend="${currentPage == i ? 'active' : ''}">
+                                    <a class="page-link" th:href="@{/instructor/enrolled(page=${i}, size=${size})}" th:text="${i+1}">1</a>
+                                </li>
+                                <!-- Ellipsis before last page if needed -->
+                                <li class="page-item mb-0 disabled" th:if="${currentPage < totalPages - 3}">
+                                    <span class="page-link">...</span>
+                                </li>
+                                <!-- Last page (always show if > 1) -->
+                                <li class="page-item mb-0" th:if="${totalPages > 1}" th:classappend="${currentPage == totalPages - 1 ? 'active' : ''}">
+                                    <a class="page-link" th:href="@{/instructor/enrolled(page=${totalPages - 1}, size=${size})}" th:text="${totalPages}">1</a>
+                                </li>
+
+                                <!-- Next page -->
+                                <li class="page-item mb-0" th:classappend="${currentPage + 1 >= totalPages ? 'disabled' : ''}">
+                                    <a class="page-link" th:href="@{/instructor/enrolled(page=${currentPage + 1 < totalPages ? currentPage + 1 : totalPages - 1}, size=${size})}">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                    <!-- Pagination END -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal hiển thị thông tin user/enrollment -->
+    <div class="modal fade" id="enrollmentDetailModal" tabindex="-1" aria-labelledby="enrollmentDetailModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="enrollmentDetailModalLabel">Student & Enrollment Detail</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id="enrollmentDetailModalBody">
+            <!-- Nội dung sẽ được fill động bằng JS -->
+            <div class="text-center py-5">
+              <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        function attachEnrolledPaginationAjax() {
+            document.querySelectorAll('.pagination .page-link').forEach(function(link) {
+                link.onclick = null;
+                link.addEventListener('click', function(e) {
+                    const li = this.closest('li');
+                    if (li && (li.classList.contains('disabled') || li.classList.contains('active') || this.getAttribute('href') === '#')) {
+                        return;
+                    }
+                    e.preventDefault();
+                    const url = this.getAttribute('href');
+                    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                        .then(response => response.text())
+                        .then(html => {
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(html, 'text/html');
+                            const newFragment = doc.querySelector('.enrolled-fragment');
+                            if (newFragment) {
+                                const current = document.querySelector('.enrolled-fragment');
+                                if (current) {
+                                    current.replaceWith(newFragment);
+                                    setTimeout(attachEnrolledPaginationAjax, 100); // chỉ gọi lại nếu thay thế thành công
+                                }
+                            }
+                            // Nếu không tìm thấy fragment, không gọi lại nữa để tránh vòng lặp fetch
+                        });
+                });
+            });
+        }
+        document.addEventListener('DOMContentLoaded', attachEnrolledPaginationAjax);
+
+        // Hàm gọi API lấy thông tin enrollment và user, fill vào modal
+        function showEnrollmentModal(enrollmentId) {
+            const modal = new bootstrap.Modal(document.getElementById('enrollmentDetailModal'));
+            document.getElementById('enrollmentDetailModalBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+            modal.show();
+            fetch(`/instructor/enrolled/detail?enrollmentId=${enrollmentId}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(res => res.text())
+                .then(html => {
+                    document.getElementById('enrollmentDetailModalBody').innerHTML = html;
+                });
+        }
+    </script>
+</div>

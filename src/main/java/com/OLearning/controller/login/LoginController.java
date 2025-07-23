@@ -3,28 +3,26 @@ package com.OLearning.controller.login;
 import com.OLearning.dto.login.RegisterDTO;
 import com.OLearning.entity.User;
 import com.OLearning.service.email.PasswordResetService;
+import com.OLearning.service.user.UserService;
 import com.OLearning.service.user.impl.UserServiceImpl;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Optional;
 
 @Controller
 public class LoginController {
 
 
-    private final UserServiceImpl userServiceImpl;
+    private final UserService userService;
     private final PasswordResetService passwordResetService;
 
-    public LoginController(UserServiceImpl userServiceImpl, PasswordResetService passwordResetService) {
-        this.userServiceImpl = userServiceImpl;
+    public LoginController(UserService userService, PasswordResetService passwordResetService) {
+        this.userService = userService;
         this.passwordResetService = passwordResetService;
     }
 
@@ -35,22 +33,44 @@ public class LoginController {
                             Model model) {
 
         if (error != null) {
-            model.addAttribute("errorMessage", "Tên đăng nhập hoặc mật khẩu không đúng!");
+            model.addAttribute("errorMessage", "Incorrect username or password!");
         }
 
         if (logout != null) {
-            model.addAttribute("successMessage", "Đăng xuất thành công!");
+            model.addAttribute("successMessage", "Logout successful!");
         }
         if (expired != null) {
-            model.addAttribute("warningMessage", "Phiên đăng nhập đã hết hạn!");
+            model.addAttribute("warningMessage", "Session has expired!");
         }
-        return "loginPage/login";
+        return "loginPage/normalLogin/login";
+    }
+
+    @GetMapping("/dashboard_login")
+    public String adminLoginPage(@RequestParam(value = "error", required = false) String error,
+                            @RequestParam(value = "logout", required = false) String logout,
+                            @RequestParam(value = "expired", required = false) String expired,
+                            Model model) {
+
+        if (error != null) {
+            if ("unauthorized_admin_login".equals(error)) {
+                model.addAttribute("errorMessage", "Admin accounts are not allowed to log in here!");
+            } else {
+                model.addAttribute("errorMessage", "Incorrect username or password!");
+            }
+        }
+        if (logout != null) {
+            model.addAttribute("successMessage", "Logout successful!");
+        }
+        if (expired != null) {
+            model.addAttribute("warningMessage", "Session has expired!");
+        }
+        return "loginPage/adminLogin/sign-in";
     }
 
     @GetMapping("/register")
     public String signUpPage(Model model) {
         model.addAttribute("user", new RegisterDTO());
-        return "loginPage/signup";
+        return "loginPage/normalLogin/signup";
     }
 
     @PostMapping("/register")
@@ -61,14 +81,11 @@ public class LoginController {
         //validation errors
         if (bindingResult.hasErrors()) {
             model.addAttribute("user", registerDTO);
-            return "loginPage/signup";
+            return "loginPage/normalLogin/signup";
         }
 
         try {
-            User savedUser = userServiceImpl.registerAccount(registerDTO);
-
-            return "redirect:/select-role?userId=" + savedUser.getUserId();
-
+            userService.registerAccount(registerDTO);
         } catch (RuntimeException e) {
             String errorMessage = e.getMessage();
 
@@ -82,35 +99,14 @@ public class LoginController {
                 model.addAttribute("error", errorMessage);
             }
 
-            return "loginPage/signup";
+            return "loginPage/normalLogin/signup";
 
         } catch (Exception e) {
             model.addAttribute("error", "An unexpected error occurred. Please try again.");
-            return "loginPage/signup";
+            return "loginPage/normalLogin/signup";
         }
-    }
-
-
-    @GetMapping("/select-role")
-    public String selectRolePage(@RequestParam("userId") Long userId, Model model) {
-        model.addAttribute("userId", userId);
-        model.addAttribute("roles", userServiceImpl.getListRole());
-        return "loginPage/selectRole";
-    }
-
-    @PostMapping("/assign-role")
-    public String assignRole(@RequestParam("role") String role,
-                             @RequestParam("userId") Long userId,
-                             RedirectAttributes redirectAttributes) {
-        try {
-            userServiceImpl.assignRoleToUser(userId, role);
-            redirectAttributes.addFlashAttribute("success",
-                    "Registration successful! Welcome to OLearning, " + userServiceImpl.getInfoUser(userId).get().getFullName() + "!");
-            return "redirect:/login";
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "You need selected role before.");
-            return "redirect:/select-role?userId=" + userId;
-        }
+        redirectAttributes.addFlashAttribute("successMessage", "Registration successful! Please verify your email with the OTP sent to your email address.");
+        return "redirect:/otp-verification?email=" + registerDTO.getEmail() + "&type=verifyEmail";
     }
 
     @GetMapping("/403")
@@ -121,52 +117,76 @@ public class LoginController {
 
     @GetMapping("/forgot-password")
     public String getForgotPasswordPage() {
-        return "loginPage/forgotPassword";
+        return "loginPage/normalLogin/forgotPassword";
     }
 
     @PostMapping("/forgot-password")
     public String handleForgotPassword(@RequestParam String email,
+                                       @RequestParam(value = "type", required = false, defaultValue = "forgotPassword") String type,
                                        RedirectAttributes redirectAttributes) {
         try {
             // Check if user has pending OTP (optional rate limiting)
             if (passwordResetService.hasPendingOTP(email)) {
                 redirectAttributes.addFlashAttribute("errorMessage",
-                        "Bạn đã có OTP đang chờ xử lý. Vui lòng kiểm tra email.");
-                return "redirect:/otp-verification?email=" + email;
+                        "You already have a pending OTP. Please check your email.");
+                return "redirect:/otp-verification?email=" + email + "&type=" + type;
             }
 
-            passwordResetService.generateOTP(email);
+            passwordResetService.generateOTP(email, type);
             redirectAttributes.addFlashAttribute("successMessage",
-                    "Đã gửi mã OTP đến email của bạn. Vui lòng kiểm tra hộp thư.");
-            return "redirect:/otp-verification?email=" + email;
+                    ("verifyEmail".equals(type) ? "A verification code has been sent to your email. Please check your inbox." : "An OTP has been sent to your email. Please check your inbox."));
+            return "redirect:/otp-verification?email=" + email + "&type=" + type;
 
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/forgot-password";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",
-                    "Có lỗi xảy ra. Vui lòng thử lại sau.");
+                    "An error occurred. Please try again later.");
             return "redirect:/forgot-password";
         }
     }
 
     @GetMapping("/otp-verification")
     public String getOtpVerificationPage(@RequestParam("email") String email,
+                                         @RequestParam(value = "error", required = false) String error,
+                                         @RequestParam(value = "type", required = false, defaultValue = "forgotPassword") String type,
                                          Model model) {
         model.addAttribute("email", email);
-        return "loginPage/otpVerification";
+        model.addAttribute("type", type);
+        if (error != null) {
+            model.addAttribute("errorMessage", "Invalid or expired OTP code.");
+        }
+        return "loginPage/normalLogin/otpVerification";
     }
 
     @PostMapping("/otp-verification")
     public String verifyOtp(@RequestParam("email") String email,
                             @RequestParam("otp") String otp,
-                            Model model) {
+                            @RequestParam(value = "type", required = false, defaultValue = "forgotPassword") String type,
+                            Model model,
+                            RedirectAttributes redirectAttributes) {
         if (passwordResetService.verifyOTP(email, otp)) {
+            if ("verifyEmail".equals(type)) {
+                // Cập nhật trạng thái xác thực email
+                Optional<User> userOpt = userService.findByEmail(email);
+                if (userOpt.isPresent()) {
+                    User user = userOpt.get();
+                    if (!Boolean.TRUE.equals(user.getEmailVerified())) {
+                        user.setEmailVerified(true);
+                        userService.save(user);
+                    }
+                }
+                redirectAttributes.addFlashAttribute("successMessage", "Email verification successful! Please log in.");
+                return "redirect:/login";
+            } else {
             return "redirect:/reset-password?email=" + email + "&otp=" + otp;
+            }
         } else {
             model.addAttribute("email", email);
-            model.addAttribute("errorMessage", "Mã OTP không hợp lệ hoặc đã hết hạn.");
-            return "loginPage/otpVerification";
+            model.addAttribute("type", type);
+            model.addAttribute("errorMessage", "Invalid or expired OTP code.");
+            return "redirect:/otp-verification?email=" + email + "&type=" + type + "&error=true";
         }
     }
 
@@ -177,7 +197,7 @@ public class LoginController {
                                        Model model) {
         model.addAttribute("email", email);
         model.addAttribute("otp", otp);
-        return "loginPage/resetPassword";
+        return "loginPage/normalLogin/resetPassword";
     }
 
     @PostMapping("/reset-password")
@@ -190,7 +210,7 @@ public class LoginController {
         // Validate password confirmation
         if (!newPassword.equals(confirmPassword)) {
             redirectAttributes.addFlashAttribute("errorMessage",
-                    "Mật khẩu xác nhận không khớp!");
+                    "Password confirmation does not match!");
             return "redirect:/reset-password?email=" + email + "&otp=" + otp;
         }
 
@@ -198,7 +218,7 @@ public class LoginController {
             String result = passwordResetService.resetPassword(email, otp, newPassword);
 
             if (result.equals("Đổi mật khẩu thành công!")) {
-                redirectAttributes.addFlashAttribute("successMessage", result);
+                redirectAttributes.addFlashAttribute("successMessage", "Password changed successfully!");
                 return "redirect:/login";
             } else {
                 redirectAttributes.addFlashAttribute("errorMessage", result);
@@ -207,8 +227,28 @@ public class LoginController {
 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",
-                    "Có lỗi xảy ra khi đổi mật khẩu!");
+                    "An error occurred while changing the password!");
             return "redirect:/reset-password?email=" + email + "&otp=" + otp;
         }
+    }
+
+    @GetMapping("/change-password-oauth2")
+    public String getResetPasswordOauth2Page() {
+        return "loginPage/normalLogin/changePassword-Oauth2";
+    }
+
+    @PostMapping("/change-password-oauth2")
+    public String handleResetPasswordOauth2(@RequestParam String newPassword,
+                                            @RequestParam String confirmPassword,
+                                            java.security.Principal principal,
+                                            RedirectAttributes redirectAttributes) {
+        if (!newPassword.equals(confirmPassword)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Password confirmation does not match!");
+            return "redirect:/change-password-oauth2";
+        }
+        String email = principal.getName();
+        userService.updatePasswordByEmail(email, newPassword);
+        redirectAttributes.addFlashAttribute("successMessage", "Password changed successfully!");
+        return "redirect:/home";
     }
 }

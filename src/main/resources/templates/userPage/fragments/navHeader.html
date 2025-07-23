@@ -1,12 +1,147 @@
+<div>
+
 <!-- Header START -->
 <header th:fragment="navHeader" class="navbar-light navbar-sticky">
+    <style>
+        .notification-page-btn {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .notification-page-btn:hover {
+            background-color: #f8f9fa;
+            border-color: #dee2e6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .notification-page-btn .bi-bell-fill {
+            transition: color 0.3s ease;
+        }
+
+        .notification-page-btn:hover .bi-bell-fill {
+            color: #0d6efd !important;
+        }
+
+        .notification-page-btn .notif-badge {
+            background-color: #dc3545;
+            border: 2px solid #fff;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+    <style>
+        .notification-page-btn {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .notification-page-btn:hover {
+            background-color: #f8f9fa;
+            border-color: #dee2e6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .notification-page-btn .bi-bell-fill {
+            transition: color 0.3s ease;
+        }
+
+        .notification-page-btn:hover .bi-bell-fill {
+            color: #0d6efd !important;
+        }
+
+        .notification-page-btn .notif-badge {
+            background-color: #dc3545;
+            border: 2px solid #fff;
+            animation: pulse 2s infinite;
+        }
+
+        .notification-page-btn.has-notifications {
+            background-color: #fff3cd;
+            border-color: #ffeaa7;
+        }
+
+        .notification-page-btn.has-notifications:hover {
+            background-color: #ffeaa7;
+            border-color: #fdcb6e;
+        }
+
+        .notification-page-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .notification-page-btn.loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .notification-page-btn.loading .bi-bell-fill {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .notification-page-btn {
+                width: 40px !important;
+                height: 40px !important;
+            }
+
+            .notification-page-btn .bi-bell-fill {
+                font-size: 1.2rem !important;
+                line-height: 40px !important;
+            }
+
+            .notification-page-btn .notif-badge {
+                width: 12px !important;
+                height: 12px !important;
+                top: 4px !important;
+                right: 4px !important;
+            }
+        }
+    </style>
     <!-- Nav START -->
     <nav class="navbar navbar-expand-xl z-index-9">
         <div class="container">
             <!-- Logo START -->
             <a class="navbar-brand" th:href="@{/home}">
-                <img class="light-mode-item navbar-brand-item" src="assets/images/logo.svg" alt="logo">
-                <img class="dark-mode-item navbar-brand-item" src="assets/images/logo-light.svg" alt="logo">
+                <img class="light-mode-item navbar-brand-item" th:src="@{/assets/images/logo.svg}" alt="logo">
+                <img class="dark-mode-item navbar-brand-item" th:src="@{/assets/images/logo-light.svg}" alt="logo">
             </a>
             <!-- Logo END -->
 
@@ -58,56 +193,60 @@
 
                 <!-- Wishlist START -->
                 <li class="nav-item ms-0 ms-sm-2 d-none d-sm-block">
-                    <a class="btn btn-light btn-round mb-0" href="#"> <i class="bi bi-heart fa-fw"></i></a>
+                    <div class="me-2 me-md-3 dropdown">
+                        <!-- Wishlist button -->
+                        <a class="btn btn-light btn-round mb-0" th:href="@{/home/wishlist}">
+                            <i class="bi bi-heart fa-fw"></i>
+                        </a>
+                        <!-- badge -->
+                        <span id="wishlistTotalBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-danger mt-xl-2 ms-n1" th:text="${wishlistTotal != null ? wishlistTotal : 0}">
+                <span class="visually-hidden">items in wishlist</span>
+                </span>
+                    </div>
                 </li>
                 <!-- Wishlist END -->
 
-                <!-- Notification dropdown START -->
-                <li class="nav-item ms-2 ms-sm-3 dropdown">
-                    <!-- Notification button -->
-                    <a class="btn btn-light btn-round mb-0" href="#" role="button" data-bs-toggle="dropdown"
-                        aria-expanded="false" data-bs-auto-close="outside">
-                        <i class="bi bi-bell fa-fw"></i>
-                    </a>
-                    <!-- Notification dote -->
-                    <span class="notif-badge animation-blink"></span>
+                <!-- Cart page button START -->
+                <li class="nav-item ms-0 ms-sm-0 d-none d-sm-block">
+                    <div class="me-2 me-md-3 dropdown">
+                        <!-- Cart button -->
+                        <a class="btn btn-light btn-round mb-0" th:href="@{/home/cart}">
+                            <i class="bi bi-cart3 fa-fw"></i>
+                        </a>
+                        <!-- badge -->
+                        <span id="cartTotalBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-dark mt-xl-2 ms-n1" th:text="${cartTotal != null ? cartTotal : 0}">
+                <span class="visually-hidden">items in cart</span>
+                </span>
+                    </div>
+                </li>
+                <!-- Cart page button END -->
 
-                    <!-- Notification dropdown menu START -->
-                    <div
-                        class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0">
-                        <div class="card bg-transparent">
-                            <div
-                                class="card-header bg-transparent border-bottom py-4 d-flex justify-content-between align-items-center">
-                                <h6 class="m-0">Notifications <span
-                                        class="badge bg-danger bg-opacity-10 text-danger ms-2">2 new</span></h6>
-                                <a class="small" href="#">Clear all</a>
-                            </div>
-                            <div class="card-body p-0">
-                                <ul class="list-group list-unstyled list-group-flush">
-                                    <!-- Notif item -->
-                                    <li>
-                                        <a href="#" class="list-group-item-action border-0 border-bottom d-flex p-3">
-                                            <div class="me-3">
-                                                <div class="avatar avatar-md">
-                                                    <img class="avatar-img rounded-circle"
-                                                        src="assets/images/avatar/03.jpg" alt="avatar">
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <h6 class="mb-1">Update v2.3 completed successfully</h6>
-                                                <p class="small text-body m-0">What's new! Find out about new
-                                                    features</p>
-                                                <small class="text-body">5 min ago</small>
-                                            </div>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                            <!-- Button -->
-                            <div class="card-footer bg-transparent border-0 py-3 text-center position-relative">
-                                <a href="#" class="stretched-link">See all incoming activity</a>
+                <!-- Notification dropdown START -->
+                <li class="nav-item ms-0 ms-md-2 dropdown">
+                    <div class="nav-item ms-2 dropdown" sec:authorize="isAuthenticated()">
+                        <a class="btn btn-light btn-round mb-0 position-relative notification-btn-home" href="#" role="button" data-bs-toggle="dropdown"
+                           aria-expanded="false" data-bs-auto-close="outside" title="Notifications">
+                            <i class="bi bi-bell fa-fw"></i>
+                            <span id="userNotificationBadge" th:if="${unreadCount > 0}" class="notif-badge animation-blink"></span>
+                        </a>
+                        <!-- Notification dropdown menu START -->
+                        <div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0" style="width:320px !important;min-width:320px !important;max-width:320px !important;border:1px solid #ddd;">
+                            <div class="card bg-transparent">
+                                <div class="card-header bg-transparent border-bottom py-4 d-flex justify-content-between align-items-center">
+                                    <h6 class="m-0">Unread Notifications <span id="userNotificationCount" class="badge bg-danger bg-opacity-10 text-danger ms-2">0 new</span></h6>
+                                </div>
+                                <div class="card-body p-0">
+                                    <ul id="userNotificationList" class="list-group list-unstyled list-group-flush">
+                                        <!-- Notifications will be loaded here -->
+                                    </ul>
+                                </div>
+                                <!-- Button -->
+                                <div class="card-footer bg-transparent border-0 py-3 text-center position-relative" style="padding-top:0;">
+                                    <a th:href="@{/user/notifications}" class="stretched-link">View all notifications</a>
+                                </div>
                             </div>
                         </div>
+                        <!-- Notification dropdown menu END -->
                     </div>
                     <!-- Notification dropdown menu END -->
                 </li>
@@ -117,9 +256,11 @@
                 <li class="nav-item ms-3 dropdown">
                     <!-- Avatar -->
                     <a class="avatar avatar-sm p-0" href="#" id="profileDropdown" role="button"
-                        data-bs-auto-close="outside" data-bs-display="static" data-bs-toggle="dropdown"
-                        aria-expanded="false">
-                        <img class="avatar-img rounded-circle" src="assets/images/avatar/01.jpg" alt="avatar">
+                       data-bs-auto-close="outside" data-bs-display="static" data-bs-toggle="dropdown"
+                       aria-expanded="false">
+                        <img class="avatar-img rounded-circle" th:src="${#authentication.principal.profilePicture != null} ?
+                                                                                             ${#authentication.principal.profilePicture} :
+                                                                                             @{/img/undraw_profile.svg}" alt="avatar">
                     </a>
 
                     <!-- Profile dropdown START -->
@@ -130,7 +271,9 @@
                             <div class="d-flex align-items-center">
                                 <!-- Avatar -->
                                 <div class="avatar me-3">
-                                    <img class="avatar-img rounded-circle shadow" src="assets/images/avatar/01.jpg"
+                                    <img class="avatar-img rounded-circle shadow" th:src="${#authentication.principal.profilePicture != null} ?
+                                                                                             ${#authentication.principal.profilePicture} :
+                                                                                             @{/img/undraw_profile.svg}"
                                         alt="avatar">
                                 </div>
                                 <div>
@@ -144,12 +287,10 @@
                         <li>
                             <hr class="dropdown-divider">
                         </li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-person fa-fw me-2"></i>Edit
-                                Profile</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-gear fa-fw me-2"></i>Account
-                                Settings</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle fa-fw me-2"></i>Help</a>
-                        </li>
+                        <li><a class="dropdown-item" sec:authorize="hasRole('INSTRUCTOR')"
+                               th:href="@{/instructor}"><i class="bi bi-gear fa-fw me-2"></i>DashBoard</a></li>
+                        <li sec:authorize="hasRole('USER')"><a class="dropdown-item" th:href="@{/profile}"><i class="bi bi-person fa-fw me-2"></i>Profile</a></li>
+                        <li><a class="dropdown-item" th:href="@{/home/history}"><i class="fas fa-history me-2"></i>History</a></li>
                         <li>
                             <a class="dropdown-item bg-danger-soft-hover" th:href="@{/logout}">
                                 <i class="bi bi-power fa-fw me-2"></i>
@@ -231,4 +372,178 @@
     <!-- Category Nav link END -->
 
 </header>
+<style>
+/* Ép width dropdown thông báo user luôn là 320px */
+.dropdown-menu[style*="width:320px"] {
+    width: 320px !important;
+    min-width: 320px !important;
+    max-width: 320px !important;
+}
+</style>
 <!-- Header END -->
+
+<!-- Notification JavaScript -->
+<script>
+    // Manual test function
+    function testNotifications() {
+        console.log('Manual test: Loading user notifications...');
+        loadUserNotifications();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const notificationDropdown = document.querySelector('a[title="Notifications"][data-bs-toggle="dropdown"]');
+        if (notificationDropdown) {
+            notificationDropdown.addEventListener('show.bs.dropdown', function() {
+                loadUserNotifications();
+            });
+        }
+    });
+
+
+
+    function updateUserNotificationBadge(unreadCount) {
+        console.log('Updating user notification badge with count:', unreadCount);
+        const badge = document.getElementById('userNotificationBadge');
+        const countSpan = document.getElementById('userNotificationCount');
+
+        if (unreadCount > 0) {
+            if (!badge) {
+                const newBadge = document.createElement('span');
+                newBadge.id = 'userNotificationBadge';
+                newBadge.className = 'notif-badge animation-blink';
+                newBadge.style.cssText = 'width:14px;height:14px;top:6px;right:6px;';
+                const notificationButton = document.querySelector('a[title="Notifications"][data-bs-toggle="dropdown"]');
+                if (notificationButton && notificationButton.closest('.nav-item').querySelector('#userNotificationBadge')) {
+                    notificationButton.appendChild(newBadge);
+                }
+            }
+            countSpan.textContent = unreadCount + ' new';
+        } else {
+            if (badge) {
+                badge.remove();
+            }
+            countSpan.textContent = '0 new';
+        }
+    }
+
+    function updateUserNotificationList(notifications) {
+        const list = document.getElementById('userNotificationList');
+        list.innerHTML = '';
+        if (notifications.length === 0) {
+            list.innerHTML = '<li class="p-3 text-center text-muted">No unread notifications</li>';
+            return;
+        }
+        notifications.forEach(notification => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item-action border-0 border-bottom d-flex p-3';
+            // Avatar/icon
+            let avatarHtml = `<div class=\"me-3\"><div class=\"avatar avatar-md\">`;
+            if (notification.type === 'COMMENT') {
+                avatarHtml += `<i class=\"fas fa-comment\" style=\"font-size: 1.5rem; color: #0d6efd;\"></i>`;
+            } else if (notification.type === 'ENROLLMENT') {
+                avatarHtml += `<i class=\"fas fa-user-plus\" style=\"font-size: 1.5rem; color: #28a745;\"></i>`;
+            } else if (notification.type === 'COURSE_COMPLETION') {
+                avatarHtml += `<i class=\"fas fa-graduation-cap\" style=\"font-size: 1.5rem; color: #ffc107;\"></i>`;
+            } else {
+                avatarHtml += `<i class=\"fas fa-bell\" style=\"font-size: 1.5rem; color: #6c757d;\"></i>`;
+            }
+            avatarHtml += `</div></div>`;
+            // Message + time
+            const timeAgo = getTimeAgo(notification.sentAt);
+            let contentHtml = `<div><h6 class=\"mb-1\">${notification.type.replace(/_/g, ' ')}</h6>`;
+            contentHtml += `<p class=\"small text-body m-0\">${notification.message}</p>`;
+            contentHtml += `<small class=\"text-body\">${timeAgo}</small></div>`;
+            li.innerHTML = avatarHtml + contentHtml;
+            li.addEventListener('click', function() {
+                // Nếu là comment notification và có đủ thông tin, chuyển đến comment
+                if (notification.type === 'COMMENT' && notification.commentId && notification.courseId && notification.lessonId) {
+                    window.location.href = `/learning/course/${notification.courseId}/lesson/${notification.lessonId}?commentId=${notification.commentId}`;
+                } else {
+                    // Các notification khác chuyển đến trang view notification
+                    window.location.href = `/user/notifications/view/${notification.notificationId}`;
+                }
+            });
+            list.appendChild(li);
+        });
+    }
+
+    function getTimeAgo(sentAt) {
+        const now = new Date();
+        const sent = new Date(sentAt);
+        const diffInMinutes = Math.floor((now - sent) / (1000 * 60));
+
+        if (diffInMinutes < 1) return 'Just now';
+        if (diffInMinutes < 60) return `${diffInMinutes} min ago`;
+
+        const diffInHours = Math.floor(diffInMinutes / 60);
+        if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+
+        const diffInDays = Math.floor(diffInHours / 24);
+        return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+    }
+
+    function getNotificationTypeIcon(type) {
+        switch(type) {
+            case 'ENROLLMENT': return 'fas fa-user-plus';
+            case 'COURSE_COMPLETION': return 'fas fa-graduation-cap';
+            case 'QUIZ_RESULT': return 'fas fa-question-circle';
+            case 'CERTIFICATE': return 'fas fa-certificate';
+            case 'PAYMENT_SUCCESS': return 'fas fa-check-circle';
+            case 'PAYMENT_FAILED': return 'fas fa-times-circle';
+            default: return 'fas fa-bell';
+        }
+    }
+
+    // Update notification page button tooltip and styling
+    function updateNotificationPageButton(unreadCount) {
+        const notificationPageBtn = document.querySelector('.notification-page-btn');
+        if (notificationPageBtn) {
+            if (unreadCount > 0) {
+                notificationPageBtn.title = `View All Notifications (${unreadCount} unread)`;
+                notificationPageBtn.classList.add('has-notifications');
+            } else {
+                notificationPageBtn.title = 'View All Notifications';
+                notificationPageBtn.classList.remove('has-notifications');
+            }
+        }
+    }
+
+    // Add loading effect to notification page button
+    document.addEventListener('DOMContentLoaded', function() {
+        const notificationPageBtn = document.querySelector('.notification-page-btn');
+        if (notificationPageBtn) {
+            notificationPageBtn.addEventListener('click', function() {
+                this.classList.add('loading');
+                // Remove loading class after navigation
+                setTimeout(() => {
+                    this.classList.remove('loading');
+                }, 1000);
+            });
+        }
+    });
+
+    // Call this function when notifications are loaded
+    function loadUserNotifications() {
+        console.log('Loading user notifications...');
+        fetch('/user/notifications/api/latest')
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Notification data:', data);
+                if (data.error) {
+                    console.error('Error loading notifications:', data.error);
+                    return;
+                }
+
+                updateUserNotificationBadge(data.unreadCount);
+                updateUserNotificationList(data.notifications);
+                updateNotificationPageButton(data.unreadCount); // Update page button tooltip
+            })
+            .catch(error => {
+                console.error('Error loading notifications:', error);
+            });
+    }
+</script>
+</div>
