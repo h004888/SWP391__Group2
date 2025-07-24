@@ -36,8 +36,12 @@ public class CoinTransactionMapper {
                         dto.setInstructorName(detail.getCourse().getInstructor() != null ? detail.getCourse().getInstructor().getFullName() : null);
                         dto.setOriginalPrice(detail.getCourse().getPrice());
                         dto.setDiscountedPrice(detail.getUnitPrice());
+                        if (detail.getVoucher() != null) {
+                            dto.setVoucherDiscount(detail.getVoucher().getDiscount());
+                        } else {
+                            dto.setVoucherDiscount(0.0);
+                        }
                     }
-                    // Xác định phương thức thanh toán dựa trên thông tin có sẵn
                     String paymentMethod = determinePaymentMethod(coinTransaction, coinTransaction.getOrder());
                     dto.setPaymentMethod(paymentMethod);
                 } else {
@@ -47,6 +51,11 @@ public class CoinTransactionMapper {
                                 detail.getUnitPrice().doubleValue() == Math.abs(coinTransaction.getAmount().doubleValue()) &&
                                 detail.getCourse() != null) {
                                 dto.setCourseName(detail.getCourse().getTitle());
+                                if (detail.getVoucher() != null) {
+                                    dto.setVoucherDiscount(detail.getVoucher().getDiscount());
+                                } else {
+                                    dto.setVoucherDiscount(0.0);
+                                }
                                 break;
                             }
                         }
@@ -56,12 +65,17 @@ public class CoinTransactionMapper {
                                 dto.setCourseName(detail.getCourse().getTitle());
                                 break;
                             }
+                            if (detail.getVoucher() != null) {
+                                dto.setVoucherDiscount(detail.getVoucher().getDiscount());
+                            } else {
+                                dto.setVoucherDiscount(0.0);
+                            }
                         }
                     }
                 }
             }
         } else {
-            // Nếu không có Order, xác định phương thức thanh toán dựa trên transaction type và note
+
             String paymentMethod = determinePaymentMethod(coinTransaction, null);
             dto.setPaymentMethod(paymentMethod);
         }

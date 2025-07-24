@@ -26,4 +26,5 @@ public class CoinTransactionDTO {
     private Double originalPrice;
     private Double discountedPrice;
     private String paymentMethod;
+    private Double voucherDiscount;
 }

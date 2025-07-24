@@ -163,7 +163,7 @@
                   </div>
                   <div class="row mb-2">
                     <div class="col-6 text-secondary">Discount:</div>
-                    <div class="col-6 text-decoration-line-through text-secondary" id="modal-discount"></div>
+                    <div class="col-6 fw-semibold text-dark" id="modal-discount"></div>
                   </div>
                   <div class="row mb-2">
                     <div class="col-6 text-secondary">Price after reduction:</div>
@@ -203,7 +203,7 @@
               $('#modal-instructorName').text(data.instructorName || '');
               // $('#modal-courseDuration').text(data.courseDuration || '');
               $('#modal-originalPrice').text(data.originalPrice ? data.originalPrice.toLocaleString('vi-VN') + ' VND' : '');
-
+              $('#modal-discount').text((data.voucherDiscount !== undefined && data.voucherDiscount !== null) ? data.voucherDiscount + '%' : '0%');
               // $('#modal-discountedPrice').text(data.discountedPrice ? data.discountedPrice.toLocaleString('vi-VN') + ' VND' : '');
               $('#modal-discountedPrice').text((data.discountedPrice !== undefined && data.discountedPrice !== null) ? data.discountedPrice.toLocaleString('vi-VN') + ' VND' : '');
               $('#modal-status').text(data.status === 'PAID' ? 'Paid' : (data.status === 'pending' ? 'Pending' : 'Canceled'));

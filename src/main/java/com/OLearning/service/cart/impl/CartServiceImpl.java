@@ -99,7 +99,7 @@ public class CartServiceImpl implements CartService {
                 emptyCart.put("items", new ArrayList<>());
                 return emptyCart;
             }
-            // Bổ sung instructorName cho từng item
+
             List<Map<String, Object>> items = (List<Map<String, Object>>) cart.getOrDefault("items", new ArrayList<>());
             for (Map<String, Object> item : items) {
                 Object courseIdObj = item.get("courseId");
@@ -117,7 +117,6 @@ public class CartServiceImpl implements CartService {
             }
             return cart;
         } catch (Exception e) {
-            System.err.println("Error parsing cart JSON: " + e.getMessage());
             Map<String, Object> emptyCart = new HashMap<>();
             emptyCart.put("userId", userRepository.findByEmail(userEmail)
                     .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + userEmail))

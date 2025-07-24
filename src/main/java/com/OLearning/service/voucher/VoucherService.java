@@ -13,7 +13,6 @@ import java.util.Map;
 @Service
 public interface VoucherService {
     VoucherDTO applyVoucher(String code, Long userId);
-    List<UserVoucherDTO> getUserVouchers(Long userId);
     List<UserVoucherDTO> getUserVouchersSortedByLatest(Long userId);
     List<VoucherDTO> getValidVouchersForCourse(Long courseId);
     VoucherDTO useVoucher(Long voucherId, Long userId, Long courseId);

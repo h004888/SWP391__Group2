@@ -21,7 +21,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.PageImpl;
@@ -74,11 +73,10 @@ public class VoucherServiceImpl implements VoucherService {
         if (voucher.getLimitation() != null && voucher.getUsedCount() >= voucher.getLimitation()) {
             throw new RuntimeException("Voucher usage limit reached");
         }
-        java.util.Optional<UserVoucher> existing = userVoucherRepository.findByUser_UserIdAndVoucher_VoucherId(userId, voucher.getVoucherId());
+        Optional<UserVoucher> existing = userVoucherRepository.findByUser_UserIdAndVoucher_VoucherId(userId, voucher.getVoucherId());
         if (existing.isPresent()) {
             throw new RuntimeException("You have already entered this voucher!");
         }
-        // Chặn nếu user đã mua hết các course mà voucher áp dụng
         List<Course> courses = voucher.getVoucherCourses() == null ? List.of() : voucher.getVoucherCourses().stream().map(vc -> vc.getCourse()).toList();
         boolean allPurchased = courses.stream().allMatch(course -> enrollmentRepository.existsByUser_UserIdAndCourse_CourseId(userId, course.getCourseId()));
         if (!courses.isEmpty() && allPurchased) {
@@ -96,16 +94,7 @@ public class VoucherServiceImpl implements VoucherService {
         return voucherMapper.toVoucherDTO(voucher);
     }
 
-    @Override
-    public List<UserVoucherDTO> getUserVouchers(Long userId) {
-        List<UserVoucher> userVouchers = userVoucherRepository.findByUser_UserIdAndIsUsedFalse(userId);
-        LocalDate today = LocalDate.now();
-        return userVouchers.stream()
-                .filter(uv -> uv.getVoucher().getIsActive() != null && uv.getVoucher().getIsActive())
-                .filter(uv -> uv.getVoucher().getExpiryDate() != null && !uv.getVoucher().getExpiryDate().isBefore(today))
-                .map(userVoucherMapper::toUserVoucherDTO)
-                .collect(Collectors.toList());
-    }
+
 
     @Override
     public List<UserVoucherDTO> getUserVouchersSortedByLatest(Long userId) {
@@ -379,18 +368,17 @@ public class VoucherServiceImpl implements VoucherService {
 
         List<Long> courseIdsToApply;
         if (Boolean.TRUE.equals(voucher.getIsGlobal())) {
-            // Chỉ lấy các course đang publish
             courseIdsToApply = courseRepository.findByInstructorUserIdAndStatus(instructorId, "publish")
                     .stream().map(Course::getCourseId).toList();
         } else {
             courseIdsToApply = selectedCourses != null ? selectedCourses : List.of();
         }
         if (!courseIdsToApply.isEmpty()) {
-            List<com.OLearning.entity.VoucherCourse> voucherCourses = new ArrayList<>();
+            List<VoucherCourse> voucherCourses = new ArrayList<>();
             for (Long courseId : courseIdsToApply) {
                 Course course = courseRepository.findById(courseId).orElse(null);
                 if (course != null && course.getInstructor().getUserId().equals(instructorId)) {
-                    com.OLearning.entity.VoucherCourse vc = new com.OLearning.entity.VoucherCourse();
+                    VoucherCourse vc = new VoucherCourse();
                     vc.setVoucher(voucher);
                     vc.setCourse(course);
                     voucherCourses.add(vc);
@@ -417,7 +405,7 @@ public class VoucherServiceImpl implements VoucherService {
                     notification.setMessage("You received a new voucher from the " + instructor.getFullName() + ". Voucher code: " + voucher.getCode());
                     notification.setType("VOUCHER_PRIVATE");
                     notification.setStatus("failed");
-                    notification.setSentAt(java.time.LocalDateTime.now());
+                    notification.setSentAt(LocalDateTime.now());
                     notificationService.sendMess(notification);
                 }
             }
