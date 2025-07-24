@@ -681,19 +681,15 @@ Page content START -->
 										<video controls crossorigin="anonymous" playsinline
 											th:poster="@{${course.courseImg} ? ${course.courseImg} : '/assets/images/courses/4by3/01.jpg'}">
 											<source
-												th:src="@{/api/video/stream/video/{videoURL}(videoURL=${course.videoUrlPreview})}"
+												th:src="@{/api/video/stream/videopreview/{videoURL}(videoURL=${course.videoUrlPreview})}"
 												size="360">
 											<source
-												th:src="@{/api/video/stream/video/{videoURL}(videoURL=${course.videoUrlPreview})}"
+												th:src="@{/api/video/stream/videopreview/{videoURL}(videoURL=${course.videoUrlPreview})}"
 												size="720">
 											<source
-												th:src="@{/api/video/stream/video/{videoURL}(videoURL=${course.videoUrlPreview})}"
+												th:src="@{/api/video/stream/videopreview/{videoURL}(videoURL=${course.videoUrlPreview})}"
 												size="1080">
-											<!-- Caption files -->
-											<track kind="captions" label="English" srclang="en"
-												src="/assets/images/videos/en.vtt" default>
-											<track kind="captions" label="French" srclang="fr"
-												src="/assets/images/videos/fr.vtt">
+
 										</video>
 									</div>
 

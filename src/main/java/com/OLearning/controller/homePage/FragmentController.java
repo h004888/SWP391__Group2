@@ -55,7 +55,7 @@ public class FragmentController {
             @RequestParam(defaultValue = "Newest") String sortBy,
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "9") int size,
+            @RequestParam(defaultValue = "6") int size,
             Model model) {
 
         Page<CourseViewDTO> courses = courseService.searchCoursesGrid(

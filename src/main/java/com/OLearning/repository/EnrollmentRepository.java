@@ -145,8 +145,10 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
             """)
     List<UserCourseProgressDTO> findProgressDTOExcludingCompleted(@Param("userId") Long userId);
 
-    @Query("UPDATE Enrollment e SET e.status = 'completed' WHERE e.status = 'on going' AND e.user.userId = :userId AND e.course.courseId = :courseId")
-    void updateStatusCompleted(@Param("userId") Long userId, @Param("courseId") Long courseId);
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE Enrollments SET Status = 'completed' WHERE Status = 'on going' AND UserID = :userId AND CourseID = :courseId", nativeQuery = true)
+    int updateStatusCompleted(@Param("userId") Long userId, @Param("courseId") Long courseId);
 
     @Query(value = "SELECT COUNT(*) AS TotalEnrollments " +
             "FROM Courses c " +

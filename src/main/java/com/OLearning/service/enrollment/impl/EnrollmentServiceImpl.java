@@ -271,8 +271,8 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     @Override
-    public void updateStatusToCompleted(Long userId, Long courseId) {
-        enrollmentRepository.updateStatusCompleted(userId, courseId);
+    public int updateStatusToCompleted(Long userId, Long courseId) {
+        return enrollmentRepository.updateStatusCompleted(userId, courseId);
     }
 
 }

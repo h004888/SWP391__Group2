@@ -92,7 +92,14 @@ public class UserCourseController {
             return "userPage/LearningDashboard";
         }
 
-        CourseViewDTO courseViewDTO = courseService.getCourseRecentIncomplete(currentUser.getUserId());
+        CourseViewDTO courseViewDTO = courseService.getCourseById(courses.get(0).getCourseId());
+
+        // CourseViewDTO courseViewDTO =
+        // courseService.getCourseRecentIncomplete(currentUser.getUserId());
+        // if (courseViewDTO == null) {
+        // model.addAttribute("course", null); // hoặc ẩn phần này trên giao diện
+        // return "userPage/LearningDashboard";
+        // }
 
         model.addAttribute("course", courseViewDTO);
         model.addAttribute("progress",

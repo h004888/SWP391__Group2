@@ -170,6 +170,22 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    public Course getMostRecentCourseWithFallback(Long userId) {
+        List<Course> courses = courseRepository.findFallbackMostRecentCourse(userId);
+        if (courses.isEmpty()) {
+            return null;
+        }
+        return courses.get(0);
+    }
+
+    @Override
+    public List<CourseViewDTO> getCourseByJoinByUserId(Long userId) {
+        return courseRepository.getCourseByJoinByUserId(userId).stream()
+                .map(CourseMapper::toCourseViewDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<CourseViewDTO> getTopCourses() {
         return courseRepository.findAllPublishedOrderByStudentCountDesc().stream()
                 .map(CourseMapper::toCourseViewDTO)
@@ -238,7 +254,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public Page<CourseDTO> filterCoursesWithPagination(String keyword, Long category, String price, String status,
-                                                       int page, int size) {
+            int page, int size) {
         String searchKeyword = keyword != null && !keyword.trim().isEmpty() ? keyword.trim() : null;
 
         Pageable pageable = PageRequest.of(page, size);
@@ -249,7 +265,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public Page<CourseDTO> filterCoursesInstructorManage(Long userId, Long categoryId, String status, String price,
-                                                         String title, int page, int size) {
+            String title, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         // Đồng bộ status publish -> published
         Page<Course> coursePage = courseRepository.findCoursesByFilters(userId, categoryId, status, price, title,
@@ -438,7 +454,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     public int countByInstructorAndStatusWithFilter(Long userId, String status, Long categoryId, String price,
-                                                    String title) {
+            String title) {
         return courseRepository.countByFilters(userId, categoryId, status, price, title);
     }
 

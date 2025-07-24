@@ -82,5 +82,6 @@ public interface CourseService {
     List<CourseViewDTO> getCourseByUserId(Long userId);
 
         Long countCourseIsPublish();
-
+        Course getMostRecentCourseWithFallback(Long userId);
+        List<CourseViewDTO> getCourseByJoinByUserId(Long userId);
 }
