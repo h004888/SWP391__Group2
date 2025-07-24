@@ -214,6 +214,13 @@
     </div>
   </section>
   <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('select[name="type"], select[name="status"]').forEach(function (select) {
+        select.addEventListener('change', function () {
+          this.form.submit();
+        });
+      });
+    });
     function markAllAsRead() {
       if (confirm('Mark all notifications as read?')) {
         fetch('/user/notifications/mark-all-read', {

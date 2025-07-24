@@ -35,21 +35,21 @@
 
                 <dt class="col-sm-3">Link/chứng cứ</dt>
                 <dd class="col-sm-9">
-                    <th:block th:if="${report.evidenceLink != null}">
+                    <th:block th:if="${evidenceLink != null}">
                         <th:block
-                            th:if="${#strings.contains(report.evidenceLink, 'image') || report.evidenceLink.matches('.*\\.(jpg|jpeg|png|gif)$')}">
-                            <img th:src="${report.evidenceLink}" alt="Bằng chứng ảnh"
+                            th:if="${#strings.contains(evidenceLink, 'image') || evidenceLink.matches('.*\\.(jpg|jpeg|png|gif)$')}">
+                            <img th:src="${evidenceLink}" alt="Bằng chứng ảnh"
                                 style="max-width: 300px; max-height: 200px; display: block; margin-top: 8px;" />
                         </th:block>
                         <th:block
-                            th:if="${#strings.contains(report.evidenceLink, 'video') || report.evidenceLink.matches('.*\\.(mp4|webm|ogg)$')}">
-                            <video th:src="${report.evidenceLink}" controls
+                            th:if="${#strings.contains(evidenceLink, 'video') || evidenceLink.matches('.*\\.(mp4|webm|ogg)$')}">
+                            <video th:src="${evidenceLink}" controls
                                 style="max-width: 300px; max-height: 200px; display: block; margin-top: 8px;"></video>
                         </th:block>
-                        <a th:if="${!(#strings.contains(report.evidenceLink, 'image') || report.evidenceLink.matches('.*\\.(jpg|jpeg|png|gif)$') || #strings.contains(report.evidenceLink, 'video') || report.evidenceLink.matches('.*\\.(mp4|webm|ogg)$'))}"
-                            th:href="${report.evidenceLink}" target="_blank" th:text="${report.evidenceLink}"></a>
+                        <a th:if="${!(#strings.contains(evidenceLink, 'image') || evidenceLink.matches('.*\\.(jpg|jpeg|png|gif)$') || #strings.contains(evidenceLink, 'video') || evidenceLink.matches('.*\\.(mp4|webm|ogg)$'))}"
+                            th:href="${evidenceLink}" target="_blank" th:text="${evidenceLink}"></a>
                     </th:block>
-                    <span th:if="${report.evidenceLink == null}">Không có</span>
+                    <span th:if="${evidenceLink == null}">Không có</span>
                 </dd>
 
                 <dt class="col-sm-3">Trạng thái</dt>

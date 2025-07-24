@@ -181,7 +181,6 @@ public class UserNotificationsController {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             Long userId = userDetails.getUserId();
             Pageable pageable = PageRequest.of(0, 5);
-            // Lấy tất cả các type mà user từng nhận được
             List<String> types = notificationService.getAllNotificationTypesByUserId(userId);
             Page<NotificationDTO> notificationPage = notificationService.getUnreadNotificationsByUserId(userId, types,
                     pageable);
