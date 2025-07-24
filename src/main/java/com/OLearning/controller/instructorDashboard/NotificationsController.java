@@ -246,15 +246,16 @@ public class NotificationsController {
                 adminNoti.setMessage(replyContent); // Nội dung instructor nhập
                 adminNoti.setStatus("failed");
                 adminNoti.setSentAt(java.time.LocalDateTime.now());
-                adminNoti.setEvidenceLink(evidenceLink);
+                // KHÔNG setEvidenceLink ở đây!
                 notificationRepository.save(adminNoti);
             }
-            // Cập nhật evidenceLink vào report liên quan
-            Report report = reportRepository.findFirstByCourse_CourseIdAndNotification_NotificationId(courseId,
-                    notificationId);
-            if (report != null && evidenceLink != null) {
-                report.setEvidenceLink(evidenceLink);
-                reportRepository.save(report);
+            // Lưu evidenceLink vào tất cả report liên quan đến courseId
+            List<Report> relatedReports = reportRepository.findByCourse_CourseId(courseId);
+            if (relatedReports != null && evidenceLink != null && !evidenceLink.isEmpty()) {
+                for (Report report : relatedReports) {
+                    report.setEvidenceLink(evidenceLink);
+                    reportRepository.save(report);
+                }
             }
         }
         model.addAttribute("success", "Phản hồi của bạn đã được gửi thành công!");
@@ -294,8 +295,7 @@ public class NotificationsController {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             Long userId = userDetails.getUserId();
             Pageable pageable = PageRequest.of(0, 5);
-            List<String> types = List.of("COURSE_BLOCKED", "comment", "COURSE_UNBLOCKED", "COURSE_REJECTION",
-                    "COURSE_APPROVED", "MAINTENANCE_FEE", "COURSE_CREATED", "SUCCESSFULLY");
+            List<String> types = notificationService.getAllNotificationTypesByUserId(userId);
             Page<NotificationDTO> notificationPage = notificationService.getUnreadNotificationsByUserId(userId, types,
                     pageable);
             long unreadCount = notificationService.countUnreadByUserId(userId);

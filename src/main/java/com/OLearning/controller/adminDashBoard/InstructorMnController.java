@@ -233,18 +233,26 @@ public class InstructorMnController {
     @PostMapping("/request/accept/{id}")
     public String acceptRequest(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
-            // Get current logged-in admin
+            // Log authentication context
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            System.out.println("[ACCEPT] Authentication: " + authentication);
+            if (authentication != null) {
+                System.out.println("[ACCEPT] Principal: " + authentication.getPrincipal());
+            }
             if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
                 CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-
-                //config username is email to login in CustomerDetail
                 String userName = userDetails.getUsername();
+                System.out.println("[ACCEPT] Username: " + userName);
                 UserDTO admin = userService.getUserByEmail(userName);
+                System.out.println("[ACCEPT] Admin UserDTO: " + admin);
                 instructorRequestService.acceptRequest(id, admin.getUserId());
                 redirectAttributes.addFlashAttribute("successMessage", SUCCESS_REQUEST_ACCEPTED);
+            } else {
+                System.out.println("[ACCEPT] Authentication is null or not CustomUserDetails");
+                redirectAttributes.addFlashAttribute("errorMessage", "Authentication is null or not CustomUserDetails");
             }
         } catch (Exception e) {
+            System.out.println("[ACCEPT] Exception: " + e.getMessage());
             redirectAttributes.addFlashAttribute("errorMessage", ERROR_REQUEST_ACCEPT + e.getMessage());
         }
         return "redirect:/admin/mnInstructors/request";
@@ -255,18 +263,26 @@ public class InstructorMnController {
                               @RequestParam String rejectionReason,
                               RedirectAttributes redirectAttributes) {
         try {
-            // Get current logged-in admin
+            // Log authentication context
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            System.out.println("[REJECT] Authentication: " + authentication);
+            if (authentication != null) {
+                System.out.println("[REJECT] Principal: " + authentication.getPrincipal());
+            }
             if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
                 CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-
-                //config username is email to login in CustomerDetail
                 String userName = userDetails.getUsername();
+                System.out.println("[REJECT] Username: " + userName);
                 UserDTO admin = userService.getUserByEmail(userName);
+                System.out.println("[REJECT] Admin UserDTO: " + admin);
                 instructorRequestService.rejectRequest(id, admin.getUserId(), rejectionReason);
                 redirectAttributes.addFlashAttribute("successMessage", "Request rejected successfully");
+            } else {
+                System.out.println("[REJECT] Authentication is null or not CustomUserDetails");
+                redirectAttributes.addFlashAttribute("errorMessage", "Authentication is null or not CustomUserDetails");
             }
         } catch (Exception e) {
+            System.out.println("[REJECT] Exception: " + e.getMessage());
             redirectAttributes.addFlashAttribute("errorMessage", "Error rejecting request: " + e.getMessage());
         }
         return "redirect:/admin/mnInstructors/request";

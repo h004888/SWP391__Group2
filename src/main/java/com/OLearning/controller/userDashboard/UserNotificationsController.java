@@ -36,11 +36,11 @@ public class UserNotificationsController {
 
     @GetMapping
     public String viewNotifications(Authentication authentication, Model model,
-                                   @RequestParam(value = "page", defaultValue = "0") int page,
-                                   @RequestParam(value = "size", defaultValue = "5") int size,
-                                   @RequestParam(value = "type", required = false) List<String> types,
-                                   @RequestParam(value = "status", required = false) String status,
-                                   @RequestParam(value = "search", required = false) String search) {
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "5") int size,
+            @RequestParam(value = "type", required = false) List<String> types,
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "search", required = false) String search) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
         // Lấy profile và truyền vào model
@@ -48,7 +48,8 @@ public class UserNotificationsController {
         model.addAttribute("profile", profileOpt.orElse(new UserProfileEditDTO()));
         Pageable pageable = PageRequest.of(page, size);
         List<String> allTypes = notificationService.getAllNotificationTypesByUserId(userId);
-        if (types == null || types.isEmpty() || (types.size() == 1 && (types.get(0) == null || types.get(0).isBlank()))) {
+        if (types == null || types.isEmpty()
+                || (types.size() == 1 && (types.get(0) == null || types.get(0).isBlank()))) {
             types = allTypes;
         }
         if (status == null || status.isBlank() || "All".equalsIgnoreCase(status)) {
@@ -143,7 +144,8 @@ public class UserNotificationsController {
                 model.addAttribute("lessonId", lessonId);
                 model.addAttribute("user", userDetails.getUser());
                 model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderCategory");
-                 model.addAttribute("fragmentContent", "homePage/fragments/notificationsDetailContent :: notificationsDetailContent");
+                model.addAttribute("fragmentContent",
+                        "homePage/fragments/notificationsDetailContent :: notificationsDetailContent");
                 return "homePage/index";
             } else {
                 return "redirect:/user/notifications";
@@ -179,43 +181,43 @@ public class UserNotificationsController {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             Long userId = userDetails.getUserId();
             Pageable pageable = PageRequest.of(0, 5);
-            List<String> types = List.of("ENROLLMENT", "COURSE_COMPLETION", "QUIZ_RESULT", "CERTIFICATE", "PAYMENT_SUCCESS", "PAYMENT_FAILED", "COMMENT", "COMMENT_HIDDEN");
-            Page<NotificationDTO> notificationPage = notificationService.getUnreadNotificationsByUserId(userId, types, pageable);
+            List<String> types = notificationService.getAllNotificationTypesByUserId(userId);
+            Page<NotificationDTO> notificationPage = notificationService.getUnreadNotificationsByUserId(userId, types,
+                    pageable);
             long unreadCount = notificationService.countUnreadByUserId(userId);
             List<NotificationDropdownDTO> dropdownList = notificationPage.getContent().stream()
-                .map(n -> {
-                    String msg = n.getMessage();
-                    if (msg != null) {
-                        msg = msg.split("\\r?\\n")[0]; // chỉ lấy dòng đầu tiên
-                        if (msg.length() > 25) msg = msg.substring(0, 25) + "...";
-                    }
-
-                    Long lessonId = null;
-                    if ("COMMENT".equals(n.getType()) && n.getCommentId() != null) {
-                        var commentOpt = courseReviewRepository.findById(n.getCommentId());
-                        if (commentOpt.isPresent() && commentOpt.get().getLesson() != null) {
-                            lessonId = commentOpt.get().getLesson().getLessonId();
+                    .map(n -> {
+                        String msg = n.getMessage();
+                        if (msg != null) {
+                            msg = msg.split("\\r?\\n")[0]; // chỉ lấy dòng đầu tiên
+                            if (msg.length() > 25)
+                                msg = msg.substring(0, 25) + "...";
                         }
-                    }
 
-                    return new NotificationDropdownDTO(
-                        n.getNotificationId(),
-                        msg,
-                        n.getType(),
-                        n.getStatus(),
-                        n.getSentAt(),
-                        n.getCommentId(),
-                        n.getCourse() != null ? n.getCourse().getCourseId() : null,
-                        lessonId
-                    );
-                }).toList();
+                        Long lessonId = null;
+                        if ("COMMENT".equals(n.getType()) && n.getCommentId() != null) {
+                            var commentOpt = courseReviewRepository.findById(n.getCommentId());
+                            if (commentOpt.isPresent() && commentOpt.get().getLesson() != null) {
+                                lessonId = commentOpt.get().getLesson().getLessonId();
+                            }
+                        }
+
+                        return new NotificationDropdownDTO(
+                                n.getNotificationId(),
+                                msg,
+                                n.getType(),
+                                n.getStatus(),
+                                n.getSentAt(),
+                                n.getCommentId(),
+                                n.getCourse() != null ? n.getCourse().getCourseId() : null,
+                                lessonId);
+                    }).toList();
             return ResponseEntity.ok(Map.of(
-                "notifications", dropdownList,
-                "unreadCount", unreadCount
-            ));
+                    "notifications", dropdownList,
+                    "unreadCount", unreadCount));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Error loading notifications: " + e.getMessage()));
         }
     }
-} 
+}
