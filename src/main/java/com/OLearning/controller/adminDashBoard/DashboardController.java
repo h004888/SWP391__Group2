@@ -43,8 +43,8 @@ public class DashboardController {
     @GetMapping()
     public String getAdminDashboardPAge(Model model) {
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/content :: contentMain");
-        Map<String, Double> revenuePerMonth = ordersService.getRevenuePerMonth();
-        model.addAttribute("revenuePerMonth", revenuePerMonth);
+//        Map<String, Double> revenuePerMonth = ordersService.getRevenuePerMonth();
+//        model.addAttribute("revenuePerMonth", revenuePerMonth);
         
         // Get initial enrollment data for current year
         LocalDate now = LocalDate.now();
@@ -68,7 +68,7 @@ public class DashboardController {
         return "adminDashBoard/index";
     }
 
-    @GetMapping("/revenue")
+/*    @GetMapping("/revenue")
     @ResponseBody
     public Map<String, Double> getRevenueByDateRange(
             @RequestParam("startDate") String startDateStr,
@@ -76,8 +76,9 @@ public class DashboardController {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate startDate = LocalDate.parse(startDateStr, formatter);
         LocalDate endDate = LocalDate.parse(endDateStr, formatter);
-        return ordersService.getRevenueByDateRange(startDate, endDate);
-    }
+ // ordersService.getRevenueByDateRange(startDate, endDate);
+        return
+    }*/
 
     @GetMapping("/enrollments")
     @ResponseBody
@@ -110,8 +111,8 @@ public class DashboardController {
         LocalDate startDate = LocalDate.parse(startDateStr, formatter);
         LocalDate endDate = LocalDate.parse(endDateStr, formatter);
 
-        Map<String, Double> revenueData = ordersService.getRevenueByDateRange(startDate, endDate);
-        Map<String, Long> enrollmentData = enrollmentService.getEnrollmentsByCategoryAndDateRange(startDate, endDate);
+//        Map<String, Double> revenueData = ordersService.getRevenueByDateRange(startDate, endDate);
+//        Map<String, Long> enrollmentData = enrollmentService.getEnrollmentsByCategoryAndDateRange(startDate, endDate);
         Map<String, Object> maintenanceRevenueData = courseMaintenanceService.getMaintenanceRevenueByDateRange(startDate, endDate);
 
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
@@ -119,8 +120,8 @@ public class DashboardController {
         response.setHeader("Content-Disposition", "attachment; filename=dashboard_report_charts_" + randomSuffix + ".xlsx");
 
         try (XSSFWorkbook workbook = new XSSFWorkbook()) {
-            createRevenueSheetWithChart(workbook, revenueData);
-            createEnrollmentPieChartSheet(workbook, enrollmentData);
+//            createRevenueSheetWithChart(workbook, revenueData);
+//            createEnrollmentPieChartSheet(workbook, enrollmentData);
             createMaintenanceAreaChartSheet(workbook, maintenanceRevenueData);
             workbook.write(response.getOutputStream());
         }

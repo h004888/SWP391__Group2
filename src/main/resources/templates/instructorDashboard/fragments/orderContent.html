@@ -16,58 +16,6 @@
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        function renderOrderChart() {
-            fetch('/instructor/orders/statistics')
-                .then(res => res.json())
-                .then(data => {
-                    const labels = data.map(stat => 'Tháng ' + stat.month);
-                    const orderCount = data.map(stat => stat.orderCount);
-                    const totalAmount = data.map(stat => stat.totalAmount);
-                    const ctx = document.getElementById('orderStatsChart').getContext('2d');
-                    if (window.orderChart) window.orderChart.destroy();
-                    window.orderChart = new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: labels,
-                            datasets: [
-                                {
-                                    label: 'Số đơn hàng',
-                                    data: orderCount,
-                                    backgroundColor: 'rgba(54, 162, 235, 0.7)'
-                                },
-                                {
-                                    label: 'Tổng doanh thu',
-                                    data: totalAmount,
-                                    backgroundColor: 'rgba(255, 206, 86, 0.7)',
-                                    type: 'line',
-                                    yAxisID: 'y1'
-                                }
-                            ]
-                        },
-                        options: {
-                            responsive: true,
-                            plugins: {
-                                legend: { position: 'top' },
-                                title: { display: true, text: 'Order & Revenue per Month' }
-                            },
-                            scales: {
-                                x: { title: { display: true, text: 'Tháng' } },
-                                y: { title: { display: true, text: 'Số đơn hàng' }, beginAtZero: true },
-                                y1: {
-                                    position: 'right',
-                                    title: { display: true, text: 'Doanh thu (VNĐ)' },
-                                    beginAtZero: true,
-                                    grid: { drawOnChartArea: false }
-                                }
-                            }
-                        }
-                    });
-                });
-        }
-        document.addEventListener('DOMContentLoaded', renderOrderChart);
-    </script>
-    <!-- Fragment nhỏ: bảng + phân trang -->
     <div th:replace="instructorDashboard/fragments/orderContent :: orderList"></div>
 </div>
 

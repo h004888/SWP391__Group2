@@ -1,5 +1,8 @@
 package com.OLearning.repository;
 
+import com.OLearning.dto.order.InvoiceDTO;
+import com.OLearning.dto.order.RevenueDTO;
+import com.OLearning.entity.Course;
 import com.OLearning.entity.Order;
 import com.OLearning.entity.User;
 import org.springframework.data.domain.Page;
@@ -48,6 +51,7 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
     List<Order> findAllByOrderByOrderDateDesc();
 
     List<Order> findByUserAndStatus(User user, String status);
+
     // Combined username filtering and sorting with pagination
     @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
     Page<Order> findByUserUsernameContainingOrderByAmountAsc(String username, Pageable pageable);
@@ -74,23 +78,23 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
             "GROUP BY FORMAT(o.orderDate, 'yyyy-MM') " +
             "ORDER BY FORMAT(o.orderDate, 'yyyy-MM')", nativeQuery = true)
     List<Object[]> getRevenueByDateRange(@Param("startDate") LocalDate startDate,
-                                        @Param("endDate") LocalDate endDate);
+                                         @Param("endDate") LocalDate endDate);
 
     // Find orders by username and date range with pagination
     @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
     Page<Order> findByUserUsernameContainingAndOrderDateBetween(
-        String username,
-        LocalDateTime startDate,
-        LocalDateTime endDate,
-        Pageable pageable
+            String username,
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            Pageable pageable
     );
 
     // Find orders by date range with pagination
     @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
     Page<Order> findByOrderDateBetween(
-        LocalDateTime startDate,
-        LocalDateTime endDate,
-        Pageable pageable
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            Pageable pageable
     );
 
     // Find orders by username and order type with pagination
@@ -108,20 +112,20 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
     // Find orders by username, order type and date range with pagination
     @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
     Page<Order> findByUserUsernameContainingAndOrderTypeAndOrderDateBetween(
-        String username,
-        String orderType,
-        LocalDateTime startDate,
-        LocalDateTime endDate,
-        Pageable pageable
+            String username,
+            String orderType,
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            Pageable pageable
     );
 
     // Find orders by order type and date range with pagination
     @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
     Page<Order> findByOrderTypeAndOrderDateBetween(
-        String orderType,
-        LocalDateTime startDate,
-        LocalDateTime endDate,
-        Pageable pageable
+            String orderType,
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            Pageable pageable
     );
 
     // Find orders by status with pagination
@@ -143,41 +147,41 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
     // Find orders by status and date range with pagination
     @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
     Page<Order> findByStatusAndOrderDateBetween(
-        String status,
-        LocalDateTime startDate,
-        LocalDateTime endDate,
-        Pageable pageable
+            String status,
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            Pageable pageable
     );
 
     // Find orders by username, status and date range with pagination
     @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
     Page<Order> findByUserUsernameContainingAndStatusAndOrderDateBetween(
-        String username,
-        String status,
-        LocalDateTime startDate,
-        LocalDateTime endDate,
-        Pageable pageable
+            String username,
+            String status,
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            Pageable pageable
     );
 
     // Find orders by order type, status and date range with pagination
     @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
     Page<Order> findByOrderTypeAndStatusAndOrderDateBetween(
-        String orderType,
-        String status,
-        LocalDateTime startDate,
-        LocalDateTime endDate,
-        Pageable pageable
+            String orderType,
+            String status,
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            Pageable pageable
     );
 
     // Find orders by username, order type, status and date range with pagination
     @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
     Page<Order> findByUserUsernameContainingAndOrderTypeAndStatusAndOrderDateBetween(
-        String username,
-        String orderType,
-        String status,
-        LocalDateTime startDate,
-        LocalDateTime endDate,
-        Pageable pageable
+            String username,
+            String orderType,
+            String status,
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            Pageable pageable
     );
 
     // Find orders by instructor ID (through course relationship) with pagination
@@ -272,4 +276,138 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT MONTH(o.orderDate), COUNT(DISTINCT o), SUM(o.amount) FROM Order o JOIN o.orderDetails od WHERE od.course.instructor.userId = :instructorId GROUP BY MONTH(o.orderDate) ORDER BY MONTH(o.orderDate)")
     List<Object[]> getOrderStatsByInstructor(@Param("instructorId") Long instructorId);
+
+    @Query(value = """
+            SELECT DISTINCT o.OrderID, u.FullName, o.Amount, o.OrderDate
+            FROM Orders o
+            JOIN OrderDetail d ON o.OrderID = d.OrderID
+            JOIN Users u ON o.UserID = u.UserID
+            WHERE d.CourseID IN (
+                SELECT CourseID
+                FROM Courses
+                WHERE InstructorID = :instructorId
+            )
+            ORDER BY o.OrderDate DESC
+            """,
+            countQuery = """
+                    SELECT COUNT(DISTINCT o.OrderID)
+                    FROM Orders o
+                    JOIN OrderDetail d ON o.OrderID = d.OrderID
+                    WHERE d.CourseID IN (
+                        SELECT CourseID
+                        FROM Courses
+                        WHERE InstructorID = :instructorId
+                    )
+                    """,
+            nativeQuery = true)
+    Page<InvoiceDTO> findInvoiceByInstructorId(@Param("instructorId") Long instructorId, Pageable pageable);
+
+    @Query(value = """
+            select sum(revenue.amount) from (SELECT DISTINCT o.OrderID,o.Amount, o.OrderDate
+            FROM Orders o
+            JOIN OrderDetail d ON o.OrderID = d.OrderID
+            WHERE d.CourseID IN (
+                SELECT CourseID
+                FROM Courses
+                WHERE InstructorID = :instructorId
+            )) as revenue
+            """, nativeQuery = true)
+    Double sumRevenueOrders(@Param("instructorId") Long instructorId);
+
+    @Query(value = """
+
+            WITH RevenueByMonth AS (
+        SELECT
+            SUM(CASE WHEN YEAR(o.OrderDate) = YEAR(GETDATE()) AND MONTH(o.OrderDate) = MONTH(GETDATE()) THEN o.Amount ELSE 0 END) AS current_month_revenue,
+            SUM(CASE WHEN YEAR(o.OrderDate) = YEAR(DATEADD(MONTH, -1, GETDATE())) AND MONTH(o.OrderDate) = MONTH(DATEADD(MONTH, -1, GETDATE())) THEN o.Amount ELSE 0 END) AS last_month_revenue
+        FROM Orders o
+        JOIN OrderDetail d ON o.OrderID = d.OrderID
+        JOIN Courses c ON d.CourseID = c.CourseID
+        WHERE c.InstructorID = :instructorid
+    )
+    SELECT
+        current_month_revenue,
+        last_month_revenue,
+        CASE 
+            WHEN last_month_revenue = 0 THEN NULL
+            ELSE ((current_month_revenue - last_month_revenue) * 100.0 / last_month_revenue)
+        END AS percent_growth
+    FROM RevenueByMonth
+    """, nativeQuery = true)
+    RevenueDTO getRevenueStatsByInstructor(@Param("instructorid") Long instructorId);
+
+    @Query(value = """
+            SELECT DISTINCT o.OrderID, u.FullName, o.Amount, o.OrderDate
+            FROM Orders o
+            JOIN OrderDetail d ON o.OrderID = d.OrderID
+            JOIN Users u ON o.UserID = u.UserID
+            WHERE d.CourseID IN (
+                SELECT CourseID
+                FROM Courses
+                WHERE InstructorID = :instructorId
+            )
+            ORDER BY o.OrderDate DESC
+            """,
+            countQuery = """
+                    SELECT COUNT(DISTINCT o.OrderID)
+                    FROM Orders o
+                    JOIN OrderDetail d ON o.OrderID = d.OrderID
+                    WHERE d.CourseID IN (
+                        SELECT CourseID
+                        FROM Courses
+                        WHERE InstructorID = :instructorId
+                    )
+                    """,
+            nativeQuery = true)
+    Page<InvoiceDTO> findInvoiceByInstructorIdAscDate(@Param("instructorId") Long instructorId, Pageable pageable);
+
+    @Query(value = """
+            SELECT DISTINCT o.OrderID, u.FullName, o.Amount, o.OrderDate
+            FROM Orders o
+            JOIN OrderDetail d ON o.OrderID = d.OrderID
+            JOIN Users u ON o.UserID = u.UserID
+            WHERE d.CourseID IN (
+                SELECT CourseID
+                FROM Courses
+                WHERE InstructorID = :instructorId
+            )
+            ORDER BY o.OrderDate DESC
+            """,
+            countQuery = """
+                    SELECT COUNT(DISTINCT o.OrderID)
+                    FROM Orders o
+                    JOIN OrderDetail d ON o.OrderID = d.OrderID
+                    WHERE d.CourseID IN (
+                        SELECT CourseID
+                        FROM Courses
+                        WHERE InstructorID = :instructorId
+                    )
+                    """,
+            nativeQuery = true)
+    Page<InvoiceDTO> findInvoiceByInstructorIdAmountAsc(@Param("instructorId") Long instructorId, Pageable pageable);
+    @Query(value = """
+            SELECT DISTINCT o.OrderID, u.FullName, o.Amount, o.OrderDate
+            FROM Orders o
+            JOIN OrderDetail d ON o.OrderID = d.OrderID
+            JOIN Users u ON o.UserID = u.UserID
+            WHERE d.CourseID IN (
+                SELECT CourseID
+                FROM Courses
+                WHERE InstructorID = :instructorId
+            )
+            ORDER BY o.OrderDate DESC
+            """,
+            countQuery = """
+                    SELECT COUNT(DISTINCT o.OrderID)
+                    FROM Orders o
+                    JOIN OrderDetail d ON o.OrderID = d.OrderID
+                    WHERE d.CourseID IN (
+                        SELECT CourseID
+                        FROM Courses
+                        WHERE InstructorID = :instructorId
+                    )
+                    """,
+            nativeQuery = true)
+    Page<InvoiceDTO> findInvoiceByInstructorIdAmountDesc(@Param("instructorId") Long instructorId, Pageable pageable);
+
 }

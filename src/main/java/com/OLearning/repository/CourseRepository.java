@@ -16,7 +16,6 @@ import org.springframework.data.domain.Pageable;
 public interface CourseRepository extends JpaRepository<Course, Long> {
     //tao the nay la xong roi no lay ve mot dong ham roi
     List<Course> findByInstructorUserId(Long userId);
-
     List<Course> findByStatus(String status);
      @Query("SELECT c FROM Course c LEFT JOIN c.enrollments e GROUP BY c ORDER BY COUNT(e) DESC")
      List<Course> findAllOrderByStudentCountDesc();
@@ -160,4 +159,8 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
         @Param("price") String price,
         @Param("title") String title
     );
+
+    // Add new method
+    @Query("SELECT c FROM Course c WHERE c.instructor.userId = :instructorId")
+    List<Course> findByInstructorId(@Param("instructorId") Long instructorId);
 }

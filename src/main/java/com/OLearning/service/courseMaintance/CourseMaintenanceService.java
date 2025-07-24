@@ -33,4 +33,6 @@ public interface CourseMaintenanceService {
     void deleteFee(Long feeId);
 
     void addFee(Long minEnrollments, Long maxEnrollments, Long maintenanceFee);
+
+    Long sumCourseMaintainForInstructor(Long instructorId);
 }

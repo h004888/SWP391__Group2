@@ -32,19 +32,19 @@ public class OrdersController {
                                @RequestParam(value = "startDate", required = false) String startDate,
                                @RequestParam(value = "endDate", required = false) String endDate) {
         // Default to PAID status for initial load
-        Page<OrdersDTO> ordersPage = ordersService.filterAndSortOrdersWithStatus(
-            username, amountDirection, orderType, startDate, endDate, "PAID", page, size);
-        model.addAttribute("accNamePage", "Management Orders");
-        model.addAttribute("orders", ordersPage.getContent());
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", ordersPage.getTotalPages());
-        model.addAttribute("totalItems", ordersPage.getTotalElements());
-        model.addAttribute("pageSize", size);
-        model.addAttribute("username", username);
-        model.addAttribute("amountDirection", amountDirection);
-        model.addAttribute("orderType", orderType);
-        model.addAttribute("startDate", startDate);
-        model.addAttribute("endDate", endDate);
+//        Page<OrdersDTO> ordersPage = ordersService.filterAndSortOrdersWithStatus(
+//            username, amountDirection, orderType, startDate, endDate, "PAID", page, size);
+//        model.addAttribute("accNamePage", "Management Orders");
+//        model.addAttribute("orders", ordersPage.getContent());
+//        model.addAttribute("currentPage", page);
+//        model.addAttribute("totalPages", ordersPage.getTotalPages());
+//        model.addAttribute("totalItems", ordersPage.getTotalElements());
+//        model.addAttribute("pageSize", size);
+//        model.addAttribute("username", username);
+//        model.addAttribute("amountDirection", amountDirection);
+//        model.addAttribute("orderType", orderType);
+//        model.addAttribute("startDate", startDate);
+//        model.addAttribute("endDate", endDate);
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/ordersContent :: contentOrders");
         return "adminDashBoard/index";
     }
@@ -61,11 +61,12 @@ public class OrdersController {
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             Model model) {
-        Page<OrdersDTO> ordersPage = ordersService.filterAndSortOrdersWithStatus(
-            username, amountDirection, orderType, startDate, endDate, status, page, size);
-        model.addAttribute("orders", ordersPage.getContent());
+//        Page<OrdersDTO> ordersPage = ordersService.filterAndSortOrdersWithStatus(
+//            username, amountDirection, orderType, startDate, endDate, status, page, size);
+//        model.addAttribute("orders", ordersPage.getContent());
 
-        return "adminDashBoard/fragments/ordersTableRowContent :: ordersTableRowContent";
+            model.addAttribute("fragmentContent", "adminDashBoard/fragments/ordersContent :: contentOrders");
+        return "adminDashBoard/index";
     }
 
     // New endpoint for pagination only
@@ -80,14 +81,14 @@ public class OrdersController {
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             Model model) {
-        Page<OrdersDTO> ordersPage = ordersService.filterAndSortOrdersWithStatus(
-            username, amountDirection, orderType, startDate, endDate, status, page, size);
-        
-        model.addAttribute("orders", ordersPage.getContent());
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", ordersPage.getTotalPages());
-        model.addAttribute("totalItems", ordersPage.getTotalElements());
-        model.addAttribute("pageSize", size);
+//        Page<OrdersDTO> ordersPage = ordersService.filterAndSortOrdersWithStatus(
+//            username, amountDirection, orderType, startDate, endDate, status, page, size);
+//
+//        model.addAttribute("orders", ordersPage.getContent());
+//        model.addAttribute("currentPage", page);
+//        model.addAttribute("totalPages", ordersPage.getTotalPages());
+//        model.addAttribute("totalItems", ordersPage.getTotalElements());
+//        model.addAttribute("pageSize", size);
 
         return "adminDashBoard/fragments/ordersTableRowContent :: ordersPagination";
     }
@@ -102,18 +103,20 @@ public class OrdersController {
             @RequestParam(value = "endDate", required = false) String endDate,
             @RequestParam(value = "status", required = false) String status) {
         
-        Page<OrdersDTO> ordersPage = ordersService.filterAndSortOrdersWithStatus(
-            username, amountDirection, orderType, startDate, endDate, status, 0, 1); // Get only 1 item to check total
-
-        return ordersPage.getTotalElements();
+//        Page<OrdersDTO> ordersPage = ordersService.filterAndSortOrdersWithStatus(
+//            username, amountDirection, orderType, startDate, endDate, status, 0, 1); // Get only 1 item to check total
+//
+//        return ordersPage.getTotalElements();
+//        model.addAttribute("fragmentContent", "adminDashBoard/fragments/ordersContent :: contentOrders");
+        return 1L;
     }
 
     @GetMapping("/view/{orderId}")
     public String viewOrderDetails(@PathVariable("orderId") Long orderId, Model model) {
-        model.addAttribute("accNamePage", "Order Details");
-        List<OrderDetail> orderDetails = ordersService.getOrderDetailsByOrderId(orderId);
-        model.addAttribute("orderDetails", orderDetails);
-        model.addAttribute("orderId", orderId);
+//        model.addAttribute("accNamePage", "Order Details");
+//        List<OrderDetail> orderDetails = ordersService.getOrderDetailsByOrderId(orderId);
+//        model.addAttribute("orderDetails", orderDetails);
+//        model.addAttribute("orderId", orderId);
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/orderDetailsContent :: contentOrderDetails");
         return "adminDashBoard/index";
     }

@@ -123,6 +123,11 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
         feesRepository.save(newFee);
     }
 
+    @Override
+    public Long sumCourseMaintainForInstructor(Long instructorId) {
+        return courseMaintenanceRepository.courseMaintainInstructor(instructorId);
+    }
+
     @Scheduled(cron = "0 59 23 L * ?") // Chạy vào 23:59 ngày cuối tháng
     @Override
     public void processMonthlyMaintenance() {
