@@ -150,7 +150,6 @@ public class CoinTransactionServiceImpl implements CoinTransactionService {
         return transactions.stream().map(coinTransactionMapper::toDTO).map(CoinTransactionDTO::getCourseName).distinct().count();
     }
 
-    // Lấy chi tiết giao dịch
     public CoinTransactionDTO getTransactionDetail(Long transactionId) {
         CoinTransaction transaction = coinTransactionRepository.findById(transactionId).orElse(null);
         if (transaction == null) return null;

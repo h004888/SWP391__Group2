@@ -90,7 +90,7 @@ public class DashboardController {
             @RequestParam("endDate") String endDateStr) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate startDate = LocalDate.parse(startDateStr, formatter);
-        LocalDate endDate = LocalDate.parse(endDateStr, formatter);
+        LocalDate endDate = LocalDate.parse(endDateStr, formatter).plusDays(1);
         if (startDate.isAfter(endDate)) {
             throw new IllegalArgumentException("startDate must be before or equal to endDate");
         }
@@ -120,7 +120,7 @@ public class DashboardController {
             Model model) throws IOException {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate startDate = LocalDate.parse(startDateStr, formatter);
-        LocalDate endDate = LocalDate.parse(endDateStr, formatter);
+        LocalDate endDate = LocalDate.parse(endDateStr, formatter).plusDays(1);
         if (startDate.isAfter(endDate)) {
             redirectAttributes.addFlashAttribute("errorMessage", "Start date must be before or equal to end date.");
             return "redirect:/admin";
