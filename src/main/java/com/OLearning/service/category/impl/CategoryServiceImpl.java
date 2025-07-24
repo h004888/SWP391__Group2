@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -112,4 +113,17 @@ public class CategoryServiceImpl implements CategoryService {
     public boolean existsByNameAndIdNot(String name, Long id) {
         return categoryRepository.existsByNameAndIdNot(name, id);
     }
+
+    @Override
+    public List<CategoryDTO> getAllCategory() {
+        List<Category> categories = categoryRepository.findAll();
+        return categories.stream().map(category -> {
+            CategoryDTO dto = new CategoryDTO();
+            dto.setId(category.getId());
+            dto.setName(category.getName());
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+
 }

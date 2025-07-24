@@ -55,6 +55,8 @@ public interface CourseService {
     List<CourseViewDTO> getTopCourses();
 
     List<CourseViewDTO> getCoursesByCategoryId(Long categoryId);
+        boolean existsById(Long id);
+
 
     Page<CourseViewDTO> searchCoursesGrid(
             List<Long> categoryIds,
@@ -79,4 +81,7 @@ public interface CourseService {
 
     List<CourseViewDTO> getCourseByUserId(Long userId);
 
+        Long countCourseIsPublish();
+        Course getMostRecentCourseWithFallback(Long userId);
+        List<CourseViewDTO> getCourseByJoinByUserId(Long userId);
 }

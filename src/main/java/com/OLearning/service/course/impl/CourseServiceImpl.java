@@ -72,8 +72,8 @@ public class CourseServiceImpl implements CourseService {
     public Page<CourseDTO> findCourseByUserId(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Course> coursePage = courseRepository.findByInstructorUserId(userId, pageable);// Page<Course> la doi tuong
-                                                                                            // chua ca danh sach khoa
-                                                                                            // hoc
+        // chua ca danh sach khoa
+        // hoc
         List<CourseDTO> courseDTOList = new ArrayList<>();
         for (Course course : coursePage.getContent()) {
             CourseDTO courseDTO = courseMapper.MapCourseDTO(course);
@@ -170,10 +170,31 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    public Course getMostRecentCourseWithFallback(Long userId) {
+        List<Course> courses = courseRepository.findFallbackMostRecentCourse(userId);
+        if (courses.isEmpty()) {
+            return null;
+        }
+        return courses.get(0);
+    }
+
+    @Override
+    public List<CourseViewDTO> getCourseByJoinByUserId(Long userId) {
+        return courseRepository.getCourseByJoinByUserId(userId).stream()
+                .map(CourseMapper::toCourseViewDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<CourseViewDTO> getTopCourses() {
         return courseRepository.findAllPublishedOrderByStudentCountDesc().stream()
                 .map(CourseMapper::toCourseViewDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean existsById(Long id) {
+        return courseRepository.existsById(id);
     }
 
     @Override
@@ -415,6 +436,11 @@ public class CourseServiceImpl implements CourseService {
         return courseRepository.findCoursesByUserId(userId).stream()
                 .map(CourseMapper::toCourseViewDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Long countCourseIsPublish() {
+        return courseRepository.countCourseIsPublish();
     }
 
     @Override

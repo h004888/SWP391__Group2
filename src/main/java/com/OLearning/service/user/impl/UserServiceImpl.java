@@ -286,7 +286,7 @@ public class UserServiceImpl implements UserService {
     public List<UserDTO> getTopInstructorsByCourseCount(int limit) {
         // Get all instructors (roleId = 2)
         List<User> instructors = userRepository.findByRoleId(2L);
-        
+
         // Sort instructors by number of courses in descending order
         return instructors.stream()
                 .sorted((i1, i2) -> Integer.compare(
@@ -328,6 +328,15 @@ public class UserServiceImpl implements UserService {
         return userRepository.existsById(userId);
     }
 
+    @Override
+    public Long countInstructor() {
+        return userRepository.countInstructor();
+    }
+
+    @Override
+    public Long countStudent() {
+        return userRepository.countStudent();
+    }
     @Override
     public Optional<UserProfileEditDTO> getProfileByUsername(String username) {
         return userRepository.findByEmail(username).map(user -> {

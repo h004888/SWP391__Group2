@@ -2,7 +2,7 @@
     <!-- Hidden inputs for JavaScript -->
     <input type="hidden" name="courseId" th:value="${course.courseId}" />
     <input type="hidden" name="lessonId" th:value="${currentLesson.lessonId}" />
-    
+
     <!-- =======================
     Page banner video START -->
 
@@ -12,7 +12,9 @@
             <!-- Course video START -->
             <div class="col-lg-9">
                 <div class="video-player rounded-3">
-                    <video controls crossorigin="anonymous" playsinline poster="/assets/images/videos/poster.jpg">
+                    <video controls crossorigin="anonymous" playsinline
+                        th:poster="@{${course.courseImg} ? ${course.courseImg} : '/assets/images/courses/4by3/01.jpg'}"
+                        style="object-fit: contain; height: 650px; width: 100%;">
                         <source th:src="@{/api/video/stream/video/{videoURL}(videoURL=${lessonVideoURL})}" size="360">
                         <source th:src="@{/api/video/stream/video/{videoURL}(videoURL=${lessonVideoURL})}" size="720">
                         <source th:src="@{/api/video/stream/video/{videoURL}(videoURL=${lessonVideoURL})}" size="1080">
@@ -46,10 +48,10 @@
                                     <div class="d-flex align-items-center">
                                         <!-- Avatar image -->
                                         <div class="avatar avatar-lg">
-                                            <img class="avatar-img rounded-circle" th:src="${course.instructor.profilePicture != null} ?
+                                            <img class="avatar-img rounded-circle"
+                                                th:src="${course.instructor.profilePicture != null} ?
                                                                                              ${course.instructor.profilePicture} :
-                                                                                             @{/img/undraw_profile.svg}"
-                                                alt="avatar">
+                                                                                             @{/img/undraw_profile.svg}" alt="avatar">
                                         </div>
                                         <div class="ms-3">
                                             <h6 class="mb-0"><a href="#" th:text="${course.instructor.fullName}">By
@@ -90,7 +92,9 @@
                                                 <div id="commentMessage"></div>
                                                 <!-- Comments list container -->
                                                 <div id="commentsList">
-                                                    <div th:replace="userPage/fragmentLessonVideo/commentLessonVideoFragment :: commentLessonVideoFragment(comments=${comments}, currentLesson=${currentLesson}, user=${user})"></div>
+                                                    <div
+                                                        th:replace="userPage/fragmentLessonVideo/commentLessonVideoFragment :: commentLessonVideoFragment(comments=${comments}, currentLesson=${currentLesson}, user=${user})">
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -247,7 +251,7 @@
                 <!-- Responsive offcanvas body END -->
 
                 <!-- Tags START -->
-                <div class="mt-4">
+                <!-- <div class="mt-4">
                     <h4 class="mb-3">Tags</h4>
                     <ul class="list-inline mb-0">
                         <li class="list-inline-item"><a class="btn btn-outline-light btn-sm" href="#">blog</a></li>
@@ -264,7 +268,7 @@
                         <li class="list-inline-item"><a class="btn btn-outline-light btn-sm" href="#">machine
                                 learning</a></li>
                     </ul>
-                </div>
+                </div> -->
                 <!-- Tags END -->
             </div>
             <!-- Right sidebar END -->
@@ -288,24 +292,24 @@
 <script th:inline="javascript">
     // Set current user ID for comment functionality
     window.currentUserId = /*[[${user.userId}]]*/ null;
-    
+
     // Load comments when page loads
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const courseId = document.querySelector('input[name="courseId"]').value;
         const lessonId = document.querySelector('input[name="lessonId"]').value;
-        
+
         console.log('Page loaded with:', { courseId, lessonId });
-        
+
         // Validate lessonId is present - bắt buộc
         if (!lessonId) {
             console.error('Lesson ID is missing! Comment system requires lesson ID.');
             document.getElementById('commentsList').innerHTML = '<p class="text-danger">Lỗi: Không tìm thấy thông tin bài học. Comment system yêu cầu lesson ID.</p>';
             return;
         }
-        
+
         // Load comments for this specific lesson
         loadComments(courseId, lessonId);
-        
+
         // Add event listeners for initial elements
         addCommentEventListeners();
     });
@@ -326,10 +330,10 @@
                 // Clear existing content and add new comments
                 commentsList.innerHTML = '';
                 commentsList.innerHTML = renderComments(comments);
-                
+
                 // Add event listeners for newly created elements
                 addCommentEventListeners();
-                
+
                 // Scroll tới cuối danh sách comment để thấy reply mới
                 commentsList.scrollIntoView({ behavior: 'smooth', block: 'end' });
                 // --- Scroll to comment if commentId param exists ---
@@ -505,7 +509,7 @@
                 </ul>
             </div>
         `).join('');
-        
+
         return html;
     }
 
@@ -533,21 +537,21 @@
         // Comment form
         const commentForm = document.getElementById('commentForm');
         if (commentForm) {
-            commentForm.addEventListener('submit', function(e) {
+            commentForm.addEventListener('submit', function (e) {
                 e.preventDefault();
                 const formData = new FormData(this);
                 const comment = formData.get('comment');
                 const courseId = formData.get('courseId');
                 const lessonId = formData.get('lessonId');
-                
+
                 console.log('Submitting comment:', { comment, courseId, lessonId });
-                
+
                 // Validate lessonId is present - bắt buộc
                 if (!lessonId) {
                     showMessage('Lỗi: Không tìm thấy thông tin bài học. Comment phải thuộc về một bài học cụ thể.', 'error');
                     return;
                 }
-                
+
                 fetch(`/api/course/${courseId}/comment`, {
                     method: 'POST',
                     headers: {
@@ -559,30 +563,30 @@
                         lessonId: parseInt(lessonId) // lessonId bắt buộc
                     })
                 })
-                .then(response => {
-                    console.log('Comment submit response status:', response.status);
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Comment submit response:', data);
-                    if (data.success) {
-                        showMessage('Thao tác thành công!', 'success');
-                        this.reset();
-                        loadComments(courseId, lessonId);
-                    } else {
-                        showMessage(data.error || 'Có lỗi xảy ra', 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error submitting comment:', error);
-                    showMessage('Error posting comment', 'error');
-                });
+                    .then(response => {
+                        console.log('Comment submit response status:', response.status);
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Comment submit response:', data);
+                        if (data.success) {
+                            showMessage('Thao tác thành công!', 'success');
+                            this.reset();
+                            loadComments(courseId, lessonId);
+                        } else {
+                            showMessage(data.error || 'Có lỗi xảy ra', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error submitting comment:', error);
+                        showMessage('Error posting comment', 'error');
+                    });
             });
         }
 
         // Reply links
-        document.querySelectorAll('.reply-link').forEach(function(link) {
-            link.addEventListener('click', function(e) {
+        document.querySelectorAll('.reply-link').forEach(function (link) {
+            link.addEventListener('click', function (e) {
                 e.preventDefault();
                 var formId = this.getAttribute('data-reply-form-id');
                 var form = document.getElementById(formId);
@@ -594,8 +598,8 @@
         });
 
         // Edit links
-        document.querySelectorAll('.edit-link').forEach(function(link) {
-            link.addEventListener('click', function(e) {
+        document.querySelectorAll('.edit-link').forEach(function (link) {
+            link.addEventListener('click', function (e) {
                 e.preventDefault();
                 var commentId = this.getAttribute('data-comment-id');
                 var form = document.getElementById('edit-form-' + commentId);
@@ -607,22 +611,22 @@
         });
 
         // Cancel edit buttons
-        document.querySelectorAll('.cancel-edit').forEach(function(btn) {
-            btn.addEventListener('click', function(e) {
+        document.querySelectorAll('.cancel-edit').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
                 e.preventDefault();
                 this.closest('.edit-form').classList.add('d-none');
             });
         });
 
         // Delete links
-        document.querySelectorAll('.delete-link').forEach(function(link) {
-            link.addEventListener('click', function(e) {
+        document.querySelectorAll('.delete-link').forEach(function (link) {
+            link.addEventListener('click', function (e) {
                 e.preventDefault();
                 if (confirm('Bạn có chắc muốn xóa bình luận này?')) {
                     var commentId = this.getAttribute('data-comment-id');
                     var courseId = document.querySelector('input[name="courseId"]').value;
                     var lessonId = document.querySelector('input[name="lessonId"]').value;
-                    
+
                     fetch(`/api/course/${courseId}/comment/${commentId}/delete`, { method: 'DELETE' })
                         .then(res => res.json())
                         .then(data => {
@@ -641,14 +645,14 @@
         });
 
         // Report links
-        document.querySelectorAll('.report-link').forEach(function(link) {
-            link.addEventListener('click', function(e) {
+        document.querySelectorAll('.report-link').forEach(function (link) {
+            link.addEventListener('click', function (e) {
                 e.preventDefault();
                 var commentId = this.getAttribute('data-comment-id');
                 var reason = prompt('Please provide a reason for reporting this comment:');
                 if (reason && reason.trim()) {
                     var courseId = document.querySelector('input[name="courseId"]').value;
-                    
+
                     fetch(`/api/course/${courseId}/comment/${commentId}/report`, {
                         method: 'POST',
                         headers: {
@@ -658,24 +662,24 @@
                             reason: reason.trim()
                         })
                     })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            showMessage('Thao tác thành công!', 'success');
-                        } else {
-                            showMessage(data.error || 'Error reporting comment', 'error');
-                        }
-                    })
-                    .catch(error => {
-                        showMessage('Error reporting comment', 'error');
-                    });
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                showMessage('Thao tác thành công!', 'success');
+                            } else {
+                                showMessage(data.error || 'Error reporting comment', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            showMessage('Error reporting comment', 'error');
+                        });
                 }
             });
         });
 
         // Reply forms
-        document.querySelectorAll('.replyCommentForm').forEach(function(form) {
-            form.addEventListener('submit', function(e) {
+        document.querySelectorAll('.replyCommentForm').forEach(function (form) {
+            form.addEventListener('submit', function (e) {
                 e.preventDefault();
                 const comment = this.querySelector('input[name="comment"]').value;
                 const courseId = this.querySelector('input[name="courseId"]').value;
@@ -697,31 +701,31 @@
                         replyToUserName: replyToUserName
                     })
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showMessage('Thao tác thành công!', 'success');
-                        // Ẩn form trả lời và reset input
-                        this.classList.add('d-none');
-                        // Reset input
-                        const input = this.querySelector('input[name="comment"]');
-                        if (input) input.value = '';
-                        this.reset && this.reset();
-                        // Gọi lại loadComments để cập nhật danh sách
-                        loadComments(courseId, lessonId);
-                    } else {
-                        showMessage(data.error || 'Error posting reply', 'error');
-                    }
-                })
-                .catch(error => {
-                    showMessage('Error posting reply', 'error');
-                });
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showMessage('Thao tác thành công!', 'success');
+                            // Ẩn form trả lời và reset input
+                            this.classList.add('d-none');
+                            // Reset input
+                            const input = this.querySelector('input[name="comment"]');
+                            if (input) input.value = '';
+                            this.reset && this.reset();
+                            // Gọi lại loadComments để cập nhật danh sách
+                            loadComments(courseId, lessonId);
+                        } else {
+                            showMessage(data.error || 'Error posting reply', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        showMessage('Error posting reply', 'error');
+                    });
             });
         });
 
         // Edit forms
-        document.querySelectorAll('.editCommentForm').forEach(function(form) {
-            form.addEventListener('submit', function(e) {
+        document.querySelectorAll('.editCommentForm').forEach(function (form) {
+            form.addEventListener('submit', function (e) {
                 e.preventDefault();
                 const formData = new FormData(this);
                 const comment = formData.get('comment');
@@ -739,19 +743,19 @@
                     method: 'POST',
                     body: formData
                 })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        showMessage('Thao tác thành công!', 'success');
-                        this.classList.add('d-none');
-                        loadComments(courseId, lessonId);
-                    } else {
-                        showMessage(data.error || 'Có lỗi xảy ra', 'error');
-                    }
-                })
-                .catch(error => {
-                    showMessage('Error updating comment', 'error');
-                });
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            showMessage('Thao tác thành công!', 'success');
+                            this.classList.add('d-none');
+                            loadComments(courseId, lessonId);
+                        } else {
+                            showMessage(data.error || 'Có lỗi xảy ra', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        showMessage('Error updating comment', 'error');
+                    });
             });
         });
     }
@@ -764,7 +768,7 @@
                 ${message}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>`;
-            
+
             // Auto hide after 5 seconds
             setTimeout(() => {
                 messageDiv.innerHTML = '';

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Modal Box với thẻ VIDEO</title>
+    <style>
+        /* ----- Phần CSS cho giao diện ----- */
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+        }
+
+        /* Nút bấm để mở modal */
+        .open-modal-btn {
+            padding: 12px 24px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+
+        .open-modal-btn:hover {
+            background-color: #0056b3;
+        }
+
+        /* Lớp phủ (overlay) nền tối */
+        .modal-overlay {
+            display: none;
+            /* Ẩn mặc định */
+            position: fixed;
+            /* Vị trí cố định để che toàn màn hình */
+            z-index: 1000;
+            /* Hiển thị trên cùng */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            /* Màu đen với độ trong suốt 80% */
+            display: flex;
+            /* Sử dụng flexbox để căn giữa */
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Nội dung của modal */
+        .modal-content {
+            position: relative;
+            background-color: #1c1c1c;
+            /* Nền tối cho hợp với video */
+            padding: 0;
+            /* Bỏ padding để video vừa khít */
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            animation: slideDown 0.4s ease-out;
+            overflow: hidden;
+            /* Ẩn các phần thừa của video khi bo góc */
+        }
+
+        /* CSS cho thẻ video để nó đáp ứng (responsive) */
+        .modal-content video {
+            width: 100%;
+            height: auto;
+            display: block;
+            /* Loại bỏ khoảng trống thừa bên dưới video */
+        }
+
+        /* Nút đóng (dấu X) */
+        .close-btn {
+            color: white;
+            position: absolute;
+            top: -5px;
+            right: 10px;
+            font-size: 40px;
+            font-weight: bold;
+            transition: color 0.2s;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        .close-btn:hover,
+        .close-btn:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Hiệu ứng trượt xuống khi modal xuất hiện */
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Sử dụng thẻ <video> trong Modal</h2>
+    <p>Nhấn vào nút bên dưới để mở video được host trực tiếp.</p>
+
+    <!-- Nút để mở modal -->
+    <button id="openVideoBtn" class="open-modal-btn">Mở Video</button>
+
+    <!-- The Modal -->
+    <div id="videoModal" class="modal-overlay">
+
+        <!-- Nội dung Modal -->
+        <div class="modal-content">
+            <span class="close-modal-btn">×</span>
+
+            <!--
+      THẺ VIDEO HTML5
+      - `controls`: Hiển thị các nút điều khiển mặc định.
+      - `id`: Để JavaScript có thể điều khiển (play, pause).
+      - Thẻ <source> cho phép cung cấp nhiều định dạng video để tương thích với nhiều trình duyệt.
+    -->
+            <video id="modalVideo" width="100%" controls>
+                <!-- Thay đường dẫn đến tệp video của bạn ở đây -->
+                <!-- Bạn nên có cả 2 định dạng .mp4 và .webm để tối ưu tương thích -->
+                <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+                <source src="https://www.w3schools.com/html/mov_bbb.ogg" type="video/ogg">
+                Trình duyệt của bạn không hỗ trợ thẻ video.
+            </video>
+        </div>
+
+    </div>
+
+    <script>
+        // ----- Phần JavaScript để xử lý sự kiện -----
+
+        // 1. Lấy các phần tử HTML cần thiết
+        const modal = document.getElementById("videoModal");
+        const openBtn = document.getElementById("openVideoBtn");
+        const closeBtn = document.querySelector(".close-modal-btn");
+        const video = document.getElementById("modalVideo");
+
+        // 2. Định nghĩa hàm để đóng modal
+        function closeModal() {
+            modal.style.display = "none"; // Ẩn modal
+            video.pause();               // Dừng video
+            video.currentTime = 0;       // Tua video về giây 0
+        }
+
+        // 3. Gán sự kiện cho các phần tử
+        // Khi người dùng nhấn vào nút, mở modal và phát video
+        openBtn.onclick = function () {
+            modal.style.display = "flex"; // Hiện modal
+            video.play();                 // Phát video
+        }
+
+        // Khi người dùng nhấn vào nút (x), đóng modal
+        closeBtn.onclick = function () {
+            closeModal();
+        }
+
+        // Khi người dùng nhấn vào bất cứ đâu bên ngoài modal, đóng nó lại
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+
+</body>
+
+</html>

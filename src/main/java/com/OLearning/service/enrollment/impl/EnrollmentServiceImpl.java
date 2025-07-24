@@ -253,6 +253,14 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     @Override
+    public List<Long> getTotalEnrollmentOfInstructor(List<UserDTO> instructors) {
+        return instructors.stream()
+                .map(UserDTO::getUserId)
+                .map(enrollmentRepository::countTotalEnrollmentByUserId)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<Enrollment> findByUserId(Long userId) {
         return enrollmentRepository.findByUser_UserId(userId).stream().toList();
     }

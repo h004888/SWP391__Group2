@@ -25,7 +25,7 @@ public class Course {
     @Column(name = "Title")
     private String title;
 
-    @Column(name = "Description",columnDefinition = "nvarchar(max)")
+    @Column(name = "Description", columnDefinition = "nvarchar(max)")
     private String description;
 
     @Column(name = "Price")
@@ -77,5 +77,8 @@ public class Course {
 
     @Column(name = "PreviousStatus")
     private String previousStatus;
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Certificate> certificates;
 
 }

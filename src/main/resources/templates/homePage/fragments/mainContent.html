@@ -383,8 +383,9 @@ Counter START -->
                         <div class="ms-4 h6 fw-normal mb-0">
                             <div class="d-flex">
                                 <h5 class="purecounter mb-0 fw-bold" data-purecounter-start="0"
-                                    data-purecounter-end="10" data-purecounter-delay="200">0</h5>
-                                <span class="mb-0 h5">K</span>
+                                    th:data-purecounter-end="${totalCourseIsPublish}" data-purecounter-delay="200">0
+                                </h5>
+                                <span class="mb-0 h5" th:if="${totalCourseIsPublish >= 1000}">K</span>
                             </div>
                             <p class="mb-0">Online Courses</p>
                         </div>
@@ -397,7 +398,7 @@ Counter START -->
                         <div class="ms-4 h6 fw-normal mb-0">
                             <div class="d-flex">
                                 <h5 class="purecounter mb-0 fw-bold" data-purecounter-start="0"
-                                    data-purecounter-end="200" data-purecounter-delay="200">0</h5>
+                                    th:data-purecounter-end="${totalInstructor}" data-purecounter-delay="200">0</h5>
                                 <span class="mb-0 h5">+</span>
                             </div>
                             <p class="mb-0">Expert Tutors</p>
@@ -411,8 +412,8 @@ Counter START -->
                         <div class="ms-4 h6 fw-normal mb-0">
                             <div class="d-flex">
                                 <h5 class="purecounter mb-0 fw-bold" data-purecounter-start="0"
-                                    data-purecounter-end="60" data-purecounter-delay="200">0</h5>
-                                <span class="mb-0 h5">K+</span>
+                                    th:data-purecounter-end="${totalStudent}" data-purecounter-delay="200">0</h5>
+                                <span class="mb-0 h5" th:if="${totalStudent >= 1000}">K</span>
                             </div>
                             <p class="mb-0">Online Students</p>
                         </div>
@@ -548,8 +549,8 @@ Trending courses START -->
                         <div th:each="course : ${topCourses}">
                             <div class="card action-trigger-hover border bg-transparent" style="height: 580px;">
                                 <!-- Image -->
-                                <img th:if="${course.courseImg != null}" th:src="${course.courseImg}"
-                                    src="assets/images/courses/4by3/14.jpg" class="card-img-top" alt="course image"
+                                <img th:src="@{${course.courseImg} ? ${course.courseImg} : '/assets/images/courses/4by3/01.jpg'}"
+                                    class="card-img-top" alt="course image"
                                     style="height: 300px; object-fit: contain; background: #f8f9fa;">
                                 <!-- Ribbon -->
 

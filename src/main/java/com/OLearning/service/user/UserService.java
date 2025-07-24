@@ -55,6 +55,10 @@ public interface UserService {
     Page<UserDTO> filterInstructors(String keyword, Pageable pageable);
 
     boolean existsById(Long userId);
+
+    Long countInstructor();
+
+    Long countStudent();
     User findById(Long id);
 
     void updatePasswordByEmail(String email, String newPassword);

@@ -107,7 +107,7 @@ Page Banner START -->
                         <div class="d-flex justify-content-center">
                             <nav aria-label="breadcrumb">
                                 <ol class="breadcrumb breadcrumb-dark breadcrumb-dots mb-0">
-                                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                                    <li class="breadcrumb-item"><a th:href="@{/home}">Home</a></li>
                                     <li class="breadcrumb-item active" aria-current="page">Courses classic</li>
                                 </ol>
                             </nav>
@@ -151,10 +151,10 @@ Page content START -->
                             </div>
 
                             <div class="col-12 col-xl-3 d-flex justify-content-between align-items-center mt-3 mt-xl-0">
-                                <p class="mb-0 text-end"
+                                <!-- <p class="mb-0 text-end"
                                     th:text="'Showing ' + ${#lists.size(courses)} + ' of ' + ${totalPages * 7} + ' results'">
                                     Showing 1-7
-                                    of 32 results</p>
+                                    of 32 results</p> -->
                             </div>
                         </div>
 

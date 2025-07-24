@@ -92,7 +92,14 @@ public class UserCourseController {
             return "userPage/LearningDashboard";
         }
 
-        CourseViewDTO courseViewDTO = courseService.getCourseRecentIncomplete(currentUser.getUserId());
+        CourseViewDTO courseViewDTO = courseService.getCourseById(courses.get(0).getCourseId());
+
+        // CourseViewDTO courseViewDTO =
+        // courseService.getCourseRecentIncomplete(currentUser.getUserId());
+        // if (courseViewDTO == null) {
+        // model.addAttribute("course", null); // hoặc ẩn phần này trên giao diện
+        // return "userPage/LearningDashboard";
+        // }
 
         model.addAttribute("course", courseViewDTO);
         model.addAttribute("progress",
@@ -128,7 +135,9 @@ public class UserCourseController {
                         .filter(progress -> !progress.getCourseId().equals(courseViewDTO.getCourseId()))
                         .collect(Collectors.toList()));
         model.addAttribute("lsInstructor", userService.getUsersByRole(2L));
-        model.addAttribute("totalEnrollments", courseViewDTO);
+        model.addAttribute("totalEnrollments",
+                enrollmentService.getTotalEnrollmentOfInstructor(userService.getUsersByRole(2L)));
+
         return "userPage/LearningDashboard";
     }
 
@@ -336,6 +345,7 @@ public class UserCourseController {
         model.addAttribute("nextLesson", nextLesson);
         model.addAttribute("course", courseView);
         model.addAttribute("chapters", courseView.getListOfChapters());
+        System.out.println("Chapters in lesson detail: " + courseView.getListOfChapters());
 
         // Load comments for the specific lesson only (Rating = null)
 
@@ -360,7 +370,7 @@ public class UserCourseController {
         // Add unread notification count
         long unreadCount = notificationService.countUnreadByUserId(user.getUserId());
         model.addAttribute("unreadCount", unreadCount);
-
+        model.addAttribute("chapterProgressMap", chapterProgressMap);
         return "userPage/course-detail-min";
     }
 
