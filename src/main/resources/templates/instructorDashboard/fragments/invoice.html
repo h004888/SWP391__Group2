@@ -1,0 +1,588 @@
+<div class="container py-4" th:fragment="invoice">
+    <!-- Header -->
+    <header class="mb-4">
+        <h4 class="text-dark">Management Revenue & Invoice</h4>
+    </header>
+
+    <!-- Tổng quan doanh thu -->
+    <div class="row g-4 mb-4">
+        <!-- Tổng doanh thu -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-start">
+                        <div class="me-3">
+                            <i class="bi-currency-dollar"></i>
+                        </div>
+                        <div>
+                            <p class="text-bg-muted mb-1 small">Total revenue</p>
+                            <h3 class="fw-bold mb-1"
+                                th:text="${#numbers.formatDecimal(sumRevenue, 0, 'COMMA', 0, 'POINT')} + ' VND'">
+                                125.000.000 ₫</h3>
+                            <small class="text-bg-muted">All the time</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Doanh thu tháng này -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-start">
+                        <div class="me-3">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div>
+                            <p class="text-bg-muted mb-1 small">Revenue this month</p>
+                            <h3 class="fw-bold mb-1"
+                                th:text="${#numbers.formatDecimal(currentMonth, 0, 'COMMA', 0, 'POINT')} + ' VND'">25.000.000
+                                ₫</h3>
+                            <div class="d-flex align-items-center">
+                                <small class="text-bg-muted">This month</small>
+                                <span class="badge bg-success ms-2 small"
+                                      th:text="${growth != null ? growth.intValue() : 0} + '%'">
+                                        <i class="fas fa-arrow-up me-1"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tổng đơn hàng -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-start">
+                        <div class="me-3">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <div>
+                            <p class="text-bg-muted mb-1 small">Total order</p>
+                            <h3 class="fw-bold mb-1" th:text="${totalElement} + ' orders'">1,250</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tính toán doanh thu thực nhận -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-4">
+                <i class="fas fa-calculator me-2"></i>
+                Payment
+            </h5>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded">
+                        <div class="d-flex align-items-center">
+                            <div>
+                                <p class="text-bg-muted mb-1">Total Revenue</p>
+                                <h4 class="fw-bold mb-0"
+                                    th:text="${#numbers.formatDecimal(sumRevenue, 0, 'COMMA', 0, 'POINT')} + ' VND'"></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded">
+                        <div class="d-flex align-items-center">
+                            <div>
+                                <p class="text-bg-muted mb-1">Platform Fees</p>
+                                <h4 class="fw-bold mb-0 text-danger" th:utext="${maintain} + ' VND'" >37.500.000 ₫</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded">
+                        <div class="d-flex align-items-center">
+                            <div>
+                                <p class="text-bg-muted mb-1">Receive</p>
+                                <h4 class="fw-bold mb-0 text-success"
+                                    th:text="${formatted}">
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Biểu đồ doanh thu -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-area me-2"></i>
+                    Amount and orders chart
+                </h5>
+                <div class="d-flex gap-2">
+                    <select id="chartPeriod" class="form-select form-select-sm" onchange="updateChart()">
+                        <option value="day">Day</option>
+                        <option value="month" selected>Month</option>
+                        <option value="quarter">Quarter</option>
+                    </select>
+                    <select id="chartType" class="form-select form-select-sm" onchange="updateChart()">
+                        <option value="line">Line chart</option>
+                        <option value="bar" selected>Column chart</option>
+                    </select>
+                    <select id="chartData" class="form-select form-select-sm" onchange="updateChart()">
+                        <option value="revenue">Revenue</option>
+                        <option value="orders">Orders</option>
+                        <option value="both" selected>Both</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danh sách đơn hàng -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    Order List
+                </h5>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4 mb-2">
+                    <select class="form-select">
+                        <option name="action" value="date_desc">Latest date</option>
+                        <option name="action" value="date_asc">Oldest date</option>
+                        <option name="action" value="revenue_desc">Highest Revenue</option>
+                        <option name="action" value="revenue_asc">Lowest revenue</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="text-muted" id="ordersCount" th:utext="Showing + ' ' +${totalElement} + ' ' + orders">Showing 0 orders</span>
+                <span class="fw-bold" id="ordersTotal"
+                      th:text="${#numbers.formatDecimal(sumRevenue, 0, 'COMMA', 2, 'POINT')} + ' VND'">Tổng: 0₫</span>
+            </div>
+
+            <div class="table-container">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                    <tr>
+                        <th>
+                            OrderId
+                        </th>
+                        <th>
+                            Name Enrollment
+                        </th>
+                        <th>
+                            Order Date
+                        </th>
+                        <th>
+                            Amount
+                        </th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <!--                    <tbody id="ordersTableBody">-->
+                    <tbody id="invoice-body">
+                    <!-- Orders will be populated by JavaScript -->
+                    <tr th:each="order : ${orders}">
+                        <td th:utext="${order.orderId}">OrderId</td>
+                        <td th:utext="${order.fullName}">Name Enrollment</td>
+                        <td th:utext="${order.orderDate}">Order Date</td>
+                        <td th:text="${#numbers.formatDecimal(order.amount, 0, 'COMMA', 2, 'POINT')} + ' VNĐ'">Amount
+                        </td>
+                        </td>
+
+                        <td>
+                            <a th:href="@{/instructor/invoice/{orderId}(orderId=${order.orderId})}"
+                               class="btn btn-info-soft btn-round me-1 mb-1 mb-md-0"
+                               title="View"><i class="fas fa-eye"></i></a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-center mt-4">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination" id="pagination">
+                        <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                            <a class="page-link page-link-btn" th:data-page="${currentPage - 1}">Previous</a>
+                        </li>
+                        <li th:each="i : ${#numbers.sequence(1, totalPage)}"
+                            class="page-item"
+                            th:classappend="${i == currentPage} ? 'active'">
+                            <a class="page-link page-link-btn" th:text="${i}" th:attr="data-page=${i}"></a>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage == totalPage} ? 'disabled'">
+                            <a class="page-link page-link-btn" th:data-page="${currentPage + 1}">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+    <script>
+        //ajax phan trang
+        document.addEventListener("DOMContentLoaded", function () {
+            bindAjaxPagination();
+        });
+
+        function bindAjaxPagination() {
+            document.querySelectorAll('.page-link-btn').forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const page = parseInt(this.getAttribute('data-page'));
+
+                    // Nếu là trang 1 thì reload lại Thymeleaf
+                    // if (page === 1) {
+                    //     window.location.href = "/instructor/invoice";
+                    // } else {
+                    fetch(`/instructor/invoice/ajax?pageNo=${page}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            renderInstructorTable(data);
+                            renderPagination(data.number + 1, data.totalPages); // cập nhật currentPage
+                        });
+                    // }
+                });
+            });
+        }
+
+        function renderInstructorTable(pageData) {
+            const body = document.getElementById('invoice-body');
+            body.innerHTML = '';
+            pageData.content.forEach(order => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+            <td>${order.orderId}</td>
+            <td>${order.fullName}</td>
+            <td>${formatDate(order.orderDate)}</td>
+            <td>${order.amount.toLocaleString()} VND</td>
+            <td>
+                <a href="/instructor/orders/view/${order.orderId}"
+                   class="btn btn-info-soft btn-round me-1 mb-1 mb-md-0"
+                   title="View"><i class="fas fa-eye"></i></a>
+            </td>
+        `;
+                body.appendChild(row);
+            });
+        }
+
+        function renderPagination(currentPage, totalPages) {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+
+            // Previous
+            const prev = document.createElement('li');
+            prev.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+            prev.innerHTML = `
+            <a class="page-link page-link-btn" href="#" data-page="${currentPage - 1}">Previous</a>
+        `;
+            pagination.appendChild(prev);
+
+            // Trang số
+            for (let i = 1; i <= totalPages; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                li.innerHTML = `
+                <a class="page-link page-link-btn" href="#" data-page="${i}">${i}</a>
+            `;
+                pagination.appendChild(li);
+            }
+
+            // Next
+            const next = document.createElement('li');
+            next.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+            next.innerHTML = `
+            <a class="page-link page-link-btn" href="#" data-page="${currentPage + 1}">Next</a>
+        `;
+            pagination.appendChild(next);
+
+            // Gán lại sự kiện click
+            bindAjaxPagination();
+        }
+
+        // Hàm formatDate để chuyển ISO date sang dạng ngày/tháng/năm
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString("vi-VN");
+        }
+
+
+
+        // Utility functions
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat("vi-VN", {
+                style: "currency",
+                currency: "VND",
+            }).format(amount)
+        }
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString("vi-VN")
+        }
+
+
+        // Update dashboard based on filters
+        function updateDashboard() {
+            // Tính toán thống kê đơn giản
+            const totalRevenue = ordersData.reduce((sum, order) => sum + (order.originalPrice - order.discount), 0)
+            const monthlyRevenue = totalRevenue * 0.2 // Giả sử 20% là tháng này
+            const totalOrders = ordersData.length
+            const totalStudents = new Set(ordersData.map((order) => order.studentName)).size
+
+            const grossRevenue = totalRevenue
+            const platformFee = grossRevenue * 0.3
+            const netRevenue = grossRevenue - platformFee
+
+            // Cập nhật UI
+            document.getElementById("periodRevenue").textContent = formatCurrency(monthlyRevenue)
+            document.getElementById("totalOrders").textContent = totalOrders.toLocaleString()
+            document.getElementById("totalStudents").textContent = totalStudents.toLocaleString()
+
+            document.getElementById("grossRevenue").textContent = formatCurrency(grossRevenue)
+            document.getElementById("platformFee").textContent = formatCurrency(platformFee)
+            document.getElementById("netRevenue").textContent = formatCurrency(netRevenue)
+
+            filteredOrders = [...ordersData]
+            filterOrders()
+        }
+
+        // Initialize chart
+        function initChart() {
+            const ctx = document.getElementById("revenueChart")
+            if (!ctx) return
+
+            updateChart()
+        }
+
+
+        // Gọi API lấy dữ liệu chart động
+        function fetchChartData(range) {
+            return fetch(`/instructor/revenue/chart?range=${range}`)
+                .then(res => res.json())
+                .then(res => res.data); // [{label, revenue, orders}, ...]
+        }
+
+        // Update chart động
+        function updateChart() {
+            const chartPeriod = document.getElementById("chartPeriod").value;
+            const chartType = document.getElementById("chartType").value;
+            const chartDataType = document.getElementById("chartData").value;
+            const ctx = document.getElementById("revenueChart");
+
+            if (!ctx) return;
+            if (window.currentChart) {
+                window.currentChart.destroy();
+            }
+
+            fetchChartData(chartPeriod).then(data => {
+                const labels = data.map(item => item.label);
+                const datasets = [];
+
+                if (chartDataType === "revenue" || chartDataType === "both") {
+                    datasets.push({
+                        label: "Revenue",
+                        data: data.map(item => item.revenue),
+                        backgroundColor: chartType === "line" ? "rgba(102, 126, 234, 0.1)" : "rgba(102, 126, 234, 0.8)",
+                        borderColor: "rgba(102, 126, 234, 1)",
+                        borderWidth: 2,
+                        fill: chartType === "line",
+                        tension: chartType === "line" ? 0.4 : 0,
+                        borderRadius: chartType === "bar" ? 8 : 0,
+                        borderSkipped: false,
+                        yAxisID: "y",
+                    });
+                }
+
+                if (chartDataType === "orders" || chartDataType === "both") {
+                    datasets.push({
+                        label: "Order",
+                        data: data.map(item => item.orders),
+                        backgroundColor: chartType === "line" ? "rgba(34, 197, 94, 0.1)" : "rgba(34, 197, 94, 0.8)",
+                        borderColor: "rgba(34, 197, 94, 1)",
+                        borderWidth: 2,
+                        fill: chartType === "line",
+                        tension: chartType === "line" ? 0.4 : 0,
+                        borderRadius: chartType === "bar" ? 8 : 0,
+                        borderSkipped: false,
+                        yAxisID: chartDataType === "both" ? "y1" : "y",
+                    });
+                }
+
+                const scales = {
+                    y: {
+                        type: "linear",
+                        display: true,
+                        position: "left",
+                        beginAtZero: true,
+                        ticks: {
+                            callback: (value) => {
+                                if (chartDataType === "orders") {
+                                    return value.toLocaleString();
+                                }
+                                return new Intl.NumberFormat("vi-VN", {
+                                    style: "currency",
+                                    currency: "VND",
+                                    notation: "compact",
+                                }).format(value);
+                            },
+                        },
+                        grid: {
+                            color: "rgba(0, 0, 0, 0.1)",
+                        },
+                    },
+                    x: {
+                        grid: {
+                            display: false,
+                        },
+                    },
+                };
+
+                if (chartDataType === "both") {
+                    scales.y1 = {
+                        type: "linear",
+                        display: true,
+                        position: "right",
+                        beginAtZero: true,
+                        ticks: {
+                            callback: (value) => value.toLocaleString(),
+                        },
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                    };
+                }
+
+                window.currentChart = new Chart(ctx, {
+                    type: chartType,
+                    data: {
+                        labels: labels,
+                        datasets: datasets,
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: "index",
+                            intersect: false,
+                        },
+                        plugins: {
+                            legend: {
+                                display: chartDataType === "both",
+                                position: "top",
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: (context) => {
+                                        let label = context.dataset.label || "";
+                                        if (label) {
+                                            label += ": ";
+                                        }
+                                        if (context.dataset.label === "Revenue") {
+                                            label += new Intl.NumberFormat("vi-VN", {
+                                                style: "currency",
+                                                currency: "VND",
+                                            }).format(context.parsed.y);
+                                        } else {
+                                            label += context.parsed.y.toLocaleString() + " order";
+                                        }
+                                        return label;
+                                    },
+                                },
+                            },
+                        },
+                        scales: scales,
+                    },
+                });
+            });
+        }
+
+
+
+        // Make functions globally available
+        window.updateDashboard = updateDashboard
+        window.updateChart = updateChart
+
+        // Khi trang load xong, luôn gọi updateChart với month
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("chartPeriod").value = "month";
+            updateChart();
+        });
+
+    </script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+        }
+
+        .icon-revenue {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .icon-monthly {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .icon-orders {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+        }
+
+        .icon-students {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+
+        .icon-gross {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .icon-fee {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+
+        .icon-net {
+            background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+        }
+
+        .chart-container {
+            height: 400px;
+            position: relative;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</div>

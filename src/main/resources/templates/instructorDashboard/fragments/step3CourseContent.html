@@ -902,7 +902,6 @@
             </div>
         </div>
     </div>
-
     <!-- Chapter Update Modal -->
     <div class="modal fade" id="updateChapterModal" tabindex="-1" aria-labelledby="updateChapterModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -1181,7 +1180,6 @@
             </div>
         </div>
     </div>
-
     <!-- Template for Quiz Question in Edit Mode -->
     <template id="edit-question-template">
         <div class="card mb-3 quiz-question">
@@ -1314,7 +1312,7 @@
                 if (videoUrl) {
                     // --- Hàm lấy signed URL và set vào video preview ---
                     function refreshSignedUrl() {
-                        fetch('/api/video/signed-url?publicId=' + encodeURIComponent(videoUrl))
+                        fetch('/api/video/stream/video?publicId=' + encodeURIComponent(videoUrl))
                             .then(response => response.text())
                             .then(url => {
                                 document.getElementById('currentVideoSource').src = url;
@@ -1545,7 +1543,7 @@
                 if (videoUrl) {
                     // --- Hàm lấy signed URL và set vào video preview ---
                     function refreshSignedUrl() {
-                        fetch('/api/video/signed-url?publicId=' + encodeURIComponent(videoUrl))
+                        fetch('/api/video/stream/video?publicId=' + encodeURIComponent(videoUrl))
                             .then(response => response.text())
                             .then(url => {
                                 document.getElementById('currentVideoSource').src = url;

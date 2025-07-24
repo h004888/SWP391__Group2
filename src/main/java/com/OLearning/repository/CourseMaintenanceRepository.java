@@ -60,4 +60,13 @@ public interface CourseMaintenanceRepository extends JpaRepository<CourseMainten
         @Param("monthYear") LocalDate monthYear,
         Pageable pageable
     );
+    @Query(value = """
+            SELECT SUM(f.MaintenanceFee) AS TotalMaintenanceFee
+            FROM CourseMaintenance cm
+            JOIN Courses c ON cm.CourseID = c.CourseID
+            JOIN Fees f ON cm.FeeID = f.FeeID
+            WHERE c.InstructorID = :instructorId
+              AND cm.Status = 'Paid'
+            """, nativeQuery = true)
+    Long courseMaintainInstructor(@Param("instructorId") Long instructorId);
 }

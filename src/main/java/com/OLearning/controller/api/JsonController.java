@@ -41,31 +41,28 @@ public class JsonController {
     private EnrollmentRepository enrollmentRepository;
 
     @GetMapping("/stream/video/{publicId}")
-    public void streamVideo(@PathVariable String publicId, HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        // lay va kiem tra user, xem co null khong
-        if (authentication == null || !authentication.isAuthenticated()
-                || authentication.getPrincipal().equals("anonymousUser")) {
-            // tra ve loi chua dang nhap, va chuyen luon ve trang dang nhap
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Bạn chưa đăng nhập");
-            return;
-        }
-        String email = null;
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof UserDetails) {
-            email = ((UserDetails) principal).getUsername();
-        } else if (principal instanceof String) {
-            email = (String) principal;
-        }
-        // neu no khong phai 1 trong 3 dieu kien la instructor, admin, enrollment thi no
-        // in ra loi
-        if (!checkUserAccessToVideo(email, publicId)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "bạn chưa có quyền");
-            return;
-        }
-        // con khong thi no generate ra binh thuong de phat video
-        String cloudinaryUrl = uploadFile.generateSignedVideoUrl(publicId, "video");
+    public void streamVideo(@PathVariable String publicId, HttpServletRequest request, HttpServletResponse response) throws IOException {
+       Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+      //lay va kiem tra user, xem co null khong
+       if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal().equals("anonymousUser")) {
+        //tra ve loi chua dang nhap, va chuyen luon ve trang dang nhap
+           response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Bạn chưa đăng nhập");
+           return;
+       }
+       String email = null;
+       Object principal = authentication.getPrincipal();
+       if (principal instanceof UserDetails) {
+           email = ((UserDetails) principal).getUsername();
+       } else if (principal instanceof String) {
+           email = (String) principal;
+       }
+       //neu no khong phai 1 trong 3 dieu kien la instructor, admin, enrollment thi no in ra loi
+       if (!checkUserAccessToVideo(email, publicId)) {
+           response.sendError(HttpServletResponse.SC_FORBIDDEN, "bạn chưa có quyền");
+           return;
+       }
+       //con khong thi no generate ra binh thuong de phat video
+        String cloudinaryUrl = uploadFile.generateSignedVideoUrl(publicId,"video");
 
         URL url = new URL(cloudinaryUrl);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -79,18 +76,14 @@ public class JsonController {
         response.setStatus(code);
 
         String contentType = conn.getHeaderField("Content-Type");
-        if (contentType != null)
-            response.setContentType(contentType);
-        else
-            response.setContentType("video/mp4");
+        if (contentType != null) response.setContentType(contentType);
+        else response.setContentType("video/mp4");
 
         String contentRange = conn.getHeaderField("Content-Range");
-        if (contentRange != null)
-            response.setHeader("Content-Range", contentRange);
+        if (contentRange != null) response.setHeader("Content-Range", contentRange);
 
         String contentLength = conn.getHeaderField("Content-Length");
-        if (contentLength != null)
-            response.setHeader("Content-Length", contentLength);
+        if (contentLength != null) response.setHeader("Content-Length", contentLength);
 
         response.setHeader("Accept-Ranges", "bytes");
 
@@ -101,7 +94,7 @@ public class JsonController {
         }
 
         try (InputStream is = conn.getInputStream();
-                OutputStream os = response.getOutputStream()) {
+             OutputStream os = response.getOutputStream()) {
             byte[] buffer = new byte[8192];
             int bytesRead;
             while ((bytesRead = is.read(buffer)) != -1) {
@@ -161,60 +154,58 @@ public class JsonController {
         return enrollment != null;
     }
 
-    // video Preview
-    @GetMapping("/stream/videopreview/{publicId}")
-    public void streamVideoPreview(@PathVariable String publicId, HttpServletRequest request,
-            HttpServletResponse response) throws IOException {
-        // Bất kỳ ai cũng có thể xem video preview, không kiểm tra authentication
-        String cloudinaryUrl = uploadFile.generateSignedVideoUrl(publicId, "video");
+//video Preview
+@GetMapping("/stream/videopreview/{publicId}")
+public void streamVideoPreview(@PathVariable String publicId, HttpServletRequest request,
+                               HttpServletResponse response) throws IOException {
+    // Bất kỳ ai cũng có thể xem video preview, không kiểm tra authentication
+    String cloudinaryUrl = uploadFile.generateSignedVideoUrl(publicId, "video");
 
-        URL url = new URL(cloudinaryUrl);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    URL url = new URL(cloudinaryUrl);
+    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
-        String range = request.getHeader("Range");
-        if (range != null) {
-            conn.setRequestProperty("Range", range);
-        }
-
-        int code = conn.getResponseCode();
-        response.setStatus(code);
-
-        String contentType = conn.getHeaderField("Content-Type");
-        if (contentType != null)
-            response.setContentType(contentType);
-        else
-            response.setContentType("video/mp4");
-
-        String contentRange = conn.getHeaderField("Content-Range");
-        if (contentRange != null)
-            response.setHeader("Content-Range", contentRange);
-
-        String contentLength = conn.getHeaderField("Content-Length");
-        if (contentLength != null)
-            response.setHeader("Content-Length", contentLength);
-
-        response.setHeader("Accept-Ranges", "bytes");
-
-        if (code >= 400) {
-            System.err.println("Cloudinary error: " + code + " - " + conn.getResponseMessage());
-            response.sendError(code, conn.getResponseMessage());
-            return;
-        }
-
-        try (InputStream is = conn.getInputStream();
-                OutputStream os = response.getOutputStream()) {
-            byte[] buffer = new byte[8192];
-            int bytesRead;
-            while ((bytesRead = is.read(buffer)) != -1) {
-                os.write(buffer, 0, bytesRead);
-            }
-            os.flush();
-        }
+    String range = request.getHeader("Range");
+    if (range != null) {
+        conn.setRequestProperty("Range", range);
     }
 
+    int code = conn.getResponseCode();
+    response.setStatus(code);
+
+    String contentType = conn.getHeaderField("Content-Type");
+    if (contentType != null)
+        response.setContentType(contentType);
+    else
+        response.setContentType("video/mp4");
+
+    String contentRange = conn.getHeaderField("Content-Range");
+    if (contentRange != null)
+        response.setHeader("Content-Range", contentRange);
+
+    String contentLength = conn.getHeaderField("Content-Length");
+    if (contentLength != null)
+        response.setHeader("Content-Length", contentLength);
+
+    response.setHeader("Accept-Ranges", "bytes");
+
+    if (code >= 400) {
+        System.err.println("Cloudinary error: " + code + " - " + conn.getResponseMessage());
+        response.sendError(code, conn.getResponseMessage());
+        return;
+    }
+
+    try (InputStream is = conn.getInputStream();
+         OutputStream os = response.getOutputStream()) {
+        byte[] buffer = new byte[8192];
+        int bytesRead;
+        while ((bytesRead = is.read(buffer)) != -1) {
+            os.write(buffer, 0, bytesRead);
+        }
+        os.flush();
+    }
+}
     @Autowired
     CourseRepository courseRepository;
-
     private boolean checkUserAccessToVideoPreview(String email, String videoUrl) {
         Optional<User> userOpt = userRepository.findByEmail(email);
         if (userOpt.isEmpty()) {
@@ -233,10 +224,10 @@ public class JsonController {
 
         // lay course lieen quan den videoPreview
         Optional<Course> courseOptional = courseRepository.findByVideoUrlPreview(videoUrl);
-        if (courseOptional.isEmpty()) {
+        if(courseOptional.isEmpty()) {
             return false;
         }
-        Course course = courseOptional.orElseThrow(() -> new RuntimeException("course not found"));
+        Course course =  courseOptional.orElseThrow(() -> new RuntimeException("course not found"));
         // chi lay instructor theo course
         if ("instructor".equals(roleName)) {
             Long userId = user.getUserId();

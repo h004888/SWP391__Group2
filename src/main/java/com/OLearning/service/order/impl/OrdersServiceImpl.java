@@ -6,6 +6,10 @@ import com.OLearning.entity.*;
 import com.OLearning.mapper.order.OrdersMapper;
 import com.OLearning.mapper.order.InstructorOrderMapper;
 import com.OLearning.repository.*;
+import com.OLearning.dto.order.*;
+import com.OLearning.entity.OrderDetail;
+import com.OLearning.repository.OrderDetailRepository;
+import com.OLearning.repository.OrdersRepository;
 import com.OLearning.service.order.OrdersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,14 +24,20 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import java.util.stream.Collectors;
 import java.util.Optional;
 import com.OLearning.service.cart.CartService;
 import com.OLearning.service.voucher.VoucherService;
 import com.OLearning.dto.course.CourseSalesDTO;
 import java.time.format.DateTimeFormatter;
-import com.OLearning.dto.order.OrderStatsDTO;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
+
+import com.OLearning.dto.order.InvoiceDTO;
+import com.OLearning.repository.CourseRepository;
+import com.OLearning.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 
 @Service
 public class OrdersServiceImpl implements OrdersService {
@@ -124,35 +134,35 @@ public class OrdersServiceImpl implements OrdersService {
                 LocalDate end = LocalDate.parse(endDate);
                 // Set end date to end of day
                 LocalDateTime endDateTime = end.plusDays(1).atStartOfDay().minusSeconds(1);
-                
+
                 pageable = PageRequest.of(page, size, Sort.by("orderDate").descending());
                 Page<Order> ordersPage;
                 if (username != null && !username.trim().isEmpty() && orderType != null && !orderType.trim().isEmpty()) {
                     ordersPage = ordersRepository.findByUserUsernameContainingAndOrderTypeAndOrderDateBetween(
-                        username, 
+                        username,
                         orderType,
-                        start.atStartOfDay(), 
-                        endDateTime, 
+                        start.atStartOfDay(),
+                        endDateTime,
                         pageable
                     );
                 } else if (username != null && !username.trim().isEmpty()) {
                     ordersPage = ordersRepository.findByUserUsernameContainingAndOrderDateBetween(
-                        username, 
-                        start.atStartOfDay(), 
-                        endDateTime, 
+                        username,
+                        start.atStartOfDay(),
+                        endDateTime,
                         pageable
                     );
                 } else if (orderType != null && !orderType.trim().isEmpty()) {
                     ordersPage = ordersRepository.findByOrderTypeAndOrderDateBetween(
                         orderType,
-                        start.atStartOfDay(), 
-                        endDateTime, 
+                        start.atStartOfDay(),
+                        endDateTime,
                         pageable
                     );
                 } else {
                     ordersPage = ordersRepository.findByOrderDateBetween(
-                        start.atStartOfDay(), 
-                        endDateTime, 
+                        start.atStartOfDay(),
+                        endDateTime,
                         pageable
                     );
                 }
@@ -162,7 +172,7 @@ public class OrdersServiceImpl implements OrdersService {
                 pageable = PageRequest.of(page, size, Sort.by("orderDate").descending());
             }
         } else if (amountDirection != null && !amountDirection.trim().isEmpty()) {
-            pageable = PageRequest.of(page, size, "asc".equalsIgnoreCase(amountDirection) ? 
+            pageable = PageRequest.of(page, size, "asc".equalsIgnoreCase(amountDirection) ?
                 Sort.by("amount").ascending() : Sort.by("amount").descending());
         } else {
             pageable = PageRequest.of(page, size, Sort.by("orderDate").descending());
@@ -185,7 +195,7 @@ public class OrdersServiceImpl implements OrdersService {
     @Override
     public Page<OrdersDTO> filterAndSortOrdersWithStatus(String username, String amountDirection, String orderType, String startDate, String endDate, String status, int page, int size) {
         Pageable pageable = createPageable(amountDirection, page, size);
-        
+
         if (hasDateRange(startDate, endDate)) {
             return filterWithDateRange(username, orderType, status, startDate, endDate, pageable);
         } else {
@@ -206,7 +216,7 @@ public class OrdersServiceImpl implements OrdersService {
 
     private Pageable createPageable(String amountDirection, int page, int size) {
         if (amountDirection != null && !amountDirection.trim().isEmpty()) {
-            Sort sort = "asc".equalsIgnoreCase(amountDirection) ? 
+            Sort sort = "asc".equalsIgnoreCase(amountDirection) ?
                 Sort.by("amount").ascending() : Sort.by("amount").descending();
             return PageRequest.of(page, size, sort);
         } else {
@@ -218,7 +228,7 @@ public class OrdersServiceImpl implements OrdersService {
         if (amountDirection != null && !amountDirection.trim().isEmpty()) {
             // For instructor, we need to sort by the calculated instructor amount
             // Since we can't sort by calculated field in JPA, we'll sort by order amount as approximation
-            Sort sort = "asc".equalsIgnoreCase(amountDirection) ? 
+            Sort sort = "asc".equalsIgnoreCase(amountDirection) ?
                 Sort.by("amount").ascending() : Sort.by("amount").descending();
             return PageRequest.of(page, size, sort);
         } else {
@@ -227,7 +237,7 @@ public class OrdersServiceImpl implements OrdersService {
     }
 
     private boolean hasDateRange(String startDate, String endDate) {
-        return startDate != null && !startDate.trim().isEmpty() && 
+        return startDate != null && !startDate.trim().isEmpty() &&
                endDate != null && !endDate.trim().isEmpty();
     }
 
@@ -237,7 +247,7 @@ public class OrdersServiceImpl implements OrdersService {
             LocalDate end = LocalDate.parse(endDate);
             LocalDateTime endDateTime = end.plusDays(1).atStartOfDay().minusSeconds(1);
             LocalDateTime startDateTime = start.atStartOfDay();
-            
+
             Page<Order> ordersPage = getOrdersWithDateRange(username, orderType, status, startDateTime, endDateTime, pageable);
             return ordersPage.map(ordersMapper::toDTO);
         } catch (Exception e) {
@@ -248,7 +258,7 @@ public class OrdersServiceImpl implements OrdersService {
 
     private Page<Order> getOrdersWithDateRange(String username, String orderType, String status, LocalDateTime startDateTime, LocalDateTime endDateTime, Pageable pageable) {
         FilterCriteria criteria = new FilterCriteria(username, orderType, status);
-        
+
         switch (criteria.getFilterType()) {
             case ALL_FILTERS:
                 return ordersRepository.findByUserUsernameContainingAndOrderTypeAndStatusAndOrderDateBetween(
@@ -283,7 +293,7 @@ public class OrdersServiceImpl implements OrdersService {
 
     private Page<Order> getOrdersWithoutDateRange(String username, String orderType, String status, Pageable pageable) {
         FilterCriteria criteria = new FilterCriteria(username, orderType, status);
-        
+
         switch (criteria.getFilterType()) {
             case ALL_FILTERS:
                 return ordersRepository.findByUserUsernameContainingAndOrderTypeAndStatus(username, orderType, status, pageable);
@@ -310,7 +320,7 @@ public class OrdersServiceImpl implements OrdersService {
             LocalDate end = LocalDate.parse(endDate);
             LocalDateTime endDateTime = end.plusDays(1).atStartOfDay().minusSeconds(1);
             LocalDateTime startDateTime = start.atStartOfDay();
-            
+
             Page<Order> ordersPage = getOrdersWithDateRangeInstructor(username, orderType, status, startDateTime, endDateTime, pageable, instructorId);
             return ordersPage.map(ordersMapper::toInstructorDTO);
         } catch (Exception e) {
@@ -321,7 +331,7 @@ public class OrdersServiceImpl implements OrdersService {
 
     private Page<Order> getOrdersWithDateRangeInstructor(String username, String orderType, String status, LocalDateTime startDateTime, LocalDateTime endDateTime, Pageable pageable, Long instructorId) {
         FilterCriteria criteria = new FilterCriteria(username, orderType, status);
-        
+
         switch (criteria.getFilterType()) {
             case ALL_FILTERS:
                 return ordersRepository.findByInstructorIdAndUserUsernameContainingAndOrderTypeAndStatusAndOrderDateBetween(
@@ -356,7 +366,7 @@ public class OrdersServiceImpl implements OrdersService {
 
     private Page<Order> getOrdersWithoutDateRangeInstructor(String username, String orderType, String status, Pageable pageable, Long instructorId) {
         FilterCriteria criteria = new FilterCriteria(username, orderType, status);
-        
+
         switch (criteria.getFilterType()) {
             case ALL_FILTERS:
                 return ordersRepository.findByInstructorIdAndUserUsernameContainingAndOrderTypeAndStatus(
@@ -476,8 +486,8 @@ public class OrdersServiceImpl implements OrdersService {
         List<OrderDetail> allOrderDetails = orderDetailRepository.findByOrderOrderId(orderId);
 
         return allOrderDetails.stream()
-                .filter(detail -> detail.getCourse() != null && 
-                        detail.getCourse().getInstructor() != null && 
+                .filter(detail -> detail.getCourse() != null &&
+                        detail.getCourse().getInstructor() != null &&
                         detail.getCourse().getInstructor().getUserId().equals(instructorId))
                 .collect(Collectors.toList());
     }
@@ -488,7 +498,7 @@ public class OrdersServiceImpl implements OrdersService {
             LocalDate end = LocalDate.parse(endDate);
             LocalDateTime endDateTime = end.plusDays(1).atStartOfDay().minusSeconds(1);
             LocalDateTime startDateTime = start.atStartOfDay();
-            
+
             Page<Order> ordersPage = getOrdersWithDateRangeInstructor(username, orderType, status, startDateTime, endDateTime, pageable, instructorId);
             return ordersPage.map(order -> instructorOrderMapper.toInstructorDTO(order, instructorId));
         } catch (Exception e) {
@@ -699,7 +709,7 @@ public class OrdersServiceImpl implements OrdersService {
     public void saveOrderDetail(OrderDetail orderDetail) {
         orderDetailRepository.save(orderDetail);
     }
-    
+
     @Override
     public boolean hasPaidPublicationOrder(Long userId, Long courseId) {
         return ordersRepository.existsByUserUserIdAndOrderTypeAndStatusAndCourseId(userId, "course_public", "PAID", courseId);
@@ -719,6 +729,7 @@ public class OrdersServiceImpl implements OrdersService {
         return result;
     }
 
+
     @Override
     public Map<String, Double> getMonthlyRevenueForInstructor(Long instructorId, String startDate, String endDate) {
         // Nếu không truyền ngày, lấy mặc định 1 năm gần nhất
@@ -732,7 +743,7 @@ public class OrdersServiceImpl implements OrdersService {
             end = LocalDateTime.now();
             start = end.minusYears(1).withDayOfMonth(1).withMonth(1).withHour(0).withMinute(0).withSecond(0);
         }
-        List<Object[]> raw = orderDetailRepository.findRevenueByMonth(instructorId, start, end);
+        List<Object[]> raw = orderDetailRepository.findRevenueAndOrdersByMonth(instructorId, start, end);
         Map<String, Double> result = new java.util.LinkedHashMap<>();
         for (Object[] row : raw) {
             int year = ((Number) row[0]).intValue();
@@ -757,4 +768,40 @@ public class OrdersServiceImpl implements OrdersService {
         }
         return stats;
     }
+
+    @Override
+    public Page<InvoiceDTO> findInvoiceByInstructorId(Long instructorId, int pageNo) {
+        Pageable pageable = PageRequest.of(pageNo - 1, 5);
+        return ordersRepository.findInvoiceByInstructorId(instructorId, pageable);
+    }
+
+    @Override
+    public Double sumRevenueByInstructorId(Long instructorId) {
+        return ordersRepository.sumRevenueOrders(instructorId);
+    }
+
+    @Override
+    public RevenueDTO revenueMonth(Long instructorId) {
+        return ordersRepository.getRevenueStatsByInstructor(instructorId);
+    }
+
+    @Override
+    public Page<InvoiceDTO> findOrderDateAsc(Long instructorId, int pageNo) {
+        Pageable pageable = PageRequest.of(pageNo - 1, 5);
+        return ordersRepository.findInvoiceByInstructorIdAscDate(instructorId, pageable);
+    }
+
+    @Override
+    public Page<InvoiceDTO> findOrderAmountAsc(Long instructorId, int pageNo) {
+        Pageable pageable = PageRequest.of(pageNo - 1, 5);
+        return ordersRepository.findInvoiceByInstructorIdAmountAsc(instructorId, pageable);
+    }
+
+    @Override
+    public Page<InvoiceDTO> findOrderAmountDesc(Long instructorId, int pageNo) {
+        Pageable pageable = PageRequest.of(pageNo - 1, 5);
+        return ordersRepository.findInvoiceByInstructorIdAmountDesc(instructorId, pageable);
+    }
+
+
 }

@@ -6,10 +6,11 @@ import com.OLearning.entity.Order;
 import com.OLearning.entity.OrderDetail;
 import com.OLearning.entity.User;
 import com.OLearning.dto.course.CourseSalesDTO;
-import com.OLearning.dto.order.OrderStatsDTO;
+import com.OLearning.dto.order.*;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
+
 import java.util.List;
 import java.util.Map;
 
@@ -53,12 +54,23 @@ public interface OrdersService {
 
     void saveOrderDetail(OrderDetail orderDetail);
 
-    // Thống kê doanh thu cho instructor
     List<CourseSalesDTO> getCourseSalesForInstructor(Long instructorId, String startDate, String endDate);
 
     Map<String, Double> getMonthlyRevenueForInstructor(Long instructorId, String startDate, String endDate);
 
     List<OrderStatsDTO> getStatsForInstructor(Long instructorId);
+
+    Page<InvoiceDTO> findInvoiceByInstructorId(Long instructorId, int pageNo);
+
+    Double sumRevenueByInstructorId(Long instructorId);
+
+    RevenueDTO revenueMonth(Long instructorId);
+
+    Page<InvoiceDTO> findOrderDateAsc(Long instructorId, int pageNo);
+
+    Page<InvoiceDTO> findOrderAmountAsc(Long instructorId, int pageNo);
+
+    Page<InvoiceDTO> findOrderAmountDesc(Long instructorId, int pageNo);
 
     boolean hasPaidPublicationOrder(Long userId, Long courseId);
 }
