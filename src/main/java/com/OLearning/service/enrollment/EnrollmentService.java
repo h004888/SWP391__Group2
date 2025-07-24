@@ -67,12 +67,14 @@ public interface EnrollmentService {
 
     // Lấy enrollment trong 30 ngày gần nhất
     List<Enrollment> findByEnrollmentDateAfter(LocalDate date);
+
     List<Long> getTotalEnrollmentOfInstructor(List<UserDTO> instructors);
+
     // Lấy enrollment của một user cụ thể
     List<Enrollment> findByUserId(Long userId);
 
     List<UserCourseProgressDTO> getProgressCoursesByUserId(Long userId);
 
-    int updateStatusToCompleted(Long userId, Long courseId);
+    void updateStatusToCompleted(Long userId, Long courseId);
 
 }

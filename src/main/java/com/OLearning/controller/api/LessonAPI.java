@@ -25,17 +25,6 @@ public class LessonAPI {
     @Autowired
     private EnrollmentService enrollmentService;
 
-    //
-    // @GetMapping("/next")
-    // public ResponseEntity<Lesson> getNextLesson(
-    // @RequestParam("userId") Long userId,
-    // @RequestParam("courseId") Long courseId) {
-    //
-    // Optional<Lesson> next = lessonService.getNextLesson(userId, courseId);
-    // return next
-    // .map(ResponseEntity::ok)
-    // .orElseGet(() -> ResponseEntity.noContent().build());
-    // }
     @GetMapping("/first")
     public ResponseEntity<Lesson> getFirstLesson(
             @RequestParam("courseId") Long courseId) {
@@ -63,6 +52,7 @@ public class LessonAPI {
             @RequestParam Long courseId,
             Principal principal) {
         User user = extractCurrentUser(principal);
+        System.out.println("User: " + user);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -71,7 +61,7 @@ public class LessonAPI {
             lessonCompletionService.markLessonAsCompleted(user.getUserId(), lessonId);
             enrollmentService.updateProgressByUser(user.getUserId(), courseId);
         }
-        if (lessonCompletionService.getOverallProgressOfUser(user.getUserId(), courseId) >= 100) {
+        if (lessonCompletionService.getOverallProgressOfUser(user.getUserId(), courseId) == 100) {
             enrollmentService.updateStatusToCompleted(user.getUserId(), courseId);
         }
 

@@ -95,12 +95,16 @@ public class UserCourseController {
         CourseViewDTO courseViewDTO = courseService.getCourseRecentIncomplete(currentUser.getUserId());
 
         model.addAttribute("course", courseViewDTO);
-        model.addAttribute("progress", lessonCompletionService.getOverallProgressOfUser(currentUser.getUserId(), courseViewDTO.getCourseId()));
-        model.addAttribute("weeksEnrolled", enrollmentService.getWeeksEnrolled(currentUser.getUserId(), courseViewDTO.getCourseId()));
-        model.addAttribute("numberOfCompletedLessons", lessonCompletionService.getNumberOfCompletedLessons(currentUser.getUserId(),
-                courseViewDTO.getCourseId()));
+        model.addAttribute("progress",
+                lessonCompletionService.getOverallProgressOfUser(currentUser.getUserId(), courseViewDTO.getCourseId()));
+        model.addAttribute("weeksEnrolled",
+                enrollmentService.getWeeksEnrolled(currentUser.getUserId(), courseViewDTO.getCourseId()));
+        model.addAttribute("numberOfCompletedLessons",
+                lessonCompletionService.getNumberOfCompletedLessons(currentUser.getUserId(),
+                        courseViewDTO.getCourseId()));
 
-        model.addAttribute("currentLesson",lessonService.getNextLessonAfterCompleted(currentUser.getUserId(),courseViewDTO.getCourseId()).get());
+        model.addAttribute("currentLesson",
+                lessonService.getNextLessonAfterCompleted(currentUser.getUserId(), courseViewDTO.getCourseId()).get());
 
         // Add unread notification count
         long unreadCount = notificationService.countUnreadByUserId(currentUser.getUserId());
@@ -219,7 +223,8 @@ public class UserCourseController {
         // Load comments for the specific lesson only (Rating = null)
 
         Course courseEntity = courseService.findCourseById(courseId);
-        List<CourseReview> parentComments = courseReviewRepository.findByLessonAndRatingIsNullAndParentReviewIsNull(currentLesson);
+        List<CourseReview> parentComments = courseReviewRepository
+                .findByLessonAndRatingIsNullAndParentReviewIsNull(currentLesson);
         List<CommentDTO> comments = new ArrayList<>();
 
         for (CourseReview parentComment : parentComments) {
@@ -245,14 +250,16 @@ public class UserCourseController {
 
     @GetMapping("course/{courseId}/lesson/{lessonId}")
     public String showUserLessonDetail(Principal principal, Model model, @PathVariable("lessonId") Long lessonId,
-            @PathVariable("courseId") Long courseId, @RequestParam(value = "commentId", required = false) Long commentId) {
+            @PathVariable("courseId") Long courseId,
+            @RequestParam(value = "commentId", required = false) Long commentId) {
         User user = extractCurrentUser(principal);
         if (user == null) {
             return "redirect:/login";
         }
 
         CourseViewDTO course = courseService.getCourseById(courseId);
-        boolean isInstructor = course != null && course.getInstructor() != null && course.getInstructor().getUserId().equals(user.getUserId());
+        boolean isInstructor = course != null && course.getInstructor() != null
+                && course.getInstructor().getUserId().equals(user.getUserId());
         if (!isInstructor && !enrollmentService.hasEnrolled(user.getUserId(), courseId)) {
             return "redirect:/learning";
         }
@@ -280,7 +287,6 @@ public class UserCourseController {
 
         Lesson nextLesson = lessonService.getNextLesson(courseId, lessonId);
         CourseViewDTO courseView = courseService.getCourseById(courseId);
-
 
         Set<Long> accessibleLessonIds = new HashSet<>(completedLessonIds);
         if (nextAvailableLesson != null) {
@@ -332,11 +338,13 @@ public class UserCourseController {
         model.addAttribute("nextLesson", nextLesson);
         model.addAttribute("course", courseView);
         model.addAttribute("chapters", courseView.getListOfChapters());
+        System.out.println("Chapters in lesson detail: " + courseView.getListOfChapters());
 
         // Load comments for the specific lesson only (Rating = null)
 
         Course courseEntity = courseService.findCourseById(courseId);
-        List<CourseReview> parentComments = courseReviewRepository.findByLessonAndRatingIsNullAndParentReviewIsNull(currentLesson);
+        List<CourseReview> parentComments = courseReviewRepository
+                .findByLessonAndRatingIsNullAndParentReviewIsNull(currentLesson);
         List<CommentDTO> comments = new ArrayList<>();
 
         for (CourseReview parentComment : parentComments) {
@@ -355,7 +363,7 @@ public class UserCourseController {
         // Add unread notification count
         long unreadCount = notificationService.countUnreadByUserId(user.getUserId());
         model.addAttribute("unreadCount", unreadCount);
-
+        model.addAttribute("chapterProgressMap", chapterProgressMap);
         return "userPage/course-detail-min";
     }
 
@@ -393,7 +401,6 @@ public class UserCourseController {
             currentUser = extractCurrentUser(principal);
         }
 
-
         boolean isEnrolled = false;
         if (currentUser != null) {
             isEnrolled = enrollmentService.hasEnrolled(currentUser.getUserId(), courseId);
@@ -415,8 +422,7 @@ public class UserCourseController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "5") int size,
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) String filter
-    ) {
+            @RequestParam(required = false) String filter) {
         if (principal == null) {
             return "redirect:/login";
         }
@@ -428,25 +434,26 @@ public class UserCourseController {
         List<Course> filteredCourses = allCourses;
         if (search != null && !search.isBlank()) {
             filteredCourses = filteredCourses.stream()
-                .filter(c -> c.getTitle().toLowerCase().contains(search.toLowerCase()))
-                .toList();
+                    .filter(c -> c.getTitle().toLowerCase().contains(search.toLowerCase()))
+                    .toList();
         }
         // Tính progress cho tất cả course để filter
         Map<Long, Integer> allProgressMap = new HashMap<>();
         for (Course c : filteredCourses) {
-            Double progressObj = lessonCompletionService.getOverallProgressOfUser(currentUser.getUserId(), c.getCourseId());
+            Double progressObj = lessonCompletionService.getOverallProgressOfUser(currentUser.getUserId(),
+                    c.getCourseId());
             int progress = progressObj != null ? progressObj.intValue() : 0;
             allProgressMap.put(c.getCourseId(), progress);
         }
 
         if ("completed".equals(filter)) {
             filteredCourses = filteredCourses.stream()
-                .filter(c -> allProgressMap.getOrDefault(c.getCourseId(), 0) == 100)
-                .toList();
+                    .filter(c -> allProgressMap.getOrDefault(c.getCourseId(), 0) == 100)
+                    .toList();
         } else if ("incomplete".equals(filter)) {
             filteredCourses = filteredCourses.stream()
-                .filter(c -> allProgressMap.getOrDefault(c.getCourseId(), 0) < 100)
-                .toList();
+                    .filter(c -> allProgressMap.getOrDefault(c.getCourseId(), 0) < 100)
+                    .toList();
         }
         int totalCourses = filteredCourses.size();
         int totalPages = (int) Math.ceil((double) totalCourses / size);
@@ -458,8 +465,10 @@ public class UserCourseController {
         Map<Long, Integer> completedLecturesMap = new HashMap<>();
         for (Course c : pagedCourses) {
             int progress = 0;
-            Double progressObj = lessonCompletionService.getOverallProgressOfUser(currentUser.getUserId(), c.getCourseId());
-            if (progressObj != null) progress = progressObj.intValue();
+            Double progressObj = lessonCompletionService.getOverallProgressOfUser(currentUser.getUserId(),
+                    c.getCourseId());
+            if (progressObj != null)
+                progress = progressObj.intValue();
             courseProgressMap.put(c.getCourseId(), progress);
             int totalLectures = 0;
             if (c.getListOfChapters() != null) {
@@ -470,7 +479,8 @@ public class UserCourseController {
                 }
             }
             totalLecturesMap.put(c.getCourseId(), totalLectures);
-            int completedLectures = lessonCompletionService.getNumberOfCompletedLessons(currentUser.getUserId(), c.getCourseId());
+            int completedLectures = lessonCompletionService.getNumberOfCompletedLessons(currentUser.getUserId(),
+                    c.getCourseId());
             completedLecturesMap.put(c.getCourseId(), completedLectures);
         }
         model.addAttribute("courses", pagedCourses);

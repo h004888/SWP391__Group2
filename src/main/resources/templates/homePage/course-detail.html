@@ -19,7 +19,7 @@
 		<div th:if="${error}" th:attr="data-message=${error}" id="server-error" style="display: none;"></div>
 		<script>
 			// Check for server messages on page load
-			document.addEventListener('DOMContentLoaded', function() {
+			document.addEventListener('DOMContentLoaded', function () {
 				const errorDiv = document.getElementById('server-error');
 				if (errorDiv && errorDiv.getAttribute('data-message')) {
 					showNotification(errorDiv.getAttribute('data-message'), 'error');
@@ -68,7 +68,8 @@ Page intro START -->
 
 						<!-- Report Button -->
 						<div class="mt-3">
-							<button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#reportCourseModal">
+							<button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal"
+								data-bs-target="#reportCourseModal">
 								<i class="fas fa-flag me-2"></i>Báo cáo khóa học
 							</button>
 						</div>
@@ -205,8 +206,12 @@ Page content START -->
 											<div class="row g-0 align-items-center">
 												<div class="col-md-5">
 													<!-- Image -->
-													<img src="assets/images/instructor/01.jpg"
-														class="img-fluid rounded-3" alt="instructor-image">
+													<div class="ratio ratio-1x1"
+														style="width: 150px; max-width: 100%; overflow: hidden;">
+														<img th:src="@{${course.instructor.profilePicture} ? ${course.instructor.profilePicture} : '/assets/images/avatar/09.jpg'}"
+															class="img-fluid rounded-circle object-fit-cover w-100 h-100"
+															alt="instructor-image" style="object-fit: cover;">
+													</div>
 												</div>
 												<div class="col-md-7">
 													<!-- Card body -->
@@ -312,7 +317,8 @@ Page content START -->
 												<div>
 													<h5 class="mb-0">Our Student Reviews</h5>
 													<small class="text-muted" th:if="${selectedStar > 0}">
-														Hiển thị <span th:text="${reviews.size()}"></span> đánh giá với <span th:text="${selectedStar} + ' sao'"></span>
+														Hiển thị <span th:text="${reviews.size()}"></span> đánh giá với
+														<span th:text="${selectedStar} + ' sao'"></span>
 													</small>
 													<small class="text-muted" th:unless="${selectedStar > 0}">
 														Tổng cộng <span th:text="${reviews.size()}"></span> đánh giá
@@ -320,18 +326,32 @@ Page content START -->
 												</div>
 												<!-- Filter by stars -->
 												<div class="dropdown">
-													<button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+													<button class="btn btn-outline-primary btn-sm dropdown-toggle"
+														type="button" data-bs-toggle="dropdown">
 														<i class="fas fa-filter me-1"></i>
-														<span th:if="${selectedStar > 0}" th:text="${selectedStar} + ' sao'">Filter</span>
+														<span th:if="${selectedStar > 0}"
+															th:text="${selectedStar} + ' sao'">Filter</span>
 														<span th:unless="${selectedStar > 0}">Tất cả sao</span>
 													</button>
 													<ul class="dropdown-menu">
-														<li><a class="dropdown-item" th:href="@{/home/course-detail(id=${course.courseId})}">Tất cả sao</a></li>
-														<li><a class="dropdown-item" th:href="@{/home/course-detail(id=${course.courseId}, star=5)}">5 sao</a></li>
-														<li><a class="dropdown-item" th:href="@{/home/course-detail(id=${course.courseId}, star=4)}">4 sao</a></li>
-														<li><a class="dropdown-item" th:href="@{/home/course-detail(id=${course.courseId}, star=3)}">3 sao</a></li>
-														<li><a class="dropdown-item" th:href="@{/home/course-detail(id=${course.courseId}, star=2)}">2 sao</a></li>
-														<li><a class="dropdown-item" th:href="@{/home/course-detail(id=${course.courseId}, star=1)}">1 sao</a></li>
+														<li><a class="dropdown-item"
+																th:href="@{/home/course-detail(id=${course.courseId})}">Tất
+																cả sao</a></li>
+														<li><a class="dropdown-item"
+																th:href="@{/home/course-detail(id=${course.courseId}, star=5)}">5
+																sao</a></li>
+														<li><a class="dropdown-item"
+																th:href="@{/home/course-detail(id=${course.courseId}, star=4)}">4
+																sao</a></li>
+														<li><a class="dropdown-item"
+																th:href="@{/home/course-detail(id=${course.courseId}, star=3)}">3
+																sao</a></li>
+														<li><a class="dropdown-item"
+																th:href="@{/home/course-detail(id=${course.courseId}, star=2)}">2
+																sao</a></li>
+														<li><a class="dropdown-item"
+																th:href="@{/home/course-detail(id=${course.courseId}, star=1)}">1
+																sao</a></li>
 													</ul>
 												</div>
 											</div>
@@ -340,14 +360,20 @@ Page content START -->
 											<div class="col-md-4 mb-3 mb-md-0">
 												<div class="text-center">
 													<!-- Info -->
-													<h2 class="mb-0" th:text="${#numbers.formatDecimal(averageRating, 1, 1)}">4.5</h2>
+													<h2 class="mb-0"
+														th:text="${#numbers.formatDecimal(averageRating, 1, 1)}">4.5
+													</h2>
 													<!-- Star -->
 													<ul class="list-inline mb-0">
-														<li class="list-inline-item me-0" th:each="i : ${#numbers.sequence(1, 5)}">
-															<i th:class="${i <= averageRating ? 'fas fa-star text-warning' : (i - 0.5 <= averageRating ? 'fas fa-star-half-alt text-warning' : 'far fa-star text-warning')}"></i>
+														<li class="list-inline-item me-0"
+															th:each="i : ${#numbers.sequence(1, 5)}">
+															<i
+																th:class="${i <= averageRating ? 'fas fa-star text-warning' : (i - 0.5 <= averageRating ? 'fas fa-star-half-alt text-warning' : 'far fa-star text-warning')}"></i>
 														</li>
 													</ul>
-													<p class="mb-0" th:text="'(Based on ' + ${reviews.size()} + ' reviews)'">(Based on todays review)</p>
+													<p class="mb-0"
+														th:text="'(Based on ' + ${reviews.size()} + ' reviews)'">(Based
+														on todays review)</p>
 												</div>
 											</div>
 
@@ -359,9 +385,9 @@ Page content START -->
 														<!-- Progress item -->
 														<div class="progress progress-sm bg-warning bg-opacity-15">
 															<div class="progress-bar bg-warning" role="progressbar"
-																 th:style="'width: ' + ${reviews.size() > 0 ? (ratingDistribution.get(5) != null ? (ratingDistribution.get(5) * 100 / reviews.size()) : 0) : 0} + '%'"
-																 th:aria-valuenow="${reviews.size() > 0 ? (ratingDistribution.get(5) != null ? (ratingDistribution.get(5) * 100 / reviews.size()) : 0) : 0}"
-																 aria-valuemin="0" aria-valuemax="100"></div>
+																th:style="'width: ' + ${reviews.size() > 0 ? (ratingDistribution.get(5) != null ? (ratingDistribution.get(5) * 100 / reviews.size()) : 0) : 0} + '%'"
+																th:aria-valuenow="${reviews.size() > 0 ? (ratingDistribution.get(5) != null ? (ratingDistribution.get(5) * 100 / reviews.size()) : 0) : 0}"
+																aria-valuemin="0" aria-valuemax="100"></div>
 														</div>
 													</div>
 
@@ -386,9 +412,9 @@ Page content START -->
 														<!-- Progress item -->
 														<div class="progress progress-sm bg-warning bg-opacity-15">
 															<div class="progress-bar bg-warning" role="progressbar"
-																 th:style="'width: ' + ${reviews.size() > 0 ? (ratingDistribution.get(4) != null ? (ratingDistribution.get(4) * 100 / reviews.size()) : 0) : 0} + '%'"
-																 th:aria-valuenow="${reviews.size() > 0 ? (ratingDistribution.get(4) != null ? (ratingDistribution.get(4) * 100 / reviews.size()) : 0) : 0}"
-																 aria-valuemin="0" aria-valuemax="100"></div>
+																th:style="'width: ' + ${reviews.size() > 0 ? (ratingDistribution.get(4) != null ? (ratingDistribution.get(4) * 100 / reviews.size()) : 0) : 0} + '%'"
+																th:aria-valuenow="${reviews.size() > 0 ? (ratingDistribution.get(4) != null ? (ratingDistribution.get(4) * 100 / reviews.size()) : 0) : 0}"
+																aria-valuemin="0" aria-valuemax="100"></div>
 														</div>
 													</div>
 
@@ -413,9 +439,9 @@ Page content START -->
 														<!-- Progress item -->
 														<div class="progress progress-sm bg-warning bg-opacity-15">
 															<div class="progress-bar bg-warning" role="progressbar"
-																 th:style="'width: ' + ${reviews.size() > 0 ? (ratingDistribution.get(3) != null ? (ratingDistribution.get(3) * 100 / reviews.size()) : 0) : 0} + '%'"
-																 th:aria-valuenow="${reviews.size() > 0 ? (ratingDistribution.get(3) != null ? (ratingDistribution.get(3) * 100 / reviews.size()) : 0) : 0}"
-																 aria-valuemin="0" aria-valuemax="100"></div>
+																th:style="'width: ' + ${reviews.size() > 0 ? (ratingDistribution.get(3) != null ? (ratingDistribution.get(3) * 100 / reviews.size()) : 0) : 0} + '%'"
+																th:aria-valuenow="${reviews.size() > 0 ? (ratingDistribution.get(3) != null ? (ratingDistribution.get(3) * 100 / reviews.size()) : 0) : 0}"
+																aria-valuemin="0" aria-valuemax="100"></div>
 														</div>
 													</div>
 
@@ -440,9 +466,9 @@ Page content START -->
 														<!-- Progress item -->
 														<div class="progress progress-sm bg-warning bg-opacity-15">
 															<div class="progress-bar bg-warning" role="progressbar"
-																 th:style="'width: ' + ${reviews.size() > 0 ? (ratingDistribution.get(2) != null ? (ratingDistribution.get(2) * 100 / reviews.size()) : 0) : 0} + '%'"
-																 th:aria-valuenow="${reviews.size() > 0 ? (ratingDistribution.get(2) != null ? (ratingDistribution.get(2) * 100 / reviews.size()) : 0) : 0}"
-																 aria-valuemin="0" aria-valuemax="100"></div>
+																th:style="'width: ' + ${reviews.size() > 0 ? (ratingDistribution.get(2) != null ? (ratingDistribution.get(2) * 100 / reviews.size()) : 0) : 0} + '%'"
+																th:aria-valuenow="${reviews.size() > 0 ? (ratingDistribution.get(2) != null ? (ratingDistribution.get(2) * 100 / reviews.size()) : 0) : 0}"
+																aria-valuemin="0" aria-valuemax="100"></div>
 														</div>
 													</div>
 
@@ -467,9 +493,9 @@ Page content START -->
 														<!-- Progress item -->
 														<div class="progress progress-sm bg-warning bg-opacity-15">
 															<div class="progress-bar bg-warning" role="progressbar"
-																 th:style="'width: ' + ${reviews.size() > 0 ? (ratingDistribution.get(1) != null ? (ratingDistribution.get(1) * 100 / reviews.size()) : 0) : 0} + '%'"
-																 th:aria-valuenow="${reviews.size() > 0 ? (ratingDistribution.get(1) != null ? (ratingDistribution.get(1) * 100 / reviews.size()) : 0) : 0}"
-																 aria-valuemin="0" aria-valuemax="100"></div>
+																th:style="'width: ' + ${reviews.size() > 0 ? (ratingDistribution.get(1) != null ? (ratingDistribution.get(1) * 100 / reviews.size()) : 0) : 0} + '%'"
+																th:aria-valuenow="${reviews.size() > 0 ? (ratingDistribution.get(1) != null ? (ratingDistribution.get(1) * 100 / reviews.size()) : 0) : 0}"
+																aria-valuemin="0" aria-valuemax="100"></div>
 														</div>
 													</div>
 
@@ -506,30 +532,40 @@ Page content START -->
 												<!-- Text -->
 												<div>
 													<div class="d-sm-flex mt-1 mt-md-0 align-items-center">
-														<h5 class="me-3 mb-0" th:text="${review.enrollment.user.fullName}">User Name</h5>
+														<h5 class="me-3 mb-0"
+															th:text="${review.enrollment.user.fullName}">User Name</h5>
 														<!-- Review star -->
 														<ul class="list-inline mb-0">
-															<li class="list-inline-item me-0" th:each="i : ${#numbers.sequence(1, 5)}">
-																<i th:class="${i <= review.rating ? 'fas fa-star text-warning' : 'far fa-star text-warning'}"></i>
+															<li class="list-inline-item me-0"
+																th:each="i : ${#numbers.sequence(1, 5)}">
+																<i
+																	th:class="${i <= review.rating ? 'fas fa-star text-warning' : 'far fa-star text-warning'}"></i>
 															</li>
 														</ul>
 													</div>
 													<!-- Info -->
-													<p class="small mb-2" th:text="${#temporals.format(review.createdAt, 'dd MMM yyyy')}">Date</p>
+													<p class="small mb-2"
+														th:text="${#temporals.format(review.createdAt, 'dd MMM yyyy')}">
+														Date</p>
 													<p class="mb-2" th:text="${review.comment}">Review comment</p>
 
 													<!-- Delete button for user's own review -->
-													<div th:if="${currentUser != null and review.enrollment.user.userId == currentUser.userId}" class="mt-2">
-														<form th:action="@{/home/course-review/delete}" method="post" style="display: inline;">
-															<input type="hidden" name="courseId" th:value="${course.courseId}" />
-															<input type="hidden" name="reviewId" th:value="${review.reviewId}" />
+													<div th:if="${currentUser != null and review.enrollment.user.userId == currentUser.userId}"
+														class="mt-2">
+														<form th:action="@{/home/course-review/delete}" method="post"
+															style="display: inline;">
+															<input type="hidden" name="courseId"
+																th:value="${course.courseId}" />
+															<input type="hidden" name="reviewId"
+																th:value="${review.reviewId}" />
 															<a type="submit" class="small text-danger"
-																	onclick="return confirm('Bạn có chắc chắn muốn xóa đánh giá này?')">
+																onclick="return confirm('Bạn có chắc chắn muốn xóa đánh giá này?')">
 																<i>delete</i>
 															</a>
 														</form>
 														<small class="text-muted d-block mt-1">
-															Đánh giá của bạn - <span th:text="${#temporals.format(review.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+															Đánh giá của bạn - <span
+																th:text="${#temporals.format(review.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
 														</small>
 													</div>
 												</div>
@@ -544,8 +580,10 @@ Page content START -->
 										<div class="row" th:if="${reviews.isEmpty()}">
 											<div class="col-12">
 												<p class="text-muted text-center" th:if="${selectedStar > 0}">
-													Không có đánh giá nào với <span th:text="${selectedStar} + ' sao'"></span> cho khóa học này.
-													<a th:href="@{/home/course-detail(id=${course.courseId})}" class="text-primary">Xem tất cả đánh giá</a>
+													Không có đánh giá nào với <span
+														th:text="${selectedStar} + ' sao'"></span> cho khóa học này.
+													<a th:href="@{/home/course-detail(id=${course.courseId})}"
+														class="text-primary">Xem tất cả đánh giá</a>
 												</p>
 												<p class="text-muted text-center" th:unless="${selectedStar > 0}">
 													Chưa có đánh giá nào cho khóa học này.
@@ -563,43 +601,55 @@ Page content START -->
 												Bạn có thể đánh giá nhiều lần để chia sẻ trải nghiệm học tập của mình!
 											</div>
 											<form class="row g-3" th:action="@{/home/course-review/add}" method="post">
-												<input type="hidden" name="courseId" th:value="${course.courseId}"/>
+												<input type="hidden" name="courseId" th:value="${course.courseId}" />
 												<!-- Rating -->
 												<div class="col-12 bg-light-input">
 													<div class="d-flex align-items-center mb-2">
-														<span class="me-2" style="font-weight:500;">Select rating:</span>
-														<div class="star-rating" style="font-size:2rem; direction: rtl; display: flex; justify-content: flex-start;">
-															<input type="radio" id="star5" name="rating" value="5" required/><label for="star5" title="5 stars">★</label>
-															<input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4 stars">★</label>
-															<input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="3 stars">★</label>
-															<input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="2 stars">★</label>
-															<input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="1 star">★</label>
+														<span class="me-2" style="font-weight:500;">Select
+															rating:</span>
+														<div class="star-rating"
+															style="font-size:2rem; direction: rtl; display: flex; justify-content: flex-start;">
+															<input type="radio" id="star5" name="rating" value="5"
+																required /><label for="star5" title="5 stars">★</label>
+															<input type="radio" id="star4" name="rating"
+																value="4" /><label for="star4" title="4 stars">★</label>
+															<input type="radio" id="star3" name="rating"
+																value="3" /><label for="star3" title="3 stars">★</label>
+															<input type="radio" id="star2" name="rating"
+																value="2" /><label for="star2" title="2 stars">★</label>
+															<input type="radio" id="star1" name="rating"
+																value="1" /><label for="star1" title="1 star">★</label>
 														</div>
 													</div>
 												</div>
 												<style>
-												.star-rating input[type="radio"] {
-													display: none;
-												}
-												.star-rating label {
-													color: #ddd;
-													cursor: pointer;
-													transition: color 0.2s;
-												}
-												.star-rating input[type="radio"]:checked ~ label,
-												.star-rating label:hover,
-												.star-rating label:hover ~ label {
-													color: #ffc700;
-												}
+													.star-rating input[type="radio"] {
+														display: none;
+													}
+
+													.star-rating label {
+														color: #ddd;
+														cursor: pointer;
+														transition: color 0.2s;
+													}
+
+													.star-rating input[type="radio"]:checked~label,
+													.star-rating label:hover,
+													.star-rating label:hover~label {
+														color: #ffc700;
+													}
 												</style>
 												<!-- Message -->
 												<div class="col-12 bg-light-input">
-													<textarea class="form-control" name="comment" id="exampleFormControlTextarea1"
-														placeholder="Viết đánh giá của bạn..." rows="3" required></textarea>
+													<textarea class="form-control" name="comment"
+														id="exampleFormControlTextarea1"
+														placeholder="Viết đánh giá của bạn..." rows="3"
+														required></textarea>
 												</div>
 												<!-- Button -->
 												<div class="col-12">
-													<button type="submit" class="btn btn-primary mb-0">Đăng đánh giá</button>
+													<button type="submit" class="btn btn-primary mb-0">Đăng đánh
+														giá</button>
 												</div>
 											</form>
 										</div>
@@ -629,7 +679,7 @@ Page content START -->
 								<div class="card shadow p-2 mb-4 z-index-9">
 									<div class="video-player rounded-3">
 										<video controls crossorigin="anonymous" playsinline
-											poster="/assets/images/videos/poster.jpg">
+											th:poster="@{${course.courseImg} ? ${course.courseImg} : '/assets/images/courses/4by3/01.jpg'}">
 											<source
 												th:src="@{/api/video/stream/video/{videoURL}(videoURL=${course.videoUrlPreview})}"
 												size="360">
@@ -653,66 +703,51 @@ Page content START -->
 										<div class="d-flex justify-content-between align-items-center">
 											<!-- Price and time -->
 											<th:block th:unless="${isEnrolled}">
-											<div>
-												<div class="d-flex align-items-center">
-													<h3 class="fw-bold mb-0 me-2" id="original-price" th:text="${course.price} + ' ₫'">$150</h3>
-													<span class="discounted-price text-danger fw-bold" id="discounted-price"></span>
-													<!-- Voucher button - chỉ hiển thị khi user đã đăng nhập -->
-													<div th:if="${currentUser != null}" class="ms-2">
-														<button type="button" class="btn btn-sm voucher-btn" th:attr="data-course-id=${course.courseId}">
-															<i class="fas fa-ticket-alt"></i>
-														</button>
+												<div>
+													<div class="d-flex align-items-center">
+														<h3 class="fw-bold mb-0 me-2" id="original-price"
+															th:text="${course.price} + ' ₫'">$150</h3>
+														<span class="discounted-price text-danger fw-bold"
+															id="discounted-price"></span>
+														<!-- Voucher button - chỉ hiển thị khi user đã đăng nhập -->
+														<div th:if="${currentUser != null}" class="ms-2">
+															<button type="button" class="btn btn-sm voucher-btn"
+																th:attr="data-course-id=${course.courseId}">
+																<i class="fas fa-ticket-alt"></i>
+															</button>
+														</div>
 													</div>
+													<div class="mt-1">
+														<span class="applied-voucher" id="applied-voucher"></span>
+													</div>
+													<p class="mb-0 text-danger"><i class="fas fa-stopwatch me-2"></i>5
+														days
+														left at this price</p>
 												</div>
-												<div class="mt-1">
-													<span class="applied-voucher" id="applied-voucher"></span>
-												</div>
-												<p class="mb-0 text-danger"><i class="fas fa-stopwatch me-2"></i>5 days
-													left at this price</p>
-											</div>
 											</th:block>
-											<!-- Share button with dropdown -->
-											<div class="dropdown">
-												<!-- Share button -->
-												<a href="#" class="btn btn-sm btn-light rounded small" role="button"
-												   id="dropdownShare" data-bs-toggle="dropdown" aria-expanded="false">
-													<i class="fas fa-fw fa-share-alt"></i>
-												</a>
-												<!-- dropdown button -->
-												<ul class="dropdown-menu dropdown-w-sm dropdown-menu-end min-w-auto shadow rounded"
-													aria-labelledby="dropdownShare">
-													<li><a class="dropdown-item" href="#"><i
-															class="fab fa-twitter-square me-2"></i>Twitter</a></li>
-													<li><a class="dropdown-item" href="#"><i
-															class="fab fa-facebook-square me-2"></i>Facebook</a>
-													</li>
-													<li><a class="dropdown-item" href="#"><i
-															class="fab fa-linkedin me-2"></i>LinkedIn</a></li>
-													<li>
-														<a class="dropdown-item" href="#" id="copyLinkBtn">
-															<i class="fas fa-copy me-2"></i>Copy link
-														</a>
-													</li>
 
-												</ul>
-											</div>
+
 										</div>
 
 										<!-- Buttons -->
 										<div class="mt-3 d-sm-flex justify-content-sm-between">
 											<th:block th:if="${isEnrolled}">
-												<a th:href="@{/learning/course/view(courseId=${course.courseId})}" class="btn btn-sm btn-primary-soft mb-0">Continue</a>
+												<a th:href="@{/learning/course/view(courseId=${course.courseId})}"
+													class="btn btn-sm btn-primary-soft mb-0">Continue</a>
 											</th:block>
 											<th:block th:unless="${isEnrolled}">
 												<button type="button"
-														class="btn btn-sm btn-success-soft item-show-hover m-1 add-to-cart-btn"
-														th:attr="data-course-id=${course.courseId}">
+													class="btn btn-sm btn-success-soft item-show-hover m-1 add-to-cart-btn"
+													th:attr="data-course-id=${course.courseId}">
 													<i class="fas fa-shopping-cart me-2"></i>Add to cart
 												</button>
-												<form th:action="@{'/home/buy-now'}" method="post" class="d-inline" id="buy-now-form">
-													<input type="hidden" name="courseId" th:value="${course.courseId}"/>
+												<form th:action="@{'/home/buy-now'}" method="post" class="d-inline"
+													id="buy-now-form">
+													<input type="hidden" name="courseId"
+														th:value="${course.courseId}" />
 													<input type="hidden" name="voucherId" id="buy-now-voucherId" />
-													<button type="submit" class="btn btn-success mb-0"><i class="fas fa-bolt me-2"></i>Buy now</button>
+													<button type="submit" class="btn btn-success mb-0"><i
+															class="fas fa-bolt me-2"></i>Buy now</button>
 												</form>
 											</th:block>
 										</div>
@@ -761,7 +796,7 @@ Page content START -->
 								<!-- Recently Viewed START -->
 								<div class="card card-body shadow p-4 mb-4">
 									<!-- Title -->
-									<h4 class="mb-3">Recently Viewed</h4>
+									<h4 class="mb-3">Course by this instructor</h4>
 									<!-- Course item START -->
 									<div class="row gx-3 mb-3" th:each="course : ${courseByInstructor}">
 										<!-- Image -->
@@ -797,22 +832,12 @@ Page content START -->
 								<div class="card card-body shadow p-4">
 									<h4 class="mb-3">Popular Tags</h4>
 									<ul class="list-inline mb-0">
-										<li class="list-inline-item"> <a class="btn btn-outline-light btn-sm"
-												href="#">blog</a> </li>
-										<li class="list-inline-item"> <a class="btn btn-outline-light btn-sm"
-												href="#">business</a> </li>
-										<li class="list-inline-item"> <a class="btn btn-outline-light btn-sm"
-												href="#">theme</a> </li>
-										<li class="list-inline-item"> <a class="btn btn-outline-light btn-sm"
-												href="#">bootstrap</a> </li>
-										<li class="list-inline-item"> <a class="btn btn-outline-light btn-sm"
-												href="#">data science</a> </li>
-										<li class="list-inline-item"> <a class="btn btn-outline-light btn-sm"
-												href="#">web development</a> </li>
-										<li class="list-inline-item"> <a class="btn btn-outline-light btn-sm"
-												href="#">tips</a> </li>
-										<li class="list-inline-item"> <a class="btn btn-outline-light btn-sm"
-												href="#">machine learning</a> </li>
+										<li class="list-inline-item" th:each="category : ${listCategory}">
+											<a class="btn btn-outline-light btn-sm"
+												th:href="@{'/home/coursesGrid?categoryIds=' + ${category.id}}"
+												th:text="${category.name}">blog</a>
+										</li>
+
 									</ul>
 								</div>
 								<!-- Tags END -->
@@ -894,7 +919,8 @@ Listed courses START -->
 											</ul>
 											<!-- Avatar -->
 											<div class="avatar avatar-sm">
-												<img class="avatar-img rounded-circle" src="assets/images/avatar/09.jpg"
+												<img class="avatar-img rounded-circle"
+													th:src="@{${course.instructor.profilePicture} ? ${course.instructor.profilePicture} : '/assets/images/avatar/09.jpg'}"
 													alt="avatar">
 											</div>
 										</div>
@@ -907,11 +933,15 @@ Listed courses START -->
 												Courses in 1</a></h5>
 										<!-- Badge and Price -->
 										<div class="d-flex justify-content-between align-items-center">
-											<a href="#" class="badge bg-info bg-opacity-10 text-info"><i
-													class="fas fa-circle small fw-bold me-2"></i><span
-													th:text="${course.category.name}"></span></a>
+											<a href="#" class="badge bg-info bg-opacity-10 text-info">
+												<i class="fas fa-circle small fw-bold me-2"></i>
+												<span
+													th:text="${#strings.length(course.category.name) > 20 ? #strings.substring(course.category.name, 0, 20) + '...' : course.category.name}"></span>
+											</a>
 											<!-- Price -->
-											<h3 class="text-success mb-0" th:text="${course.price} + ' ₫'">$140</h3>
+											<span class="text-success fw-bold small"
+												style="font-size: 1.5rem; white-space: nowrap;"
+												th:text="${#numbers.formatDecimal(course.price, 0, 'POINT', 0, 'POINT')} + ' ₫'">$140</span>
 										</div>
 									</div>
 								</div>
@@ -1172,16 +1202,17 @@ Footer END -->
 	</script>
 
 	<!-- Modal chọn voucher -->
-	<div class="modal" id="voucherModal" tabindex="-1" style="display:none; background:rgba(0,0,0,0.3); position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:9999;">
-	  <div class="modal-dialog" style="margin:10vh auto; max-width:400px;">
-		<div class="modal-content">
-		  <div class="modal-header">
-			<h5 class="modal-title">Chọn voucher cho khóa học</h5>
-			<button type="button" class="btn-close" onclick="voucherJS.closeVoucherModal()"></button>
-		  </div>
-		  <div class="modal-body" id="voucher-list"></div>
+	<div class="modal" id="voucherModal" tabindex="-1"
+		style="display:none; background:rgba(0,0,0,0.3); position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:9999;">
+		<div class="modal-dialog" style="margin:10vh auto; max-width:400px;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Chọn voucher cho khóa học</h5>
+					<button type="button" class="btn-close" onclick="voucherJS.closeVoucherModal()"></button>
+				</div>
+				<div class="modal-body" id="voucher-list"></div>
+			</div>
 		</div>
-	  </div>
 	</div>
 
 	<!-- Đảm bảo userId global trước khi load voucher.js -->
@@ -1202,33 +1233,40 @@ Footer END -->
 				</div>
 				<form id="reportCourseForm">
 					<div class="modal-body">
-						<input type="hidden" name="courseId" th:value="${course.courseId}"/>
-						<input type="hidden" name="userId" th:value="${currentUser != null ? currentUser.userId : ''}"/>
+						<input type="hidden" name="courseId" th:value="${course.courseId}" />
+						<input type="hidden" name="userId"
+							th:value="${currentUser != null ? currentUser.userId : ''}" />
 
 						<p class="mb-3">Vui lòng chọn lý do báo cáo khóa học này:</p>
 
 						<div class="form-check mb-2">
-							<input class="form-check-input" type="radio" id="reason1" name="reason" value="Nội dung không phù hợp" required>
+							<input class="form-check-input" type="radio" id="reason1" name="reason"
+								value="Nội dung không phù hợp" required>
 							<label class="form-check-label" for="reason1">Nội dung không phù hợp</label>
 						</div>
 						<div class="form-check mb-2">
-							<input class="form-check-input" type="radio" id="reason2" name="reason" value="Spam hoặc gây hiểu nhầm" required>
+							<input class="form-check-input" type="radio" id="reason2" name="reason"
+								value="Spam hoặc gây hiểu nhầm" required>
 							<label class="form-check-label" for="reason2">Spam hoặc gây hiểu nhầm</label>
 						</div>
 						<div class="form-check mb-2">
-							<input class="form-check-input" type="radio" id="reason3" name="reason" value="Vi phạm bản quyền" required>
+							<input class="form-check-input" type="radio" id="reason3" name="reason"
+								value="Vi phạm bản quyền" required>
 							<label class="form-check-label" for="reason3">Vi phạm bản quyền</label>
 						</div>
 						<div class="form-check mb-2">
-							<input class="form-check-input" type="radio" id="reason4" name="reason" value="Ngôn ngữ xúc phạm" required>
+							<input class="form-check-input" type="radio" id="reason4" name="reason"
+								value="Ngôn ngữ xúc phạm" required>
 							<label class="form-check-label" for="reason4">Ngôn ngữ xúc phạm</label>
 						</div>
 						<div class="form-check mb-2">
-							<input class="form-check-input" type="radio" id="reason5" name="reason" value="Chất lượng kém" required>
+							<input class="form-check-input" type="radio" id="reason5" name="reason"
+								value="Chất lượng kém" required>
 							<label class="form-check-label" for="reason5">Chất lượng kém</label>
 						</div>
 						<div class="form-check mb-3">
-							<input class="form-check-input" type="radio" id="reasonOther" name="reason" value="Khác" required>
+							<input class="form-check-input" type="radio" id="reasonOther" name="reason" value="Khác"
+								required>
 							<label class="form-check-label" for="reasonOther">Khác (vui lòng mô tả):</label>
 						</div>
 
@@ -1251,48 +1289,48 @@ Footer END -->
 	</div>
 
 	<script th:inline="javascript">
-	  voucherJS.initDetailVoucher({
-		courseId: /*[[${course.courseId}]]*/ 1,
-		isEnrolled: /*[[${isEnrolled}]]*/ false,
-		updatePriceUI: function(data) {
-		  const originalPriceEl = document.getElementById('original-price');
-		  const discountedPriceEl = document.getElementById('discounted-price');
-		  const appliedVoucherEl = document.getElementById('applied-voucher');
-		  if (originalPriceEl) {
-			if (data && typeof data.discountedPrice !== 'undefined' && data.discountedPrice !== null && Number(data.discountedPrice) < Number(originalPriceEl.textContent.replace(/[^\d]/g, ''))) {
-			  originalPriceEl.style.textDecoration = 'line-through';
-			  originalPriceEl.style.color = '#888';
-			} else {
-			  originalPriceEl.style.textDecoration = 'none';
-			  originalPriceEl.style.color = '';
+		voucherJS.initDetailVoucher({
+			courseId: /*[[${course.courseId}]]*/ 1,
+			isEnrolled: /*[[${isEnrolled}]]*/ false,
+			updatePriceUI: function (data) {
+				const originalPriceEl = document.getElementById('original-price');
+				const discountedPriceEl = document.getElementById('discounted-price');
+				const appliedVoucherEl = document.getElementById('applied-voucher');
+				if (originalPriceEl) {
+					if (data && typeof data.discountedPrice !== 'undefined' && data.discountedPrice !== null && Number(data.discountedPrice) < Number(originalPriceEl.textContent.replace(/[^\d]/g, ''))) {
+						originalPriceEl.style.textDecoration = 'line-through';
+						originalPriceEl.style.color = '#888';
+					} else {
+						originalPriceEl.style.textDecoration = 'none';
+						originalPriceEl.style.color = '';
+					}
+				}
+				if (discountedPriceEl) {
+					if (data && typeof data.discountedPrice !== 'undefined' && data.discountedPrice !== null) {
+						discountedPriceEl.textContent = ' ' + voucherJS.formatNumberWithCommas(Number(data.discountedPrice)) + ' đ';
+					} else {
+						discountedPriceEl.textContent = '';
+					}
+				}
+			},
+			syncVoucherToBuyNowForm: function () {
+				const buyNowVoucherInput = document.getElementById('buy-now-voucherId');
+				if (buyNowVoucherInput) {
+					buyNowVoucherInput.value = window.selectedVoucher || '';
+				}
 			}
-		  }
-		  if (discountedPriceEl) {
-			if (data && typeof data.discountedPrice !== 'undefined' && data.discountedPrice !== null) {
-			  discountedPriceEl.textContent = ' ' + voucherJS.formatNumberWithCommas(Number(data.discountedPrice)) + ' đ';
-			} else {
-			  discountedPriceEl.textContent = '';
-			}
-		  }
-		},
-		syncVoucherToBuyNowForm: function() {
-		  const buyNowVoucherInput = document.getElementById('buy-now-voucherId');
-		  if (buyNowVoucherInput) {
-			buyNowVoucherInput.value = window.selectedVoucher || '';
-		  }
-		}
-	  });
+		});
 	</script>
 
 	<!-- Report Course JavaScript -->
 	<script>
-		document.addEventListener('DOMContentLoaded', function() {
+		document.addEventListener('DOMContentLoaded', function () {
 			// Handle "Other" reason selection
 			const otherRadio = document.getElementById('reasonOther');
 			const otherInput = document.getElementById('otherReasonText');
 
 			if (otherRadio && otherInput) {
-				otherRadio.addEventListener('change', function() {
+				otherRadio.addEventListener('change', function () {
 					otherInput.disabled = !this.checked;
 					if (!this.checked) {
 						otherInput.value = '';
@@ -1303,7 +1341,7 @@ Footer END -->
 			// Handle form submission
 			const reportForm = document.getElementById('reportCourseForm');
 			if (reportForm) {
-				reportForm.addEventListener('submit', function(e) {
+				reportForm.addEventListener('submit', function (e) {
 					e.preventDefault();
 
 					// Check if user is logged in
@@ -1351,188 +1389,215 @@ Footer END -->
 						},
 						body: JSON.stringify(data)
 					})
-					.then(response => response.json())
-					.then(result => {
-						const messageDiv = document.getElementById('reportCourseMessage');
-						if (result.success) {
-							messageDiv.innerHTML = `
+						.then(response => response.json())
+						.then(result => {
+							const messageDiv = document.getElementById('reportCourseMessage');
+							if (result.success) {
+								messageDiv.innerHTML = `
 								<div class="alert alert-success alert-dismissible fade show" role="alert">
 									<i class="fas fa-check-circle me-2"></i>${result.success}
 									<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 								</div>
 							`;
-							reportForm.reset();
-							otherInput.disabled = true;
+								reportForm.reset();
+								otherInput.disabled = true;
 
-							// Close modal after 2 seconds
-							setTimeout(() => {
-								const modal = bootstrap.Modal.getInstance(document.getElementById('reportCourseModal'));
-								modal.hide();
-							}, 2000);
-						} else if (result.error) {
-							messageDiv.innerHTML = `
+								// Close modal after 2 seconds
+								setTimeout(() => {
+									const modal = bootstrap.Modal.getInstance(document.getElementById('reportCourseModal'));
+									modal.hide();
+								}, 2000);
+							} else if (result.error) {
+								messageDiv.innerHTML = `
 								<div class="alert alert-danger alert-dismissible fade show" role="alert">
 									<i class="fas fa-exclamation-triangle me-2"></i>${result.error}
 									<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 								</div>
 							`;
-						}
-					})
-					.catch(error => {
-						console.error('Error:', error);
-						document.getElementById('reportCourseMessage').innerHTML = `
+							}
+						})
+						.catch(error => {
+							console.error('Error:', error);
+							document.getElementById('reportCourseMessage').innerHTML = `
 							<div class="alert alert-danger alert-dismissible fade show" role="alert">
 								<i class="fas fa-exclamation-triangle me-2"></i>Có lỗi xảy ra. Vui lòng thử lại.
 								<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 							</div>
 						`;
-					});
+						});
 				});
 			}
 		});
 	</script>
 
 	<!-- Modal chọn phương thức thanh toán cho Buy Now -->
-	<div class="modal fade" id="buyNowPaymentModal" tabindex="-1" aria-labelledby="buyNowPaymentModalLabel" aria-hidden="true">
-	  <div class="modal-dialog modal-dialog-centered">
-		<div class="modal-content">
-		  <div class="modal-header">
-			<h5 class="modal-title" id="buyNowPaymentModalLabel">
-			  <i class="fas fa-credit-card me-2"></i>Chọn phương thức thanh toán
-			</h5>
-			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closeBuyNowPaymentModal()"></button>
-		  </div>
-		  <div class="modal-body">
-			<div class="row g-3">
-			  <!-- QR Option -->
-			  <div class="col-12">
-				<div class="card payment-option-card" id="buyNow-qr-card" onclick="selectBuyNowPaymentMethod('qr')">
-				  <div class="card-body d-flex align-items-center">
-					<div class="payment-icon me-3">
-					  <i class="fas fa-qrcode text-primary fa-2x"></i>
-					</div>
-					<div class="flex-grow-1">
-					  <h6 class="mb-1">QR Banking</h6>
-					  <p class="mb-0 text-muted small">Thanh toán qua chuyển khoản ngân hàng với mã QR</p>
-					</div>
-					<div class="payment-radio">
-					  <input type="radio" name="buyNowPaymentMethodModal" value="qr" id="buyNow-qr-radio">
-					  <label for="buyNow-qr-radio"></label>
-					</div>
-				  </div>
+	<div class="modal fade" id="buyNowPaymentModal" tabindex="-1" aria-labelledby="buyNowPaymentModalLabel"
+		aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="buyNowPaymentModalLabel">
+						<i class="fas fa-credit-card me-2"></i>Chọn phương thức thanh toán
+					</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+						onclick="closeBuyNowPaymentModal()"></button>
 				</div>
-			  </div>
-			  <!-- VNPay Option -->
-			  <div class="col-12">
-				<div class="card payment-option-card" id="buyNow-vnpay-card" onclick="selectBuyNowPaymentMethod('vnpay')">
-				  <div class="card-body d-flex align-items-center">
-					<div class="payment-icon me-3">
-					  <i class="fas fa-credit-card text-success fa-2x"></i>
+				<div class="modal-body">
+					<div class="row g-3">
+						<!-- QR Option -->
+						<div class="col-12">
+							<div class="card payment-option-card" id="buyNow-qr-card"
+								onclick="selectBuyNowPaymentMethod('qr')">
+								<div class="card-body d-flex align-items-center">
+									<div class="payment-icon me-3">
+										<i class="fas fa-qrcode text-primary fa-2x"></i>
+									</div>
+									<div class="flex-grow-1">
+										<h6 class="mb-1">QR Banking</h6>
+										<p class="mb-0 text-muted small">Thanh toán qua chuyển khoản ngân hàng với mã QR
+										</p>
+									</div>
+									<div class="payment-radio">
+										<input type="radio" name="buyNowPaymentMethodModal" value="qr"
+											id="buyNow-qr-radio">
+										<label for="buyNow-qr-radio"></label>
+									</div>
+								</div>
+							</div>
+						</div>
+						<!-- VNPay Option -->
+						<div class="col-12">
+							<div class="card payment-option-card" id="buyNow-vnpay-card"
+								onclick="selectBuyNowPaymentMethod('vnpay')">
+								<div class="card-body d-flex align-items-center">
+									<div class="payment-icon me-3">
+										<i class="fas fa-credit-card text-success fa-2x"></i>
+									</div>
+									<div class="flex-grow-1">
+										<h6 class="mb-1">VNPay</h6>
+										<p class="mb-0 text-muted small">Thanh toán qua thẻ ngân hàng nội địa</p>
+									</div>
+									<div class="payment-radio">
+										<input type="radio" name="buyNowPaymentMethodModal" value="vnpay"
+											id="buyNow-vnpay-radio">
+										<label for="buyNow-vnpay-radio"></label>
+									</div>
+								</div>
+							</div>
+						</div>
 					</div>
-					<div class="flex-grow-1">
-					  <h6 class="mb-1">VNPay</h6>
-					  <p class="mb-0 text-muted small">Thanh toán qua thẻ ngân hàng nội địa</p>
-					</div>
-					<div class="payment-radio">
-					  <input type="radio" name="buyNowPaymentMethodModal" value="vnpay" id="buyNow-vnpay-radio">
-					  <label for="buyNow-vnpay-radio"></label>
-					</div>
-				  </div>
 				</div>
-			  </div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+						onclick="closeBuyNowPaymentModal()">Hủy</button>
+					<button type="button" class="btn btn-primary" onclick="proceedBuyNowCheckout()" disabled
+						id="buyNow-proceed-btn">
+						<i class="fas fa-arrow-right me-2"></i>Tiếp tục
+					</button>
+				</div>
 			</div>
-		  </div>
-		  <div class="modal-footer">
-			<button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="closeBuyNowPaymentModal()">Hủy</button>
-			<button type="button" class="btn btn-primary" onclick="proceedBuyNowCheckout()" disabled id="buyNow-proceed-btn">
-			  <i class="fas fa-arrow-right me-2"></i>Tiếp tục
-			</button>
-		  </div>
 		</div>
-	  </div>
 	</div>
 
 	<style>
-	  .payment-option-card { cursor: pointer; border: 2px solid #e3e6f0; transition: border-color 0.2s, box-shadow 0.2s; }
-	  .payment-option-card.selected { border-color: #4e73df; box-shadow: 0 0 0 0.2rem rgba(78,115,223,.15); background: #f8f9fc; }
-	  .payment-radio input[type="radio"] { accent-color: #4e73df; width: 18px; height: 18px; }
-	  .payment-icon { min-width: 40px; text-align: center; }
+		.payment-option-card {
+			cursor: pointer;
+			border: 2px solid #e3e6f0;
+			transition: border-color 0.2s, box-shadow 0.2s;
+		}
+
+		.payment-option-card.selected {
+			border-color: #4e73df;
+			box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, .15);
+			background: #f8f9fc;
+		}
+
+		.payment-radio input[type="radio"] {
+			accent-color: #4e73df;
+			width: 18px;
+			height: 18px;
+		}
+
+		.payment-icon {
+			min-width: 40px;
+			text-align: center;
+		}
 	</style>
 
 	<script>
-	  // Mở modal khi bấm Buy Now
-	  document.addEventListener('DOMContentLoaded', function() {
-		var buyNowBtn = document.querySelector('#buy-now-form button[type="submit"]');
-		if (buyNowBtn) {
-		  buyNowBtn.type = 'button';
-		  buyNowBtn.onclick = function(e) {
-			e.preventDefault();
-			  if (!window.userId || window.userId == 0) {
-				  window.location.href = '/login'; // Đổi lại nếu URL login khác
-				  return;
-			  }
-			if (window.bootstrap && bootstrap.Modal) {
-			  const modal = new bootstrap.Modal(document.getElementById('buyNowPaymentModal'));
-			  modal.show();
-			  window._buyNowPaymentModalInstance = modal;
-			} else {
-			  document.getElementById('buyNowPaymentModal').style.display = 'block';
+		// Mở modal khi bấm Buy Now
+		document.addEventListener('DOMContentLoaded', function () {
+			var buyNowBtn = document.querySelector('#buy-now-form button[type="submit"]');
+			if (buyNowBtn) {
+				buyNowBtn.type = 'button';
+				buyNowBtn.onclick = function (e) {
+					e.preventDefault();
+					if (!window.userId || window.userId == 0) {
+						window.location.href = '/login'; // Đổi lại nếu URL login khác
+						return;
+					}
+					if (window.bootstrap && bootstrap.Modal) {
+						const modal = new bootstrap.Modal(document.getElementById('buyNowPaymentModal'));
+						modal.show();
+						window._buyNowPaymentModalInstance = modal;
+					} else {
+						document.getElementById('buyNowPaymentModal').style.display = 'block';
+					}
+				};
 			}
-		  };
+		});
+		// Chọn phương thức thanh toán
+		function selectBuyNowPaymentMethod(method) {
+			document.getElementById('buyNow-qr-card').classList.remove('selected');
+			document.getElementById('buyNow-vnpay-card').classList.remove('selected');
+			document.getElementById('buyNow-qr-radio').checked = false;
+			document.getElementById('buyNow-vnpay-radio').checked = false;
+			if (method === 'qr') {
+				document.getElementById('buyNow-qr-card').classList.add('selected');
+				document.getElementById('buyNow-qr-radio').checked = true;
+			} else if (method === 'vnpay') {
+				document.getElementById('buyNow-vnpay-card').classList.add('selected');
+				document.getElementById('buyNow-vnpay-radio').checked = true;
+			}
+			document.getElementById('buyNow-proceed-btn').disabled = false;
 		}
-	  });
-	  // Chọn phương thức thanh toán
-	  function selectBuyNowPaymentMethod(method) {
-		document.getElementById('buyNow-qr-card').classList.remove('selected');
-		document.getElementById('buyNow-vnpay-card').classList.remove('selected');
-		document.getElementById('buyNow-qr-radio').checked = false;
-		document.getElementById('buyNow-vnpay-radio').checked = false;
-		if (method === 'qr') {
-		  document.getElementById('buyNow-qr-card').classList.add('selected');
-		  document.getElementById('buyNow-qr-radio').checked = true;
-		} else if (method === 'vnpay') {
-		  document.getElementById('buyNow-vnpay-card').classList.add('selected');
-		  document.getElementById('buyNow-vnpay-radio').checked = true;
+		// Đóng modal
+		function closeBuyNowPaymentModal() {
+			if (window._buyNowPaymentModalInstance) {
+				window._buyNowPaymentModalInstance.hide();
+			} else {
+				document.getElementById('buyNowPaymentModal').style.display = 'none';
+			}
+			document.getElementById('buyNow-qr-card').classList.remove('selected');
+			document.getElementById('buyNow-vnpay-card').classList.remove('selected');
+			document.getElementById('buyNow-qr-radio').checked = false;
+			document.getElementById('buyNow-vnpay-radio').checked = false;
+			document.getElementById('buyNow-proceed-btn').disabled = true;
 		}
-		document.getElementById('buyNow-proceed-btn').disabled = false;
-	  }
-	  // Đóng modal
-	  function closeBuyNowPaymentModal() {
-		if (window._buyNowPaymentModalInstance) {
-		  window._buyNowPaymentModalInstance.hide();
-		} else {
-		  document.getElementById('buyNowPaymentModal').style.display = 'none';
+		// Khi bấm Tiếp tục
+		function proceedBuyNowCheckout() {
+			let method = '';
+			const radios = document.getElementsByName('buyNowPaymentMethodModal');
+			for (const r of radios) {
+				if (r.checked) method = r.value;
+			}
+			if (!method) {
+				alert('Vui lòng chọn phương thức thanh toán!');
+				return;
+			}
+			// Thêm input hidden vào form
+			let form = document.getElementById('buy-now-form');
+			let input = form.querySelector('input[name="paymentMethod"]');
+			if (!input) {
+				input = document.createElement('input');
+				input.type = 'hidden';
+				input.name = 'paymentMethod';
+				form.appendChild(input);
+			}
+			input.value = method;
+			closeBuyNowPaymentModal();
+			form.submit();
 		}
-		document.getElementById('buyNow-qr-card').classList.remove('selected');
-		document.getElementById('buyNow-vnpay-card').classList.remove('selected');
-		document.getElementById('buyNow-qr-radio').checked = false;
-		document.getElementById('buyNow-vnpay-radio').checked = false;
-		document.getElementById('buyNow-proceed-btn').disabled = true;
-	  }
-	  // Khi bấm Tiếp tục
-	  function proceedBuyNowCheckout() {
-		let method = '';
-		const radios = document.getElementsByName('buyNowPaymentMethodModal');
-		for (const r of radios) {
-		  if (r.checked) method = r.value;
-		}
-		if (!method) {
-		  alert('Vui lòng chọn phương thức thanh toán!');
-		  return;
-		}
-		// Thêm input hidden vào form
-		let form = document.getElementById('buy-now-form');
-		let input = form.querySelector('input[name="paymentMethod"]');
-		if (!input) {
-		  input = document.createElement('input');
-		  input.type = 'hidden';
-		  input.name = 'paymentMethod';
-		  form.appendChild(input);
-		}
-		input.value = method;
-		closeBuyNowPaymentModal();
-		form.submit();
-	  }
 	</script>
 
 

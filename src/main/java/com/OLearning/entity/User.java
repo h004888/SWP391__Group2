@@ -99,6 +99,10 @@ public class User {
     @OneToMany(mappedBy = "user")
     @JsonIgnore
     private List<UserVoucher> userVouchers;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Certificate> certificates;
 }
 
 

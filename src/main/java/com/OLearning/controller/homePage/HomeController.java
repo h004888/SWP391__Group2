@@ -46,11 +46,11 @@ import com.OLearning.service.payment.CartServiceUtil;
 @Controller
 @RequestMapping("/home")
 public class HomeController {
-        @Autowired
-        private CategoryService categoryService;
+    @Autowired
+    private CategoryService categoryService;
 
-        @Autowired
-        private CourseService courseService;
+    @Autowired
+    private CourseService courseService;
     @Autowired
     private CartService cartService;
 
@@ -97,9 +97,9 @@ public class HomeController {
     private NotificationService notificationService;
 
     @GetMapping()
-        public String getMethodName(Model model ,
-                @AuthenticationPrincipal UserDetails userDetails,
-                HttpServletRequest request) {
+    public String getMethodName(Model model,
+            @AuthenticationPrincipal UserDetails userDetails,
+            HttpServletRequest request) {
         // chia làm 2 danh sách:
         List<CategoryDTO> firstFive = categoryService.getAllCategory().stream().limit(5).toList();
         List<CategoryDTO> nextFive = categoryService.getAllCategory().stream().skip(5).limit(5).toList();
@@ -115,9 +115,10 @@ public class HomeController {
         model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderCategory");
         model.addAttribute("fragmentContent", "homePage/fragments/mainContent :: mainContent");
         return "homePage/index";
-        }
+    }
 
-    private void addUserHomePageAttributes(Model model, UserDetails userDetails, HttpServletRequest request, List<CourseViewDTO> topCourses) {
+    private void addUserHomePageAttributes(Model model, UserDetails userDetails, HttpServletRequest request,
+            List<CourseViewDTO> topCourses) {
         // Add currentUserId for all pages
         Long userId = 0L;
         if (userDetails != null) {
@@ -137,7 +138,8 @@ public class HomeController {
         if (userDetails != null) {
             Long userIdForWishlist = CartServiceUtil.getUserIdFromUserDetails(userDetails, userRepository);
             String encodedWishlistJson = CartServiceUtil.getWishlistCookie(request, userIdForWishlist);
-            Map<String, Object> wishlist = wishlistService.getWishlistDetails(encodedWishlistJson, userDetails.getUsername());
+            Map<String, Object> wishlist = wishlistService.getWishlistDetails(encodedWishlistJson,
+                    userDetails.getUsername());
             model.addAttribute("wishlistTotal", CartServiceUtil.getLongValue(wishlist.getOrDefault("total", 0L)));
         } else {
             model.addAttribute("wishlistTotal", 0L);
@@ -157,137 +159,144 @@ public class HomeController {
         model.addAttribute("topCoursesEnrolledMap", topCoursesEnrolledMap);
     }
 
-        @GetMapping("/coursesGrid")
-        public String coursesGrid(Model model, @RequestParam(defaultValue = "0") int page,
-                        @RequestParam(required = false) String keyword,
-                        @RequestParam(required = false) List<Long> categoryIds,
-                        @RequestParam(required = false) List<String> priceFilters,
-                        @RequestParam(required = false) List<String> levels,
-                        @RequestParam(defaultValue = "Newest") String sortBy,
-                        @RequestParam(defaultValue = "9") int size,
-                        @AuthenticationPrincipal UserDetails userDetails,
-                        HttpServletRequest request) {
-                Page<CourseViewDTO> courses = courseService.searchCoursesGrid(categoryIds, priceFilters, levels, sortBy,
-                                keyword,
-                                page, size); // lưu ý trả về Page<CourseDTO>
-                model.addAttribute("categories", categoryService.getListCategories());
-                model.addAttribute("courses", courses.getContent());
-                model.addAttribute("currentPage", page);
-                model.addAttribute("totalPages", courses.getTotalPages());
-                model.addAttribute("totalItems", courses.getTotalElements());
-                model.addAttribute("categoryIds", categoryIds);
-                model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderDefault");
+    @GetMapping("/coursesGrid")
+    public String coursesGrid(Model model, @RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) List<Long> categoryIds,
+            @RequestParam(required = false) List<String> priceFilters,
+            @RequestParam(required = false) List<String> levels,
+            @RequestParam(defaultValue = "Newest") String sortBy,
+            @RequestParam(defaultValue = "9") int size,
+            @AuthenticationPrincipal UserDetails userDetails,
+            HttpServletRequest request) {
+        Page<CourseViewDTO> courses = courseService.searchCoursesGrid(categoryIds, priceFilters, levels, sortBy,
+                keyword,
+                page, size); // lưu ý trả về Page<CourseDTO>
+        model.addAttribute("categories", categoryService.getListCategories());
+        model.addAttribute("courses", courses.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", courses.getTotalPages());
+        model.addAttribute("totalItems", courses.getTotalElements());
+        model.addAttribute("categoryIds", categoryIds);
+        model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderDefault");
 
-                // Add user attributes including currentUserId
-                addUserHomePageAttributes(model, userDetails, request, new ArrayList<>());
+        // Add user attributes including currentUserId
+        addUserHomePageAttributes(model, userDetails, request, new ArrayList<>());
 
-                return "homePage/course-grid";
+        return "homePage/course-grid";
+    }
+
+    @GetMapping("/course-detail")
+    public String courseDetail(@RequestParam("id") Long id,
+            @RequestParam(value = "star", required = false, defaultValue = "0") Integer star,
+            Model model,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        boolean flag = courseService.existsById(id);
+        if (!flag) {
+            model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderDefault");
+            return "homePage/error-404";
         }
 
-        @GetMapping("/course-detail")
-        public String courseDetail( @RequestParam("id") Long id,
-                                    @RequestParam(value = "star", required = false, defaultValue = "0") Integer star,
-                                    Model model,
-                                    @AuthenticationPrincipal UserDetails userDetails) {
-                boolean flag = courseService.existsById(id);
-                if (!flag) {
-                        model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderDefault");
-                        return "homePage/error-404";
-                }
+        CourseViewDTO course = courseService.getCourseById(id);
+        Course courseEntity = courseRepository.findById(id).orElse(null);
 
-                CourseViewDTO course = courseService.getCourseById(id);
-                Course courseEntity = courseRepository.findById(id).orElse(null);
+        // Lấy danh sách review của course (chỉ những review có rating)
+        List<CourseReview> reviews = new ArrayList<>();
+        double averageRating = 0.0;
+        Map<Integer, Long> ratingDistribution = new HashMap<>();
+        if (courseEntity != null) {
+            reviews = courseReviewService.getReviewsByCourseWithUser(courseEntity);
 
-                // Lấy danh sách review của course (chỉ những review có rating)
-                List<CourseReview> reviews = new ArrayList<>();
-                double averageRating = 0.0;
-                Map<Integer, Long> ratingDistribution = new HashMap<>();
-                if (courseEntity != null) {
-                    reviews = courseReviewService.getReviewsByCourseWithUser(courseEntity);
+            if (star > 0 && star <= 5) {
+                reviews = reviews.stream()
+                        .filter(review -> review.getRating() == star)
+                        .collect(Collectors.toList());
+            }
 
-                    if (star > 0 && star <= 5) {
-                        reviews = reviews.stream()
-                                .filter(review -> review.getRating() == star)
-                                .collect(Collectors.toList());
-                    }
+            if (!reviews.isEmpty()) {
+                averageRating = reviews.stream()
+                        .mapToInt(CourseReview::getRating)
+                        .average()
+                        .orElse(0.0);
 
-                    if (!reviews.isEmpty()) {
-                        averageRating = reviews.stream()
-                                .mapToInt(CourseReview::getRating)
-                                .average()
-                                .orElse(0.0);
-
-                        // Tính phân bố rating (từ tất cả reviews, không chỉ filtered)
-                        List<CourseReview> allReviews = courseReviewService.getReviewsByCourseWithUser(courseEntity);
-                        ratingDistribution = allReviews.stream()
-                                .collect(Collectors.groupingBy(CourseReview::getRating, Collectors.counting()));
-                    }
-                }
-
-                boolean isEnrolled = false;
-                if (userDetails != null) {
-                    User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
-                    if (user != null && courseEntity != null) {
-                        isEnrolled = enrollmentService.findFirstByUserAndCourseOrderByEnrollmentDateDesc(user, courseEntity).isPresent();
-                    }
-                }
-
-                model.addAttribute("totalStudents", course.getEnrollments().size());
-                model.addAttribute("courseByInstructor",
-                                course.getInstructor().getCourses().stream().map(CourseMapper::toCourseViewDTO)
-                                                .collect(Collectors.toList()));
-                model.addAttribute("courseByCategory",
-                                course.getCategory().getCourses().stream().map(CourseMapper::toCourseViewDTO)
-                                                .collect(Collectors.toList()));
-                model.addAttribute("course", course);
-                model.addAttribute("reviews", reviews);
-                model.addAttribute("averageRating", averageRating);
-                model.addAttribute("ratingDistribution", ratingDistribution);
-                model.addAttribute("selectedStar", star);
-                model.addAttribute("isEnrolled", isEnrolled);
-
-                // Thêm thông tin số review của user hiện tại
-                if (userDetails != null) {
-                    User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
-                    if (user != null) {
-                        Long userReviewCount = courseReviewService.countByUserIdAndCourseId(user.getUserId(), id);
-                        model.addAttribute("userReviewCount", userReviewCount);
-                    }
-                }
-
-                // Thêm thông tin user nếu đã đăng nhập
-                if (userDetails != null) {
-                    User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
-                    if (user != null) {
-                        model.addAttribute("currentUser", user);
-                        model.addAttribute("currentUserId", user.getUserId());
-                        // Add unread notification count
-                        long unreadCount = notificationService.countUnreadByUserId(user.getUserId());
-                        model.addAttribute("unreadCount", unreadCount);
-                    }
-                } else {
-                    model.addAttribute("currentUserId", 0L);
-                }
-
-                model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderDefault");
-
-                return "homePage/course-detail";
+                // Tính phân bố rating (từ tất cả reviews, không chỉ filtered)
+                List<CourseReview> allReviews = courseReviewService.getReviewsByCourseWithUser(courseEntity);
+                ratingDistribution = allReviews.stream()
+                        .collect(Collectors.groupingBy(CourseReview::getRating, Collectors.counting()));
+            }
         }
+
+        boolean isEnrolled = false;
+        if (userDetails != null) {
+            User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
+            if (user != null && courseEntity != null) {
+                isEnrolled = enrollmentService.findFirstByUserAndCourseOrderByEnrollmentDateDesc(user, courseEntity)
+                        .isPresent();
+            }
+        }
+
+        model.addAttribute("totalStudents", course.getEnrollments().size());
+        model.addAttribute("courseByInstructor",
+                course.getInstructor().getCourses().stream()
+                        .filter(c -> "publish".equalsIgnoreCase(c.getStatus()))
+                        .map(CourseMapper::toCourseViewDTO)
+                        .collect(Collectors.toList()));
+        model.addAttribute("courseByCategory",
+                course.getCategory().getCourses().stream().map(CourseMapper::toCourseViewDTO)
+                        .collect(Collectors.toList()));
+        model.addAttribute("course", course);
+        model.addAttribute("reviews", reviews);
+        model.addAttribute("averageRating", averageRating);
+        model.addAttribute("ratingDistribution", ratingDistribution);
+        model.addAttribute("selectedStar", star);
+        model.addAttribute("isEnrolled", isEnrolled);
+
+        // Thêm thông tin số review của user hiện tại
+        if (userDetails != null) {
+            User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
+            if (user != null) {
+                Long userReviewCount = courseReviewService.countByUserIdAndCourseId(user.getUserId(), id);
+                model.addAttribute("userReviewCount", userReviewCount);
+            }
+        }
+
+        // Thêm thông tin user nếu đã đăng nhập
+        if (userDetails != null) {
+            User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
+            if (user != null) {
+                model.addAttribute("currentUser", user);
+                model.addAttribute("currentUserId", user.getUserId());
+                // Add unread notification count
+                long unreadCount = notificationService.countUnreadByUserId(user.getUserId());
+                model.addAttribute("unreadCount", unreadCount);
+            }
+        } else {
+            model.addAttribute("currentUserId", 0L);
+        }
+
+        model.addAttribute("listCategory", categoryService.getListCategories().stream().limit(8).toList());
+
+        model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderDefault");
+
+        return "homePage/course-detail";
+    }
 
     @PostMapping("/buy-now")
     public String buyNow(@AuthenticationPrincipal UserDetails userDetails,
-                         @RequestParam("courseId") Long courseId,
-                         @RequestParam(value = "voucherId", required = false) Long voucherId,
-                         @RequestParam(value = "paymentMethod", required = false) String paymentMethod,
-                         HttpServletRequest request,
-                         HttpServletResponse response,
-                         RedirectAttributes redirectAttributes) {
+            @RequestParam("courseId") Long courseId,
+            @RequestParam(value = "voucherId", required = false) Long voucherId,
+            @RequestParam(value = "paymentMethod", required = false) String paymentMethod,
+            HttpServletRequest request,
+            HttpServletResponse response,
+            RedirectAttributes redirectAttributes) {
         if (userDetails == null) {
             return "redirect:/login";
         }
-        String mainCartEncoded = CartServiceUtil.getCartCookie(request, CartServiceUtil.getUserIdFromUserDetails(userDetails, userRepository));
+        String mainCartEncoded = CartServiceUtil.getCartCookie(request,
+                CartServiceUtil.getUserIdFromUserDetails(userDetails, userRepository));
         if (cartService.isCourseInCart(mainCartEncoded, courseId, userDetails.getUsername())) {
-            redirectAttributes.addFlashAttribute("error", "This course is already in your cart. Please proceed to checkout from your cart.");
+            redirectAttributes.addFlashAttribute("error",
+                    "This course is already in your cart. Please proceed to checkout from your cart.");
             return "redirect:/home/course-detail?id=" + courseId;
         }
 
@@ -376,10 +385,10 @@ public class HomeController {
 
     @PostMapping("/course-review/add")
     public String addCourseReview(@RequestParam("courseId") Long courseId,
-                                  @RequestParam("rating") Integer rating,
-                                  @RequestParam("comment") String comment,
-                                  @AuthenticationPrincipal UserDetails userDetails,
-                                  RedirectAttributes redirectAttributes) {
+            @RequestParam("rating") Integer rating,
+            @RequestParam("comment") String comment,
+            @AuthenticationPrincipal UserDetails userDetails,
+            RedirectAttributes redirectAttributes) {
         if (userDetails == null) {
             redirectAttributes.addFlashAttribute("error", "Bạn cần đăng nhập để đánh giá.");
             return "redirect:/home/course-detail?id=" + courseId;
@@ -394,7 +403,8 @@ public class HomeController {
             redirectAttributes.addFlashAttribute("error", "Không tìm thấy khóa học.");
             return "redirect:/home/course-detail?id=" + courseId;
         }
-        boolean isEnrolled = enrollmentService.findFirstByUserAndCourseOrderByEnrollmentDateDesc(user, course).isPresent();
+        boolean isEnrolled = enrollmentService.findFirstByUserAndCourseOrderByEnrollmentDateDesc(user, course)
+                .isPresent();
         if (!isEnrolled) {
             redirectAttributes.addFlashAttribute("error", "Bạn cần đăng ký khóa học để đánh giá.");
             return "redirect:/home/course-detail?id=" + courseId;
@@ -407,7 +417,8 @@ public class HomeController {
         review.setComment(comment);
         review.setCreatedAt(java.time.LocalDateTime.now());
         // Gán enrollment
-        Enrollment enrollment = enrollmentService.findFirstByUserAndCourseOrderByEnrollmentDateDesc(user, course).orElse(null);
+        Enrollment enrollment = enrollmentService.findFirstByUserAndCourseOrderByEnrollmentDateDesc(user, course)
+                .orElse(null);
         review.setEnrollment(enrollment);
         courseReviewService.save(review);
         redirectAttributes.addFlashAttribute("message", "Đánh giá của bạn đã được ghi nhận.");
@@ -416,9 +427,9 @@ public class HomeController {
 
     @PostMapping("/course-review/delete")
     public String deleteCourseReview(@RequestParam("courseId") Long courseId,
-                                     @RequestParam("reviewId") Long reviewId,
-                                     @AuthenticationPrincipal UserDetails userDetails,
-                                     RedirectAttributes redirectAttributes) {
+            @RequestParam("reviewId") Long reviewId,
+            @AuthenticationPrincipal UserDetails userDetails,
+            RedirectAttributes redirectAttributes) {
         if (userDetails == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn cần đăng nhập để xóa đánh giá.");
             return "redirect:/home/course-detail?id=" + courseId;
@@ -448,9 +459,9 @@ public class HomeController {
 
     @GetMapping("/vnpay-payment-return")
     public String paymentCompleted(HttpServletRequest request,
-                                   HttpServletResponse response,
-                                   RedirectAttributes redirectAttributes,
-                                   @AuthenticationPrincipal UserDetails userDetails) {
+            HttpServletResponse response,
+            RedirectAttributes redirectAttributes,
+            @AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
             return "redirect:/login";
         }
@@ -474,7 +485,8 @@ public class HomeController {
                     courseId = Long.valueOf(items.get(0).get("courseId").toString());
                 }
             }
-        } catch (Exception ignore) {}
+        } catch (Exception ignore) {
+        }
 
         int paymentStatus = vnPayService.orderReturn(request);
 
@@ -494,7 +506,8 @@ public class HomeController {
                     CartServiceUtil.clearBuyNowCookie(response);
                 } else if (encodedCartJson != null && !encodedCartJson.isEmpty()) {
                     cartService.processCheckout(encodedCartJson, userDetails.getUsername());
-                    CartServiceUtil.updateCartCookie(cartService.clearCart(userDetails.getUsername()), response, userId, objectMapper);
+                    CartServiceUtil.updateCartCookie(cartService.clearCart(userDetails.getUsername()), response, userId,
+                            objectMapper);
                 }
 
                 cartService.completeCheckout(cart, order, false, transactionId);
