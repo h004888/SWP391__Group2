@@ -784,6 +784,10 @@ function clearChatbotHistory() {
         })
         .then(response => {
             if (response.ok) {
+                // Generate new session ID
+                chatbotSessionId = generateSessionId();
+                localStorage.setItem('chatbotSessionId', chatbotSessionId); // Lưu sessionId mới vào localStorage
+
                 // Clear messages and show welcome message
                 const messagesContainer = document.getElementById('chatbotMessages');
                 messagesContainer.innerHTML = `
@@ -806,9 +810,10 @@ function clearChatbotHistory() {
                         </div>
                     </div>
                 `;
-                
-                // Generate new session ID
-                chatbotSessionId = generateSessionId();
+                // Reload lại lịch sử chat (bây giờ sẽ là rỗng)
+                setTimeout(() => {
+                    loadChatHistory();
+                }, 100);
             } else {
                 alert('Có lỗi xảy ra khi xóa lịch sử chat.');
             }

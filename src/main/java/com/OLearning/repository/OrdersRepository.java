@@ -32,7 +32,6 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
     @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
     List<Order> findByUserUsernameContaining(String username);
 
-
     // Sắp xếp theo amount tăng dần
     @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
     List<Order> findAllByOrderByAmountAsc();

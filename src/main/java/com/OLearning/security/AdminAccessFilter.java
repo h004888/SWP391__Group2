@@ -49,13 +49,13 @@ public class AdminAccessFilter implements Filter {
                     session.setAttribute("admin_visited_admin", true);
                 }
             }
-            // Nếu vào /instructordashboard mà đã từng vào /admin thì chặn
-            if (uri.startsWith("/instructordashboard")) {
-                if (session != null && Boolean.TRUE.equals(session.getAttribute("admin_visited_admin"))) {
-                    response.sendRedirect("/403");
-                    return;
-                }
-            }
+//            // Nếu vào /instructordashboard mà đã từng vào /admin thì chặn
+//            if (uri.startsWith("/instructor")) {
+//                if (session != null && Boolean.TRUE.equals(session.getAttribute("admin_visited_admin"))) {
+//                    response.sendRedirect("/403");
+//                    return;
+//                }
+//            }
         }
         filterChain.doFilter(servletRequest, servletResponse);
     }

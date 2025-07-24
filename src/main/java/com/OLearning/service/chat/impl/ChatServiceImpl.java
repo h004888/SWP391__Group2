@@ -22,6 +22,8 @@ import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 @Service
 @RequiredArgsConstructor
@@ -39,23 +41,105 @@ public class ChatServiceImpl implements ChatService {
 
     private static final String SYSTEM_PROMPT = "Bạn là một trợ lý AI thông minh cho nền tảng học trực tuyến OLearning. " +
             "Bạn có thể giúp người dùng với các câu hỏi về khóa học, hướng dẫn học tập, giải thích các khái niệm, " +
-            "và hỗ trợ trong quá trình học tập. Hãy trả lời một cách thân thiện,ngắn gọn và dễ hiểu, hữu ích và chính xác. " +
+            "và hỗ trợ trong quá trình học tập. Hãy trả lời một cách thân thiện, ngắn gọn và dễ hiểu, hữu ích và chính xác. " +
             "Nếu câu hỏi không rõ ràng hoặc không liên quan đến OLearning, hãy yêu cầu người dùng làm rõ. " +
             "Bạn không được cung cấp thông tin cá nhân của người dùng hoặc bất kỳ thông tin nhạy cảm nào. " +
             "Bạn có thể sử dụng thông tin thực tế từ hệ thống OLearning để trả lời câu hỏi. " +
             "Nếu bạn không biết câu trả lời, hãy thành thật nói rằng bạn không biết.";
 
     private enum ChatTopic {
-        COURSE, INSTRUCTOR, CATEGORY, STUDENT_COUNT, UNKNOWN
+        COURSE, COURSE_SEARCH, INSTRUCTOR, CATEGORY, STUDENT_COUNT, UNKNOWN
     }
 
     private ChatTopic detectTopic(String message) {
         String lower = message.toLowerCase();
+
+        if (isSearchQuery(lower)) {
+            return ChatTopic.COURSE_SEARCH;
+        }
+
+        if ((lower.contains("khóa học") || lower.contains("course")) &&
+            (lower.contains("nổi bật") || lower.contains("top") || lower.contains("tiêu biểu") || lower.contains("xuất sắc") || lower.contains("best") || lower.contains("featured"))) {
+            return ChatTopic.COURSE;
+        }
+
         if (lower.contains("khóa học") || lower.contains("course")) return ChatTopic.COURSE;
-        if (lower.contains("giảng viên") || lower.contains("instructor") || lower.contains("thầy cô")) return ChatTopic.INSTRUCTOR;
+        if (lower.contains("giảng viên") || lower.contains("instructor") || lower.contains("thầy cô")|| lower.contains("người dạy")) return ChatTopic.INSTRUCTOR;
         if (lower.contains("danh mục") || lower.contains("category") || lower.contains("chuyên mục")) return ChatTopic.CATEGORY;
-        if (lower.contains("học viên") || lower.contains("sinh viên") || lower.contains("student")) return ChatTopic.STUDENT_COUNT;
+        if (lower.contains("học viên") || lower.contains("sinh viên") || lower.contains("student")|| lower.contains("người đăng kí") ) return ChatTopic.STUDENT_COUNT;
         return ChatTopic.UNKNOWN;
+    }
+
+    private boolean isSearchQuery(String message) {
+        String[] searchPatterns = {
+                "tìm kiếm.*khóa học", "khóa học.*về", "có khóa học.*nào",
+                "search.*course", "course.*about", "find.*course",
+                "học.*về", "muốn học", "khóa.*nào", "course.*that"
+        };
+
+        for (String pattern : searchPatterns) {
+            if (Pattern.compile(pattern).matcher(message).find()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String extractKeyword(String message) {
+        String lower = message.toLowerCase();
+
+        String[] patterns = {
+                "tìm kiếm khóa học về (.+?)(?:\\.|$|\\?|!)",
+                "khóa học về (.+?)(?:\\.|$|\\?|!)",
+                "có khóa học (.+?) nào",
+                "muốn học (.+?)(?:\\.|$|\\?|!)",
+                "học về (.+?)(?:\\.|$|\\?|!)",
+                "search course about (.+?)(?:\\.|$|\\?|!)",
+                "course about (.+?)(?:\\.|$|\\?|!)",
+                "find course (.+?)(?:\\.|$|\\?|!)"
+        };
+
+        for (String pattern : patterns) {
+            Pattern p = Pattern.compile(pattern);
+            Matcher m = p.matcher(lower);
+            if (m.find()) {
+                String keyword = m.group(1).trim();
+                // Loại bỏ các từ không cần thiết
+                keyword = keyword.replaceAll("\\b(nào|gì|thế|không|ko)\\b", "").trim();
+                return keyword;
+            }
+        }
+
+        if (lower.contains("khóa học")) {
+            String[] words = lower.split("\\s+");
+            StringBuilder keyword = new StringBuilder();
+            boolean foundCourse = false;
+
+            for (int i = 0; i < words.length; i++) {
+                if (words[i].equals("khóa") && i + 1 < words.length && words[i + 1].equals("học")) {
+                    foundCourse = true;
+                    i++; // skip "học"
+                    continue;
+                }
+                if (foundCourse && !isStopWord(words[i])) {
+                    keyword.append(words[i]).append(" ");
+                }
+            }
+
+            return keyword.toString().trim();
+        }
+
+        return "";
+    }
+
+    private boolean isStopWord(String word) {
+        String[] stopWords = {"về", "nào", "gì", "thế", "không", "ko", "có", "là", "của", "trong", "và", "hoặc"};
+        for (String stopWord : stopWords) {
+            if (word.equals(stopWord)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -67,6 +151,39 @@ public class ChatServiceImpl implements ChatService {
             StringBuilder contextData = new StringBuilder();
 
             switch (topic) {
+                case COURSE_SEARCH -> {
+                    String keyword = extractKeyword(request.getMessage());
+                    log.info("Extracted keyword for course search: '{}'", keyword);
+
+                    List<Course> searchResults = searchCourses(keyword);
+                    contextData.append("Kết quả tìm kiếm khóa học");
+                    if (!keyword.isEmpty()) {
+                        contextData.append(" với từ khóa \"").append(keyword).append("\"");
+                    }
+                    contextData.append(":\n");
+
+                    if (searchResults.isEmpty()) {
+                        contextData.append("Không tìm thấy khóa học nào phù hợp.\n");
+                    } else {
+                        contextData.append("Tìm thấy ").append(searchResults.size()).append(" khóa học:\n");
+                        searchResults.stream().limit(10).forEach(course -> {
+                            contextData.append("- ").append(course.getTitle());
+                            if (course.getDescription() != null && !course.getDescription().isEmpty()) {
+                                String shortDesc = course.getDescription().length() > 100
+                                        ? course.getDescription().substring(0, 100) + "..."
+                                        : course.getDescription();
+                                contextData.append(": ").append(shortDesc);
+                            }
+
+                            // Thêm thông tin số học viên nếu có
+                            long studentCount = getStudentCountOfCourse(course.getCourseId());
+                            if (studentCount > 0) {
+                                contextData.append(" (").append(studentCount).append(" học viên)");
+                            }
+                            contextData.append("\n");
+                        });
+                    }
+                }
                 case COURSE -> {
                     List<Course> topCourses = getTopCourses();
                     contextData.append("Top 5 khóa học nổi bật hiện có trên OLearning:\n");
@@ -97,6 +214,16 @@ public class ChatServiceImpl implements ChatService {
                     contextData.append("Hiện tại OLearning có tổng cộng khoảng ").append(total).append(" học viên đang theo học.\n");
                 }
                 default -> {
+                    String potentialKeyword = extractKeyword(request.getMessage());
+                    if (!potentialKeyword.isEmpty()) {
+                        List<Course> searchResults = searchCourses(potentialKeyword);
+                        if (!searchResults.isEmpty()) {
+                            contextData.append("Có thể bạn đang tìm hiểu về:\n");
+                            searchResults.stream().limit(3).forEach(course -> {
+                                contextData.append("- ").append(course.getTitle()).append("\n");
+                            });
+                        }
+                    }
                 }
             }
 
@@ -120,21 +247,21 @@ public class ChatServiceImpl implements ChatService {
             chatMessageRepository.save(chatMessage);
 
             return new ChatResponseDTO(
-                aiResponse,
-                request.getSessionId(),
-                LocalDateTime.now(),
-                true,
-                null
+                    aiResponse,
+                    request.getSessionId(),
+                    LocalDateTime.now(),
+                    true,
+                    null
             );
 
         } catch (Exception e) {
             log.error("Error sending message: ", e);
             return new ChatResponseDTO(
-                null,
-                request.getSessionId(),
-                LocalDateTime.now(),
-                false,
-                "Có lỗi xảy ra khi xử lý tin nhắn: " + e.getMessage()
+                    null,
+                    request.getSessionId(),
+                    LocalDateTime.now(),
+                    false,
+                    "Có lỗi xảy ra khi xử lý tin nhắn: " + e.getMessage()
             );
         }
     }
@@ -163,17 +290,17 @@ public class ChatServiceImpl implements ChatService {
     private String buildPromptWithContext(String currentMessage, List<ChatMessage> chatHistory) {
         StringBuilder prompt = new StringBuilder();
         prompt.append(SYSTEM_PROMPT).append("\n\n");
-        
+
         int historyLimit = Math.min(chatHistory.size(), 10);
         for (int i = Math.max(0, chatHistory.size() - historyLimit); i < chatHistory.size(); i++) {
             ChatMessage msg = chatHistory.get(i);
             prompt.append("User: ").append(msg.getUserMessage()).append("\n");
             prompt.append("Assistant: ").append(msg.getAiResponse()).append("\n\n");
         }
-        
+
         prompt.append("User: ").append(currentMessage).append("\n");
         prompt.append("Assistant: ");
-        
+
         return prompt.toString();
     }
 
@@ -198,12 +325,11 @@ public class ChatServiceImpl implements ChatService {
             } else {
                 return "Xin lỗi, tôi không thể xử lý yêu cầu của bạn lúc này.";
             }
-            
+
         }catch (WebClientResponseException ex) {
             // Bắt lỗi cụ thể từ WebClient
             log.error("Error calling Google AI API. Status: {}, Response Body: {}",
                     ex.getStatusCode(), ex.getResponseBodyAsString(), ex);
-            // Trả về thông báo lỗi chi tiết hơn (chỉ cho mục đích debug, có thể thay đổi sau)
             return "Lỗi từ API: " + ex.getStatusCode() + " - " + ex.getResponseBodyAsString();
         } catch (Exception e) {
             log.error("Error calling Google AI API: ", e);
@@ -214,12 +340,12 @@ public class ChatServiceImpl implements ChatService {
     public List<Course> searchCourses(String keyword) {
         if (keyword == null || keyword.isBlank()) return courseRepository.findAll();
         return courseRepository.findAll().stream()
-            .filter(c -> c.getTitle() != null && c.getTitle().toLowerCase().contains(keyword.toLowerCase()))
-            .toList();
+                .filter(c -> c.getTitle() != null && c.getTitle().toLowerCase().contains(keyword.toLowerCase()))
+                .toList();
     }
 
     public List<Course> getTopCourses() {
-        return courseRepository.findAllOrderByStudentCountDesc().stream().limit(5).toList();
+        return courseRepository.findAllPublishedOrderByStudentCountDesc().stream().limit(5).toList();
     }
 
     public List<Category> getTopCategories() {
@@ -234,17 +360,17 @@ public class ChatServiceImpl implements ChatService {
 
     public List<CourseReview> getCourseReviews(Long courseId) {
         return courseReviewRepository.findAll().stream()
-            .filter(r -> r.getCourse() != null && r.getCourse().getCourseId().equals(courseId))
-            .toList();
+                .filter(r -> r.getCourse() != null && r.getCourse().getCourseId().equals(courseId))
+                .toList();
     }
 
     public long getStudentCountOfCourse(Long courseId) {
         return enrollmentRepository.findAll().stream()
-            .filter(e -> e.getCourse() != null && e.getCourse().getCourseId().equals(courseId))
-            .count();
+                .filter(e -> e.getCourse() != null && e.getCourse().getCourseId().equals(courseId))
+                .count();
     }
 
     public long getTotalStudentCount() {
         return enrollmentRepository.countTotalStudents();
     }
-} 
+}

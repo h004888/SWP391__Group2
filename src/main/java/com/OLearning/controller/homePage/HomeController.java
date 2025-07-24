@@ -153,7 +153,7 @@ public class HomeController {
                         @RequestParam(required = false) List<String> priceFilters,
                         @RequestParam(required = false) List<String> levels,
                         @RequestParam(defaultValue = "Newest") String sortBy,
-                        @RequestParam(defaultValue = "9") int size,
+                        @RequestParam(defaultValue = "6") int size,
                         @AuthenticationPrincipal UserDetails userDetails,
                         HttpServletRequest request) {
                 Page<CourseViewDTO> courses = courseService.searchCoursesGrid(categoryIds, priceFilters, levels, sortBy,

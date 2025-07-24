@@ -35,12 +35,15 @@ public class BlockedAccountController {
             User user = userRepository.findByEmail(auth.getName()).orElse(null);
             if (user != null) {
                 Notification notification = new Notification();
-                notification.setUser(user);
+                var admins = userRepository.findByRole_RoleId(1L); // Giả sử roleId=1 là ADMIN
+                for (var admin : admins) {
+                notification.setUser(admin);
                 notification.setMessage("Appeal from blocked account: " + message);
                 notification.setType("BLOCKED_ACCOUNT_APPEAL");
                 notification.setStatus("failed");
                 notification.setSentAt(LocalDateTime.now());
                 notificationService.sendMess(notification);
+                }
             }
         }
         return "redirect:/account-blocked?sent=true";

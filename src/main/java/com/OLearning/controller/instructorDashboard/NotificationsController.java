@@ -239,7 +239,7 @@ public class NotificationsController {
             var notification = notificationOpt.get();
             var admins = userRepository.findByRole_RoleId(1L); // Giả sử roleId=1 là ADMIN
             for (var admin : admins) {
-                var adminNoti = new com.OLearning.entity.Notification();
+                var adminNoti = new Notification();
                 adminNoti.setUser(admin);
                 adminNoti.setCourse(notification.getCourse());
                 adminNoti.setType("INSTRUCTOR_REPLY_BLOCK");
@@ -249,7 +249,6 @@ public class NotificationsController {
                 adminNoti.setEvidenceLink(evidenceLink);
                 notificationRepository.save(adminNoti);
             }
-            // Không gửi notification cho instructor nữa
             // Cập nhật evidenceLink vào report liên quan
             Report report = reportRepository.findFirstByCourse_CourseIdAndNotification_NotificationId(courseId,
                     notificationId);

@@ -33,8 +33,8 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     //thanh search
     @Query("""
             SELECT c FROM Course c
-            WHERE
-                (:title IS NULL OR :title = '' OR LOWER(c.title) LIKE LOWER(CONCAT('%', :title, '%')))
+            WHERE LOWER(c.status) = 'publish'
+            AND(:title IS NULL OR :title = '' OR LOWER(c.title) LIKE LOWER(CONCAT('%', :title, '%')))
                 AND (:userId IS NULL OR c.instructor.userId = :userId)
             """)
     Page<Course> searchCoursesByKeyWord(

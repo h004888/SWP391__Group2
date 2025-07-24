@@ -90,7 +90,7 @@ public class SecurityConfig {
                         .requestMatchers("/home/cart").authenticated()
                         .requestMatchers("/home/wishlist").authenticated()
                         .requestMatchers("/api/sepay/**", "/api/order/status").permitAll()
-                        // Chỉ admin mới được truy cập /admin/**
+                        // Chỉ admin, staff mới được truy cập /admin/**
                         .requestMatchers("/admin/**").hasAnyRole("ADMIN", "STAFF")
 
                         // Chỉ instructor mới được truy cập /instructor/**
