@@ -386,11 +386,19 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public void blockCourse(Long courseId) {
         Course course = courseRepository.findById(courseId).orElseThrow();
-        // Chỉ cho phép block khi status là 'publish'
-        if (!"publish".equalsIgnoreCase(course.getStatus())) {
-            throw new IllegalStateException("Chỉ có thể block khóa học khi đang ở trạng thái 'publish'.");
+        // Chỉ cho phép block khi status là 'pending_block'
+        if (!"pending_block".equalsIgnoreCase(course.getStatus())) {
+            throw new IllegalStateException("Chỉ có thể block khóa học khi đang ở trạng thái 'pending_block'.");
         }
-        course.setStatus("blocked"); // hoặc trạng thái bạn định nghĩa
+        course.setStatus("blocked");
+        courseRepository.save(course);
+    }
+
+    // Thay đổi logic mở khóa: trả lại trạng thái 'publish' khi unblock
+    @Override
+    public void unblockCourse(Long courseId) {
+        Course course = courseRepository.findById(courseId).orElseThrow();
+        course.setStatus("publish");
         courseRepository.save(course);
     }
 
