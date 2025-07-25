@@ -275,8 +275,7 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
             
             try {
                 if (daysOverdue >= 14) {
-                    // Khóa tài khoản giảng viên
-                    course.getInstructor().setStatus(false);
+                    course.setStatus("blocked");
                     courseRepository.save(course);
                     
                     // Gửi email thông báo
@@ -294,10 +293,10 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
                     Notification notification = new Notification();
                     notification.setUser(course.getInstructor());
                     notification.setMessage(String.format(
-                        "Tài khoản của bạn đã bị khóa do không thanh toán phí bảo trì khóa học '%s' sau 14 ngày quá hạn",
+                        "Khóa học '%s' đã bị khóa do không thanh toán phí bảo trì sau 14 ngày quá hạn",
                         course.getTitle()
                     ));
-                    notification.setType("ACCOUNT_LOCKED");
+                    notification.setType("COURSE_LOCKED");
                     notification.setSentAt(LocalDateTime.now());
                     notification.setCourse(course);
                     notification.setStatus("failed");
@@ -358,7 +357,6 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
                     notificationRepository.save(notification);
                 }
 
-                // Cập nhật trạng thái maintenance
                 maintenance.setStatus("overdue");
                 courseMaintenanceRepository.save(maintenance);
 

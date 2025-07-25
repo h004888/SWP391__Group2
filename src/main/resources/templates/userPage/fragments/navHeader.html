@@ -292,7 +292,7 @@
                             <hr class="dropdown-divider">
                         </li>
                         <li><a class="dropdown-item" sec:authorize="hasRole('INSTRUCTOR')"
-                               th:href="@{/instructor}"><i class="bi bi-gear fa-fw me-2"></i>DashBoard</a></li>
+                               th:href="@{/instructor/courses}"><i class="bi bi-gear fa-fw me-2"></i>DashBoard</a></li>
                         <li sec:authorize="hasRole('USER')"><a class="dropdown-item" th:href="@{/profile}"><i class="bi bi-person fa-fw me-2"></i>Profile</a></li>
                         <li><a class="dropdown-item" th:href="@{/home/history}"><i class="fas fa-history me-2"></i>History</a></li>
                         <li>

@@ -36,9 +36,10 @@ public class BlockedAccountController {
             if (user != null) {
                 Notification notification = new Notification();
                 var admins = userRepository.findByRole_RoleId(1L); // Giả sử roleId=1 là ADMIN
+                String senderInfo = String.format("[Sender: %s | Email: %s | Full Name: %s] ", user.getUsername(), user.getEmail(), user.getFullName());
                 for (var admin : admins) {
                 notification.setUser(admin);
-                notification.setMessage("Appeal from blocked account: " + message);
+                notification.setMessage(senderInfo + "Appeal from blocked account: " + message);
                 notification.setType("BLOCKED_ACCOUNT_APPEAL");
                 notification.setStatus("failed");
                 notification.setSentAt(LocalDateTime.now());

@@ -59,6 +59,22 @@ public class ChatServiceImpl implements ChatService {
         }
 
         if ((lower.contains("khóa học") || lower.contains("course")) &&
+            (
+                (lower.contains("nhiều học viên") && (lower.contains("nhất") || lower.contains("nào")))
+                || lower.contains("nhiều người đăng ký")
+                || lower.contains("nhiều người đăng kí")
+                || lower.contains("most students")
+                || lower.contains("most enrollments")
+                || lower.contains("most registrations")
+                || lower.contains("học viên nhất")
+                || lower.contains("đăng ký nhiều nhất")
+                || lower.contains("đăng kí nhiều nhất")
+            )
+        ) {
+            return ChatTopic.COURSE;
+        }
+
+        if ((lower.contains("khóa học") || lower.contains("course")) &&
             (lower.contains("nổi bật") || lower.contains("top") || lower.contains("tiêu biểu") || lower.contains("xuất sắc") || lower.contains("best") || lower.contains("featured"))) {
             return ChatTopic.COURSE;
         }
@@ -118,7 +134,7 @@ public class ChatServiceImpl implements ChatService {
             for (int i = 0; i < words.length; i++) {
                 if (words[i].equals("khóa") && i + 1 < words.length && words[i + 1].equals("học")) {
                     foundCourse = true;
-                    i++; // skip "học"
+                    i++;
                     continue;
                 }
                 if (foundCourse && !isStopWord(words[i])) {
@@ -185,12 +201,37 @@ public class ChatServiceImpl implements ChatService {
                     }
                 }
                 case COURSE -> {
-                    List<Course> topCourses = getTopCourses();
-                    contextData.append("Top 5 khóa học nổi bật hiện có trên OLearning:\n");
-                    for (Course c : topCourses) {
-                        contextData.append("- ").append(c.getTitle());
-                        if (c.getDescription() != null) contextData.append(": ").append(c.getDescription());
-                        contextData.append("\n");
+                    String lowerMsg = request.getMessage().toLowerCase();
+                    if ((lowerMsg.contains("nhiều học viên") && (lowerMsg.contains("nhất") || lowerMsg.contains("nào")))
+                        || lowerMsg.contains("nhiều người đăng ký")
+                        || lowerMsg.contains("nhiều người đăng kí")
+                        || lowerMsg.contains("most students")
+                        || lowerMsg.contains("most enrollments")
+                        || lowerMsg.contains("most registrations")
+                        || lowerMsg.contains("học viên nhất")
+                        || lowerMsg.contains("đăng ký nhiều nhất")
+                        || lowerMsg.contains("đăng kí nhiều nhất")) {
+                        List<Course> topCourses = getTopCourses();
+                        if (!topCourses.isEmpty()) {
+                            Course mostStudentCourse = topCourses.get(0);
+                            long studentCount = getStudentCountOfCourse(mostStudentCourse.getCourseId());
+                            contextData.append("Khóa học có nhiều học viên/đăng ký nhất là: ")
+                                .append(mostStudentCourse.getTitle());
+                            if (mostStudentCourse.getDescription() != null) {
+                                contextData.append(": ").append(mostStudentCourse.getDescription());
+                            }
+                            contextData.append(" (").append(studentCount).append(" học viên)\n");
+                        } else {
+                            contextData.append("Không tìm thấy dữ liệu về các khóa học.\n");
+                        }
+                    } else {
+                        List<Course> topCourses = getTopCourses();
+                        contextData.append("Top 5 khóa học nổi bật hiện có trên OLearning:\n");
+                        for (Course c : topCourses) {
+                            contextData.append("- ").append(c.getTitle());
+                            if (c.getDescription() != null) contextData.append(": ").append(c.getDescription());
+                            contextData.append("\n");
+                        }
                     }
                 }
                 case INSTRUCTOR -> {
@@ -226,8 +267,7 @@ public class ChatServiceImpl implements ChatService {
                     }
                 }
             }
-
-            // Tạo prompt với context
+            
             String fullPrompt = SYSTEM_PROMPT + "\n\n";
             if (!contextData.isEmpty()) {
                 fullPrompt += "Thông tin thực tế từ hệ thống:\n" + contextData + "\n";

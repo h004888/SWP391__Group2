@@ -92,7 +92,7 @@ public class UserCourseController {
             return "userPage/LearningDashboard";
         }
 
-        CourseViewDTO courseViewDTO = courseService.getCourseById(courses.get(0).getCourseId());
+        CourseViewDTO courseViewDTO = courseService.getCourseRecentIncomplete(currentUser.getUserId());
 
         // CourseViewDTO courseViewDTO =
         // courseService.getCourseRecentIncomplete(currentUser.getUserId());
