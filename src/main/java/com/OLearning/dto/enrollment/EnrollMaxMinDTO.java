@@ -15,7 +15,7 @@ public class EnrollMaxMinDTO {
     private Long enrollmentCount;
     private Long courseId;
     private String courseImg;
-    private BigDecimal averageProgress;
+    private Double averageProgress;
     private String courseLevel;
     private Timestamp enrollmentDate;
     private String title;
