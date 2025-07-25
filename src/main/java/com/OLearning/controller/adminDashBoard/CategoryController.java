@@ -113,8 +113,8 @@ public class CategoryController {
         return categoryPage.getTotalElements();
     }
 
-    @GetMapping("/category/delete/{id}")
-    public String deleteCategory(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
+    @PostMapping("/category/delete")
+    public String deleteCategory(@RequestParam Long id, RedirectAttributes redirectAttributes) {
         Category category = categoryService.findById(id).orElse(null);
         if (category == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Category not found");
