@@ -12,7 +12,7 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @AllArgsConstructor
 public class InvoiceDTO {
-    private int orderId;
+    private Long orderId;
     private String fullName;
     private Double amount;
     private Timestamp orderDate;

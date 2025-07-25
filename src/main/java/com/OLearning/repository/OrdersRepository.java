@@ -293,7 +293,7 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
             WHERE d.CourseID IN (
                 SELECT CourseID
                 FROM Courses
-                WHERE InstructorID = :instructorId
+                WHERE InstructorID = :instructorId and o.status = 'paid'
             )
             ORDER BY o.OrderDate DESC
             """,
@@ -304,7 +304,7 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
                     WHERE d.CourseID IN (
                         SELECT CourseID
                         FROM Courses
-                        WHERE InstructorID = :instructorId
+                        WHERE InstructorID = :instructorId and o.status = 'paid'
                     )
                     """,
             nativeQuery = true)
@@ -317,7 +317,7 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
             WHERE d.CourseID IN (
                 SELECT CourseID
                 FROM Courses
-                WHERE InstructorID = :instructorId
+                WHERE InstructorID = :instructorId and o.status = 'paid'
             )) as revenue
             """, nativeQuery = true)
     Double sumRevenueOrders(@Param("instructorId") Long instructorId);
@@ -331,7 +331,7 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
         FROM Orders o
         JOIN OrderDetail d ON o.OrderID = d.OrderID
         JOIN Courses c ON d.CourseID = c.CourseID
-        WHERE c.InstructorID = :instructorid
+        WHERE c.InstructorID = :instructorid and o.status = 'paid'
     )
     SELECT
         current_month_revenue,
@@ -352,7 +352,7 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
             WHERE d.CourseID IN (
                 SELECT CourseID
                 FROM Courses
-                WHERE InstructorID = :instructorId
+                WHERE InstructorID = :instructorId and o.status = 'paid'
             )
             ORDER BY o.OrderDate DESC
             """,
@@ -363,7 +363,7 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
                     WHERE d.CourseID IN (
                         SELECT CourseID
                         FROM Courses
-                        WHERE InstructorID = :instructorId
+                        WHERE InstructorID = :instructorId and o.status = 'paid'
                     )
                     """,
             nativeQuery = true)
@@ -377,7 +377,7 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
             WHERE d.CourseID IN (
                 SELECT CourseID
                 FROM Courses
-                WHERE InstructorID = :instructorId
+                WHERE InstructorID = :instructorId and o.status = 'paid'
             )
             ORDER BY o.OrderDate DESC
             """,
@@ -388,7 +388,7 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
                     WHERE d.CourseID IN (
                         SELECT CourseID
                         FROM Courses
-                        WHERE InstructorID = :instructorId
+                        WHERE InstructorID = :instructorId and o.status = 'paid'
                     )
                     """,
             nativeQuery = true)
@@ -401,7 +401,7 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
             WHERE d.CourseID IN (
                 SELECT CourseID
                 FROM Courses
-                WHERE InstructorID = :instructorId
+                WHERE InstructorID = :instructorId and o.status = 'paid'
             )
             ORDER BY o.OrderDate DESC
             """,
@@ -412,7 +412,7 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
                     WHERE d.CourseID IN (
                         SELECT CourseID
                         FROM Courses
-                        WHERE InstructorID = :instructorId
+                        WHERE InstructorID = :instructorId and o.status = 'paid'
                     )
                     """,
             nativeQuery = true)

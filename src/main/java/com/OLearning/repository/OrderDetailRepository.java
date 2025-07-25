@@ -36,7 +36,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
         FROM Orders o
         JOIN OrderDetail od ON o.OrderID = od.OrderID
         JOIN Courses c ON od.CourseID = c.CourseID
-        WHERE c.InstructorID = :instructorId
+        WHERE c.InstructorID = :instructorId and o.status = 'paid'
           AND o.OrderDate >= :start AND o.OrderDate <= :end
         GROUP BY YEAR(o.OrderDate), MONTH(o.OrderDate), DAY(o.OrderDate)
         ORDER BY YEAR(o.OrderDate), MONTH(o.OrderDate), DAY(o.OrderDate)
@@ -52,7 +52,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
         FROM Orders o
         JOIN OrderDetail od ON o.OrderID = od.OrderID
         JOIN Courses c ON od.CourseID = c.CourseID
-        WHERE c.InstructorID = :instructorId
+        WHERE c.InstructorID = :instructorId and o.status = 'paid'
           AND o.OrderDate >= :start AND o.OrderDate <= :end
         GROUP BY YEAR(o.OrderDate), MONTH(o.OrderDate)
         ORDER BY YEAR(o.OrderDate), MONTH(o.OrderDate)
@@ -68,7 +68,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
         FROM Orders o
         JOIN OrderDetail od ON o.OrderID = od.OrderID
         JOIN Courses c ON od.CourseID = c.CourseID
-        WHERE c.InstructorID = :instructorId
+        WHERE c.InstructorID = :instructorId and o.status = 'paid'
           AND o.OrderDate >= :start AND o.OrderDate <= :end
         GROUP BY YEAR(o.OrderDate), DATEPART(quarter, o.OrderDate)
         ORDER BY YEAR(o.OrderDate), DATEPART(quarter, o.OrderDate)
