@@ -73,8 +73,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<UserDTO> getInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(String keyword, Long roleId, Pageable pageable) {
-        Page<User> userPage = userRepository.findInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(roleId, keyword, pageable);
+    public Page<UserDTO> getInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(String keyword, Long roleId,
+            Pageable pageable) {
+        Page<User> userPage = userRepository.findInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(roleId, keyword,
+                pageable);
         return userPage.map(userMapper::toDTO);
     }
 
@@ -85,8 +87,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<UserDTO> searchByNameAndStatusWithPagination(String keyword, Long roleId, boolean status, Pageable pageable) {
-        Page<User> userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleIdAndStatus(keyword, roleId, status, pageable);
+    public Page<UserDTO> searchByNameAndStatusWithPagination(String keyword, Long roleId, boolean status,
+            Pageable pageable) {
+        Page<User> userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleIdAndStatus(keyword, roleId,
+                status, pageable);
         return userPage.map(userMapper::toDTO);
     }
 
@@ -104,13 +108,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<UserDTO> searchByNameWithPagination(String keyword, List<Long> roleIds, Pageable pageable) {
-        Page<User> userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleIdIn(keyword, roleIds, pageable);
+        Page<User> userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleIdIn(keyword, roleIds,
+                pageable);
         return userPage.map(userMapper::toDTO);
     }
 
     @Override
-    public Page<UserDTO> searchByNameAndStatusWithPagination(String keyword, List<Long> roleIds, boolean status, Pageable pageable) {
-        Page<User> userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleIdInAndStatus(keyword, roleIds, status, pageable);
+    public Page<UserDTO> searchByNameAndStatusWithPagination(String keyword, List<Long> roleIds, boolean status,
+            Pageable pageable) {
+        Page<User> userPage = userRepository.findByUsernameContainingIgnoreCaseAndRole_RoleIdInAndStatus(keyword,
+                roleIds, status, pageable);
         return userPage.map(userMapper::toDTO);
     }
 
@@ -144,7 +151,8 @@ public class UserServiceImpl implements UserService {
     public boolean changStatus(Long id, String reason) {
         if (userRepository.existsById(id)) {
             Optional<User> userOpt = userRepository.findById(id);
-            if (userOpt.isEmpty()) return false;
+            if (userOpt.isEmpty())
+                return false;
             User user = userOpt.get();
             boolean oldStatus = user.getStatus();
             try {
@@ -158,7 +166,8 @@ public class UserServiceImpl implements UserService {
             if (oldStatus && !user.getStatus()) {
                 Notification notification = new Notification();
                 notification.setUser(user);
-                notification.setMessage("Tài khoản của bạn đã bị block." + (reason != null && !reason.isBlank() ? (" Lý do: " + reason) : ""));
+                notification.setMessage("Tài khoản của bạn đã bị block."
+                        + (reason != null && !reason.isBlank() ? (" Lý do: " + reason) : ""));
                 notification.setType("ACCOUNT_BLOCKED");
                 notification.setStatus("failed");
                 notification.setSentAt(LocalDateTime.now());
@@ -230,11 +239,11 @@ public class UserServiceImpl implements UserService {
         if (user.getProfilePicture() == null || user.getProfilePicture().trim().isEmpty()) {
             user.setProfilePicture("/img/undraw_profile.svg");
         }
-        //Default password
+        // Default password
         String encodedPassword = new BCryptPasswordEncoder().encode("123");
         user.setPassword(encodedPassword);
 
-        //Send notification email to new staff
+        // Send notification email to new staff
         emailService.sendPromotedToStaffEmail(user);
 
         return userRepository.save(user);
@@ -259,7 +268,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean deleteAcc(Long id) {
         Optional<User> userOptional = userRepository.findById(id);
-        if(userOptional.isEmpty()) {
+        if (userOptional.isEmpty()) {
             return false;
         }
         userRepository.deleteById(id);
@@ -274,11 +283,11 @@ public class UserServiceImpl implements UserService {
         }
         User user = optionalUser.get();
 
-        //Defaut reset password is 123
+        // Defaut reset password is 123
         String encodedPassword = new BCryptPasswordEncoder().encode("123");
         user.setPassword(encodedPassword);
         userRepository.save(user);
-        //sau khi doi pass gửi email cho user bt
+        // sau khi doi pass gửi email cho user bt
         return false;
     }
 
@@ -286,13 +295,12 @@ public class UserServiceImpl implements UserService {
     public List<UserDTO> getTopInstructorsByCourseCount(int limit) {
         // Get all instructors (roleId = 2)
         List<User> instructors = userRepository.findByRoleId(2L);
-        
+
         // Sort instructors by number of courses in descending order
         return instructors.stream()
                 .sorted((i1, i2) -> Integer.compare(
                         i2.getCourses().size(),
-                        i1.getCourses().size()
-                ))
+                        i1.getCourses().size()))
                 .limit(limit)
                 .map(userMapper::toDTO)
                 .collect(Collectors.toList());
@@ -302,7 +310,8 @@ public class UserServiceImpl implements UserService {
     public Page<UserDTO> filterInstructors(String keyword, Pageable pageable) {
         Page<User> userPage;
         if (keyword != null && !keyword.trim().isEmpty()) {
-            userPage = userRepository.findInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(2L, keyword.trim(), pageable);
+            userPage = userRepository.findInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(2L, keyword.trim(),
+                    pageable);
         } else {
             userPage = userRepository.findInstructorsByRoleIdOrderByCourseCountDesc(2L, pageable);
         }
@@ -320,7 +329,6 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("User not found with email: " + email);
         }
     }
-
 
     @Override
     public boolean existsById(Long userId) {
@@ -346,8 +354,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateProfileByUsername(String username, UserProfileEditDTO profileEditDTO) {
-        User user = userRepository.findByEmail(username)
-                .orElseThrow(() -> new RuntimeException("User not found with email: " + username));
+        // Tìm user theo username trước, nếu không thấy thì fallback sang email
+        Optional<User> userOpt = userRepository.findByUsername(username);
+        if (userOpt.isEmpty()) {
+            userOpt = userRepository.findByEmail(username);
+        }
+        User user = userOpt
+                .orElseThrow(() -> new RuntimeException("User not found with username or email: " + username));
         user.setFullName(profileEditDTO.getFullName());
         user.setPhone(profileEditDTO.getPhone());
         user.setProfilePicture(profileEditDTO.getAvatarUrl());
