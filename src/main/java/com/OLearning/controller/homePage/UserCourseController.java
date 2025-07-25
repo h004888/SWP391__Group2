@@ -94,13 +94,6 @@ public class UserCourseController {
 
         CourseViewDTO courseViewDTO = courseService.getCourseRecentIncomplete(currentUser.getUserId());
 
-        // CourseViewDTO courseViewDTO =
-        // courseService.getCourseRecentIncomplete(currentUser.getUserId());
-        // if (courseViewDTO == null) {
-        // model.addAttribute("course", null); // hoặc ẩn phần này trên giao diện
-        // return "userPage/LearningDashboard";
-        // }
-
         model.addAttribute("course", courseViewDTO);
         model.addAttribute("progress",
                 lessonCompletionService.getOverallProgressOfUser(currentUser.getUserId(), courseViewDTO.getCourseId()));
@@ -137,7 +130,7 @@ public class UserCourseController {
         model.addAttribute("lsInstructor", userService.getUsersByRole(2L));
         model.addAttribute("totalEnrollments",
                 enrollmentService.getTotalEnrollmentOfInstructor(userService.getUsersByRole(2L)));
-
+        model.addAttribute("activeMenu", "learning");
         return "userPage/LearningDashboard";
     }
 
@@ -293,6 +286,7 @@ public class UserCourseController {
         }
 
         Lesson nextLesson = lessonService.getNextLesson(courseId, lessonId);
+
         CourseViewDTO courseView = courseService.getCourseById(courseId);
 
         Set<Long> accessibleLessonIds = new HashSet<>(completedLessonIds);
@@ -506,5 +500,22 @@ public class UserCourseController {
         model.addAttribute("fragmentContent", "homePage/fragments/myCourseContent :: myCourseContent");
         model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderDefault");
         return "homePage/index";
+    }
+
+    @GetMapping("/congratulations")
+    public String showCongratulations(Principal principal, Model model, @RequestParam("courseId") Long courseId) {
+        if (principal == null) {
+            return "redirect:/login";
+        }
+
+        User currentUser = extractCurrentUser(principal);
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute("categories", categoryService.getListCategories().stream().limit(5).toList());
+        model.addAttribute("user", currentUser);
+        model.addAttribute("course", courseService.getCourseById(courseId));
+        return "userPage/Congratulations";
     }
 }

@@ -121,6 +121,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
         List<Enrollment> findByUserAndCourseOrderByEnrollmentDateDesc(@Param("user") User user,
                         @Param("course") Course course);
 
+
         @Query("SELECT e FROM Enrollment e WHERE e.user = :user AND e.course = :course ORDER BY e.enrollmentDate DESC")
         Optional<Enrollment> findFirstByUserAndCourseOrderByEnrollmentDateDesc(@Param("user") User user,
                         @Param("course") Course course);

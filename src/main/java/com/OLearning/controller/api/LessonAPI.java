@@ -6,6 +6,8 @@ import com.OLearning.security.CustomUserDetails;
 import com.OLearning.service.enrollment.EnrollmentService;
 import com.OLearning.service.lesson.LessonService;
 import com.OLearning.service.lessonCompletion.LessonCompletionService;
+import com.OLearning.service.certificate.CertificateService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,8 @@ public class LessonAPI {
     private LessonCompletionService lessonCompletionService;
     @Autowired
     private EnrollmentService enrollmentService;
+    @Autowired
+    private CertificateService certificateService;
 
     @GetMapping("/first")
     public ResponseEntity<Lesson> getFirstLesson(
@@ -63,6 +67,7 @@ public class LessonAPI {
         }
         if (lessonCompletionService.getOverallProgressOfUser(user.getUserId(), courseId) == 100) {
             enrollmentService.updateStatusToCompleted(user.getUserId(), courseId);
+            certificateService.generateCertificate(user.getUserId(), courseId);
         }
 
         Lesson nextLesson = lessonService.getNextLesson(courseId, lessonId);
@@ -71,7 +76,8 @@ public class LessonAPI {
                     "status", "success",
                     "nextLessonUrl", "/learning/course/" + courseId + "/lesson/" + nextLesson.getLessonId()));
         } else {
-            return ResponseEntity.ok(Map.of("status", "completed_all"));
+            return ResponseEntity.ok(Map.of("status", "completed_all",
+                    "redirectUrl", "/learning/congratulations?courseId=" + courseId));
         }
     }
 }

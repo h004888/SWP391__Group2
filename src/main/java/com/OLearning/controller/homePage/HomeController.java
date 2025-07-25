@@ -16,6 +16,7 @@ import com.OLearning.repository.VoucherRepository;
 import com.OLearning.service.cart.CartService;
 import com.OLearning.service.cart.impl.CartServiceImpl;
 import com.OLearning.service.category.CategoryService;
+import com.OLearning.service.certificate.CertificateService;
 import com.OLearning.service.course.CourseService;
 import com.OLearning.service.courseReview.CourseReviewService;
 import com.OLearning.service.user.UserService;
@@ -41,6 +42,8 @@ import com.OLearning.service.order.OrdersService;
 import com.OLearning.service.payment.VietQRService;
 import com.OLearning.service.notification.NotificationService;
 import com.OLearning.service.payment.CartServiceUtil;
+
+import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath;
 
 @Controller
 @RequestMapping("/home")
@@ -96,6 +99,9 @@ public class HomeController {
     @Autowired
     private NotificationService notificationService;
 
+    @Autowired
+    private CertificateService certificateService;
+
     @GetMapping()
     public String getMethodName(Model model,
             @AuthenticationPrincipal UserDetails userDetails,
@@ -112,6 +118,7 @@ public class HomeController {
         model.addAttribute("totalCourseIsPublish", courseService.countCourseIsPublish());
         model.addAttribute("totalInstructor", userService.countInstructor());
         model.addAttribute("totalStudent", userService.countStudent());
+        model.addAttribute("totalCertificate", certificateService.countAllByCertificate());
         model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderCategory");
         model.addAttribute("fragmentContent", "homePage/fragments/mainContent :: mainContent");
         return "homePage/index";
@@ -251,6 +258,7 @@ public class HomeController {
         model.addAttribute("selectedStar", star);
         model.addAttribute("isEnrolled", isEnrolled);
 
+
         // Thêm thông tin số review của user hiện tại
         if (userDetails != null) {
             User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
@@ -294,20 +302,18 @@ public class HomeController {
 
     @PostMapping("/buy-now")
     public String buyNow(@AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam("courseId") Long courseId,
-            @RequestParam(value = "voucherId", required = false) Long voucherId,
-            @RequestParam(value = "paymentMethod", required = false) String paymentMethod,
-            HttpServletRequest request,
-            HttpServletResponse response,
-            RedirectAttributes redirectAttributes) {
+                         @RequestParam("courseId") Long courseId,
+                         @RequestParam(value = "voucherId", required = false) Long voucherId,
+                         @RequestParam(value = "paymentMethod", required = false) String paymentMethod,
+                         HttpServletRequest request,
+                         HttpServletResponse response,
+                         RedirectAttributes redirectAttributes) {
         if (userDetails == null) {
             return "redirect:/login";
         }
-        String mainCartEncoded = CartServiceUtil.getCartCookie(request,
-                CartServiceUtil.getUserIdFromUserDetails(userDetails, userRepository));
+        String mainCartEncoded = CartServiceUtil.getCartCookie(request, CartServiceUtil.getUserIdFromUserDetails(userDetails, userRepository));
         if (cartService.isCourseInCart(mainCartEncoded, courseId, userDetails.getUsername())) {
-            redirectAttributes.addFlashAttribute("error",
-                    "This course is already in your cart. Please proceed to checkout from your cart.");
+            redirectAttributes.addFlashAttribute("error", "This course is already in your cart. Please proceed to checkout from your cart.");
             return "redirect:/home/course-detail?id=" + courseId;
         }
 
@@ -327,22 +333,24 @@ public class HomeController {
             item.put("id", UUID.randomUUID().toString());
             item.put("courseId", courseId);
             item.put("courseTitle", course.getTitle());
-            double price = course.getPrice().doubleValue();
+            double originalPrice = course.getPrice().doubleValue();
+            double discountedPrice = originalPrice;
             if (voucherId != null) {
                 var voucherOpt = voucherRepository.findById(voucherId);
                 if (voucherOpt.isPresent()) {
                     double discount = voucherOpt.get().getDiscount() != null ? voucherOpt.get().getDiscount() : 0.0;
-                    price = discount >= 100.0 ? 0 : Math.round(price * (1 - discount / 100.0));
+                    discountedPrice = discount >= 100.0 ? 0 : Math.round(originalPrice * (1 - discount / 100.0));
                     item.put("appliedVoucherId", voucherId);
                 }
             }
-            item.put("price", price);
+            item.put("originalPrice", originalPrice);
+            item.put("discountedPrice", discountedPrice);
             items.add(item);
             cart.put("items", items);
             cart.put("total", 1L);
 
             String cartJson = objectMapper.writeValueAsString(cart);
-            double totalAmount = price;
+            double totalAmount = discountedPrice;
 
             if (user.getCoin() >= totalAmount) {
                 Order order = new Order();
@@ -363,7 +371,11 @@ public class HomeController {
                 OrderDetail orderDetail = new OrderDetail();
                 orderDetail.setOrder(order);
                 orderDetail.setCourse(course);
-                orderDetail.setUnitPrice(price);
+                orderDetail.setUnitPrice(discountedPrice);
+                if (voucherId != null) {
+                    Voucher voucher = voucherRepository.findById(voucherId).orElse(null);
+                    orderDetail.setVoucher(voucher);
+                }
                 ordersService.saveOrderDetail(orderDetail);
                 String qrUrl = vietQRService.generateSePayQRUrl(order.getAmount(), order.getDescription());
                 request.setAttribute("orderId", order.getOrderId());
@@ -381,7 +393,7 @@ public class HomeController {
                 request.setAttribute("amount", (int) (totalAmount * 100));
                 String currentPath = request.getRequestURI();
                 String basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
-                String returnUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                String returnUrl = fromCurrentContextPath()
                         .path(basePath)
                         .build()
                         .toUriString();
@@ -391,6 +403,105 @@ public class HomeController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Purchase error: " + e.getMessage());
             return "redirect:/home/course-detail?id=" + courseId;
+        }
+    }
+    @GetMapping("/vnpay-payment-return")
+    public String paymentCompleted(HttpServletRequest request,
+                                   HttpServletResponse response,
+                                   RedirectAttributes redirectAttributes,
+                                   @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+
+        Long userId = CartServiceUtil.getUserIdFromUserDetails(userDetails, userRepository);
+        String encodedBuyNowJson = CartServiceUtil.getBuyNowCookie(request);
+        String encodedCartJson = CartServiceUtil.getCartCookie(request, userId);
+        Long courseId = null;
+        Map<String, Object> cart = null;
+        try {
+            if (encodedBuyNowJson != null) {
+                byte[] decodedBytes = Base64.getDecoder().decode(encodedBuyNowJson);
+                String cartJson = new String(decodedBytes, StandardCharsets.UTF_8);
+                cart = objectMapper.readValue(cartJson, Map.class);
+            } else if (encodedCartJson != null && !encodedCartJson.isEmpty()) {
+                cart = cartService.getCartDetails(encodedCartJson, userDetails.getUsername());
+            }
+            if (cart != null) {
+                List<Map<String, Object>> items = (List<Map<String, Object>>) cart.get("items");
+                if (items != null && !items.isEmpty()) {
+                    courseId = Long.valueOf(items.get(0).get("courseId").toString());
+                }
+            }
+        } catch (Exception ignore) {}
+
+        int paymentStatus = vnPayService.orderReturn(request);
+
+        if (paymentStatus == 1) {
+            try {
+                String transactionId = request.getParameter("vnp_TransactionNo");
+                double totalAmount = 0.0;
+                if (cart != null) {
+                    List<Map<String, Object>> items = (List<Map<String, Object>>) cart.get("items");
+                    if (items != null && !items.isEmpty()) {
+                        Object price = items.get(0).getOrDefault("discountedPrice", items.get(0).get("price"));
+                        totalAmount = price != null ? ((Number) price).doubleValue() : 0.0;
+                    }
+                }
+
+                Order order = new Order();
+                order.setUser(userRepository.findById(userId)
+                        .orElseThrow(() -> new EntityNotFoundException("User not found")));
+                order.setAmount(totalAmount);
+                order.setRefCode(transactionId);
+
+                if (encodedBuyNowJson != null) {
+                    CartServiceUtil.clearBuyNowCookie(response);
+                } else if (encodedCartJson != null && !encodedCartJson.isEmpty()) {
+                    cartService.processCheckout(encodedCartJson, userDetails.getUsername());
+                    CartServiceUtil.updateCartCookie(cartService.clearCart(userDetails.getUsername()), response, userId, objectMapper);
+                }
+                cartService.completeCheckout(cart, order, false, transactionId);
+
+                if (cart != null) {
+                    List<Map<String, Object>> items = (List<Map<String, Object>>) cart.get("items");
+                    if (items != null && !items.isEmpty()) {
+                        Object vId = items.get(0).get("appliedVoucherId");
+                        if (vId != null) {
+                            Long voucherId = Long.valueOf(vId.toString());
+                            voucherService.useVoucherForUserAndCourse(voucherId, userId);
+                        }
+                    }
+                }
+
+                redirectAttributes.addFlashAttribute("message", "VNPay payment successful!");
+                if (courseId != null) {
+                    return "redirect:/home/course-detail?id=" + courseId;
+                } else {
+                    return "redirect:/home";
+                }
+            } catch (CartServiceImpl.CourseAlreadyPurchasedException e) {
+                redirectAttributes.addFlashAttribute("error", e.getMessage());
+                if (courseId != null) {
+                    return "redirect:/home/course-detail?id=" + courseId;
+                } else {
+                    return "redirect:/home";
+                }
+            } catch (Exception e) {
+                redirectAttributes.addFlashAttribute("error", "VNPay success but internal error: " + e.getMessage());
+                if (courseId != null) {
+                    return "redirect:/home/course-detail?id=" + courseId;
+                } else {
+                    return "redirect:/home";
+                }
+            }
+        } else {
+            redirectAttributes.addFlashAttribute("error", "VNPay payment failed.");
+            if (courseId != null) {
+                return "redirect:/home/course-detail?id=" + courseId;
+            } else {
+                return "redirect:/home";
+            }
         }
     }
 
@@ -465,100 +576,5 @@ public class HomeController {
         return "redirect:/home/course-detail?id=" + courseId;
     }
 
-    @GetMapping("/vnpay-payment-return")
-    public String paymentCompleted(HttpServletRequest request,
-            HttpServletResponse response,
-            RedirectAttributes redirectAttributes,
-            @AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null) {
-            return "redirect:/login";
-        }
 
-        Long userId = CartServiceUtil.getUserIdFromUserDetails(userDetails, userRepository);
-        String encodedBuyNowJson = CartServiceUtil.getBuyNowCookie(request);
-        String encodedCartJson = CartServiceUtil.getCartCookie(request, userId);
-        Long courseId = null;
-        Map<String, Object> cart = null;
-        try {
-            if (encodedBuyNowJson != null) {
-                byte[] decodedBytes = Base64.getDecoder().decode(encodedBuyNowJson);
-                String cartJson = new String(decodedBytes, StandardCharsets.UTF_8);
-                cart = objectMapper.readValue(cartJson, Map.class);
-            } else if (encodedCartJson != null && !encodedCartJson.isEmpty()) {
-                cart = cartService.getCartDetails(encodedCartJson, userDetails.getUsername());
-            }
-            if (cart != null) {
-                List<Map<String, Object>> items = (List<Map<String, Object>>) cart.get("items");
-                if (items != null && !items.isEmpty()) {
-                    courseId = Long.valueOf(items.get(0).get("courseId").toString());
-                }
-            }
-        } catch (Exception ignore) {
-        }
-
-        int paymentStatus = vnPayService.orderReturn(request);
-
-        if (paymentStatus == 1) {
-            try {
-                String transactionId = request.getParameter("vnp_TransactionNo");
-                String amount = request.getParameter("vnp_Amount");
-                double totalAmount = Double.parseDouble(amount) / 100;
-
-                Order order = new Order();
-                order.setUser(userRepository.findById(userId)
-                        .orElseThrow(() -> new EntityNotFoundException("User not found")));
-                order.setAmount(totalAmount);
-                order.setRefCode(transactionId);
-
-                if (encodedBuyNowJson != null) {
-                    CartServiceUtil.clearBuyNowCookie(response);
-                } else if (encodedCartJson != null && !encodedCartJson.isEmpty()) {
-                    cartService.processCheckout(encodedCartJson, userDetails.getUsername());
-                    CartServiceUtil.updateCartCookie(cartService.clearCart(userDetails.getUsername()), response, userId,
-                            objectMapper);
-                }
-
-                cartService.completeCheckout(cart, order, false, transactionId);
-
-                if (cart != null) {
-                    List<Map<String, Object>> items = (List<Map<String, Object>>) cart.get("items");
-                    if (items != null && !items.isEmpty()) {
-                        Object vId = items.get(0).get("appliedVoucherId");
-                        if (vId != null) {
-                            Long voucherId = Long.valueOf(vId.toString());
-                            voucherService.useVoucherForUserAndCourse(voucherId, userId);
-                        }
-                    }
-                }
-
-                redirectAttributes.addFlashAttribute("message", "VNPay payment successful!");
-                if (courseId != null) {
-                    return "redirect:/home/course-detail?id=" + courseId;
-                } else {
-                    return "redirect:/home";
-                }
-            } catch (CartServiceImpl.CourseAlreadyPurchasedException e) {
-                redirectAttributes.addFlashAttribute("error", e.getMessage());
-                if (courseId != null) {
-                    return "redirect:/home/course-detail?id=" + courseId;
-                } else {
-                    return "redirect:/home";
-                }
-            } catch (Exception e) {
-                redirectAttributes.addFlashAttribute("error", "VNPay success but internal error: " + e.getMessage());
-                if (courseId != null) {
-                    return "redirect:/home/course-detail?id=" + courseId;
-                } else {
-                    return "redirect:/home";
-                }
-            }
-        } else {
-            redirectAttributes.addFlashAttribute("error", "VNPay payment failed.");
-            if (courseId != null) {
-                return "redirect:/home/course-detail?id=" + courseId;
-            } else {
-                return "redirect:/home";
-            }
-        }
-    }
 }

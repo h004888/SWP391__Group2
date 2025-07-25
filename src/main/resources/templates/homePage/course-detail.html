@@ -168,22 +168,30 @@ Page content START -->
 													<div class="accordion-body mt-3">
 														<div th:each="lesson : ${chapter.lessons}">
 															<div
-																class="d-flex justify-content-between align-items-center">
+																class="d-flex justify-content-between align-items-center"
+																th:classappend="${!lesson.isFree} ? 'lesson-premium-blur' : ''">
 																<div
 																	class="position-relative d-flex align-items-center">
 																	<a href="#"
-																		class="btn btn-danger-soft btn-round btn-sm mb-0 stretched-link position-static">
-																		<i th:if="${lesson.contentType == 'video'}"
-																			class="fas fa-play me-0"></i>
-																		<i th:if="${lesson.contentType != 'video'}"
-																			class="fas fa-question-circle me-0"></i>
+																		class="btn btn-danger-soft btn-round btn-sm mb-0 stretched-link position-static lesson-video-link"
+																		th:if="${lesson.contentType == 'video'}"
+																		th:attr="data-videoid=${lesson.video != null ? lesson.video.videoUrl : ''}",
+																		onclick="return false;">
+																		<i class="fas fa-play me-0"></i>
+																	</a>
+																	<a href="#"
+																		class="btn btn-danger-soft btn-round btn-sm mb-0 stretched-link position-static"
+																		th:if="${lesson.contentType != 'video'}">
+																		<i class="fas fa-question-circle me-0"></i>
 																	</a>
 																	<span
 																		class="d-inline-block text-truncate ms-2 mb-0 h6 fw-light w-100px w-sm-200px w-md-400px"
 																		th:text="${lesson.title}">Lesson Title</span>
+																	<span class="badge ms-2"
+																		th:classappend="${lesson.isFree} ? 'bg-success' : 'bg-danger'"
+																		th:text="${lesson.isFree} ? 'Free' : 'Premium'">Free</span>
 																</div>
-																<p class="mb-0"
-																	th:text="${lesson.duration/60 + ' min'}">
+																<p class="mb-0" th:text="${lesson.duration + ' min'}">
 																	10m</p>
 															</div>
 															<hr />
@@ -786,7 +794,11 @@ Page content START -->
 										<li class="list-group-item d-flex justify-content-between align-items-center">
 											<span class="h6 fw-light mb-0"><i
 													class="fas fa-fw fa-clock text-primary"></i>Duration</span>
-											<span th:text="${course.duration/60} + 'h'">4h 50m</span>
+											<span th:if="${course.duration >= 60}"
+												th:text="${(course.duration / 60) + 'h ' + (course.duration % 60) + 'm'}">4h
+												50m</span>
+											<span th:if="${course.duration < 60}"
+												th:text="${'0h ' + course.duration + 'm'}">0h 50m</span>
 										</li>
 										<li class="list-group-item d-flex justify-content-between align-items-center">
 											<span class="h6 fw-light mb-0"><i
@@ -826,9 +838,14 @@ Page content START -->
 										</div>
 										<!-- Info -->
 										<div class="col-8">
-											<h6 class="mb-0"><a
-													th:href="@{'/home/course-detail?id=' + ${course.courseId}}"
-													th:text="${course.title}">Fundamentals of Business Analysis</a></h6>
+											<h6 class="mb-0">
+												<a th:href="@{'/home/course-detail?id=' + ${course.courseId}}">
+													<span
+														th:text="${#strings.length(course.title) > 50} ? ${#strings.substring(course.title, 0, 50)} + '...' : ${course.title}">
+														Fundamentals of Business Analysis
+													</span>
+												</a>
+											</h6>
 											<ul
 												class="list-group list-group-borderless mt-1 d-flex justify-content-between">
 												<li class="list-group-item px-0 d-flex justify-content-between">
@@ -1543,6 +1560,11 @@ Footer END -->
 			min-width: 40px;
 			text-align: center;
 		}
+
+		.lesson-premium-blur {
+			opacity: 0.5;
+			pointer-events: none;
+		}
 	</style>
 
 	<script>
@@ -1621,7 +1643,56 @@ Footer END -->
 		}
 	</script>
 
+	<!-- Modal xem video lesson (dùng chung)-->
+	<div class="modal fade" id="lessonVideoModal" tabindex="-1" aria-labelledby="lessonVideoModalLabel" aria-hidden="true">
+	  <div class="modal-dialog modal-lg modal-dialog-centered">
+	    <div class="modal-content bg-dark border-0 rounded-4">
+	      <div class="modal-header border-0 pb-0" style="background: transparent;">
+	        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+	      </div>
+	      <div class="modal-body p-0">
+	        <video id="lessonModalVideo" style="width:100%;border-radius:0 0 1rem 1rem;" controls></video>
+	      </div>
+	    </div>
+	  </div>
+	</div>
 
+	<script>
+	  document.addEventListener('DOMContentLoaded', function () {
+	    // Xử lý click lesson video để mở modal
+	    document.querySelectorAll('.lesson-video-link').forEach(function(btn) {
+	      btn.addEventListener('click', function(e) {
+	        e.preventDefault();
+	        var videoId = this.getAttribute('data-videoid');
+	        var isFree = this.closest('.d-flex').classList.contains('lesson-premium-blur') ? false : true;
+	        if (!videoId) return;
+	        var video = document.getElementById('lessonModalVideo');
+	        var src = '';
+	        if (isFree) {
+	          src = '/api/video/stream/videopreview/' + encodeURIComponent(videoId);
+	        } else {
+	          src = '/api/video/stream/video/' + encodeURIComponent(videoId);
+	        }
+	        video.src = src;
+	        var modal = new bootstrap.Modal(document.getElementById('lessonVideoModal'));
+	        modal.show();
+	        video.play();
+	      });
+	    });
+	    // Reset video khi đóng modal
+	    var lessonVideoModal = document.getElementById('lessonVideoModal');
+	    if (lessonVideoModal) {
+	      lessonVideoModal.addEventListener('hidden.bs.modal', function () {
+	        var video = document.getElementById('lessonModalVideo');
+	        if (video) {
+	          video.pause();
+	          video.currentTime = 0;
+	          video.src = "";
+	        }
+	      });
+	    }
+	  });
+	</script>
 
 </body>
 

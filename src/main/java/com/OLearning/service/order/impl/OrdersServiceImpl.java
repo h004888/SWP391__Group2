@@ -566,14 +566,6 @@ public class OrdersServiceImpl implements OrdersService {
                 coinTransactionRepository.save(studentTransaction);
                 user.setCoin(user.getCoin() - coursePrice);
 
-                Notification notificationuser = new Notification();
-                notificationuser.setUser(user);
-                notificationuser.setCourse(orderDetail.getCourse());
-                notificationuser.setMessage("You have purchased a course: " + orderDetail.getCourse().getTitle());
-                notificationuser.setSentAt(LocalDateTime.now());
-                notificationuser.setStatus("failed");
-                notificationRepository.save(notificationuser);
-
                 User instructor = orderDetail.getCourse().getInstructor();
                 if (instructor != null) {
                     CoinTransaction instructorTransaction = new CoinTransaction();

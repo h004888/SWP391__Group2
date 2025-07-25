@@ -206,7 +206,8 @@
                                                         <span style="margin-left: 10px;"
                                                             class="d-inline-block text-truncate ms-2 mb-0 h6 fw-light w-200px"
                                                             th:class="${lesson.lessonId == currentLessonId} ? 'fw-bold' : 'fw-light'"
-                                                            th:text="${lesson.title}">Tên bài học</span>
+                                                            th:text="${#strings.length(lesson.title) > 50} ? ${#strings.substring(lesson.title, 0, 50)} + '...' : ${lesson.title}">Tên
+                                                            bài học</span>
                                                     </div>
 
                                                     <div class="text-end">

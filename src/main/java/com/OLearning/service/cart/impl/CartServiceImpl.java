@@ -233,7 +233,7 @@ public class CartServiceImpl implements CartService {
         double totalPrice = items.stream()
                 .filter(Objects::nonNull)
                 .mapToDouble(item -> {
-                    Object price = item.get("price");
+                    Object price = item.getOrDefault("discountedPrice", item.get("price"));
                     return price != null ? ((Number) price).doubleValue() : 0.0;
                 })
                 .sum();
@@ -246,7 +246,6 @@ public class CartServiceImpl implements CartService {
         order.setDescription("Buy Course OLearning - ORDER" + order.getOrderId());
         ordersRepository.save(order);
 
-
         if (!useCoins) {
             CoinTransaction transaction = new CoinTransaction();
             transaction.setUser(user);
@@ -254,7 +253,7 @@ public class CartServiceImpl implements CartService {
             transaction.setStatus("PAID");
             transaction.setTransactionType("top_up");
             transaction.setCreatedAt(LocalDateTime.now());
-            transaction.setNote("VNPay payment"+ refCode);
+            transaction.setNote("VNPay payment" + refCode);
             transaction.setOrder(null);
             coinTransactionRepository.save(transaction);
             user.setCoin(user.getCoin() + totalPrice);
@@ -269,7 +268,8 @@ public class CartServiceImpl implements CartService {
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setOrder(order);
             orderDetail.setCourse(course);
-            orderDetail.setUnitPrice(((Number) item.get("price")).doubleValue());
+            Object price = item.getOrDefault("discountedPrice", item.get("price"));
+            orderDetail.setUnitPrice(price != null ? ((Number) price).doubleValue() : 0.0);
             if (item.containsKey("appliedVoucherId")) {
                 Long voucherId = Long.valueOf(item.get("appliedVoucherId").toString());
                 Voucher voucher = null;
@@ -289,7 +289,7 @@ public class CartServiceImpl implements CartService {
             enrollment.setOrder(order);
             enrollmentRepository.save(enrollment);
 
-            double coursePrice = ((Number) item.get("price")).doubleValue();
+            double coursePrice = ((Number) item.getOrDefault("discountedPrice", item.get("price"))).doubleValue();
 
             CoinTransaction studentTransaction = new CoinTransaction();
             studentTransaction.setUser(user);
@@ -337,6 +337,7 @@ public class CartServiceImpl implements CartService {
 
         userRepository.save(user);
     }
+
 
     public void checkCoursePurchaseStatus(String userEmail, Long courseId, String courseTitle) {
         User user = userRepository.findByEmail(userEmail)

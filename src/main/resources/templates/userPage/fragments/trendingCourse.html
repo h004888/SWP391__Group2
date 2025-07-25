@@ -26,7 +26,9 @@
                 <div class="card shadow-hover overflow-hidden bg-transparent">
                     <div class="position-relative">
                         <!-- Image -->
-                        <img class="card-img-top" th:src="@{${course.courseImg}!=null ? ${course.courseImg} : 'assets/images/courses/4by3/16.jpg'}"  style="height: 265px; object-fit: contain;" alt="Card image">
+                        <img class="card-img-top"
+                            th:src="@{${course.courseImg}!=null ? ${course.courseImg} : 'assets/images/courses/4by3/16.jpg'}"
+                            style="height: 265px; object-fit: contain;" alt="Card image">
                         <!-- Overlay -->
                         <div class="bg-overlay bg-dark opacity-4"></div>
                         <div class="card-img-overlay d-flex align-items-start flex-column">
@@ -35,7 +37,8 @@
                                 <div class="d-flex align-items-center bg-white p-2 rounded-2">
                                     <!-- Avatar -->
                                     <div class="avatar avatar-sm me-2">
-                                        <img class="avatar-img rounded-1" th:src="@{${course.instructor.profilePicture}!=null ? ${course.instructor.profilePicture} : '/assets/images/avatar/01.jpg'}"
+                                        <img class="avatar-img rounded-1"
+                                            th:src="@{${course.instructor.profilePicture}!=null ? ${course.instructor.profilePicture} : '/assets/images/avatar/01.jpg'}"
                                             alt="avatar">
                                     </div>
                                     <!-- Avatar info -->

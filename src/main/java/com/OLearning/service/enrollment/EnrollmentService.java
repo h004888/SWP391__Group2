@@ -40,9 +40,8 @@ public interface EnrollmentService {
     Long countEnrollmentsByInstructorAndMonth(long instructorId, int year, int month);
 
     Long countEnrollmentsByInstructorAndDateRange(long instructorId, LocalDate start, java.time.LocalDate end);
+
     Page<EnrollmentDTO> getEnrollmentsByInstructorId(Long userId, int page, int size);
-
-
 
     Integer getTotalEnrollment(Long courseId);
 
@@ -75,15 +74,26 @@ public interface EnrollmentService {
     int updateStatusToCompleted(Long userId, Long courseId);
 
     Integer countTotalEnrollment(Long instructorId);
+
     Integer countTotalEnrollmentOnGoing(Long instructorId);
+
     Integer countTotalEnrollmentCompelted(Long instructorId);
+
     EnrollMaxMinDTO enrollmentMax(Long instructorId);
+
     EnrollMaxMinDTO enrollmentMin(Long instructorId);
+
     Integer completeMax(Long instructorId);
+
     Integer onGoingMax(Long instructorId);
+
     Integer completeMin(Long instructorId);
+
     Integer onGoingMin(Long instructorId);
+
     Page<EnrollmentDTO> findEnrollmentsWithFilters(Long instructorId, EnrollmentFilterDTO filterDTO);
 
     List<Course> getInstructorCourses(Long instructorId);
+
+    Map<Long, Double> getEnrollmentByUserId(Long userId);
 }

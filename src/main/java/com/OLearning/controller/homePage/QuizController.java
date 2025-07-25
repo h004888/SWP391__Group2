@@ -13,13 +13,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody; 
+import org.springframework.web.bind.annotation.RequestBody;
 
 import com.OLearning.dto.quiz.QuizSubmissionForm;
 import com.OLearning.entity.Quiz;
 import com.OLearning.entity.QuizQuestion;
 import com.OLearning.entity.User;
 import com.OLearning.security.CustomUserDetails;
+import com.OLearning.service.certificate.CertificateService;
 import com.OLearning.service.lessonCompletion.LessonCompletionService;
 import com.OLearning.service.quizQuestion.QuizQuestionService;
 import com.OLearning.service.quizTest.QuizTestService;
@@ -37,6 +38,9 @@ public class QuizController {
     private LessonService lessonService;
     @Autowired
     private EnrollmentService enrollmentService;
+    @Autowired
+    private CertificateService certificateService;
+
     @PostMapping("quiz/submit")
     public String handleQuizSubmit(@ModelAttribute("submissionForm") QuizSubmissionForm form, Model model,
             Principal principal) {
@@ -68,18 +72,26 @@ public class QuizController {
         double scorePercent = ((double) correct / total) * 100;
         boolean isPassed = scorePercent >= 75;
         if (isPassed) {
-          if (!lessonCompletionService.checkLessonCompletion(user.getUserId(), form.getLessonId())) {
-              lessonCompletionService.markLessonAsCompleted(user.getUserId(), form.getLessonId());
-              enrollmentService.updateProgressByUser(user.getUserId(), form.getCourseId());
-          }
+            if (!lessonCompletionService.checkLessonCompletion(user.getUserId(), form.getLessonId())) {
+                lessonCompletionService.markLessonAsCompleted(user.getUserId(), form.getLessonId());
+                enrollmentService.updateProgressByUser(user.getUserId(), form.getCourseId());
+                // Reload progress sau khi đã đánh dấu completed
+                double progress = lessonCompletionService.getOverallProgressOfUser(user.getUserId(),
+                        form.getCourseId());
+                if (progress == 100) {
+                    enrollmentService.updateStatusToCompleted(user.getUserId(), form.getCourseId());
+                }
+            }
         }
 
         Lesson nextLesson = lessonService.getNextLessonAfterCurrent(form.getLessonId(), form.getCourseId());
+        if (isPassed && nextLesson == null) {
+            // Nếu không còn lesson tiếp theo, chuyển sang trang congratulations
+            certificateService.generateCertificate(user.getUserId(), form.getCourseId());
+            return "redirect:/learning/congratulations?courseId=" + form.getCourseId();
+        }
         Lesson lessonToShow = nextLesson != null ? nextLesson : lessonService.findFirstLesson(form.getCourseId());
         model.addAttribute("nextLessonId", lessonToShow != null ? lessonToShow.getLessonId() : null);
-
-
-
 
         model.addAttribute("courseId", form.getCourseId());
         model.addAttribute("score", correct);
