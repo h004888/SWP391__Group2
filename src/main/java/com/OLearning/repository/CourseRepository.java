@@ -30,17 +30,18 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 
   Page<Course> findAll(Pageable pageable);
 
-  // thanh search
-  @Query("""
-      SELECT c FROM Course c
-      WHERE
-          (:title IS NULL OR :title = '' OR LOWER(c.title) LIKE LOWER(CONCAT('%', :title, '%')))
-          AND (:userId IS NULL OR c.instructor.userId = :userId)
-      """)
-  Page<Course> searchCoursesByKeyWord(
-      @Param("title") String title,
-      @Param("userId") Long userId,
-      Pageable pageable);
+    //thanh search
+    @Query("""
+            SELECT c FROM Course c
+            WHERE LOWER(c.status) = 'publish'
+            AND(:title IS NULL OR :title = '' OR LOWER(c.title) LIKE LOWER(CONCAT('%', :title, '%')))
+                AND (:userId IS NULL OR c.instructor.userId = :userId)
+            """)
+    Page<Course> searchCoursesByKeyWord(
+            @Param("title") String title,
+            @Param("userId") Long userId,
+            Pageable pageable
+    );
 
   // phan trang theo status
   @Query("SELECT c FROM Course c WHERE " +
@@ -217,4 +218,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
       """, nativeQuery = true)
   List<Course> getCourseByJoinByUserId(@Param("userId") Long userId);
 
+    // Add new method
+    @Query("SELECT c FROM Course c WHERE c.instructor.userId = :instructorId")
+    List<Course> findByInstructorId(@Param("instructorId") Long instructorId);
 }

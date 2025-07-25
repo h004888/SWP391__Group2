@@ -90,7 +90,7 @@ public class DashboardController {
             @RequestParam("endDate") String endDateStr) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate startDate = LocalDate.parse(startDateStr, formatter);
-        LocalDate endDate = LocalDate.parse(endDateStr, formatter);
+        LocalDate endDate = LocalDate.parse(endDateStr, formatter).plusDays(1);
         if (startDate.isAfter(endDate)) {
             throw new IllegalArgumentException("startDate must be before or equal to endDate");
         }
@@ -112,19 +112,17 @@ public class DashboardController {
     }
 
     @GetMapping("/export-excel-charts")
-    
-    public String exportExcelWithCharts(
+    @ResponseBody
+    public void exportExcelWithCharts(
             @RequestParam("startDate") String startDateStr,
             @RequestParam("endDate") String endDateStr,
-            RedirectAttributes redirectAttributes,
-            HttpServletResponse response,
-            Model model) throws IOException {
+            HttpServletResponse response) throws IOException {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate startDate = LocalDate.parse(startDateStr, formatter);
-        LocalDate endDate = LocalDate.parse(endDateStr, formatter);
+        LocalDate endDate = LocalDate.parse(endDateStr, formatter).plusDays(1);
         if (startDate.isAfter(endDate)) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Start date must be before or equal to end date.");
-            return "redirect:/admin";
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Start date must be before or equal to end date.");
+            return;
         }
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         String randomSuffix = UUID.randomUUID().toString().substring(0, 8);
@@ -138,7 +136,6 @@ public class DashboardController {
             createMaintenanceAreaChartSheet(workbook, maintenanceRevenueData);
             workbook.write(response.getOutputStream());
         }
-        return null;
     }
 
     private CellStyle createHeaderStyle(XSSFWorkbook workbook) {
@@ -599,6 +596,7 @@ public class DashboardController {
             row.createCell(0).setCellValue(entry.getKey());
             row.createCell(1).setCellValue(entry.getValue());
         }
+        if (rowNum <= 1) return; // Fix: Không có dữ liệu, tránh lỗi cell range
         XSSFDrawing drawing = sheet.createDrawingPatriarch();
         XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 3, 1, 13, 20);
         XSSFChart chart = drawing.createChart(anchor);
@@ -629,6 +627,7 @@ public class DashboardController {
             row.createCell(0).setCellValue(entry.getKey());
             row.createCell(1).setCellValue(entry.getValue());
         }
+        if (rowNum <= 1) return; // Fix: Không có dữ liệu, tránh lỗi cell range
         XSSFDrawing drawing = sheet.createDrawingPatriarch();
         XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 3, 1, 13, 20);
         XSSFChart chart = drawing.createChart(anchor);
@@ -673,6 +672,7 @@ public class DashboardController {
             }
             row.createCell(2).setCellValue(enrollment);
         }
+        if (rowNum <= 1) return; // Fix: Không có dữ liệu, tránh lỗi cell range
         XSSFDrawing drawing = sheet.createDrawingPatriarch();
         XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 3, 1, 13, 20);
         XSSFChart chart = drawing.createChart(anchor);

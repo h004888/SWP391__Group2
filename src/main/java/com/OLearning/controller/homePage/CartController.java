@@ -80,10 +80,30 @@ public class CartController {
         Long userId = CartServiceUtil.getUserIdFromUserDetails(userDetails, userRepository);
         String encodedCartJson = CartServiceUtil.getCartCookie(request, userId);
         Map<String, Object> cart = cartService.getCartDetails(encodedCartJson, userDetails.getUsername());
-        model.addAttribute("cartItems", cart.getOrDefault("items", List.of()));
-        model.addAttribute("totalPrice", calculateTotalPrice(cart));
+        List<Map<String, Object>> items = (List<Map<String, Object>>) cart.getOrDefault("items", List.of());
+
+        double originalTotal = items.stream()
+                .mapToDouble(item -> {
+                    Object originalPrice = item.get("originalPrice");
+                    if (originalPrice == null) originalPrice = item.get("price");
+                    return originalPrice != null ? ((Number) originalPrice).doubleValue() : 0.0;
+                })
+                .sum();
+
+        double discountedTotal = items.stream()
+                .mapToDouble(item -> {
+                    Object discountedPrice = item.get("discountedPrice");
+                    if (discountedPrice == null) discountedPrice = item.get("price");
+                    return discountedPrice != null ? ((Number) discountedPrice).doubleValue() : 0.0;
+                })
+                .sum();
+
+        model.addAttribute("cartItems", items);
+        model.addAttribute("originalTotal", originalTotal);
+        model.addAttribute("totalPrice", discountedTotal);
         model.addAttribute("cartTotal", getLongValue(cart.getOrDefault("total", 0L)));
         model.addAttribute("currentUserId", userId);
+
 
         String encodedWishlistJson = getWishlistCookie(request, userId);
         Map<String, Object> wishlist = wishlistService.getWishlistDetails(encodedWishlistJson, userDetails.getUsername());
@@ -98,12 +118,12 @@ public class CartController {
     public Map<String, Long> getCartTotal(HttpServletRequest request,
                                           @AuthenticationPrincipal UserDetails userDetails) {
         Map<String, Long> response = new HashMap<>();
-        
+
         if (userDetails == null) {
             response.put("total", 0L);
             return response;
         }
-        
+
         try {
             Long userId = CartServiceUtil.getUserIdFromUserDetails(userDetails, userRepository);
             String encodedCartJson = CartServiceUtil.getCartCookie(request, userId);
@@ -112,7 +132,7 @@ public class CartController {
         } catch (Exception e) {
             response.put("total", 0L);
         }
-        
+
         return response;
     }
 
@@ -240,16 +260,22 @@ public class CartController {
             for (Map<String, Object> item : items) {
                 Long courseId = Long.valueOf(item.get("courseId").toString());
                 double price = Double.valueOf(item.get("price").toString());
+                double originalPrice = Double.valueOf(item.get("price").toString());
                 if (voucherMapping.containsKey(courseId)) {
                     Long voucherId = voucherMapping.get(courseId);
                     double discount = voucherRepository.findById(voucherId).map(v -> v.getDiscount()).orElse(0.0);
                     price = discount >= 100.0 ? 0 : Math.round(price * (1 - discount / 100.0));
-                    item.put("price", price);
+                    item.put("discountedPrice", price);
+                    item.put("originalPrice", originalPrice);
                     item.put("appliedVoucherId", voucherId);
+                } else {
+                    item.put("discountedPrice", originalPrice);
+                    item.put("originalPrice", originalPrice);
                 }
                 totalAmount += price;
             }
             cart.put("items", items);
+            CartServiceUtil.updateCartCookie(cart, response, userId, objectMapper);
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new EntityNotFoundException("User not found"));
             if (user.getCoin() >= totalAmount) {
@@ -275,9 +301,9 @@ public class CartController {
 
                 for (Map<String, Object> item : items) {
                     Long courseId = Long.valueOf(item.get("courseId").toString());
-                    double price = Double.valueOf(item.get("price").toString());
+                    double price = Double.valueOf(item.getOrDefault("discountedPrice", item.get("price")).toString());
                     Course course = courseRepository.findById(courseId)
-                        .orElseThrow(() -> new EntityNotFoundException("Course not found: " + courseId));
+                            .orElseThrow(() -> new EntityNotFoundException("Course not found: " + courseId));
                     OrderDetail orderDetail = new OrderDetail();
                     orderDetail.setOrder(order);
                     orderDetail.setCourse(course);
@@ -414,33 +440,7 @@ public class CartController {
                 .sum();
     }
 
-    private void updateCartCookie(Map<String, Object> cart, HttpServletResponse response, Long userId) throws Exception {
-        String cartJson = objectMapper.writeValueAsString(cart);
-        String encodedCartJson = Base64.getEncoder().encodeToString(cartJson.getBytes(StandardCharsets.UTF_8));
-        Cookie cartCookie = new Cookie("cart_" + userId, encodedCartJson);
-        cartCookie.setPath("/");
-        cartCookie.setMaxAge(14 * 24 * 60 * 60);
-        cartCookie.setHttpOnly(true);
-        response.addCookie(cartCookie);
-    }
 
-    private Long getUserIdFromUserDetails(UserDetails userDetails) {
-        String email = userDetails.getUsername();
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
-        return user.getUserId();
-    }
-
-    private String getCartCookie(HttpServletRequest request, Long userId) {
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if (cookie.getName().equals("cart_" + userId)) {
-                    return cookie.getValue();
-                }
-            }
-        }
-        return "";
-    }
 
     private String getWishlistCookie(HttpServletRequest request, Long userId) {
         Cookie[] cookies = request.getCookies();

@@ -36,11 +36,11 @@ public class ReportMnController {
 
     @GetMapping
     public String listReports(@RequestParam(required = false) String type,
-                             @RequestParam(required = false) String status,
-                             @RequestParam(required = false) String keyword,
-                             @RequestParam(value = "page", defaultValue = "0") int page,
-                             @RequestParam(value = "size", defaultValue = "5") int size,
-                             Model model) {
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "5") int size,
+            Model model) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Report> reportPage;
         if (type != null && !type.isEmpty() && status != null && !status.isEmpty()) {
@@ -67,21 +67,12 @@ public class ReportMnController {
     public String viewReport(@PathVariable Long id, Model model) {
         Report report = reportRepository.findById(id).orElse(null);
         model.addAttribute("report", report);
-        // Nếu là report comment, truyền thêm  nội dung comment
         if (report != null && "COMMENT".equalsIgnoreCase(report.getReportType()) && report.getCommentId() != null) {
             CourseReview comment = courseReviewRepository.findById(report.getCommentId()).orElse(null);
             model.addAttribute("reportedComment", comment);
         }
-        //  notification phản hồi instructor
-        if (report != null && report.getCourse() != null) {
-            Notification reply = notificationRepository.findAll().stream()
-                .filter(n -> "INSTRUCTOR_REPLY_BLOCK".equals(n.getType())
-                    && n.getCourse() != null && n.getCourse().getCourseId().equals(report.getCourse().getCourseId())
-                    && n.getUser() != null && report.getCourse().getInstructor() != null
-                    && n.getUser().getUserId().equals(report.getCourse().getInstructor().getUserId()))
-                .findFirst().orElse(null);
-            model.addAttribute("instructorReplyNotification", reply);
-        }
+        String evidenceLink = report != null ? report.getEvidenceLink() : null;
+        model.addAttribute("evidenceLink", evidenceLink);
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/reportDetailContent :: reportDetailContent");
         model.addAttribute("accNamePage", "Chi tiết báo cáo");
         return "adminDashBoard/index";
@@ -108,11 +99,11 @@ public class ReportMnController {
 
     @GetMapping("/filter")
     public String filterReports(@RequestParam(required = false) String type,
-                               @RequestParam(required = false) String status,
-                               @RequestParam(required = false) String keyword,
-                               @RequestParam(value = "page", defaultValue = "0") int page,
-                               @RequestParam(value = "size", defaultValue = "5") int size,
-                               Model model) {
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "5") int size,
+            Model model) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Report> reportPage;
         if (type != null && !type.isEmpty() && status != null && !status.isEmpty()) {
@@ -130,11 +121,11 @@ public class ReportMnController {
 
     @GetMapping("/pagination")
     public String getPagination(@RequestParam(required = false) String type,
-                                @RequestParam(required = false) String status,
-                                @RequestParam(required = false) String keyword,
-                                @RequestParam(value = "page", defaultValue = "0") int page,
-                                @RequestParam(value = "size", defaultValue = "5") int size,
-                                Model model) {
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "5") int size,
+            Model model) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Report> reportPage;
         if (type != null && !type.isEmpty() && status != null && !status.isEmpty()) {
@@ -158,8 +149,8 @@ public class ReportMnController {
     @GetMapping("/count")
     @ResponseBody
     public long getReportCount(@RequestParam(required = false) String type,
-                               @RequestParam(required = false) String status,
-                               @RequestParam(required = false) String keyword) {
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String keyword) {
         Pageable pageable = PageRequest.of(0, 1);
         Page<Report> reportPage;
         if (type != null && !type.isEmpty() && status != null && !status.isEmpty()) {

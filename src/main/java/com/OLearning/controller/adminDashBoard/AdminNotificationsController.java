@@ -103,7 +103,6 @@ public class AdminNotificationsController {
 
     @PostMapping("/mark-all-read")
     public String markAllAsRead(Authentication authentication) {
-        // Ép kiểu để lấy ra CustomUserDetails
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
         notificationService.markAllAsRead(userId);
@@ -150,11 +149,10 @@ public class AdminNotificationsController {
             
             // Lấy 5 thông báo chưa đọc
             Pageable pageable = PageRequest.of(0, 5);
-            List<String> types = List.of("REPORT_COURSE", "INSTRUCTOR_REPLY_BLOCK", "REPORT_COMMENT");
+            List<String> types = notificationService.getAllNotificationTypesByUserId(userId);
             Page<NotificationDTO> notificationPage = notificationService.getUnreadNotificationsByUserId(userId, types, pageable);
             
             long unreadCount = notificationService.countUnreadByUserId(userId);
-
             List<NotificationDropdownDTO> dropdownList = notificationPage.getContent().stream()
                 .map(n -> {
                     String msg = n.getMessage();
@@ -162,8 +160,7 @@ public class AdminNotificationsController {
                         msg = msg.split("\\r?\\n")[0]; // chỉ lấy dòng đầu tiên
                         if (msg.length() > 25) msg = msg.substring(0, 25) + "...";
                     }
-                    
-                    // Lấy lessonId nếu là notification comment
+
                     Long lessonId = null;
                     if ("REPORT_COMMENT".equals(n.getType()) && n.getCommentId() != null) {
                         var commentOpt = courseReviewRepository.findById(n.getCommentId());

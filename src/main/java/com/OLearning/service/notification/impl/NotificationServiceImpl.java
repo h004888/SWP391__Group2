@@ -68,19 +68,6 @@ public class NotificationServiceImpl implements NotificationService {
         courseRepository.save(course);
 
     }
-    @Override
-    public List<NotificationDTO> getNotificationsByUserId(Long userId) {
-        return notificationRepository.findByUser_UserIdOrderByUnreadFirstAndSentAtDesc(userId)
-                .stream()
-                .map(notificationMapper::toDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<NotificationDTO> searchNotificationsByUser(String keyword, Long userId) {
-        List<Notification> entities = notificationRepository.findByUserIdAndKeywordUnreadFirst(userId, keyword);
-        return entities.stream().map(notificationMapper::toDTO).collect(Collectors.toList());
-    }
 
 
     @Override
@@ -102,11 +89,6 @@ public class NotificationServiceImpl implements NotificationService {
         notificationRepository.markAllAsReadByUserId(userId);
     }
 
-    @Override
-    public Page<NotificationDTO> getNotificationsByUserId(Long userId, Pageable pageable) {
-        return notificationRepository.findByUser_UserIdOrderByUnreadFirstAndSentAtDesc(userId, pageable)
-                .map(notificationMapper::toDTO);
-    }
 
     @Override
     public Page<NotificationDTO> searchNotificationsByUser(String keyword, Long userId, Pageable pageable) {

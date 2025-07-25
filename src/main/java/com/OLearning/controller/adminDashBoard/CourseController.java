@@ -249,12 +249,10 @@ public class CourseController {
             Principal principal,
             RedirectAttributes redirect) {
         try {
+            courseService.unblockCourse(courseId);
+            // Gửi thông báo cho instructor
             Course course = courseRepository.findById(courseId)
                     .orElseThrow(() -> new RuntimeException("Course not found"));
-
-            // Mở khóa course bằng cách set status = "approved"
-            course.setStatus("approved");
-            courseRepository.save(course);
 
             // Gửi thông báo cho instructor
             User instructor = course.getInstructor();
@@ -268,12 +266,10 @@ public class CourseController {
                 notification.setSentAt(LocalDateTime.now());
                 notificationRepository.save(notification);
             }
-
             redirect.addFlashAttribute("success", "Course has been unblocked successfully");
         } catch (Exception e) {
             redirect.addFlashAttribute("error", "Failed to unblock course: " + e.getMessage());
         }
-
         return "redirect:/admin/course/detail/" + courseId;
     }
 
@@ -281,13 +277,11 @@ public class CourseController {
     public String blockCourse(@PathVariable("courseId") Long courseId, RedirectAttributes redirectAttributes) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("Course not found"));
-        // Chỉ cho phép block khi status là 'pending_block' và trước đó phải là publish
         if (!"pending_block".equalsIgnoreCase(course.getStatus())) {
             redirectAttributes.addFlashAttribute("error",
                     "Chỉ có thể xác nhận block khi khóa học đang ở trạng thái 'pending_block'.");
             return "redirect:/admin/course/detail/" + courseId;
         }
-        // Có thể kiểm tra thêm nếu cần
         courseService.blockCourse(courseId);
         redirectAttributes.addFlashAttribute("message", "Khóa học đã bị block!");
         return "redirect:/admin/course/detail/" + courseId;

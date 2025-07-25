@@ -99,7 +99,7 @@ public class CartServiceImpl implements CartService {
                 emptyCart.put("items", new ArrayList<>());
                 return emptyCart;
             }
-            // Bổ sung instructorName cho từng item
+
             List<Map<String, Object>> items = (List<Map<String, Object>>) cart.getOrDefault("items", new ArrayList<>());
             for (Map<String, Object> item : items) {
                 Object courseIdObj = item.get("courseId");
@@ -117,7 +117,6 @@ public class CartServiceImpl implements CartService {
             }
             return cart;
         } catch (Exception e) {
-            System.err.println("Error parsing cart JSON: " + e.getMessage());
             Map<String, Object> emptyCart = new HashMap<>();
             emptyCart.put("userId", userRepository.findByEmail(userEmail)
                     .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + userEmail))
@@ -234,7 +233,7 @@ public class CartServiceImpl implements CartService {
         double totalPrice = items.stream()
                 .filter(Objects::nonNull)
                 .mapToDouble(item -> {
-                    Object price = item.get("price");
+                    Object price = item.getOrDefault("discountedPrice", item.get("price"));
                     return price != null ? ((Number) price).doubleValue() : 0.0;
                 })
                 .sum();
@@ -254,7 +253,7 @@ public class CartServiceImpl implements CartService {
             transaction.setStatus("PAID");
             transaction.setTransactionType("top_up");
             transaction.setCreatedAt(LocalDateTime.now());
-            transaction.setNote("VNPay payment"+ refCode);
+            transaction.setNote("VNPay payment" + refCode);
             transaction.setOrder(null);
             coinTransactionRepository.save(transaction);
             user.setCoin(user.getCoin() + totalPrice);
@@ -269,7 +268,8 @@ public class CartServiceImpl implements CartService {
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setOrder(order);
             orderDetail.setCourse(course);
-            orderDetail.setUnitPrice(((Number) item.get("price")).doubleValue());
+            Object price = item.getOrDefault("discountedPrice", item.get("price"));
+            orderDetail.setUnitPrice(price != null ? ((Number) price).doubleValue() : 0.0);
             if (item.containsKey("appliedVoucherId")) {
                 Long voucherId = Long.valueOf(item.get("appliedVoucherId").toString());
                 Voucher voucher = null;
@@ -289,7 +289,7 @@ public class CartServiceImpl implements CartService {
             enrollment.setOrder(order);
             enrollmentRepository.save(enrollment);
 
-            double coursePrice = ((Number) item.get("price")).doubleValue();
+            double coursePrice = ((Number) item.getOrDefault("discountedPrice", item.get("price"))).doubleValue();
 
             CoinTransaction studentTransaction = new CoinTransaction();
             studentTransaction.setUser(user);
@@ -324,19 +324,20 @@ public class CartServiceImpl implements CartService {
                 instructor.setCoin(instructor.getCoin() + coursePrice);
                 userRepository.save(instructor);
 
-                Notification notificationInstructor = new Notification();
-                notificationInstructor.setUser(instructor);
-                notificationInstructor.setCourse(course);
-                notificationInstructor.setMessage("You have received a payment of " + coursePrice + " VND for your course " + course.getTitle());
-                notificationInstructor.setType("COURSE_PURCHASE");
-                notificationInstructor.setStatus("failed");
-                notificationInstructor.setSentAt(LocalDateTime.now());
-                notificationRepository.save(notificationInstructor);
+                Notification notificationinstructor = new Notification();
+                notificationinstructor.setUser(instructor);
+                notificationinstructor.setCourse(course);
+                notificationinstructor.setMessage("You have received a payment of " + coursePrice + " VND for your course " + course.getTitle());
+                notificationinstructor.setType("COURSE_PURCHASE");
+                notificationinstructor.setStatus("failed");
+                notificationinstructor.setSentAt(LocalDateTime.now());
+                notificationRepository.save(notificationinstructor);
             }
         }
 
         userRepository.save(user);
     }
+
 
     public void checkCoursePurchaseStatus(String userEmail, Long courseId, String courseTitle) {
         User user = userRepository.findByEmail(userEmail)

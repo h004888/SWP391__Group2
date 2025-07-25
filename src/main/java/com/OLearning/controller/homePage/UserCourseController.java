@@ -123,7 +123,6 @@ public class UserCourseController {
                 courseService.getCourseByUserId(currentUser.getUserId()).stream()
                         .filter(co -> !co.getCourseId().equals(courseViewDTO.getCourseId()))
                         .collect(Collectors.toList()));
-        System.out.println("Course by user: " + courseService.getCourseByUserId(currentUser.getUserId()));
         model.addAttribute("progressCourses",
                 enrollmentService.getProgressCoursesByUserId(currentUser.getUserId()).stream()
                         .filter(progress -> !progress.getCourseId().equals(courseViewDTO.getCourseId()))

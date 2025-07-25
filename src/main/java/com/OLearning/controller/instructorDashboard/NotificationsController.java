@@ -74,7 +74,7 @@ public class NotificationsController {
             types = allTypes;
         }
         if (types == null || types.isEmpty()) {
-            types = List.of(""); // Đảm bảo không null để Thymeleaf render đúng
+            types = List.of("");
         }
         if (status == null || status.isBlank() || "All".equalsIgnoreCase(status)) {
             status = null;
@@ -239,23 +239,22 @@ public class NotificationsController {
             var notification = notificationOpt.get();
             var admins = userRepository.findByRole_RoleId(1L); // Giả sử roleId=1 là ADMIN
             for (var admin : admins) {
-                var adminNoti = new com.OLearning.entity.Notification();
+                var adminNoti = new Notification();
                 adminNoti.setUser(admin);
                 adminNoti.setCourse(notification.getCourse());
                 adminNoti.setType("INSTRUCTOR_REPLY_BLOCK");
                 adminNoti.setMessage(replyContent); // Nội dung instructor nhập
                 adminNoti.setStatus("failed");
                 adminNoti.setSentAt(java.time.LocalDateTime.now());
-                adminNoti.setEvidenceLink(evidenceLink);
                 notificationRepository.save(adminNoti);
             }
-            // Không gửi notification cho instructor nữa
-            // Cập nhật evidenceLink vào report liên quan
-            Report report = reportRepository.findFirstByCourse_CourseIdAndNotification_NotificationId(courseId,
-                    notificationId);
-            if (report != null && evidenceLink != null) {
-                report.setEvidenceLink(evidenceLink);
-                reportRepository.save(report);
+
+            List<Report> relatedReports = reportRepository.findByCourse_CourseId(courseId);
+            if (relatedReports != null && evidenceLink != null && !evidenceLink.isEmpty()) {
+                for (Report report : relatedReports) {
+                    report.setEvidenceLink(evidenceLink);
+                    reportRepository.save(report);
+                }
             }
         }
         model.addAttribute("success", "Phản hồi của bạn đã được gửi thành công!");
@@ -295,8 +294,7 @@ public class NotificationsController {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             Long userId = userDetails.getUserId();
             Pageable pageable = PageRequest.of(0, 5);
-            List<String> types = List.of("COURSE_BLOCKED", "comment", "COURSE_UNBLOCKED", "COURSE_REJECTION",
-                    "COURSE_APPROVED", "MAINTENANCE_FEE", "COURSE_CREATED", "SUCCESSFULLY");
+            List<String> types = notificationService.getAllNotificationTypesByUserId(userId);
             Page<NotificationDTO> notificationPage = notificationService.getUnreadNotificationsByUserId(userId, types,
                     pageable);
             long unreadCount = notificationService.countUnreadByUserId(userId);

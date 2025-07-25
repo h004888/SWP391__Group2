@@ -2,7 +2,6 @@ package com.OLearning.repository;
 
 import com.OLearning.entity.Order;
 import com.OLearning.entity.OrderDetail;
-import com.OLearning.dto.RevenueGroupDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,7 +13,9 @@ import java.util.List;
 @Repository
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> {
     List<OrderDetail> findByOrderOrderId(Long orderId);
+
     List<OrderDetail> findByOrder(Order order);
+
     @Query("SELECT SUM(o.unitPrice * (1 - COALESCE(c.discount, 0) / 100.0)) " +
             "FROM OrderDetail o JOIN o.course c " +
             "WHERE c.instructor.userId = :instructorId")
@@ -27,33 +28,54 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
             "GROUP BY c.courseId, c.title")
     List<Object[]> findCourseSalesAndRevenueByInstructor(@Param("instructorId") Long instructorId);
 
-    // Doanh thu theo tháng (trả về: year, month, revenue)
-    @Query("SELECT YEAR(od.order.orderDate), MONTH(od.order.orderDate), SUM(od.unitPrice * (1 - COALESCE(c.discount, 0) / 100.0)) " +
-           "FROM OrderDetail od JOIN od.course c " +
-           "WHERE c.instructor.userId = :instructorId AND od.order.orderDate >= :start AND od.order.orderDate <= :end " +
-           "GROUP BY YEAR(od.order.orderDate), MONTH(od.order.orderDate) " +
-           "ORDER BY YEAR(od.order.orderDate), MONTH(od.order.orderDate)")
-    List<Object[]> findRevenueByMonth(@Param("instructorId") Long instructorId,
-                                      @Param("start") LocalDateTime start,
-                                      @Param("end") LocalDateTime end);
 
-    // Doanh thu theo năm (trả về: year, revenue)
-    @Query("SELECT YEAR(od.order.orderDate), SUM(od.unitPrice * (1 - COALESCE(c.discount, 0) / 100.0)) " +
-           "FROM OrderDetail od JOIN od.course c " +
-           "WHERE c.instructor.userId = :instructorId AND od.order.orderDate >= :start AND od.order.orderDate <= :end " +
-           "GROUP BY YEAR(od.order.orderDate) " +
-           "ORDER BY YEAR(od.order.orderDate)")
-    List<Object[]> findRevenueByYear(@Param("instructorId") Long instructorId,
-                                     @Param("start") LocalDateTime start,
-                                     @Param("end") LocalDateTime end);
+    // Doanh thu theo ngày (7 ngày gần nhất)
+    @Query(value = """
+        SELECT YEAR(o.OrderDate), MONTH(o.OrderDate), DAY(o.OrderDate),
+               SUM(o.Amount), COUNT(DISTINCT o.OrderID)
+        FROM Orders o
+        JOIN OrderDetail od ON o.OrderID = od.OrderID
+        JOIN Courses c ON od.CourseID = c.CourseID
+        WHERE c.InstructorID = :instructorId and o.status = 'paid'
+          AND o.OrderDate >= :start AND o.OrderDate <= :end
+        GROUP BY YEAR(o.OrderDate), MONTH(o.OrderDate), DAY(o.OrderDate)
+        ORDER BY YEAR(o.OrderDate), MONTH(o.OrderDate), DAY(o.OrderDate)
+    """, nativeQuery = true)
+    List<Object[]> findRevenueAndOrdersByDay(@Param("instructorId") Long instructorId,
+                                             @Param("start") LocalDateTime start,
+                                             @Param("end") LocalDateTime end);
 
-    // Doanh thu theo ngày (trả về: year, month, day, revenue)
-    @Query("SELECT YEAR(od.order.orderDate), MONTH(od.order.orderDate), DAY(od.order.orderDate), SUM(od.unitPrice * (1 - COALESCE(c.discount, 0) / 100.0)) " +
-           "FROM OrderDetail od JOIN od.course c " +
-           "WHERE c.instructor.userId = :instructorId AND od.order.orderDate >= :start AND od.order.orderDate <= :end " +
-           "GROUP BY YEAR(od.order.orderDate), MONTH(od.order.orderDate), DAY(od.order.orderDate) " +
-           "ORDER BY YEAR(od.order.orderDate), MONTH(od.order.orderDate), DAY(od.order.orderDate)")
-    List<Object[]> findRevenueByDay(@Param("instructorId") Long instructorId,
-                                    @Param("start") LocalDateTime start,
-                                    @Param("end") LocalDateTime end);
+    // Doanh thu theo tháng (12 tháng gần nhất)
+    @Query(value = """
+        SELECT YEAR(o.OrderDate), MONTH(o.OrderDate),
+               SUM(o.Amount), COUNT(DISTINCT o.OrderID)
+        FROM Orders o
+        JOIN OrderDetail od ON o.OrderID = od.OrderID
+        JOIN Courses c ON od.CourseID = c.CourseID
+        WHERE c.InstructorID = :instructorId and o.status = 'paid'
+          AND o.OrderDate >= :start AND o.OrderDate <= :end
+        GROUP BY YEAR(o.OrderDate), MONTH(o.OrderDate)
+        ORDER BY YEAR(o.OrderDate), MONTH(o.OrderDate)
+    """, nativeQuery = true)
+    List<Object[]> findRevenueAndOrdersByMonth(@Param("instructorId") Long instructorId,
+                                               @Param("start") LocalDateTime start,
+                                               @Param("end") LocalDateTime end);
+
+    // Doanh thu theo quý (4 quý gần nhất)
+    @Query(value = """
+        SELECT YEAR(o.OrderDate), DATEPART(quarter, o.OrderDate),
+               SUM(o.Amount), COUNT(DISTINCT o.OrderID)
+        FROM Orders o
+        JOIN OrderDetail od ON o.OrderID = od.OrderID
+        JOIN Courses c ON od.CourseID = c.CourseID
+        WHERE c.InstructorID = :instructorId and o.status = 'paid'
+          AND o.OrderDate >= :start AND o.OrderDate <= :end
+        GROUP BY YEAR(o.OrderDate), DATEPART(quarter, o.OrderDate)
+        ORDER BY YEAR(o.OrderDate), DATEPART(quarter, o.OrderDate)
+    """, nativeQuery = true)
+    List<Object[]> findRevenueAndOrdersByQuarter(@Param("instructorId") Long instructorId,
+                                                 @Param("start") LocalDateTime start,
+                                                 @Param("end") LocalDateTime end);
+
+
 }

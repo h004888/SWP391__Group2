@@ -51,8 +51,10 @@ public class InstructorRequestServiceImpl implements InstructorRequestService {
     public InstructorRequest acceptRequest(Long requestId, Long adminId) {
         InstructorRequest request = getRequestById(requestId);
         User admin = userRepository.findById(adminId)
-                .orElseThrow(() -> new RuntimeException("Admin not found with id: " + adminId));
-        
+                .orElseThrow(() -> {
+                    System.out.println("[SERVICE] Admin not found with id: " + adminId);
+                    return new RuntimeException("Admin not found with id: " + adminId);
+                });
         // Update request status
         request.setStatus("APPROVED");
         request.setDecisionDate(LocalDateTime.now());
@@ -62,20 +64,31 @@ public class InstructorRequestServiceImpl implements InstructorRequestService {
         // Update user role to instructor
         User user = request.getUser();
         Role instructorRole = roleRepository.findById(2L) // 2L is the instructor role ID
-                .orElseThrow(() -> new RuntimeException("Instructor role not found"));
+                .orElseThrow(() -> {
+                    System.out.println("[SERVICE] Instructor role not found");
+                    return new RuntimeException("Instructor role not found");
+                });
         user.setRole(instructorRole);
         userRepository.save(user);
-
-//        send mail
-        emailService.sendBecomeInstructorEmail(user, true);
+        // send mail
+        try {
+            emailService.sendBecomeInstructorEmail(user, true);
+            System.out.println("[SERVICE] Sent become instructor email");
+        } catch (Exception e) {
+            System.out.println("[SERVICE] Error sending email: " + e.getMessage());
+        }
         // send notification
-        Notification notification = new Notification();
-        notification.setUser(user);
-        notification.setMessage("Yêu cầu trở thành giảng viên của bạn đã được duyệt. Bạn đã trở thành giảng viên!");
-        notification.setType("INSTRUCTOR_REQUEST");
-        notification.setStatus("failed");
-        notification.setSentAt(LocalDateTime.now());
-        notificationService.sendMess(notification);
+        try {
+            Notification notification = new Notification();
+            notification.setUser(user);
+            notification.setMessage("Yêu cầu trở thành giảng viên của bạn đã được duyệt. Bạn đã trở thành giảng viên!");
+            notification.setType("INSTRUCTOR_REQUEST");
+            notification.setStatus("failed");
+            notification.setSentAt(LocalDateTime.now());
+            notificationService.sendMess(notification);
+        } catch (Exception e) {
+            System.out.println("[SERVICE] Error sending notification: " + e.getMessage());
+        }
         return instructorRequestRepository.save(request);
     }
     
@@ -84,25 +97,33 @@ public class InstructorRequestServiceImpl implements InstructorRequestService {
     public InstructorRequest rejectRequest(Long requestId, Long adminId, String rejectionReason) {
         InstructorRequest request = getRequestById(requestId);
         User admin = userRepository.findById(adminId)
-                .orElseThrow(() -> new RuntimeException("Admin not found with id: " + adminId));
-        
+                .orElseThrow(() -> {
+                    System.out.println("[SERVICE] Admin not found with id: " + adminId);
+                    return new RuntimeException("Admin not found with id: " + adminId);
+                });
         // Update request status and note
         request.setStatus("REJECTED");
         request.setDecisionDate(LocalDateTime.now());
         request.setAdmin(admin);
         request.setNote(rejectionReason);
-
-        //send mail
-        emailService.sendBecomeInstructorEmail(request.getUser(), false);
+        // send mail
+        try {
+            emailService.sendBecomeInstructorEmail(request.getUser(), false);
+        } catch (Exception e) {
+            System.out.println("[SERVICE] Error sending rejection email: " + e.getMessage());
+        }
         // send notification
-        Notification notification = new Notification();
-        notification.setUser(request.getUser());
-        notification.setMessage("Yêu cầu trở thành giảng viên của bạn đã bị từ chối. Lý do: " + rejectionReason);
-        notification.setType("INSTRUCTOR_REQUEST");
-        notification.setStatus("failed");
-        notification.setSentAt(LocalDateTime.now());
-        notificationService.sendMess(notification);
-        
+        try {
+            Notification notification = new Notification();
+            notification.setUser(request.getUser());
+            notification.setMessage("Yêu cầu trở thành giảng viên của bạn đã bị từ chối. Lý do: " + rejectionReason);
+            notification.setType("INSTRUCTOR_REQUEST");
+            notification.setStatus("failed");
+            notification.setSentAt(LocalDateTime.now());
+            notificationService.sendMess(notification);
+        } catch (Exception e) {
+            System.out.println("[SERVICE] Error sending rejection notification: " + e.getMessage());
+        }
         return instructorRequestRepository.save(request);
     }
 

@@ -12,18 +12,16 @@
     .table thead td {
       background: #23272b !important;
       color: #fff !important;
-      border: none;
-    }
 
-    .table thead tr th:first-child {
-      border-top-left-radius: 8px;
-      border-bottom-left-radius: 8px;
-    }
+      border: no .table thead tr th:first-child {
+        border-top-left-radius: 8px;
+        border-bottom-left-radius: 8px;
+      }
 
-    .table thead tr th:last-child {
-      border-top-right-radius: 8px;
-      border-bottom-right-radius: 8px;
-    }
+      .table thead tr th:last-child {
+        border-top-right-radius: 8px;
+        border-bottom-right-radius: 8px;
+      }
   </style>
   <section class="pt-0">
     <div class="container-fluid px-0">
@@ -138,6 +136,9 @@
                         <a th:href="@{/learning/course/view(courseId=${course.courseId})}"
                           class="btn btn-sm btn-primary-soft me-1 mb-1 mb-md-0"><i
                             class="bi bi-play-circle me-1"></i>Continue</a>
+                        <span th:if="${courseProgressMap[course.courseId] == 100}"
+                          class="btn btn-sm btn-success mb-1 mb-md-0 ms-1"
+                          style="pointer-events:none;opacity:0.95;">Complete</span>
                       </td>
                     </tr>
                   </tbody>
@@ -177,4 +178,14 @@
       </div>
     </div>
   </section>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var filterSelect = document.querySelector('select[name="filter"]');
+      if (filterSelect) {
+        filterSelect.addEventListener('change', function () {
+          this.form.submit();
+        });
+      }
+    });
+  </script>
 </div>

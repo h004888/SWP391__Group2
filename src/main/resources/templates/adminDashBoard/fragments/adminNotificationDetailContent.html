@@ -125,14 +125,14 @@
                 </button>
             </form>
 
-            <!-- Manage Reports button for REPORT_COURSE and REPORT_COMMENT -->
-            <a th:if="${notification.type == 'REPORT_COURSE' or notification.type == 'REPORT_COMMENT'}"
+            <!-- Manage Reports button for REPORT_COURSE, REPORT_COMMENT, INSTRUCTOR_REPLY_BLOCK -->
+            <a th:if="${notification.type == 'REPORT_COURSE' or notification.type == 'REPORT_COMMENT' or notification.type == 'INSTRUCTOR_REPLY_BLOCK'}"
                 th:href="@{/admin/reports}" class="btn btn-danger">
                 <i class="fas fa-flag me-2"></i>Manage Reports
             </a>
 
             <!-- View Course button for other types -->
-            <a th:if="${notification.type != 'REPORT_COURSE' and notification.type != 'REPORT_COMMENT' and notification.course != null and notification.course.courseId != null}"
+            <a th:if="${notification.type != 'REPORT_COURSE' and notification.type != 'REPORT_COMMENT' and notification.type != 'INSTRUCTOR_REPLY_BLOCK' and notification.course != null and notification.course.courseId != null}"
                 th:href="@{/admin/course/detail/{courseId}(courseId=${notification.course.courseId})}"
                 class="btn btn-success">
                 <i class="fas fa-book-open me-2"></i>View Course

@@ -5,6 +5,17 @@
         <span th:text="${errorMessage}">Error message</span>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            var successAlert = document.getElementById('success-alert');
+            if (successAlert) {
+                setTimeout(function() {
+                    var alert = bootstrap.Alert.getOrCreateInstance(successAlert);
+                    alert.close();
+                }, 3000);
+            }
+        });
+    </script>
 
     <!-- Title -->
     <div class="row mb-3">
@@ -87,8 +98,8 @@
                                     <td th:text="${m.description != null ? m.description : ''}"></td>
                                     <td th:text="${m.dueDate != null ? #temporals.format(m.dueDate, 'dd/MM/yyyy') : 'N/A'}"></td>
                                     <td>
-                                        <a th:if="${m.status != 'PAID'}" th:href="@{/instructor/maintenance/pay/{id}(id=${m.maintenanceId})}" class="btn btn-primary btn-sm">Thanh toán</a>
-                                        <div th:if="${m.status == 'PAID'}" class="btn btn-success btn-sm" disabled>Đã thanh toán</div>
+                                        <a th:if="${m.status != 'PAID'}" th:href="@{/instructor/maintenance/pay/{id}(id=${m.maintenanceId})}" class="btn btn-primary btn-sm">pay now</a>
+                                        <div th:if="${m.status == 'PAID'}" class="btn btn-success btn-sm" disabled>paid successfully</div>
                                     </td>
                                 </tr>
                                 <tr th:if="${#lists.isEmpty(pendingPayments)}">
@@ -124,7 +135,7 @@
                                     <td th:text="${m.description != null ? m.description : ''}"></td>
                                     <td th:text="${m.dueDate != null ? #temporals.format(m.dueDate, 'dd/MM/yyyy') : 'N/A'}"></td>
                                     <td>
-                                        <div class="btn btn-success btn-sm" disabled>Đã thanh toán</div>
+                                        <div class="btn btn-success btn-sm" disabled>paid successfully</div>
                                     </td>
                                 </tr>
                                 <tr th:if="${#lists.isEmpty(paidPayments)}">

@@ -85,36 +85,36 @@
                 </span>
             </div>
             <!-- Notification -->
-            <div class="nav-item ms-2 dropdown" sec:authorize="isAuthenticated()">
-                <a class="btn btn-light btn-round mb-0 position-relative notification-btn-home" href="#" role="button"
-                    data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside" title="Notifications">
-                    <i class="bi bi-bell fa-fw"></i>
-                    <span id="userNotificationBadge" th:if="${unreadCount > 0}"
-                        class="notif-badge animation-blink"></span>
-                </a>
-                <!-- Notification dropdown menu START -->
-                <div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0"
-                    style="width:320px;min-width:320px;max-width:320px;border:1px solid #ddd;">
-                    <div class="card bg-transparent">
-                        <div
+            <div class="nav-item ms-2 dropdown" sec:authorize="isAuthenticated()" style="margin:15px;">
+            <a class="btn btn-light btn-round mb-0 position-relative notification-btn-home" href="#" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside" title="Notifications">
+                <i class="bi bi-bell fa-fw"></i>
+                <span id="userNotificationBadge" th:if="${unreadCount > 0}"
+                      class="notif-badge animation-blink"></span>
+            </a>
+            <!-- Notification dropdown menu START -->
+            <div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0"
+                 style="width:320px;min-width:320px;max-width:320px;border:1px solid #ddd;">
+                <div class="card bg-transparent">
+                    <div
                             class="card-header bg-transparent border-bottom py-4 d-flex justify-content-between align-items-center">
-                            <h6 class="m-0">Unread Notifications <span id="userNotificationCount"
-                                    class="badge bg-danger bg-opacity-10 text-danger ms-2">0 new</span></h6>
-                        </div>
-                        <div class="card-body p-0">
-                            <ul id="userNotificationList" class="list-group list-unstyled list-group-flush">
-                                <!-- Notifications will be loaded here -->
-                            </ul>
-                        </div>
-                        <!-- Button -->
-                        <div class="card-footer bg-transparent border-0 py-3 text-center position-relative"
-                            style="padding-top:0;">
-                            <a th:href="@{/user/notifications}" class="stretched-link">View all notifications</a>
-                        </div>
+                        <h6 class="m-0">Unread Notifications <span id="userNotificationCount"
+                                                                   class="badge bg-danger bg-opacity-10 text-danger ms-2">0 new</span></h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <ul id="userNotificationList" class="list-group list-unstyled list-group-flush">
+                            <!-- Notifications will be loaded here -->
+                        </ul>
+                    </div>
+                    <!-- Button -->
+                    <div class="card-footer bg-transparent border-0 py-3 text-center position-relative"
+                         style="padding-top:0;">
+                        <a th:href="@{/user/notifications}" class="stretched-link">View all notifications</a>
                     </div>
                 </div>
-                <!-- Notification dropdown menu END -->
             </div>
+            <!-- Notification dropdown menu END -->
+        </div>
             <div class="me-2 me-md-3 dropdown">
                 <!-- Cart button -->
                 <a class="btn btn-light btn-round mb-0" th:href="@{/home/cart}">
@@ -169,12 +169,10 @@
                         <hr class="dropdown-divider">
                     </li>
                     <!-- Links -->
-                    <li><a class="dropdown-item" sec:authorize="hasRole('INSTRUCTOR')" th:href="@{/instructor}"><i
-                                class="bi bi-gear fa-fw me-2"></i>DashBoard</a></li>
-                    <li sec:authorize="hasRole('USER')"><a class="dropdown-item" th:href="@{/profile}"><i
-                                class="bi bi-person fa-fw me-2"></i>Profile</a></li>
-                    <li><a class="dropdown-item" th:href="@{/home/history}"><i
-                                class="fas fa-history me-2"></i>History</a></li>
+                    <li><a class="dropdown-item" sec:authorize="hasRole('INSTRUCTOR')"
+                           th:href="@{/instructor/courses}"><i class="bi bi-gear fa-fw me-2"></i>DashBoard</a></li>
+                    <li sec:authorize="hasRole('USER')"><a class="dropdown-item" th:href="@{/profile}"><i class="bi bi-person fa-fw me-2"></i>Profile</a></li>
+                    <li><a class="dropdown-item" th:href="@{/home/history}"><i class="fas fa-history me-2"></i>History</a></li>
                     <li>
                         <a class="dropdown-item bg-danger-soft-hover" th:href="@{/logout}">
                             <i class="bi bi-power fa-fw me-2"></i>
@@ -221,62 +219,7 @@
         </div>
     </nav>
     <!-- Nav END -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const cartTotalBadge = document.getElementById('cartTotalBadge');
-            const wishlistTotalBadge = document.getElementById('wishlistTotalBadge');
-
-            // Function to fetch and update cart total
-            const updateCartTotal = async () => {
-                try {
-                    const response = await fetch('/home/cart/total', {
-                        method: 'GET',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    });
-                    if (!response.ok) throw new Error('Failed to fetch cart total');
-                    const data = await response.json();
-                    if (cartTotalBadge) {
-                        cartTotalBadge.textContent = data.total || 0;
-                    }
-                } catch (error) {
-                    if (cartTotalBadge) {
-                        cartTotalBadge.textContent = '0';
-                    }
-                }
-            };
-
-            // Function to fetch and update wishlist total
-            const updateWishlistTotal = async () => {
-                try {
-                    const response = await fetch('/home/wishlist/total', {
-                        method: 'GET',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    });
-                    if (!response.ok) throw new Error('Failed to fetch wishlist total');
-                    const data = await response.json();
-                    if (wishlistTotalBadge) {
-                        wishlistTotalBadge.textContent = data.total || 0;
-                    }
-                } catch (error) {
-                    if (wishlistTotalBadge) {
-                        wishlistTotalBadge.textContent = '0';
-                    }
-                }
-            };
-
-            // Lắng nghe sự kiện custom để cập nhật cartTotal từ bất kỳ nơi nào
-            document.addEventListener('cart-updated', updateCartTotal);
-            document.addEventListener('wishlist-updated', updateWishlistTotal);
-
-            // Initial updates
-            updateCartTotal();
-            updateWishlistTotal();
-        });
-    </script>
+    <script th:src="@{/js/totalcart.js}"></script>
 
     <!-- Notification button styles -->
     <style>

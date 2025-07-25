@@ -200,9 +200,10 @@
                         <div class="d-sm-flex align-items-center mb-1 mb-sm-0">
                             <!-- Avatar -->
                             <div class="avatar avatar-md flex-shrink-0">
-                                <img class="avatar-img rounded-circle" th:src="${instructor.profilePicture}"
+                                <img class="avatar-img rounded-circle" th:src="${instructor.profilePicture != null} ?${instructor.profilePicture}: @{/img/undraw_profile.svg}"
                                      alt="avatar">
                             </div>
+
                             <!-- Info -->
                             <div class="ms-0 ms-sm-2 mt-2 mt-sm-0">
                                 <h6 class="mb-1" th:text="${instructor.userName}">Instructor Name</h6>

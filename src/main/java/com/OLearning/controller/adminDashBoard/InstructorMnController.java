@@ -28,6 +28,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -97,7 +98,7 @@ public class InstructorMnController {
 
         // Get enrollment data for current year
         int year = java.time.LocalDate.now().getYear();
-        Map<String, Long> instructorEnrollmentChartData = new java.util.LinkedHashMap<>();
+        Map<String, Long> instructorEnrollmentChartData = new LinkedHashMap<>();
         for (int month = 1; month <= 12; month++) {
             Long count = enrollmentService.countEnrollmentsByInstructorAndMonth(id, year, month);
             String label = String.format("%02d/%d", month, year);
@@ -233,16 +234,20 @@ public class InstructorMnController {
     @PostMapping("/request/accept/{id}")
     public String acceptRequest(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
-            // Get current logged-in admin
+            // Log authentication context
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            System.out.println("[ACCEPT] Authentication: " + authentication);
+            if (authentication != null) {
+                System.out.println("[ACCEPT] Principal: " + authentication.getPrincipal());
+            }
             if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
                 CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-
-                //config username is email to login in CustomerDetail
                 String userName = userDetails.getUsername();
                 UserDTO admin = userService.getUserByEmail(userName);
                 instructorRequestService.acceptRequest(id, admin.getUserId());
                 redirectAttributes.addFlashAttribute("successMessage", SUCCESS_REQUEST_ACCEPTED);
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "Authentication is null or not CustomUserDetails");
             }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", ERROR_REQUEST_ACCEPT + e.getMessage());
@@ -255,16 +260,20 @@ public class InstructorMnController {
                               @RequestParam String rejectionReason,
                               RedirectAttributes redirectAttributes) {
         try {
-            // Get current logged-in admin
+            // Log authentication context
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            System.out.println("[REJECT] Authentication: " + authentication);
+            if (authentication != null) {
+                System.out.println("[REJECT] Principal: " + authentication.getPrincipal());
+            }
             if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
                 CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-
-                //config username is email to login in CustomerDetail
                 String userName = userDetails.getUsername();
                 UserDTO admin = userService.getUserByEmail(userName);
                 instructorRequestService.rejectRequest(id, admin.getUserId(), rejectionReason);
                 redirectAttributes.addFlashAttribute("successMessage", "Request rejected successfully");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "Authentication is null or not CustomUserDetails");
             }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error rejecting request: " + e.getMessage());

@@ -2,64 +2,67 @@
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex justify-content-between align-items-center">
             <h5 class="m-0 font-weight-bold text-primary">
-                <i class="fas fa-flag me-2"></i>Chi tiết báo cáo
+                <i class="fas fa-flag me-2"></i>Report Details
             </h5>
             <a th:href="@{/admin/course/detail/{courseId}(courseId=${report.course.courseId})}"
                 class="btn btn-success btn-sm">
-                <i class="fas fa-book-open me-1"></i>Xem chi tiết khóa học
+                <i class="fas fa-book-open me-1"></i>View Course Details
             </a>
         </div>
         <div class="card-body">
             <dl class="row">
-                <dt class="col-sm-3">Loại báo cáo</dt>
+                <dt class="col-sm-3">Report Type</dt>
                 <dd class="col-sm-9">
-                    <span
-                        th:text="${report.reportType == 'REPORT_COURSE' ? 'Báo cáo khóa học' : 'Báo cáo bình luận'}"></span>
+                    <span th:switch="${report.reportType}">
+                        <span th:case="'REPORT_COURSE'">Course Report</span>
+                        <span th:case="'REPORT_COMMENT'">Comment Report</span>
+                        <span th:case="*">Other</span>
+                    </span>
                 </dd>
 
-                <dt class="col-sm-3">Người báo cáo</dt>
+                <dt class="col-sm-3">Reporter</dt>
                 <dd class="col-sm-9">
                     <span th:text="${report.user.fullName}"></span>
                     (<span th:text="${report.user.email}"></span>)
                 </dd>
 
-                <dt class="col-sm-3">Thời gian tạo</dt>
+                <dt class="col-sm-3">Created At</dt>
                 <dd class="col-sm-9">
                     <span th:text="${#temporals.format(report.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
                 </dd>
 
-                <dt class="col-sm-3">Nội dung báo cáo</dt>
+                <dt class="col-sm-3">Report Content</dt>
                 <dd class="col-sm-9">
                     <span th:text="${report.content}"></span>
                 </dd>
 
-                <dt class="col-sm-3">Link/chứng cứ</dt>
+                <dt class="col-sm-3">Evidence Link</dt>
                 <dd class="col-sm-9">
-                    <th:block th:if="${report.evidenceLink != null}">
+                    <th:block th:if="${evidenceLink != null}">
                         <th:block
-                            th:if="${#strings.contains(report.evidenceLink, 'image') || report.evidenceLink.matches('.*\\.(jpg|jpeg|png|gif)$')}">
-                            <img th:src="${report.evidenceLink}" alt="Bằng chứng ảnh"
+                            th:if="${#strings.contains(evidenceLink, 'image') || evidenceLink.matches('.*\\.(jpg|jpeg|png|gif)$')}">
+                            <img th:src="${evidenceLink}" alt="Evidence Image"
                                 style="max-width: 300px; max-height: 200px; display: block; margin-top: 8px;" />
                         </th:block>
                         <th:block
-                            th:if="${#strings.contains(report.evidenceLink, 'video') || report.evidenceLink.matches('.*\\.(mp4|webm|ogg)$')}">
-                            <video th:src="${report.evidenceLink}" controls
+                            th:if="${#strings.contains(evidenceLink, 'video') || evidenceLink.matches('.*\\.(mp4|webm|ogg)$')}">
+                            <video th:src="${evidenceLink}" controls
                                 style="max-width: 300px; max-height: 200px; display: block; margin-top: 8px;"></video>
                         </th:block>
-                        <a th:if="${!(#strings.contains(report.evidenceLink, 'image') || report.evidenceLink.matches('.*\\.(jpg|jpeg|png|gif)$') || #strings.contains(report.evidenceLink, 'video') || report.evidenceLink.matches('.*\\.(mp4|webm|ogg)$'))}"
-                            th:href="${report.evidenceLink}" target="_blank" th:text="${report.evidenceLink}"></a>
+                        <a th:if="${!(#strings.contains(evidenceLink, 'image') || evidenceLink.matches('.*\\.(jpg|jpeg|png|gif)$') || #strings.contains(evidenceLink, 'video') || evidenceLink.matches('.*\\.(mp4|webm|ogg)$'))}"
+                            th:href="${evidenceLink}" target="_blank" th:text="${evidenceLink}"></a>
                     </th:block>
-                    <span th:if="${report.evidenceLink == null}">Không có</span>
+                    <span th:if="${evidenceLink == null}">None</span>
                 </dd>
 
-                <dt class="col-sm-3">Trạng thái</dt>
+                <dt class="col-sm-3">Status</dt>
                 <dd class="col-sm-9">
                     <span th:text="${report.status}"></span>
                 </dd>
 
-                <!-- Hiển thị phản hồi của instructor nếu có -->
+                <!-- Instructor reply if any -->
                 <th:block th:if="${instructorReplyNotification != null}">
-                    <dt class="col-sm-3">Phản hồi từ Instructor</dt>
+                    <dt class="col-sm-3">Reply from Instructor</dt>
                     <dd class="col-sm-9">
                         <div class="border rounded p-2 mb-2 bg-light" th:text="${instructorReplyNotification.message}">
                         </div>
@@ -68,10 +71,10 @@
                         <span class="badge bg-info"
                             th:text="${#temporals.format(instructorReplyNotification.sentAt, 'dd/MM/yyyy HH:mm')}"></span>
                         <div th:if="${instructorReplyNotification.evidenceLink != null}" class="mt-2">
-                            <span class="fw-bold">Bằng chứng:</span>
+                            <span class="fw-bold">Evidence:</span>
                             <th:block
                                 th:if="${#strings.contains(instructorReplyNotification.evidenceLink, 'image') || instructorReplyNotification.evidenceLink.matches('.*\\.(jpg|jpeg|png|gif)$')}">
-                                <img th:src="${instructorReplyNotification.evidenceLink}" alt="Bằng chứng ảnh"
+                                <img th:src="${instructorReplyNotification.evidenceLink}" alt="Evidence Image"
                                     style="max-width: 300px; max-height: 200px; display: block; margin-top: 8px;" />
                             </th:block>
                             <th:block
@@ -80,42 +83,42 @@
                                     style="max-width: 300px; max-height: 200px; display: block; margin-top: 8px;"></video>
                             </th:block>
                             <a th:href="${instructorReplyNotification.evidenceLink}" target="_blank"
-                                class="d-block mt-1">Xem file</a>
+                                class="d-block mt-1">View File</a>
                         </div>
                     </dd>
                 </th:block>
-                <!-- Hiển thị nội dung comment bị report nếu là report comment -->
+                <!-- Reported comment content if report type is comment -->
                 <th:block th:if="${report.reportType == 'COMMENT' and reportedComment != null}">
-                    <dt class="col-sm-3">Nội dung bình luận bị báo cáo</dt>
+                    <dt class="col-sm-3">Reported Comment Content</dt>
                     <dd class="col-sm-9">
                         <div class="border rounded p-2 mb-2" th:text="${reportedComment.comment}"></div>
                         <span class="badge bg-secondary me-2"
-                            th:text="'Tác giả: ' + ${reportedComment.enrollment.user.fullName}"></span>
+                            th:text="'Author: ' + ${reportedComment.enrollment.user.fullName}"></span>
                         <span class="badge bg-info"
                             th:text="${#temporals.format(reportedComment.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
                         <div class="mt-2">
                             <button type="button" class="btn btn-warning btn-sm" th:if="${!reportedComment.hidden}"
-                                th:onclick="|hideComment(${reportedComment.reviewId}, true)|">Ẩn bình luận</button>
+                                th:onclick="|hideComment(${reportedComment.reviewId}, true)|">Hide Comment</button>
                             <button type="button" class="btn btn-success btn-sm" th:if="${reportedComment.hidden}"
-                                th:onclick="|hideComment(${reportedComment.reviewId}, false)|">Hiện bình luận</button>
-                            <span th:if="${reportedComment.hidden}" class="badge bg-danger ms-2">Đã bị ẩn</span>
+                                th:onclick="|hideComment(${reportedComment.reviewId}, false)|">Show Comment</button>
+                            <span th:if="${reportedComment.hidden}" class="badge bg-danger ms-2">Hidden</span>
                         </div>
                     </dd>
                 </th:block>
                 <th:block th:if="${report.reportType == 'COMMENT' and reportedComment == null}">
-                    <dt class="col-sm-3">Nội dung bình luận bị báo cáo</dt>
-                    <dd class="col-sm-9 text-danger">Bình luận đã bị xóa hoặc không tồn tại.</dd>
+                    <dt class="col-sm-3">Reported Comment Content</dt>
+                    <dd class="col-sm-9 text-danger">The comment has been deleted or does not exist.</dd>
                 </th:block>
             </dl>
             <form th:if="${report.status != 'processed'}" th:action="@{/admin/reports/process/{id}(id=${report.id})}"
                 method="post">
-                <button type="submit" class="btn btn-success">Processed</button>
+                <button type="submit" class="btn btn-success">Mark as Processed</button>
             </form>
         </div>
         <script>
             function hideComment(reviewId, hidden) {
-                if (hidden && !confirm('Bạn có chắc muốn ẩn bình luận này?')) return;
-                if (!hidden && !confirm('Bạn có chắc muốn hiện lại bình luận này?')) return;
+                if (hidden && !confirm('Are you sure you want to hide this comment?')) return;
+                if (!hidden && !confirm('Are you sure you want to show this comment?')) return;
                 fetch('/admin/reports/hide-comment', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -124,7 +127,7 @@
                     .then(res => res.text())
                     .then(data => {
                         if (data === 'success') {
-                            // Nếu trang lesson đang mở ở window.opener, reload comment động
+                            // If lesson page is open in window.opener, reload comments dynamically
                             if (window.opener && typeof window.opener.loadComments === 'function') {
                                 window.opener.loadComments(
                                     window.opener.document.querySelector('input[name="courseId"]').value,
@@ -133,7 +136,7 @@
                             }
                             location.reload();
                         } else {
-                            alert('Có lỗi xảy ra!');
+                            alert('An error occurred!');
                         }
                     });
             }

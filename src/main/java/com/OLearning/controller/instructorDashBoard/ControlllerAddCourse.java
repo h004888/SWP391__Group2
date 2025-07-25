@@ -201,9 +201,15 @@ public class ControlllerAddCourse {
             , RedirectAttributes redirectAttributes, HttpServletRequest request) {
         try {
             courseChapterService.deleteCourseFK(courseId);
-            redirectAttributes.addFlashAttribute("successMessage", "course deleted successfully.");
+            redirectAttributes.addFlashAttribute("successMessage", "Course deleted successfully.");
         } catch (RuntimeException ex) {
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            String msg = ex.getMessage();
+            if (msg != null && msg.toLowerCase().contains("students enrolled")) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Cannot delete course: there are students enrolled in this course.");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            }
+            return "redirect:../courses";
         }
         return "redirect:../courses";
     }
@@ -218,70 +224,75 @@ public class ControlllerAddCourse {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
 
-        // Find course and instructor
-        Course course = courseService.findCourseById(courseId);
-        if (course == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Course not found.");
-            return "redirect:../courses";
-        }
+        try {
+            // Find course and instructor
+            Course course = courseService.findCourseById(courseId);
+            if (course == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Course not found.");
+                return "redirect:../courses";
+            }
 
-        User instructor = userService.findById(userId);
-        if (instructor == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Instructor not found.");
-            return "redirect:../courses";
-        }
+            User instructor = userService.findById(userId);
+            if (instructor == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Instructor not found.");
+                return "redirect:../courses";
+            }
 
-        boolean isFirstPublication = !ordersService.hasPaidPublicationOrder(userId, courseId);
+            boolean isFirstPublication = !ordersService.hasPaidPublicationOrder(userId, courseId);
 
-        if (isFirstPublication) {
-            // First publication - requires payment
-            double publicationFee = 100000.0;
+            if (isFirstPublication) {
+                // First publication - requires payment
+                double publicationFee = 100000.0;
 
-            if (instructor.getCoin() >= publicationFee) {
-                Order order = ordersService.createOrder(instructor, publicationFee, "course_public");
-                String description = "Thanh toan phi cong bo khoa hoc voi coin";
-                order.setStatus("PAID");
-                order.setDescription(description);
-                order.setRefCode(UUID.randomUUID().toString());
-                ordersService.saveOrder(order);
-                instructor.setCoin(instructor.getCoin() - (long) publicationFee);
-                userRepository.save(instructor);
+                if (instructor.getCoin() >= publicationFee) {
+                    Order order = ordersService.createOrder(instructor, publicationFee, "course_public");
+                    String description = "Thanh toan phi cong bo khoa hoc voi coin";
+                    order.setStatus("PAID");
+                    order.setDescription(description);
+                    order.setRefCode(UUID.randomUUID().toString());
+                    ordersService.saveOrder(order);
+                    instructor.setCoin(instructor.getCoin() - (long) publicationFee);
+                    userRepository.save(instructor);
 
-                OrderDetail orderDetail = new OrderDetail();
-                orderDetail.setOrder(order);
-                orderDetail.setCourse(course);
-                orderDetail.setUnitPrice(publicationFee);
-                ordersService.saveOrderDetail(orderDetail);
+                    OrderDetail orderDetail = new OrderDetail();
+                    orderDetail.setOrder(order);
+                    orderDetail.setCourse(course);
+                    orderDetail.setUnitPrice(publicationFee);
+                    ordersService.saveOrderDetail(orderDetail);
 
+                    courseService.submitCourse(courseId, "publish");
+                    redirectAttributes.addFlashAttribute("successMessage", "Course published successfully!");
+                    return "redirect:../courses";
+                } else {
+                    // Create order for publication fee payment
+                    Order order = ordersService.createOrder(instructor, publicationFee, "course_public");
+                    String description = "Thanh toan phi cong bo khoa hoc - ORDER" + order.getOrderId();
+                    order.setDescription(description);
+                    ordersService.saveOrder(order);
+
+                    // Create order detail
+                    OrderDetail orderDetail = new OrderDetail();
+                    orderDetail.setOrder(order);
+                    orderDetail.setCourse(course);
+                    orderDetail.setUnitPrice(publicationFee);
+                    ordersService.saveOrderDetail(orderDetail);
+
+                    String qrUrl = vietQRService.generateSePayQRUrl(order.getAmount(), order.getDescription());
+
+                    model.addAttribute("orderId", order.getOrderId());
+                    model.addAttribute("amount", order.getAmount());
+                    model.addAttribute("description", order.getDescription());
+                    model.addAttribute("qrUrl", qrUrl);
+
+                    return "homePage/qr_checkout";
+                }
+            } else {
                 courseService.submitCourse(courseId, "publish");
                 redirectAttributes.addFlashAttribute("successMessage", "Course published successfully!");
                 return "redirect:../courses";
-            } else {
-                // Create order for publication fee payment
-                Order order = ordersService.createOrder(instructor, publicationFee, "course_public");
-                String description = "Thanh toan phi cong bo khoa hoc - ORDER" + order.getOrderId();
-                order.setDescription(description);
-                ordersService.saveOrder(order);
-
-                // Create order detail
-                OrderDetail orderDetail = new OrderDetail();
-                orderDetail.setOrder(order);
-                orderDetail.setCourse(course);
-                orderDetail.setUnitPrice(publicationFee);
-                ordersService.saveOrderDetail(orderDetail);
-
-                String qrUrl = vietQRService.generateSePayQRUrl(order.getAmount(), order.getDescription());
-
-                model.addAttribute("orderId", order.getOrderId());
-                model.addAttribute("amount", order.getAmount());
-                model.addAttribute("description", order.getDescription());
-                model.addAttribute("qrUrl", qrUrl);
-
-                return "homePage/qr_checkout";
             }
-        } else {
-            courseService.submitCourse(courseId, "publish");
-            redirectAttributes.addFlashAttribute("successMessage", "Course published successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Publish course failed: " + e.getMessage());
             return "redirect:../courses";
         }
     }
@@ -448,7 +459,7 @@ public class ControlllerAddCourse {
                                   BindingResult result,
                                   Model model,
                                   @RequestParam(name = "action") String action,
-                                  HttpServletRequest request) {
+                                  HttpServletRequest request, RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             model.addAttribute("coursestep2", courseMediaDTO);
             model.addAttribute("fragmentContent", "instructorDashboard/fragments/step2CourseMedia :: step2Content");
@@ -475,24 +486,29 @@ public class ControlllerAddCourse {
             model.addAttribute("fragmentContent", "instructorDashboard/fragments/step1BasicInfor :: step1Content");
             return "instructorDashboard/indexUpdate";
         }
-
-        Course course = courseService.createCourseMedia(courseId, courseMediaDTO);
-        ChapterDTO chapterDTO = new ChapterDTO();
-        model.addAttribute("chapter", chapterDTO);
-        List<Chapter> chapters = chapterService.chapterListByCourse(course.getCourseId());
-        for (Chapter chapter : chapters) {
-            List<Lesson> lessons = lessonService.findLessonsByChapterId(chapter.getChapterId());
-            if (lessons != null && lessons.size() > 0) {
-                chapter.setLessons(lessons);
+        try{
+            Course course = courseService.createCourseMedia(courseId, courseMediaDTO);
+            ChapterDTO chapterDTO = new ChapterDTO();
+            model.addAttribute("chapter", chapterDTO);
+            List<Chapter> chapters = chapterService.chapterListByCourse(course.getCourseId());
+            for (Chapter chapter : chapters) {
+                List<Lesson> lessons = lessonService.findLessonsByChapterId(chapter.getChapterId());
+                if (lessons != null && lessons.size() > 0) {
+                    chapter.setLessons(lessons);
+                }
             }
+            if (chapters != null && !chapters.isEmpty()) {
+                model.addAttribute("chapters", chapters);
+            }
+            model.addAttribute("lessontitle", new LessonTitleDTO());
+            model.addAttribute("videoDTO", new VideoDTO());
+            model.addAttribute("fragmentContent", "instructorDashboard/fragments/step3CourseContent :: step3Content");
+            return "instructorDashboard/indexUpdate";
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", "Error adding video: " + e.getMessage());
+            return "redirect:../createcourse/coursemedia";
         }
-        if (chapters != null && !chapters.isEmpty()) {
-            model.addAttribute("chapters", chapters);
-        }
-        model.addAttribute("lessontitle", new LessonTitleDTO());
-        model.addAttribute("videoDTO", new VideoDTO());
-        model.addAttribute("fragmentContent", "instructorDashboard/fragments/step3CourseContent :: step3Content");
-        return "instructorDashboard/indexUpdate";
     }
 
     //save chapter in course Content
@@ -641,6 +657,11 @@ public class ControlllerAddCourse {
                            @RequestParam(name = "lessonId") Long lessonId,
                            RedirectAttributes redirectAttributes) {
         try {
+            // Validate video size <= 40MB
+            if (videoDTO.getVideoUrl() != null && !videoDTO.getVideoUrl().isEmpty() && videoDTO.getVideoUrl().getSize() > 40 * 1024 * 1024) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Maximum video size is 40MB. Please select a smaller file!");
+                return "redirect:../createcourse/coursecontent";
+            }
             System.out.println("Adding video for lesson ID: " + lessonId);
             System.out.println("Video duration received: " + videoDTO.getDuration());
 
@@ -707,7 +728,7 @@ public class ControlllerAddCourse {
     public String addQuiz(@RequestParam("lessonId") Long lessonId,
                           @RequestParam("title") String title,
                           @RequestParam("description") String description,
-                          @RequestParam("timeLimit") Integer timeLimit,
+                          @RequestParam(value = "timeLimit", required = false) Integer timeLimit,
                           @RequestParam(value = "question", required = false) List<String> questions,
                           @RequestParam(value = "optionA", required = false) List<String> optionsA,
                           @RequestParam(value = "optionB", required = false) List<String> optionsB,
@@ -716,6 +737,12 @@ public class ControlllerAddCourse {
                           @RequestParam(value = "correctAnswer", required = false) List<String> correctAnswers,
                           RedirectAttributes redirectAttributes) {
         try {
+            // Validate timeLimit
+            if (timeLimit == null || timeLimit < 1) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Time limit must be at least 1 minute");
+                return "redirect:../createcourse/coursecontent";
+            }
+
             // Check if parameters are valid
             if (questions == null || questions.isEmpty()) {
                 redirectAttributes.addFlashAttribute("errorMessage", "No quiz questions provided");
@@ -789,8 +816,13 @@ public class ControlllerAddCourse {
             courseService.submitCourse(courseId, "draft");
             return "redirect:../courses";
         }
+        List<Chapter> chapters = chapterService.chapterListByCourse(courseId);
+        if(chapters.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Please create chapter and video to continue");
+            return "redirect:../createcourse/coursecontent";
+        }
         // Fetch terms and conditions for INSTRUCTOR and ALL
-        java.util.List<TermsAndCondition> terms = termsAndConditionService.getByRoleTargetOrAll("INSTRUCTOR");
+        List<TermsAndCondition> terms = termsAndConditionService.getByRoleTargetOrAll("INSTRUCTOR");
         model.addAttribute("termsAndConditions", terms);
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/step4SubmitCourse :: step4Content");
         return "instructorDashboard/indexUpdate";
@@ -840,6 +872,11 @@ public class ControlllerAddCourse {
                                RedirectAttributes redirectAttributes,
                                HttpServletRequest request) {
         try {
+            // Validate video size <= 40MB
+            if ("video".equals(contentType) && videoFile != null && !videoFile.isEmpty() && videoFile.getSize() > 40 * 1024 * 1024) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Maximum video size is 40MB. Please select a smaller file!");
+                return "redirect:../createcourse/coursecontent";
+            }
             // Lấy lesson hiện tại
             Lesson lesson = lessonRepository.findById(lessonId)
                     .orElseThrow(() -> new RuntimeException("Lesson not found with ID: " + lessonId));
@@ -893,6 +930,10 @@ public class ControlllerAddCourse {
                     quizService.deleteQuiz(quiz.getId());
                 }
             } else if ("quiz".equals(contentType)) {
+                if (quizTimeLimit == null || quizTimeLimit < 1) {
+                    redirectAttributes.addFlashAttribute("errorMessage", "Time limit must be at least 1 minute");
+                    return "redirect:../createcourse/coursecontent";
+                }
                 // Cập nhật quiz
                 QuizDTO quizDTO = new QuizDTO();
                 quizDTO.setTitle(quizTitle);

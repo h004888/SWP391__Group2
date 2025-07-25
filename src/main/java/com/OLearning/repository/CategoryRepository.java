@@ -42,7 +42,20 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     List<Category> findTop5ByOrderByIdAsc();
 
     Page<Category> findByNameContainingIgnoreCase(String name, Pageable pageable);
-    @Query("SELECT c FROM Category c LEFT JOIN c.courses cs GROUP BY c.id, c.name ORDER BY COUNT(cs) DESC")
+
+    @Query("""
+    SELECT c FROM Category c 
+    WHERE EXISTS (
+        SELECT 1 FROM Course co 
+        WHERE co.category.id = c.id 
+        AND LOWER(co.status) = 'publish'
+    )
+    ORDER BY (
+        SELECT COUNT(co) FROM Course co 
+        WHERE co.category.id = c.id 
+        AND LOWER(co.status) = 'publish'
+    ) DESC
+    """)
     List<Category> findTopCategoriesByCourseCount(Pageable pageable);
 
     boolean existsByNameAndIdNot(String name, Long id);

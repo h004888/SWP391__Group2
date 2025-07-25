@@ -42,4 +42,6 @@ public interface CourseMaintenanceService {
     boolean processMaintenancePayment(Long maintenanceId, String refCode);
 
     String getMaintenanceStatusById(Long maintenanceId);
+
+    Long sumCourseMaintainForInstructor(Long instructorId);
 }
