@@ -201,9 +201,15 @@ public class ControlllerAddCourse {
             , RedirectAttributes redirectAttributes, HttpServletRequest request) {
         try {
             courseChapterService.deleteCourseFK(courseId);
-            redirectAttributes.addFlashAttribute("successMessage", "course deleted successfully.");
+            redirectAttributes.addFlashAttribute("successMessage", "Course deleted successfully.");
         } catch (RuntimeException ex) {
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            String msg = ex.getMessage();
+            if (msg != null && msg.toLowerCase().contains("students enrolled")) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Cannot delete course: there are students enrolled in this course.");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            }
+            return "redirect:../courses";
         }
         return "redirect:../courses";
     }
@@ -453,7 +459,7 @@ public class ControlllerAddCourse {
                                   BindingResult result,
                                   Model model,
                                   @RequestParam(name = "action") String action,
-                                  HttpServletRequest request) {
+                                  HttpServletRequest request, RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             model.addAttribute("coursestep2", courseMediaDTO);
             model.addAttribute("fragmentContent", "instructorDashboard/fragments/step2CourseMedia :: step2Content");
@@ -480,24 +486,29 @@ public class ControlllerAddCourse {
             model.addAttribute("fragmentContent", "instructorDashboard/fragments/step1BasicInfor :: step1Content");
             return "instructorDashboard/indexUpdate";
         }
-
-        Course course = courseService.createCourseMedia(courseId, courseMediaDTO);
-        ChapterDTO chapterDTO = new ChapterDTO();
-        model.addAttribute("chapter", chapterDTO);
-        List<Chapter> chapters = chapterService.chapterListByCourse(course.getCourseId());
-        for (Chapter chapter : chapters) {
-            List<Lesson> lessons = lessonService.findLessonsByChapterId(chapter.getChapterId());
-            if (lessons != null && lessons.size() > 0) {
-                chapter.setLessons(lessons);
+        try{
+            Course course = courseService.createCourseMedia(courseId, courseMediaDTO);
+            ChapterDTO chapterDTO = new ChapterDTO();
+            model.addAttribute("chapter", chapterDTO);
+            List<Chapter> chapters = chapterService.chapterListByCourse(course.getCourseId());
+            for (Chapter chapter : chapters) {
+                List<Lesson> lessons = lessonService.findLessonsByChapterId(chapter.getChapterId());
+                if (lessons != null && lessons.size() > 0) {
+                    chapter.setLessons(lessons);
+                }
             }
+            if (chapters != null && !chapters.isEmpty()) {
+                model.addAttribute("chapters", chapters);
+            }
+            model.addAttribute("lessontitle", new LessonTitleDTO());
+            model.addAttribute("videoDTO", new VideoDTO());
+            model.addAttribute("fragmentContent", "instructorDashboard/fragments/step3CourseContent :: step3Content");
+            return "instructorDashboard/indexUpdate";
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", "Error adding video: " + e.getMessage());
+            return "redirect:../createcourse/coursemedia";
         }
-        if (chapters != null && !chapters.isEmpty()) {
-            model.addAttribute("chapters", chapters);
-        }
-        model.addAttribute("lessontitle", new LessonTitleDTO());
-        model.addAttribute("videoDTO", new VideoDTO());
-        model.addAttribute("fragmentContent", "instructorDashboard/fragments/step3CourseContent :: step3Content");
-        return "instructorDashboard/indexUpdate";
     }
 
     //save chapter in course Content
@@ -646,6 +657,11 @@ public class ControlllerAddCourse {
                            @RequestParam(name = "lessonId") Long lessonId,
                            RedirectAttributes redirectAttributes) {
         try {
+            // Validate video size <= 40MB
+            if (videoDTO.getVideoUrl() != null && !videoDTO.getVideoUrl().isEmpty() && videoDTO.getVideoUrl().getSize() > 40 * 1024 * 1024) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Maximum video size is 40MB. Please select a smaller file!");
+                return "redirect:../createcourse/coursecontent";
+            }
             System.out.println("Adding video for lesson ID: " + lessonId);
             System.out.println("Video duration received: " + videoDTO.getDuration());
 
@@ -856,6 +872,11 @@ public class ControlllerAddCourse {
                                RedirectAttributes redirectAttributes,
                                HttpServletRequest request) {
         try {
+            // Validate video size <= 40MB
+            if ("video".equals(contentType) && videoFile != null && !videoFile.isEmpty() && videoFile.getSize() > 40 * 1024 * 1024) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Maximum video size is 40MB. Please select a smaller file!");
+                return "redirect:../createcourse/coursecontent";
+            }
             // Lấy lesson hiện tại
             Lesson lesson = lessonRepository.findById(lessonId)
                     .orElseThrow(() -> new RuntimeException("Lesson not found with ID: " + lessonId));
