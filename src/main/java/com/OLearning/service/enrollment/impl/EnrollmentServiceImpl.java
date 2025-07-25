@@ -116,36 +116,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         return new PageImpl<>(enrollmentDTOList, pageable, enrollments.getTotalElements());
     }
 
-    @Override
-    public boolean blockEnrollment(int enrollmentId) {
-        Optional<Enrollment> enrollmentOpt = enrollmentRepository.findById(enrollmentId);
 
-        if (enrollmentOpt.isPresent()) {
-            Enrollment enrollment = enrollmentOpt.get();
-            enrollment.setStatus("blocked");
-            enrollmentRepository.save(enrollment);
-
-            // Gửi email thông báo cho học viên
-            try {
-                User student = enrollment.getUser();
-                Course course = enrollment.getCourse();
-                emailService.sendEnrollmentBlockedEmail(student, course);
-            } catch (Exception e) {
-                log.error("Failed to send enrollment blocked email", e);
-                // Không throw exception để không ảnh hưởng đến việc block
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-    @Override
-    public EnrollmentDTO getRequestById(int enrollmentId) {
-        return enrollmentRepository.findByEnrollmentId(enrollmentId).map(mapper::MapEnrollmentDTO)
-                .orElseThrow(() -> new RuntimeException("Enrollment request not found with id: " + enrollmentId));
-    }
 
     @Override
     public Integer getTotalEnrollment(Long courseId) {

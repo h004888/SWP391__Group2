@@ -510,6 +510,20 @@
             updateChart();
         });
 
+        function showLessonForm(chapterId) {
+            // Mở collapse của chapter
+            const collapseElement = document.getElementById('collapseChapter' + chapterId);
+            if (collapseElement) {
+                collapseElement.classList.add('show');
+            }
+            
+            // Hiển thị form lesson
+            const lessonForm = document.getElementById('lessonForm' + chapterId);
+            if (lessonForm) {
+                lessonForm.classList.remove('d-none');
+            }
+        }
+
     </script>
     <style>
         body {
