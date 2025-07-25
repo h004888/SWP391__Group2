@@ -1,7 +1,11 @@
 package com.OLearning.controller.api;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.text.Normalizer;
 import java.security.Principal;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,6 +24,11 @@ import com.OLearning.service.enrollment.EnrollmentService;
 import com.OLearning.service.category.CategoryService;
 import com.OLearning.service.user.UserService;
 import com.OLearning.security.CustomUserDetails;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.model.IText;
+import org.thymeleaf.spring6.SpringTemplateEngine;
+import org.xhtmlrenderer.pdf.ITextRenderer;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 @RequestMapping("/certificates")
@@ -32,6 +41,9 @@ public class CertificateController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private SpringTemplateEngine templateEngine;
 
     @Autowired
     private CategoryService categoryService;
@@ -83,6 +95,38 @@ public class CertificateController {
         model.addAttribute("cert", cert);
         System.out.println(cert);
         return "/userPage/certificate";
+    }
+
+    @GetMapping("/download")
+    public void downloadCertificate(@RequestParam Long userId,
+            @RequestParam Long courseId, Model model, HttpServletResponse response) throws IOException {
+        Certificate cert = certificateService.findByUser_UserIdAndCourse_CourseId(userId, courseId);
+        if (cert == null) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+        Context context = new Context();
+        context.setVariable("cert", cert);
+        String htmlContent = templateEngine.process("/userPage/certificate", context);
+        htmlContent = removeVietnameseAccents(htmlContent);
+
+        ITextRenderer renderer = new ITextRenderer();
+        renderer.setDocumentFromString(htmlContent);
+        renderer.layout();
+
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=certificate.pdf");
+        OutputStream outputStream = response.getOutputStream();
+        renderer.createPDF(outputStream);
+        outputStream.close();
+
+    }
+
+    public static String removeVietnameseAccents(String input) {
+        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+        // Bỏ toàn bộ ký tự dấu kết hợp
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        return pattern.matcher(normalized).replaceAll("");
     }
 
 }
