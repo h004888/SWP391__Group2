@@ -294,7 +294,7 @@ public class CartController {
                 redirectAttributes.addFlashAttribute("message", "Checkout completed using wallet!");
                 return "redirect:/home/cart";
             } else if ("qr".equalsIgnoreCase(paymentMethod)) {
-                Order order = ordersService.createOrder(user, totalAmount, "course_purchase");
+                Order order = ordersService.createOrder(user, totalAmount, "COURSE_PURCHASE");
                 String description = "Buy Course OLearning - ORDER" + order.getOrderId();
                 order.setDescription(description);
                 ordersService.saveOrder(order);

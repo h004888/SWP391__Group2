@@ -2,6 +2,8 @@ package com.OLearning.controller.instructorDashBoard;
 
 import com.OLearning.dto.order.InstructorOrderDTO;
 import com.OLearning.entity.CourseMaintenance;
+import com.OLearning.entity.User;
+import com.OLearning.repository.UserRepository;
 import com.OLearning.security.CustomUserDetails;
 import com.OLearning.service.courseMaintance.CourseMaintenanceService;
 import com.OLearning.service.order.OrdersService;
@@ -24,6 +26,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/instructor/maintenance")
@@ -35,6 +38,8 @@ public class CourseInstructorMaintenanceController {
     private CourseMaintenanceService courseMaintenanceService;
     @Autowired
     private VietQRService vietQRService;
+    @Autowired
+    private UserRepository userRepository;
 
     @GetMapping
     public String getAllMaintenances(Model model,
@@ -63,14 +68,18 @@ public class CourseInstructorMaintenanceController {
                 instructorId, courseName, monthYearDate, pageable);
 
         List<CourseMaintenance> pendingPayments = maintenancePage.getContent().stream()
-                .filter(m -> !"PAID".equalsIgnoreCase(m.getStatus()))
+                .filter(m -> "pending".equalsIgnoreCase(m.getStatus()))
                 .toList();
         List<CourseMaintenance> paidPayments = maintenancePage.getContent().stream()
                 .filter(m -> "PAID".equalsIgnoreCase(m.getStatus()))
                 .toList();
+        List<CourseMaintenance> overduePayments = maintenancePage.getContent().stream()
+                .filter(m -> "overdue".equalsIgnoreCase(m.getStatus()))
+                .toList();
         
         model.addAttribute("pendingPayments", pendingPayments);
         model.addAttribute("paidPayments", paidPayments);
+        model.addAttribute("overduePayments", overduePayments);
         model.addAttribute("maintenancePayments", maintenancePage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", maintenancePage.getTotalPages());
@@ -80,6 +89,12 @@ public class CourseInstructorMaintenanceController {
         model.addAttribute("monthYear", monthYear);
         model.addAttribute("accNamePage", "My Maintenance");
         model.addAttribute("fragmentContent", "instructorDashBoard/fragments/courseInstructorMaintainceContent :: maintenanceContent");
+        
+        // Add instructor coin balance to model
+        User instructor = userRepository.findById(instructorId).orElse(null);
+        if (instructor != null) {
+            model.addAttribute("instructorCoin", instructor.getCoin());
+        }
 
         if ("access_denied".equals(error)) {
             model.addAttribute("errorMessage", "You don't have permission to view this order.");
@@ -90,23 +105,54 @@ public class CourseInstructorMaintenanceController {
     @GetMapping("/pay/{maintenanceId}")
     public String payMaintenance(@PathVariable("maintenanceId") Long maintenanceId, Model model, RedirectAttributes redirectAttributes) {
         try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            User instructor = userRepository.findById(userDetails.getUserId()).orElse(null);
+            
+            if (instructor == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "User not found!");
+                return "redirect:/instructor/maintenance";
+            }
+
             CourseMaintenance maintenance = courseMaintenanceService.getAllCourseMaintenances().stream()
                     .filter(cm -> cm.getMaintenanceId().equals(maintenanceId))
                     .findFirst().orElse(null);
             if (maintenance == null) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Maintenance fee not found!");
-                return "redirect:/instructor/orders";
+                return "redirect:/instructor/maintenance";
             }
-            String monthYearStr = maintenance.getMonthYear().format(DateTimeFormatter.ofPattern("MM/yyyy"));
-            String description = "thanh toan bao tri thang " + monthYearStr + " MAINTENANCE" + maintenance.getMaintenanceId();
+
+            if ("PAID".equalsIgnoreCase(maintenance.getStatus())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "This maintenance fee has already been paid!");
+                return "redirect:/instructor/maintenance";
+            }
+
             double amount = maintenance.getFee() != null ? maintenance.getFee().getMaintenanceFee() : 0.0;
-            String qrUrl = vietQRService.generateSePayQRUrl(amount, description);
-            model.addAttribute("maintenanceId", maintenance.getMaintenanceId());
-            model.addAttribute("isMaintenance", true);
-            model.addAttribute("amount", amount);
-            model.addAttribute("description", description);
-            model.addAttribute("qrUrl", qrUrl);
-            return "homePage/qr_checkout";
+
+            if (instructor.getCoin() >= amount) {
+                String refCode = UUID.randomUUID().toString();
+                boolean success = courseMaintenanceService.processMaintenancePayment(maintenanceId, refCode);
+                
+                if (success) {
+                    redirectAttributes.addFlashAttribute("successMessage", "Payment successful! Maintenance fee has been paid using coin.");
+                } else {
+                    redirectAttributes.addFlashAttribute("errorMessage", "Payment failed! Please try again.");
+                }
+                
+                return "redirect:/instructor/maintenance";
+            } else {
+                String monthYearStr = maintenance.getMonthYear().format(DateTimeFormatter.ofPattern("MM/yyyy"));
+                String description = "thanh toan bao tri thang " + monthYearStr + " MAINTENANCE" + maintenance.getMaintenanceId();
+                String qrUrl = vietQRService.generateSePayQRUrl(amount, description);
+                model.addAttribute("maintenanceId", maintenance.getMaintenanceId());
+                model.addAttribute("isMaintenance", true);
+                model.addAttribute("amount", amount);
+                model.addAttribute("description", description);
+                model.addAttribute("qrUrl", qrUrl);
+                model.addAttribute("instructorCoin", instructor.getCoin());
+                model.addAttribute("insufficientCoin", true);
+                return "homePage/qr_checkout";
+            }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error processing maintenance payment: " + e.getMessage());
             return "redirect:/instructor/maintenance";

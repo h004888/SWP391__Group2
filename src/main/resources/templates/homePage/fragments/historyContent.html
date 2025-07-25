@@ -80,7 +80,7 @@
               <tbody id="transactionTable">
               <tr th:each="transaction, loop : ${transactions}">
                 <td th:text="${loop.index + 1}"></td>
-                <td th:text="${#temporals.format(transaction.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
+                <td th:text="${#temporals.format(transaction.orderDate, 'dd/MM/yyyy HH:mm')}"></td>
                 <td>
                   <div th:text="${transaction.courseName}" class="fw-bold text-center"></div>
                   <div class="text-muted small text-center" th:text="'Instructor: ' + ${transaction.instructorName}"></div>
@@ -89,10 +89,9 @@
                 <td class="text-center">
                   <span th:if="${transaction.status == 'PAID'}" class="badge bg-success">Paid</span>
                   <span th:if="${transaction.status == 'PENDING'}" class="badge bg-warning text-dark">Pending</span>
-                  <span th:if="${transaction.status == 'CANCELLED'}" class="badge bg-danger">Canceled</span>
                 </td>
                 <td class="text-center">
-                  <button class="btn btn-link text-primary transaction-detail-btn" th:attr="data-id=${transaction.transactionId}">View</button>
+                  <button class="btn btn-link text-primary transaction-detail-btn" th:attr="data-id=${transaction.orderId}">View</button>
                 </td>
               </tr>
               <tr th:if="${transactions.size() == 0}"><td colspan="6" class="text-center text-muted">No transactions</td></tr>
@@ -106,6 +105,7 @@
         <div th:if="${totalItems > 0}">
           <span class="text-muted">Show <span th:text="${currentPage * pageSize + 1}"></span> to <span th:text="${(currentPage * pageSize) + pageSize > totalItems ? totalItems : (currentPage * pageSize) + pageSize}"></span> in total <span th:text="${totalItems}"></span> result</span>
         </div>
+
         <nav th:if="${totalPages > 1}">
           <ul class="pagination mb-0">
             <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
@@ -189,25 +189,21 @@
     </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-      // Modal logic đẹp như mẫu
-      // Modal logic as beautiful as the template
       $(document).ready(function () {
         $(document).on('click', '.transaction-detail-btn', function () {
           var id = $(this).data('id');
           $.get('/home/history/detail/' + id, function(data) {
             if (data) {
               $('#modal-refCode').text('#' + (data.refCode || ''));
-              $('#modal-createdAt').text(data.createdAt ? new Date(data.createdAt).toLocaleString('vi-VN') : '');
+              $('#modal-createdAt').text(data.orderDate ? new Date(data.orderDate).toLocaleString('vi-VN') : '');
               $('#modal-paymentMethod').text(data.paymentMethod || '');
               $('#modal-courseName').text(data.courseName || '');
               $('#modal-instructorName').text(data.instructorName || '');
-              // $('#modal-courseDuration').text(data.courseDuration || '');
               $('#modal-originalPrice').text(data.originalPrice ? data.originalPrice.toLocaleString('vi-VN') + ' VND' : '');
               $('#modal-discount').text((data.voucherDiscount !== undefined && data.voucherDiscount !== null) ? data.voucherDiscount + '%' : '0%');
-              // $('#modal-discountedPrice').text(data.discountedPrice ? data.discountedPrice.toLocaleString('vi-VN') + ' VND' : '');
               $('#modal-discountedPrice').text((data.discountedPrice !== undefined && data.discountedPrice !== null) ? data.discountedPrice.toLocaleString('vi-VN') + ' VND' : '');
-              $('#modal-status').text(data.status === 'PAID' ? 'Paid' : (data.status === 'pending' ? 'Pending' : 'Canceled'));
-              $('#modal-note').text(data.note || '');
+              $('#modal-status').text(data.status === 'PAID' ? 'PAID' : 'PENDING' );
+              $('#modal-note').text(data.description || '');
               var modal = new bootstrap.Modal(document.getElementById('transactionModal'));
               modal.show();
             }
@@ -227,16 +223,20 @@
               endDate: endDate,
               page: page
             },
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            },
             success: function (data) {
-              // Lấy fragment content từ response (nếu trả về html fragment)
-              // Get fragment content from response (if returning html fragment)
+
               const html = $(data);
               const newTable = html.find('#transactionTable').parent().parent().parent().html();
               $('#transactionTable').parent().parent().parent().html(newTable);
-              // Cập nhật phân trang nếu có
-              // Update pagination if available
+
               const newPagination = html.find('.pagination').parent().html();
               $('.pagination').parent().html(newPagination);
+
+              const newInfo = html.find('.d-flex.justify-content-between.align-items-center.mt-3 .text-muted').html();
+              $('.d-flex.justify-content-between.align-items-center.mt-3 .text-muted').html(newInfo);
             }
           });
         }
@@ -244,11 +244,14 @@
           fetchHistory();
         });
         // Xử lý phân trang ajax
-        // Handle ajax pagination
         $(document).on('click', '.pagination .page-link', function (e) {
           e.preventDefault();
-          const page = $(this).text() - 1;
-          fetchHistory(page);
+          const href = $(this).attr('href');
+          if (href) {
+            const url = new URL(href, window.location.origin);
+            const page = url.searchParams.get('page') || 0;
+            fetchHistory(page);
+          }
         });
       });
     </script>

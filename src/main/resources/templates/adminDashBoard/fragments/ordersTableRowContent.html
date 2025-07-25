@@ -10,7 +10,6 @@
                   class="badge bg-secondary" th:text="${order.status != null ? order.status : ''}"></span>
         </td>
         <td th:text="${order.orderDate != null ? #temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm') : ''}"></td>
-        <td th:text="${order.refCode != null ? order.refCode : ''}"></td>
         <td th:text="${order.username != null ? order.username : ''}"></td>
         <td>
             <a th:href="@{/admin/orders/view/{orderId}(orderId=${order.orderId})}"

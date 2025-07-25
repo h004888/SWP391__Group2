@@ -3,6 +3,7 @@ package com.OLearning.service.order.impl;
 import com.OLearning.dto.order.OrdersDTO;
 import com.OLearning.dto.order.InstructorOrderDTO;
 import com.OLearning.entity.*;
+import com.OLearning.mapper.order.OrderHistoryMapper;
 import com.OLearning.mapper.order.OrdersMapper;
 import com.OLearning.mapper.order.InstructorOrderMapper;
 import com.OLearning.repository.*;
@@ -11,27 +12,22 @@ import com.OLearning.entity.OrderDetail;
 import com.OLearning.repository.OrderDetailRepository;
 import com.OLearning.repository.OrdersRepository;
 import com.OLearning.service.order.OrdersService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import java.util.stream.Collectors;
-import java.util.Optional;
+
 import com.OLearning.service.cart.CartService;
 import com.OLearning.service.voucher.VoucherService;
 import com.OLearning.dto.course.CourseSalesDTO;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import com.OLearning.dto.order.InvoiceDTO;
@@ -55,6 +51,9 @@ public class OrdersServiceImpl implements OrdersService {
     private InstructorOrderMapper instructorOrderMapper;
 
     @Autowired
+    private OrderHistoryMapper orderHistoryMapper;
+
+    @Autowired
     private CartService cartService;
 
     @Autowired
@@ -73,11 +72,6 @@ public class OrdersServiceImpl implements OrdersService {
     @Autowired
     private VoucherService voucherService;
 
-    @Autowired
-    private UserVoucherRepository userVoucherRepository;
-
-    @Autowired
-    private VoucherRepository voucherRepository;
 
     @Override
     public List<OrdersDTO> getAllOrders() {
@@ -512,6 +506,169 @@ public class OrdersServiceImpl implements OrdersService {
     }
 
     @Override
+    @Transactional
+    public Page<OrderHistoryDTO> getUserOrderHistory(Long userId, Pageable pageable) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID cannot be null");
+        }
+
+        Pageable pageableWithSort = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "orderDate")
+        );
+
+        String orderType = "course_purchase";
+        String orderStatus = "paid";
+
+        // Tìm orders theo userId, orderType và status = "paid"
+        Page<Order> orderPage = ordersRepository.findByUserUserIdAndOrderTypeAndStatus(userId, orderType, orderStatus, pageableWithSort);
+        if (orderPage.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        List<OrderHistoryDTO> orderDTOs = orderHistoryMapper.toDTOList(orderPage.getContent());
+        return new PageImpl<>(orderDTOs, pageableWithSort, orderPage.getTotalElements());
+    }
+
+    @Override
+    @Transactional
+    public Page<OrderHistoryDTO> filterAndSortOrders(Long userId, String orderType, String startDate, String endDate, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "orderDate"));
+        String orderStatus = "paid";
+
+        Page<Order> orderPage;
+        if (startDate != null && !startDate.trim().isEmpty() && endDate != null && !endDate.trim().isEmpty()) {
+            try {
+                LocalDate start = LocalDate.parse(startDate);
+                LocalDate end = LocalDate.parse(endDate);
+                LocalDate actualStart = start.isBefore(end) ? start : end;
+                LocalDate actualEnd = start.isBefore(end) ? end : start;
+                LocalDateTime endDateTime = actualEnd.plusDays(1).atStartOfDay().minusSeconds(1);
+
+                if (orderType != null && !orderType.trim().isEmpty()) {
+                    orderPage = ordersRepository.findByUserUserIdAndOrderTypeAndStatusAndOrderDateBetween(
+                            userId, orderType, orderStatus, actualStart.atStartOfDay(), endDateTime, pageable);
+                } else {
+                    orderPage = ordersRepository.findByUserUserIdAndStatusAndOrderDateBetween(
+                            userId, orderStatus, actualStart.atStartOfDay(), endDateTime, pageable);
+                }
+            } catch (Exception e) {
+                pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "orderDate"));
+                if (orderType != null && !orderType.trim().isEmpty()) {
+                    orderPage = ordersRepository.findByUserUserIdAndOrderTypeAndStatus(userId, orderType, orderStatus, pageable);
+                } else {
+                    orderPage = ordersRepository.findByUserUserIdAndStatus(userId, orderStatus, pageable);
+                }
+            }
+        } else {
+            if (orderType != null && !orderType.trim().isEmpty()) {
+                orderPage = ordersRepository.findByUserUserIdAndOrderTypeAndStatus(userId, orderType, orderStatus, pageable);
+            } else {
+                orderPage = ordersRepository.findByUserUserIdAndStatus(userId, orderStatus, pageable);
+            }
+        }
+
+        List<OrderHistoryDTO> orderDTOs = orderHistoryMapper.toDTOList(orderPage.getContent());
+        return new PageImpl<>(orderDTOs, pageable, orderPage.getTotalElements());
+    }
+
+    @Override
+    @Transactional
+    public Page<OrderHistoryDTO> getUserCoursePurchaseOrders(Long userId, String courseName, String status, String startDate, String endDate, int page, int size) {
+        String orderType = "course_purchase";
+        String orderStatus = "paid"; // Chỉ lấy những order có status = "paid"
+
+        // Lấy tất cả orders có status "paid" mà không phân trang
+        List<Order> orders = ordersRepository.findByUserUserIdAndOrderTypeAndStatus(userId, orderType, orderStatus, Pageable.unpaged()).getContent();
+
+        // Ánh xạ tất cả orders thành DTOs
+        List<OrderHistoryDTO> allDtos = orderHistoryMapper.toDTOList(orders);
+
+        // Lọc theo courseName nếu có
+        if (courseName != null && !courseName.trim().isEmpty()) {
+            allDtos = allDtos.stream()
+                    .filter(dto -> dto.getCourseName() != null &&
+                            dto.getCourseName().toLowerCase().contains(courseName.toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+
+        // Lọc theo ngày nếu có
+        if (startDate != null && !startDate.trim().isEmpty() && endDate != null && !endDate.trim().isEmpty()) {
+            try {
+                LocalDate start = LocalDate.parse(startDate);
+                LocalDate end = LocalDate.parse(endDate);
+                LocalDate actualStart = start.isBefore(end) ? start : end;
+                LocalDate actualEnd = start.isBefore(end) ? end : start;
+
+                allDtos = allDtos.stream()
+                        .filter(dto -> {
+                            if (dto.getOrderDate() == null) return false;
+                            LocalDate orderDate = dto.getOrderDate().toLocalDate();
+                            return !orderDate.isBefore(actualStart) && !orderDate.isAfter(actualEnd);
+                        })
+                        .collect(Collectors.toList());
+            } catch (Exception e) {
+                // Nếu parse date lỗi thì bỏ qua filter date
+            }
+        }
+
+        // Sắp xếp theo ngày giảm dần
+        allDtos.sort((a, b) -> b.getOrderDate().compareTo(a.getOrderDate()));
+
+        // Tính toán phân trang thủ công
+        int totalItems = allDtos.size();
+        int totalPages = (int) Math.ceil((double) totalItems / size);
+        int startIndex = page * size;
+        int endIndex = Math.min(startIndex + size, totalItems);
+
+        List<OrderHistoryDTO> pageContent = allDtos.subList(startIndex, endIndex);
+
+        return new PageImpl<>(pageContent, PageRequest.of(page, size), totalItems);
+    }
+
+    @Override
+    @Transactional
+    public Double getTotalSpent(Long userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID cannot be null");
+        }
+        String orderType = "course_purchase";
+        String orderStatus = "paid";
+        List<Order> orders = ordersRepository.findByUserUserIdAndOrderTypeAndStatus(userId, orderType, orderStatus, Pageable.unpaged()).getContent();
+        return orders.stream()
+                .filter(o -> o.getAmount() != null && o.getAmount() > 0)
+                .mapToDouble(Order::getAmount)
+                .sum();
+    }
+
+    @Override
+    @Transactional
+    public long getTotalCoursesPurchased(Long userId) {
+        String orderType = "course_purchase";
+        String orderStatus = "paid";
+        List<Order> orders = ordersRepository.findByUserUserIdAndOrderTypeAndStatus(userId, orderType, orderStatus, Pageable.unpaged()).getContent();
+        return orders.stream()
+                .flatMap(order -> orderHistoryMapper.toDTOList(order).stream())
+                .map(OrderHistoryDTO::getCourseName)
+                .filter(courseName -> courseName != null && !courseName.isEmpty())
+                .distinct()
+                .count();
+    }
+
+    @Override
+    @Transactional
+    public OrderHistoryDTO getOrderDetail(Long orderId) {
+        Order order = ordersRepository.findById(orderId).orElse(null);
+        if (order == null) return null;
+
+        if (order.getOrderDetails() != null && !order.getOrderDetails().isEmpty()) {
+            return orderHistoryMapper.toDTO(order, order.getOrderDetails().get(0));
+        }
+        return null;
+    }
+
+    @Override
     public void markOrderAsPaid(Long orderId, String refCode) {
         Optional<Order> optionalOrder = ordersRepository.findById(orderId);
         if (optionalOrder.isPresent()) {
@@ -542,7 +699,7 @@ public class OrdersServiceImpl implements OrdersService {
                 Enrollment enrollment = new Enrollment();
                 enrollment.setUser(user);
                 enrollment.setCourse(orderDetail.getCourse());
-                enrollment.setEnrollmentDate(new java.util.Date());
+                enrollment.setEnrollmentDate(new Date());
                 enrollment.setProgress(0.0);
                 enrollment.setStatus("onGoing");
                 enrollment.setOrder(order);
@@ -561,7 +718,7 @@ public class OrdersServiceImpl implements OrdersService {
                 studentTransaction.setStatus("PAID");
                 studentTransaction.setCreatedAt(LocalDateTime.now());
                 studentTransaction.setOrder(order);
-                studentTransaction.setTransactionType("course_purchase");
+                studentTransaction.setTransactionType("COURSE_PURCHASE");
                 studentTransaction.setNote("Purchase course via SePay");
                 coinTransactionRepository.save(studentTransaction);
                 user.setCoin(user.getCoin() - coursePrice);
@@ -574,7 +731,7 @@ public class OrdersServiceImpl implements OrdersService {
                     instructorTransaction.setStatus("PAID");
                     instructorTransaction.setCreatedAt(LocalDateTime.now());
                     instructorTransaction.setOrder(null);
-                    instructorTransaction.setTransactionType("course_purchase");
+                    instructorTransaction.setTransactionType("COURSE_PURCHASE");
                     instructorTransaction.setNote("students buy courses");
                     coinTransactionRepository.save(instructorTransaction);
                     instructor.setCoin(instructor.getCoin() + coursePrice);

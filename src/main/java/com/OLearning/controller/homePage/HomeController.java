@@ -1,6 +1,5 @@
 package com.OLearning.controller.homePage;
 
-import java.security.Principal;
 import java.util.List;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -364,7 +363,7 @@ public class HomeController {
                 redirectAttributes.addFlashAttribute("message", "Purchase completed using wallet!");
                 return "redirect:/home/course-detail?id=" + courseId;
             } else if ("qr".equalsIgnoreCase(paymentMethod)) {
-                Order order = ordersService.createOrder(user, totalAmount, "course_purchase");
+                Order order = ordersService.createOrder(user, totalAmount, "COURSE_PURCHASE");
                 String description = "Buy Course " + course.getTitle() + " - ORDER" + order.getOrderId();
                 order.setDescription(description);
                 ordersService.saveOrder(order);

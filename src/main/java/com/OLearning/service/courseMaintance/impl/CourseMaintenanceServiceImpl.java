@@ -382,7 +382,6 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
             User instructor = maintenance.getCourse().getInstructor();
             Fee fee = maintenance.getFee();
             double feeAmount = fee != null ? fee.getMaintenanceFee() : 0.0;
-            // 1. Nếu instructor không đủ coin, cộng coin trước
             if (instructor.getCoin() < feeAmount) {
                 instructor.setCoin(instructor.getCoin() + feeAmount);
                 CoinTransaction topup = new CoinTransaction();
@@ -392,10 +391,8 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
                 topup.setStatus("PAID");
                 topup.setNote("SePay maintenance fee top up");
                 topup.setCreatedAt(LocalDateTime.now());
-                topup.setOrder(null);
                 coinTransactionRepository.save(topup);
             }
-            // 2. Trừ coin instructor
             instructor.setCoin(instructor.getCoin() - feeAmount);
             CoinTransaction pay = new CoinTransaction();
             pay.setUser(instructor);
@@ -404,7 +401,6 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
             pay.setStatus("PAID");
             pay.setNote("Pay maintenance fee");
             pay.setCreatedAt(LocalDateTime.now());
-            pay.setOrder(null);
             coinTransactionRepository.save(pay);
             User admin = userRepository.findById(1L).orElse(null);
             if (admin != null) {
@@ -416,7 +412,6 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
                 receive.setStatus("PAID");
                 receive.setNote("Receive maintenance fee from instructor " + instructor.getUserId());
                 receive.setCreatedAt(LocalDateTime.now());
-                receive.setOrder(null);
                 coinTransactionRepository.save(receive);
                 userRepository.save(admin);
             }

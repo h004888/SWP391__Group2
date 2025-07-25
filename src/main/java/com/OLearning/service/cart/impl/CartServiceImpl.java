@@ -243,7 +243,7 @@ public class CartServiceImpl implements CartService {
         order.setOrderDate(LocalDateTime.now());
         order.setRefCode(refCode != null ? refCode : UUID.randomUUID().toString());
         order.setAmount(totalPrice);
-        order.setDescription("Buy Course OLearning - ORDER" + order.getOrderId());
+        order.setDescription("Buy Course OLearning ");
         ordersRepository.save(order);
 
         if (!useCoins) {

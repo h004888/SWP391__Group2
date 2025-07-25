@@ -53,18 +53,6 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
 
     List<Order> findByUserAndStatus(User user, String status);
 
-    // Combined username filtering and sorting with pagination
-    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
-    Page<Order> findByUserUsernameContainingOrderByAmountAsc(String username, Pageable pageable);
-
-    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
-    Page<Order> findByUserUsernameContainingOrderByAmountDesc(String username, Pageable pageable);
-
-    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
-    Page<Order> findByUserUsernameContainingOrderByOrderDateAsc(String username, Pageable pageable);
-
-    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
-    Page<Order> findByUserUsernameContainingOrderByOrderDateDesc(String username, Pageable pageable);
 
     @Query("SELECT MONTH(o.orderDate) as month, SUM(o.amount) as totalAmount " +
             "FROM Order o " +
@@ -284,6 +272,23 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
     // Check if user has any PAID order with specific order type and courseId
     @Query("SELECT CASE WHEN COUNT(o) > 0 THEN true ELSE false END FROM Order o JOIN o.orderDetails od WHERE o.user.userId = :userId AND o.orderType = :orderType AND o.status = :status AND od.course.courseId = :courseId")
     boolean existsByUserUserIdAndOrderTypeAndStatusAndCourseId(Long userId, String orderType, String status, Long courseId);
+
+
+    // Find orders by user ID, order type and status with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    Page<Order> findByUserUserIdAndOrderTypeAndStatus(Long userId, String orderType, String status, Pageable pageable);
+
+    // Find orders by user ID, order type, status and order date between with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    Page<Order> findByUserUserIdAndOrderTypeAndStatusAndOrderDateBetween(Long userId, String orderType, String status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+
+    // Find orders by user ID and status with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    Page<Order> findByUserUserIdAndStatus(Long userId, String status, Pageable pageable);
+
+    // Find orders by user ID, status and order date between with pagination
+    @EntityGraph(attributePaths = {"user", "user.role", "orderDetails", "orderDetails.course"})
+    Page<Order> findByUserUserIdAndStatusAndOrderDateBetween(Long userId, String status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 
     @Query(value = """
             SELECT DISTINCT o.OrderID, u.FullName, o.Amount, o.OrderDate

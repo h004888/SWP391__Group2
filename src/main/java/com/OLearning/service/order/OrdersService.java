@@ -8,6 +8,7 @@ import com.OLearning.entity.User;
 import com.OLearning.dto.course.CourseSalesDTO;
 import com.OLearning.dto.order.*;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 
@@ -41,6 +42,18 @@ public interface OrdersService {
     Map<String, Double> getRevenuePerMonth();
 
     Map<String, Double> getRevenueByDateRange(LocalDate startDate, LocalDate endDate);
+
+    Page<OrderHistoryDTO> getUserOrderHistory(Long userId, Pageable pageable);
+
+    Page<OrderHistoryDTO> filterAndSortOrders(Long userId, String orderType, String startDate, String endDate, int page, int size);
+
+    Page<OrderHistoryDTO> getUserCoursePurchaseOrders(Long userId, String courseName, String status, String startDate, String endDate, int page, int size);
+
+    Double getTotalSpent(Long userId);
+
+    long getTotalCoursesPurchased(Long userId);
+
+    OrderHistoryDTO getOrderDetail(Long orderId);
 
     void markOrderAsPaid(Long orderId, String refCode);
 
