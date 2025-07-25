@@ -581,7 +581,8 @@
 
             <!-- Hiển thị 5 category tiếp theo khi click -->
             <li id="moreCategories" style="display:none;" th:each="cat : ${nextFive}">
-                <a class="dropdown-item" th:text="${cat.name}" th:href="@{/courses/category/{id}(id=${cat.id})}"></a>
+                <a class="dropdown-item" th:text="${cat.name}"
+                    th:href="@{/home/coursesGrid(categoryIds=${cat.id})}"></a>
             </li>
         </ul>
     </li>

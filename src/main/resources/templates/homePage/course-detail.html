@@ -806,9 +806,14 @@ Page content START -->
 										</div>
 										<!-- Info -->
 										<div class="col-8">
-											<h6 class="mb-0"><a
-													th:href="@{'/home/course-detail?id=' + ${course.courseId}}"
-													th:text="${course.title}">Fundamentals of Business Analysis</a></h6>
+											<h6 class="mb-0">
+												<a th:href="@{'/home/course-detail?id=' + ${course.courseId}}">
+													<span
+														th:text="${#strings.length(course.title) > 50} ? ${#strings.substring(course.title, 0, 50)} + '...' : ${course.title}">
+														Fundamentals of Business Analysis
+													</span>
+												</a>
+											</h6>
 											<ul
 												class="list-group list-group-borderless mt-1 d-flex justify-content-between">
 												<li class="list-group-item px-0 d-flex justify-content-between">
