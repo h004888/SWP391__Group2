@@ -249,11 +249,10 @@ public class CourseController {
             Principal principal,
             RedirectAttributes redirect) {
         try {
+            courseService.unblockCourse(courseId);
+            // Gửi thông báo cho instructor
             Course course = courseRepository.findById(courseId)
                     .orElseThrow(() -> new RuntimeException("Course not found"));
-
-            course.setStatus("publish");
-            courseRepository.save(course);
 
             // Gửi thông báo cho instructor
             User instructor = course.getInstructor();
@@ -267,12 +266,10 @@ public class CourseController {
                 notification.setSentAt(LocalDateTime.now());
                 notificationRepository.save(notification);
             }
-
             redirect.addFlashAttribute("success", "Course has been unblocked successfully");
         } catch (Exception e) {
             redirect.addFlashAttribute("error", "Failed to unblock course: " + e.getMessage());
         }
-
         return "redirect:/admin/course/detail/" + courseId;
     }
 

@@ -54,25 +54,4 @@ class ReportServiceImpl implements ReportService {
         reportRepo.save(report);
     }
 
-    @Override
-    public void reportComment(ReportCommentDTO dto) {
-        User user = userRepo.findById(dto.getUserId()).orElseThrow();
-        Course course = courseRepo.findById(dto.getCourseId()).orElseThrow();
-        List<User> adminUsers = userRepo.findByRoleId(1L);
-        Notification firstNoti = null;
-        for (User admin : adminUsers) {
-            Notification noti = commentMapper.toNotification(dto, user, course);
-            noti.setUser(admin);
-            noti.setMessage("Report Comment ID " + dto.getCommentId() + " by " + user.getFullName() + " (" + user.getEmail() + ") - Reason: " + dto.getReason());
-            noti.setStatus("failed");
-            noti.setType("REPORT_COMMENT");
-            noti.setSentAt(LocalDateTime.now());
-            noti.setCommentId(dto.getCommentId());
-            noti.setCourse(course);
-            Notification savedNoti = notiRepo.save(noti);
-            if (firstNoti == null) firstNoti = savedNoti;
-        }
-        Report report = reportMapper.toReportFromCommentReport(dto, course, user, firstNoti);
-        reportRepo.save(report);
-    }
 }

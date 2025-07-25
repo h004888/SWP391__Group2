@@ -13,12 +13,12 @@
         <td>
             <span th:class="${cm.status == 'PAID' ? 'badge bg-success' :
                             (cm.status == 'PENDING' ? 'badge bg-secondary' :
-                            (cm.status == 'OVERDUE' ? 'badge bg-danger' : 'badge bg-secondary'))}"
+                            (cm.status == 'overdue' ? 'badge bg-danger' : 'badge bg-secondary'))}"
                   th:text="${cm.status != null ? cm.status : 'N/A'}" class="text-uppercase ">
             </span>
         </td>
         <td th:class="${cm.status == 'PENDING' ? 'text-danger' :
-                        (cm.status == 'OVERDUE' ? 'text-danger'  : '')}"
+                        (cm.status == 'overdue' ? 'text-danger'  : '')}"
             th:text="${cm.dueDate != null ? #temporals.format(cm.dueDate, 'dd/MM/yyyy') : 'N/A'}"></td>
         <td>
             <a href="#"

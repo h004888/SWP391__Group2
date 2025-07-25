@@ -407,11 +407,40 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public void blockCourse(Long courseId) {
         Course course = courseRepository.findById(courseId).orElseThrow();
-        // Chỉ cho phép block khi status là 'publish'
-        if (!"publish".equalsIgnoreCase(course.getStatus())) {
-            throw new IllegalStateException("Chỉ có thể block khóa học khi đang ở trạng thái 'publish'.");
+        // Chỉ cho phép block khi status là 'pending_block'
+        if (!"pending_block".equalsIgnoreCase(course.getStatus())) {
+            throw new IllegalStateException("Chỉ có thể block khóa học khi đang ở trạng thái 'pending_block'.");
         }
-        course.setStatus("blocked"); // hoặc trạng thái bạn định nghĩa
+        course.setStatus("blocked");
+        User instructor = course.getInstructor();
+        if (instructor != null) {
+            Notification notification = new Notification();
+            notification.setUser(instructor);
+            notification.setCourse(course);
+            notification.setMessage("Your course '" + course.getTitle() + "' has been officially confirm blocked by admin.");
+            notification.setType("CONFIRM_BLOCK");
+            notification.setStatus("failed");
+            notification.setSentAt(LocalDateTime.now());
+            notificationRepository.save(notification);
+        }
+        courseRepository.save(course);
+    }
+
+    @Override
+    public void unblockCourse(Long courseId) {
+        Course course = courseRepository.findById(courseId).orElseThrow();
+        course.setStatus("publish");
+        User instructor = course.getInstructor();
+        if (instructor != null) {
+            Notification notification = new Notification();
+            notification.setUser(instructor);
+            notification.setCourse(course);
+            notification.setMessage("Your course '" + course.getTitle() + "' has been officially unblock by admin.");
+            notification.setType("UNBLOCK_COURSE");
+            notification.setStatus("failed");
+            notification.setSentAt(LocalDateTime.now());
+            notificationRepository.save(notification);
+        }
         courseRepository.save(course);
     }
 

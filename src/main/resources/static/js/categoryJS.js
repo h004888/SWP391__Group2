@@ -118,21 +118,14 @@ function attachEventHandlers() {
         loadCourseDetails(categoryId, categoryName);
     });
 
-    // Re-attach delete category events
+    // Re-attach delete category events (just open modal and set data)
     $('.delete-category').off('click').on('click', function() {
         const categoryId = $(this).data('id');
-        $.ajax({
-            url: '/admin/category/delete/' + categoryId,
-            method: 'DELETE',
-            success: function(response) {
-                // Reload current page after successful deletion
-                filterCategories(currentPage, pageSize);
-            },
-            error: function(xhr, status, error) {
-                console.error('Error deleting category:', error);
-                alert('Error deleting category. Please try again.');
-            }
-        });
+        const categoryName = $(this).data('name');
+        $('#deleteCategoryId').val(categoryId);
+        $('#deleteCategoryName').text(categoryName);
+        // Show modal (in case not auto)
+        $('#deleteCategoryModal').modal('show');
     });
 
     // Re-attach edit category events
@@ -318,4 +311,32 @@ $(document).ready(function () {
     setTimeout(function() {
         $('.alert').fadeOut('slow');
     }, 5000);
+});
+
+$(document).on('submit', '#deleteCategoryForm', function(e) {
+    e.preventDefault();
+    const categoryId = $('#deleteCategoryId').val();
+    const submitBtn = $(this).find('button[type="submit"]');
+    const originalText = submitBtn.html();
+    submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Deleting...');
+    $.ajax({
+        url: '/admin/category/delete/' + categoryId,
+        method: 'GET', // Use GET to match backend (change to DELETE if backend supports)
+        success: function(response) {
+            $('#deleteCategoryModal').modal('hide');
+            filterCategories(currentPage, pageSize);
+            showAlert('Category deleted successfully!', 'success');
+        },
+        error: function(xhr, status, error) {
+            $('#deleteCategoryModal').modal('hide');
+            let errorMessage = 'Error deleting category. Please try again.';
+            if (xhr.responseText) {
+                errorMessage = xhr.responseText;
+            }
+            showAlert(errorMessage, 'error');
+        },
+        complete: function() {
+            submitBtn.prop('disabled', false).html(originalText);
+        }
+    });
 });

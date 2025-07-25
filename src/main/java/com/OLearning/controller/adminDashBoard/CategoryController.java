@@ -114,10 +114,17 @@ public class CategoryController {
     }
 
     @GetMapping("/category/delete/{id}")
-    public String deleteCategory(@PathVariable Long id,Model model) {
-        model.addAttribute("fragmentContent", "adminDashBoard/fragments/category :: categoryList");
-        categoryService.deleteById(id);
-        return "adminDashBoard/index";
+    public String deleteCategory(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
+        Category category = categoryService.findById(id).orElse(null);
+        if (category == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Category not found");
+        } else if (category.getCourses() != null && !category.getCourses().isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Cannot delete category with existing courses.");
+        } else {
+            categoryService.deleteById(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Category deleted successfully.");
+        }
+        return "redirect:/admin/category";
     }
 
     @PostMapping("/category/edit")

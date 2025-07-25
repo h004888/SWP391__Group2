@@ -194,6 +194,18 @@ public class CommentServiceImpl implements CommentService {
         report.setStatus("pending");
         report.setCommentId(reviewId);
         reportRepo.save(report);
+        List<User> admins = userRepo.findByRoleId(1L);
+        for (User admin : admins) {
+            Notification notification = new Notification();
+            notification.setType("REPORT_COMMENT");
+            notification.setUser(admin);
+            notification.setCourse(review.getCourse());
+            notification.setCommentId(review.getReviewId());
+            notification.setMessage("A comment has been reported: " + reason);
+            notification.setSentAt(LocalDateTime.now());
+            notification.setStatus("failed");
+            notificationService.sendMess(notification);
+        }
     }
 
     @Override

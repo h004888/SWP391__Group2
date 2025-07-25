@@ -4,20 +4,16 @@ import com.OLearning.dto.coinTransaction.CoinTransactionDTO;
 import com.OLearning.entity.CoinTransaction;
 import com.OLearning.entity.Order;
 import com.OLearning.entity.OrderDetail;
-import com.OLearning.repository.OrderDetailRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
 public class CoinTransactionMapper {
-    @Autowired
-    private OrderDetailRepository orderDetailRepository;
 
-    public CoinTransactionDTO toDTO(CoinTransaction coinTransaction) {
+    public CoinTransactionDTO toDTO(CoinTransaction coinTransaction, List<OrderDetail> details) {
         CoinTransactionDTO dto = new CoinTransactionDTO();
         dto.setTransactionId(coinTransaction.getTransactionId());
         dto.setAmount(coinTransaction.getAmount());
@@ -25,19 +21,26 @@ public class CoinTransactionMapper {
         dto.setStatus(coinTransaction.getStatus());
         dto.setNote(coinTransaction.getNote());
         dto.setCreatedAt(coinTransaction.getCreatedAt());
+
         if (coinTransaction.getOrder() != null) {
             dto.setRefCode(coinTransaction.getOrder().getRefCode());
-            List<OrderDetail> details = orderDetailRepository.findByOrder(coinTransaction.getOrder());
             if (details != null && !details.isEmpty()) {
                 if ("course_purchase".equals(coinTransaction.getTransactionType())) {
-                    OrderDetail detail = details.get(0);
-                    if (detail.getCourse() != null) {
-                        dto.setCourseName(detail.getCourse().getTitle());
-                        dto.setInstructorName(detail.getCourse().getInstructor() != null ? detail.getCourse().getInstructor().getFullName() : null);
-                        dto.setOriginalPrice(detail.getCourse().getPrice());
-                        dto.setDiscountedPrice(detail.getUnitPrice());
-                        if (detail.getVoucher() != null) {
-                            dto.setVoucherDiscount(detail.getVoucher().getDiscount());
+                    // Tìm OrderDetail khớp với số tiền của CoinTransaction
+                    OrderDetail matchingDetail = details.stream()
+                            .filter(detail -> detail.getUnitPrice() != null &&
+                                    Math.abs(detail.getUnitPrice().doubleValue()) == Math.abs(coinTransaction.getAmount().doubleValue()))
+                            .findFirst()
+                            .orElse(details.get(0)); // Fallback nếu không tìm thấy khớp
+
+                    if (matchingDetail.getCourse() != null) {
+                        dto.setCourseName(matchingDetail.getCourse().getTitle());
+                        dto.setInstructorName(matchingDetail.getCourse().getInstructor() != null ?
+                                matchingDetail.getCourse().getInstructor().getFullName() : null);
+                        dto.setOriginalPrice(matchingDetail.getCourse().getPrice());
+                        dto.setDiscountedPrice(matchingDetail.getUnitPrice());
+                        if (matchingDetail.getVoucher() != null) {
+                            dto.setVoucherDiscount(matchingDetail.getVoucher().getDiscount());
                         } else {
                             dto.setVoucherDiscount(0.0);
                         }
@@ -45,46 +48,32 @@ public class CoinTransactionMapper {
                     String paymentMethod = determinePaymentMethod(coinTransaction, coinTransaction.getOrder());
                     dto.setPaymentMethod(paymentMethod);
                 } else {
-                    if (coinTransaction.getAmount() != null && coinTransaction.getAmount() < 0) {
-                        for (OrderDetail detail : details) {
-                            if (detail.getUnitPrice() != null &&
+                    // Xử lý các trường hợp khác
+                    for (OrderDetail detail : details) {
+                        if (detail.getUnitPrice() != null &&
                                 detail.getUnitPrice().doubleValue() == Math.abs(coinTransaction.getAmount().doubleValue()) &&
                                 detail.getCourse() != null) {
-                                dto.setCourseName(detail.getCourse().getTitle());
-                                if (detail.getVoucher() != null) {
-                                    dto.setVoucherDiscount(detail.getVoucher().getDiscount());
-                                } else {
-                                    dto.setVoucherDiscount(0.0);
-                                }
-                                break;
-                            }
-                        }
-                    } else {
-                        for (OrderDetail detail : details) {
-                            if (detail.getCourse() != null) {
-                                dto.setCourseName(detail.getCourse().getTitle());
-                                break;
-                            }
+                            dto.setCourseName(detail.getCourse().getTitle());
                             if (detail.getVoucher() != null) {
                                 dto.setVoucherDiscount(detail.getVoucher().getDiscount());
                             } else {
                                 dto.setVoucherDiscount(0.0);
                             }
+                            break;
                         }
                     }
                 }
             }
         } else {
-
             String paymentMethod = determinePaymentMethod(coinTransaction, null);
             dto.setPaymentMethod(paymentMethod);
         }
         return dto;
     }
 
-    public List<CoinTransactionDTO> toDTOList(List<CoinTransaction> coinTransactions) {
+    public List<CoinTransactionDTO> toDTOList(List<CoinTransaction> coinTransactions, Map<Long, List<OrderDetail>> orderDetailsMap) {
         return coinTransactions.stream()
-                .map(this::toDTO)
+                .map(transaction -> toDTO(transaction, orderDetailsMap.getOrDefault(transaction.getTransactionId(), List.of())))
                 .collect(Collectors.toList());
     }
 
@@ -135,4 +124,3 @@ public class CoinTransactionMapper {
         return "Ví nội bộ";
     }
 }
-

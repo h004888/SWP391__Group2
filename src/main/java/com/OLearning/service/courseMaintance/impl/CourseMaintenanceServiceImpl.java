@@ -238,13 +238,20 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
         List<CourseMaintenance> maintenances = courseMaintenanceRepository.findByMonthYearBetween(startDate, endDate);
 
         for (CourseMaintenance maintenance : maintenances) {
+            if (!"PAID".equalsIgnoreCase(maintenance.getStatus())) continue;
             String monthYear = maintenance.getMonthYear().format(DateTimeFormatter.ofPattern("MM/yyyy"));
             Double fee = maintenance.getFee().getMaintenanceFee().doubleValue();
             Long enrollmentCount = maintenance.getEnrollmentCount();
 
-            Map<String, Object> monthData = (Map<String, Object>) maintenanceData.computeIfAbsent(monthYear, k -> new HashMap<>());
-            monthData.put("revenue", fee);
-            monthData.put("enrollmentCount", enrollmentCount);
+            Map<String, Object> monthData = (Map<String, Object>) maintenanceData.computeIfAbsent(monthYear, k -> {
+                Map<String, Object> map = new HashMap<>();
+                map.put("revenue", 0.0);
+                map.put("enrollmentCount", 0L);
+                return map;
+            });
+            // Cộng dồn phí bảo trì và enrollment count cho từng tháng
+            monthData.put("revenue", ((Double) monthData.get("revenue")) + fee);
+            monthData.put("enrollmentCount", ((Long) monthData.get("enrollmentCount")) + enrollmentCount);
         }
 
         return maintenanceData;
