@@ -37,7 +37,7 @@
                         <div class="d-flex align-items-center">
                             <div>
                                 <h6 class="text-bg-muted mb-1">Most Popular Course</h6>
-                                <h3 class="mb-0" th:text="${max.enrollmentCount}">856</h3>
+                                <h3 class="mb-0" th:text="${maxCompleted} + ${maxOnGoing}">856</h3>
                                 <p class="small mb-1" th:text="${max.title}">Complete Web Development</p>
                                 <div class="mt-1 small">
                                 <span class="text-success me-2">
@@ -62,7 +62,7 @@
                         <div class="d-flex align-items-center">
                             <div>
                                 <h6 class="text-bg-muted mb-1">Least Popular Course</h6>
-                                <h3 class="mb-0" th:text="${min.enrollmentCount}">124</h3>
+                                <h3 class="mb-0" th:text="${minCompleted} + ${minOnGoing}">124</h3>
                                 <p class="small mb-1" th:text="${min.title}">Advanced Machine Learning</p>
                                 <div class="mt-1 small">
                                 <span class="text-success me-2">
@@ -113,7 +113,7 @@
                                 </div>
                             </td>
                             <td class="text-center">
-                                <h6 class="mb-0" th:text="${max.enrollmentCount}">856</h6>
+                                <h6 class="mb-0" th:text="${maxCompleted} + ${maxOnGoing}">856</h6>
                             </td>
                             <td class="text-center">
                                 <span class="badge bg-success" th:text="${maxCompleted} + ' Completed'">520</span>
@@ -152,7 +152,7 @@
                                 </div>
                             </td>
                             <td class="text-center">
-                                <h6 class="mb-0" th:text="${min.enrollmentCount}">856</h6>
+                                <h6 class="mb-0" th:text="${minCompleted} + ${minOnGoing}">856</h6>
                             </td>
                             <td class="text-center">
                                 <span class="badge bg-success" th:text="${minCompleted} + ' Completed'">520</span>

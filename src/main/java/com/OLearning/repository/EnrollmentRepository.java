@@ -236,21 +236,43 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
                         @Param("searchTerm") String searchTerm,
                         Pageable pageable);
 
-        @Query(value = "SELECT Top 1 CAST(COUNT(e.EnrollmentID) AS BIGINT) AS enrollment_count, " +
-                        "c.CourseID, c.CourseImg, AVG(e.Progress), c.CourseLevel, e.EnrollmentDate, c.Title " +
-                        "FROM Enrollments e " +
-                        "JOIN Courses c ON e.CourseID = c.CourseID " +
-                        "WHERE c.InstructorID = :instructorId " +
-                        "GROUP BY c.CourseID, c.CourseImg, c.CourseLevel, e.EnrollmentDate, c.Title " +
-                        "ORDER BY COUNT(e.EnrollmentID) DESC", nativeQuery = true)
+        @Query(value = "                        SELECT TOP 1 \n" +
+                "    CAST(COUNT(e.EnrollmentID) AS BIGINT) AS enrollment_count,\n" +
+                "    c.CourseID, \n" +
+                "    c.CourseImg, \n" +
+                "    AVG(e.Progress) AS AvgProgress, \n" +
+                "    c.CourseLevel, \n" +
+                "    MAX(e.EnrollmentDate) AS FirstEnrollmentDate, \n" +
+                "    c.Title\n" +
+                "FROM Enrollments e \n" +
+                "JOIN Courses c ON e.CourseID = c.CourseID\n" +
+                "WHERE c.InstructorID = :instructorId\n" +
+                "GROUP BY \n" +
+                "    c.CourseID, \n" +
+                "    c.CourseImg, \n" +
+                "    c.CourseLevel, \n" +
+                "    c.Title\n" +
+                "ORDER BY \n" +
+                "    COUNT(e.EnrollmentID) Desc;", nativeQuery = true)
         EnrollMaxMinDTO courseEnrollMax(@Param("instructorId") Long instructorId);
 
-        @Query(value = "SELECT Top 1 CAST(COUNT(e.EnrollmentID) AS BIGINT) AS enrollment_count, " +
-                        "c.CourseID, c.CourseImg, AVG(e.Progress), c.CourseLevel, e.EnrollmentDate, c.Title " +
-                        "FROM Enrollments e " +
-                        "JOIN Courses c ON e.CourseID = c.CourseID " +
-                        "WHERE c.InstructorID = :instructorId " +
-                        "GROUP BY c.CourseID, c.CourseImg, c.CourseLevel, e.EnrollmentDate, c.Title " +
-                        "ORDER BY COUNT(e.EnrollmentID) ASC", nativeQuery = true)
+        @Query(value = "                        SELECT TOP 1 \n" +
+                "    CAST(COUNT(e.EnrollmentID) AS BIGINT) AS enrollment_count,\n" +
+                "    c.CourseID, \n" +
+                "    c.CourseImg, \n" +
+                "    AVG(e.Progress) AS AvgProgress, \n" +
+                "    c.CourseLevel, \n" +
+                "    MAX(e.EnrollmentDate) AS FirstEnrollmentDate, \n" +
+                "    c.Title\n" +
+                "FROM Enrollments e \n" +
+                "JOIN Courses c ON e.CourseID = c.CourseID\n" +
+                "WHERE c.InstructorID = :instructorId\n" +
+                "GROUP BY \n" +
+                "    c.CourseID, \n" +
+                "    c.CourseImg, \n" +
+                "    c.CourseLevel, \n" +
+                "    c.Title\n" +
+                "ORDER BY \n" +
+                "    COUNT(e.EnrollmentID) asc;", nativeQuery = true)
         EnrollMaxMinDTO courseEnrollMin(@Param("instructorId") Long instructorId);
 }

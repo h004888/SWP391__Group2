@@ -42,9 +42,7 @@ public interface EnrollmentService {
     Long countEnrollmentsByInstructorAndDateRange(long instructorId, LocalDate start, java.time.LocalDate end);
     Page<EnrollmentDTO> getEnrollmentsByInstructorId(Long userId, int page, int size);
 
-    boolean blockEnrollment(int enrollmentId);
 
-    EnrollmentDTO getRequestById(int enrollmentId);
 
     Integer getTotalEnrollment(Long courseId);
 
