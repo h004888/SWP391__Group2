@@ -1,5 +1,5 @@
-<div class="main-content" th:fragment="step3Content">
-    <div class="container-fluid py-4">
+<div th:fragment="step3Content">
+    <div>
         <!-- Page Header & Step Indicator -->
         <div class="content-card sticky-step-indicator mb-4 rounded-3 border-0 shadow-sm px-4 py-3">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-2">
@@ -69,27 +69,27 @@
                 <!-- Add Chapter Form -->
                 <form th:action="@{/instructor/createcourse/chaptersadd}" th:object="${chapter}" method="post" class="mb-4">
                     <div id="addChapterSection" th:class="${showForm} ? '' : 'd-none'">
-                        <div class="row">
+                        <div class="row p-3" style="background-color: whitesmoke; width: 1000px" >
                             <!-- Chapter Title -->
                             <div class="col-12 mb-3">
                                 <label class="form-label">Chapter Title</label>
-                                <input type="text" th:field="*{title}" class="form-control" id="chapterTitle" placeholder="Enter the chapter title here">
+                                <input type="text" th:field="*{title}" style="width: 400px" class="form-control" id="chapterTitle" placeholder="Enter the chapter title here">
                                 <div style="color: red" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
                             </div>
 
                             <!-- Chapter Description -->
                             <div class="col-12 mb-3">
                                 <label class="form-label">Chapter Description</label>
-                                <textarea class="form-control" th:field="*{description}" id="chapterDesc" rows="2" placeholder="Write a short description of the chapter"></textarea>
+                                <textarea class="form-control" th:field="*{description}" style="width: 800px" id="chapterDesc" rows="2" placeholder="Write a short description of the chapter"></textarea>
                                 <div style="color: red" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
                             </div>
 
                             <!-- Chapter Order -->
                             <div class="col-12 mb-3">
                                 <label class="form-label">
-                                    Chapter Order <strong><em>(If you leave this field empty, the system will automatically generate the chapter order for you.)</em></strong>
+                                    Chapter Order
                                 </label>
-                                <input type="number" th:field="*{orderNumberChapter}" class="form-control" id="chapterOrder" min="1" placeholder="Enter the chapter order (e.g., 1, 2, 3...)">
+                                <input type="number" style="width: 210px" th:field="*{orderNumberChapter}" class="form-control" id="chapterOrder" min="1" placeholder="Enter the chapter order">
                                 <div style="color: red" th:if="${#fields.hasErrors('orderNumberChapter')}" th:errors="*{orderNumberChapter}"></div>
                             </div>
                         </div>
@@ -109,9 +109,9 @@
                                 <a th:href="'#collapseChapter' + ${chapter.chapterId}" data-bs-toggle="collapse"
                                    th:attr="aria-controls='collapseChapter' + ${chapter.chapterId}" aria-expanded="false"
                                    style="text-decoration:none;">
-                                    <h4 class="mb-1" th:text="'Chapter ' + ${chapter.orderNumber} + ': ' + ${chapter.title}"></h4>
+                                    <h4 class="mb-1" style="color: #2c9faf" th:text="'Chapter ' + ${chapter.orderNumber} + ': ' + ${chapter.title}"></h4>
                                 </a>
-                                <p class="text-muted mb-0" th:text="${chapter.description}"></p>
+                                <p class="text-bg-muted mb-0" th:text="${chapter.description}"></p>
                             </div>
                             <div class="d-flex align-items-center gap-2 mb-3">
                                 <!--                                auto fill-->
@@ -131,7 +131,7 @@
                                 <!-- Add Lesson button -->
                                 <button type="button"
                                         class="btn btn-sm btn-primary"
-                                        th:onclick="'document.getElementById(\'lessonForm' + ${chapter.chapterId} + '\').classList.toggle(\'d-none\')'">
+                                        th:onclick="'showLessonForm(' + ${chapter.chapterId} + ')'">
                                     <i class="bi bi-plus me-1"></i> Add Lesson
                                 </button>
                                 <!-- Update Chapter button -->
@@ -159,17 +159,17 @@
                         </div>
                         <div th:id="'collapseChapter' + ${chapter.chapterId}" class="collapse chapter-body">
                             <!-- Add Lesson Form - Initially Hidden -->
-                            <form th:id="'lessonForm' + ${chapter.chapterId}" class="lesson-form mt-3 d-none"
+                            <form style="background-color: whitesmoke; width: 1000px" th:id="'lessonForm' + ${chapter.chapterId}" class="lesson-form mt-3 mb-2 d-none p-3"
                                   th:action="@{/instructor/createcourse/addlesson}" th:object="${lessontitle}" method="post">
                                 <div class="mb-2">
                                     <input type="hidden" name="chapterId" th:value="${chapter.chapterId}" />
                                     <label class="form-label">Lesson Title</label>
-                                    <input type="text" th:field="*{title}" class="form-control">
+                                    <input type="text" style="width: 400px" th:field="*{title}" class="form-control">
                                     <div style="color: red" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
                                 </div>
                                 <div class="mb-2">
                                     <label class="form-label">Lesson Description</label>
-                                    <textarea class="form-control" th:field="*{description}" rows="2"></textarea>
+                                    <textarea class="form-control" style="width: 800px" th:field="*{description}" rows="2"></textarea>
                                     <div style="color: red" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
                                 </div>
                                 <div class="mb-2 d-flex align-items-center gap-2">
@@ -182,7 +182,7 @@
                                 </div>
                                 <div class="mb-2">
                                     <label class="form-label">Order Number</label>
-                                    <input type="text" class="form-control" th:field="*{orderNumber}" name="orderNumber" min="1" placeholder="Enter lesson order (e.g. 1, 2, 3...)">
+                                    <input type="text" class="form-control" style="width: 210px" th:field="*{orderNumber}" name="orderNumber" min="1" placeholder="Enter lesson order">
                                     <div style="color: red" th:if="${#fields.hasErrors('orderNumber')}" th:errors="*{orderNumber}"></div>
                                 </div>
 
@@ -283,7 +283,7 @@
                                                th:attr="data-videoid=${lesson.video.videoUrl}">
                                                 <span th:text="${lesson.title}"></span>
                                             </a>
-                                            <span class="text-muted" th:text="'(' + ${lesson.duration} + ' min)'"></span>
+                                            <span class="text-bg-muted" th:text="'(' + ${lesson.duration} + 'm)'"></span>
                                         </div>
                                     </div>
                                     <!-- Show quiz-->
@@ -302,7 +302,7 @@
                                                th:data-bs-target="'#quizModal' + ${lesson.quiz.id}">
                                                 <span th:text="${lesson.quiz.title}"></span>
                                             </a>
-                                            <span class="text-muted" th:text="'(' + ${lesson.quiz.timeLimit} + ' min)'"></span>
+                                            <span class="text-bg-muted" th:text="'(' + ${lesson.quiz.timeLimit} + ' min)'"></span>
                                         </div>
 
                                         <!-- Quiz Modal -->
@@ -395,7 +395,7 @@
                                                 </div>
                                                 <div class="mb-3">
                                                     <label class="form-label">Duration (minutes)</label>
-                                                    <input type="number" th:field="*{duration}" class="form-control video-duration-input" id="videoDuration" readonly>
+                                                    <input type="number" style="width: 100px" th:field="*{duration}" class="form-control video-duration-input" id="videoDuration" readonly>
                                                     <small class="form-text text-muted">Duration will be calculated automatically when you select a video file.</small>
                                                 </div>
                                                 <div class="d-flex justify-content-end">
@@ -411,17 +411,17 @@
 
                                                 <div class="mb-3">
                                                     <label class="form-label">Quiz Title</label>
-                                                    <input type="text" name="title" class="form-control" placeholder="Enter quiz title" required>
+                                                    <input  type="text" style="width: 400px" name="title" class="form-control" placeholder="Enter quiz title" required>
                                                 </div>
 
                                                 <div class="mb-3">
                                                     <label class="form-label">Quiz Description</label>
-                                                    <textarea name="description" class="form-control" rows="2" placeholder="Enter quiz description" required></textarea>
+                                                    <textarea name="description" style="width: 800px" class="form-control" rows="2" placeholder="Enter quiz description" required></textarea>
                                                 </div>
 
                                                 <div class="mb-3">
                                                     <label class="form-label">Time Limit (minutes)</label>
-                                                    <input type="number" name="timeLimit" class="form-control"  min="1" required>
+                                                    <input type="number" style="width: 100px" name="timeLimit" class="form-control"  min="1" required>
                                                 </div>
 
                                                 <!-- Quiz List -->
@@ -474,7 +474,7 @@
                                                             </div>
                                                             <div class="mt-2">
                                                                 <label class="form-label">Correct Answer*</label>
-                                                                <select name="correctAnswer" class="form-select" required>
+                                                                <select name="correctAnswer" style="width: 400px" class="form-select" required>
                                                                     <option value="">Select correct answer</option>
                                                                     <option value="A">A</option>
                                                                     <option value="B">B</option>
@@ -513,375 +513,8 @@
                 </form>
             </div>
         </div>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-        <style>
-            .d-none { display: none !important; }
-            .chapter-card { border: 1px solid #dee2e6; border-radius: 8px; margin-bottom: 1.5rem; background: #fff; }
-            .chapter-header { padding: 1rem; background: #f8f9fa; border-bottom: 1px solid #dee2e6; border-radius: 8px 8px 0 0; }
-            .chapter-body { padding: 1rem; }
-            .lesson-item { border: 1px solid #e5e7eb; border-radius: 6px; padding: 1rem; background: #fafafa; margin-bottom: 1rem; }
-            .quiz-block { border: 1px solid #ffffff; border-radius: 6px; padding: 1rem; background: rgb(251, 247, 247); margin-bottom: 1rem; }
-            .quiz-number { background: #f2f2f1; color: #000; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; }
-            details summary { cursor: pointer; }
-            details summary > * { display: inline; }
-            .quiz-container { border-left: 3px solid #cdcbc8; padding-left: 15px; margin-top: 10px; }
 
-            /* Fix modal backdrop issues */
-            .modal-backdrop {
-                z-index: 1040 !important;
-            }
-
-            .modal {
-                z-index: 1055 !important;
-            }
-
-            /* Ensure proper modal stacking */
-            .modal.show {
-                display: block !important;
-            }
-
-            /* Fix body scroll when modal is open */
-            body.modal-open {
-                overflow: hidden;
-                padding-right: 0 !important;
-            }
-
-            /* Ensure backdrop is properly removed */
-            .modal-backdrop.show {
-                opacity: 0.5;
-            }
-
-            /* Fix toast z-index */
-            .toast {
-                z-index: 1056 !important;
-            }
-
-            /* Additional modal fixes */
-            .modal-dialog {
-                pointer-events: auto;
-            }
-
-            .modal-content {
-                pointer-events: auto;
-            }
-
-            /* Ensure proper stacking context */
-            .modal.show {
-                display: block !important;
-                background-color: rgba(0, 0, 0, 0.5);
-            }
-
-            /* Fix for multiple backdrops */
-            .modal-backdrop + .modal-backdrop {
-                z-index: 1039 !important;
-            }
-
-            body {
-                min-height: 100vh;
-                background-color: #f8f9fa;
-            }
-
-            .content-card {
-                background-color: #fff;
-                border-radius: 0.5rem;
-                box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-                padding: 1.5rem;
-                margin-bottom: 1.5rem;
-            }
-
-            .step-indicator {
-                display: flex;
-                justify-content: space-between;
-                margin-bottom: 0;
-                gap: 0.5rem;
-            }
-
-            .step {
-                flex: 1;
-                text-align: center;
-                position: relative;
-            }
-
-            .step:not(:last-child)::after {
-                content: '';
-                position: absolute;
-                top: 15px;
-                right: -50%;
-                width: 100%;
-                height: 2px;
-                background-color: #dee2e6;
-                z-index: 1;
-            }
-
-            .step.active:not(:last-child)::after {
-                background-color: #0d6efd;
-            }
-
-            .step-circle {
-                width: 32px;
-                height: 32px;
-                border-radius: 50%;
-                background-color: #dee2e6;
-                color: #6c757d;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                font-weight: bold;
-                margin-bottom: 0.5rem;
-                position: relative;
-                z-index: 2;
-                font-size: 1.1rem;
-            }
-
-            .step.active .step-circle {
-                background-color: #0d6efd;
-                color: white;
-            }
-
-            .step.completed .step-circle {
-                background-color: #198754;
-                color: white;
-            }
-
-            .image-upload-area {
-                border: 2px dashed #dee2e6;
-                border-radius: 0.5rem;
-                padding: 2rem;
-                text-align: center;
-                cursor: pointer;
-                transition: all 0.3s;
-            }
-
-            .image-upload-area:hover {
-                border-color: #0d6efd;
-                background-color: rgba(13, 110, 253, 0.05);
-            }
-
-            .image-upload-area.dragover {
-                border-color: #0d6efd;
-                background-color: rgba(13, 110, 253, 0.1);
-            }
-
-            .lesson-item {
-                border: 1px solid #dee2e6;
-                border-radius: 0.5rem;
-                padding: 1rem;
-                margin-bottom: 1rem;
-                background-color: #f8f9fa;
-            }
-
-            .lesson-item.dragging {
-                opacity: 0.5;
-            }
-
-            .drag-handle {
-                cursor: move;
-                color: #6c757d;
-            }
-
-            .video-upload-area {
-                border: 2px dashed #dee2e6;
-                border-radius: 0.5rem;
-                padding: 1.5rem;
-                text-align: center;
-                cursor: pointer;
-                transition: all 0.3s;
-            }
-
-            .video-upload-area:hover {
-                border-color: #0d6efd;
-                background-color: rgba(13, 110, 253, 0.05);
-            }
-
-            .progress-container {
-                display: none;
-                margin-top: 1rem;
-            }
-
-            .avatar {
-                width: 40px;
-                height: 40px;
-                border-radius: 50%;
-                object-fit: cover;
-            }
-
-            .tab-content {
-                padding-top: 1rem;
-            }
-
-            .form-floating textarea {
-                min-height: 120px;
-            }
-
-            .preview-card {
-                border: 1px solid #dee2e6;
-                border-radius: 0.5rem;
-                overflow: hidden;
-            }
-
-            .preview-image {
-                width: 100%;
-                height: 200px;
-                object-fit: cover;
-            }
-
-            .sticky-sidebar {
-                position: sticky;
-                top: 20px;
-            }
-            .content-card.sticky-step-indicator {
-                position: sticky;
-                top: 0;
-                z-index: 1000;
-                background-color: #f0f4fa;
-                margin-bottom: 1.5rem;
-                padding-top: 10px;
-                padding-bottom: 10px;
-                border-bottom: 2px solid #b6c6e3;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            }
-
-            /* Style cho sticky navigation buttons */
-            .content-card.sticky-navigation-buttons {
-                position: sticky;
-                bottom: 0;
-                z-index: 1000;
-                background-color: #f0f4fa;
-                margin-top: 1.5rem;
-                padding-top: 15px;
-                padding-bottom: 15px;
-                border-top: 2px solid #b6c6e3;
-                box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
-            }
-            @media (max-width: 768px) {
-                .card-body, .content-card.sticky-step-indicator, .content-card.sticky-navigation-buttons {
-                    padding-left: 1rem !important;
-                    padding-right: 1rem !important;
-                }
-            }
-        </style>
-        <script>
-            // Minimal JavaScript - Only 3 simple functions
-
-            // Show chapters section when Add Chapter button is clicked
-            document.getElementById('addChapterBtn').onclick = function() {
-                document.getElementById('addChapterSection').classList.add('d-none');
-                document.getElementById('chaptersSection').classList.remove('d-none');
-            };
-
-            // Toggle between video and quiz sections
-            function toggleLessonType(selectElement) {
-                const lessonItem = selectElement.closest('.lesson-item');
-                const videoForm = lessonItem.querySelector('.video-form');
-                const quizSection = lessonItem.querySelector('.quiz-section');
-
-                if (selectElement.value === 'video') {
-                    videoForm.classList.remove('d-none');
-                    quizSection.classList.add('d-none');
-                } else {
-                    videoForm.classList.add('d-none');
-                    quizSection.classList.remove('d-none');
-                }
-            }
-
-            // Add a new quiz using HTML template
-            function addQuiz(buttonElement) {
-                const quizSection = buttonElement.closest('.quiz-section');
-                const quizList = quizSection.querySelector('.quiz-list');
-                const quizTemplate = quizSection.querySelector('.quiz-template');
-
-                // Clone the template
-                const newQuiz = document.importNode(quizTemplate.content, true);
-
-                // Update quiz number
-                const quizCount = quizList.children.length + 1;
-                newQuiz.querySelector('.quiz-number').textContent = `Quiz ${quizCount}`;
-
-                // Add to the list
-                quizList.appendChild(newQuiz);
-            }
-
-            // Add a new lesson using HTML template
-            function addLesson(buttonElement) {
-                const form = buttonElement.closest('form');
-                const lessonTitle = form.querySelector('input').value;
-                const lessonDescription = form.querySelector('textarea').value;
-
-                if (!lessonTitle) {
-                    alert('Please enter a lesson title');
-                    return;
-                }
-
-                // Get the lessons list
-                const lessonsList = document.getElementById('lessonsList1');
-
-                // Clone the lesson template
-                const lessonTemplate = document.getElementById('lesson-template');
-                const newLesson = document.importNode(lessonTemplate.content, true);
-
-                // Update lesson title and description
-                newLesson.querySelector('h6').textContent = lessonTitle;
-                newLesson.querySelector('p').textContent = lessonDescription || 'No description';
-
-                // Add to the list
-                lessonsList.appendChild(newLesson);
-
-                // Hide the form
-                form.classList.add('d-none');
-            }
-        </script>
-        <script>
-            window.addEventListener("DOMContentLoaded", function () {
-                if (document.body.classList.contains("show-add-chapter")) {
-                    document.getElementById("addChapterSection").classList.remove("d-none");
-                }
-            });
-            function toggleChapterForm() {
-                const section = document.getElementById("addChapterSection");
-                section.classList.toggle("d-none");
-            }
-
-            function addChapter(event) {
-                event.preventDefault();
-
-                const title = document.getElementById("chapterTitle").value;
-                const desc = document.getElementById("chapterDesc").value;
-
-                if (!title || !desc) return;
-
-                const chapterHTML = `
-            <div class="chapter-card mb-3">
-                <div class="chapter-header">
-                    <h5>${title}</h5>
-                    <p>${desc}</p>
-                </div>
-            </div>
-        `;
-
-                const container = document.getElementById("chaptersSection");
-                container.insertAdjacentHTML('beforeend', chapterHTML);
-
-                // Reset form and keep it open
-                document.getElementById("addChapterForm").reset();
-            }
-            window.addEventListener('DOMContentLoaded', (event) => {
-                const toastElList = [].slice.call(document.querySelectorAll('.toast'));
-                toastElList.forEach(function (toastEl) {
-                    const toast = new bootstrap.Toast(toastEl, { delay: 5000 });
-                    toast.show();
-                });
-            });
-            function toggleCollapse(element) {
-                const targetId = element.getAttribute('href').substring(1);
-                const targetElement = document.getElementById(targetId);
-                if (targetElement.classList.contains('show')) {
-                    targetElement.classList.remove('show');
-                } else {
-                    targetElement.classList.add('show');
-                }
-            }
-        </script>
     </div>
     <!-- Video Modal -->
     <div class="modal fade" id="videoModal" tabindex="-1" aria-hidden="true">
@@ -930,120 +563,6 @@
             </div>
         </div>
     </div>
-    <script>
-        document.getElementById('videoModal').addEventListener('hidden.bs.modal', function () {
-            var video = document.getElementById('dynamicVideo');
-            video.pause();
-            video.currentTime = 0;
-            video.src = "";
-        });
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var updateModal = document.getElementById('updateChapterModal');
-            updateModal.addEventListener('show.bs.modal', function (event) {
-                var button = event.relatedTarget;
-                document.getElementById('modalChapterId').value = button.getAttribute('data-chapter-id');
-                document.getElementById('modalTitle').value = button.getAttribute('data-title');
-                document.getElementById('modalDescription').value = button.getAttribute('data-description');
-                document.getElementById('modalOrderNumber').value = button.getAttribute('data-ordernumber');
-            });
-
-            // Xử lý modal update lesson (mới thêm)
-            var updateLessonModal = document.getElementById('updateLessonModal');
-            if (updateLessonModal) {
-                updateLessonModal.addEventListener('show.bs.modal', function (event) {
-                    var button = event.relatedTarget;
-                    document.getElementById('lessonModalId').value = button.getAttribute('data-lesson-id');
-                    document.getElementById('lessonModalTitle').value = button.getAttribute('data-title');
-                    document.getElementById('lessonModalDescription').value = button.getAttribute('data-description');
-                    document.getElementById('lessonModalOrderNumber').value = button.getAttribute('data-order-number');
-
-                    // Xử lý checkbox Free Lesson
-                    const isFree = button.getAttribute('data-is-free') === 'true';
-                    document.getElementById('lessonModalIsFree').checked = isFree;
-                });
-            }
-
-            // Fix modal backdrop issues for all modals
-            const allModals = document.querySelectorAll('.modal');
-            allModals.forEach(modal => {
-                modal.addEventListener('hidden.bs.modal', function() {
-                    // Remove any leftover backdrops
-                    const backdrops = document.querySelectorAll('.modal-backdrop');
-                    backdrops.forEach(backdrop => {
-                        backdrop.remove();
-                    });
-
-                    // Remove modal-open class from body
-                    document.body.classList.remove('modal-open');
-                    document.body.style.overflow = '';
-                    document.body.style.paddingRight = '';
-                });
-
-                // Handle backdrop click
-                modal.addEventListener('click', function(event) {
-                    if (event.target === modal) {
-                        const modalId = modal.id;
-                        closeModalSafely(modalId);
-                    }
-                });
-            });
-
-            // Optional: Hiển thị message sau khi update (nếu có)
-            var urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('successMessage')) {
-                alert(urlParams.get('successMessage'));
-            }
-            if (urlParams.has('errorMessage')) {
-                alert(urlParams.get('errorMessage'));
-            }
-        });
-    </script>
-    <script>
-        // Hàm để thiết lập tính toán duration cho mỗi form video
-        function setupVideoForms() {
-            // Lấy tất cả các form video
-            document.querySelectorAll('.video-form form').forEach(function(form) {
-                const fileInput = form.querySelector('input[type="file"]');
-                const durationInput = form.querySelector('input[name="duration"]');
-
-                if (fileInput && durationInput) {
-                    fileInput.addEventListener('change', function(event) {
-                        const file = event.target.files[0];
-                        if (file) {
-                            const video = document.createElement('video');
-                            video.preload = 'metadata';
-                            video.onloadedmetadata = function() {
-                                window.URL.revokeObjectURL(video.src);
-                                const durationMinutes = Math.ceil(video.duration / 60);
-                                durationInput.value = durationMinutes;
-                                console.log("Duration set to:", durationMinutes, "for form:", form);
-                            }
-                            video.src = URL.createObjectURL(file);
-                        }
-                    });
-                }
-            });
-        }
-
-        // Chạy khi DOM đã tải xong
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log("DOM loaded, setting up video forms");
-            setupVideoForms();
-
-            // Thiết lập lại khi có thay đổi trong DOM (ví dụ: khi thêm lesson mới)
-            const observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                    if (mutation.addedNodes.length) {
-                        setupVideoForms();
-                    }
-                });
-            });
-
-            observer.observe(document.body, { childList: true, subtree: true });
-        });
-    </script>
     <!-- Lesson Update Modal -->
     <div class="modal fade" id="updateLessonModal" tabindex="-1" aria-labelledby="updateLessonModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -1097,10 +616,13 @@
                             <div class="mb-3" id="currentVideoContainer">
                                 <label class="form-label">Current Video</label>
                                 <div class="ratio ratio-16x9" style="max-width: 400px;">
-                                    <video id="currentLessonVideo" controls class="rounded">
-                                        <source id="currentVideoSource" src="" type="video/mp4">
+                                    <video id="currentLessonVideo" controls class="rounded" style="background: #000;" onerror="handleVideoError(this)">
                                         Your browser does not support the video tag.
                                     </video>
+                                </div>
+                                <div id="videoErrorMessage" class="alert alert-danger mt-2 d-none">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                    <span>Failed to load video. Please try again later.</span>
                                 </div>
                             </div>
 
@@ -1291,26 +813,35 @@
             const editLessonType = document.getElementById('editLessonType');
             if (contentType === 'video') {
                 editLessonType.value = 'video';
+                document.getElementById('videoEditSection').classList.remove('d-none');
+                
                 if (videoUrl) {
-                    // --- Hàm lấy signed URL và set vào video preview ---
-                    function refreshSignedUrl() {
-                        fetch('/api/video/stream/video?publicId=' + encodeURIComponent(videoUrl))
-                            .then(response => response.text())
-                            .then(url => {
-                                document.getElementById('currentVideoSource').src = url;
-                                document.getElementById('currentLessonVideo').load();
-                                document.getElementById('currentVideoContainer').classList.remove('d-none');
-                            });
+                    // Hiển thị container video và set source ngay lập tức
+                    const videoContainer = document.getElementById('currentVideoContainer');
+                    const videoElement = document.getElementById('currentLessonVideo');
+                    const errorMessage = document.getElementById('videoErrorMessage');
+                    
+                    if (videoContainer && videoElement) {
+                        videoContainer.classList.remove('d-none');
+                        if (errorMessage) errorMessage.classList.add('d-none');
+                        
+                        try {
+                            videoElement.src = '/api/video/stream/video/' + encodeURIComponent(videoUrl);
+                            videoElement.load();
+                            
+                            // Thêm timeout để kiểm tra nếu video không load được sau 5 giây
+                            setTimeout(() => {
+                                if (videoElement.readyState === 0) { // HAVE_NOTHING
+                                    handleVideoError(videoElement);
+                                }
+                            }, 5000);
+                        } catch (error) {
+                            console.error('Error loading video:', error);
+                            if (errorMessage) errorMessage.classList.remove('d-none');
+                        }
                     }
-                    // Lấy URL lần đầu
-                    refreshSignedUrl();
-                    // Nếu đã có interval cũ thì clear
-                    if (currentVideoRefreshInterval) clearInterval(currentVideoRefreshInterval);
-                    // Đặt interval refresh mỗi 4 phút
-                    currentVideoRefreshInterval = setInterval(refreshSignedUrl, 4 * 60 * 1000);
                 } else {
                     document.getElementById('currentVideoContainer').classList.add('d-none');
-                    if (currentVideoRefreshInterval) clearInterval(currentVideoRefreshInterval);
                 }
                 document.getElementById('editVideoDuration').value = duration || '';
             } else if (contentType === 'quiz') {
@@ -1471,8 +1002,6 @@
                 });
             });
         });
-    </script>
-    <script>
         function handleLessonClick(event, element) {
             event.stopPropagation();
             var videoId = element.getAttribute('data-videoid');
@@ -1490,8 +1019,6 @@
                 modal.show();
             }
         }
-    </script>
-    <script>
         // --- Thêm biến interval cho refresh signed URL ---
         let currentVideoRefreshInterval = null;
 
@@ -1522,26 +1049,35 @@
             const editLessonType = document.getElementById('editLessonType');
             if (contentType === 'video') {
                 editLessonType.value = 'video';
+                document.getElementById('videoEditSection').classList.remove('d-none');
+                
                 if (videoUrl) {
-                    // --- Hàm lấy signed URL và set vào video preview ---
-                    function refreshSignedUrl() {
-                        fetch('/api/video/stream/video?publicId=' + encodeURIComponent(videoUrl))
-                            .then(response => response.text())
-                            .then(url => {
-                                document.getElementById('currentVideoSource').src = url;
-                                document.getElementById('currentLessonVideo').load();
-                                document.getElementById('currentVideoContainer').classList.remove('d-none');
-                            });
+                    // Hiển thị container video và set source ngay lập tức
+                    const videoContainer = document.getElementById('currentVideoContainer');
+                    const videoElement = document.getElementById('currentLessonVideo');
+                    const errorMessage = document.getElementById('videoErrorMessage');
+                    
+                    if (videoContainer && videoElement) {
+                        videoContainer.classList.remove('d-none');
+                        if (errorMessage) errorMessage.classList.add('d-none');
+                        
+                        try {
+                            videoElement.src = '/api/video/stream/video/' + encodeURIComponent(videoUrl);
+                            videoElement.load();
+                            
+                            // Thêm timeout để kiểm tra nếu video không load được sau 5 giây
+                            setTimeout(() => {
+                                if (videoElement.readyState === 0) { // HAVE_NOTHING
+                                    handleVideoError(videoElement);
+                                }
+                            }, 5000);
+                        } catch (error) {
+                            console.error('Error loading video:', error);
+                            if (errorMessage) errorMessage.classList.remove('d-none');
+                        }
                     }
-                    // Lấy URL lần đầu
-                    refreshSignedUrl();
-                    // Nếu đã có interval cũ thì clear
-                    if (currentVideoRefreshInterval) clearInterval(currentVideoRefreshInterval);
-                    // Đặt interval refresh mỗi 4 phút
-                    currentVideoRefreshInterval = setInterval(refreshSignedUrl, 4 * 60 * 1000);
                 } else {
                     document.getElementById('currentVideoContainer').classList.add('d-none');
-                    if (currentVideoRefreshInterval) clearInterval(currentVideoRefreshInterval);
                 }
                 document.getElementById('editVideoDuration').value = duration || '';
             } else if (contentType === 'quiz') {
@@ -1581,5 +1117,454 @@
                 });
             }
         });
+
+            document.getElementById('videoModal').addEventListener('hidden.bs.modal', function () {
+            var video = document.getElementById('dynamicVideo');
+            video.pause();
+            video.currentTime = 0;
+            video.src = "";
+        });
+            document.addEventListener('DOMContentLoaded', function() {
+            var updateModal = document.getElementById('updateChapterModal');
+            updateModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            document.getElementById('modalChapterId').value = button.getAttribute('data-chapter-id');
+            document.getElementById('modalTitle').value = button.getAttribute('data-title');
+            document.getElementById('modalDescription').value = button.getAttribute('data-description');
+            document.getElementById('modalOrderNumber').value = button.getAttribute('data-ordernumber');
+        });
+
+            // Xử lý modal update lesson (mới thêm)
+            var updateLessonModal = document.getElementById('updateLessonModal');
+            if (updateLessonModal) {
+            updateLessonModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            document.getElementById('lessonModalId').value = button.getAttribute('data-lesson-id');
+            document.getElementById('lessonModalTitle').value = button.getAttribute('data-title');
+            document.getElementById('lessonModalDescription').value = button.getAttribute('data-description');
+            document.getElementById('lessonModalOrderNumber').value = button.getAttribute('data-order-number');
+
+            // Xử lý checkbox Free Lesson
+            const isFree = button.getAttribute('data-is-free') === 'true';
+            document.getElementById('lessonModalIsFree').checked = isFree;
+        });
+        }
+
+            // Fix modal backdrop issues for all modals
+            const allModals = document.querySelectorAll('.modal');
+            allModals.forEach(modal => {
+            modal.addEventListener('hidden.bs.modal', function() {
+            // Remove any leftover backdrops
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => {
+            backdrop.remove();
+        });
+
+            // Remove modal-open class from body
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+        });
+
+            // Handle backdrop click
+            modal.addEventListener('click', function(event) {
+            if (event.target === modal) {
+            const modalId = modal.id;
+            closeModalSafely(modalId);
+        }
+        });
+        });
+
+            // Optional: Hiển thị message sau khi update (nếu có)
+            var urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('successMessage')) {
+            alert(urlParams.get('successMessage'));
+        }
+            if (urlParams.has('errorMessage')) {
+            alert(urlParams.get('errorMessage'));
+        }
+        });
+            // Hàm để thiết lập tính toán duration cho mỗi form video
+            function setupVideoForms() {
+            // Lấy tất cả các form video
+            document.querySelectorAll('.video-form form').forEach(function(form) {
+                const fileInput = form.querySelector('input[type="file"]');
+                const durationInput = form.querySelector('input[name="duration"]');
+
+                if (fileInput && durationInput) {
+                    fileInput.addEventListener('change', function(event) {
+                        const file = event.target.files[0];
+                        if (file) {
+                            const video = document.createElement('video');
+                            video.preload = 'metadata';
+                            video.onloadedmetadata = function() {
+                                window.URL.revokeObjectURL(video.src);
+                                const durationMinutes = Math.ceil(video.duration / 60);
+                                durationInput.value = durationMinutes;
+                                console.log("Duration set to:", durationMinutes, "for form:", form);
+                            }
+                            video.src = URL.createObjectURL(file);
+                        }
+                    });
+                }
+            });
+        }
+
+            // Chạy khi DOM đã tải xong
+            document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM loaded, setting up video forms");
+            setupVideoForms();
+
+            // Thiết lập lại khi có thay đổi trong DOM (ví dụ: khi thêm lesson mới)
+            const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+            if (mutation.addedNodes.length) {
+            setupVideoForms();
+        }
+        });
+        });
+
+            observer.observe(document.body, { childList: true, subtree: true });
+        });
+            // Minimal JavaScript - Only 3 simple functions
+
+            // Show chapters section when Add Chapter button is clicked
+            document.getElementById('addChapterBtn').onclick = function() {
+            document.getElementById('addChapterSection').classList.add('d-none');
+            document.getElementById('chaptersSection').classList.remove('d-none');
+        };
+
+            // Toggle between video and quiz sections
+            function toggleLessonType(selectElement) {
+            const lessonItem = selectElement.closest('.lesson-item');
+            const videoForm = lessonItem.querySelector('.video-form');
+            const quizSection = lessonItem.querySelector('.quiz-section');
+
+            if (selectElement.value === 'video') {
+            videoForm.classList.remove('d-none');
+            quizSection.classList.add('d-none');
+        } else {
+            videoForm.classList.add('d-none');
+            quizSection.classList.remove('d-none');
+        }
+        }
+
+            // Add a new quiz using HTML template
+            function addQuiz(buttonElement) {
+            const quizSection = buttonElement.closest('.quiz-section');
+            const quizList = quizSection.querySelector('.quiz-list');
+            const quizTemplate = quizSection.querySelector('.quiz-template');
+
+            // Clone the template
+            const newQuiz = document.importNode(quizTemplate.content, true);
+
+            // Update quiz number
+            const quizCount = quizList.children.length + 1;
+            newQuiz.querySelector('.quiz-number').textContent = `Quiz ${quizCount}`;
+
+            // Add to the list
+            quizList.appendChild(newQuiz);
+        }
+
+            // Add a new lesson using HTML template
+            function addLesson(buttonElement) {
+            const form = buttonElement.closest('form');
+            const lessonTitle = form.querySelector('input').value;
+            const lessonDescription = form.querySelector('textarea').value;
+
+            if (!lessonTitle) {
+            alert('Please enter a lesson title');
+            return;
+        }
+
+            // Get the lessons list
+            const lessonsList = document.getElementById('lessonsList1');
+
+            // Clone the lesson template
+            const lessonTemplate = document.getElementById('lesson-template');
+            const newLesson = document.importNode(lessonTemplate.content, true);
+
+            // Update lesson title and description
+            newLesson.querySelector('h6').textContent = lessonTitle;
+            newLesson.querySelector('p').textContent = lessonDescription || 'No description';
+
+            // Add to the list
+            lessonsList.appendChild(newLesson);
+
+            // Hide the form
+            form.classList.add('d-none');
+        }
+        window.addEventListener("DOMContentLoaded", function () {
+            if (document.body.classList.contains("show-add-chapter")) {
+                document.getElementById("addChapterSection").classList.remove("d-none");
+            }
+        });
+        function toggleChapterForm() {
+            const section = document.getElementById("addChapterSection");
+            section.classList.toggle("d-none");
+        }
+
+        function addChapter(event) {
+            event.preventDefault();
+
+            const title = document.getElementById("chapterTitle").value;
+            const desc = document.getElementById("chapterDesc").value;
+
+            if (!title || !desc) return;
+
+            const chapterHTML = `
+            <div class="chapter-card mb-3">
+                <div class="chapter-header">
+                    <h5>${title}</h5>
+                    <p>${desc}</p>
+                </div>
+            </div>
+        `;
+
+            const container = document.getElementById("chaptersSection");
+            container.insertAdjacentHTML('beforeend', chapterHTML);
+
+            // Reset form and keep it open
+            document.getElementById("addChapterForm").reset();
+        }
+        window.addEventListener('DOMContentLoaded', (event) => {
+            const toastElList = [].slice.call(document.querySelectorAll('.toast'));
+            toastElList.forEach(function (toastEl) {
+                const toast = new bootstrap.Toast(toastEl, { delay: 5000 });
+                toast.show();
+            });
+        });
+        function toggleCollapse(element) {
+            const targetId = element.getAttribute('href').substring(1);
+            const targetElement = document.getElementById(targetId);
+            if (targetElement.classList.contains('show')) {
+                targetElement.classList.remove('show');
+            } else {
+                targetElement.classList.add('show');
+            }
+        }
+
+        function showLessonForm(chapterId) {
+            const collapseElement = document.getElementById('collapseChapter' + chapterId);
+            const lessonForm = document.getElementById('lessonForm' + chapterId);
+
+            if (!collapseElement || !lessonForm) return;
+
+            const isCollapseOpen = collapseElement.classList.contains('show');
+            const isFormOpen = !lessonForm.classList.contains('d-none');
+
+            // Trường hợp 1: List đang đóng -> mở cả list và form
+            if (!isCollapseOpen) {
+                collapseElement.classList.add('show');
+                lessonForm.classList.remove('d-none');
+            }
+            // Trường hợp 2: List đang mở và form đang mở -> đóng cả list và form
+            else if (isCollapseOpen && isFormOpen && !collapseElement.hasAttribute('data-opened-by-chapter')) {
+                collapseElement.classList.remove('show');
+                lessonForm.classList.add('d-none');
+            }
+            // Trường hợp 3: List đang mở (do click chapter) và form đang mở -> chỉ đóng form
+            else {
+                lessonForm.classList.toggle('d-none');
+            }
+        }
+
+        function handleVideoError(videoElement) {
+            // Hiển thị thông báo lỗi
+            const errorMessage = document.getElementById('videoErrorMessage');
+            if (errorMessage) {
+                errorMessage.classList.remove('d-none');
+            }
+            
+            // Thử load lại video
+            retryLoadVideo(videoElement, 3); // Thử lại 3 lần
+        }
+
+        function retryLoadVideo(videoElement, maxRetries, currentRetry = 0) {
+            if (currentRetry >= maxRetries) return;
+            
+            setTimeout(() => {
+                const currentSrc = videoElement.src;
+                videoElement.src = '';
+                videoElement.src = currentSrc;
+                
+                // Thêm event listener để kiểm tra nếu video load thành công
+                videoElement.onloadeddata = function() {
+                    const errorMessage = document.getElementById('videoErrorMessage');
+                    if (errorMessage) {
+                        errorMessage.classList.add('d-none');
+                    }
+                };
+                
+                // Nếu vẫn lỗi, thử lại
+                videoElement.onerror = function() {
+                    retryLoadVideo(videoElement, maxRetries, currentRetry + 1);
+                };
+            }, 1000); // Đợi 1 giây trước khi thử lại
+        }
     </script>
+    <style>
+        .d-none { display: none !important; }
+        .chapter-card { border: 1px solid #dee2e6; border-radius: 8px; margin-bottom: 1.5rem; background: #fff; }
+        .chapter-header { padding: 1rem; background: #f8f9fa; border-bottom: 1px solid #dee2e6; border-radius: 8px 8px 0 0; }
+        .chapter-body { padding: 1rem; }
+        .lesson-item { border: 1px solid #e5e7eb; border-radius: 6px; padding: 1rem; background: #fafafa; margin-bottom: 1rem; }
+        .quiz-block { border: 1px solid #ffffff; border-radius: 6px; padding: 1rem; background: rgb(251, 247, 247); margin-bottom: 1rem; }
+        .quiz-number { background: #f2f2f1; color: #000; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+        details summary { cursor: pointer; }
+        details summary > * { display: inline; }
+        .quiz-container { border-left: 3px solid #cdcbc8; padding-left: 15px; margin-top: 10px; }
+
+
+        .modal {
+            z-index: 1055 !important;
+        }
+
+        /* Ensure proper modal stacking */
+        .modal.show {
+            display: block !important;
+        }
+
+
+
+        /* Fix toast z-index */
+        .toast {
+            z-index: 1056 !important;
+        }
+
+        /* Additional modal fixes */
+        .modal-dialog {
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            pointer-events: auto;
+        }
+
+        /* Ensure proper stacking context */
+        .modal.show {
+            display: block !important;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        /* Fix for multiple backdrops */
+        .modal-backdrop + .modal-backdrop {
+            z-index: 1039 !important;
+        }
+
+        body {
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+
+        .content-card {
+            background-color: #fff;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0;
+            gap: 0.5rem;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            right: -50%;
+            width: 100%;
+            height: 2px;
+            background-color: #dee2e6;
+            z-index: 1;
+        }
+
+        .step.active:not(:last-child)::after {
+            background-color: #0d6efd;
+        }
+
+        .step-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #dee2e6;
+            color: #6c757d;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 2;
+            font-size: 1.1rem;
+        }
+
+        .step.active .step-circle {
+            background-color: #0d6efd;
+            color: white;
+        }
+
+        .step.completed .step-circle {
+            background-color: #198754;
+            color: white;
+        }
+
+
+        .lesson-item {
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background-color: #f8f9fa;
+        }
+
+        .lesson-item.dragging {
+            opacity: 0.5;
+        }
+
+        .form-floating textarea {
+            min-height: 120px;
+        }
+
+        .content-card.sticky-step-indicator {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background-color: #f0f4fa;
+            margin-bottom: 1.5rem;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #b6c6e3;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* Style cho sticky navigation buttons */
+        .content-card.sticky-navigation-buttons {
+            position: sticky;
+            bottom: 0;
+            z-index: 1000;
+            background-color: #f0f4fa;
+            margin-top: 1.5rem;
+            padding-top: 15px;
+            padding-bottom: 15px;
+            border-top: 2px solid #b6c6e3;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+        }
+        @media (max-width: 768px) {
+            .card-body, .content-card.sticky-step-indicator, .content-card.sticky-navigation-buttons {
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+            }
+        }
+    </style>
 </div>

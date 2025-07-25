@@ -58,4 +58,5 @@ public class GlobalExceptionHandler {
         mav.setViewName("error/404"); // Tạo view này để hiển thị lỗi 404
         return mav;
     }
+    
 } 

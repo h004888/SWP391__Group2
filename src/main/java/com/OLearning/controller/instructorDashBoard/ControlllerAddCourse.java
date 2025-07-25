@@ -712,7 +712,7 @@ public class ControlllerAddCourse {
     public String addQuiz(@RequestParam("lessonId") Long lessonId,
                           @RequestParam("title") String title,
                           @RequestParam("description") String description,
-                          @RequestParam("timeLimit") Integer timeLimit,
+                          @RequestParam(value = "timeLimit", required = false) Integer timeLimit,
                           @RequestParam(value = "question", required = false) List<String> questions,
                           @RequestParam(value = "optionA", required = false) List<String> optionsA,
                           @RequestParam(value = "optionB", required = false) List<String> optionsB,
@@ -721,6 +721,12 @@ public class ControlllerAddCourse {
                           @RequestParam(value = "correctAnswer", required = false) List<String> correctAnswers,
                           RedirectAttributes redirectAttributes) {
         try {
+            // Validate timeLimit
+            if (timeLimit == null || timeLimit < 1) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Time limit must be at least 1 minute");
+                return "redirect:../createcourse/coursecontent";
+            }
+
             // Check if parameters are valid
             if (questions == null || questions.isEmpty()) {
                 redirectAttributes.addFlashAttribute("errorMessage", "No quiz questions provided");
@@ -794,8 +800,13 @@ public class ControlllerAddCourse {
             courseService.submitCourse(courseId, "draft");
             return "redirect:../courses";
         }
+        List<Chapter> chapters = chapterService.chapterListByCourse(courseId);
+        if(chapters.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Please create chapter and video to continue");
+            return "redirect:../createcourse/coursecontent";
+        }
         // Fetch terms and conditions for INSTRUCTOR and ALL
-        java.util.List<TermsAndCondition> terms = termsAndConditionService.getByRoleTargetOrAll("INSTRUCTOR");
+        List<TermsAndCondition> terms = termsAndConditionService.getByRoleTargetOrAll("INSTRUCTOR");
         model.addAttribute("termsAndConditions", terms);
         model.addAttribute("fragmentContent", "instructorDashboard/fragments/step4SubmitCourse :: step4Content");
         return "instructorDashboard/indexUpdate";
@@ -898,6 +909,10 @@ public class ControlllerAddCourse {
                     quizService.deleteQuiz(quiz.getId());
                 }
             } else if ("quiz".equals(contentType)) {
+                if (quizTimeLimit == null || quizTimeLimit < 1) {
+                    redirectAttributes.addFlashAttribute("errorMessage", "Time limit must be at least 1 minute");
+                    return "redirect:../createcourse/coursecontent";
+                }
                 // Cập nhật quiz
                 QuizDTO quizDTO = new QuizDTO();
                 quizDTO.setTitle(quizTitle);
