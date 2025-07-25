@@ -277,13 +277,11 @@ public class CourseController {
     public String blockCourse(@PathVariable("courseId") Long courseId, RedirectAttributes redirectAttributes) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("Course not found"));
-        // Chỉ cho phép block khi status là 'pending_block' và trước đó phải là publish
         if (!"pending_block".equalsIgnoreCase(course.getStatus())) {
             redirectAttributes.addFlashAttribute("error",
                     "Chỉ có thể xác nhận block khi khóa học đang ở trạng thái 'pending_block'.");
             return "redirect:/admin/course/detail/" + courseId;
         }
-        // Có thể kiểm tra thêm nếu cần
         courseService.blockCourse(courseId);
         redirectAttributes.addFlashAttribute("message", "Khóa học đã bị block!");
         return "redirect:/admin/course/detail/" + courseId;

@@ -40,10 +40,6 @@ public class CourseReviewServiceImpl implements CourseReviewService {
         return new PageImpl<>(filtered, pageable, filtered.size());
     }
 
-    @Override
-    public List<CourseReview> getCourseReviewsByCourse(Course course) {
-        return courseReviewRepository.findByCourseWithUserOrderByCreatedAtDesc(course);
-    }
 
     @Override
     public List<CourseReview> getCourseReviewsByCourseWithUser(Course course) {
@@ -59,22 +55,7 @@ public class CourseReviewServiceImpl implements CourseReviewService {
     public CourseReview save(CourseReview review) {
         return courseReviewRepository.save(review);
     }
-    
-    @Override
-    public Optional<CourseReview> findByEnrollment(Enrollment enrollment) {
-        return courseReviewRepository.findByEnrollment(enrollment);
-    }
-    
-    @Override
-    public Optional<CourseReview> findByUserIdAndCourseIdAndRatingGreaterThanZero(Long userId, Long courseId) {
-        return courseReviewRepository.findByUserIdAndCourseIdAndRatingGreaterThanZero(userId, courseId);
-    }
-    
-    @Override
-    public List<CourseReview> findAllByUserIdAndCourseId(Long userId, Long courseId) {
-        return courseReviewRepository.findAllByUserIdAndCourseId(userId, courseId);
-    }
-    
+
     @Override
     public Long countByUserIdAndCourseId(Long userId, Long courseId) {
         return courseReviewRepository.countByUserIdAndCourseId(userId, courseId);

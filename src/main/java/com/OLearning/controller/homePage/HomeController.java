@@ -200,7 +200,7 @@ public class HomeController {
         CourseViewDTO course = courseService.getCourseById(id);
         Course courseEntity = courseRepository.findById(id).orElse(null);
 
-        // Lấy danh sách review của course (chỉ những review có rating)
+        // Lấy danh sách review của course
         List<CourseReview> reviews = new ArrayList<>();
         double averageRating = 0.0;
         Map<Integer, Long> ratingDistribution = new HashMap<>();
@@ -219,7 +219,7 @@ public class HomeController {
                         .average()
                         .orElse(0.0);
 
-                // Tính phân bố rating (từ tất cả reviews, không chỉ filtered)
+                // Tính phân bố rating
                 List<CourseReview> allReviews = courseReviewService.getReviewsByCourseWithUser(courseEntity);
                 ratingDistribution = allReviews.stream()
                         .collect(Collectors.groupingBy(CourseReview::getRating, Collectors.counting()));
@@ -273,6 +273,17 @@ public class HomeController {
         } else {
             model.addAttribute("currentUserId", 0L);
         }
+                if (userDetails != null) {
+                    User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
+                    if (user != null) {
+                        model.addAttribute("currentUser", user);
+                        model.addAttribute("currentUserId", user.getUserId());
+                        long unreadCount = notificationService.countUnreadByUserId(user.getUserId());
+                        model.addAttribute("unreadCount", unreadCount);
+                    }
+                } else {
+                    model.addAttribute("currentUserId", 0L);
+                }
 
         model.addAttribute("listCategory", categoryService.getListCategories().stream().limit(8).toList());
 
@@ -385,10 +396,10 @@ public class HomeController {
 
     @PostMapping("/course-review/add")
     public String addCourseReview(@RequestParam("courseId") Long courseId,
-            @RequestParam("rating") Integer rating,
-            @RequestParam("comment") String comment,
-            @AuthenticationPrincipal UserDetails userDetails,
-            RedirectAttributes redirectAttributes) {
+                                  @RequestParam("rating") Integer rating,
+                                  @RequestParam("comment") String comment,
+                                  @AuthenticationPrincipal UserDetails userDetails,
+                                  RedirectAttributes redirectAttributes) {
         if (userDetails == null) {
             redirectAttributes.addFlashAttribute("error", "Bạn cần đăng nhập để đánh giá.");
             return "redirect:/home/course-detail?id=" + courseId;
@@ -409,16 +420,13 @@ public class HomeController {
             redirectAttributes.addFlashAttribute("error", "Bạn cần đăng ký khóa học để đánh giá.");
             return "redirect:/home/course-detail?id=" + courseId;
         }
-        // Cho phép review nhiều lần
-        // Tạo review mới
+
         CourseReview review = new CourseReview();
         review.setCourse(course);
         review.setRating(rating);
         review.setComment(comment);
         review.setCreatedAt(java.time.LocalDateTime.now());
-        // Gán enrollment
-        Enrollment enrollment = enrollmentService.findFirstByUserAndCourseOrderByEnrollmentDateDesc(user, course)
-                .orElse(null);
+        Enrollment enrollment = enrollmentService.findFirstByUserAndCourseOrderByEnrollmentDateDesc(user, course).orElse(null);
         review.setEnrollment(enrollment);
         courseReviewService.save(review);
         redirectAttributes.addFlashAttribute("message", "Đánh giá của bạn đã được ghi nhận.");

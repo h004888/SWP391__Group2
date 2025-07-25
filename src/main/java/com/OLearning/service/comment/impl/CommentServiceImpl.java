@@ -89,7 +89,7 @@ public class CommentServiceImpl implements CommentService {
                     .orElseThrow(() -> new RuntimeException("Bạn cần đăng ký khóa học để có thể trả lời bình luận"));
         }
 
-        // Kiểm tra comment cha tồn tại
+
         CourseReview parentReview = reviewRepo.findById(dto.getParentId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy bình luận gốc"));
 
@@ -149,7 +149,7 @@ public class CommentServiceImpl implements CommentService {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
 
-        // Kiểm tra comment tồn tại và thuộc về user
+
         CourseReview review = reviewRepo.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy bình luận"));
 
@@ -157,7 +157,6 @@ public class CommentServiceImpl implements CommentService {
             throw new RuntimeException("Bạn không có quyền xóa bình luận này");
         }
 
-        // Delete all replies first
         List<CourseReview> replies = reviewRepo.findByParentReviewOrderByCreatedAtDesc(review);
         for (CourseReview reply : replies) {
             reviewRepo.delete(reply);
@@ -174,7 +173,6 @@ public class CommentServiceImpl implements CommentService {
         CourseReview review = reviewRepo.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy bình luận"));
 
-        // Check if user is not reporting their own comment
         Long ownerId = null;
         if (review.getEnrollment() != null && review.getEnrollment().getUser() != null) {
             ownerId = review.getEnrollment().getUser().getUserId();
@@ -194,6 +192,7 @@ public class CommentServiceImpl implements CommentService {
         report.setStatus("pending");
         report.setCommentId(reviewId);
         reportRepo.save(report);
+
         List<User> admins = userRepo.findByRoleId(1L);
         for (User admin : admins) {
             Notification notification = new Notification();
@@ -214,7 +213,6 @@ public class CommentServiceImpl implements CommentService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy bình luận"));
         review.setHidden(hidden);
         reviewRepo.save(review);
-        // Gửi notification cho user khi comment bị ẩn
         if (hidden) {
             User commentUser = review.getEnrollment().getUser();
             Notification notification = new Notification();

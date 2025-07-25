@@ -74,7 +74,7 @@ public class NotificationsController {
             types = allTypes;
         }
         if (types == null || types.isEmpty()) {
-            types = List.of(""); // Đảm bảo không null để Thymeleaf render đúng
+            types = List.of("");
         }
         if (status == null || status.isBlank() || "All".equalsIgnoreCase(status)) {
             status = null;
@@ -246,10 +246,9 @@ public class NotificationsController {
                 adminNoti.setMessage(replyContent); // Nội dung instructor nhập
                 adminNoti.setStatus("failed");
                 adminNoti.setSentAt(java.time.LocalDateTime.now());
-                // KHÔNG setEvidenceLink ở đây!
                 notificationRepository.save(adminNoti);
             }
-            // Lưu evidenceLink vào tất cả report liên quan đến courseId
+
             List<Report> relatedReports = reportRepository.findByCourse_CourseId(courseId);
             if (relatedReports != null && evidenceLink != null && !evidenceLink.isEmpty()) {
                 for (Report report : relatedReports) {
