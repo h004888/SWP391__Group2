@@ -204,6 +204,7 @@ public class ControlllerAddCourse {
             redirectAttributes.addFlashAttribute("successMessage", "course deleted successfully.");
         } catch (RuntimeException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            return "redirect:../courses";
         }
         return "redirect:../courses";
     }
@@ -453,7 +454,7 @@ public class ControlllerAddCourse {
                                   BindingResult result,
                                   Model model,
                                   @RequestParam(name = "action") String action,
-                                  HttpServletRequest request) {
+                                  HttpServletRequest request, RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             model.addAttribute("coursestep2", courseMediaDTO);
             model.addAttribute("fragmentContent", "instructorDashboard/fragments/step2CourseMedia :: step2Content");
@@ -480,24 +481,29 @@ public class ControlllerAddCourse {
             model.addAttribute("fragmentContent", "instructorDashboard/fragments/step1BasicInfor :: step1Content");
             return "instructorDashboard/indexUpdate";
         }
-
-        Course course = courseService.createCourseMedia(courseId, courseMediaDTO);
-        ChapterDTO chapterDTO = new ChapterDTO();
-        model.addAttribute("chapter", chapterDTO);
-        List<Chapter> chapters = chapterService.chapterListByCourse(course.getCourseId());
-        for (Chapter chapter : chapters) {
-            List<Lesson> lessons = lessonService.findLessonsByChapterId(chapter.getChapterId());
-            if (lessons != null && lessons.size() > 0) {
-                chapter.setLessons(lessons);
+        try{
+            Course course = courseService.createCourseMedia(courseId, courseMediaDTO);
+            ChapterDTO chapterDTO = new ChapterDTO();
+            model.addAttribute("chapter", chapterDTO);
+            List<Chapter> chapters = chapterService.chapterListByCourse(course.getCourseId());
+            for (Chapter chapter : chapters) {
+                List<Lesson> lessons = lessonService.findLessonsByChapterId(chapter.getChapterId());
+                if (lessons != null && lessons.size() > 0) {
+                    chapter.setLessons(lessons);
+                }
             }
+            if (chapters != null && !chapters.isEmpty()) {
+                model.addAttribute("chapters", chapters);
+            }
+            model.addAttribute("lessontitle", new LessonTitleDTO());
+            model.addAttribute("videoDTO", new VideoDTO());
+            model.addAttribute("fragmentContent", "instructorDashboard/fragments/step3CourseContent :: step3Content");
+            return "instructorDashboard/indexUpdate";
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", "Error adding video: " + e.getMessage());
+            return "redirect:../createcourse/coursecontent";
         }
-        if (chapters != null && !chapters.isEmpty()) {
-            model.addAttribute("chapters", chapters);
-        }
-        model.addAttribute("lessontitle", new LessonTitleDTO());
-        model.addAttribute("videoDTO", new VideoDTO());
-        model.addAttribute("fragmentContent", "instructorDashboard/fragments/step3CourseContent :: step3Content");
-        return "instructorDashboard/indexUpdate";
     }
 
     //save chapter in course Content

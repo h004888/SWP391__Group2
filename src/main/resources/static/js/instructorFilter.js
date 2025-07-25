@@ -159,7 +159,7 @@ function upToPublic(courseId, hasPaidPublicationFee) {
 
 function unpublishCourse(courseId) {
     showConfirmActionModal(
-        'Bạn có chắc chắn muốn hủy công khai khóa học này?',
+        'Are you sure you want to unpublish this course?',
         '/instructor/courses/unpublish',
         courseId,
         function() {
@@ -171,7 +171,7 @@ function unpublishCourse(courseId) {
 
 function hideCourse(courseId) {
     showConfirmActionModal(
-        'Bạn có chắc chắn muốn ẩn khóa học này?',
+        'Are you sure you want to hide this course?',
         '/instructor/courses/hide',
         courseId,
         function() {
@@ -183,7 +183,7 @@ function hideCourse(courseId) {
 
 function unhideCourse(courseId) {
     showConfirmActionModal(
-        'Bạn có chắc chắn muốn hiển thị lại khóa học này?',
+        'Are you sure you want to republish this course?',
         '/instructor/courses/unhide',
         courseId,
         function() {
@@ -279,11 +279,9 @@ $('#deleteForm').on('submit', function(e) {
             filterCourses(status, 0);
 
             // Hiển thị thông báo thành công
-            showToast('Course deleted successfully!', 'success');
         },
         error: function(xhr, status, error) {
             console.error("Error deleting course:", error);
-            showToast('An error occurred while deleting the course.', 'error');
         }
     });
 });

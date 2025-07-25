@@ -56,7 +56,8 @@
                     class="btn btn-icon btn-sm btn-light border shadow-sm rounded-circle text-danger d-flex align-items-center justify-content-center"
                     title="Delete Course"
                     th:data-id="${course.courseId}" 
-                    th:data-title="${course.title}" 
+                    th:data-title="${course.title}"
+                    th:if="${course.status != 'pending' and course.status != 'blocked'}"
                     onclick="deleteCourse(this.getAttribute('data-id'), this.getAttribute('data-title'))"
                     style="width: 36px; height: 36px;">
                 <i class="fas fa-trash"></i>
@@ -68,7 +69,7 @@
                         data-bs-toggle="dropdown" 
                         aria-expanded="false" 
                         title="More actions"
-                        style="width: 36px; height: 36px;">
+                        style="width: 36px; height: 36px;" th:if="${course.status != 'blocked' and course.status != 'pending' and course.status != 'rejected'}">
                     <i class="fas fa-ellipsis-v"></i>
                 </button>
                 <ul class="dropdown-menu" th:aria-labelledby="'dropdownMenuButton-' + ${course.courseId}">
@@ -85,7 +86,7 @@
                         </a>
                     </li>
                     <!-- Hide: for all courses except already hidden -->
-                    <li th:if="${course.status != 'hidden'}">
+                    <li th:if="${course.status == 'draft' or course.status == 'approved'}">
                         <a class="dropdown-item" href="#" th:onclick="|hideCourse('${course.courseId}')|">
                             <i class="bi bi-eye me-2"></i>Hide
                         </a>
@@ -112,4 +113,5 @@
         </div>
     </td>
 </tr>
+
 </div>
