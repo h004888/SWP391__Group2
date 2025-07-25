@@ -201,7 +201,7 @@
                             <form id="filterForm" class="row g-3">
                                 <input type="hidden" id="currentPage" name="page" value="0">
                                 <input type="hidden" id="pageSize" name="size" th:value="${size}">
-                                
+
                                 <div class="col-sm-4">
                                     <select class="form-select" name="courseId" id="courseFilter">
                                         <option value="">All Courses</option>
@@ -212,7 +212,7 @@
                                         </option>
                                     </select>
                                 </div>
-                                
+
                                 <div class="col-sm-3">
                                     <select class="form-select" name="status" id="statusFilter">
                                         <option value="">All Status</option>
@@ -220,7 +220,7 @@
                                         <option value="completed" th:selected="${selectedStatus == 'completed'}">Completed</option>
                                     </select>
                                 </div>
-                                
+
                                 <div class="col-sm-5">
                                     <div class="input-group">
                                         <input type="text" class="form-control" name="search" id="searchInput"
@@ -252,7 +252,7 @@
                                     <td>
                                         <div class="mb-0 ms-2">
                                             <a class="mb-0" th:href="@{/instructor/enrolled/detail/{id}(id=${enrollment.enrollmentId})}" style="color: #0b0f13"
-                                                th:text="${enrollment.user.fullName}"></a>
+                                               th:text="${enrollment.user.fullName}"></a>
                                             <span class="text-body small" th:if="${enrollment.user.address != null}">
                                                 <i class="fas fa-fw fa-map-marker-alt me-1 mt-1"></i>
                                                 <span th:text="${enrollment.user.address}"></span>
@@ -303,7 +303,7 @@
                                 </tbody>
                             </table>
                         </div>
-                        
+
                         <!-- Pagination -->
                         <div class="d-sm-flex justify-content-sm-between align-items-sm-center mt-4 mt-sm-3"
                              th:if="${totalPages > 0}">
@@ -325,7 +325,7 @@
                                     <!-- Dynamic page numbers -->
                                     <th:block th:with="start=${currentPage - 2 < 0 ? 0 : currentPage - 2},
                                                      end=${currentPage + 2 >= totalPages ? totalPages - 1 : currentPage + 2}">
-                                        
+
                                         <!-- First page if not in range -->
                                         <li class="page-item mb-0" th:if="${start > 0}">
                                             <a class="page-link" href="javascript:void(0)" th:data-page="0">1</a>
@@ -333,22 +333,22 @@
                                         <li class="page-item disabled mb-0" th:if="${start > 1}">
                                             <span class="page-link">...</span>
                                         </li>
-                                        
+
                                         <!-- Pages in range -->
-                                        <li class="page-item mb-0" 
+                                        <li class="page-item mb-0"
                                             th:each="pageNum : ${#numbers.sequence(start, end)}"
                                             th:classappend="${pageNum == currentPage ? 'active' : ''}">
-                                            <a class="page-link" href="javascript:void(0)" 
+                                            <a class="page-link" href="javascript:void(0)"
                                                th:data-page="${pageNum}"
                                                th:text="${pageNum + 1}">1</a>
                                         </li>
-                                        
+
                                         <!-- Last page if not in range -->
                                         <li class="page-item disabled mb-0" th:if="${end < totalPages - 2}">
                                             <span class="page-link">...</span>
                                         </li>
                                         <li class="page-item mb-0" th:if="${end < totalPages - 1}">
-                                            <a class="page-link" href="javascript:void(0)" 
+                                            <a class="page-link" href="javascript:void(0)"
                                                th:data-page="${totalPages - 1}"
                                                th:text="${totalPages}">Last</a>
                                         </li>
@@ -386,34 +386,34 @@
             formData.set('page', page);
 
             const params = new URLSearchParams(formData);
-            
+
             fetch(`/instructor/enrolled/search?${params.toString()}`, {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             })
-            .then(response => response.text())
-            .then(html => {
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = html;
-                
-                // Update content
-                const tableContainer = document.getElementById('tableContainer');
-                const newContent = tempDiv.querySelector('#tableContainer');
-                if (newContent) {
-                    tableContainer.innerHTML = newContent.innerHTML;
-                    
-                    // Update totalPages from the new content
-                    const newTotalPages = tempDiv.querySelector('[data-total-pages]');
-                    if (newTotalPages) {
-                        totalPages = parseInt(newTotalPages.getAttribute('data-total-pages'));
+                .then(response => response.text())
+                .then(html => {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = html;
+
+                    // Update content
+                    const tableContainer = document.getElementById('tableContainer');
+                    const newContent = tempDiv.querySelector('#tableContainer');
+                    if (newContent) {
+                        tableContainer.innerHTML = newContent.innerHTML;
+
+                        // Update totalPages from the new content
+                        const newTotalPages = tempDiv.querySelector('[data-total-pages]');
+                        if (newTotalPages) {
+                            totalPages = parseInt(newTotalPages.getAttribute('data-total-pages'));
+                        }
+
+                        // Reattach events
+                        attachPaginationEvents();
                     }
-                    
-                    // Reattach events
-                    attachPaginationEvents();
-                }
-            })
-            .catch(error => console.error('Error:', error));
+                })
+                .catch(error => console.error('Error:', error));
         }
 
         // Attach pagination events
@@ -459,4 +459,3 @@
     <!-- Hidden element for total pages -->
     <div data-total-pages="[[${totalPages}]]" style="display: none;"></div>
 </div>
-

@@ -42,8 +42,8 @@ function afterAjaxUpdate() {
     });
     // Reinitialize dropdowns
     initializeDropdowns();
-    // Xóa toast cũ
-    $('.toast').remove();
+    // KHÔNG xóa toast ở đây nữa!
+    // $('.toast').remove();
 }
 
 // Filter function
@@ -227,6 +227,10 @@ function showConfirmActionModal(message, actionUrl, courseId, callback) {
             .done(function() {
                 if (typeof callback === 'function') callback();
                 $('#confirmActionModal').modal('hide');
+                showToast('Thao tác thành công!');
+            })
+            .fail(function(xhr) {
+                showToast('Có lỗi xảy ra: ' + xhr.responseText, 'error');
             });
     });
     var modal = new bootstrap.Modal(document.getElementById('confirmActionModal'));

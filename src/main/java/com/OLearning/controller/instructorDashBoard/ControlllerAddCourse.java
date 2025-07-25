@@ -296,6 +296,13 @@ public class ControlllerAddCourse {
     @PostMapping("/courses/unpublish")
     public String down(@RequestParam(name = "courseId") Long courseId
             , RedirectAttributes redirectAttributes, HttpServletRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long userId = userDetails.getUserId();
+        if(enrollmentService.countTotalEnrollment(userId) > 0) {
+            redirectAttributes.addFlashAttribute("errorMessage", "course unpublish successfully.");
+            return "redirect:../courses";
+        }
         courseService.submitCourse(courseId, "approved");
         redirectAttributes.addFlashAttribute("successMessage", "course unpublish successfully.");
         return "redirect:../courses";

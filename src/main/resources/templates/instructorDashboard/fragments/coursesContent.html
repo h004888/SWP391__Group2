@@ -1,24 +1,23 @@
 <div id="courseContentContainer" class="container-fluid" th:fragment="listsCourseContent">
-
-    <div class="table-wrapper">
-        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1056">
-            <div th:if="${successMessage}" class="toast align-items-center text-white bg-success border-0 show" role="alert">
-                <div class="d-flex">
-                    <div class="toast-body">
-                        <span th:text="${successMessage}"></span>
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1056">
+        <div th:if="${successMessage}" class="toast align-items-center text-white bg-success border-0 show" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <span th:text="${successMessage}"></span>
                 </div>
-            </div>
-            <div th:if="${errorMessage}" class="toast align-items-center text-white bg-danger border-0 show" role="alert">
-                <div class="d-flex">
-                    <div class="toast-body">
-                        <span th:text="${errorMessage}"></span>
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
         </div>
+        <div th:if="${errorMessage}" class="toast align-items-center text-white bg-danger border-0 show" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <span th:text="${errorMessage}"></span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    <div class="table-wrapper">
         <div class="table-title d-flex justify-content-between align-items-center flex-wrap">
             <div class="d-flex align-items-center ms-auto" style="gap: 12px;">
                 <div class="search-box" style="min-width: 240px;">
@@ -242,7 +241,7 @@
         </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script th:src="@{/assets/js/functions.js}"></script>
+<!--    <script th:src="@{/assets/js/functions.js}"></script>-->
     <script th:src="@{/js/instructorFilter.js}"></script>
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
@@ -291,5 +290,15 @@
         </div>
     </div>
 </div>
+<script>
+    // Tăng thời gian toast lên 10 giây
+    document.addEventListener('DOMContentLoaded', function() {
+        var toastElList = [].slice.call(document.querySelectorAll('.toast'));
+        toastElList.forEach(function(toastEl) {
+            var toast = new bootstrap.Toast(toastEl, { delay: 10000 }); // 10 giây
+            toast.show();
+        });
+    });
+</script>
 
 
