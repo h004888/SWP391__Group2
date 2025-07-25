@@ -189,7 +189,7 @@ public class UserNotificationsController {
                     .map(n -> {
                         String msg = n.getMessage();
                         if (msg != null) {
-                            msg = msg.split("\\r?\\n")[0]; // chỉ lấy dòng đầu tiên
+                            msg = msg.split("\\r?\\n")[0];
                             if (msg.length() > 25)
                                 msg = msg.substring(0, 25) + "...";
                         }

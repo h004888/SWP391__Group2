@@ -67,12 +67,10 @@ public class ReportMnController {
     public String viewReport(@PathVariable Long id, Model model) {
         Report report = reportRepository.findById(id).orElse(null);
         model.addAttribute("report", report);
-        // Nếu là report comment, truyền thêm nội dung comment
         if (report != null && "COMMENT".equalsIgnoreCase(report.getReportType()) && report.getCommentId() != null) {
             CourseReview comment = courseReviewRepository.findById(report.getCommentId()).orElse(null);
             model.addAttribute("reportedComment", comment);
         }
-        // Lấy evidenceLink từ report
         String evidenceLink = report != null ? report.getEvidenceLink() : null;
         model.addAttribute("evidenceLink", evidenceLink);
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/reportDetailContent :: reportDetailContent");

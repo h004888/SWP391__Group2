@@ -13,16 +13,11 @@ import java.util.Optional;
 public interface NotificationService {
     Notification sendMess(Notification notification);
     void rejectCourseMess(NotificationDTO dto, boolean allowResubmission);
-    List<NotificationDTO> getNotificationsByUserId(Long userId);
-    Page<NotificationDTO> getNotificationsByUserId(Long userId, Pageable pageable);
     Page<NotificationDTO> getNotificationsByUserId(Long userId, List<String> types, String status, Pageable pageable);
     Page<NotificationDTO> getUnreadNotificationsByUserId(Long userId, List<String> types, Pageable pageable);
-    public List<NotificationDTO> searchNotificationsByUser(String keyword, Long userId);
     Page<NotificationDTO> searchNotificationsByUser(String keyword, Long userId, Pageable pageable);
     List<String> getAllNotificationTypes();
     List<String> getAllNotificationTypesByUserId(Long userId);
-
-    //    NotificationsDTO getNotificationDetail(Long notificationId, Long userId);
     void markAsRead(Long notificationId);
     Optional<Notification> findById(Long id);
     void markAllAsRead(Long userId);

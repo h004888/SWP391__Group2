@@ -246,13 +246,12 @@ public class CourseServiceImpl implements CourseService {
     public Page<CourseDTO> filterCoursesInstructorManage(Long userId, Long categoryId, String status, String price,
             String title, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        // Đồng bộ status publish -> published
         Page<Course> coursePage = courseRepository.findCoursesByFilters(userId, categoryId, status, price, title,
                 pageable);
         return coursePage.map(course -> mapCourseToDTO(course));
     }
 
-    // Helper method để map Course sang CourseDTO với đầy đủ thông tin
+
     private CourseDTO mapCourseToDTO(Course course) {
         CourseDTO dto = courseMapper.MapCourseDTO(course);
 
@@ -386,15 +385,25 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public void blockCourse(Long courseId) {
         Course course = courseRepository.findById(courseId).orElseThrow();
-        // Chỉ cho phép block khi status là 'pending_block'
         if (!"pending_block".equalsIgnoreCase(course.getStatus())) {
             throw new IllegalStateException("Chỉ có thể block khóa học khi đang ở trạng thái 'pending_block'.");
         }
         course.setStatus("blocked");
         courseRepository.save(course);
+        User instructor = course.getInstructor();
+        if (instructor != null) {
+            Notification notification = new Notification();
+            notification.setUser(instructor);
+            notification.setCourse(course);
+            notification.setMessage("Your course '" + course.getTitle() + "' has been officially blocked by admin.");
+            notification.setType("CONFIRM_BLOCK");
+            notification.setStatus("failed");
+            notification.setSentAt(LocalDateTime.now());
+            notificationRepository.save(notification);
+        }
     }
 
-    // Thay đổi logic mở khóa: trả lại trạng thái 'publish' khi unblock
+
     @Override
     public void unblockCourse(Long courseId) {
         Course course = courseRepository.findById(courseId).orElseThrow();
@@ -440,12 +449,11 @@ public class CourseServiceImpl implements CourseService {
         return courseRepository.countByFilters(userId, categoryId, status, price, title);
     }
 
-    // Lưu course entity
+
     public void setPendingBlock(Long courseId) {
         Course course = courseRepository.findById(courseId).orElseThrow();
         course.setStatus("pending_block");
         courseRepository.save(course);
-        // Gửi notification và email cho instructor
         User instructor = course.getInstructor();
         if (instructor != null) {
             com.OLearning.entity.Notification notification = new com.OLearning.entity.Notification();

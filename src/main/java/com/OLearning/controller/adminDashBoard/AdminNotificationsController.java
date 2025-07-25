@@ -103,7 +103,6 @@ public class AdminNotificationsController {
 
     @PostMapping("/mark-all-read")
     public String markAllAsRead(Authentication authentication) {
-        // Ép kiểu để lấy ra CustomUserDetails
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
         notificationService.markAllAsRead(userId);

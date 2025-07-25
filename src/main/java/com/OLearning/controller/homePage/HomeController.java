@@ -183,7 +183,7 @@ public class HomeController {
                 CourseViewDTO course = courseService.getCourseById(id);
                 Course courseEntity = courseRepository.findById(id).orElse(null);
 
-                // Lấy danh sách review của course (chỉ những review có rating)
+                // Lấy danh sách review của course
                 List<CourseReview> reviews = new ArrayList<>();
                 double averageRating = 0.0;
                 Map<Integer, Long> ratingDistribution = new HashMap<>();
@@ -202,7 +202,7 @@ public class HomeController {
                                 .average()
                                 .orElse(0.0);
 
-                        // Tính phân bố rating (từ tất cả reviews, không chỉ filtered)
+                        // Tính phân bố rating
                         List<CourseReview> allReviews = courseReviewService.getReviewsByCourseWithUser(courseEntity);
                         ratingDistribution = allReviews.stream()
                                 .collect(Collectors.groupingBy(CourseReview::getRating, Collectors.counting()));
@@ -240,13 +240,11 @@ public class HomeController {
                     }
                 }
 
-                // Thêm thông tin user nếu đã đăng nhập
                 if (userDetails != null) {
                     User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
                     if (user != null) {
                         model.addAttribute("currentUser", user);
                         model.addAttribute("currentUserId", user.getUserId());
-                        // Add unread notification count
                         long unreadCount = notificationService.countUnreadByUserId(user.getUserId());
                         model.addAttribute("unreadCount", unreadCount);
                     }
@@ -384,14 +382,12 @@ public class HomeController {
             redirectAttributes.addFlashAttribute("error", "Bạn cần đăng ký khóa học để đánh giá.");
             return "redirect:/home/course-detail?id=" + courseId;
         }
-        // Cho phép review nhiều lần
-        // Tạo review mới
+
         CourseReview review = new CourseReview();
         review.setCourse(course);
         review.setRating(rating);
         review.setComment(comment);
         review.setCreatedAt(java.time.LocalDateTime.now());
-        // Gán enrollment
         Enrollment enrollment = enrollmentService.findFirstByUserAndCourseOrderByEnrollmentDateDesc(user, course).orElse(null);
         review.setEnrollment(enrollment);
         courseReviewService.save(review);

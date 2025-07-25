@@ -16,6 +16,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Optional;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import com.OLearning.security.CustomUserDetailsService;
+
 @Controller
 @RequestMapping("/profile")
 public class UserProfileController {
@@ -31,6 +36,9 @@ public class UserProfileController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private CustomUserDetailsService customUserDetailsService;
+
     @GetMapping()
     public String showProfile(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         Optional<UserProfileEditDTO> profileOpt = userService.getProfileByUsername(userDetails.getUsername());
@@ -41,7 +49,6 @@ public class UserProfileController {
         boolean isInstructor = userDetails.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_INSTRUCTOR"));
 
-        // dem notification chua doc
         if (!isAdmin && !isInstructor) {
             userRepository.findByUsername(userDetails.getUsername()).ifPresent(user -> {
                 long unreadCount = notificationService.countUnreadByUserId(user.getUserId());
@@ -112,8 +119,14 @@ public class UserProfileController {
                 Optional<UserProfileEditDTO> oldProfile = userService.getProfileByUsername(userDetails.getUsername());
                 oldProfile.ifPresent(old -> profileEditDTO.setAvatarUrl(old.getAvatarUrl()));
             }
-
             userService.updateProfileByUsername(userDetails.getUsername(), profileEditDTO);
+            UserDetails updatedUserDetails = customUserDetailsService.loadUserByUsername(
+                    profileEditDTO.getEmail() != null ? profileEditDTO.getEmail() : userDetails.getUsername());
+            Authentication newAuth = new UsernamePasswordAuthenticationToken(
+                    updatedUserDetails,
+                    userDetails.getPassword(),
+                    updatedUserDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(newAuth);
             return "redirect:/profile";
         } catch (IOException e) {
             model.addAttribute("error", "Không thể tải lên ảnh. Vui lòng thử lại.");
