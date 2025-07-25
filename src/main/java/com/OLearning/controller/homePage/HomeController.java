@@ -16,6 +16,7 @@ import com.OLearning.repository.VoucherRepository;
 import com.OLearning.service.cart.CartService;
 import com.OLearning.service.cart.impl.CartServiceImpl;
 import com.OLearning.service.category.CategoryService;
+import com.OLearning.service.certificate.CertificateService;
 import com.OLearning.service.course.CourseService;
 
 import com.OLearning.service.courseReview.CourseReviewService;
@@ -96,6 +97,9 @@ public class HomeController {
     @Autowired
     private NotificationService notificationService;
 
+    @Autowired
+    private CertificateService certificateService;
+
     @GetMapping()
     public String getMethodName(Model model,
             @AuthenticationPrincipal UserDetails userDetails,
@@ -112,6 +116,7 @@ public class HomeController {
         model.addAttribute("totalCourseIsPublish", courseService.countCourseIsPublish());
         model.addAttribute("totalInstructor", userService.countInstructor());
         model.addAttribute("totalStudent", userService.countStudent());
+        model.addAttribute("totalCertificate", certificateService.countAllByCertificate());
         model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderCategory");
         model.addAttribute("fragmentContent", "homePage/fragments/mainContent :: mainContent");
         return "homePage/index";
@@ -250,6 +255,7 @@ public class HomeController {
         model.addAttribute("ratingDistribution", ratingDistribution);
         model.addAttribute("selectedStar", star);
         model.addAttribute("isEnrolled", isEnrolled);
+
 
         // Thêm thông tin số review của user hiện tại
         if (userDetails != null) {

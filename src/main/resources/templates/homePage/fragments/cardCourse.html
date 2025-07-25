@@ -28,10 +28,7 @@
                                 th:text="${course.title}">Sketch from A to Z: for
                                 app
                                 designer</a></h5>
-                        <p class="mb-2 text-truncate-2 text-lowercase"
-                            th:utext="${#strings.length(course.description) > 25 ? #strings.substring(#strings.toLowerCase(course.description), 0, 25) + '...' : #strings.toLowerCase(course.description)}">
-                            proposal indulged no do sociable he throwing settling.
-                        </p>
+
                         <!-- Rating star -->
                         <ul class="list-inline mb-0">
                             <li class="list-inline-item me-0 small" th:each="i : ${#numbers.sequence(1, 5)}">
@@ -47,8 +44,14 @@
                     <div class="card-footer pt-0 pb-3">
                         <hr>
                         <div class="d-flex justify-content-between">
-                            <span class="h6 fw-light mb-0"><i class="far fa-clock text-danger me-2"></i><span
-                                    th:text="${course.getDuration()/60 + 'h'}">12h 56m</span></span>
+                            <span class="h6 fw-light mb-0">
+                                <i class="far fa-clock text-danger me-2"></i>
+                                <span th:if="${course.getDuration() >= 60}"
+                                    th:text="${(course.getDuration() / 60) + 'h ' + (course.getDuration() % 60) + 'm'}">12h
+                                    56m</span>
+                                <span th:if="${course.getDuration() < 60}"
+                                    th:text="${'0h ' + course.getDuration() + 'm'}">0h 45m</span>
+                            </span>
                             <span class="h6 fw-light mb-0"><i class="fas fa-table text-orange me-2"></i><span
                                     th:text="${course.getTotalLessons() + ' lectures'}">15</span></span>
                         </div>

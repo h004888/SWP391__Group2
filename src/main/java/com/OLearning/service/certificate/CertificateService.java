@@ -13,4 +13,5 @@ public interface CertificateService {
     Certificate findByUser_UserIdAndCourse_CourseId(Long userUserId, Long courseId);
 
     Page<Certificate> findByUser_UserId(Long userUserId, Pageable pageable);
+    Long countAllByCertificate();
 }

@@ -1,8 +1,10 @@
 <!-- **************** MAIN CONTENT START **************** -->
 <main th:fragment="mainContent" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
-    <div id="notification" class="position-fixed top-0 end-0 p-5" style="z-index: 1050; top: 80px; transform: translateX(200%); transition: transform 0.5s ease;">
-        <div id="notification-alert" class="alert d-flex align-items-center mb-0" role="alert" style="min-width: 250px;">
+    <div id="notification" class="position-fixed top-0 end-0 p-5"
+        style="z-index: 1050; top: 80px; transform: translateX(200%); transition: transform 0.5s ease;">
+        <div id="notification-alert" class="alert d-flex align-items-center mb-0" role="alert"
+            style="min-width: 250px;">
             <i id="notification-icon" class="me-2"></i>
             <span id="notification-message"></span>
         </div>
@@ -425,9 +427,9 @@ Counter START -->
                         <span class="display-6 lh-1 text-info mb-0"><i class="bi bi-patch-check-fill"></i></span>
                         <div class="ms-4 h6 fw-normal mb-0">
                             <div class="d-flex">
-                                <h5 class="purecounter mb-0 fw-bold" data-purecounter-start="0" data-purecounter-end="6"
-                                    data-purecounter-delay="300">0</h5>
-                                <span class="mb-0 h5">K+</span>
+                                <h5 class="purecounter mb-0 fw-bold" data-purecounter-start="0"
+                                    th:data-purecounter-end="${totalCertificate}" data-purecounter-delay="300">0</h5>
+                                <span class="mb-0 h5" th:if="${totalCertificate >= 1000}">K+</span>
                             </div>
                             <p class="mb-0">Certified Courses</p>
                         </div>
@@ -516,7 +518,8 @@ Action box START -->
                                     </div>
                                     <!-- Content and input -->
                                     <div class="col-lg-5 text-lg-end">
-                                        <a th:href="@{/become-instructor}" class="btn btn-outline-warning mb-0">Start Teaching Today</a>
+                                        <a th:href="@{/become-instructor}" class="btn btn-outline-warning mb-0">Start
+                                            Teaching Today</a>
                                     </div>
                                 </div>
                             </div>
@@ -571,11 +574,10 @@ Trending courses START -->
                                             <a href="#" class="badge text-bg-dark"
                                                 th:text="${course.courseLevel}">Beginner</a>
                                         </span>
-                                        <button type="button"
-                                                class="btn btn-link text-muted p-0 wishlist-toggle"
-                                                th:data-course-id="${course.courseId}"
-                                                th:onclick="'toggleWishlist(this, ' + ${course.courseId} + ')'"
-                                                style="font-size: 1.2rem;">
+                                        <button type="button" class="btn btn-link text-muted p-0 wishlist-toggle"
+                                            th:data-course-id="${course.courseId}"
+                                            th:onclick="'toggleWishlist(this, ' + ${course.courseId} + ')'"
+                                            style="font-size: 1.2rem;">
                                             <i class="far fa-heart"></i>
                                         </button>
                                     </div>
@@ -632,21 +634,23 @@ Trending courses START -->
                                         </div>
                                         <!-- Price -->
                                         <div>
-                                            <div th:if="${topCoursesEnrolledMap[course.courseId] == null or !topCoursesEnrolledMap[course.courseId]}">
-                                            <h4 class="text-success mb-0 item-show " style="font-size: 1.2rem;"
-                                                th:if="${course.price>0}"><span
-                                                    th:text="${course.price != null ? #numbers.formatDecimal(course.price, 0, 'COMMA', 0, 'POINT')+' ₫' : 'N/A'}"></span>
-                                            </h4>
-                                            <h4 class="text-success mb-0 item-show" th:if="${course.price==0}">Free
-                                            </h4>
-                                                <button type="button" class="btn btn-sm btn-success-soft item-show-hover m-1 add-to-cart-btn"
-                                                        th:attr="data-course-id=${course.courseId}">
+                                            <div
+                                                th:if="${topCoursesEnrolledMap[course.courseId] == null or !topCoursesEnrolledMap[course.courseId]}">
+                                                <h4 class="text-success mb-0 item-show " style="font-size: 1.2rem;"
+                                                    th:if="${course.price>0}"><span
+                                                        th:text="${course.price != null ? #numbers.formatDecimal(course.price, 0, 'COMMA', 0, 'POINT')+' ₫' : 'N/A'}"></span>
+                                                </h4>
+                                                <h4 class="text-success mb-0 item-show" th:if="${course.price==0}">Free
+                                                </h4>
+                                                <button type="button"
+                                                    class="btn btn-sm btn-success-soft item-show-hover m-1 add-to-cart-btn"
+                                                    th:attr="data-course-id=${course.courseId}">
                                                     <i class="fas fa-shopping-cart me-2"></i>Add to cart
                                                 </button>
                                             </div>
                                             <a th:if="${topCoursesEnrolledMap[course.courseId] != null and topCoursesEnrolledMap[course.courseId]}"
-                                               th:href="@{/learning/course/view(courseId=${course.courseId})}"
-                                               class="btn btn-sm btn-primary-soft mb-0">Continue</a>
+                                                th:href="@{/learning/course/view(courseId=${course.courseId})}"
+                                                class="btn btn-sm btn-primary-soft mb-0">Continue</a>
                                         </div>
                                     </div>
                                 </div>

@@ -70,4 +70,10 @@ public class CertificateServiceImpl implements CertificateService {
     public Page<Certificate> findByUser_UserId(Long userUserId, Pageable pageable) {
         return certificateRepository.findByUser_UserId(userUserId, pageable);
     }
+
+    @Override
+    public Long countAllByCertificate() {
+
+        return certificateRepository.countAllByCertificate();
+    }
 }
