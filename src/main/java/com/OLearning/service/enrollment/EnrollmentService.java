@@ -74,5 +74,5 @@ public interface EnrollmentService {
     List<UserCourseProgressDTO> getProgressCoursesByUserId(Long userId);
 
     int updateStatusToCompleted(Long userId, Long courseId);
-
+    Map<Long, Double> getEnrollmentByUserId(Long userId);
 }

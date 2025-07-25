@@ -6,8 +6,8 @@
         <div class="container-fluid px-3 px-xl-5">
             <!-- Logo START -->
             <a class="navbar-brand" th:href="@{/home}">
-                <img class="light-mode-item navbar-brand-item" src="assets/images/logo.svg" alt="logo">
-                <img class="dark-mode-item navbar-brand-item" src="assets/images/logo-light.svg" alt="logo">
+                <img class="light-mode-item navbar-brand-item" th:src="@{/assets/images/logo.svg}" alt="logo">
+                <img class="dark-mode-item navbar-brand-item" th:src="@{/assets/images/logo-light.svg}" alt="logo">
             </a>
             <!-- Logo END -->
 
@@ -169,10 +169,12 @@
                         <hr class="dropdown-divider">
                     </li>
                     <!-- Links -->
-                    <li><a class="dropdown-item" sec:authorize="hasRole('INSTRUCTOR')"
-                           th:href="@{/instructor}"><i class="bi bi-gear fa-fw me-2"></i>DashBoard</a></li>
-                    <li sec:authorize="hasRole('USER')"><a class="dropdown-item" th:href="@{/profile}"><i class="bi bi-person fa-fw me-2"></i>Profile</a></li>
-                    <li><a class="dropdown-item" th:href="@{/home/history}"><i class="fas fa-history me-2"></i>History</a></li>
+                    <li><a class="dropdown-item" sec:authorize="hasRole('INSTRUCTOR')" th:href="@{/instructor}"><i
+                                class="bi bi-gear fa-fw me-2"></i>DashBoard</a></li>
+                    <li sec:authorize="hasRole('USER')"><a class="dropdown-item" th:href="@{/profile}"><i
+                                class="bi bi-person fa-fw me-2"></i>Profile</a></li>
+                    <li><a class="dropdown-item" th:href="@{/home/history}"><i
+                                class="fas fa-history me-2"></i>History</a></li>
                     <li>
                         <a class="dropdown-item bg-danger-soft-hover" th:href="@{/logout}">
                             <i class="bi bi-power fa-fw me-2"></i>
@@ -344,6 +346,7 @@
                 transform: scale(1.1);
                 opacity: 0.8;
             }
+
             100% {
                 transform: scale(1);
                 opacity: 1;
@@ -351,8 +354,13 @@
         }
 
         @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         /* Mobile responsive */
@@ -373,10 +381,12 @@
             align-items: center;
             justify-content: center;
         }
+
         .notification-btn-home .bi-bell {
             font-size: 1.2rem !important;
             line-height: 40px !important;
         }
+
         .notification-btn-home .notif-badge {
             width: 12px !important;
             height: 12px !important;

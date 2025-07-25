@@ -42,16 +42,17 @@ public class Certificate {
     private User user;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "CourseID")
+    // Không cho phép null
+    @JoinColumn(name = "CourseID", nullable = false)
     private Course course;
 
-    @Column(name = "IssueDate", columnDefinition = "date")
+    @Column(name = "IssueDate", columnDefinition = "date", nullable = false)
     private Date issueDate;
 
-    @Column(name = "CertificateCode", columnDefinition = "nvarchar(255)")
+    @Column(name = "CertificateCode", columnDefinition = "nvarchar(255)", nullable = false)
     private String certificateCode;
 
-    @Column(name = "FileUrl", columnDefinition = "nvarchar(500)")
+    @Column(name = "FileUrl", columnDefinition = "nvarchar(500)", nullable = false)
     private String fileUrl;
 
 }

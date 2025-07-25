@@ -275,4 +275,17 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         return enrollmentRepository.updateStatusCompleted(userId, courseId);
     }
 
+    @Override
+    public Map<Long, Double> getEnrollmentByUserId(Long userId) {
+        // Convert list to map: key = courseId, value = progress
+        List<Enrollment> results = enrollmentRepository.findByUserUserId(userId);
+        Map<Long, Double> resultMap = new HashMap<>();
+        for (Enrollment result : results) {
+            Long courseId = result.getCourse().getCourseId();
+            Double progress = result.getProgress();
+            resultMap.put(courseId, progress);
+        }
+        return resultMap;
+    }
+
 }

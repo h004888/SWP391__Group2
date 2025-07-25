@@ -1,7 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
-
-<!-- Mirrored from stackbros.in/eduport/landing/course-detail-min.html by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 06 Jun 2025 07:32:06 GMT -->
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <title>Eduport - LMS, Education and Course Theme</title>
@@ -73,7 +71,7 @@
     </script>
 
     <!-- Favicon -->
-    <link rel="shortcut icon" th:href="@{/assets/images/favicon.ico}">
+    <link rel="shortcut icon" th:href="@{//assets/images/favicon.ico}">
 
     <!-- Google Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com/">
@@ -93,21 +91,132 @@
 
 </head>
 
+
 <body>
-
     <!-- Header START -->
-    <div th:replace="userPage/fragmentLessonVideo/navHeaderLessonVideo :: navHeaderLessonVideo"></div>
+    <div th:replace="userPage/fragments/navHeader :: navHeader"></div>
     <!-- Header END -->
+    <main class="py-5">
+        <div class="container">
+            <!-- Card body START -->
+            <div class="card-body">
 
-    <!-- **************** MAIN CONTENT START **************** -->
-    <div
-        th:replace="userPage/fragmentLessonVideo/mainContentLessonVideo :: mainContentLessonVideo(currentLesson=${currentLesson}, course=${course}, user=${user})">
-    </div>
-    <!-- **************** MAIN CONTENT END **************** -->
+                <!-- Search and select START -->
+
+                <!-- Search and select END -->
+
+                <!-- Course list table START -->
+                <div class="table-responsive border-0">
+                    <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                        <!-- Table head -->
+                        <thead>
+                            <tr>
+
+                                <th scope="col" class="border-0 rounded-start">#No</th>
+                                <th scope="col" class="border-0">Course title</th>
+                                <th scope="col" class="border-0">Người học</th>
+                                <th scope="col" class="border-0">Ngày nhận</th>
+                                <th scope="col" class="border-0">Giảng viên</th>
+                                <th scope="col" class="border-0">Action</th>
+
+                            </tr>
+                        </thead>
+
+                        <!-- Table body START -->
+                        <tbody>
+
+                            <tr th:each="certificate , status : ${certificates}">
+                                <td th:text="${status.index + 1}"></td>
+                                <!-- Table data -->
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <!-- Image -->
+                                        <div class="w-100px">
+                                            <img th:src="${certificate.course.courseImg}" class="rounded" alt="">
+                                        </div>
+                                        <div class="mb-0 ms-2">
+                                            <!-- Title -->
+                                            <h6><a th:href="@{'/learning/course/view?courseId=' + ${certificate.course.courseId}}"
+                                                    th:text="${certificate.course.title}"></a></h6>
+
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Table data -->
+                                <td>
+                                    <span th:text="${certificate.user.fullName}"></span>
+                                </td>
+
+                                <!-- Table data -->
+                                <td th:text="${#dates.format(certificate.issueDate, 'dd/MM/yyyy')}"></td>
+                                <td>
+                                    <span th:text="${certificate.course.instructor.fullName}"></span>
+                                </td>
+                                <!-- Table data -->
+                                <td>
+                                    <a th:href="@{'/certificates/generate?userId=' + ${certificate.user.userId} + '&courseId=' + ${certificate.course.courseId}}"
+                                        class="btn btn-sm btn-primary-soft me-1 mb-1 mb-md-0"><i
+                                            class="bi bi-play-circle me-1"></i>Show certificate</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <!-- Table body END -->
+                    </table>
+                </div>
+                <!-- Course list table END -->
+
+                <!-- Pagination START -->
+                <div class="d-sm-flex justify-content-sm-between align-items-sm-center mt-4 mt-sm-3">
+                    <!-- Content -->
+                    <p class="mb-0 text-center text-sm-start">
+                        Hiển thị
+                        <span th:text="${certificates.number * certificates.size + 1}"></span>
+                        đến
+                        <span
+                            th:text="${(certificates.number + 1) * certificates.size > certificates.totalElements ? certificates.totalElements : (certificates.number + 1) * certificates.size}"></span>
+                        của
+                        <span th:text="${certificates.totalElements}"></span>
+                        mục
+                    </p>
+                    <!-- Pagination -->
+                    <nav class="d-flex justify-content-center mb-0" aria-label="navigation">
+                        <ul
+                            class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
+                            <!-- Previous page -->
+                            <li class="page-item mb-0" th:classappend="${certificates.first} ? 'disabled'">
+                                <a class="page-link" th:href="@{|?page=${certificates.number - 1}|}" tabindex="-1">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                            <!-- Page numbers -->
+                            <li class="page-item mb-0"
+                                th:each="pageNum : ${#numbers.sequence(0, certificates.totalPages - 1)}"
+                                th:classappend="${pageNum == certificates.number} ? 'active'">
+                                <a class="page-link" th:href="@{|?page=${pageNum}|}" th:text="${pageNum + 1}"></a>
+                            </li>
+                            <!-- Next page -->
+                            <li class="page-item mb-0" th:classappend="${certificates.last} ? 'disabled'">
+                                <a class="page-link" th:href="@{|?page=${certificates.number + 1}|}">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <!-- Pagination END -->
+            </div>
+            <!-- Card body START -->
+
+        </div>
+    </main>
+
+
+
 
     <!-- =======================
 Footer START -->
-    <div th:replace="userPage/fragmentLessonVideo/footerLessonVideo :: footerLessonVideo"> </div>
+    <div th:replace="userPage/fragmentLessonVideo/footerLessonVideo :: footerLessonVideo"></div>
     <!-- =======================
 Footer END -->
 
@@ -218,43 +327,8 @@ Footer END -->
     <script src="/assets/js/functions.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-
-
-    <script>
-        $(document).ready(function () {
-            const video = $("video")[0];
-            const lessonId = [[${ currentLesson.lessonId }]];
-            const courseId = [[${ course.courseId }]];
-
-            video.addEventListener("ended", function () {
-                $.ajax({
-                    url: '/api/lesson/complete',
-                    type: 'POST',
-                    data: {
-                        lessonId: lessonId,
-                        courseId: courseId
-                    },
-                    success: function (response) {
-                        if (response.status === 'success') {
-                            window.location.href = response.nextLessonUrl;
-                        } else if (response.status === 'completed_all') {
-                            alert("🎉 Bạn đã hoàn thành toàn bộ khóa học!");
-                            window.location.href = response.redirectUrl;
-                        } else {
-                            alert("❌ Không thể chuyển bài học. Vui lòng thử lại.");
-                        }
-                    },
-                    error: function () {
-                        alert("⚠️ Đã xảy ra lỗi khi gửi yêu cầu đánh dấu hoàn thành bài học.");
-                    }
-                });
-            });
-        });
-    </script>
-
+    <script th:src="@{/js/totalcart.js}"></script>
 
 </body>
-
-<!-- Mirrored from stackbros.in/eduport/landing/course-detail-min.html by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 06 Jun 2025 07:32:10 GMT -->
 
 </html>

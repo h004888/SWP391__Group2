@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Date;
 import java.util.Optional;
 
-
 @Repository
 @Transactional
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer> {
@@ -38,7 +37,8 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
             "JOIN categories c ON co.categoryId = c.categoryId " +
             "WHERE e.enrollmentDate BETWEEN :startDate AND :endDate " +
             "GROUP BY c.name", nativeQuery = true)
-    List<Object[]> getEnrollmentsByCategoryAndDateRange(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+    List<Object[]> getEnrollmentsByCategoryAndDateRange(@Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
 
     @Query("SELECT COUNT(DISTINCT e.user.userId) FROM Enrollment e")
     Long countTotalStudents();
@@ -50,26 +50,28 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
     Long countStudentsByInstructorId(@Param("instructorId") Long instructorId);
 
     @Query("SELECT COUNT(e) FROM Enrollment e WHERE e.course.instructor.userId = :instructorId AND YEAR(e.enrollmentDate) = :year AND MONTH(e.enrollmentDate) = :month")
-    Long countByInstructorIdAndMonth(@Param("instructorId") long instructorId, @Param("year") int year, @Param("month") int month);
+    Long countByInstructorIdAndMonth(@Param("instructorId") long instructorId, @Param("year") int year,
+            @Param("month") int month);
 
     @Query("SELECT COUNT(e) FROM Enrollment e WHERE e.course.instructor.userId = :instructorId AND e.enrollmentDate >= :startDate AND e.enrollmentDate <= :endDate")
-    Long countByInstructorIdAndDateRange(@Param("instructorId") long instructorId, @Param("startDate") Date start, @Param("endDate") Date end);
+    Long countByInstructorIdAndDateRange(@Param("instructorId") long instructorId, @Param("startDate") Date start,
+            @Param("endDate") Date end);
 
-
-    //muốn làm theo phân trang
-    //query lấy tất cả enrolled by Id
+    // muốn làm theo phân trang
+    // query lấy tất cả enrolled by Id
     @Query("SELECT e FROM Enrollment e WHERE e.course.instructor.userId = :userId")
     Page<Enrollment> findEnrollmentsByInstructorId(@Param("userId") Long userId, Pageable pageable);
 
     @Query("SELECT e FROM Enrollment e WHERE e.user.userId = :userId")
     List<Enrollment> findEnrollmentsByUserId(@Param("userId") Long userId);
 
-    //query lấy all enrollment by courseId
+    // query lấy all enrollment by courseId
     @Query("SELECT e FROM Enrollment e WHERE e.course.courseId = :courseId")
     Page<Enrollment> findEnrollmentsByCourseId(@Param("courseId") Long courseId, Pageable pageable);
 
     @Query("SELECT e FROM Enrollment e WHERE e.enrollmentId = :enrollmentId")
     Optional<Enrollment> findByEnrollmentId(int enrollmentId);
+
     boolean existsByUser_UserIdAndCourse_CourseId(Long userId, Long courseId);
 
     @Query(value = """
@@ -107,21 +109,24 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
 
     Optional<Enrollment> findByUserAndCourse(User user, Course course);
 
-    //lay all enrollment theo InstructorId
+    // lay all enrollment theo InstructorId
     @Query("SELECT e FROM Enrollment e JOIN e.course c WHERE c.instructor.userId = :instructorId")
     List<Enrollment> calculateSumEnrollment(@Param("instructorId") Long instructorId);
 
     @Query("SELECT e FROM Enrollment e WHERE e.user = :user AND e.course = :course ORDER BY e.enrollmentDate DESC")
-    List<Enrollment> findByUserAndCourseOrderByEnrollmentDateDesc(@Param("user") User user, @Param("course") Course course);
+    List<Enrollment> findByUserAndCourseOrderByEnrollmentDateDesc(@Param("user") User user,
+            @Param("course") Course course);
 
     @Query("SELECT e FROM Enrollment e WHERE e.user = :user AND e.course = :course ORDER BY e.enrollmentDate DESC")
-    Optional<Enrollment> findFirstByUserAndCourseOrderByEnrollmentDateDesc(@Param("user") User user, @Param("course") Course course);
+    Optional<Enrollment> findFirstByUserAndCourseOrderByEnrollmentDateDesc(@Param("user") User user,
+            @Param("course") Course course);
 
     @Query("SELECT COUNT(e) FROM Enrollment e WHERE e.user = :user AND e.course = :course")
     Long countByUserAndCourse(@Param("user") User user, @Param("course") Course course);
 
     @Query("SELECT e FROM Enrollment e WHERE e.user = :user AND e.course = :course ORDER BY e.enrollmentDate DESC")
-    List<Enrollment> findAllByUserAndCourseOrderByEnrollmentDateDesc(@Param("user") User user, @Param("course") Course course);
+    List<Enrollment> findAllByUserAndCourseOrderByEnrollmentDateDesc(@Param("user") User user,
+            @Param("course") Course course);
 
     Optional<Enrollment> findByEnrollmentDateAfter(LocalDate date);
 
@@ -147,7 +152,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE Enrollments SET Status = 'completed' WHERE Status = 'on going' AND UserID = :userId AND CourseID = :courseId", nativeQuery = true)
+    @Query(value = "UPDATE Enrollments SET Status = 'completed' WHERE Status = 'onGoing' AND UserID = :userId AND CourseID = :courseId", nativeQuery = true)
     int updateStatusCompleted(@Param("userId") Long userId, @Param("courseId") Long courseId);
 
     @Query(value = "SELECT COUNT(*) AS TotalEnrollments " +
@@ -161,5 +166,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
 
     @Query("SELECT e FROM Enrollment e WHERE e.user.userId = :userId AND e.course.courseId = :courseId")
     Enrollment findByUserIdAndCourseId(@Param("userId") Long userId, @Param("courseId") Long courseId);
+
     
+
 }
