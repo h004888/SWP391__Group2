@@ -201,14 +201,9 @@ public class ControlllerAddCourse {
             , RedirectAttributes redirectAttributes, HttpServletRequest request) {
         try {
             courseChapterService.deleteCourseFK(courseId);
-            redirectAttributes.addFlashAttribute("successMessage", "Course deleted successfully.");
+            redirectAttributes.addFlashAttribute("successMessage", "course deleted successfully.");
         } catch (RuntimeException ex) {
-            String msg = ex.getMessage();
-            if (msg != null && msg.toLowerCase().contains("students enrolled")) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Cannot delete course: there are students enrolled in this course.");
-            } else {
-                redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
-            }
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
             return "redirect:../courses";
         }
         return "redirect:../courses";
@@ -301,6 +296,13 @@ public class ControlllerAddCourse {
     @PostMapping("/courses/unpublish")
     public String down(@RequestParam(name = "courseId") Long courseId
             , RedirectAttributes redirectAttributes, HttpServletRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long userId = userDetails.getUserId();
+        if(enrollmentService.countTotalEnrollment(userId) > 0) {
+            redirectAttributes.addFlashAttribute("errorMessage", "course unpublish successfully.");
+            return "redirect:../courses";
+        }
         courseService.submitCourse(courseId, "approved");
         redirectAttributes.addFlashAttribute("successMessage", "course unpublish successfully.");
         return "redirect:../courses";
@@ -507,7 +509,7 @@ public class ControlllerAddCourse {
         } catch (Exception e) {
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("errorMessage", "Error adding video: " + e.getMessage());
-            return "redirect:../createcourse/coursemedia";
+            return "redirect:../createcourse/coursecontent";
         }
     }
 
@@ -657,11 +659,6 @@ public class ControlllerAddCourse {
                            @RequestParam(name = "lessonId") Long lessonId,
                            RedirectAttributes redirectAttributes) {
         try {
-            // Validate video size <= 40MB
-            if (videoDTO.getVideoUrl() != null && !videoDTO.getVideoUrl().isEmpty() && videoDTO.getVideoUrl().getSize() > 40 * 1024 * 1024) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Maximum video size is 40MB. Please select a smaller file!");
-                return "redirect:../createcourse/coursecontent";
-            }
             System.out.println("Adding video for lesson ID: " + lessonId);
             System.out.println("Video duration received: " + videoDTO.getDuration());
 
@@ -872,11 +869,6 @@ public class ControlllerAddCourse {
                                RedirectAttributes redirectAttributes,
                                HttpServletRequest request) {
         try {
-            // Validate video size <= 40MB
-            if ("video".equals(contentType) && videoFile != null && !videoFile.isEmpty() && videoFile.getSize() > 40 * 1024 * 1024) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Maximum video size is 40MB. Please select a smaller file!");
-                return "redirect:../createcourse/coursecontent";
-            }
             // Lấy lesson hiện tại
             Lesson lesson = lessonRepository.findById(lessonId)
                     .orElseThrow(() -> new RuntimeException("Lesson not found with ID: " + lessonId));
