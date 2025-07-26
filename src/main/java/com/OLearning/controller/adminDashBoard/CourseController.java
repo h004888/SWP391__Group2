@@ -215,7 +215,7 @@ public class CourseController {
             // KHÔNG block ngay, chỉ gửi email cho instructor
             User instructor = course.getInstructor();
             if (instructor != null) {
-                // Gửi notification như cũ
+                // Gửi notification
                 Notification notification = new Notification();
                 notification.setUser(instructor);
                 notification.setCourse(course);

@@ -22,7 +22,7 @@
     <div th:if="${successMessage}"
          class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-4 shadow"
          role="alert" id="success-alert" style="z-index: 1055; min-width: 300px;">
-        <strong th:text="${successMessage}">Thành công!</strong>
+        <strong th:text="${successMessage}">Success!</strong>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 
@@ -30,7 +30,7 @@
     <div th:if="${errorMessage}"
          class="alert alert-danger alert-dismissible fade show position-fixed top-0 end-0 m-4 shadow"
          role="alert" id="error-alert" style="z-index: 1055; min-width: 300px;">
-        <strong th:text="${errorMessage}">Lỗi xảy ra!</strong>
+        <strong th:text="${errorMessage}">Error occurred!</strong>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 
@@ -228,17 +228,19 @@
                                         <td>
                                             <input type="hidden" name="feeId" th:value="${fee.feeId}">
                                             <input type="number" class="form-control min-enrollments"
-                                                   name="minEnrollments" th:value="${fee.minEnrollments}">
+                                                   name="minEnrollments" th:value="${fee.minEnrollments}"
+                                                   oninput="handleInputChange(this)">
                                         </td>
                                         <td>
                                             <input type="number" class="form-control max-enrollments" 
                                                    name="maxEnrollments" th:value="${fee.maxEnrollments}" 
                                                    th:placeholder="${fee.maxEnrollments == null ? 'MAX' : ''}"
-                                                   oninput="handleMaxEnrollmentChange(this)">
+                                                   min="1" oninput="handleMaxEnrollmentChange(this)">
                                         </td>
                                         <td>
                                             <input type="number" class="form-control maintenance-fee" 
-                                                   name="maintenanceFee" th:value="${fee.maintenanceFee}">
+                                                   name="maintenanceFee" th:value="${fee.maintenanceFee}"
+                                                   min="1" oninput="handleInputChange(this)">
                                         </td>
                                         <td>
                                             <button type="submit" class="btn btn-primary btn-sm save-btn">
@@ -261,10 +263,10 @@
                                 <input type="number" class="form-control" name="minEnrollments" placeholder="Min Enrollments" required>
                             </div>
                             <div class="col-md-3">
-                                <input type="number" class="form-control" name="maxEnrollments" placeholder="Max Enrollments" >
+                                <input type="number" class="form-control" name="maxEnrollments" placeholder="Max Enrollments" min="1">
                             </div>
                             <div class="col-md-3">
-                                <input type="number" class="form-control" name="maintenanceFee" placeholder="Maintenance Fee" required>
+                                <input type="number" class="form-control" name="maintenanceFee" placeholder="Maintenance Fee" min="1" required>
                             </div>
                             <div class="col-md-3">
                                 <button type="submit" class="btn btn-success">
