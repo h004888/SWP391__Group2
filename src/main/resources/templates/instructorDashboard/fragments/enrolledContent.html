@@ -305,65 +305,66 @@
                         </div>
 
                         <!-- Pagination -->
-                        <div class="d-sm-flex justify-content-sm-between align-items-sm-center mt-4 mt-sm-3"
-                             th:if="${totalPages > 0}">
-                            <p class="mb-0 text-center text-sm-start">
-                                Showing <span th:text="${currentPage * size + 1}">1</span> to
-                                <span th:text="${(currentPage * size) + #lists.size(courses) > totalElements ? totalElements : (currentPage * size) + #lists.size(courses)}">8</span>
-                                of
-                                <span th:text="${totalElements}">20</span> entries
-                            </p>
-                            <nav class="d-flex justify-content-center mb-0" aria-label="navigation">
-                                <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
-                                    <!-- Previous button -->
-                                    <li class="page-item mb-0" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
-                                        <a class="page-link" href="javascript:void(0)" th:data-page="${currentPage - 1}">
-                                            <i class="fas fa-angle-left"></i>
-                                        </a>
-                                    </li>
 
-                                    <!-- Dynamic page numbers -->
-                                    <th:block th:with="start=${currentPage - 2 < 0 ? 0 : currentPage - 2},
+                    </div>
+                </div>
+                <div class="d-sm-flex justify-content-sm-between align-items-sm-center mt-4 mt-sm-3"
+                     th:if="${totalPages > 0}">
+                    <p class="mb-0 text-center text-sm-start">
+                        Showing <span th:text="${currentPage * size + 1}">1</span> to
+                        <span th:text="${(currentPage * size) + #lists.size(courses) > totalElements ? totalElements : (currentPage * size) + #lists.size(courses)}">8</span>
+                        of
+                        <span th:text="${totalElements}">20</span> entries
+                    </p>
+                    <nav class="d-flex justify-content-center mb-0" aria-label="navigation">
+                        <ul class="pagination pagination-sm pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
+                            <!-- Previous button -->
+                            <li class="page-item mb-0" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                                <a class="page-link" href="javascript:void(0)" th:data-page="${currentPage - 1}">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+
+                            <!-- Dynamic page numbers -->
+                            <th:block th:with="start=${currentPage - 2 < 0 ? 0 : currentPage - 2},
                                                      end=${currentPage + 2 >= totalPages ? totalPages - 1 : currentPage + 2}">
 
-                                        <!-- First page if not in range -->
-                                        <li class="page-item mb-0" th:if="${start > 0}">
-                                            <a class="page-link" href="javascript:void(0)" th:data-page="0">1</a>
-                                        </li>
-                                        <li class="page-item disabled mb-0" th:if="${start > 1}">
-                                            <span class="page-link">...</span>
-                                        </li>
+                                <!-- First page if not in range -->
+                                <li class="page-item mb-0" th:if="${start > 0}">
+                                    <a class="page-link" href="javascript:void(0)" th:data-page="0">1</a>
+                                </li>
+                                <li class="page-item disabled mb-0" th:if="${start > 1}">
+                                    <span class="page-link">...</span>
+                                </li>
 
-                                        <!-- Pages in range -->
-                                        <li class="page-item mb-0"
-                                            th:each="pageNum : ${#numbers.sequence(start, end)}"
-                                            th:classappend="${pageNum == currentPage ? 'active' : ''}">
-                                            <a class="page-link" href="javascript:void(0)"
-                                               th:data-page="${pageNum}"
-                                               th:text="${pageNum + 1}">1</a>
-                                        </li>
+                                <!-- Pages in range -->
+                                <li class="page-item mb-0"
+                                    th:each="pageNum : ${#numbers.sequence(start, end)}"
+                                    th:classappend="${pageNum == currentPage ? 'active' : ''}">
+                                    <a class="page-link" href="javascript:void(0)"
+                                       th:data-page="${pageNum}"
+                                       th:text="${pageNum + 1}">1</a>
+                                </li>
 
-                                        <!-- Last page if not in range -->
-                                        <li class="page-item disabled mb-0" th:if="${end < totalPages - 2}">
-                                            <span class="page-link">...</span>
-                                        </li>
-                                        <li class="page-item mb-0" th:if="${end < totalPages - 1}">
-                                            <a class="page-link" href="javascript:void(0)"
-                                               th:data-page="${totalPages - 1}"
-                                               th:text="${totalPages}">Last</a>
-                                        </li>
-                                    </th:block>
+                                <!-- Last page if not in range -->
+                                <li class="page-item disabled mb-0" th:if="${end < totalPages - 2}">
+                                    <span class="page-link">...</span>
+                                </li>
+                                <li class="page-item mb-0" th:if="${end < totalPages - 1}">
+                                    <a class="page-link" href="javascript:void(0)"
+                                       th:data-page="${totalPages - 1}"
+                                       th:text="${totalPages}">Last</a>
+                                </li>
+                            </th:block>
 
-                                    <!-- Next button -->
-                                    <li class="page-item mb-0" th:classappend="${currentPage >= totalPages - 1 ? 'disabled' : ''}">
-                                        <a class="page-link" href="javascript:void(0)" th:data-page="${currentPage + 1}">
-                                            <i class="fas fa-angle-right"></i>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
+                            <!-- Next button -->
+                            <li class="page-item mb-0" th:classappend="${currentPage >= totalPages - 1 ? 'disabled' : ''}">
+                                <a class="page-link" href="javascript:void(0)" th:data-page="${currentPage + 1}">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
             </div>
         </div>
