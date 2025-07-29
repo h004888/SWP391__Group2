@@ -12,11 +12,11 @@ public class CustomLogoutSuccessHandler implements LogoutSuccessHandler {
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         String requestURI = request.getRequestURI();
         
-        if (requestURI.startsWith("/instructordashboard")) {
+        if (requestURI.startsWith("/instructor")) {
             response.sendRedirect("/login?logout=true");
         }
         else if (authentication != null &&
-                 authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+                 authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")|| a.getAuthority().equals("ROLE_STAFF"))) {
             response.sendRedirect("/dashboard_login?logout=true");
         }
         else {

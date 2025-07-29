@@ -4,16 +4,23 @@ let currentPage = 0;
 let totalPages = 0;
 let currentStatus = 'true'; // Default to active status
 
-// Event listeners
 $(document).ready(function () {
-    // Load data for all tabs but only show pagination for admin tab initially
-    [1, 2, 3].forEach(roleId => {
-        loadUsers(roleId,'', 0, roleId === 1); // Only show pagination for admin tab (roleId === 1)
+    // Xác định vai trò ban đầu từ tab đang active
+    const initialActiveTab = $('#accountTabs .nav-link.active');
+    if (initialActiveTab.length) {
+        currentRole = parseInt(initialActiveTab.data('role'));
+    }
+
+    // Tải dữ liệu cho tất cả các tab có thể nhìn thấy
+    $('#accountTabs .nav-link').each(function () {
+        const roleId = parseInt($(this).data('role'));
+        const isActive = $(this).hasClass('active');
+        loadUsers(roleId, '', 0, isActive); // Chỉ hiển thị pagination cho tab active
     });
-    
+
     // Load initial counts
     updateAllCounts();
-    
+
     function toggleAddButton(tabId) {
         if (tabId === "#admin") {
             $("#addAccountBtnContainer").show();
@@ -30,12 +37,10 @@ $(document).ready(function () {
         toggleAddButton(target);
     });
 
-    // Xử lý phân trang với AJAX
     $(document).on('click', '.pagination a', function (e) {
         e.preventDefault();
         const page = $(this).data('page');
 
-        // Kiểm tra page hợp lệ
         if (page !== undefined && page >= 0) {
             currentPage = page;
             const keyword = $('#searchInput').val().trim();
@@ -45,7 +50,6 @@ $(document).ready(function () {
         }
     });
 
-    // Tab change
     $('#accountTabs button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
         const roleId = parseInt($(e.target).data('role'));
         currentRole = roleId;
@@ -62,79 +66,82 @@ $(document).ready(function () {
 
         clearTimeout(searchTimer);
         searchTimer = setTimeout(function () {
-            currentPage = 0; // Reset về trang đầu khi search
+            currentPage = 0;
             loadUsers(currentRole, keyword, 0, true);
-            // Removed updateAllCounts() - counts should not update when searching
         }, 300);
     });
 
     // Status filter change event
-    $('#statusFilter').on('change', function() {
+    $('#statusFilter').on('change', function () {
         currentStatus = $(this).val();
         currentPage = 0;
         const keyword = $('#searchInput').val().trim();
         loadUsers(currentRole, keyword, 0, true);
-        // Removed updateAllCounts() - counts should not update when filtering
     });
 
     // Khi click nút block
     $(document).on('click', '.btn-danger-soft[title="Blocked"]', function (e) {
         e.preventDefault();
-
         const blockUrl = $(this).attr('href');
         const userId = blockUrl.split('/').pop();
         const userEmail = $(this).closest('tr').find('td:nth-child(3)').text();
-
         currentBlockUserId = userId;
         currentBlockAction = 'block';
-
-        $('#deleteModal .modal-title').text("Block Account");
-        $('#deleteModal .modal-body h6').text(`Bạn có chắc chắn muốn block tài khoản "${userEmail}" không?`);
+        $('#blockModalMessage').text(`Are you sure you want to block the account "${userEmail}"?`);
+        $('#blockReasonWrapper').show();
+        $('#blockReason').val('').prop('required', true);
         $('#confirmDelete').text("Block").removeClass("btn-warning").addClass("btn-danger");
-
         $('#deleteModal').modal('show');
     });
 
     // Khi click nút active
-    $(document).on('click', '.btn-warning[title="Activate"]', function (e) {
+    $(document).on('click', '.btn-danger-soft[title="Activate"]', function (e) {
         e.preventDefault();
-
         const blockUrl = $(this).attr('href');
         const userId = blockUrl.split('/').pop();
         const userEmail = $(this).closest('tr').find('td:nth-child(3)').text();
-
         currentBlockUserId = userId;
         currentBlockAction = 'active';
-
-        $('#deleteModal .modal-title').text("Activate Account");
-        $('#deleteModal .modal-body h6').text(`Bạn có chắc chắn muốn active tài khoản "${userEmail}" không?`);
-        $('#confirmDelete').text("Active").removeClass("btn-danger").addClass("btn-warning");
-
+        $('#blockModalMessage').text(`Are you sure you want to activate the account "${userEmail}"?`);
+        $('#blockReasonWrapper').hide();
+        $('#blockReason').val('').prop('required', false);
+        $('#confirmDelete').text("Activate").removeClass("btn-danger").addClass("btn-warning");
         $('#deleteModal').modal('show');
     });
 
-    // Confirm block button click
+    // Confirm block/active button click
     $(document).on('click', '#confirmDelete', function (e) {
         e.preventDefault();
-
         if (currentBlockUserId) {
+            let data = {};
+            let method = 'POST';
+            let url = '/admin/account/block/' + currentBlockUserId;
+            if (currentBlockAction === 'block') {
+                const reason = $('#blockReason').val();
+                if (!reason.trim()) {
+                    $('#blockReason').focus();
+                    return;
+                }
+                data.reason = reason;
+            }
             $.ajax({
-                url: '/admin/account/block/' + currentBlockUserId + '?action=' + currentBlockAction,
-                method: 'GET',
+                url: url,
+                method: method,
+                data: data,
                 beforeSend: function () {
-                    $('#confirmDelete').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Đang xử lý...');
+                    $('#confirmDelete').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Processing...');
                 },
                 success: function (response) {
                     $('#deleteModal').modal('hide');
                     const keyword = $('#searchInput').val().trim();
                     loadUsers(currentRole, keyword, currentPage, true);
-                    updateAllCounts(); // Update counts after blocking/activating
+                    updateAllCounts();
                 },
                 error: function () {
-                    alert("Có lỗi xảy ra!");
+                    alert("An error occurred!");
                 },
                 complete: function () {
-                    $('#confirmDelete').prop('disabled', false).text(currentBlockAction === 'block' ? 'Block' : 'Active');
+                    $('#confirmDelete').prop('disabled', false).text(currentBlockAction === 'block' ? 'Block' : 'Activate');
                     currentBlockUserId = null;
                     currentBlockAction = null;
                 }
@@ -152,7 +159,10 @@ $(document).ready(function () {
     // Reset modal khi đóng
     $('#deleteModal').on('hidden.bs.modal', function () {
         $('#confirmDelete').prop('disabled', false).html('Block');
+        $('#blockReason').val('');
+        $('#blockReasonWrapper').hide();
         currentBlockUserId = null;
+        currentBlockAction = null;
     });
 });
 
@@ -183,23 +193,19 @@ function loadUsers(roleId, keyword = '', page = 0, showPagination = false) {
         },
         beforeSend: function () {
             console.log("=== AJAX SENDING ===");
-            console.log("Data:", {keyword: keyword || null, role: roleId, page: page, status: statusParam});
+            console.log("Data:", { keyword: keyword || null, role: roleId, page: page, status: statusParam });
         },
         success: function (data) {
-            //Parse response để lấy cả table content và pagination info
+
             if (typeof data === 'object' && data.tableContent && data.pagination) {
-                // Nếu server trả về object với tableContent và pagination
+
                 $(tableBodyElement).html(data.tableContent);
-                // Removed updateAllCounts() - counts should not update during normal loading
                 if (showPagination) {
                     totalPages = data.pagination.totalPages;
                 }
             } else {
-                // Nếu server chỉ trả về HTML content (current implementation)
-                $(tableBodyElement).html(data);
-                // Removed updateAllCounts() - counts should not update during normal loading
 
-                //call API riêng để lấy pagination info hoặc modify server response
+                $(tableBodyElement).html(data);
                 if (showPagination) {
                     getPaginationInfo(roleId, keyword, page);
                 }
@@ -230,7 +236,6 @@ function blockUser(userId, userEmail) {
             $('#deleteModal').modal('hide');
             let errorMessage = 'Có lỗi xảy ra khi block tài khoản!';
 
-            // Xử lý error response từ server
             if (xhr.responseJSON && xhr.responseJSON.message) {
                 errorMessage = xhr.responseJSON.message;
             } else if (xhr.responseText) {
@@ -243,7 +248,6 @@ function blockUser(userId, userEmail) {
             console.error('Error blocking user:', error);
         },
         complete: function () {
-            // Reset lại confirm button
             $('#confirmDelete').prop('disabled', false).html('Block');
             currentBlockUserId = null;
         }
@@ -251,7 +255,6 @@ function blockUser(userId, userEmail) {
 }
 
 function getPaginationInfo(roleId, keyword = '', page = 0) {
-    // Convert status string to boolean or null
     let statusParam = null;
     if (currentStatus !== 'all') {
         statusParam = currentStatus === 'true';
@@ -305,14 +308,14 @@ function getTableBodyElement(roleId) {
             return document.getElementById('instructorTableBody');
         case 3:
             return document.getElementById('userTableBody');
+        case 4:
+            return document.getElementById('adminTableBody');
         default:
             return null;
     }
 }
 
 function updateCountBadge(roleId, data) {
-    // This function is now deprecated since we use updateAllCounts()
-    // But we'll keep it for backward compatibility and just call updateAllCounts
     updateAllCounts();
 }
 
@@ -326,7 +329,6 @@ function updateAllCounts() {
             keyword: keyword || null
         },
         success: function (counts) {
-            // Cộng cả active và inactive cho mỗi role
             $('#adminCount').text((counts.adminActive ?? 0) + (counts.adminInactive ?? 0));
             $('#instructorCount').text((counts.instructorActive ?? 0) + (counts.instructorInactive ?? 0));
             $('#userCount').text((counts.userActive ?? 0) + (counts.userInactive ?? 0));

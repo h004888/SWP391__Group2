@@ -1,5 +1,5 @@
 <div th:fragment="notification">
-  <div id="notification" class="position-fixed top-0 end-0 p-5" style="z-index: 1050; top: 80px; transform: translateX(200%); transition: transform 0.5s ease;">
+  <div id="notification" class="position-fixed top-1 end-0 p-5" style="z-index: 1050; top: 80px; transform: translateX(200%); transition: transform 0.5s ease;">
     <div id="notification-alert" class="alert d-flex align-items-center mb-0" role="alert" style="min-width: 250px;">
       <i id="notification-icon" class="me-2"></i>
       <span id="notification-message"></span>
@@ -25,5 +25,15 @@
         notification.style.transform = 'translateX(200%)';
       }, 4000);
     }
+    document.addEventListener('DOMContentLoaded', function() {
+      const errorDiv = document.getElementById('server-error');
+      if (errorDiv && errorDiv.getAttribute('data-message')) {
+        showNotification(errorDiv.getAttribute('data-message'), 'error');
+      }
+      const serverMessage = document.getElementById('server-message');
+      if (serverMessage && serverMessage.getAttribute('data-message')) {
+        showNotification(serverMessage.getAttribute('data-message'), 'success');
+      }
+    });
   </script>
 </div> 

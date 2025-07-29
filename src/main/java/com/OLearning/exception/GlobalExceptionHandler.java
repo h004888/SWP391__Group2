@@ -16,10 +16,11 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
-    // Xử lý cho API trả về JSON
+
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseBody
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -40,22 +41,31 @@ public class GlobalExceptionHandler {
         return error;
     }
 
-    // Xử lý Exception cho giao diện người dùng (trả về view)
     @ExceptionHandler(Exception.class)
     public ModelAndView handleException(Exception ex, WebRequest request, HttpServletRequest httpRequest) {
         ModelAndView mav = new ModelAndView();
         mav.addObject("errorMessage", ex.getMessage());
         String referer = httpRequest.getHeader("Referer");
         mav.addObject("lastUrl", referer);
-        mav.setViewName("error/global-error"); // Tạo view này để hiển thị lỗi chung
+        mav.setViewName("error/global-error");
         return mav;
     }
 
-    // Xử lý 404 cho giao diện người dùng
     @ExceptionHandler(NoHandlerFoundException.class)
     public ModelAndView handleNotFound(NoHandlerFoundException ex) {
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("error/404"); // Tạo view này để hiển thị lỗi 404
+        mav.setViewName("error/404");
         return mav;
     }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ModelAndView handleMaxSizeException(MaxUploadSizeExceededException ex, HttpServletRequest request) {
+        ModelAndView mav = new ModelAndView();
+        mav.addObject("errorMessage", "File size exceeds the allowed limit (maximum 40MB). Please choose a smaller file!");
+        String referer = request.getHeader("Referer");
+        mav.addObject("lastUrl", referer);
+        mav.setViewName("error/global-error");
+        return mav;
+    }
+    
 } 

@@ -76,7 +76,6 @@ public class CourseMaintenanceController {
         return "adminDashBoard/index";
     }
 
-    //Filter with ajax for tab functionality
     @GetMapping("/filter")
     public String filterMaintenances(
             @RequestParam(required = false) String username,
@@ -87,8 +86,7 @@ public class CourseMaintenanceController {
             Model model) {
         
         Pageable pageable = PageRequest.of(page, size);
-        
-        // Parse monthYear string to LocalDate if provided
+
         LocalDate monthYearDate = null;
         if (monthYear != null && !monthYear.isEmpty()) {
             try {
@@ -109,7 +107,7 @@ public class CourseMaintenanceController {
         return "adminDashBoard/fragments/courseMaintenanceTableRowContent :: maintenanceTableRowContent";
     }
 
-    // New endpoint for pagination only
+
     @GetMapping("/pagination")
     public String getPagination(
             @RequestParam(required = false) String username,
@@ -144,7 +142,6 @@ public class CourseMaintenanceController {
         return "adminDashBoard/fragments/courseMaintenanceTableRowContent :: maintenancePagination";
     }
 
-    // New endpoint to get total count for badge
     @GetMapping("/count")
     @ResponseBody
     public long getMaintenanceCount(
@@ -172,12 +169,61 @@ public class CourseMaintenanceController {
     @PostMapping("/fees/update")
     public String updateFee(
             @RequestParam Long feeId,
-            @RequestParam Long minEnrollments,
-            @RequestParam(required = false) Long maxEnrollments,
-            @RequestParam Long maintenanceFee,
+            @RequestParam String minEnrollments,
+            @RequestParam(required = false) String maxEnrollments,
+            @RequestParam String maintenanceFee,
             RedirectAttributes redirectAttributes) {
         try {
-            courseMaintenanceService.updateFee(feeId, minEnrollments, maxEnrollments, maintenanceFee);
+            // Validate and convert parameters
+            if (minEnrollments == null || minEnrollments.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Min Enrollments cannot be empty!");
+                return "redirect:/admin/courseMaintenance";
+            }
+            
+            Long minEnrollmentsLong;
+            Long maxEnrollmentsLong = null;
+            Long maintenanceFeeLong;
+            
+            try {
+                minEnrollmentsLong = Long.parseLong(minEnrollments.trim());
+                if (minEnrollmentsLong <= 0) {
+                    redirectAttributes.addFlashAttribute("errorMessage", "Min Enrollments must be greater than 0!");
+                    return "redirect:/admin/courseMaintenance";
+                }
+            } catch (NumberFormatException e) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Min Enrollments must be a valid number!");
+                return "redirect:/admin/courseMaintenance";
+            }
+            
+            if (maxEnrollments != null && !maxEnrollments.trim().isEmpty()) {
+                try {
+                    maxEnrollmentsLong = Long.parseLong(maxEnrollments.trim());
+                    if (maxEnrollmentsLong <= 0) {
+                        redirectAttributes.addFlashAttribute("errorMessage", "Max Enrollments must be greater than 0!");
+                        return "redirect:/admin/courseMaintenance";
+                    }
+                    if (minEnrollmentsLong >= maxEnrollmentsLong) {
+                        redirectAttributes.addFlashAttribute("errorMessage", "Min Enrollments must be less than Max Enrollments!");
+                        return "redirect:/admin/courseMaintenance";
+                    }
+                } catch (NumberFormatException e) {
+                    redirectAttributes.addFlashAttribute("errorMessage", "Max Enrollments must be a valid number!");
+                    return "redirect:/admin/courseMaintenance";
+                }
+            }
+            
+            try {
+                maintenanceFeeLong = Long.parseLong(maintenanceFee.trim());
+                if (maintenanceFeeLong <= 0) {
+                    redirectAttributes.addFlashAttribute("errorMessage", "Maintenance Fee must be greater than 0!");
+                    return "redirect:/admin/courseMaintenance";
+                }
+            } catch (NumberFormatException e) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Maintenance Fee must be a valid number!");
+                return "redirect:/admin/courseMaintenance";
+            }
+            
+            courseMaintenanceService.updateFee(feeId, minEnrollmentsLong, maxEnrollmentsLong, maintenanceFeeLong);
             redirectAttributes.addFlashAttribute("successMessage", SUCCESS_FEE_UPDATED);
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", ERROR_FEE_UPDATE + e.getMessage());
@@ -200,12 +246,61 @@ public class CourseMaintenanceController {
 
     @PostMapping("/fees/add")
     public String addFee(
-            @RequestParam Long minEnrollments,
-            @RequestParam(required = false) Long maxEnrollments,
-            @RequestParam Long maintenanceFee,
+            @RequestParam String minEnrollments,
+            @RequestParam(required = false) String maxEnrollments,
+            @RequestParam String maintenanceFee,
             RedirectAttributes redirectAttributes) {
         try {
-            courseMaintenanceService.addFee(minEnrollments, maxEnrollments, maintenanceFee);
+            // Validate and convert parameters
+            if (minEnrollments == null || minEnrollments.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Min Enrollments cannot be empty!");
+                return "redirect:/admin/courseMaintenance";
+            }
+            
+            Long minEnrollmentsLong;
+            Long maxEnrollmentsLong = null;
+            Long maintenanceFeeLong;
+            
+            try {
+                minEnrollmentsLong = Long.parseLong(minEnrollments.trim());
+                if (minEnrollmentsLong <= 0) {
+                    redirectAttributes.addFlashAttribute("errorMessage", "Min Enrollments must be greater than 0!");
+                    return "redirect:/admin/courseMaintenance";
+                }
+            } catch (NumberFormatException e) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Min Enrollments must be a valid number!");
+                return "redirect:/admin/courseMaintenance";
+            }
+            
+            if (maxEnrollments != null && !maxEnrollments.trim().isEmpty()) {
+                try {
+                    maxEnrollmentsLong = Long.parseLong(maxEnrollments.trim());
+                    if (maxEnrollmentsLong <= 0) {
+                        redirectAttributes.addFlashAttribute("errorMessage", "Max Enrollments must be greater than 0!");
+                        return "redirect:/admin/courseMaintenance";
+                    }
+                    if (minEnrollmentsLong >= maxEnrollmentsLong) {
+                        redirectAttributes.addFlashAttribute("errorMessage", "Min Enrollments must be less than Max Enrollments!");
+                        return "redirect:/admin/courseMaintenance";
+                    }
+                } catch (NumberFormatException e) {
+                    redirectAttributes.addFlashAttribute("errorMessage", "Max Enrollments must be a valid number!");
+                    return "redirect:/admin/courseMaintenance";
+                }
+            }
+            
+            try {
+                maintenanceFeeLong = Long.parseLong(maintenanceFee.trim());
+                if (maintenanceFeeLong <= 0) {
+                    redirectAttributes.addFlashAttribute("errorMessage", "Maintenance Fee must be greater than 0!");
+                    return "redirect:/admin/courseMaintenance";
+                }
+            } catch (NumberFormatException e) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Maintenance Fee must be a valid number!");
+                return "redirect:/admin/courseMaintenance";
+            }
+            
+            courseMaintenanceService.addFee(minEnrollmentsLong, maxEnrollmentsLong, maintenanceFeeLong);
             redirectAttributes.addFlashAttribute("successMessage", SUCCESS_FEE_ADDED);
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", ERROR_FEE_ADD + e.getMessage());

@@ -1,18 +1,28 @@
 <div th:fragment="adminNotificationDetailContent">
     <style>
         .notification-detail-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: #111;
+            color: #fff;
             border-radius: 15px;
             padding: 2rem;
             margin-bottom: 2rem;
+        }
+
+        .notification-detail-card h4,
+        .notification-detail-card p,
+        .notification-detail-card i {
+            color: #fff !important;
+        }
+
+        .notification-detail-card .status-badge {
+            /* Giữ nguyên màu cho badge */
         }
 
         .notification-content-card {
             background: white;
             border-radius: 15px;
             padding: 2rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
 
         .status-badge {
@@ -61,10 +71,12 @@
                     </p>
                 </div>
                 <div class="col-md-4 text-end">
-                           <span th:class="${notification.status == 'sent'} ? 'status-badge status-read' : 'status-badge status-unread'">
-    <i th:class="${notification.status == 'sent'} ? 'fas fa-check-circle me-1' : 'fas fa-circle me-1'"></i>
-    <span th:text="${notification.status == 'sent'} ? 'Read' : 'Unread'"></span>
-</span>
+                    <span
+                        th:class="${notification.status == 'sent'} ? 'status-badge status-read' : 'status-badge status-unread'">
+                        <i
+                            th:class="${notification.status == 'sent'} ? 'fas fa-check-circle me-1' : 'fas fa-circle me-1'"></i>
+                        <span th:text="${notification.status == 'sent'} ? 'Read' : 'Unread'"></span>
+                    </span>
                 </div>
             </div>
         </div>
@@ -79,20 +91,25 @@
                     <p class="lead" th:text="${notification.message}"></p>
 
                     <div class="mt-4">
-                                <span th:class="'badge fs-6 ' + ${notification.type == 'COURSE_REJECTION' ? 'bg-danger' : (notification.type == 'ENROLLMENT' ? 'bg-success' : (notification.type == 'REPORT_COURSE' ? 'bg-danger' : 'bg-info'))}">
-                                    <i th:class="'fas me-2 ' + ${notification.type == 'COURSE_REJECTION' ? 'fa-times-circle' : (notification.type == 'ENROLLMENT' ? 'fa-user-plus' : (notification.type == 'REPORT_COURSE' ? 'fa-flag' : 'fa-info-circle'))}"></i>
-                                    <span th:text="${notification.type}"></span>
-                                </span>
+                        <span
+                            th:class="'badge fs-6 ' + ${notification.type == 'COURSE_REJECTION' ? 'bg-danger' : (notification.type == 'ENROLLMENT' ? 'bg-success' : (notification.type == 'REPORT_COURSE' ? 'bg-danger' : 'bg-info'))}">
+                            <i
+                                th:class="'fas me-2 ' + ${notification.type == 'COURSE_REJECTION' ? 'fa-times-circle' : (notification.type == 'ENROLLMENT' ? 'fa-user-plus' : (notification.type == 'REPORT_COURSE' ? 'fa-flag' : 'fa-info-circle'))}"></i>
+                            <span th:text="${notification.type}"></span>
+                        </span>
                     </div>
                 </div>
 
                 <div class="col-md-4">
-                    <div class="course-info">
+                    <div class="course-info"
+                        th:if="${notification.course != null and notification.course.courseId != null}">
                         <h6 class="mb-3">
                             <i class="fas fa-book me-2"></i>Course Information
                         </h6>
-                        <p class="mb-2"><strong th:text="${notification.course.title}"></strong></p>
-                        <small class="text-muted">Course ID: <span th:text="${notification.course.courseId}"></span></small>
+                        <p class="mb-1"><strong>Course Title:</strong> <span
+                                th:text="${notification.course.title}"></span></p>
+                        <p class="mb-1"><strong>Course ID:</strong> <span
+                                th:text="${notification.course.courseId}"></span></p>
                     </div>
                 </div>
             </div>
@@ -102,24 +119,22 @@
         <div class="d-flex gap-3 justify-content-center mt-4">
             <!-- Mark as read if unread -->
             <form th:if="${notification.status != 'sent'}"
-                  th:action="@{/admin/notifications/mark-read(id=${notification.notificationId})}"
-                  method="post">
+                th:action="@{/admin/notifications/mark-read(id=${notification.notificationId})}" method="post">
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-check me-2"></i>Mark as Read
                 </button>
             </form>
-            
-            <!-- Manage Reports button for REPORT_COURSE and REPORT_COMMENT -->
-            <a th:if="${notification.type == 'REPORT_COURSE' or notification.type == 'REPORT_COMMENT'}"
-               th:href="@{/admin/reports}"
-               class="btn btn-danger">
+
+            <!-- Manage Reports button for REPORT_COURSE, REPORT_COMMENT, INSTRUCTOR_REPLY_BLOCK -->
+            <a th:if="${notification.type == 'REPORT_COURSE' or notification.type == 'REPORT_COMMENT' or notification.type == 'INSTRUCTOR_REPLY_BLOCK'}"
+                th:href="@{/admin/reports}" class="btn btn-danger">
                 <i class="fas fa-flag me-2"></i>Manage Reports
             </a>
-            
+
             <!-- View Course button for other types -->
-            <a th:if="${notification.type != 'REPORT_COURSE' and notification.type != 'REPORT_COMMENT'}"
-               th:href="@{/admin/course/detail/{courseId}(courseId=${notification.course.courseId})}"
-               class="btn btn-success">
+            <a th:if="${notification.type != 'REPORT_COURSE' and notification.type != 'REPORT_COMMENT' and notification.type != 'INSTRUCTOR_REPLY_BLOCK' and notification.course != null and notification.course.courseId != null}"
+                th:href="@{/admin/course/detail/{courseId}(courseId=${notification.course.courseId})}"
+                class="btn btn-success">
                 <i class="fas fa-book-open me-2"></i>View Course
             </a>
         </div>

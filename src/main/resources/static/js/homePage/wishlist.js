@@ -1,7 +1,14 @@
 // Wishlist functionality
 function toggleWishlist(button, courseId) {
-    fetch(`/wishlist/toggle/${courseId}`, {
+    // Kiểm tra đăng nhập trước khi thực hiện
+    if (typeof window.userId === 'undefined' || window.userId === null || window.userId === 0) {
+        window.location.href = '/login';
+        return;
+    }
+    
+    fetch(`/home/wishlist/toggle/${courseId}`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest'
@@ -26,7 +33,7 @@ function toggleWishlist(button, courseId) {
             updateWishlistTotal(data.total);
             
             // Remove the card from wishlist page if removed
-            if (data.action === 'removed' && window.location.pathname === '/wishlist') {
+            if (data.action === 'removed' && window.location.pathname === '/home/wishlist') {
                 // Update wishlist count immediately
                 const countElement = document.querySelector('[data-wishlist-count]');
                 if (countElement) {
@@ -47,7 +54,7 @@ function toggleWishlist(button, courseId) {
                         
                         if (currentPage > 0) {
                             // Go to previous page
-                            window.location.href = `/wishlist?page=${currentPage - 1}`;
+                            window.location.href = `/home/wishlist?page=${currentPage - 1}`;
                         } else {
                             // Reload to show empty state
                             location.reload();
@@ -60,12 +67,12 @@ function toggleWishlist(button, courseId) {
                 }
             }
         } else {
-            alert(data.error || 'Failed to update wishlist');
+            showNotification(data.message || 'Failed to update wishlist', 'error');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Failed to update wishlist');
+        showNotification('Failed to update wishlist', 'error');
     });
 }
 
@@ -92,7 +99,9 @@ function checkWishlistStatus() {
     wishlistButtons.forEach(button => {
         const courseId = button.getAttribute('data-course-id');
         if (courseId) {
-            fetch(`/wishlist/check/${courseId}`)
+            fetch(`/home/wishlist/check/${courseId}`, {
+                credentials: 'include'
+            })
             .then(response => response.json())
             .then(data => {
                 const heartIcon = button.querySelector('i');
@@ -171,5 +180,5 @@ function changePageSize(size) {
     const urlParams = new URLSearchParams(window.location.search);
     urlParams.set('size', size);
     urlParams.set('page', '0'); // Reset to first page when changing size
-    window.location.href = `/wishlist?${urlParams.toString()}`;
+    window.location.href = `/home/wishlist?${urlParams.toString()}`;
 }

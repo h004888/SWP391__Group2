@@ -1,12 +1,18 @@
 <!-- **************** MAIN CONTENT START **************** -->
-<main th:fragment="mainContent">
+<main th:fragment="mainContent" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
-    <div id="notification" class="position-fixed top-0 end-0 p-5" style="z-index: 1050; top: 80px; transform: translateX(200%); transition: transform 0.5s ease;">
-        <div id="notification-alert" class="alert d-flex align-items-center mb-0" role="alert" style="min-width: 250px;">
+    <div id="notification" class="position-fixed top-0 end-0 p-5"
+        style="z-index: 1050; top: 80px; transform: translateX(200%); transition: transform 0.5s ease;">
+        <div id="notification-alert" class="alert d-flex align-items-center mb-0" role="alert"
+            style="min-width: 250px;">
             <i id="notification-icon" class="me-2"></i>
             <span id="notification-message"></span>
         </div>
     </div>
+    <script th:inline="javascript">
+        // Set currentUserId for frontend JavaScript
+        window.userId = /*[[${currentUserId}]]*/ 0;
+    </script>
     <script>
         // Function to show notification (copied from voucherContent.html)
         function showNotification(message, type) {
@@ -226,7 +232,8 @@ Main Banner START -->
 
                     <div class="d-sm-flex align-items-center justify-content-center justify-content-lg-start">
                         <!-- Button -->
-                        <a href="#" class="btn btn-lg btn-danger-soft me-2 mb-4 mb-sm-0">Get Started</a>
+                        <a th:href="${#authorization.expression('isAuthenticated()') ? '/learning' : '/login'}"
+                            class="btn btn-lg btn-danger-soft me-2 mb-4 mb-sm-0">Get Started</a>
                         <!-- Video button -->
                         <div class="d-flex align-items-center justify-content-center py-2 ms-0 ms-sm-4">
                             <a data-glightbox data-gallery="office-tour"
@@ -379,8 +386,9 @@ Counter START -->
                         <div class="ms-4 h6 fw-normal mb-0">
                             <div class="d-flex">
                                 <h5 class="purecounter mb-0 fw-bold" data-purecounter-start="0"
-                                    data-purecounter-end="10" data-purecounter-delay="200">0</h5>
-                                <span class="mb-0 h5">K</span>
+                                    th:data-purecounter-end="${totalCourseIsPublish}" data-purecounter-delay="200">0
+                                </h5>
+                                <span class="mb-0 h5" th:if="${totalCourseIsPublish >= 1000}">K</span>
                             </div>
                             <p class="mb-0">Online Courses</p>
                         </div>
@@ -393,7 +401,7 @@ Counter START -->
                         <div class="ms-4 h6 fw-normal mb-0">
                             <div class="d-flex">
                                 <h5 class="purecounter mb-0 fw-bold" data-purecounter-start="0"
-                                    data-purecounter-end="200" data-purecounter-delay="200">0</h5>
+                                    th:data-purecounter-end="${totalInstructor}" data-purecounter-delay="200">0</h5>
                                 <span class="mb-0 h5">+</span>
                             </div>
                             <p class="mb-0">Expert Tutors</p>
@@ -407,8 +415,8 @@ Counter START -->
                         <div class="ms-4 h6 fw-normal mb-0">
                             <div class="d-flex">
                                 <h5 class="purecounter mb-0 fw-bold" data-purecounter-start="0"
-                                    data-purecounter-end="60" data-purecounter-delay="200">0</h5>
-                                <span class="mb-0 h5">K+</span>
+                                    th:data-purecounter-end="${totalStudent}" data-purecounter-delay="200">0</h5>
+                                <span class="mb-0 h5" th:if="${totalStudent >= 1000}">K</span>
                             </div>
                             <p class="mb-0">Online Students</p>
                         </div>
@@ -420,9 +428,9 @@ Counter START -->
                         <span class="display-6 lh-1 text-info mb-0"><i class="bi bi-patch-check-fill"></i></span>
                         <div class="ms-4 h6 fw-normal mb-0">
                             <div class="d-flex">
-                                <h5 class="purecounter mb-0 fw-bold" data-purecounter-start="0" data-purecounter-end="6"
-                                    data-purecounter-delay="300">0</h5>
-                                <span class="mb-0 h5">K+</span>
+                                <h5 class="purecounter mb-0 fw-bold" data-purecounter-start="0"
+                                    th:data-purecounter-end="${totalCertificate}" data-purecounter-delay="300">0</h5>
+                                <span class="mb-0 h5" th:if="${totalCertificate >= 1000}">K+</span>
                             </div>
                             <p class="mb-0">Certified Courses</p>
                         </div>
@@ -488,7 +496,7 @@ Action box START -->
             </figure>
             <!-- SVG decoration END -->
 
-            <div class="row">
+            <div class="row" sec:authorize="hasRole('USER')">
                 <div class="col-12">
                     <div class="bg-info p-4 p-sm-5 rounded-3">
                         <div class="row position-relative">
@@ -511,7 +519,8 @@ Action box START -->
                                     </div>
                                     <!-- Content and input -->
                                     <div class="col-lg-5 text-lg-end">
-                                        <a href="#" class="btn btn-outline-warning mb-0">Start Teaching Today</a>
+                                        <a th:href="@{/become-instructor}" class="btn btn-outline-warning mb-0">Start
+                                            Teaching Today</a>
                                     </div>
                                 </div>
                             </div>
@@ -544,8 +553,8 @@ Trending courses START -->
                         <div th:each="course : ${topCourses}">
                             <div class="card action-trigger-hover border bg-transparent" style="height: 580px;">
                                 <!-- Image -->
-                                <img th:if="${course.courseImg != null}" th:src="${course.courseImg}"
-                                    src="assets/images/courses/4by3/14.jpg" class="card-img-top" alt="course image"
+                                <img th:src="@{${course.courseImg} ? ${course.courseImg} : '/assets/images/courses/4by3/01.jpg'}"
+                                    class="card-img-top" alt="course image"
                                     style="height: 300px; object-fit: contain; background: #f8f9fa;">
                                 <!-- Ribbon -->
 
@@ -566,11 +575,10 @@ Trending courses START -->
                                             <a href="#" class="badge text-bg-dark"
                                                 th:text="${course.courseLevel}">Beginner</a>
                                         </span>
-                                        <button type="button"
-                                                class="btn btn-link text-muted p-0 wishlist-toggle"
-                                                th:data-course-id="${course.courseId}"
-                                                th:onclick="'toggleWishlist(this, ' + ${course.courseId} + ')'"
-                                                style="font-size: 1.2rem;">
+                                        <button type="button" class="btn btn-link text-muted p-0 wishlist-toggle"
+                                            th:data-course-id="${course.courseId}"
+                                            th:onclick="'toggleWishlist(this, ' + ${course.courseId} + ')'"
+                                            style="font-size: 1.2rem;">
                                             <i class="far fa-heart"></i>
                                         </button>
                                     </div>
@@ -601,9 +609,14 @@ Trending courses START -->
                                     </div>
                                     <!-- Time -->
                                     <div class="hstack gap-3">
-                                        <span class="h6 fw-light mb-0"><i
-                                                class="far fa-clock text-danger me-2"></i><span
-                                                th:text="${course.duration} + 'h'">12h</span></span>
+                                        <span class="h6 fw-light mb-0">
+                                            <i class="far fa-clock text-danger me-2"></i>
+                                            <span th:if="${course.getDuration() >= 60}"
+                                                th:text="${(course.getDuration() / 60) + 'h ' + (course.getDuration() % 60) + 'm'}">12h
+                                                56m</span>
+                                            <span th:if="${course.getDuration() < 60}"
+                                                th:text="${'0h ' + course.getDuration() + 'm'}">0h 45m</span>
+                                        </span>
                                         <span class="h6 fw-light mb-0"><i
                                                 class="fas fa-table text-orange me-2"></i><span
                                                 th:text="${course.getTotalLessons()} + ' lectures'">15
@@ -618,7 +631,8 @@ Trending courses START -->
                                         <!-- Avatar -->
                                         <div class="d-flex align-items-center">
                                             <div class="avatar avatar-sm">
-                                                <img class="avatar-img rounded-1" src="assets/images/avatar/10.jpg"
+                                                <img class="avatar-img rounded-1"
+                                                    th:src="@{${course.instructor.profilePicture} ? ${course.instructor.profilePicture} : '/assets/images/avatar/10.jpg'}"
                                                     alt="avatar">
                                             </div>
                                             <p class="mb-0 ms-2"><a href="#" class="h6 fw-light mb-0"
@@ -627,17 +641,23 @@ Trending courses START -->
                                         </div>
                                         <!-- Price -->
                                         <div>
-
-                                            <h4 class="text-success mb-0 item-show " style="font-size: 1.2rem;"
-                                                th:if="${course.price>0}"><span
-                                                    th:text="${course.price != null ? #numbers.formatDecimal(course.price, 0, 'COMMA', 0, 'POINT')+' ₫' : 'N/A'}"></span>
-                                            </h4>
-                                            <h4 class="text-success mb-0 item-show" th:if="${course.price==0}">Free
-                                            </h4>
-                                            <button type="button" class="btn btn-sm btn-success-soft item-show-hover m-1 add-to-cart-btn"
+                                            <div
+                                                th:if="${topCoursesEnrolledMap[course.courseId] == null or !topCoursesEnrolledMap[course.courseId]}">
+                                                <h4 class="text-success mb-0 item-show " style="font-size: 1.2rem;"
+                                                    th:if="${course.price>0}"><span
+                                                        th:text="${course.price != null ? #numbers.formatDecimal(course.price, 0, 'COMMA', 0, 'POINT')+' ₫' : 'N/A'}"></span>
+                                                </h4>
+                                                <h4 class="text-success mb-0 item-show" th:if="${course.price==0}">Free
+                                                </h4>
+                                                <button type="button"
+                                                    class="btn btn-sm btn-success-soft item-show-hover m-1 add-to-cart-btn"
                                                     th:attr="data-course-id=${course.courseId}">
-                                                <i class="fas fa-shopping-cart me-2"></i>Add to cart
-                                            </button>
+                                                    <i class="fas fa-shopping-cart me-2"></i>Add to cart
+                                                </button>
+                                            </div>
+                                            <a th:if="${topCoursesEnrolledMap[course.courseId] != null and topCoursesEnrolledMap[course.courseId]}"
+                                                th:href="@{/learning/course/view(courseId=${course.courseId})}"
+                                                class="btn btn-sm btn-primary-soft mb-0">Continue</a>
                                         </div>
                                     </div>
                                 </div>
@@ -924,8 +944,6 @@ Reviews START -->
     <!-- =======================
 Reviews END -->
 
-    <!-- Chatbot Widget -->
-    <div th:replace="~{homePage/fragments/chatbotWidget.html}"></div>
 
     <script th:src="@{/js/homePage/addtocart.js}"></script>
 

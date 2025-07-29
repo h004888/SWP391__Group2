@@ -22,17 +22,17 @@ public class AdminAccessFilter implements Filter {
 
         String uri = request.getRequestURI();
 
-        // Bỏ qua filter cho webhook của SePay
         if (uri.equals("/api/payment/sepay/webhook")) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        boolean isAdmin = auth != null && auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        boolean isAdminOrStaff = auth != null && auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_STAFF"));
 
-        if (isAdmin) {
-            // Nếu vào /home 
+        if (isAdminOrStaff) {
+            // Nếu vào /home
             if (uri.startsWith("/home")) {
                 if (session != null) {
                     session.setAttribute("admin_visited_home", true);
@@ -49,13 +49,13 @@ public class AdminAccessFilter implements Filter {
                     session.setAttribute("admin_visited_admin", true);
                 }
             }
-            // Nếu vào /instructordashboard mà đã từng vào /admin thì chặn
-            if (uri.startsWith("/instructordashboard")) {
-                if (session != null && Boolean.TRUE.equals(session.getAttribute("admin_visited_admin"))) {
-                    response.sendRedirect("/403");
-                    return;
-                }
-            }
+//            // Nếu vào /instructordashboard mà đã từng vào /admin thì chặn
+//            if (uri.startsWith("/instructor")) {
+//                if (session != null && Boolean.TRUE.equals(session.getAttribute("admin_visited_admin"))) {
+//                    response.sendRedirect("/403");
+//                    return;
+//                }
+//            }
         }
         filterChain.doFilter(servletRequest, servletResponse);
     }

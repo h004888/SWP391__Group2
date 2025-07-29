@@ -15,10 +15,9 @@ import com.OLearning.service.payment.VNPayService;
 import com.OLearning.service.payment.VietQRService;
 import com.OLearning.service.voucher.VoucherService;
 import com.OLearning.service.wishlist.WishlistService;
+import com.OLearning.service.payment.CartServiceUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,8 +33,12 @@ import org.springframework.beans.factory.annotation.Value;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.OLearning.entity.Voucher;
+
 @Controller
-@RequestMapping("/cart")
+@RequestMapping("/home/cart")
 public class CartController {
     @Autowired
     private VNPayService vnPayService;
@@ -70,25 +73,41 @@ public class CartController {
     @GetMapping
     public String getCart(@AuthenticationPrincipal UserDetails userDetails,
                           HttpServletRequest request,
-                          Model model,
-                          @RequestParam(value = "message", required = false) String message) {
+                          Model model) {
         if (userDetails == null) {
             return "redirect:/login";
         }
-        Long userId = getUserIdFromUserDetails(userDetails);
-        String encodedCartJson = getCartCookie(request, userId);
+        Long userId = CartServiceUtil.getUserIdFromUserDetails(userDetails, userRepository);
+        String encodedCartJson = CartServiceUtil.getCartCookie(request, userId);
         Map<String, Object> cart = cartService.getCartDetails(encodedCartJson, userDetails.getUsername());
-        model.addAttribute("cartItems", cart.getOrDefault("items", List.of()));
-        model.addAttribute("totalPrice", calculateTotalPrice(cart));
+        List<Map<String, Object>> items = (List<Map<String, Object>>) cart.getOrDefault("items", List.of());
+
+        double originalTotal = items.stream()
+                .mapToDouble(item -> {
+                    Object originalPrice = item.get("originalPrice");
+                    if (originalPrice == null) originalPrice = item.get("price");
+                    return originalPrice != null ? ((Number) originalPrice).doubleValue() : 0.0;
+                })
+                .sum();
+
+        double discountedTotal = items.stream()
+                .mapToDouble(item -> {
+                    Object discountedPrice = item.get("discountedPrice");
+                    if (discountedPrice == null) discountedPrice = item.get("price");
+                    return discountedPrice != null ? ((Number) discountedPrice).doubleValue() : 0.0;
+                })
+                .sum();
+
+        model.addAttribute("cartItems", items);
+        model.addAttribute("originalTotal", originalTotal);
+        model.addAttribute("totalPrice", discountedTotal);
         model.addAttribute("cartTotal", getLongValue(cart.getOrDefault("total", 0L)));
         model.addAttribute("currentUserId", userId);
-        // Add wishlist total
+
+
         String encodedWishlistJson = getWishlistCookie(request, userId);
         Map<String, Object> wishlist = wishlistService.getWishlistDetails(encodedWishlistJson, userDetails.getUsername());
         model.addAttribute("wishlistTotal", getLongValue(wishlist.getOrDefault("total", 0L)));
-        if ("qr_success".equals(message)) {
-            model.addAttribute("message", "Thanh toán thành công bằng QR!");
-        }
         model.addAttribute("navCategory", "homePage/fragments/navHeader :: navHeaderDefault");
         model.addAttribute("fragmentContent", "homePage/fragments/cartContent :: cartContent");
         return "homePage/index";
@@ -99,21 +118,21 @@ public class CartController {
     public Map<String, Long> getCartTotal(HttpServletRequest request,
                                           @AuthenticationPrincipal UserDetails userDetails) {
         Map<String, Long> response = new HashMap<>();
-        
+
         if (userDetails == null) {
             response.put("total", 0L);
             return response;
         }
-        
+
         try {
-            Long userId = getUserIdFromUserDetails(userDetails);
-            String encodedCartJson = getCartCookie(request, userId);
+            Long userId = CartServiceUtil.getUserIdFromUserDetails(userDetails, userRepository);
+            String encodedCartJson = CartServiceUtil.getCartCookie(request, userId);
             Map<String, Object> cart = cartService.getCartDetails(encodedCartJson, userDetails.getUsername());
             response.put("total", getLongValue(cart.getOrDefault("total", 0L)));
         } catch (Exception e) {
             response.put("total", 0L);
         }
-        
+
         return response;
     }
 
@@ -129,17 +148,17 @@ public class CartController {
         if (userDetails == null) {
             if (isAjax) {
                 result.put("success", false);
-                result.put("error", "Bạn cần đăng nhập!");
+                result.put("error", "You need to login!");
                 return result;
             } else {
                 return "redirect:/login";
             }
         }
-        Long userId = getUserIdFromUserDetails(userDetails);
-        String encodedCartJson = getCartCookie(request, userId);
+        Long userId = CartServiceUtil.getUserIdFromUserDetails(userDetails, userRepository);
+        String encodedCartJson = CartServiceUtil.getCartCookie(request, userId);
         try {
             Map<String, Object> cart = cartService.addCourseToCart(encodedCartJson, courseId, userDetails.getUsername());
-            updateCartCookie(cart, response, userId);
+            CartServiceUtil.updateCartCookie(cart, response, userId, objectMapper);
             if (isAjax) {
                 result.put("success", true);
                 return result;
@@ -149,7 +168,7 @@ public class CartController {
         } catch (CartServiceImpl.CourseAlreadyPurchasedException | CartServiceImpl.CourseAlreadyInCartException e) {
             if (isAjax) {
                 result.put("success", false);
-                result.put("error", e.getMessage());
+                result.put("message", e.getMessage());
                 return result;
             } else {
                 model.addAttribute("error", e.getMessage());
@@ -157,7 +176,7 @@ public class CartController {
         } catch (Exception e) {
             if (isAjax) {
                 result.put("success", false);
-                result.put("error", "Failed to add course to cart");
+                result.put("message", "Failed to add course to cart");
                 return result;
             } else {
                 model.addAttribute("error", "Failed to add course to cart");
@@ -166,7 +185,7 @@ public class CartController {
         if (isAjax) {
             if (!result.containsKey("success")) {
                 result.put("success", false);
-                result.put("error", "Unknown error");
+                result.put("message", "Unknown error");
             }
             return result;
         } else {
@@ -183,38 +202,38 @@ public class CartController {
                                  @AuthenticationPrincipal UserDetails userDetails,
                                  HttpServletRequest request,
                                  HttpServletResponse response,
-                                 Model model) {
+                                 RedirectAttributes redirectAttributes) {
         if (userDetails == null) {
             return "redirect:/login";
         }
-        Long userId = getUserIdFromUserDetails(userDetails);
-        String encodedCartJson = getCartCookie(request, userId);
+        Long userId = CartServiceUtil.getUserIdFromUserDetails(userDetails, userRepository);
+        String encodedCartJson = CartServiceUtil.getCartCookie(request, userId);
         try {
             Map<String, Object> cart = cartService.removeCartDetail(encodedCartJson, cartDetailId, userDetails.getUsername());
-            updateCartCookie(cart, response, userId);
-            model.addAttribute("message", "Item removed from cart successfully!");
+            CartServiceUtil.updateCartCookie(cart, response, userId, objectMapper);
+            redirectAttributes.addFlashAttribute("message", "Item removed from cart successfully!");
         } catch (Exception e) {
-            model.addAttribute("error", "Failed to remove item from cart");
+            redirectAttributes.addFlashAttribute("error", "Failed to remove item from cart");
         }
-        return "redirect:/cart";
+        return "redirect:/home/cart";
     }
 
     @PostMapping("/clear")
     public String clearCart(@AuthenticationPrincipal UserDetails userDetails,
                             HttpServletResponse response,
-                            Model model) {
+                            RedirectAttributes redirectAttributes) {
         if (userDetails == null) {
             return "redirect:/login";
         }
-        Long userId = getUserIdFromUserDetails(userDetails);
+        Long userId = CartServiceUtil.getUserIdFromUserDetails(userDetails, userRepository);
         try {
             Map<String, Object> emptyCart = cartService.clearCart(userDetails.getUsername());
-            updateCartCookie(emptyCart, response, userId);
-            model.addAttribute("message", "Cart cleared successfully!");
+            CartServiceUtil.updateCartCookie(emptyCart, response, userId, objectMapper);
+            redirectAttributes.addFlashAttribute("message", "Cart cleared successfully!");
         } catch (Exception e) {
-            model.addAttribute("error", "Failed to clear cart");
+            redirectAttributes.addFlashAttribute("error", "Failed to clear cart");
         }
-        return "redirect:/cart";
+        return "redirect:/home/cart";
     }
 
     @PostMapping("/checkout")
@@ -223,12 +242,13 @@ public class CartController {
                            @AuthenticationPrincipal UserDetails userDetails,
                            HttpServletRequest request,
                            HttpServletResponse response,
-                           Model model) {
+                           Model model,
+                           RedirectAttributes redirectAttributes) {
         if (userDetails == null) {
             return "redirect:/login";
         }
-        Long userId = getUserIdFromUserDetails(userDetails);
-        String encodedCartJson = getCartCookie(request, userId);
+        Long userId = CartServiceUtil.getUserIdFromUserDetails(userDetails, userRepository);
+        String encodedCartJson = CartServiceUtil.getCartCookie(request, userId);
         try {
             Map<String, Object> cart = cartService.getCartDetails(encodedCartJson, userDetails.getUsername());
             List<Map<String, Object>> items = (List<Map<String, Object>>) cart.getOrDefault("items", List.of());
@@ -240,25 +260,29 @@ public class CartController {
             for (Map<String, Object> item : items) {
                 Long courseId = Long.valueOf(item.get("courseId").toString());
                 double price = Double.valueOf(item.get("price").toString());
+                double originalPrice = Double.valueOf(item.get("price").toString());
                 if (voucherMapping.containsKey(courseId)) {
                     Long voucherId = voucherMapping.get(courseId);
                     double discount = voucherRepository.findById(voucherId).map(v -> v.getDiscount()).orElse(0.0);
-                    price = Math.round(price * (1 - discount / 100.0));
-                    item.put("price", price);
+                    price = discount >= 100.0 ? 0 : Math.round(price * (1 - discount / 100.0));
+                    item.put("discountedPrice", price);
+                    item.put("originalPrice", originalPrice);
                     item.put("appliedVoucherId", voucherId);
+                } else {
+                    item.put("discountedPrice", originalPrice);
+                    item.put("originalPrice", originalPrice);
                 }
                 totalAmount += price;
             }
             cart.put("items", items);
-            updateCartCookie(cart, response, userId);
-            String ipAddr = request.getRemoteAddr();
+            CartServiceUtil.updateCartCookie(cart, response, userId, objectMapper);
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new EntityNotFoundException("User not found"));
             if (user.getCoin() >= totalAmount) {
                 Order order = new Order();
                 order.setUser(user);
                 order.setAmount(totalAmount);
-                cartService.processCheckout(encodedCartJson, ipAddr, userDetails.getUsername());
+                cartService.processCheckout(encodedCartJson, userDetails.getUsername());
                 cartService.completeCheckout(cart, order, true, null);
                 for (Map<String, Object> item : items) {
                     if (item.containsKey("appliedVoucherId")) {
@@ -266,24 +290,29 @@ public class CartController {
                         voucherService.useVoucherForUserAndCourse(voucherId, userId);
                     }
                 }
-                updateCartCookie(cartService.clearCart(userDetails.getUsername()), response, userId);
-                model.addAttribute("message", "Checkout completed using wallet!");
-                return "redirect:/cart";
+                CartServiceUtil.updateCartCookie(cartService.clearCart(userDetails.getUsername()), response, userId, objectMapper);
+                redirectAttributes.addFlashAttribute("message", "Checkout completed using wallet!");
+                return "redirect:/home/cart";
             } else if ("qr".equalsIgnoreCase(paymentMethod)) {
-                Order order = ordersService.createOrder(user, totalAmount, "course_purchase", "temp_description");
+                Order order = ordersService.createOrder(user, totalAmount, "course_purchase");
                 String description = "Buy Course OLearning - ORDER" + order.getOrderId();
                 order.setDescription(description);
                 ordersService.saveOrder(order);
 
                 for (Map<String, Object> item : items) {
                     Long courseId = Long.valueOf(item.get("courseId").toString());
-                    double price = Double.valueOf(item.get("price").toString());
+                    double price = Double.valueOf(item.getOrDefault("discountedPrice", item.get("price")).toString());
                     Course course = courseRepository.findById(courseId)
-                        .orElseThrow(() -> new EntityNotFoundException("Course not found: " + courseId));
+                            .orElseThrow(() -> new EntityNotFoundException("Course not found: " + courseId));
                     OrderDetail orderDetail = new OrderDetail();
                     orderDetail.setOrder(order);
                     orderDetail.setCourse(course);
                     orderDetail.setUnitPrice(price);
+                    if (item.containsKey("appliedVoucherId")) {
+                        Long voucherId = Long.valueOf(item.get("appliedVoucherId").toString());
+                        Voucher voucher = voucherRepository.findById(voucherId).orElse(null);
+                        orderDetail.setVoucher(voucher);
+                    }
                     ordersService.saveOrderDetail(orderDetail);
                 }
 
@@ -298,32 +327,32 @@ public class CartController {
                 request.setAttribute("cart", encodedCartJson);
                 String currentPath = request.getRequestURI();
                 String basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
-                String returnUrl = org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath()
+                String returnUrl = fromCurrentContextPath()
                         .path(basePath)
                         .build()
                         .toUriString();
                 request.setAttribute("urlReturn", returnUrl);
                 return "redirect:" + vnPayService.createOrder(request);
             } else {
-                model.addAttribute("error", "Vui lòng chọn phương thức thanh toán!");
-                return "redirect:/cart";
+                redirectAttributes.addFlashAttribute("error", "Please select payment method!");
+                return "redirect:/home/cart";
             }
         } catch (Exception e) {
-            model.addAttribute("error", "Checkout error: " + e.getMessage());
-            return "redirect:/cart";
+            redirectAttributes.addFlashAttribute("error", "Checkout error: " + e.getMessage());
+            return "redirect:/home/cart";
         }
     }
 
     @GetMapping("/vnpay-payment-return")
     public String paymentCompleted(HttpServletRequest request,
                                    HttpServletResponse response,
-                                   Model model,
+                                   RedirectAttributes redirectAttributes,
                                    @AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
             return "redirect:/login";
         }
-        Long userId = getUserIdFromUserDetails(userDetails);
-        String encodedCartJson = getCartCookie(request, userId);
+        Long userId = CartServiceUtil.getUserIdFromUserDetails(userDetails, userRepository);
+        String encodedCartJson = CartServiceUtil.getCartCookie(request, userId);
         int paymentStatus = vnPayService.orderReturn(request);
         if (paymentStatus == 1) {
             try {
@@ -331,16 +360,14 @@ public class CartController {
                 User user = userRepository.findById(userId)
                         .orElseThrow(() -> new EntityNotFoundException("User not found"));
                 String transactionId = request.getParameter("vnp_TransactionNo");
-                String ipAddr = request.getRemoteAddr();
                 double totalAmount = calculateTotalPrice(cart);
                 Order order = new Order();
                 order.setUser(user);
                 order.setAmount(totalAmount);
                 order.setRefCode(transactionId);
-                cartService.processCheckout(encodedCartJson, ipAddr, userDetails.getUsername());
+                cartService.processCheckout(encodedCartJson, userDetails.getUsername());
                 cartService.completeCheckout(cart, order, false, transactionId);
-                
-                // Xử lý voucher sau khi thanh toán thành công
+
                 List<Map<String, Object>> items = (List<Map<String, Object>>) cart.getOrDefault("items", List.of());
                 for (Map<String, Object> item : items) {
                     if (item.containsKey("appliedVoucherId")) {
@@ -348,16 +375,16 @@ public class CartController {
                         voucherService.useVoucherForUserAndCourse(voucherId, userId);
                     }
                 }
-                updateCartCookie(cartService.clearCart(userDetails.getUsername()), response, userId);
-                model.addAttribute("message", "VNPay payment successful!");
-                return "redirect:/cart";
+                CartServiceUtil.updateCartCookie(cartService.clearCart(userDetails.getUsername()), response, userId, objectMapper);
+                redirectAttributes.addFlashAttribute("message", "VNPay payment successful!");
+                return "redirect:/home/cart";
             } catch (Exception e) {
-                model.addAttribute("error", "VNPay success but internal error: " + e.getMessage());
-                return "redirect:/cart";
+                redirectAttributes.addFlashAttribute("error", "VNPay success but internal error: " + e.getMessage());
+                return "redirect:/home/cart";
             }
         } else {
-            model.addAttribute("error", "VNPay payment failed.");
-            return "redirect:/cart";
+            redirectAttributes.addFlashAttribute("error", "VNPay payment failed.");
+            return "redirect:/home/cart";
         }
     }
 
@@ -365,78 +392,27 @@ public class CartController {
     @ResponseBody
     public Map<String, Object> applyVoucherToCourse(@RequestBody Map<String, Object> req) {
         Map<String, Object> result = new HashMap<>();
-        
         try {
-            // Validate required parameters
             if (req == null) {
                 result.put("error", "Request body is null");
                 return result;
             }
-            
             Object userIdObj = req.get("userId");
             Object courseIdObj = req.get("courseId");
             Object voucherIdObj = req.get("voucherId");
-            
             if (userIdObj == null || courseIdObj == null || voucherIdObj == null) {
                 result.put("error", "Missing required parameters: userId, courseId, or voucherId");
                 return result;
             }
-            
             Long userId = Long.valueOf(userIdObj.toString());
             Long courseId = Long.valueOf(courseIdObj.toString());
             Long voucherId = Long.valueOf(voucherIdObj.toString());
-            
-            // Kiểm tra user có tồn tại không
-            if (!userRepository.existsById(userId)) {
-                result.put("error", "User not found");
-                return result;
-            }
-            
-            // Kiểm tra course có tồn tại không
-            if (!courseRepository.existsById(courseId)) {
-                result.put("error", "Course not found");
-                return result;
-            }
-            
-            // Kiểm tra voucher có tồn tại không
-            if (!voucherRepository.existsById(voucherId)) {
-                result.put("error", "Voucher not found");
-                return result;
-            }
-            
-            var userVoucherOpt = userVoucherRepository.findByUser_UserIdAndVoucher_VoucherId(userId, voucherId);
-            if (userVoucherOpt.isEmpty()) {
-                result.put("error", "User does not have this voucher");
-                return result;
-            }
-            
-            var userVoucher = userVoucherOpt.get();
-            if (Boolean.TRUE.equals(userVoucher.getIsUsed())) {
-                result.put("error", "Voucher has already been used");
-                return result;
-            }
-
-            double originalPrice = courseRepository.findById(courseId)
-                .map(course -> course.getPrice().doubleValue())
-                .orElse(0.0);
-            double discount = voucherRepository.findById(voucherId)
-                .map(voucher -> voucher.getDiscount())
-                .orElse(0.0);
-            String voucherCode = voucherRepository.findById(voucherId)
-                .map(voucher -> voucher.getCode())
-                .orElse("");
-            double discountedPrice = Math.round(originalPrice * (1 - discount / 100.0));
-            
-            result.put("voucherId", voucherId);
-            result.put("voucherCode", voucherCode);
-            result.put("discountedPrice", (long) discountedPrice);
-            
+            result = voucherService.applyVoucherToCourse(userId, courseId, voucherId);
         } catch (NumberFormatException e) {
             result.put("error", "Invalid parameter format. Please check userId, courseId, and voucherId values.");
         } catch (Exception e) {
             result.put("error", "An error occurred while applying the voucher: " + e.getMessage());
         }
-        
         return result;
     }
 
@@ -444,7 +420,7 @@ public class CartController {
     @ResponseBody
     public String clearCartCookie(@AuthenticationPrincipal UserDetails userDetails, HttpServletResponse response) {
         if (userDetails == null) return "not_logged_in";
-        Long userId = getUserIdFromUserDetails(userDetails);
+        Long userId = CartServiceUtil.getUserIdFromUserDetails(userDetails, userRepository);
         Cookie cartCookie = new Cookie("cart_" + userId, null);
         cartCookie.setPath("/");
         cartCookie.setMaxAge(0);
@@ -464,43 +440,7 @@ public class CartController {
                 .sum();
     }
 
-    private void updateCartCookie(Map<String, Object> cart, HttpServletResponse response, Long userId) throws Exception {
-        String cartJson = objectMapper.writeValueAsString(cart);
-        String encodedCartJson = Base64.getEncoder().encodeToString(cartJson.getBytes(StandardCharsets.UTF_8));
-        Cookie cartCookie = new Cookie("cart_" + userId, encodedCartJson);
-        cartCookie.setPath("/");
-        cartCookie.setMaxAge(14 * 24 * 60 * 60);
-        cartCookie.setHttpOnly(true);
-        response.addCookie(cartCookie);
-    }
 
-    private Long getUserIdFromUserDetails(UserDetails userDetails) {
-        String email = userDetails.getUsername();
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
-        return user.getUserId();
-    }
-
-    private String getCartCookie(HttpServletRequest request, Long userId) {
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if (cookie.getName().equals("cart_" + userId)) {
-                    return cookie.getValue();
-                }
-            }
-        }
-        return "";
-    }
-
-    private Long getLongValue(Object value) {
-        if (value instanceof Integer) {
-            return ((Integer) value).longValue();
-        } else if (value instanceof Long) {
-            return (Long) value;
-        } else {
-            return 0L;
-        }
-    }
 
     private String getWishlistCookie(HttpServletRequest request, Long userId) {
         Cookie[] cookies = request.getCookies();
@@ -512,5 +452,15 @@ public class CartController {
             }
         }
         return null;
+    }
+
+    private Long getLongValue(Object value) {
+        if (value instanceof Integer) {
+            return ((Integer) value).longValue();
+        } else if (value instanceof Long) {
+            return (Long) value;
+        } else {
+            return 0L;
+        }
     }
 }

@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import java.util.UUID;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -30,7 +31,8 @@ public class UploadFileImpl implements UploadFile {
         return uploadVideoSeFile(file);
     }
 
-    private String uploadFile(MultipartFile file, String resourceType) throws IOException {
+    @Override
+    public String uploadFile(MultipartFile file, String resourceType) throws IOException {
         assert file.getOriginalFilename() != null;
         String publicValue = generatePublicValue(file.getOriginalFilename());
         String extension = getFileName(file.getOriginalFilename())[1];//jpg, png
@@ -44,6 +46,28 @@ public class UploadFileImpl implements UploadFile {
                     )
             );
             return cloudinary.url().resourceType(resourceType).generate(publicValue + "." + extension);
+        } finally {
+            cleanDisk(fileUpload);
+        }
+    }
+
+    @Override
+    public String uploadFileRaw(MultipartFile file, String resourceType) throws IOException {
+        assert file.getOriginalFilename() != null;
+        String publicValue = generatePublicValue(file.getOriginalFilename());
+        String extension = getFileName(file.getOriginalFilename())[1];//jpg, png
+        File fileUpload = convert(file, publicValue, extension);
+        try {
+            Map uploadResult = cloudinary.uploader().upload(
+                fileUpload,
+                ObjectUtils.asMap(
+                    "public_id", publicValue,
+                    "resource_type", resourceType
+                )
+            );
+            // Lấy URL trả về từ Cloudinary
+            Object url = uploadResult.get("secure_url");
+            return url != null ? url.toString() : null;
         } finally {
             cleanDisk(fileUpload);
         }
@@ -100,7 +124,6 @@ public class UploadFileImpl implements UploadFile {
     //generate tu publicId sang Signed de co the phat
     @Override
     public String generateSignedVideoUrl(String publicId, String resourceType) {
-        // Không tự thêm extension, chỉ trả về đúng publicId như lưu trên Cloudinary
         return cloudinary.url()
                 .resourceType(resourceType)
                 .type("private")

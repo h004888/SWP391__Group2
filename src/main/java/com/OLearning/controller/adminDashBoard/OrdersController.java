@@ -19,7 +19,7 @@ import java.util.List;
 @RequestMapping("/admin/orders")
 public class OrdersController {
 
-    private static final String ACC_NAME_PAGE_MANAGEMENT = "Management Orders";
+    private static final String ACC_NAME_PAGE_MANAGEMENT = "Invoice";
     private static final String ACC_NAME_PAGE_ORDER_DETAILS = "Order Details";
 
     @Autowired

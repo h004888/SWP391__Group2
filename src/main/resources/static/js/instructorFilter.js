@@ -42,8 +42,8 @@ function afterAjaxUpdate() {
     });
     // Reinitialize dropdowns
     initializeDropdowns();
-    // Xóa toast cũ
-    $('.toast').remove();
+    // KHÔNG xóa toast ở đây nữa!
+    // $('.toast').remove();
 }
 
 // Filter function
@@ -132,20 +132,34 @@ function showToast(message, type = 'info') {
 }
 
 // Các hàm xử lý hành động khóa học
-function upToPublic(courseId) {
+function upToPublic(courseId, hasPaidPublicationFee) {
     if (!courseId) return;
-    if (confirm('Are you sure you want to publish this course?')) {
-        $.post('/instructor/courses/uptopublic', { courseId: courseId })
-            .done(function() {
-                filterAllTabs(0); // Reload tất cả các tab
+    
+    // Nếu hasPaidPublicationFee là true (đã trả phí publication)
+    if (hasPaidPublicationFee === true) {
+        showConfirmActionModal(
+            'Are you sure you want to publish this course?',
+            '/instructor/courses/uptopublic',
+            courseId,
+            function() {
+                filterAllTabs(0);
                 updateStatusBadges();
-            });
+            }
+        );
+    } else {
+        // Nếu chưa trả phí publication
+        showConfirmActionModalPublic(
+            'Are you sure you want to make this course public? The public fee will be 100,000 the next time there will be no fee.',
+            '/instructor/courses/uptopublic',
+            courseId,
+            null
+        );
     }
 }
 
 function unpublishCourse(courseId) {
     showConfirmActionModal(
-        'Bạn có chắc chắn muốn hủy công khai khóa học này?',
+        'Are you sure you want to unpublish this course?',
         '/instructor/courses/unpublish',
         courseId,
         function() {
@@ -157,7 +171,7 @@ function unpublishCourse(courseId) {
 
 function hideCourse(courseId) {
     showConfirmActionModal(
-        'Bạn có chắc chắn muốn ẩn khóa học này?',
+        'Are you sure you want to hide this course?',
         '/instructor/courses/hide',
         courseId,
         function() {
@@ -169,7 +183,7 @@ function hideCourse(courseId) {
 
 function unhideCourse(courseId) {
     showConfirmActionModal(
-        'Bạn có chắc chắn muốn hiển thị lại khóa học này?',
+        'Are you sure you want to republish this course?',
         '/instructor/courses/unhide',
         courseId,
         function() {
@@ -213,7 +227,21 @@ function showConfirmActionModal(message, actionUrl, courseId, callback) {
             .done(function() {
                 if (typeof callback === 'function') callback();
                 $('#confirmActionModal').modal('hide');
+                showToast('Thao tác thành công!');
+            })
+            .fail(function(xhr) {
+                showToast('Có lỗi xảy ra: ' + xhr.responseText, 'error');
             });
+    });
+    var modal = new bootstrap.Modal(document.getElementById('confirmActionModal'));
+    modal.show();
+}
+
+function showConfirmActionModalPublic(message, actionUrl, courseId, callback) {
+    $('#confirmActionMessage').text(message);
+    $('#confirmActionForm').attr('action', actionUrl);
+    $('#confirmActionCourseId').val(courseId);
+    $('#confirmActionForm').off('submit').on('submit', function(e) {
     });
     var modal = new bootstrap.Modal(document.getElementById('confirmActionModal'));
     modal.show();
@@ -255,11 +283,9 @@ $('#deleteForm').on('submit', function(e) {
             filterCourses(status, 0);
 
             // Hiển thị thông báo thành công
-            showToast('Course deleted successfully!', 'success');
         },
         error: function(xhr, status, error) {
             console.error("Error deleting course:", error);
-            showToast('An error occurred while deleting the course.', 'error');
         }
     });
 });

@@ -22,11 +22,14 @@ public interface CourseService {
 
     boolean rejectCourse(Long id);
 
-//    List<CourseDTO> filterCourses(String keyword, Integer categoryId, String price, String status);
+    // List<CourseDTO> filterCourses(String keyword, Integer categoryId, String
+    // price, String status);
 
-    Page<CourseDTO> filterCoursesWithPagination(String keyword, Long category, String price, String status, int page, int size);
+    Page<CourseDTO> filterCoursesWithPagination(String keyword, Long category, String price, String status, int page,
+            int size);
 
-    Page<CourseDTO> filterCoursesInstructorManage(Long userId, Long categoryId, String status, String price, String title, int page, int size);
+    Page<CourseDTO> filterCoursesInstructorManage(Long userId, Long categoryId, String status, String price,
+            String title, int page, int size);
 
     void deleteCourse(Long courseId);
 
@@ -55,6 +58,8 @@ public interface CourseService {
     List<CourseViewDTO> getTopCourses();
 
     List<CourseViewDTO> getCoursesByCategoryId(Long categoryId);
+        boolean existsById(Long id);
+
 
     Page<CourseViewDTO> searchCoursesGrid(
             List<Long> categoryIds,
@@ -69,14 +74,19 @@ public interface CourseService {
 
     void setPendingBlock(Long courseId);
 
+    void unblockCourse(Long courseId);
+
     Course findById(Long courseId);
 
     int countByInstructorAndStatus(Long userId, String status);
 
-    CourseViewDTO getCourseRecentIncomplete (Long userId);
+    CourseViewDTO getCourseRecentIncomplete(Long userId);
 
     int countByInstructorAndStatusWithFilter(Long userId, String status, Long categoryId, String price, String title);
 
     List<CourseViewDTO> getCourseByUserId(Long userId);
 
+        Long countCourseIsPublish();
+        Course getMostRecentCourseWithFallback(Long userId);
+        List<CourseViewDTO> getCourseByJoinByUserId(Long userId);
 }

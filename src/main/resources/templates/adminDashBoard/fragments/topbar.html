@@ -66,12 +66,12 @@
                     <li class="nav-item ms-2 ms-md-3 dropdown">
                         <!-- Notification button -->
                         <a class="btn btn-light btn-round mb-0 position-relative" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside" title="Notifications" style="width:48px;height:48px;">
-                            <i class="bi bi-bell fa-fw" style="font-size:2rem;line-height:48px;"></i>
+                            <i class="bi bi-bell fa-fw" style="font-size:1.3rem;line-height:48px;"></i>
                             <span id="adminNotificationBadge" th:if="${unreadCount > 0}" class="notif-badge animation-blink" style="width:14px;height:14px;top:6px;right:6px;"></span>
                         </a>
 
                         <!-- Notification dropdown menu START -->
-                        <div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0" style="width:220px;min-width:220px;max-width:220px;border:1px solid #ddd;">
+                        <div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0" style="width:320px;min-width:320px;max-width:320px;border:1px solid #ddd;">
                             <div class="card bg-transparent">
                                 <div class="card-header bg-transparent border-bottom py-4 d-flex justify-content-between align-items-center">
                                     <h6 class="m-0">Unread Notifications <span id="adminNotificationCount" class="badge bg-danger bg-opacity-10 text-danger ms-2">0 new</span></h6>
@@ -129,8 +129,6 @@
                             </li>
                             <!-- Links -->
                             <li><a class="dropdown-item" th:href="@{/profile}"><i class="bi bi-person fa-fw me-2"></i>Profile</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-gear fa-fw me-2"></i>Account Settings</a>
-                            </li>
                             <li><a class="dropdown-item bg-danger-soft-hover" data-bs-toggle="modal" data-bs-target="#logoutModal"><i
                                     class="bi bi-power fa-fw me-2"></i>Sign Out</a></li>
                             <li>

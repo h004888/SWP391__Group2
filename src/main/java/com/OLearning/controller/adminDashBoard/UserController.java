@@ -4,7 +4,10 @@ import com.OLearning.dto.course.CourseDTO;
 import com.OLearning.dto.enrollment.EnrollmentDTO;
 import com.OLearning.dto.user.UserDTO;
 import com.OLearning.dto.user.UserDetailDTO;
+import com.OLearning.entity.Notification;
+import com.OLearning.entity.User;
 import com.OLearning.service.enrollment.EnrollmentService;
+import com.OLearning.service.notification.NotificationService;
 import com.OLearning.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -17,24 +20,37 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import com.OLearning.security.CustomUserDetails;
 
 @Controller
 @RequestMapping("/admin")
 public class UserController {
-    // Các biến constant dùng cho model attribute (gán giá trị thực tế)
     private static final String ACC_NAME_PAGE_MANAGEMENT = "Management Account";
-    private static final String ACC_NAME_PAGE_DETAIL = "Detail Account";
-    private static final String ERROR_MESSAGE_USER_ADD = "User added successfully";
-    private static final String ERROR_MESSAGE_UNEXPECTED = "Unexpected error: ";
-    private static final String SUCCESS_MESSAGE_RESET_PASS = "Reset password successfully";
     private static final String SUCCESS_MESSAGE_DELETE_STAFF = "Delete staff successfully";
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private NotificationService notificationService;
+
+    private Long getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getName())) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof CustomUserDetails) {
+                return ((CustomUserDetails) principal).getUserId();
+            }
+        }
+        return null;
+    }
 
     @GetMapping("/account")
     public String getAccountPage(
@@ -45,13 +61,18 @@ public class UserController {
         Page<UserDTO> listU = userService.getAllUsers(prs);
         List<UserDTO> listUser = listU.getContent();
 
+        final Long currentUserId = getCurrentUserId();
+        if (currentUserId != null) {
+            listUser = listUser.stream().filter(u -> !currentUserId.equals(u.getUserId())).toList();
+        }
+
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", listU.getTotalPages());
         model.addAttribute("totalItems", listU.getTotalElements());
 
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/accountContent :: accountContent");
         model.addAttribute("listU", listUser);
-        model.addAttribute("accNamePage", "Management Account");
+        model.addAttribute("accNamePage", ACC_NAME_PAGE_MANAGEMENT);
         model.addAttribute("addAccount", new UserDTO());
         model.addAttribute("listRole", userService.getListRole());
         return "adminDashBoard/index";
@@ -61,7 +82,7 @@ public class UserController {
     public String addUser(@ModelAttribute("addAccount") UserDTO userDTO, RedirectAttributes redirectAttributes) {
         try {
             userService.createNewStaff(userDTO);
-            redirectAttributes.addFlashAttribute("successMessage", "User added successfully");
+            redirectAttributes.addFlashAttribute("successMessage", "Staff added successfully");
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         } catch (Exception e) {
@@ -90,23 +111,29 @@ public class UserController {
 
         Pageable pageable = PageRequest.of(page, size);
         Page<UserDTO> userPage;
+        List<Long> roleIds = (roleId == 1) ? List.of(1L, 4L) : List.of(roleId);
 
         if (keyword != null && !keyword.trim().isEmpty()) {
             if (status != null) {
-                userPage = userService.searchByNameAndStatusWithPagination(keyword.trim(), roleId, status, pageable);
+                userPage = userService.searchByNameAndStatusWithPagination(keyword.trim(), roleIds, status, pageable);
             } else {
-                userPage = userService.searchByNameWithPagination(keyword.trim(), roleId, pageable);
+                userPage = userService.searchByNameWithPagination(keyword.trim(), roleIds, pageable);
             }
         } else {
             if (status != null) {
-                userPage = userService.getUsersByRoleAndStatusWithPagination(roleId, status, pageable);
+                userPage = userService.getUsersByRolesAndStatusWithPagination(roleIds, status, pageable);
             } else {
-                userPage = userService.getUsersByRoleWithPagination(roleId, pageable);
+                userPage = userService.getUsersByRolesWithPagination(roleIds, pageable);
             }
         }
 
-        //Add pagination information to model
-        model.addAttribute("listU", userPage.getContent());
+        List<UserDTO> listUser = userPage.getContent();
+        final Long currentUserId = getCurrentUserId();
+        if (currentUserId != null) {
+            listUser = listUser.stream().filter(u -> !currentUserId.equals(u.getUserId())).toList();
+        }
+
+        model.addAttribute("listU", listUser);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", userPage.getTotalPages());
         model.addAttribute("totalItems", userPage.getTotalElements());
@@ -117,7 +144,6 @@ public class UserController {
         return "adminDashBoard/fragments/userTableRowContent :: userTableRows";
     }
 
-    // New endpoint to get pagination fragment
     @GetMapping("/account/pagination")
     public String getPaginationFragment(
             @RequestParam(required = false) String keyword,
@@ -137,22 +163,29 @@ public class UserController {
 
         Pageable pageable = PageRequest.of(page, size);
         Page<UserDTO> userPage;
+        List<Long> roleIds = (roleId == 1) ? List.of(1L, 4L) : List.of(roleId);
 
         if (keyword != null && !keyword.trim().isEmpty()) {
             if (status != null) {
-                userPage = userService.searchByNameAndStatusWithPagination(keyword.trim(), roleId, status, pageable);
+                userPage = userService.searchByNameAndStatusWithPagination(keyword.trim(), roleIds, status, pageable);
             } else {
-                userPage = userService.searchByNameWithPagination(keyword.trim(), roleId, pageable);
+                userPage = userService.searchByNameWithPagination(keyword.trim(), roleIds, pageable);
             }
         } else {
             if (status != null) {
-                userPage = userService.getUsersByRoleAndStatusWithPagination(roleId, status, pageable);
+                userPage = userService.getUsersByRolesAndStatusWithPagination(roleIds, status, pageable);
             } else {
-                userPage = userService.getUsersByRoleWithPagination(roleId, pageable);
+                userPage = userService.getUsersByRolesWithPagination(roleIds, pageable);
             }
         }
 
-        model.addAttribute("listU", userPage.getContent());
+        List<UserDTO> listUser = userPage.getContent();
+        final Long currentUserId = getCurrentUserId();
+        if (currentUserId != null) {
+            listUser = listUser.stream().filter(u -> !currentUserId.equals(u.getUserId())).toList();
+        }
+
+        model.addAttribute("listU", listUser);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", userPage.getTotalPages());
         model.addAttribute("totalItems", userPage.getTotalElements());
@@ -193,33 +226,34 @@ public class UserController {
     public Map<String, Long> getAccountCounts(
             @RequestParam(required = false) String keyword) {
         Map<String, Long> counts = new HashMap<>();
-        for (long roleId = 1; roleId <= 3; roleId++) {
+        for (long roleId = 1; roleId <= 4; roleId++) {
             Pageable pageable = PageRequest.of(0, 1);
+            List<Long> roleIds = (roleId == 1) ? List.of(1L, 4L) : List.of(roleId);
             // Active
             Page<UserDTO> activePage;
             if (keyword != null && !keyword.trim().isEmpty()) {
-                activePage = userService.searchByNameAndStatusWithPagination(keyword.trim(), roleId, true, pageable);
+                activePage = userService.searchByNameAndStatusWithPagination(keyword.trim(), roleIds, true, pageable);
             } else {
-                activePage = userService.getUsersByRoleAndStatusWithPagination(roleId, true, pageable);
+                activePage = userService.getUsersByRolesAndStatusWithPagination(roleIds, true, pageable);
             }
             // Inactive
             Page<UserDTO> inactivePage;
             if (keyword != null && !keyword.trim().isEmpty()) {
-                inactivePage = userService.searchByNameAndStatusWithPagination(keyword.trim(), roleId, false, pageable);
+                inactivePage = userService.searchByNameAndStatusWithPagination(keyword.trim(), roleIds, false, pageable);
             } else {
-                inactivePage = userService.getUsersByRoleAndStatusWithPagination(roleId, false, pageable);
+                inactivePage = userService.getUsersByRolesAndStatusWithPagination(roleIds, false, pageable);
             }
-            String roleKey = roleId == 1 ? "admin" : roleId == 2 ? "instructor" : "user";
+            String roleKey = (roleId == 1 || roleId == 4) ? "admin" : roleId == 2 ? "instructor" : "user";
             counts.put(roleKey + "Active", activePage.getTotalElements());
             counts.put(roleKey + "Inactive", inactivePage.getTotalElements());
         }
         return counts;
     }
 
-    @GetMapping("/account/block/{userId}")
-    public String blockAccount(Model model, @PathVariable("userId") long id) {
+    @PostMapping("/account/block/{userId}")
+    public String blockAccount(Model model, @PathVariable("userId") long id, @RequestParam(value = "reason", required = false) String reason, RedirectAttributes redirectAttributes) {
         model.addAttribute("fragmentContent", "adminDashBoard/fragments/accountContent :: accountContent");
-        userService.changStatus(id);
+         userService.changStatus(id, reason);
         return "redirect:/admin/account";
     }
 
@@ -238,7 +272,5 @@ public class UserController {
         userService.deleteAcc(id);
         return "redirect:/admin/account";
     }
-
-
 
 }

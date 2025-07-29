@@ -6,19 +6,17 @@ let currentPages = {
 };
 
 $(document).ready(function () {
-    // Initialize max enrollment fields
     $('.max-enrollments').each(function() {
         const input = this;
         const form = $(input).closest('form');
-        const saveBtn = form.find('.save-btn');
 
         if (input.value.trim() === '') {
             input.placeholder = 'MAX';
-            saveBtn.hide();
         } else {
             input.placeholder = '';
-            saveBtn.show();
         }
+        
+        updateSaveButtonVisibility(form);
     });
 
     // Set current date to month year filter
@@ -28,93 +26,204 @@ $(document).ready(function () {
     const currentMonthYear = `${currentYear}-${currentMonth}`;
     $('#monthYearFilter').val(currentMonthYear);
 
-    // Load initial data for all tabs
     const statuses = ['pending', 'paid', 'overdue'];
     statuses.forEach(status => {
         loadMaintenances(status, 0);
     });
 
-    // Tab change event
     $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
         const status = $(this).data('status');
         console.log("Tab changed to:", status);
         currentStatus = status;
-        // Load current page for this status
         filterMaintenances(currentStatus, currentPages[currentStatus] || 0);
     });
 
     // Filter events
     $('#monthYearFilter').on('change', function () {
         console.log("Month year filter changed:", $(this).val());
-        // Reset to first page when filtering
         currentPages[currentStatus] = 0;
         filterMaintenances(currentStatus, 0);
     });
 
-    // Search input with debounce
     let searchTimer;
     $('#searchInput').on('input', function () {
         const searchValue = $(this).val();
         console.log("Search input triggered - value:", searchValue);
         clearTimeout(searchTimer);
         searchTimer = setTimeout(function () {
-            // Reset to first page when searching
             currentPages[currentStatus] = 0;
             filterMaintenances(currentStatus, 0);
         }, 500);
     });
 
-    // Prevent form submission
     $('#filterForm').on('submit', function (e) {
         e.preventDefault();
         currentPages[currentStatus] = 0;
         filterMaintenances(currentStatus, 0);
     });
 
-    // Validate fee rule before submit
     function getFeeRulesFromTable() {
         let rules = [];
         document.querySelectorAll('.fee-form').forEach(form => {
-            const min = parseInt(form.querySelector('.min-enrollments').value, 10);
+            const minInput = form.querySelector('.min-enrollments').value;
             const maxInput = form.querySelector('.max-enrollments').value;
-            const max = maxInput === "" ? null : parseInt(maxInput, 10);
+            
+            if (minInput.trim() === '') {
+                return;
+            }
+            
+            const min = parseInt(minInput, 10);
+            const max = maxInput.trim() === "" ? null : parseInt(maxInput, 10);
             rules.push({min, max, form});
         });
         return rules;
     }
 
     function validateFeeRule(currentMin, currentMax, rules, currentForm) {
-        // Nếu max trống, min phải lớn nhất
+        if (!currentMin || isNaN(currentMin)) {
+            return "Min Enrollments cannot be empty!";
+        }
+
+        if (currentMin <= 0) {
+            return "Min Enrollments must be greater than 0!";
+        }
+
+        if (currentMax !== null && currentMin >= currentMax) {
+            return "Min Enrollments must be less than Max Enrollments!";
+        }
+
         if (currentMax === null) {
-            const maxMin = Math.max(...rules.filter(r => r.form !== currentForm).map(r => r.min));
-            if (rules.length > 1 && currentMin <= maxMin) {
-                return "Nếu không nhập Max Enrollments, Min Enrollments phải lớn nhất!";
+            const otherRulesWithNullMax = rules.filter(r => r.form !== currentForm && r.max === null);
+            if (otherRulesWithNullMax.length > 0) {
+                const maxMin = Math.max(...otherRulesWithNullMax.map(r => r.min));
+                if (currentMin <= maxMin) {
+                    return "If Max Enrollments is empty, Min Enrollments must be the largest!";
+                }
             }
         }
-        // Nếu max có giá trị, min < max
-        if (currentMax !== null && currentMin >= currentMax) {
-            return "Min Enrollments phải nhỏ hơn Max Enrollments!";
-        }
-        // Không được chồng chéo các khoảng
+
+        // No overlapping ranges
         for (let rule of rules) {
             if (rule.form === currentForm) continue;
             let minA = currentMin, maxA = currentMax, minB = rule.min, maxB = rule.max;
             if (maxA === null) maxA = Infinity;
             if (maxB === null) maxB = Infinity;
             if (Math.max(minA, minB) < Math.min(maxA, maxB)) {
-                return "Khoảng Min-Max bị chồng chéo với rule khác!";
+                return "Min-Max range overlaps with another rule!";
             }
         }
         return null;
     }
 
+    // Store original values for comparison
+    let originalValues = {};
+
+    function storeOriginalValues() {
+        document.querySelectorAll('.fee-form').forEach(form => {
+            const feeId = form.querySelector('input[name="feeId"]').value;
+            const minValue = form.querySelector('.min-enrollments').value;
+            const maxValue = form.querySelector('.max-enrollments').value;
+            const maintenanceFeeValue = form.querySelector('.maintenance-fee').value;
+            originalValues[feeId] = {
+                min: minValue,
+                max: maxValue,
+                maintenanceFee: maintenanceFeeValue
+            };
+        });
+    }
+
+    function hasChanges(form) {
+        const feeId = form.querySelector('input[name="feeId"]').value;
+        const currentMin = form.querySelector('.min-enrollments').value;
+        const currentMax = form.querySelector('.max-enrollments').value;
+        const currentMaintenanceFee = form.querySelector('.maintenance-fee').value;
+        
+        if (!originalValues[feeId]) return true;
+        
+        const hasChanges = originalValues[feeId].min !== currentMin || 
+               originalValues[feeId].max !== currentMax ||
+               originalValues[feeId].maintenanceFee !== currentMaintenanceFee;
+        
+        return hasChanges;
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
-        // Validate on save (update)
+        storeOriginalValues();
+
+        window.hasChanges = hasChanges;
+
+        document.querySelectorAll('.fee-form').forEach(form => {
+            const minInput = form.querySelector('.min-enrollments');
+            const maxInput = form.querySelector('.max-enrollments');
+            const maintenanceFeeInput = form.querySelector('.maintenance-fee');
+            
+            minInput.addEventListener('input', function() {
+                handleInputChange(this);
+            });
+            
+            maxInput.addEventListener('input', function() {
+                handleInputChange(this);
+            });
+            
+            maintenanceFeeInput.addEventListener('input', function() {
+                handleInputChange(this);
+            });
+        });
+        
+        setTimeout(() => {
+            document.querySelectorAll('.fee-form').forEach(form => {
+                updateSaveButtonVisibility(form);
+            });
+        }, 100);
+
         document.querySelectorAll('.fee-form').forEach(form => {
             form.addEventListener('submit', function(e) {
-                const min = parseInt(form.querySelector('.min-enrollments').value, 10);
+                if (!hasChanges(form)) {
+                    e.preventDefault(); // Prevent submission if no changes
+                    return;
+                }
+
+                const minInput = form.querySelector('.min-enrollments').value;
                 const maxInput = form.querySelector('.max-enrollments').value;
-                const max = maxInput === "" ? null : parseInt(maxInput, 10);
+                const maintenanceFeeInput = form.querySelector('.maintenance-fee').value;
+                
+                // Check if min enrollment is empty
+                if (minInput.trim() === '') {
+                    e.preventDefault();
+                    alert("Min Enrollments cannot be empty!");
+                    return;
+                }
+
+                // Check if maintenance fee is empty
+                if (maintenanceFeeInput.trim() === '') {
+                    e.preventDefault();
+                    alert("Maintenance Fee cannot be empty!");
+                    return;
+                }
+
+                const min = parseInt(minInput, 10);
+                const max = maxInput.trim() === "" ? null : parseInt(maxInput, 10);
+                const maintenanceFee = parseInt(maintenanceFeeInput, 10);
+                
+                // Additional validation
+                if (min <= 0) {
+                    e.preventDefault();
+                    alert("Min Enrollments must be greater than 0!");
+                    return;
+                }
+                
+                if (max !== null && max <= 0) {
+                    e.preventDefault();
+                    alert("Max Enrollments must be greater than 0!");
+                    return;
+                }
+                
+                if (maintenanceFee <= 0) {
+                    e.preventDefault();
+                    alert("Maintenance Fee must be greater than 0!");
+                    return;
+                }
+                
                 const rules = getFeeRulesFromTable();
                 const error = validateFeeRule(min, max, rules, form);
                 if (error) {
@@ -123,13 +232,52 @@ $(document).ready(function () {
                 }
             });
         });
+
         // Validate on add
         const addForm = document.getElementById('addFeeForm');
         if (addForm) {
             addForm.addEventListener('submit', function(e) {
-                const min = parseInt(addForm.querySelector('input[name="minEnrollments"]').value, 10);
+                const minInput = addForm.querySelector('input[name="minEnrollments"]').value;
                 const maxInput = addForm.querySelector('input[name="maxEnrollments"]').value;
-                const max = maxInput === "" ? null : parseInt(maxInput, 10);
+                const maintenanceFeeInput = addForm.querySelector('input[name="maintenanceFee"]').value;
+                
+                // Check if min enrollment is empty
+                if (minInput.trim() === '') {
+                    e.preventDefault();
+                    alert("Min Enrollments cannot be empty!");
+                    return;
+                }
+
+                // Check if maintenance fee is empty
+                if (maintenanceFeeInput.trim() === '') {
+                    e.preventDefault();
+                    alert("Maintenance Fee cannot be empty!");
+                    return;
+                }
+
+                const min = parseInt(minInput, 10);
+                const max = maxInput.trim() === "" ? null : parseInt(maxInput, 10);
+                const maintenanceFee = parseInt(maintenanceFeeInput, 10);
+                
+                // Additional validation
+                if (min <= 0) {
+                    e.preventDefault();
+                    alert("Min Enrollments must be greater than 0!");
+                    return;
+                }
+                
+                if (max !== null && max <= 0) {
+                    e.preventDefault();
+                    alert("Max Enrollments must be greater than 0!");
+                    return;
+                }
+                
+                if (maintenanceFee <= 0) {
+                    e.preventDefault();
+                    alert("Maintenance Fee must be greater than 0!");
+                    return;
+                }
+                
                 const rules = getFeeRulesFromTable();
                 const error = validateFeeRule(min, max, rules, null);
                 if (error) {
@@ -148,11 +296,30 @@ function handleMaxEnrollmentChange(input) {
 
     if (input.value.trim() === '') {
         input.placeholder = 'MAX';
-        saveBtn.hide();
     } else {
         input.placeholder = '';
-        saveBtn.show();
     }
+    
+    // Show/hide save button based on changes
+    updateSaveButtonVisibility(form);
+}
+
+// Function to update save button visibility based on changes
+function updateSaveButtonVisibility(form) {
+    const saveBtn = $(form).find('.save-btn');
+    const hasChanges = window.hasChanges ? window.hasChanges(form) : true;
+    
+    if (hasChanges) {
+        saveBtn.show();
+    } else {
+        saveBtn.hide();
+    }
+}
+
+// Function to handle input changes for all fields
+function handleInputChange(input) {
+    const form = $(input).closest('form');
+    updateSaveButtonVisibility(form);
 }
 
 // Function to handle fee deletion

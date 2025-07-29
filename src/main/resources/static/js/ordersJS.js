@@ -8,7 +8,6 @@ let currentPages = {
 function getTableBodyElement(status) {
     const tableMap = {
         'PAID': '#paidTableBody',
-        'CANCELLED': '#cancelledTableBody'
     };
     
     const selector = tableMap[status] || '#paidTableBody';
@@ -19,7 +18,6 @@ function getTableBodyElement(status) {
 function getPaginationElement(status) {
     const paginationMap = {
         'PAID': '#paidPagination',
-        'CANCELLED': '#cancelledPagination'
     };
     
     const selector = paginationMap[status] || '#paidPagination';
@@ -30,7 +28,6 @@ function getPaginationElement(status) {
 function getBadgeElement(status) {
     const badgeMap = {
         'PAID': 'paidCount',
-        'CANCELLED': 'cancelledCount'
     };
     
     const badgeId = badgeMap[status];
@@ -170,7 +167,7 @@ $(document).on('click', '.pagination .page-link', function (e) {
 
 $(document).ready(function () {
     // Load initial data for all tabs
-    const statuses = ['PAID', 'CANCELLED'];
+    const statuses = ['PAID'];
     statuses.forEach(status => {
         loadOrders(status, 0);
     });

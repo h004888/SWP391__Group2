@@ -1,0 +1,98 @@
+<th:block th:fragment="modalContent">
+    <div class="row g-4">
+        <!-- Personal Information Card -->
+        <div class="col-xxl-7">
+            <div class="card bg-transparent border rounded-3 h-100">
+                <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="card-header-title mb-0">Personal Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <div class="avatar avatar-xxl mx-auto mb-3">
+                            <img class="avatar-img rounded-circle border border-white border-3 shadow"
+                                 th:src="${user.profilePicture != null ? user.profilePicture : '/assets/images/avatar/01.jpg'}"
+                                 alt="Profile Picture">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-group list-group-borderless">
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span class="fw-semibold">Full Name:</span>
+                                    <span th:text="${user.fullName}">Full Name</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span class="fw-semibold">Username:</span>
+                                    <span th:text="${user.username}">Username</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span class="fw-semibold">Email:</span>
+                                    <span th:text="${user.email}">Email</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span class="fw-semibold">Phone:</span>
+                                    <span th:text="${user.phone != null ? user.phone : 'Not provided'}">Phone</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-group list-group-borderless">
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span class="fw-semibold">Birthday:</span>
+                                    <span th:text="${user.birthDay != null ? #temporals.format(user.birthDay, 'dd/MM/yyyy') : 'Not provided'}">Birthday</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span class="fw-semibold">Address:</span>
+                                    <span th:text="${user.address != null ? user.address : 'Not provided'}">Address</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span class="fw-semibold">Coins:</span>
+                                    <span class="text-success fw-bold" th:text="${user.coin != null ? user.coin : '0'}">0</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="mt-4" th:if="${user.personalSkill != null}">
+                        <h6 class="fw-semibold mb-2">Professional Skills:</h6>
+                        <p class="text-muted mb-0 fw-bold" th:text="${user.personalSkill}">Professional skills description</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Enrollment Information Card -->
+        <div class="col-xxl-5">
+            <div class="card bg-transparent border rounded-3 h-100">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="card-header-title mb-0">Enrollment Information</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-borderless">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="fw-semibold">Course:</span>
+                            <span th:text="${enrollment.course.title}">Course Title</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="fw-semibold">Enrollment Date:</span>
+                            <span th:text="${#dates.format(enrollment.enrollmentDate, 'dd/MM/yyyy HH:mm')}">01/01/2023</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="fw-semibold">Progress:</span>
+                            <span th:text="${enrollment.progress + '%'}"></span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="fw-semibold">Status:</span>
+                            <span th:text="${enrollment.status}">Status</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between" th:if="${enrollment.order != null}">
+                            <span class="fw-semibold">Order ID:</span>
+                            <span th:text="${enrollment.order.orderId}">OrderId</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+<th:block th:fragment="errorContent">
+    <div class="alert alert-danger" th:text="${errorMessage}">Enrollment not found</div>
+</th:block> 

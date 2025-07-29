@@ -23,7 +23,7 @@ public class CoinTransaction {
     private User user;
 
     @Column(name = "Amount")
-    private BigDecimal amount;
+    private Double amount;
 
     @Column(name = "TransactionType")
     private String transactionType;

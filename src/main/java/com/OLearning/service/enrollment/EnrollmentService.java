@@ -3,6 +3,8 @@ package com.OLearning.service.enrollment;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+
+import com.OLearning.dto.enrollment.EnrollMaxMinDTO;
 import org.springframework.stereotype.Service;
 import com.OLearning.dto.enrollment.UserCourseProgressDTO;
 import com.OLearning.dto.user.UserDTO;
@@ -12,6 +14,7 @@ import com.OLearning.entity.User;
 import com.OLearning.dto.enrollment.EnrollmentDTO;
 import org.springframework.data.domain.Page;
 import java.util.Map;
+import com.OLearning.dto.enrollment.EnrollmentFilterDTO;
 
 @Service
 public interface EnrollmentService {
@@ -36,13 +39,9 @@ public interface EnrollmentService {
     // Đếm số lượng enrollment theo instructor, năm, tháng
     Long countEnrollmentsByInstructorAndMonth(long instructorId, int year, int month);
 
-    Long countEnrollmentsByInstructorAndDateRange(long instructorId, java.time.LocalDate start, java.time.LocalDate end);
+    Long countEnrollmentsByInstructorAndDateRange(long instructorId, LocalDate start, java.time.LocalDate end);
 
     Page<EnrollmentDTO> getEnrollmentsByInstructorId(Long userId, int page, int size);
-
-    boolean blockEnrollment(int enrollmentId);
-
-    EnrollmentDTO getRequestById(int enrollmentId);
 
     Integer getTotalEnrollment(Long courseId);
 
@@ -50,7 +49,7 @@ public interface EnrollmentService {
 
     Integer getWeeksEnrolled(Long userId, Long courseId);
 
-    void updateProgressByUser( Long userId,  Long courseId);
+    void updateProgressByUser(Long userId, Long courseId);
 
     Optional<Enrollment> findByUserAndCourse(User user, Course course);
 
@@ -66,7 +65,7 @@ public interface EnrollmentService {
 
     // Lấy enrollment trong 30 ngày gần nhất
     List<Enrollment> findByEnrollmentDateAfter(LocalDate date);
-
+    List<Long> getTotalEnrollmentOfInstructor(List<UserDTO> instructors);
     // Lấy enrollment của một user cụ thể
     List<Enrollment> findByUserId(Long userId);
 
@@ -74,4 +73,27 @@ public interface EnrollmentService {
 
     int updateStatusToCompleted(Long userId, Long courseId);
 
+    Integer countTotalEnrollment(Long instructorId);
+
+    Integer countTotalEnrollmentOnGoing(Long instructorId);
+
+    Integer countTotalEnrollmentCompelted(Long instructorId);
+
+    EnrollMaxMinDTO enrollmentMax(Long instructorId);
+
+    EnrollMaxMinDTO enrollmentMin(Long instructorId);
+
+    Integer completeMax(Long instructorId);
+
+    Integer onGoingMax(Long instructorId);
+
+    Integer completeMin(Long instructorId);
+
+    Integer onGoingMin(Long instructorId);
+
+    Page<EnrollmentDTO> findEnrollmentsWithFilters(Long instructorId, EnrollmentFilterDTO filterDTO);
+
+    List<Course> getInstructorCourses(Long instructorId);
+
+    Map<Long, Double> getEnrollmentByUserId(Long userId);
 }

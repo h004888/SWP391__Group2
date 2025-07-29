@@ -2,6 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 
 <!-- Mirrored from stackbros.in/eduport/landing/course-detail-min.html by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 06 Jun 2025 07:32:06 GMT -->
+
 <head>
     <title>Eduport - LMS, Education and Course Theme</title>
 
@@ -78,14 +79,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com/">
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
     <link rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&amp;family=Roboto:wght@400;500;700&amp;display=swap">
+        href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&amp;family=Roboto:wght@400;500;700&amp;display=swap">
 
     <!-- Plugins CSS -->
     <link rel="stylesheet" type="text/css" th:href="@{/assets/vendor/font-awesome/css/all.min.css}">
     <link rel="stylesheet" type="text/css" th:href="@{/assets/vendor/bootstrap-icons/bootstrap-icons.css}">
     <link rel="stylesheet" type="text/css" th:href="@{/assets/vendor/choices/css/choices.min.css}">
     <link rel="stylesheet" type="text/css" th:href="@{/assets/vendor/aos/aos.css}">
-    <link rel="stylesheet" type="text/css" th:href="@{/assets/vendor/plyr/plyr.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/assets/vendor/plyr/plyr.css}" />
 
     <!-- Theme CSS -->
     <link rel="stylesheet" type="text/css" th:href="@{/assets/css/style.css}">
@@ -94,154 +95,166 @@
 
 <body>
 
-<!-- Header START -->
-<div th:replace="userPage/fragmentLessonVideo/navHeaderLessonVideo :: navHeaderLessonVideo"></div>
-<!-- Header END -->
+    <!-- Header START -->
+    <div th:replace="userPage/fragmentLessonVideo/navHeaderLessonVideo :: navHeaderLessonVideo"></div>
+    <!-- Header END -->
 
-<!-- **************** MAIN CONTENT START **************** -->
-<div th:replace="userPage/fragmentLessonVideo/mainContentLessonVideo :: mainContentLessonVideo(currentLesson=${currentLesson}, course=${course}, user=${user})"></div>
-<!-- **************** MAIN CONTENT END **************** -->
+    <!-- **************** MAIN CONTENT START **************** -->
+    <div
+        th:replace="userPage/fragmentLessonVideo/mainContentLessonVideo :: mainContentLessonVideo(currentLesson=${currentLesson}, course=${course}, user=${user})">
+    </div>
+    <!-- **************** MAIN CONTENT END **************** -->
 
-<!-- =======================
+    <!-- =======================
 Footer START -->
-<div th:replace="userPage/fragmentLessonVideo/footerLessonVideo :: footerLessonVideo"> </div>
-<!-- =======================
+    <div th:replace="userPage/fragmentLessonVideo/footerLessonVideo :: footerLessonVideo"> </div>
+    <!-- =======================
 Footer END -->
 
-<!-- Modal START -->
-<div class="modal fade" id="coursePremium" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header border-0 bg-transparent">
-                <!-- Close button -->
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <!-- Modal body -->
-            <div class="modal-body px-5 pb-5 position-relative overflow-hidden">
-
-                <!-- Element -->
-                <figure class="position-absolute bottom-0 end-0 mb-n4 me-n4 d-none d-sm-block">
-                    <img src="/assets/images/element/01.svg" alt="element">
-                </figure>
-                <figure class="position-absolute top-0 end-0 z-index-n1 opacity-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="818.6px"
-                         height="235.1px" viewBox="0 0 818.6 235.1">
-                        <path class="fill-info"
-                              d="M735,226.3c-5.7,0.6-11.5,1.1-17.2,1.7c-66.2,6.8-134.7,13.7-192.6-16.6c-34.6-18.1-61.4-47.9-87.3-76.7 c-21.4-23.8-43.6-48.5-70.2-66.7c-53.2-36.4-121.6-44.8-175.1-48c-13.6-0.8-27.5-1.4-40.9-1.9c-46.9-1.9-95.4-3.9-141.2-16.5 C8.3,1.2,6.2,0.6,4.2,0H0c3.3,1,6.6,2,10,3c46,12.5,94.5,14.6,141.5,16.5c13.4,0.6,27.3,1.1,40.8,1.9 c53.4,3.2,121.5,11.5,174.5,47.7c26.5,18.1,48.6,42.7,70,66.5c26,28.9,52.9,58.8,87.7,76.9c58.3,30.5,127,23.5,193.3,16.7 c5.8-0.6,11.5-1.2,17.2-1.7c26.2-2.6,55-4.2,83.5-2.2v-1.2C790,222,761.2,223.7,735,226.3z"></path>
-                    </svg>
-                </figure>
-                <!-- Title -->
-                <h2>Get Premium Course in <span class="text-success">$800</span></h2>
-                <p>Prosperous understood Middletons in conviction an uncommonly do. Supposing so be resolving breakfast
-                    am or perfectly.</p>
-                <!-- Content -->
-                <div class="row mb-3 item-collapse">
-                    <div class="col-sm-6">
-                        <ul class="list-group list-group-borderless">
-                            <li class="list-group-item text-body"><i class="bi bi-patch-check-fill text-success"></i>High
-                                quality Curriculum
-                            </li>
-                            <li class="list-group-item text-body"><i class="bi bi-patch-check-fill text-success"></i>Tuition
-                                Assistance
-                            </li>
-                            <li class="list-group-item text-body"><i class="bi bi-patch-check-fill text-success"></i>Diploma
-                                course
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="col-sm-6">
-                        <ul class="list-group list-group-borderless">
-                            <li class="list-group-item text-body"><i class="bi bi-patch-check-fill text-success"></i>Intermediate
-                                courses
-                            </li>
-                            <li class="list-group-item text-body"><i class="bi bi-patch-check-fill text-success"></i>Over
-                                200 online courses
-                            </li>
-                        </ul>
-                    </div>
+    <!-- Modal START -->
+    <div class="modal fade" id="coursePremium" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header border-0 bg-transparent">
+                    <!-- Close button -->
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <!-- Button -->
-                <a href="#" class="btn btn-lg btn-orange-soft">Purchase premium</a>
-            </div>
-            <!-- Modal footer -->
-            <div class="modal-footer d-block bg-info">
-                <div class="d-sm-flex justify-content-sm-between align-items-center text-center text-sm-start">
-                    <!-- Social media button -->
-                    <ul class="list-inline mb-0 social-media-btn mb-2 mb-sm-0">
-                        <li class="list-inline-item"><a class="btn btn-sm mb-0 me-1 bg-white text-facebook" href="#"><i
-                                class="fab fa-fw fa-facebook-f"></i></a></li>
-                        <li class="list-inline-item"><a class="btn btn-sm mb-0 me-1 bg-white text-instagram" href="#"><i
-                                class="fab fa-fw fa-instagram"></i></a></li>
-                        <li class="list-inline-item"><a class="btn btn-sm mb-0 me-1 bg-white text-twitter" href="#"><i
-                                class="fab fa-fw fa-twitter"></i></a></li>
-                        <li class="list-inline-item"><a class="btn btn-sm mb-0 bg-white text-linkedin" href="#"><i
-                                class="fab fa-fw fa-linkedin-in"></i></a></li>
-                    </ul>
-                    <!-- Contact info -->
-                    <div>
-                        <p class="mb-1 small"><a href="#" class="text-white"><i class="far fa-envelope fa-fw me-2"></i>example@gmail.com</a>
-                        </p>
-                        <p class="mb-0 small"><a href="#" class="text-white"><i class="fas fa-headset fa-fw me-2"></i>123-456-789</a>
-                        </p>
+                <!-- Modal body -->
+                <div class="modal-body px-5 pb-5 position-relative overflow-hidden">
+
+                    <!-- Element -->
+                    <figure class="position-absolute bottom-0 end-0 mb-n4 me-n4 d-none d-sm-block">
+                        <img src="/assets/images/element/01.svg" alt="element">
+                    </figure>
+                    <figure class="position-absolute top-0 end-0 z-index-n1 opacity-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                            width="818.6px" height="235.1px" viewBox="0 0 818.6 235.1">
+                            <path class="fill-info"
+                                d="M735,226.3c-5.7,0.6-11.5,1.1-17.2,1.7c-66.2,6.8-134.7,13.7-192.6-16.6c-34.6-18.1-61.4-47.9-87.3-76.7 c-21.4-23.8-43.6-48.5-70.2-66.7c-53.2-36.4-121.6-44.8-175.1-48c-13.6-0.8-27.5-1.4-40.9-1.9c-46.9-1.9-95.4-3.9-141.2-16.5 C8.3,1.2,6.2,0.6,4.2,0H0c3.3,1,6.6,2,10,3c46,12.5,94.5,14.6,141.5,16.5c13.4,0.6,27.3,1.1,40.8,1.9 c53.4,3.2,121.5,11.5,174.5,47.7c26.5,18.1,48.6,42.7,70,66.5c26,28.9,52.9,58.8,87.7,76.9c58.3,30.5,127,23.5,193.3,16.7 c5.8-0.6,11.5-1.2,17.2-1.7c26.2-2.6,55-4.2,83.5-2.2v-1.2C790,222,761.2,223.7,735,226.3z">
+                            </path>
+                        </svg>
+                    </figure>
+                    <!-- Title -->
+                    <h2>Get Premium Course in <span class="text-success">$800</span></h2>
+                    <p>Prosperous understood Middletons in conviction an uncommonly do. Supposing so be resolving
+                        breakfast
+                        am or perfectly.</p>
+                    <!-- Content -->
+                    <div class="row mb-3 item-collapse">
+                        <div class="col-sm-6">
+                            <ul class="list-group list-group-borderless">
+                                <li class="list-group-item text-body"><i
+                                        class="bi bi-patch-check-fill text-success"></i>High
+                                    quality Curriculum
+                                </li>
+                                <li class="list-group-item text-body"><i
+                                        class="bi bi-patch-check-fill text-success"></i>Tuition
+                                    Assistance
+                                </li>
+                                <li class="list-group-item text-body"><i
+                                        class="bi bi-patch-check-fill text-success"></i>Diploma
+                                    course
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-sm-6">
+                            <ul class="list-group list-group-borderless">
+                                <li class="list-group-item text-body"><i
+                                        class="bi bi-patch-check-fill text-success"></i>Intermediate
+                                    courses
+                                </li>
+                                <li class="list-group-item text-body"><i
+                                        class="bi bi-patch-check-fill text-success"></i>Over
+                                    200 online courses
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- Button -->
+                    <a href="#" class="btn btn-lg btn-orange-soft">Purchase premium</a>
+                </div>
+                <!-- Modal footer -->
+                <div class="modal-footer d-block bg-info">
+                    <div class="d-sm-flex justify-content-sm-between align-items-center text-center text-sm-start">
+                        <!-- Social media button -->
+                        <ul class="list-inline mb-0 social-media-btn mb-2 mb-sm-0">
+                            <li class="list-inline-item"><a class="btn btn-sm mb-0 me-1 bg-white text-facebook"
+                                    href="#"><i class="fab fa-fw fa-facebook-f"></i></a></li>
+                            <li class="list-inline-item"><a class="btn btn-sm mb-0 me-1 bg-white text-instagram"
+                                    href="#"><i class="fab fa-fw fa-instagram"></i></a></li>
+                            <li class="list-inline-item"><a class="btn btn-sm mb-0 me-1 bg-white text-twitter"
+                                    href="#"><i class="fab fa-fw fa-twitter"></i></a></li>
+                            <li class="list-inline-item"><a class="btn btn-sm mb-0 bg-white text-linkedin" href="#"><i
+                                        class="fab fa-fw fa-linkedin-in"></i></a></li>
+                        </ul>
+                        <!-- Contact info -->
+                        <div>
+                            <p class="mb-1 small"><a href="#" class="text-white"><i
+                                        class="far fa-envelope fa-fw me-2"></i>example@gmail.com</a>
+                            </p>
+                            <p class="mb-0 small"><a href="#" class="text-white"><i
+                                        class="fas fa-headset fa-fw me-2"></i>123-456-789</a>
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-<!-- Modal END -->
+    <!-- Modal END -->
 
-<!-- Back to top -->
-<div class="back-top"><i class="bi bi-arrow-up-short position-absolute top-50 start-50 translate-middle"></i></div>
+    <!-- Back to top -->
+    <div class="back-top"><i class="bi bi-arrow-up-short position-absolute top-50 start-50 translate-middle"></i></div>
 
-<!-- Bootstrap JS -->
-<script src="/assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="/assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Vendors -->
-<script src="/assets/vendor/choices/js/choices.min.js"></script>
-<script src="/assets/vendor/aos/aos.js"></script>
-<script src="/assets/vendor/plyr/plyr.js"></script>
+    <!-- Vendors -->
+    <script src="/assets/vendor/choices/js/choices.min.js"></script>
+    <script src="/assets/vendor/aos/aos.js"></script>
+    <script src="/assets/vendor/plyr/plyr.js"></script>
 
-<!-- Template Functions -->
-<script src="/assets/js/functions.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
+    <!-- Template Functions -->
+    <script src="/assets/js/functions.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 
-<script>
-    $(document).ready(function () {
-        const video = $("video")[0];
-        const lessonId = [[${currentLesson.lessonId}]];
-        const courseId = [[${course.courseId}]];
 
-        video.addEventListener("ended", function () {
-            $.ajax({
-                url: '/api/lesson/complete',
-                type: 'POST',
-                data: {
-                    lessonId: lessonId,
-                    courseId: courseId
-                },
-                success: function (response) {
-                    if (response.status === 'success') {
-                        window.location.href = response.nextLessonUrl;
-                    } else if (response.status === 'completed_all') {
-                        alert("🎉 Bạn đã hoàn thành toàn bộ khóa học!");
-                        window.location.href = "/learning";
-                    } else {
-                        alert("❌ Không thể chuyển bài học. Vui lòng thử lại.");
+    <script>
+        $(document).ready(function () {
+            const video = $("video")[0];
+            const lessonId = [[${ currentLesson.lessonId }]];
+            const courseId = [[${ course.courseId }]];
+
+            video.addEventListener("ended", function () {
+                $.ajax({
+                    url: '/api/lesson/complete',
+                    type: 'POST',
+                    data: {
+                        lessonId: lessonId,
+                        courseId: courseId
+                    },
+                    success: function (response) {
+                        if (response.status === 'success') {
+                            window.location.href = response.nextLessonUrl;
+                        } else if (response.status === 'completed_all') {
+                            alert("🎉 Bạn đã hoàn thành toàn bộ khóa học!");
+                            window.location.href = response.redirectUrl;
+                        } else {
+                            alert("❌ Không thể chuyển bài học. Vui lòng thử lại.");
+                        }
+                    },
+                    error: function () {
+                        alert("⚠️ Đã xảy ra lỗi khi gửi yêu cầu đánh dấu hoàn thành bài học.");
                     }
-                },
-                error: function () {
-                    alert("⚠️ Đã xảy ra lỗi khi gửi yêu cầu đánh dấu hoàn thành bài học.");
-                }
+                });
             });
         });
-    });
-</script>
+    </script>
 
 
 </body>
 
 <!-- Mirrored from stackbros.in/eduport/landing/course-detail-min.html by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 06 Jun 2025 07:32:10 GMT -->
+
 </html>

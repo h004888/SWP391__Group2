@@ -118,21 +118,13 @@ function attachEventHandlers() {
         loadCourseDetails(categoryId, categoryName);
     });
 
-    // Re-attach delete category events
+    // Re-attach delete category events (chỉ mở modal và set data, không gọi AJAX)
     $('.delete-category').off('click').on('click', function() {
         const categoryId = $(this).data('id');
-        $.ajax({
-            url: '/admin/category/delete/' + categoryId,
-            method: 'DELETE',
-            success: function(response) {
-                // Reload current page after successful deletion
-                filterCategories(currentPage, pageSize);
-            },
-            error: function(xhr, status, error) {
-                console.error('Error deleting category:', error);
-                alert('Error deleting category. Please try again.');
-            }
-        });
+        const categoryName = $(this).data('name');
+        $('#deleteCategoryId').val(categoryId);
+        $('#deleteCategoryName').text(categoryName);
+        $('#deleteCategoryModal').modal('show');
     });
 
     // Re-attach edit category events
@@ -248,14 +240,6 @@ $(document).ready(function () {
                 submitBtn.prop('disabled', false).html(originalText);
             }
         });
-    });
-
-    // Delete Category Modal - Fill data when modal opens
-    $('.delete-category').on('click', function() {
-        const categoryId = $(this).data('id');
-        const categoryName = $(this).data('name');
-        $('#deleteCategoryId').val(categoryId);
-        $('#deleteCategoryName').text(categoryName);
     });
 
     // Edit Category Modal - Fill data when modal opens

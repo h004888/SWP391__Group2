@@ -26,7 +26,9 @@
                 <div class="card shadow-hover overflow-hidden bg-transparent">
                     <div class="position-relative">
                         <!-- Image -->
-                        <img class="card-img-top" src="assets/images/courses/4by3/16.jpg" alt="Card image">
+                        <img class="card-img-top"
+                            th:src="@{${course.courseImg}!=null ? ${course.courseImg} : 'assets/images/courses/4by3/16.jpg'}"
+                            style="height: 265px; object-fit: contain;" alt="Card image">
                         <!-- Overlay -->
                         <div class="bg-overlay bg-dark opacity-4"></div>
                         <div class="card-img-overlay d-flex align-items-start flex-column">
@@ -35,15 +37,15 @@
                                 <div class="d-flex align-items-center bg-white p-2 rounded-2">
                                     <!-- Avatar -->
                                     <div class="avatar avatar-sm me-2">
-                                        <img class="avatar-img rounded-1" th:src="@{/assets/images/avatar/10.jpg}"
+                                        <img class="avatar-img rounded-1"
+                                            th:src="@{${course.instructor.profilePicture}!=null ? ${course.instructor.profilePicture} : '/assets/images/avatar/01.jpg'}"
                                             alt="avatar">
                                     </div>
                                     <!-- Avatar info -->
                                     <div>
                                         <h6 class="mb-0"><a href="#" class="text-dark"
-                                                th:text="${course.instructor.username}">Larry Lawson</a></h6>
-                                        <span class="small"
-                                            th:text="${course.instructor.personalSkill}">Instructor</span>
+                                                th:text="${course.instructor.fullName}">Larry Lawson</a></h6>
+
                                     </div>
                                 </div>
                             </div>
@@ -56,8 +58,12 @@
                             <div class="hstack gap-2">
                                 <a href="#" class="badge bg-orange bg-opacity-10 text-orange"
                                     th:utext="${course.courseLevel}">All level</a>
-                                <a href="#" class="badge text-bg-dark" th:utext="${course.duration/3600 +'h'}">6
-                                    month</a>
+                                <span class="badge text-bg-dark">
+                                    <span th:if="${course.duration >= 60}"
+                                          th:text="${(course.duration / 60) + 'h ' + (course.duration % 60) + 'm'}">12h 56m</span>
+                                    <span th:if="${course.duration < 60}"
+                                          th:text="${'0h ' + course.duration + 'm'}">0h 45m</span>
+                                </span>
                             </div>
 
                         </div>

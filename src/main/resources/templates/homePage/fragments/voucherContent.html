@@ -1,10 +1,5 @@
 <main th:fragment="voucherContent">
-    <div id="notification" class="position-fixed top-0 end-0 p-5" style="z-index: 1050; transform: translateX(200%); transition: transform 0.5s ease;">
-        <div id="notification-alert" class="alert d-flex align-items-center mb-0" role="alert" style="min-width: 250px;">
-            <i id="notification-icon" class="me-2"></i>
-            <span id="notification-message"></span>
-        </div>
-    </div>
+    <div th:replace="~{homePage/fragments/notification :: notification}"></div>
     <!-- Main Content -->
     <main class="pt-5">
         <div class="container">
@@ -23,7 +18,7 @@
                             <h2 class="h5 fw-bold text-dark mb-4">
                                 <i class="fas fa-ticket-alt text-primary me-2"></i>Apply Voucher
                             </h2>
-                            <form th:action="@{/vouchers/apply}" method="post" id="voucher-form">
+                            <form th:action="@{/home/vouchers/apply}" method="post" id="voucher-form">
                                 <div class="input-group">
                                     <input type="text" id="voucher-code" name="code" th:value="${voucherCode}" placeholder="Enter voucher code"
                                            class="form-control form-control-lg">
@@ -47,11 +42,11 @@
                 </div>
                 <div class="col-12">
                     <div class="tiny-slider arrow-round arrow-blur arrow-hover">
-                        <div class="tiny-slider-inner pb-1" data-autoplay="true" data-arrow="true" data-edge="2" data-dots="false" data-items="3" data-items-lg="2" data-items-sm="1" data-speed="600" data-autoplay-timeout="2500">
+                        <div class="tiny-slider-inner pb-1" data-autoplay="true" data-arrow="true" data-edge="2" data-dots="false" data-items="4" data-items-lg="3" data-items-md="2" data-items-sm="1" data-speed="600" data-autoplay-timeout="2500">
                             <div th:each="voucher : ${publicVouchers}">
-                                <div class="card shadow-sm voucher-card mx-2" style="border-radius: 1rem; min-width: 320px; max-width: 350px;">
+                                <div class="card shadow-sm voucher-card mx-2" style="border-radius: 1rem; min-width: 180px; max-width: 220px;">
                                     <div class="position-relative">
-                                        <img src="https://picsum.photos/seed/public-voucher/350/180.jpg" alt="Voucher" class="card-img-top" style="height: 180px; object-fit: cover; border-radius: 1rem 1rem 0 0;">
+                                        <img th:src="@{/assets/images/voucher.png}" alt="Voucher" class="card-img-top" style="height: 140px; object-fit: cover; border-radius: 1rem 1rem 0 0;">
                                         <div class="position-absolute top-0 end-0 bg-success text-white px-3 py-1 small fw-semibold rounded-end" th:text="${#numbers.formatInteger(voucher.discount, 1) + '%'}"></div>
                                     </div>
                                     <div class="card-body d-flex flex-column">
@@ -106,27 +101,27 @@
                                 <p class="mb-0">You don't have any vouchers yet. Enter voucher code to get discount!</p>
                             </div>
 
-                            <div id="voucher-list" class="row g-4" th:if="${!#lists.isEmpty(userVouchers)}">
+                            <div id="voucher-list" class="row g-3" th:if="${!#lists.isEmpty(userVouchers)}">
                                 <!-- Voucher cards will be generated here -->
-                                <div th:each="voucher : ${userVouchers}" class="col-md-6 col-lg-4">
-                                    <div class="card h-100 shadow-sm voucher-card" th:classappend="${voucher.isUsed ? 'opacity-75' : ''}" th:attr="data-voucher-id=${voucher.voucherId}">
+                                <div th:each="voucher : ${userVouchers}" class="col-12 col-sm-6 col-lg-3 d-flex">
+                                    <div class="card h-100 shadow-sm voucher-card w-100" th:classappend="${voucher.isUsed ? 'opacity-75' : ''}" th:attr="data-voucher-id=${voucher.voucherId}">
                                         <div class="position-relative">
-                                            <img src="https://picsum.photos/seed/voucher/300/150.jpg" alt="Voucher" class="card-img-top" style="height: 150px; object-fit: cover;">
+                                            <img th:src="@{/assets/images/voucher.png}" alt="Voucher" class="card-img-top" style="height: 120px; object-fit: cover;">
                                             <div class="position-absolute top-0 end-0 bg-primary text-white px-3 py-1 small fw-semibold" th:text="${#numbers.formatInteger(voucher.discount, 1) + '%'}">
                                             </div>
                                         </div>
                                         <div class="card-body d-flex flex-column">
                                             <div class="d-flex justify-content-between align-items-start mb-3">
                                                 <h5 class="card-title fw-bold mb-0" th:text="${voucher.voucherCode}"></h5>
-                                                <span class="badge" th:classappend="${voucher.isUsed ? 'bg-secondary' : 'bg-success'}" th:text="${voucher.isUsed ? 'Đã sử dụng' : 'Sử dụng được'}">
+                                                <span class="badge" th:classappend="${voucher.isUsed ? 'bg-secondary' : 'bg-success'}" th:text="${voucher.isUsed ? 'Used' : 'Available'}">
                                                 </span>
                                             </div>
                                             <div class="text-muted small mb-3">
                                                 <div class="mb-2">
                                                     <i class="fas fa-clock me-1"></i>
-                                                    Hết hạn: <span th:text="${voucher.expiryDate}"></span>
+                                                    Expired: <span th:text="${voucher.expiryDate}"></span>
                                                 </div>
-                                                <p class="mb-0" th:text="${voucher.isUsed ? 'Voucher này đã được sử dụng.' : 'Voucher này có thể được áp dụng cho đơn hàng.'}">
+                                                <p class="mb-0" th:text="${voucher.isUsed ? 'This voucher has been used.' : 'This voucher can be applied to your order.'}">
                                                 </p>
                                             </div>
                                             <div class="mt-auto">
@@ -146,7 +141,7 @@
                                         <ul class="pagination pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
                                             <!-- Previous button -->
                                             <li class="page-item mb-0" th:classappend="${!hasPrevious} ? 'disabled'">
-                                                <a class="page-link" th:href="@{/vouchers(page=${currentPage - 1})}" th:if="${hasPrevious}">
+                                                <a class="page-link" th:href="@{/home/vouchers(page=${currentPage - 1})}" th:if="${hasPrevious}">
                                                     <i class="fas fa-angle-left"></i>
                                                 </a>
                                                 <span class="page-link" th:unless="${hasPrevious}">
@@ -156,7 +151,7 @@
 
                                             <!-- Page numbers -->
                                             <li class="page-item mb-0" th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}">
-                                                <a class="page-link" th:href="@{/vouchers(page=${pageNum})}"
+                                                <a class="page-link" th:href="@{/home/vouchers(page=${pageNum})}"
                                                    th:text="${pageNum + 1}"
                                                    th:classappend="${pageNum == currentPage} ? 'active'">
                                                     1
@@ -165,7 +160,7 @@
 
                                             <!-- Next button -->
                                             <li class="page-item mb-0" th:classappend="${!hasNext} ? 'disabled'">
-                                                <a class="page-link" th:href="@{/vouchers(page=${currentPage + 1})}" th:if="${hasNext}">
+                                                <a class="page-link" th:href="@{/home/vouchers(page=${currentPage + 1})}" th:if="${hasNext}">
                                                     <i class="fas fa-angle-right"></i>
                                                 </a>
                                                 <span class="page-link" th:unless="${hasNext}">
@@ -199,32 +194,7 @@
         </div>
     </div>
     <script th:inline="javascript">
-        // Function to show notification
-        function showNotification(message, type) {
-            const notification = document.getElementById('notification');
-            const notificationAlert = document.getElementById('notification-alert');
-            const notificationIcon = document.getElementById('notification-icon');
-            const notificationMessage = document.getElementById('notification-message');
-
-            // Reset trạng thái alert
-            notificationAlert.classList.remove('alert-success', 'alert-danger');
-
-            // Set message và icon
-            notificationMessage.textContent = message;
-            if (type === 'success') {
-                notificationAlert.classList.add('alert-success');
-                notificationIcon.className = 'fas fa-check-circle me-2';
-            } else {
-                notificationAlert.classList.add('alert-danger');
-                notificationIcon.className = 'fas fa-exclamation-circle me-2';
-            }
-
-            notification.style.transform = 'translateX(0)';
-            setTimeout(() => {
-                notification.style.transform = 'translateX(200%)';
-            }, 3000);
-        }
-
+        // Không cần định nghĩa lại showNotification, đã có trong notification.html
         // Handle form submission
         document.getElementById('voucher-form').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -242,7 +212,7 @@
                 return;
             }
 
-            // Validate format voucher code (ít nhất 3 ký tự)
+            // Validate voucher code format (at least 3 characters)
             if (code.length < 3) {
                 showNotification('Voucher code must be at least 3 characters.', 'error');
                 codeInput.focus();
@@ -254,7 +224,7 @@
             const originalText = submitBtn.innerHTML;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
 
-            fetch('/vouchers/apply', {
+            fetch('/home/vouchers/apply', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
@@ -288,11 +258,11 @@
             const successMessage = document.getElementById('server-success-message');
             const errorMessage = document.getElementById('server-error-message');
             if (successMessage && successMessage.textContent.trim()) {
-                showNotification(successMessage.textContent.trim(), 'success');
-            }
+                        showNotification(successMessage.textContent.trim(), 'success');
+                    }
             if (errorMessage && errorMessage.textContent.trim()) {
-                showNotification(errorMessage.textContent.trim(), 'error');
-            }
+                        showNotification(errorMessage.textContent.trim(), 'error');
+                    }
 
             // Auto focus vào input field
             const codeInput = document.getElementById('voucher-code');
@@ -313,9 +283,9 @@
                 const isPublicVoucher = viewBtn.closest('.voucher-card').querySelector('.claim-voucher-btn') !== null;
                 let fetchUrl;
                 if (isPublicVoucher) {
-                    fetchUrl = `/vouchers/voucher/${voucherId}/courses`;
+                    fetchUrl = `/home/vouchers/voucher/${voucherId}/courses`;
                 } else {
-                    fetchUrl = `/vouchers/voucher/${voucherId}/user/${currentUserId}/courses`;
+                    fetchUrl = `/home/vouchers/voucher/${voucherId}/user/${currentUserId}/courses`;
                 }
                 // Gọi API lấy danh sách khóa học hợp lệ
                 fetch(fetchUrl)
@@ -329,10 +299,17 @@
                             data.forEach(course => {
                                 const courseDiv = document.createElement('div');
                                 courseDiv.className = 'd-flex justify-content-between align-items-center border-bottom py-2';
-                                courseDiv.innerHTML = `
-                                    <span class="fw-semibold">${course.title || 'Course #' + course.courseId}</span>
-                                    <button class="btn btn-sm btn-primary apply-voucher-btn" data-course-id="${course.courseId}" data-voucher-id="${voucherId}">Apply</button>
-                                `;
+                                // Nếu là voucher public thì KHÔNG render nút Apply
+                                if (isPublicVoucher) {
+                                    courseDiv.innerHTML = `
+                                        <span class="fw-semibold">${course.title || 'Course #' + course.courseId}</span>
+                                    `;
+                                } else {
+                                    courseDiv.innerHTML = `
+                                        <span class="fw-semibold">${course.title || 'Course #' + course.courseId}</span>
+                                        <button class="btn btn-sm btn-primary apply-voucher-btn" data-course-id="${course.courseId}" data-voucher-id="${voucherId}">Apply</button>
+                                    `;
+                                }
                                 listDiv.appendChild(courseDiv);
                             });
                         }
@@ -369,27 +346,27 @@
                 const voucherId = claimBtn.getAttribute('data-voucher-id');
                 if (!voucherId) return;
 
-                fetch(`/vouchers/claim/${voucherId}`, {
+                fetch(`/home/vouchers/claim/${voucherId}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     }
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showNotification(data.message, 'success');
-                        // Reload the page to update the voucher lists
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 300);
-                    } else {
-                        showNotification(data.message, 'error');
-                    }
-                })
-                .catch(() => {
-                    showNotification('There was an error receiving the voucher, please try again.', 'error');
-                });
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showNotification(data.message, 'success');
+                            // Reload the page to update the voucher lists
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 300);
+                        } else {
+                            showNotification(data.message, 'error');
+                        }
+                    })
+                    .catch(() => {
+                        showNotification('There was an error receiving the voucher, please try again.', 'error');
+                    });
             }
         });
     </script>

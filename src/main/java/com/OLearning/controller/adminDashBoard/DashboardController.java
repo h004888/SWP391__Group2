@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -75,7 +76,10 @@ public class DashboardController {
             @RequestParam("endDate") String endDateStr) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate startDate = LocalDate.parse(startDateStr, formatter);
-        LocalDate endDate = LocalDate.parse(endDateStr, formatter);
+        LocalDate endDate = LocalDate.parse(endDateStr, formatter).plusDays(1);
+        if (startDate.isAfter(endDate)) {
+            throw new IllegalArgumentException("startDate must be before or equal to endDate");
+        }
         return ordersService.getRevenueByDateRange(startDate, endDate);
     }
 
@@ -86,7 +90,10 @@ public class DashboardController {
             @RequestParam("endDate") String endDateStr) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate startDate = LocalDate.parse(startDateStr, formatter);
-        LocalDate endDate = LocalDate.parse(endDateStr, formatter);
+        LocalDate endDate = LocalDate.parse(endDateStr, formatter).plusDays(1);
+        if (startDate.isAfter(endDate)) {
+            throw new IllegalArgumentException("startDate must be before or equal to endDate");
+        }
         return enrollmentService.getEnrollmentsByCategoryAndDateRange(startDate, endDate);
     }
 
@@ -97,27 +104,32 @@ public class DashboardController {
             @RequestParam("endDate") String endDateStr) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate startDate = LocalDate.parse(startDateStr, formatter);
-        LocalDate endDate = LocalDate.parse(endDateStr, formatter);
+        LocalDate endDate = LocalDate.parse(endDateStr, formatter).plusMonths(1);
+        if (startDate.isAfter(endDate)) {
+            throw new IllegalArgumentException("startDate must be before or equal to endDate");
+        }
         return courseMaintenanceService.getMaintenanceRevenueByDateRange(startDate, endDate);
     }
 
     @GetMapping("/export-excel-charts")
+    @ResponseBody
     public void exportExcelWithCharts(
             @RequestParam("startDate") String startDateStr,
             @RequestParam("endDate") String endDateStr,
             HttpServletResponse response) throws IOException {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate startDate = LocalDate.parse(startDateStr, formatter);
-        LocalDate endDate = LocalDate.parse(endDateStr, formatter);
-
-        Map<String, Double> revenueData = ordersService.getRevenueByDateRange(startDate, endDate);
-        Map<String, Long> enrollmentData = enrollmentService.getEnrollmentsByCategoryAndDateRange(startDate, endDate);
-        Map<String, Object> maintenanceRevenueData = courseMaintenanceService.getMaintenanceRevenueByDateRange(startDate, endDate);
-
+        LocalDate endDate = LocalDate.parse(endDateStr, formatter).plusDays(1);
+        if (startDate.isAfter(endDate)) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Start date must be before or equal to end date.");
+            return;
+        }
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         String randomSuffix = UUID.randomUUID().toString().substring(0, 8);
         response.setHeader("Content-Disposition", "attachment; filename=dashboard_report_charts_" + randomSuffix + ".xlsx");
-
+        Map<String, Double> revenueData = ordersService.getRevenueByDateRange(startDate, endDate);
+        Map<String, Long> enrollmentData = enrollmentService.getEnrollmentsByCategoryAndDateRange(startDate, endDate);
+        Map<String, Object> maintenanceRevenueData = courseMaintenanceService.getMaintenanceRevenueByDateRange(startDate, endDate);
         try (XSSFWorkbook workbook = new XSSFWorkbook()) {
             createRevenueSheetWithChart(workbook, revenueData);
             createEnrollmentPieChartSheet(workbook, enrollmentData);
@@ -584,6 +596,7 @@ public class DashboardController {
             row.createCell(0).setCellValue(entry.getKey());
             row.createCell(1).setCellValue(entry.getValue());
         }
+        if (rowNum <= 1) return; // Fix: Không có dữ liệu, tránh lỗi cell range
         XSSFDrawing drawing = sheet.createDrawingPatriarch();
         XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 3, 1, 13, 20);
         XSSFChart chart = drawing.createChart(anchor);
@@ -614,6 +627,7 @@ public class DashboardController {
             row.createCell(0).setCellValue(entry.getKey());
             row.createCell(1).setCellValue(entry.getValue());
         }
+        if (rowNum <= 1) return; // Fix: Không có dữ liệu, tránh lỗi cell range
         XSSFDrawing drawing = sheet.createDrawingPatriarch();
         XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 3, 1, 13, 20);
         XSSFChart chart = drawing.createChart(anchor);
@@ -658,6 +672,7 @@ public class DashboardController {
             }
             row.createCell(2).setCellValue(enrollment);
         }
+        if (rowNum <= 1) return; // Fix: Không có dữ liệu, tránh lỗi cell range
         XSSFDrawing drawing = sheet.createDrawingPatriarch();
         XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 3, 1, 13, 20);
         XSSFChart chart = drawing.createChart(anchor);

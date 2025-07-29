@@ -30,4 +30,8 @@ public interface VoucherRepository extends JpaRepository<Voucher, Long> {
 
     Page<Voucher> findByInstructor_UserIdAndExpiryDateBeforeOrIsActiveFalse(Long instructorId, LocalDate now, Pageable pageable);
     Page<Voucher> findByInstructor_UserIdAndExpiryDateAfterAndIsActiveTrue(Long instructorId, LocalDate now, Pageable pageable);
+
+    // Sửa lại query để tránh lỗi logic OR, chỉ lấy voucher của instructor đó
+    @Query("SELECT v FROM Voucher v WHERE v.instructor.userId = :instructorId AND (v.expiryDate < :now OR v.isActive = false)")
+    Page<Voucher> findExpiredOrInactiveVouchersByInstructor(Long instructorId, LocalDate now, Pageable pageable);
 }

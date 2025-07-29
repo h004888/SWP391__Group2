@@ -26,4 +26,19 @@
             th:text="${status == 'valid' ? 'Không có voucher còn hạn.' : (status == 'expired' ? 'Không có voucher hết hạn.' : 'Không có voucher nào.')}"></td>
     </tr>
 </th:block>
-</html> 
+</html>
+
+<!-- DEBUG: Hiển thị thông tin voucher để kiểm tra -->
+<table>
+  <thead>
+    <tr><th>Code</th><th>isPublic</th><th>expiryDate</th><th>isActive</th></tr>
+  </thead>
+  <tbody>
+    <tr th:each="voucher : ${vouchers}">
+      <td th:text="${voucher.code}"></td>
+      <td th:text="${voucher.isPublic}"></td>
+      <td th:text="${voucher.expiryDate}"></td>
+      <td th:text="${voucher.isActive}"></td>
+    </tr>
+  </tbody>
+</table>

@@ -4,35 +4,41 @@
     <div class="row g-4">
         <div class="col-sm-6 col-xl-4" th:each="course : ${courses}">
             <div class="card shadow h-100">
-                <img th:src="@{/assets/images/courses/4by3/01.jpg}" class="card-img-top" alt="course image">
+                <img th:src="@{${course.courseImg} ? ${course.courseImg} : '/assets/images/courses/4by3/01.jpg'}"
+                    style="height: 250px; object-fit: contain;" class="card-img-top" alt="course image">
                 <div class="card-body pb-0">
                     <div class="d-flex justify-content-between mb-2">
                         <a href="#" class="badge bg-purple bg-opacity-10 text-purple"
-                           th:text="${course.courseLevel}">All level</a>
-                        <button type="button"
-                                class="btn btn-link wishlist-toggle p-0"
-                                th:data-course-id="${course.courseId}"
-                                th:onclick="'toggleWishlist(this, ' + ${course.courseId} + ')'"
-                                style="font-size: 1.2rem;">
-                            <i class="far fa-heart"></i>
+                            th:text="${course.courseLevel}">All level</a>
+                        <button type="button" class="btn btn-link wishlist-toggle p-0"
+                            th:data-course-id="${course.courseId}"
+                            th:onclick="'toggleWishlist(this, ' + ${course.courseId} + ')'">
+                            <i class=" far fa-heart"></i>
                         </button>
                     </div>
-                    <h5 class="card-title"><a th:text="${course.title}"
-                                              th:href="@{'/home/course-detail?id=' + ${course.courseId}}"></a></h5>
-                    <p class="mb-2 text-truncate-2" th:text="${course.description}"></p>
+                    <h5 class="card-title">
+                        <a th:href="@{'/home/course-detail?id=' + ${course.courseId}}">
+                            <span
+                                th:text="${#strings.length(course.title) > 50} ? ${#strings.substring(course.title, 0, 50)} + '...' : ${course.title}"></span>
+                        </a>
+                    </h5>
                     <ul class="list-inline mb-0">
                         <li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
                         <li class="list-inline-item ms-2 h6 fw-light mb-0"
                             th:text="${course.courseReviews.size()} + ' Ratings'">
                             4.0/5.0</li>
                     </ul>
+
                 </div>
                 <div class="card-footer pt-0 pb-3">
                     <hr>
                     <div class="d-flex justify-content-between">
                         <span class="h6 fw-light mb-0">
                             <i class="far fa-clock text-danger me-2"></i>
-                            <span th:text="${course.duration/60} + 'h'">12h</span>
+                            <span th:if="${course.duration >= 60}"
+                                th:text="${(course.duration / 60) + 'h ' + (course.duration % 60) + 'm'}">12h 56m</span>
+                            <span th:if="${course.duration < 60}" th:text="${'0h ' + course.duration + 'm'}">0h
+                                45m</span>
                         </span>
 
                         <span class="h6 fw-light mb-0">

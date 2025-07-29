@@ -123,8 +123,14 @@
                                 <span th:case="'rejected'" class="badge bg-danger">
                                     <i class="fas fa-times"></i> Rejected
                                 </span>
-                                <span th:case="'resubmit'" class="badge bg-warning text-dark">
-                                    <i class="fas fa-exclamation-triangle"></i> ReSubmit
+                                <span th:case="'publish'" class="badge bg-success">
+                                    <i class="fas fa-check"></i> Publish
+                                </span>
+                                <span th:case="'blocked'" class="badge bg-danger">
+                                    <i class="fas fa-ban"></i> Blocked
+                                </span>
+                                <span th:case="'pending_block'" class="badge bg-danger">
+                                    <i class="fas fa-times"></i> Pending_Block
                                 </span>
                             </span>
                         </div>
@@ -180,7 +186,7 @@
                                 <i class="bi bi-x-circle me-1"></i> Reject Course
                             </button>
                             <!-- Nếu đã approved thì hiện Block -->
-                            <div th:if="${detailCourse.status == 'approved'}" class="mb-0">
+                            <div th:if="${detailCourse.status == 'publish'}" class="mb-0">
                                 <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#blockCourseReasonModal">
                                     <i class="fas fa-ban me-2"></i>Block Course
                                 </button>
@@ -259,7 +265,7 @@
                                     <div class="overflow-hidden position-relative" style="width:100%;">
                                         <video id="previewVideo"
                                                class="card-img"
-                                               style="width:100%; object-fit:cover; background:#000; filter: blur(8px); border-radius:0;"
+                                               style="width:100%; aspect-ratio:16/9; object-fit:cover; background:#000; border-radius:0;"
                                                muted
                                                playsinline
                                                th:poster="@{${detailCourse.courseImg}}">
@@ -269,7 +275,8 @@
                                             class="btn btn-lg btn-round btn-white-shadow mb-0 position-absolute top-50 start-50 translate-middle"
                                             id="playVideoBtn"
                                             th:attr="data-publicid=${detailCourse.videoUrlPreview}"
-                                            style="background:rgba(200,200,200,0.85); border-radius:50%; width:64px; height:64px; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.2); z-index:2;">
+                                            style="background:rgba(200,200,200,0.85); border-radius:50%; width:64px; height:64px; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.2); z-index:2;"
+                                        >
                                             <i class="fas fa-play" style="font-size:2rem; color: #555;"></i>
                                         </button>
                                     </div>
@@ -320,9 +327,15 @@
                                                     <span th:case="'rejected'" class="badge bg-danger">
                                                         <i class="fas fa-times"></i> Rejected
                                                     </span>
-                                                    <span th:case="'resubmit'" class="badge bg-warning text-dark">
-                                                        <i class="fas fa-exclamation-triangle"></i> ReSubmit
+                                                    <span th:case="'publish'" class="badge bg-success">
+                                                        <i class="fas fa-check"></i> Publish
+                                                        </span>
+                                                    <span th:case="'blocked'" class="badge bg-danger">
+                                                        <i class="fas fa-ban"></i> Blocked
                                                     </span>
+                                                    <span th:case="'pending_block'" class="badge bg-danger">
+                                                         <i class="fas fa-times"></i> Pending_Block
+                                                     </span>
                                                 </span>
                                             </div>
                                         </div>

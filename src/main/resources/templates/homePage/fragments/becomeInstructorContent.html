@@ -157,7 +157,7 @@
                         <!-- Title -->
                         <h3>Please fill this form</h3>
                         <!-- Form START -->
-                        <form th:action="@{/become-instructor}" th:object="${instructorRequestDTO}" method="post"
+                        <form th:action="@{/become-instructor}" th:object="${instructorRequestDTO}" method="post" enctype="multipart/form-data"
                                 class="row g-3 mt-2 position-relative z-index-9">
                             <!-- Name -->
                             <div class="col-lg-6">
@@ -191,6 +191,11 @@
                                           th:classappend="${#fields.hasErrors('personalSkill')} ? 'is-invalid' : ''"></textarea>
                                 <div class="text-danger" th:if="${#fields.hasErrors('personalSkill')}" th:errors="*{personalSkill}"></div>
                             </div>
+                            <div class="col-12">
+                                <label class="form-label">Upload file/CV (Not about .pdf):</label>
+                                <input type="file" class="form-control" name="instructorFile" id="instructorFileInput" accept=".docx,.jpg,.jpeg,.png" onchange="previewInstructorFile()">
+                                <div id="instructorFilePreview" style="margin-top:8px;"></div>
+                            </div>
                             <!-- Button hoặc trạng thái -->
                             <div class="col-12">
                               <div class="form-check mb-3">
@@ -200,7 +205,10 @@
                                     </label>
                                 </div>
                                 <div class="text-danger" th:if="${termsError}" th:text="${termsError}"></div>
-                                <button type="submit" class="btn btn-primary mb-0" th:if="${requestStatus} == null or ${requestStatus} == 'REJECTED'">Submit form</button>
+                                <button type="submit" class="btn btn-primary mb-0" id="submitBtn" th:if="${requestStatus} == null or ${requestStatus} == 'REJECTED'">
+                                    <span id="submitBtnText">Submit form</span>
+                                    <span id="submitBtnSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                </button>
                                 <span th:if="${requestStatus} == 'APPROVED'" class="badge bg-success text-white fs-5" th:text="${requestStatus}"></span>
                                 <span th:if="${requestStatus} == 'PENDING'" class="badge bg-secondary text-white fs-5" th:text="${requestStatus}"></span>
                                 <span th:if="${requestStatus} != null and ${requestStatus} != 'REJECTED' and ${requestStatus} != 'APPROVED' and ${requestStatus} != 'PENDING'" class="badge bg-warning text-dark fs-5" th:text="${requestStatus}"></span>
@@ -354,6 +362,7 @@
       </div>
     </div>
 
+
     <script th:inline="javascript">
         /*<![CDATA[*/
         setTimeout(function() {
@@ -396,6 +405,39 @@
             }
         });
         /*]]>*/
+
+        function previewInstructorFile() {
+            const input = document.getElementById('instructorFileInput');
+            const preview = document.getElementById('instructorFilePreview');
+            preview.innerHTML = '';
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const fileName = file.name.toLowerCase();
+                const allowedExts = ['.docx', '.jpg', '.jpeg', '.png'];
+                const maxSize = 5 * 1024 * 1024; // 5MB
+                // Check extension
+                if (!allowedExts.some(ext => fileName.endsWith(ext))) {
+                    preview.innerHTML = `<span class='text-danger'>Chỉ cho phép file ảnh (.jpg, .jpeg, .png) hoặc .docx!</span>`;
+                    input.value = '';
+                    return;
+                }
+                // Check size
+                if (file.size > maxSize) {
+                    preview.innerHTML = `<span class='text-danger'>File quá lớn (tối đa 5MB). Vui lòng chọn file nhỏ hơn!</span>`;
+                    input.value = '';
+                    return;
+                }
+                if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.png')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        preview.innerHTML = `<img src='${e.target.result}' alt='Ảnh xem trước' style='max-width:200px;max-height:200px;border-radius:6px;border:1px solid #ccc;'/>`;
+                    };
+                    reader.readAsDataURL(file);
+                } else if (fileName.endsWith('.docx')) {
+                    preview.innerHTML = `<span class='text-info'>File DOCX sẽ xem được sau khi gửi.</span>`;
+                }
+            }
+        }
     </script>
 
 </th:block>

@@ -23,6 +23,7 @@ import com.OLearning.repository.UserRepository;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import com.OLearning.security.BlockedAccountFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -84,14 +85,16 @@ public class SecurityConfig {
 
                         // Root path redirect
                         .requestMatchers("/home/**").permitAll()
-                        .requestMatchers("/vouchers").permitAll()
-                        .requestMatchers("/cart").authenticated()
-                        .requestMatchers("/api/sepay/**", "/api/order/status").permitAll() // Thêm lại /api/sepay/**
-                        // Chỉ admin mới được truy cập /admin/**
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+//                        .requestMatchers("/home/vouchers").permitAll()
+//                        .requestMatchers("/home/vouchers/voucher/*/courses").permitAll()
+                        .requestMatchers("/home/cart").authenticated()
+                        .requestMatchers("/home/wishlist").authenticated()
+                        .requestMatchers("/api/sepay/**", "/api/order/status").permitAll()
+                        // Chỉ admin, staff mới được truy cập /admin/**
+                        .requestMatchers("/admin/**").hasAnyRole("ADMIN", "STAFF")
 
-                        // Cho phép cả ADMIN và INSTRUCTOR truy cập /instructordashboard/**
-                        .requestMatchers("/instructor/**").hasAnyRole("ADMIN", "INSTRUCTOR")
+                        // Chỉ instructor mới được truy cập /instructor/**
+                        .requestMatchers("/instructor/**").hasAnyRole( "INSTRUCTOR")
 
                         .requestMatchers("/terms/user").permitAll()
 
@@ -151,6 +154,15 @@ public class SecurityConfig {
         registration.setFilter(filter);
         registration.addUrlPatterns("/*");
         registration.setOrder(2); // sau security filter
+        return registration;
+    }
+
+    @Bean
+    public FilterRegistrationBean<BlockedAccountFilter> blockedAccountFilterRegistration(BlockedAccountFilter filter) {
+        FilterRegistrationBean<BlockedAccountFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(filter);
+        registration.addUrlPatterns("/*");
+        registration.setOrder(3); // sau security filter và admin filter
         return registration;
     }
 }

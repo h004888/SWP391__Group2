@@ -4,6 +4,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import com.OLearning.dto.enrollment.EnrollMaxMinDTO;
+import com.OLearning.repository.CourseRepository;
 import com.OLearning.service.course.CourseService;
 import com.OLearning.dto.enrollment.EnrollmentDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +31,8 @@ import java.util.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import com.OLearning.dto.enrollment.EnrollmentFilterDTO;
 
 @Service
 public class EnrollmentServiceImpl implements EnrollmentService {
@@ -41,6 +46,8 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     private EmailService emailService;
 
     private static final Logger log = LoggerFactory.getLogger(EnrollmentServiceImpl.class);
+    @Autowired
+    private CourseRepository courseRepository;
 
     @Override
     public int enrollmentCount() {
@@ -110,42 +117,12 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
 
-    @Override
-    public boolean blockEnrollment(int enrollmentId) {
-        Optional<Enrollment> enrollmentOpt = enrollmentRepository.findById(enrollmentId);
-
-        if (enrollmentOpt.isPresent()) {
-            Enrollment enrollment = enrollmentOpt.get();
-            enrollment.setStatus("blocked");
-            enrollmentRepository.save(enrollment);
-
-            // Gửi email thông báo cho học viên
-            try {
-                User student = enrollment.getUser();
-                Course course = enrollment.getCourse();
-                emailService.sendEnrollmentBlockedEmail(student, course);
-            } catch (Exception e) {
-                log.error("Failed to send enrollment blocked email", e);
-                // Không throw exception để không ảnh hưởng đến việc block
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-    @Override
-    public EnrollmentDTO getRequestById(int enrollmentId) {
-        return enrollmentRepository.findByEnrollmentId(enrollmentId).map(mapper::MapEnrollmentDTO)
-                .orElseThrow(() -> new RuntimeException("Enrollment request not found with id: " + enrollmentId));
-    }
 
     @Override
     public Integer getTotalEnrollment(Long courseId) {
 
         Integer count = enrollmentRepository.findByCourseId(courseId).size();
-        if(count == null){
+        if (count == null) {
             return 0;
         }
         return count;
@@ -161,6 +138,51 @@ public class EnrollmentServiceImpl implements EnrollmentService {
             enrollmentDTOList.add(EnrollmentDTO);
         }
         return new PageImpl<>(enrollmentDTOList, pageable, enrollments.getTotalElements());
+    }
+
+    @Override
+    public Integer countTotalEnrollment(Long instructorId) {
+        return enrollmentRepository.calculateSumEnrollment(instructorId).size();
+    }
+
+    @Override
+    public Integer countTotalEnrollmentOnGoing(Long instructorId) {
+        return enrollmentRepository.countAllEnrollmentsOnGoing(instructorId);
+    }
+
+    @Override
+    public Integer countTotalEnrollmentCompelted(Long instructorId) {
+        return enrollmentRepository.countAllEnrollmentsCompleted(instructorId);
+    }
+
+    @Override
+    public EnrollMaxMinDTO enrollmentMax(Long instructorId) {
+        return enrollmentRepository.courseEnrollMax(instructorId);
+    }
+
+    @Override
+    public EnrollMaxMinDTO enrollmentMin(Long instructorId) {
+        return enrollmentRepository.courseEnrollMin(instructorId);
+    }
+
+    @Override
+    public Integer completeMax(Long instructorId) {
+        return enrollmentRepository.completedMax(instructorId);
+    }
+
+    @Override
+    public Integer onGoingMax(Long instructorId) {
+        return enrollmentRepository.onGoingMax(instructorId);
+    }
+
+    @Override
+    public Integer completeMin(Long instructorId) {
+        return enrollmentRepository.completedMin(instructorId);
+    }
+
+    @Override
+    public Integer onGoingMin(Long instructorId) {
+        return enrollmentRepository.onGoingMin(instructorId);
     }
 
     @Override
@@ -238,7 +260,8 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Override
     public void cleanupDuplicateEnrollments(User user, Course course) {
-        List<Enrollment> enrollments = enrollmentRepository.findAllByUserAndCourseOrderByEnrollmentDateDesc(user, course);
+        List<Enrollment> enrollments = enrollmentRepository.findAllByUserAndCourseOrderByEnrollmentDateDesc(user,
+                course);
         if (enrollments.size() > 1) {
             // Giữ lại enrollment đầu tiên (mới nhất), xóa các enrollment còn lại
             for (int i = 1; i < enrollments.size(); i++) {
@@ -250,6 +273,14 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Override
     public List<Enrollment> findByEnrollmentDateAfter(LocalDate date) {
         return enrollmentRepository.findByEnrollmentDateAfter(date).stream().toList();
+    }
+
+    @Override
+    public List<Long> getTotalEnrollmentOfInstructor(List<UserDTO> instructors) {
+        return instructors.stream()
+                .map(UserDTO::getUserId)
+                .map(enrollmentRepository::countTotalEnrollmentByUserId)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -265,6 +296,39 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Override
     public int updateStatusToCompleted(Long userId, Long courseId) {
         return enrollmentRepository.updateStatusCompleted(userId, courseId);
+    }
+
+
+    @Override
+    public Page<EnrollmentDTO> findEnrollmentsWithFilters(Long instructorId, EnrollmentFilterDTO filterDTO) {
+        Pageable pageable = PageRequest.of(filterDTO.getPage(), filterDTO.getSize());
+
+        Page<Enrollment> enrollments = enrollmentRepository.findEnrollmentsWithFilters(
+            instructorId,
+            filterDTO.getCourseId(),
+            filterDTO.getStatus(),
+            filterDTO.getSearchTerm(),
+            pageable
+        );
+
+        return enrollments.map(mapper::MapEnrollmentDTO);
+    }
+
+    @Override
+    public List<Course> getInstructorCourses(Long instructorId) {
+        return courseRepository.findByInstructorUserId(instructorId);
+    }
+    @Override
+    public Map<Long, Double> getEnrollmentByUserId(Long userId) {
+        // Convert list to map: key = courseId, value = progress
+        List<Enrollment> results = enrollmentRepository.findByUserUserId(userId);
+        Map<Long, Double> resultMap = new HashMap<>();
+        for (Enrollment result : results) {
+            Long courseId = result.getCourse().getCourseId();
+            Double progress = result.getProgress();
+            resultMap.put(courseId, progress);
+        }
+        return resultMap;
     }
 
 }

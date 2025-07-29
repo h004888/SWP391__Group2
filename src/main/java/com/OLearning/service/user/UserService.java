@@ -18,11 +18,7 @@ public interface UserService {
 
     Page<UserDTO> getAllUsers(Pageable pageable);
 
-    Page<UserDTO> getUsersByRoleWithPagination(Long roleId, Pageable pageable);
-
     Page<UserDTO> getInstructorsByRoleIdOrderByCourseCountDesc(Long roleId, Pageable pageable);
-
-    Page<UserDTO> searchByNameWithPagination(String keyword, Long roleId, Pageable pageable);
 
     Page<UserDTO> getInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(String keyword, Long roleId, Pageable pageable);
 
@@ -40,7 +36,7 @@ public interface UserService {
 
     boolean deleteAcc(Long id);
 
-    boolean changStatus(Long id);
+    boolean changStatus(Long id, String reason);
 
 //    List<UserDTO> searchByName(String keyword, Long roleId);
 
@@ -59,13 +55,14 @@ public interface UserService {
     Page<UserDTO> filterInstructors(String keyword, Pageable pageable);
 
     boolean existsById(Long userId);
+
+    Long countInstructor();
+
+    Long countStudent();
     User findById(Long id);
 
     void updatePasswordByEmail(String email, String newPassword);
 
-    /**
-     * Cập nhật thông tin profile cho user
-     */
     void updateProfile(Long userId, UserProfileEditDTO profileEditDTO);
 
     Optional<UserProfileEditDTO> getProfileByUsername(String username);
@@ -76,4 +73,11 @@ public interface UserService {
 
     User updateProfilePicture(Long userId, String newProfilePictureUrl);
 
+    Optional<User> findByEmail(String email);
+    User save(User user);
+
+    Page<UserDTO> getUsersByRolesWithPagination(List<Long> roleIds, Pageable pageable);
+    Page<UserDTO> getUsersByRolesAndStatusWithPagination(List<Long> roleIds, boolean status, Pageable pageable);
+    Page<UserDTO> searchByNameWithPagination(String keyword, List<Long> roleIds, Pageable pageable);
+    Page<UserDTO> searchByNameAndStatusWithPagination(String keyword, List<Long> roleIds, boolean status, Pageable pageable);
 }

@@ -113,15 +113,18 @@ public class CategoryController {
         return categoryPage.getTotalElements();
     }
 
-    @DeleteMapping("/category/delete/{id}")
-    @ResponseBody
-    public String deleteCategory(@PathVariable Long id) {
-        try {
+    @PostMapping("/category/delete")
+    public String deleteCategory(@RequestParam Long id, RedirectAttributes redirectAttributes) {
+        Category category = categoryService.findById(id).orElse(null);
+        if (category == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Category not found");
+        } else if (category.getCourses() != null && !category.getCourses().isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Cannot delete category with existing courses.");
+        } else {
             categoryService.deleteById(id);
-            return "success";
-        } catch (Exception e) {
-            return "error";
+            redirectAttributes.addFlashAttribute("successMessage", "Category deleted successfully.");
         }
+        return "redirect:/admin/category";
     }
 
     @PostMapping("/category/edit")

@@ -15,6 +15,22 @@
     <!-- Content Wrapper -->
     <div class="page-content">
 
+        <!-- Success Alert -->
+        <div th:if="${successMessage}"
+             class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-4 shadow"
+             role="alert" id="success-alert" style="z-index: 1055; min-width: 300px;">
+            <strong th:text="${successMessage}">Success!</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Error Alert -->
+        <div th:if="${errorMessage}"
+             class="alert alert-danger alert-dismissible fade show position-fixed top-0 end-0 m-4 shadow"
+             role="alert" id="error-alert" style="z-index: 1055; min-width: 300px;">
+            <strong th:text="${errorMessage}">An error occurred!</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
         <!-- Topbar -->
         <th:block th:replace="adminDashBoard/fragments/topbar :: topbar"></th:block>
         <!-- End of Topbar -->

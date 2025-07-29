@@ -21,7 +21,7 @@ public class EmailService {
     @Autowired
     private TemplateEngine templateEngine;
 
-    public void sendAccountStatusEmail(User user, boolean isLocked) throws MessagingException {
+    public void sendAccountStatusEmail(User user, boolean isLocked, String reason) throws MessagingException {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
@@ -32,6 +32,9 @@ public class EmailService {
         context.setVariable("user", user);
         context.setVariable("isLocked", isLocked);
         context.setVariable("supportEmail", "support@olearning.com");
+        if (reason != null && !reason.isBlank()) {
+            context.setVariable("blockReason", reason);
+        }
 
         // Render HTML template
         String htmlContent = templateEngine.process("email/account-status", context);
@@ -57,7 +60,7 @@ public class EmailService {
 
         String content = "Xin chào " + user.getFullName() + ",\n\n"
                 + "Bạn vừa thay đổi mật khẩu tài khoản (" + user.getEmail() + ") trên hệ thống OLearning.\n"
-                + "Nếu bạn không thực hiện hành động này, vui lòng liên hệ bộ phận hỗ trợ ngay qua email: support@olearning.com.\n\n"
+                + "Nếu bạn không thực hiện hành động này, vui lòng liên hệ bộ phận hỗ trợ ngay qua email: olearningwebsite@gmail.com\n\n"
                 + "Trân trọng,\n"
                 + "Đội ngũ OLearning";
 
@@ -73,8 +76,9 @@ public class EmailService {
 
         String content = "Xin chào \n\n"
                 + "Chúng tôi xin chúc mừng bạn đã được cấp quyền trở thành nhân viên hệ thống OLearning.\n"
-                + "Từ bây giờ, bạn có thể truy cập các chức năng quản trị phù hợp với vai trò mới của mình.\n\n"
-                + "Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ đội ngũ hỗ trợ qua email: support@olearning.com\n\n"
+                + "Từ bây giờ, bạn có thể truy cập các chức năng quản trị phù hợp với vai trò mới của mình. \n\n"
+                + "Mật khẩu mặc định cho account là 123. Vui lòng không tiết lộ ai khác ngoài bạn.\n\n"
+                + "Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ đội ngũ hỗ trợ qua email: olearningwebsite@gmail.com\n\n"
                 + "Trân trọng,\n"
                 + "Đội ngũ OLearning";
 
@@ -93,7 +97,7 @@ public class EmailService {
             String content = "Xin chào " + user.getFullName() + ",\n\n"
                     + "Chúng tôi xin chúc mừng bạn! Yêu cầu trở thành giảng viên trên hệ thống OLearning của bạn đã được **chấp nhận**.\n"
                     + "Từ bây giờ, bạn có thể tạo và quản lý các khóa học của riêng mình.\n\n"
-                    + "Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ đội ngũ hỗ trợ qua email: support@olearning.com\n\n"
+                    + "Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ đội ngũ hỗ trợ qua email: olearningwebsite@gmail.com\n\n"
                     + "Trân trọng,\n"
                     + "Đội ngũ OLearning";
 
@@ -104,7 +108,7 @@ public class EmailService {
             String content = "Xin chào " + user.getFullName() + ",\n\n"
                     + "Chúng tôi rất tiếc phải thông báo rằng yêu cầu trở thành giảng viên trên hệ thống OLearning của bạn **chưa được chấp thuận** tại thời điểm này.\n"
                     + "Bạn có thể kiểm tra lại thông tin hồ sơ của mình hoặc liên hệ với chúng tôi để biết thêm chi tiết.\n\n"
-                    + "Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ đội ngũ hỗ trợ qua email: support@olearning.com\n\n"
+                    + "Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ đội ngũ hỗ trợ qua email: olearningwebsite@gmail.com\n\n"
                     + "Trân trọng,\n"
                     + "Đội ngũ OLearning";
 
@@ -234,7 +238,7 @@ public class EmailService {
             Context context = new Context();
             context.setVariable("student", student);
             context.setVariable("course", course);
-            context.setVariable("supportEmail", "support@olearning.com");
+            context.setVariable("supportEmail", "olearningwebsite@gmail.com");
 
             // Render HTML template
             String htmlContent = templateEngine.process("email/enrollment-blocked", context);
@@ -257,7 +261,7 @@ public class EmailService {
             Context context = new Context();
             context.setVariable("student", student);
             context.setVariable("course", course);
-            context.setVariable("supportEmail", "support@olearning.com");
+            context.setVariable("supportEmail", "olearningwebsite@gmail.com");
 
             // Render HTML template
             String htmlContent = templateEngine.process("email/enrollment-active", context);
@@ -284,7 +288,7 @@ public class EmailService {
             context.setVariable("course", course);
             context.setVariable("messageContent", messageContent);
             context.setVariable("subject", subject);
-            context.setVariable("supportEmail", "support@olearning.com");
+            context.setVariable("supportEmail", "olearningwebsite@gmail.com");
 
             // Render HTML template
             String htmlContent = templateEngine.process("email/instructor-message", context);

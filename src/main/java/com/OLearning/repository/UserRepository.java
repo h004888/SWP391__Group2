@@ -22,7 +22,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByUsername(String username);
 
-    boolean existsByEmail(String email);
+        boolean existsByEmail(String email);
 
     @Query("SELECT u FROM User u JOIN u.role r WHERE r.roleId = :roleId")
     List<User> findByRoleId(@Param("roleId") Long roleId);
@@ -30,10 +30,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u WHERE u.userId = :id")
     Optional<User> findById(Long id);
-
-
-    @Query("SELECT u FROM User u JOIN u.role r WHERE r.roleId = :roleId")
-    Page<User> findByRoleIdWithPagination(@Param("roleId") Long roleId, Pageable pageable);
 
     Page<User> findAll(Pageable pageable);
 
@@ -47,10 +43,21 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Page<User> findByUsernameContainingIgnoreCaseAndRole_RoleIdAndStatus(String username, Long roleId, boolean status, Pageable pageable);
 
+
     @Query("SELECT u FROM User u JOIN u.role r WHERE r.roleId = :roleId ORDER BY SIZE(u.courses) DESC")
     Page<User> findInstructorsByRoleIdOrderByCourseCountDesc(@Param("roleId") Long roleId, Pageable pageable);
 
     @Query("SELECT u FROM User u JOIN u.role r WHERE r.roleId = :roleId AND LOWER(u.username) LIKE LOWER(CONCAT('%', :keyword, '%')) ORDER BY SIZE(u.courses) DESC")
     Page<User> findInstructorsByRoleIdAndKeywordOrderByCourseCountDesc(@Param("roleId") Long roleId, @Param("keyword") String keyword, Pageable pageable);
 
+    Page<User> findByRole_RoleIdIn(List<Long> roleIds, Pageable pageable);
+    Page<User> findByRole_RoleIdInAndStatus(List<Long> roleIds, boolean status, Pageable pageable);
+    Page<User> findByUsernameContainingIgnoreCaseAndRole_RoleIdIn(String username, List<Long> roleIds, Pageable pageable);
+    Page<User> findByUsernameContainingIgnoreCaseAndRole_RoleIdInAndStatus(String username, List<Long> roleIds, boolean status, Pageable pageable);
+
+    @Query("SELECT COUNT(u) FROM User u WHERE u.role.id = 2")
+    Long countInstructor();
+
+    @Query("SELECT COUNT(u) FROM User u WHERE u.role.id = 3")
+    Long countStudent();
 }

@@ -6,6 +6,8 @@ import com.OLearning.security.CustomUserDetails;
 import com.OLearning.service.enrollment.EnrollmentService;
 import com.OLearning.service.lesson.LessonService;
 import com.OLearning.service.lessonCompletion.LessonCompletionService;
+import com.OLearning.service.certificate.CertificateService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,18 +26,9 @@ public class LessonAPI {
     private LessonCompletionService lessonCompletionService;
     @Autowired
     private EnrollmentService enrollmentService;
+    @Autowired
+    private CertificateService certificateService;
 
-    //
-    // @GetMapping("/next")
-    // public ResponseEntity<Lesson> getNextLesson(
-    // @RequestParam("userId") Long userId,
-    // @RequestParam("courseId") Long courseId) {
-    //
-    // Optional<Lesson> next = lessonService.getNextLesson(userId, courseId);
-    // return next
-    // .map(ResponseEntity::ok)
-    // .orElseGet(() -> ResponseEntity.noContent().build());
-    // }
     @GetMapping("/first")
     public ResponseEntity<Lesson> getFirstLesson(
             @RequestParam("courseId") Long courseId) {
@@ -63,6 +56,7 @@ public class LessonAPI {
             @RequestParam Long courseId,
             Principal principal) {
         User user = extractCurrentUser(principal);
+        System.out.println("User: " + user);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -71,8 +65,9 @@ public class LessonAPI {
             lessonCompletionService.markLessonAsCompleted(user.getUserId(), lessonId);
             enrollmentService.updateProgressByUser(user.getUserId(), courseId);
         }
-        if (lessonCompletionService.getOverallProgressOfUser(user.getUserId(), courseId) >= 100) {
+        if (lessonCompletionService.getOverallProgressOfUser(user.getUserId(), courseId) == 100) {
             enrollmentService.updateStatusToCompleted(user.getUserId(), courseId);
+            certificateService.generateCertificate(user.getUserId(), courseId);
         }
 
         Lesson nextLesson = lessonService.getNextLesson(courseId, lessonId);
@@ -81,7 +76,8 @@ public class LessonAPI {
                     "status", "success",
                     "nextLessonUrl", "/learning/course/" + courseId + "/lesson/" + nextLesson.getLessonId()));
         } else {
-            return ResponseEntity.ok(Map.of("status", "completed_all"));
+            return ResponseEntity.ok(Map.of("status", "completed_all",
+                    "redirectUrl", "/learning/congratulations?courseId=" + courseId));
         }
     }
 }

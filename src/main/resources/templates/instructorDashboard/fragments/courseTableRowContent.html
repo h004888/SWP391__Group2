@@ -47,20 +47,21 @@
             <a th:href="@{/instructor/createcourse/coursebasic(courseId=${course.courseId})}"
                class="btn btn-icon btn-sm btn-light border shadow-sm rounded-circle text-primary d-flex align-items-center justify-content-center"
                title="Edit Course"
-               th:if="${course.status != 'pending' and course.status != 'publish'}"
+               th:if="${course.status != 'pending' and course.status != 'publish' and course.status != 'blocked'}"
                style="width: 36px; height: 36px;">
                 <i class="fas fa-pen"></i>
             </a>
             <!-- Delete button -->
-            <button type="button"
-                    class="btn btn-icon btn-sm btn-light border shadow-sm rounded-circle text-danger d-flex align-items-center justify-content-center"
-                    title="Delete Course"
-                    th:data-id="${course.courseId}" 
-                    th:data-title="${course.title}" 
-                    onclick="deleteCourse(this.getAttribute('data-id'), this.getAttribute('data-title'))"
-                    style="width: 36px; height: 36px;">
-                <i class="fas fa-trash"></i>
-            </button>
+            <form method="post" th:action="@{/instructor/createcourse/deletecourse}" style="display:inline;" th:if="${course.status != 'pending' and course.status != 'blocked'}">
+                <input type="hidden" name="courseId" th:value="${course.courseId}" />
+                <button type="submit"
+                        class="btn btn-icon btn-sm btn-light border shadow-sm rounded-circle text-danger d-flex align-items-center justify-content-center"
+                        title="Delete Course"
+                        onclick="return confirm('Are you sure you want to delete course? This action cannot be undone.')"
+                        style="width: 36px; height: 36px;">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </form>
             <!-- Dropdown actions button -->
             <div class="dropdown">
                 <button class="btn btn-icon btn-sm btn-light border shadow-sm rounded-circle d-flex align-items-center justify-content-center" type="button"
@@ -68,33 +69,45 @@
                         data-bs-toggle="dropdown" 
                         aria-expanded="false" 
                         title="More actions"
-                        style="width: 36px; height: 36px;">
+                        style="width: 36px; height: 36px;" th:if="${course.status != 'blocked' and course.status != 'pending' and course.status != 'rejected'}">
                     <i class="fas fa-ellipsis-v"></i>
                 </button>
                 <ul class="dropdown-menu" th:aria-labelledby="'dropdownMenuButton-' + ${course.courseId}">
                     <!-- Up to Public: only for approved -->
                     <li th:if="${course.status == 'approved'}">
-                        <a class="dropdown-item" href="#" th:onclick="|upToPublic('${course.courseId}')|">
-                            <i class="bi bi-upload me-2"></i>Up to Public
-                        </a>
+                        <form method="post" th:action="@{/instructor/courses/uptopublic}" style="display:inline;">
+                            <input type="hidden" name="courseId" th:value="${course.courseId}" />
+                            <button type="submit" class="dropdown-item" onclick="return confirm('Are you sure you want to publish this course?')">
+                                <i class="bi bi-upload me-2"></i>Up to Public
+                            </button>
+                        </form>
                     </li>
                     <!-- Unpublish: only for published -->
                     <li th:if="${course.status == 'publish'}">
-                        <a class="dropdown-item" href="#" th:onclick="|unpublishCourse('${course.courseId}')|">
-                            <i class="bi bi-eye-slash me-2"></i>Unpublish
-                        </a>
+                        <form method="post" th:action="@{/instructor/courses/unpublish}" style="display:inline;">
+                            <input type="hidden" name="courseId" th:value="${course.courseId}" />
+                            <button type="submit" class="dropdown-item" onclick="return confirm('Are you sure you want to unpublish this course?')">
+                                <i class="bi bi-eye-slash me-2"></i>Unpublish
+                            </button>
+                        </form>
                     </li>
                     <!-- Hide: for all courses except already hidden -->
-                    <li th:if="${course.status != 'hidden'}">
-                        <a class="dropdown-item" href="#" th:onclick="|hideCourse('${course.courseId}')|">
-                            <i class="bi bi-eye me-2"></i>Hide
-                        </a>
+                    <li th:if="${course.status == 'draft' or course.status == 'approved'}">
+                        <form method="post" th:action="@{/instructor/courses/hide}" style="display:inline;">
+                            <input type="hidden" name="courseId" th:value="${course.courseId}" />
+                            <button type="submit" class="dropdown-item" onclick="return confirm('Are you sure you want to hide this course?')">
+                                <i class="bi bi-eye me-2"></i>Hide
+                            </button>
+                        </form>
                     </li>
                     <!-- Unhide: only for hidden courses -->
                     <li th:if="${course.status == 'hidden'}">
-                        <a class="dropdown-item" href="#" th:onclick="|unhideCourse('${course.courseId}')|">
-                            <i class="bi bi-eye-slash me-2"></i>Unhide
-                        </a>
+                        <form method="post" th:action="@{/instructor/courses/unhide}" style="display:inline;">
+                            <input type="hidden" name="courseId" th:value="${course.courseId}" />
+                            <button type="submit" class="dropdown-item" onclick="return confirm('Are you sure you want to unhide this course?')">
+                                <i class="bi bi-eye-slash me-2"></i>Unhide
+                            </button>
+                        </form>
                     </li>
                 </ul>
             </div>
@@ -112,4 +125,5 @@
         </div>
     </td>
 </tr>
+
 </div>

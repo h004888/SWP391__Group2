@@ -6,8 +6,8 @@
         <div class="container-fluid px-3 px-xl-5">
             <!-- Logo START -->
             <a class="navbar-brand" th:href="@{/home}">
-                <img class="light-mode-item navbar-brand-item" src="assets/images/logo.svg" alt="logo">
-                <img class="dark-mode-item navbar-brand-item" src="assets/images/logo-light.svg" alt="logo">
+                <img class="light-mode-item navbar-brand-item" th:src="@{/assets/images/logo.svg}" alt="logo">
+                <img class="dark-mode-item navbar-brand-item" th:src="@{/assets/images/logo-light.svg}" alt="logo">
             </a>
             <!-- Logo END -->
 
@@ -40,17 +40,14 @@
                         <a class="nav-link " th:href="@{/learning}" aria-haspopup="true"
                             aria-expanded="false">Education</a>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link " href="#" aria-haspopup="true" aria-expanded="false">About</a>
-                    </li>
-                    <li class="nav-item dropdown"
-                        sec:authorize="hasRole('USER')">
-                        <a class="nav-link" th:href="@{/become-instructor}"
-                           aria-haspopup="true" aria-expanded="false">Become Instructor</a>
+
+                    <li class="nav-item dropdown" sec:authorize="hasRole('USER')">
+                        <a class="nav-link" th:href="@{/become-instructor}" aria-haspopup="true"
+                            aria-expanded="false">Become Instructor</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link " th:href="@{/vouchers}"
-                           aria-haspopup="true" aria-expanded="false">Voucher</a>
+                        <a class="nav-link " th:href="@{/home/vouchers}" aria-haspopup="true"
+                            aria-expanded="false">Voucher</a>
                     </li>
 
                 </ul>
@@ -60,13 +57,13 @@
                 <div class="nav my-3 my-xl-0 px-4 flex-nowrap align-items-center">
                     <div class="nav-item w-100">
                         <form class="position-relative">
-                            <input class="form-control pe-5 bg-transparent" type="search" placeholder="Search"
+                            <!-- <input class="form-control pe-5 bg-transparent" type="search" placeholder="Search"
                                 aria-label="Search">
                             <button
                                 class="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset"
                                 type="submit">
                                 <i class="fas fa-search fs-6 "></i>
-                            </button>
+                            </button> -->
                         </form>
                     </div>
                 </div>
@@ -75,26 +72,32 @@
             <!-- Main navbar END -->
             <div class="me-2 me-md-3 dropdown">
                 <!-- Wishlist button -->
-                <a class="btn btn-light btn-round mb-0" th:href="@{/wishlist}">
+                <a class="btn btn-light btn-round mb-0" th:href="@{/home/wishlist}">
                     <i class="bi bi-heart fa-fw"></i>
                 </a>
                 <!-- badge -->
-                <span id="wishlistTotalBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-danger mt-xl-2 ms-n1" th:text="${wishlistTotal != null ? wishlistTotal : 0}">
-                <span class="visually-hidden">items in wishlist</span>
+                <span id="wishlistTotalBadge"
+                    class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-danger mt-xl-2 ms-n1"
+                    th:text="${wishlistTotal != null ? wishlistTotal : 0}">
+                    <span class="visually-hidden">items in wishlist</span>
                 </span>
             </div>
             <!-- Notification -->
-            <div class="nav-item ms-2 dropdown" sec:authorize="isAuthenticated()">
-                <a class="btn btn-light btn-round mb-0 position-relative notification-btn-home" href="#" role="button" data-bs-toggle="dropdown"
-                   aria-expanded="false" data-bs-auto-close="outside" title="Notifications">
+            <div class="nav-item ms-2 dropdown" sec:authorize="isAuthenticated()" style="margin:15px;">
+                <a class="btn btn-light btn-round mb-0 position-relative notification-btn-home" href="#" role="button"
+                    data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside" title="Notifications">
                     <i class="bi bi-bell fa-fw"></i>
-                    <span id="userNotificationBadge" th:if="${unreadCount > 0}" class="notif-badge animation-blink"></span>
+                    <span id="userNotificationBadge" th:if="${unreadCount > 0}"
+                        class="notif-badge animation-blink"></span>
                 </a>
                 <!-- Notification dropdown menu START -->
-                <div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0" style="width:220px;min-width:220px;max-width:220px;border:1px solid #ddd;">
+                <div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0"
+                    style="width:320px;min-width:320px;max-width:320px;border:1px solid #ddd;">
                     <div class="card bg-transparent">
-                        <div class="card-header bg-transparent border-bottom py-4 d-flex justify-content-between align-items-center">
-                            <h6 class="m-0">Unread Notifications <span id="userNotificationCount" class="badge bg-danger bg-opacity-10 text-danger ms-2">0 new</span></h6>
+                        <div
+                            class="card-header bg-transparent border-bottom py-4 d-flex justify-content-between align-items-center">
+                            <h6 class="m-0">Unread Notifications <span id="userNotificationCount"
+                                    class="badge bg-danger bg-opacity-10 text-danger ms-2">0 new</span></h6>
                         </div>
                         <div class="card-body p-0">
                             <ul id="userNotificationList" class="list-group list-unstyled list-group-flush">
@@ -102,7 +105,8 @@
                             </ul>
                         </div>
                         <!-- Button -->
-                        <div class="card-footer bg-transparent border-0 py-3 text-center position-relative" style="padding-top:0;">
+                        <div class="card-footer bg-transparent border-0 py-3 text-center position-relative"
+                            style="padding-top:0;">
                             <a th:href="@{/user/notifications}" class="stretched-link">View all notifications</a>
                         </div>
                     </div>
@@ -111,12 +115,14 @@
             </div>
             <div class="me-2 me-md-3 dropdown">
                 <!-- Cart button -->
-                <a class="btn btn-light btn-round mb-0" th:href="@{/cart}">
+                <a class="btn btn-light btn-round mb-0" th:href="@{/home/cart}">
                     <i class="bi bi-cart3 fa-fw"></i>
                 </a>
                 <!-- badge -->
-                <span id="cartTotalBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-dark mt-xl-2 ms-n1" th:text="${cartTotal != null ? cartTotal : 0}">
-                <span class="visually-hidden">items in cart</span>
+                <span id="cartTotalBadge"
+                    class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-dark mt-xl-2 ms-n1"
+                    th:text="${cartTotal != null ? cartTotal : 0}">
+                    <span class="visually-hidden">items in cart</span>
                 </span>
             </div>
             <div class="navbar-nav ms-2">
@@ -132,7 +138,8 @@
             <div class="dropdown ms-1 ms-lg-0" sec:authorize="isAuthenticated()">
                 <a class="avatar avatar-sm p-0" href="#" id="profileDropdown" role="button" data-bs-auto-close="outside"
                     data-bs-display="static" data-bs-toggle="dropdown" aria-expanded="false">
-                    <img class="avatar-img rounded-circle" th:src="${#authentication.principal.profilePicture != null} ?
+                    <img class="avatar-img rounded-circle"
+                        th:src="${#authentication.principal.profilePicture != null} ?
                                                                                              ${#authentication.principal.profilePicture} :
                                                                                              @{/img/undraw_profile.svg}" alt="avatar">
                 </a>
@@ -143,10 +150,10 @@
                         <div class="d-flex align-items-center">
                             <!-- Avatar -->
                             <div class="avatar me-3">
-                                <img class="avatar-img rounded-circle shadow" th:src="${#authentication.principal.profilePicture != null} ?
+                                <img class="avatar-img rounded-circle shadow"
+                                    th:src="${#authentication.principal.profilePicture != null} ?
                                                                                              ${#authentication.principal.profilePicture} :
-                                                                                             @{/img/undraw_profile.svg}"
-                                    alt="avatar">
+                                                                                             @{/img/undraw_profile.svg}" alt="avatar">
                             </div>
                             <div>
                                 <a class="h6" href="#" th:text="${#authentication.principal.userEntity.username}">Lori
@@ -161,10 +168,11 @@
                     </li>
                     <!-- Links -->
                     <li><a class="dropdown-item" sec:authorize="hasRole('INSTRUCTOR')"
-                           th:href="@{/instructor}"><i class="bi bi-gear fa-fw me-2"></i>DashBoard</a></li>
-                    <li><a class="dropdown-item" th:href="@{/profile}"><i class="bi bi-person fa-fw me-2"></i>Profile</a></li>
-                    <li><a class="dropdown-item" th:href="@{/history}"><i class="fas fa-history me-2"></i>History</a></li>
-                    <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle fa-fw me-2"></i>Help</a></li>
+                            th:href="@{/instructor/courses}"><i class="bi bi-gear fa-fw me-2"></i>DashBoard</a></li>
+                    <li sec:authorize="hasRole('USER')"><a class="dropdown-item" th:href="@{/profile}"><i
+                                class="bi bi-person fa-fw me-2"></i>Profile</a></li>
+                    <li><a class="dropdown-item" th:href="@{/home/history}"><i
+                                class="fas fa-history me-2"></i>History</a></li>
                     <li>
                         <a class="dropdown-item bg-danger-soft-hover" th:href="@{/logout}">
                             <i class="bi bi-power fa-fw me-2"></i>
@@ -211,62 +219,7 @@
         </div>
     </nav>
     <!-- Nav END -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const cartTotalBadge = document.getElementById('cartTotalBadge');
-            const wishlistTotalBadge = document.getElementById('wishlistTotalBadge');
-
-            // Function to fetch and update cart total
-            const updateCartTotal = async () => {
-                try {
-                    const response = await fetch('/cart/total', {
-                        method: 'GET',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    });
-                    if (!response.ok) throw new Error('Failed to fetch cart total');
-                    const data = await response.json();
-                    if (cartTotalBadge) {
-                        cartTotalBadge.textContent = data.total || 0;
-                    }
-                } catch (error) {
-                    if (cartTotalBadge) {
-                        cartTotalBadge.textContent = '0';
-                    }
-                }
-            };
-
-            // Function to fetch and update wishlist total
-            const updateWishlistTotal = async () => {
-                try {
-                    const response = await fetch('/wishlist/total', {
-                        method: 'GET',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    });
-                    if (!response.ok) throw new Error('Failed to fetch wishlist total');
-                    const data = await response.json();
-                    if (wishlistTotalBadge) {
-                        wishlistTotalBadge.textContent = data.total || 0;
-                    }
-                } catch (error) {
-                    if (wishlistTotalBadge) {
-                        wishlistTotalBadge.textContent = '0';
-                    }
-                }
-            };
-
-            // Lắng nghe sự kiện custom để cập nhật cartTotal từ bất kỳ nơi nào
-            document.addEventListener('cart-updated', updateCartTotal);
-            document.addEventListener('wishlist-updated', updateWishlistTotal);
-
-            // Initial updates
-            updateCartTotal();
-            updateWishlistTotal();
-        });
-    </script>
+    <script th:src="@{/js/totalcart.js}"></script>
 
     <!-- Notification button styles -->
     <style>
@@ -279,7 +232,7 @@
             background-color: #f8f9fa;
             border-color: #dee2e6;
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .notification-page-btn .bi-bell-fill {
@@ -314,7 +267,7 @@
 
         .notification-page-btn:active {
             transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .notification-page-btn.loading {
@@ -331,10 +284,12 @@
                 transform: scale(1);
                 opacity: 1;
             }
+
             50% {
                 transform: scale(1.1);
                 opacity: 0.8;
             }
+
             100% {
                 transform: scale(1);
                 opacity: 1;
@@ -342,8 +297,13 @@
         }
 
         @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         /* Mobile responsive */
@@ -364,10 +324,12 @@
             align-items: center;
             justify-content: center;
         }
+
         .notification-btn-home .bi-bell {
             font-size: 1.2rem !important;
             line-height: 40px !important;
         }
+
         .notification-btn-home .notif-badge {
             width: 12px !important;
             height: 12px !important;
@@ -379,10 +341,10 @@
     <!-- Notification button JavaScript -->
     <script>
         // Add loading effect to notification page button
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const notificationPageBtn = document.querySelector('.notification-page-btn');
             if (notificationPageBtn) {
-                notificationPageBtn.addEventListener('click', function() {
+                notificationPageBtn.addEventListener('click', function () {
                     this.classList.add('loading');
                     // Remove loading class after navigation
                     setTimeout(() => {
@@ -423,7 +385,7 @@
         }
 
         // Load notifications when page loads (only for authenticated users)
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Check if user is authenticated (notification button exists)
             const notificationPageBtn = document.querySelector('.notification-page-btn');
             if (notificationPageBtn) {
@@ -434,10 +396,10 @@
 
     <!-- Add this JS at the end of the file, before </body> -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const notificationDropdown = document.querySelector('a[title="Notifications"][data-bs-toggle="dropdown"]');
             if (notificationDropdown) {
-                notificationDropdown.addEventListener('show.bs.dropdown', function() {
+                notificationDropdown.addEventListener('show.bs.dropdown', function () {
                     loadUserNotifications();
                 });
             }
@@ -492,7 +454,7 @@
                         <small class="text-body">${timeAgo}</small>
                     </div>
                 `;
-                li.addEventListener('click', function() {
+                li.addEventListener('click', function () {
                     window.location.href = `/user/notifications/view/${notification.notificationId}`;
                 });
                 list.appendChild(li);
@@ -510,7 +472,7 @@
             return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
         }
         function getNotificationTypeIcon(type) {
-            switch(type) {
+            switch (type) {
                 case 'ENROLLMENT': return 'fas fa-user-plus';
                 case 'COURSE_COMPLETION': return 'fas fa-graduation-cap';
                 case 'QUIZ_RESULT': return 'fas fa-question-circle';
@@ -562,7 +524,8 @@
 
             <!-- Hiển thị 5 category tiếp theo khi click -->
             <li id="moreCategories" style="display:none;" th:each="cat : ${nextFive}">
-                <a class="dropdown-item" th:text="${cat.name}" th:href="@{/courses/category/{id}(id=${cat.id})}"></a>
+                <a class="dropdown-item" th:text="${cat.name}"
+                    th:href="@{/home/coursesGrid(categoryIds=${cat.id})}"></a>
             </li>
         </ul>
     </li>

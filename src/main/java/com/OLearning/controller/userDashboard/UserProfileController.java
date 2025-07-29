@@ -1,31 +1,32 @@
-package com.OLearning.controller.profile;
+package com.OLearning.controller.userDashboard;
 
 import com.OLearning.dto.user.UserProfileEditDTO;
-import com.OLearning.service.cloudinary.UploadFile;
-import com.OLearning.service.user.UserService;
-import com.OLearning.service.notification.NotificationService;
 import com.OLearning.repository.UserRepository;
+import com.OLearning.service.cloudinary.UploadFile;
+import com.OLearning.service.notification.NotificationService;
+import com.OLearning.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Optional;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import com.OLearning.security.CustomUserDetailsService;
 
 @Controller
 @RequestMapping("/profile")
 public class UserProfileController {
     @Autowired
     private UserService userService;
-    
+
     @Autowired
     private UploadFile uploadFile;
 
@@ -34,6 +35,9 @@ public class UserProfileController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private CustomUserDetailsService customUserDetailsService;
 
     @GetMapping()
     public String showProfile(@AuthenticationPrincipal UserDetails userDetails, Model model) {
@@ -44,8 +48,7 @@ public class UserProfileController {
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
         boolean isInstructor = userDetails.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_INSTRUCTOR"));
-        
-        // Add unread notification count for students
+
         if (!isAdmin && !isInstructor) {
             userRepository.findByUsername(userDetails.getUsername()).ifPresent(user -> {
                 long unreadCount = notificationService.countUnreadByUserId(user.getUserId());
@@ -65,7 +68,6 @@ public class UserProfileController {
             return "homePage/index";
         }
     }
-
     @GetMapping("/edit")
     public String showEditProfile(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         Optional<UserProfileEditDTO> profileOpt = userService.getProfileByUsername(userDetails.getUsername());
@@ -77,8 +79,7 @@ public class UserProfileController {
                 .anyMatch(a -> a.getAuthority().equals("ROLE_INSTRUCTOR"));
         boolean isStudent = userDetails.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_STUDENT"));
-        
-        // Add unread notification count for students
+
         if (isStudent) {
             userRepository.findByUsername(userDetails.getUsername()).ifPresent(user -> {
                 long unreadCount = notificationService.countUnreadByUserId(user.getUserId());
@@ -91,7 +92,8 @@ public class UserProfileController {
             model.addAttribute("fragmentContent", "adminDashBoard/fragments/editProfileContent :: editProfileContent");
             return "adminDashBoard/index";
         } else if (isInstructor) {
-            model.addAttribute("fragmentContent", "instructorDashboard/fragments/editProfileContent :: editProfileContent");
+            model.addAttribute("fragmentContent",
+                    "instructorDashboard/fragments/editProfileContent :: editProfileContent");
             return "instructorDashboard/indexUpdate";
         } else if (isStudent) {
             model.addAttribute("fragmentContent", "homePage/fragments/editProfileFragment :: editProfile");
@@ -112,20 +114,22 @@ public class UserProfileController {
                 String imageUrl = uploadFile.uploadImageFile(avatarFile);
                 profileEditDTO.setAvatarUrl(imageUrl);
             } else {
-                // Nếu không chọn ảnh mới, giữ lại link cũ
                 Optional<UserProfileEditDTO> oldProfile = userService.getProfileByUsername(userDetails.getUsername());
                 oldProfile.ifPresent(old -> profileEditDTO.setAvatarUrl(old.getAvatarUrl()));
             }
-            
             userService.updateProfileByUsername(userDetails.getUsername(), profileEditDTO);
-            // Sau khi lưu thành công, redirect về trang profile
+            UserDetails updatedUserDetails = customUserDetailsService.loadUserByUsername(
+                    profileEditDTO.getEmail() != null ? profileEditDTO.getEmail() : userDetails.getUsername());
+            Authentication newAuth = new UsernamePasswordAuthenticationToken(
+                    updatedUserDetails,
+                    userDetails.getPassword(),
+                    updatedUserDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(newAuth);
             return "redirect:/profile";
         } catch (IOException e) {
             model.addAttribute("error", "Không thể tải lên ảnh. Vui lòng thử lại.");
             return showEditProfile(userDetails, model);
         }
     }
-
-
 
 }

@@ -34,16 +34,15 @@ public class PasswordResetService {
     private static final int MAX_OTP_ATTEMPTS = 3;
 
     @Transactional
-    public void generateOTP(String email) {
+    public void generateOTP(String email, String type) {
         // Validate email
         if (email == null || email.trim().isEmpty()) {
-            throw new IllegalArgumentException("Email không được để trống");
+            throw new IllegalArgumentException("Email cannot be empty");
         }
 
         User user = userRepository.findByEmail(email.trim().toLowerCase())
-                .orElseThrow(() -> new RuntimeException("Email không tồn tại"));
+                .orElseThrow(() -> new RuntimeException("Email does not exist"));
 
-        // Delete existing OTP for this user to prevent multiple active OTPs
         deleteExistingOTP(user.getUserId());
 
         // Generate secure OTP
@@ -60,8 +59,21 @@ public class PasswordResetService {
         otpRepository.save(resetOtp);
 
         // Send OTP via email
-        String subject = "Khôi phục mật khẩu - OTP";
-        String message = OTPEmailMessage(user.getFullName(), otp);
+        String subject;
+        String message;
+        if ("verifyEmail".equals(type)) {
+            subject = "Email Verification - OLearning";
+            message = "Hello " + user.getFullName() + ",\n\n" +
+                    "Thank you for registering at OLearning. Your email verification code is: " + otp + "\n" +
+                    "This code will expire in 5 minutes.\n\n" +
+                    "If you did not request this, please ignore this email.";
+        } else {
+            subject = "Password Reset - OLearning";
+            message = "Hello " + user.getFullName() + ",\n\n" +
+                    "You requested to reset your password. Your OTP code is: " + otp + "\n" +
+                    "This code will expire in 5 minutes.\n\n" +
+                    "If you did not request this, please ignore this email.";
+        }
 
         try {
             emailService.sendOTP(user.getEmail(), subject, message);
@@ -70,9 +82,9 @@ public class PasswordResetService {
             try {
                 otpRepository.delete(resetOtp);
             } catch (Exception deleteException) {
-                System.err.println("Lỗi khi xóa OTP sau khi gửi email thất bại: " + deleteException.getMessage());
+                System.err.println("Error deleting OTP after failed email: " + deleteException.getMessage());
             }
-            throw new RuntimeException("Không thể gửi email. Vui lòng thử lại sau.");
+            throw new RuntimeException("Unable to send email. Please try again later.");
         }
     }
 

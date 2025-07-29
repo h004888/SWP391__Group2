@@ -32,6 +32,9 @@ public class InstructorRequest {
     @Column(name = "Personal_skill", columnDefinition = "NVARCHAR(MAX)")
     private String personalSkill;
 
+    @Column(name = "FileUrl", columnDefinition = "NVARCHAR(1000)")
+    private String fileUrl;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "UserID", nullable = false)
     private User user; // Người gửi yêu cầu

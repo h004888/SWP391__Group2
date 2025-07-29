@@ -2,14 +2,17 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.add-to-cart-btn').forEach(function(btn) {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
-            // Kiểm tra đăng nhập
-            if (!window.userId || window.userId == 0) {
-                window.location.href = '/login'; // Đổi lại nếu URL login khác
+            
+            // Kiểm tra đăng nhập - chỉ redirect nếu chắc chắn chưa đăng nhập
+            if (typeof window.userId === 'undefined' || window.userId === null || window.userId === 0) {
+                window.location.href = '/login';
                 return;
             }
+            
             const courseId = btn.getAttribute('data-course-id');
-            fetch('/cart/add/' + courseId, {
+            fetch('/home/cart/add/' + courseId, {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
                 }
@@ -20,7 +23,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         showNotification('Added to cart successfully!', 'success');
                         document.dispatchEvent(new Event('cart-updated'));
                     } else {
-                        showNotification(data.error || 'An error occurred!', 'error');
+                        // Kiểm tra nếu lỗi là do chưa đăng nhập thì redirect
+                        if (data.message && data.message.includes('đăng nhập')) {
+                            window.location.href = '/login';
+                        } else {
+                            showNotification(data.message || 'An error occurred!', 'error');
+                        }
                     }
                 })
                 .catch(() => showNotification('An error occurred!', 'error'));

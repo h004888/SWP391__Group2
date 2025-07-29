@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Certificate of Participation</title>
+    <style>
+        body {
+            width: 1000px;
+            height: 700px;
+            margin: 50px auto;
+            border: 10px solid #d4af37;
+            padding: 60px;
+            font-family: 'Times New Roman', serif;
+            position: relative;
+            background: #f9f9f9;
+        }
+
+        .logo {
+            position: absolute;
+            top: 40px;
+            right: 60px;
+            width: 100px;
+        }
+
+        .badge {
+            position: absolute;
+            top: 50px;
+            left: 50px;
+            width: 80px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 64px;
+            /* tăng từ 48px */
+            letter-spacing: 4px;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 32px;
+            /* tăng từ 20px */
+            letter-spacing: 3px;
+        }
+
+        .recipient {
+            text-align: center;
+            margin: 50px 0 20px 0;
+            font-size: 56px;
+            /* tăng từ 40px */
+            color: #d4af37;
+            font-family: 'Brush Script MT', cursive;
+        }
+
+        .course-name {
+            text-align: center;
+            font-size: 36px;
+            /* tăng từ 24px */
+            color: #222;
+            margin-bottom: 18px;
+            font-weight: bold;
+        }
+
+        .teacher-name {
+            text-align: center;
+            font-size: 28px;
+            /* tăng từ 18px */
+            color: #444;
+            margin-bottom: 40px;
+        }
+
+        .text {
+            text-align: center;
+            font-size: 28px;
+            /* tăng từ 18px */
+            margin: 30px 0;
+        }
+
+        .signature {
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        .signature-name {
+            font-weight: bold;
+            font-size: 24px;
+            /* tăng từ mặc định */
+        }
+
+
+
+        .header-wave {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 150px;
+            background: linear-gradient(135deg, #d4af37, #000);
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 30% 100%);
+        }
+
+        @page {
+            size: A4 landscape;
+            /* Hoặc dùng mm: 400mm 225mm */
+            margin: 0;
+        }
+
+        body {
+            width: 297mm;
+            /* A4 landscape width */
+            height: 210mm;
+            /* A4 landscape height */
+            margin: 0 auto;
+            border: 10px solid #d4af37;
+            box-sizing: border-box;
+            padding: 20mm;
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <div class="header-wave"></div>
+    <div class="footer-wave"></div>
+
+    <h1>CERTIFICATE</h1>
+    <h2>OF PARTICIPATION</h2>
+
+    <p class="text">This certificate is proudly presented to</p>
+
+    <!-- Tên người học -->
+    <div class="recipient" th:text="${cert.user.fullName}">
+
+    </div>
+
+    <!-- Tên khóa học -->
+    <div class="course-name">
+        <!-- Thymeleaf: th:text="${courseName}" -->
+        <span th:text="${cert.course.title}"></span>
+    </div>
+
+    <!-- Tên giáo viên -->
+    <div class="teacher-name">
+        <!-- Thymeleaf: th:text="'Instructor: ' + ${teacherName}" -->
+        Instructor: <span th:text="${cert.course.instructor.fullName}"></span>
+    </div>
+
+    <p class="text">
+        For participating in the <span style="font-weight:bold;">
+            <span th:text="${cert.course.title}"></span>
+        </span> <br />
+        held by <span th:text="${cert.course.instructor.fullName}"></span> on
+        <span th:text="${#dates.format(cert.issueDate, 'dd/MM/yyyy')}"></span>.
+    </p>
+
+</body>
+
+</html>
