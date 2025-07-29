@@ -45,8 +45,7 @@
                                     <div>
                                         <h6 class="mb-0"><a href="#" class="text-dark"
                                                 th:text="${course.instructor.fullName}">Larry Lawson</a></h6>
-                                        <span class="small"
-                                            th:text="${course.instructor.personalSkill}">Instructor</span>
+
                                     </div>
                                 </div>
                             </div>
@@ -59,8 +58,12 @@
                             <div class="hstack gap-2">
                                 <a href="#" class="badge bg-orange bg-opacity-10 text-orange"
                                     th:utext="${course.courseLevel}">All level</a>
-                                <a href="#" class="badge text-bg-dark" th:utext="${course.duration/3600 +'h'}">6
-                                    month</a>
+                                <span class="badge text-bg-dark">
+                                    <span th:if="${course.duration >= 60}"
+                                          th:text="${(course.duration / 60) + 'h ' + (course.duration % 60) + 'm'}">12h 56m</span>
+                                    <span th:if="${course.duration < 60}"
+                                          th:text="${'0h ' + course.duration + 'm'}">0h 45m</span>
+                                </span>
                             </div>
 
                         </div>

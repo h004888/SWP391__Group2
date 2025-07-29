@@ -173,7 +173,8 @@ Instructor START -->
                             <div class="position-relative">
                                 <!-- Image -->
                                 <img th:src="${instructor.profilePicture != null} ? @{${instructor.profilePicture}} : @{/assets/images/instructor/02.jpg}"
-                                    class="card-img" alt="course image">
+                                    class="card-img" alt="course image"
+                                    style="object-fit: cover; width: 100%; height: 250px; border-radius: 0.5rem;">
                                 <!-- Overlay -->
                                 <div class="card-img-overlay d-flex flex-column p-3">
                                     <div class="w-100 mt-auto text-end">

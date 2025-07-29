@@ -228,14 +228,24 @@
                                                             th:if="${!completedLessonIds.contains(lesson.lessonId) and lesson.lessonId != currentLessonId and accessibleLessonIds.contains(lesson.lessonId)}">
                                                             <span class="text-primary fw-bold">
                                                                 <i class="fas fa-clock me-1"></i>
-                                                                <span th:text="${lesson.duration / 60} + ' min'"></span>
+                                                                <span th:if="${lesson.duration >= 60}"
+                                                                    th:text="${(lesson.duration / 60) + 'h ' + (lesson.duration % 60) + 'm'}">12h
+                                                                    56m</span>
+                                                                <span th:if="${lesson.duration < 60}"
+                                                                    th:text="${'0h ' + lesson.duration + 'm'}">0h
+                                                                    45m</span>
                                                             </span>
                                                         </p>
                                                         <p class="mb-0 text-truncate"
                                                             th:if="${!accessibleLessonIds.contains(lesson.lessonId)}">
                                                             <span class="text-muted">
                                                                 <i class="fas fa-lock me-1"></i>
-                                                                <span th:text="${lesson.duration / 60} + ' min'"></span>
+                                                                <span th:if="${lesson.duration >= 60}"
+                                                                    th:text="${(lesson.duration / 60) + 'h ' + (lesson.duration % 60) + 'm'}">12h
+                                                                    56m</span>
+                                                                <span th:if="${lesson.duration < 60}"
+                                                                    th:text="${'0h ' + lesson.duration + 'm'}">0h
+                                                                    45m</span>
                                                             </span>
                                                         </p>
                                                     </div>
@@ -284,7 +294,7 @@
 
     </div>
 
-        <!-- =======================
+    <!-- =======================
         Page content END -->
 
 </main>
