@@ -69,8 +69,8 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
                 }
             } else {
                 // Đăng nhập từ form user thông thường
-                if (hasRole(authentication, "ROLE_ADMIN")) {
-                    // Admin cố gắng đăng nhập từ form user
+                if (hasRole(authentication, "ROLE_ADMIN") || hasRole(authentication, "ROLE_STAFF")) {
+                    // Admin/Staff cố gắng đăng nhập từ form user
                     response.sendRedirect("/login?error=unauthorized_admin_login");
                     return;
                 } else {
