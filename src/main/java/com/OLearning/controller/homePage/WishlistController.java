@@ -14,7 +14,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.Base64;
 
 @Controller
 @RequestMapping("/home/wishlist")
@@ -113,8 +115,17 @@ public class WishlistController {
                 result.put("action", "removed");
                 result.put("message", "Course removed from wishlist");
             } else {
-                // Add to wishlist
                 Map<String, Object> wishlist = wishlistService.addCourseToWishlist(encodedWishlistJson, courseId, userDetails.getUsername());
+                ObjectMapper objectMapper = new ObjectMapper();
+                String wishlistJson = objectMapper.writeValueAsString(wishlist);
+                String encodedWishlistJsonNew = Base64.getEncoder().encodeToString(wishlistJson.getBytes(StandardCharsets.UTF_8));
+                
+                if (encodedWishlistJsonNew.length() > 8000) {
+                    result.put("success", false);
+                    result.put("message", "Wishlist is too large. Please remove some items first.");
+                    return result;
+                }
+                
                 CartServiceUtil.updateWishlistCookie(wishlist, response, userId);
                 result.put("success", true);
                 result.put("action", "added");
@@ -128,9 +139,8 @@ public class WishlistController {
             result.put("message", e.getMessage());
         } catch (Exception e) {
             result.put("success", false);
-            result.put("message", "Failed to update wishlist");
+            result.put("message", "Failed to update wishlist: " + e.getMessage());
         }
-        
         return result;
     }
 

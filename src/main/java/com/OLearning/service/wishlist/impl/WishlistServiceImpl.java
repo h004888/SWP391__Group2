@@ -95,23 +95,6 @@ public class WishlistServiceImpl implements WishlistService {
                     Course course = courseRepository.findById(courseId).orElse(null);
                     if (course != null) {
                         item.put("courseLevel", course.getCourseLevel());
-                        item.put("description", course.getDescription());
-                        // Rating
-                        List<CourseReview> reviews = course.getCourseReviews();
-                        int ratingCount = 0;
-                        double averageRating = 0;
-                        if (reviews != null && !reviews.isEmpty()) {
-                            ratingCount = (int) reviews.stream().filter(r -> r.getRating() != null).count();
-                            averageRating = reviews.stream().filter(r -> r.getRating() != null).mapToInt(CourseReview::getRating).average().orElse(0);
-                        }
-                        item.put("ratingCount", ratingCount);
-                        item.put("averageRating", averageRating);
-                        // Duration & Lessons
-                        List<Lesson> lessons = lessonRepository.findLessonsByCourseId(courseId);
-                        int totalLessons = lessons != null ? lessons.size() : 0;
-                        int duration = lessons != null ? lessons.stream().filter(l -> l.getDuration() != null).mapToInt(Lesson::getDuration).sum() : 0;
-                        item.put("totalLessons", totalLessons);
-                        item.put("duration", duration);
                     }
                 } else {
                     item.put("enrolled", false);
@@ -119,7 +102,6 @@ public class WishlistServiceImpl implements WishlistService {
             }
             return wishlist;
         } catch (Exception e) {
-            System.err.println("Error parsing wishlist JSON: " + e.getMessage());
             Map<String, Object> emptyWishlist = new HashMap<>();
             emptyWishlist.put("userId", userRepository.findByEmail(userEmail)
                     .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + userEmail))
@@ -156,7 +138,12 @@ public class WishlistServiceImpl implements WishlistService {
         Map<String, Object> item = new HashMap<>();
         item.put("id", UUID.randomUUID().toString());
         item.put("courseId", courseId);
-        item.put("courseTitle", course.getTitle());
+        // Chỉ lưu title ngắn gọn để tiết kiệm không gian
+        String title = course.getTitle();
+        if (title.length() > 50) {
+            title = title.substring(0, 47) + "...";
+        }
+        item.put("courseTitle", title);
         item.put("courseImage", course.getCourseImg());
         item.put("coursePrice", course.getPrice());
         items.add(item);

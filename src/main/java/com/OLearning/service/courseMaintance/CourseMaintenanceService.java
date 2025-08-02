@@ -44,4 +44,6 @@ public interface CourseMaintenanceService {
     String getMaintenanceStatusById(Long maintenanceId);
 
     Long sumCourseMaintainForInstructor(Long instructorId);
+    
+    boolean canPayMaintenance(Long maintenanceId);
 }

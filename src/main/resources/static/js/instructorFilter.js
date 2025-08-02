@@ -131,14 +131,12 @@ function showToast(message, type = 'info') {
     toast.show();
 }
 
-// Các hàm xử lý hành động khóa học
 function upToPublic(courseId, hasPaidPublicationFee) {
     if (!courseId) return;
-    
-    // Nếu hasPaidPublicationFee là true (đã trả phí publication)
+
     if (hasPaidPublicationFee === true) {
         showConfirmActionModal(
-            'Are you sure you want to publish this course?',
+            'Are you sure you want to publish this course? The public fee will be 100,000 the next time there will be no fee.',
             '/instructor/courses/uptopublic',
             courseId,
             function() {
@@ -147,12 +145,14 @@ function upToPublic(courseId, hasPaidPublicationFee) {
             }
         );
     } else {
-        // Nếu chưa trả phí publication
         showConfirmActionModalPublic(
             'Are you sure you want to make this course public? The public fee will be 100,000 the next time there will be no fee.',
             '/instructor/courses/uptopublic',
             courseId,
-            null
+            function() {
+                filterAllTabs(0);
+                updateStatusBadges();
+            }
         );
     }
 }

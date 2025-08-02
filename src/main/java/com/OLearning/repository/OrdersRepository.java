@@ -291,7 +291,7 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
     Page<Order> findByUserUserIdAndStatusAndOrderDateBetween(Long userId, String status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 
     @Query(value = """
-            SELECT DISTINCT o.OrderID, u.FullName, o.Amount, o.OrderDate
+            SELECT DISTINCT o.OrderID, u.FullName, o.Amount, o.OrderDate, o.OrderType
             FROM Orders o
             JOIN OrderDetail d ON o.OrderID = d.OrderID
             JOIN Users u ON o.UserID = u.UserID
@@ -350,7 +350,7 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
     RevenueDTO getRevenueStatsByInstructor(@Param("instructorid") Long instructorId);
 
     @Query(value = """
-            SELECT DISTINCT o.OrderID, u.FullName, o.Amount, o.OrderDate
+            SELECT DISTINCT o.OrderID, u.FullName, o.Amount, o.OrderDate, o.OrderType
             FROM Orders o
             JOIN OrderDetail d ON o.OrderID = d.OrderID
             JOIN Users u ON o.UserID = u.UserID
@@ -375,7 +375,7 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
     Page<InvoiceDTO> findInvoiceByInstructorIdAscDate(@Param("instructorId") Long instructorId, Pageable pageable);
 
     @Query(value = """
-            SELECT DISTINCT o.OrderID, u.FullName, o.Amount, o.OrderDate
+            SELECT DISTINCT o.OrderID, u.FullName, o.Amount, o.OrderDate, o.OrderType
             FROM Orders o
             JOIN OrderDetail d ON o.OrderID = d.OrderID
             JOIN Users u ON o.UserID = u.UserID
@@ -399,7 +399,7 @@ public interface OrdersRepository extends JpaRepository<Order, Long> {
             nativeQuery = true)
     Page<InvoiceDTO> findInvoiceByInstructorIdAmountAsc(@Param("instructorId") Long instructorId, Pageable pageable);
     @Query(value = """
-            SELECT DISTINCT o.OrderID, u.FullName, o.Amount, o.OrderDate
+            SELECT DISTINCT o.OrderID, u.FullName, o.Amount, o.OrderDate, o.OrderType
             FROM Orders o
             JOIN OrderDetail d ON o.OrderID = d.OrderID
             JOIN Users u ON o.UserID = u.UserID

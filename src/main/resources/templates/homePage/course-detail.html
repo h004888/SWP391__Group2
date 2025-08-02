@@ -1568,7 +1568,6 @@ Footer END -->
 	</style>
 
 	<script>
-		// Mở modal khi bấm Buy Now
 		document.addEventListener('DOMContentLoaded', function () {
 			var buyNowBtn = document.querySelector('#buy-now-form button[type="submit"]');
 			if (buyNowBtn) {
@@ -1576,7 +1575,7 @@ Footer END -->
 				buyNowBtn.onclick = function (e) {
 					e.preventDefault();
 					if (!window.userId || window.userId == 0) {
-						window.location.href = '/login'; // Đổi lại nếu URL login khác
+						window.location.href = '/login';
 						return;
 					}
 					if (window.bootstrap && bootstrap.Modal) {

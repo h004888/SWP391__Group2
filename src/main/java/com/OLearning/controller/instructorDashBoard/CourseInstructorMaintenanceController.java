@@ -113,7 +113,10 @@ public class CourseInstructorMaintenanceController {
                 redirectAttributes.addFlashAttribute("errorMessage", "User not found!");
                 return "redirect:/instructor/maintenance";
             }
-
+            if (!courseMaintenanceService.canPayMaintenance(maintenanceId)) {
+                redirectAttributes.addFlashAttribute("errorMessage", "This maintenance fee is overdue for more than 30 days and cannot be paid. Please contact support.");
+                return "redirect:/instructor/maintenance";
+            }
             CourseMaintenance maintenance = courseMaintenanceService.getAllCourseMaintenances().stream()
                     .filter(cm -> cm.getMaintenanceId().equals(maintenanceId))
                     .findFirst().orElse(null);
@@ -138,7 +141,6 @@ public class CourseInstructorMaintenanceController {
                 } else {
                     redirectAttributes.addFlashAttribute("errorMessage", "Payment failed! Please try again.");
                 }
-                
                 return "redirect:/instructor/maintenance";
             } else {
                 String monthYearStr = maintenance.getMonthYear().format(DateTimeFormatter.ofPattern("MM/yyyy"));

@@ -48,6 +48,7 @@
       </div>
 
       <!-- Notification System -->
+      <div th:replace="~{homePage/fragments/notification :: notification}"></div>
       <div th:if="${message}" th:attr="data-message=${message}" id="server-message" style="display: none;"></div>
       <div th:if="${error}" th:attr="data-message=${error}" id="server-error" style="display: none;"></div>
       <script>
@@ -84,25 +85,9 @@
               </div>
               <h5 class="card-title"><a th:text="${item.courseTitle}"
                                         th:href="@{'/home/course-detail?id=' + ${item.courseId}}"></a></h5>
-              <p class="mb-2 text-truncate-2" th:text="${item.description}"></p>
-              <ul class="list-inline mb-0">
-                <li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
-                <li class="list-inline-item ms-2 h6 fw-light mb-0"
-                    th:text="${item.ratingCount} + ' Ratings'">0 Ratings</li>
-              </ul>
             </div>
             <div class="card-footer pt-0 pb-3">
               <hr>
-              <div class="d-flex justify-content-between">
-                  <span class="h6 fw-light mb-0">
-                    <i class="far fa-clock text-danger me-2"></i>
-                    <span th:text="${item.duration/60} + 'h'">0h</span>
-                  </span>
-                <span class="h6 fw-light mb-0">
-                    <i class="fas fa-table text-orange me-2"></i>
-                    <span th:text="${item.totalLessons} + ' lessons'">0 lessons</span>
-                  </span>
-              </div>
               <div class="d-flex justify-content-between align-items-center mt-2">
                 <th:block th:if="${item.enrolled}">
                   <a th:href="@{/learning/course/view(courseId=${item.courseId})}"
@@ -178,5 +163,5 @@
   <!-- =======================
   Page content END -->
   <script th:src="@{/js/homePage/wishlist.js}"></script>
-<!--  <script th:src="@{/js/homePage/addtocart.js}"></script>-->
+  <script th:src="@{/js/homePage/addtocart.js}"></script>
 </main>

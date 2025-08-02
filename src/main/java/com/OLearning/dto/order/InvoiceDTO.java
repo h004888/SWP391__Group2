@@ -16,4 +16,5 @@ public class InvoiceDTO {
     private String fullName;
     private Double amount;
     private Timestamp orderDate;
+    private String orderType;
 }

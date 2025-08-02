@@ -209,7 +209,7 @@ public class ControlllerAddCourse {
         return "redirect:../courses";
     }
 
-    //uppublic course
+
     @PostMapping("/courses/uptopublic")
     public String upcourse(@RequestParam(name = "courseId") Long courseId
             , RedirectAttributes redirectAttributes, HttpServletRequest request, Model model) {

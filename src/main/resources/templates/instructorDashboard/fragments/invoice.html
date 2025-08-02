@@ -188,8 +188,9 @@
                         <td th:utext="${order.orderId}">OrderId</td>
                         <td th:utext="${order.fullName}">Name Enrollment</td>
                         <td th:utext="${order.orderDate}">Order Date</td>
-                        <td th:text="${#numbers.formatDecimal(order.amount, 0, 'COMMA', 0, 'POINT')} == 0 ? 0 + ' VND' : ${#numbers.formatDecimal(order.amount, 0, 'COMMA', 2, 'POINT')} + ' VND'">Amount
+                        <td th:text="${order.orderType == 'course_public' ? '-' + #numbers.formatDecimal(order.amount, 0, 'COMMA', 0, 'POINT') + ' VND' : #numbers.formatDecimal(order.amount, 0, 'COMMA', 0, 'POINT') + ' VND'}">Amount
                         </td>
+
                         </td>
 
                         <td>
@@ -253,11 +254,14 @@
             body.innerHTML = '';
             pageData.content.forEach(order => {
                 const row = document.createElement('tr');
+                const amountDisplay = order.orderType === 'course_public' 
+                    ? `-${order.amount.toLocaleString()} VND` 
+                    : `${order.amount.toLocaleString()} VND`;
                 row.innerHTML = `
             <td>${order.orderId}</td>
             <td>${order.fullName}</td>
             <td>${formatDate(order.orderDate)}</td>
-            <td>${order.amount.toLocaleString()} VND</td>
+            <td>${amountDisplay}</td>
             <td>
                 <a href="/instructor/invoice/${order.orderId}"
                    class="btn btn-info-soft btn-round me-1 mb-1 mb-md-0"

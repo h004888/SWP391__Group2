@@ -56,8 +56,12 @@
         <div class="col-md-6 d-flex justify-content-end align-items-center">
           <form class="d-flex" id="filterForm" method="get" th:action="@{/home/history}" onsubmit="return false;">
             <input type="text" name="courseName" th:value="${courseName}" class="form-control me-2" placeholder="Search for courses..." id="courseNameInput">
-            <input type="date" name="startDate" th:value="${startDate}" class="form-control me-2" id="startDateInput">
-            <input type="date" name="endDate" th:value="${endDate}" class="form-control me-2" id="endDateInput">
+            <input type="date" name="startDate"
+                   th:value="${startDate != null ? startDate : #temporals.format(#temporals.createNow().withDayOfYear(1), 'yyyy-MM-dd')}"
+                   class="form-control me-2" id="startDateInput">
+            <input type="date" name="endDate"
+                   th:value="${endDate != null ? endDate : #temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"
+                   class="form-control me-2" id="endDateInput">
             <!-- Remove filter button -->
           </form>
         </div>
@@ -73,7 +77,6 @@
                 <th class="text-center">Date of purchase</th>
                 <th class="text-center">Course</th>
                 <th class="text-center">Price</th>
-                <th class="text-center">Status</th>
                 <th class="text-center">Action</th>
               </tr>
               </thead>
@@ -86,10 +89,6 @@
                   <div class="text-muted small text-center" th:text="'Instructor: ' + ${transaction.instructorName}"></div>
                 </td>
                 <td th:text="${#numbers.formatDecimal(transaction.discountedPrice, 0, 'COMMA', 0, 'POINT')} + ' VND'" class="fw-bold text-center"></td>
-                <td class="text-center">
-                  <span th:if="${transaction.status == 'PAID'}" class="badge bg-success">Paid</span>
-                  <span th:if="${transaction.status == 'PENDING'}" class="badge bg-warning text-dark">Pending</span>
-                </td>
                 <td class="text-center">
                   <button class="btn btn-link text-primary transaction-detail-btn" th:attr="data-id=${transaction.orderId}">View</button>
                 </td>

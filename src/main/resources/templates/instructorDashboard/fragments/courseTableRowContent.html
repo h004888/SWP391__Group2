@@ -74,13 +74,18 @@
                 </button>
                 <ul class="dropdown-menu" th:aria-labelledby="'dropdownMenuButton-' + ${course.courseId}">
                     <!-- Up to Public: only for approved -->
+<!--                    <li th:if="${course.status == 'approved'}">-->
+<!--                        <form method="post" th:action="@{/instructor/courses/uptopublic}" style="display:inline;">-->
+<!--                            <input type="hidden" name="courseId" th:value="${course.courseId}" />-->
+<!--                            <button type="submit" class="dropdown-item" onclick="return confirm('Are you sure you want to publish this course?')">-->
+<!--                                <i class="bi bi-upload me-2"></i>Up to Public-->
+<!--                            </button>-->
+<!--                        </form>-->
+<!--                    </li>-->
                     <li th:if="${course.status == 'approved'}">
-                        <form method="post" th:action="@{/instructor/courses/uptopublic}" style="display:inline;">
-                            <input type="hidden" name="courseId" th:value="${course.courseId}" />
-                            <button type="submit" class="dropdown-item" onclick="return confirm('Are you sure you want to publish this course?')">
-                                <i class="bi bi-upload me-2"></i>Up to Public
-                            </button>
-                        </form>
+                        <a class="dropdown-item" href="#" th:onclick="|upToPublic('${course.courseId}', ${hasPaidPublicationFee})|">
+                            <i class="bi bi-upload me-2"></i>Up to Public
+                        </a>
                     </li>
                     <!-- Unpublish: only for published -->
                     <li th:if="${course.status == 'publish'}">

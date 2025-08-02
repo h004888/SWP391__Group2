@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.time.format.DateTimeFormatter;
 import java.util.stream.Collectors;
@@ -374,11 +375,32 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
     }
 
     @Override
+    public boolean canPayMaintenance(Long maintenanceId) {
+        try {
+            CourseMaintenance maintenance = courseMaintenanceRepository.findById(maintenanceId).orElse(null);
+            if (maintenance == null) return false;
+            if ("PAID".equalsIgnoreCase(maintenance.getStatus())) return false;
+            
+            LocalDate today = LocalDate.now();
+            long daysOverdue = ChronoUnit.DAYS.between(maintenance.getDueDate(), today);
+            
+            return daysOverdue < 14;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Override
     public boolean processMaintenancePayment(Long maintenanceId, String refCode) {
         try {
             CourseMaintenance maintenance = courseMaintenanceRepository.findById(maintenanceId).orElse(null);
             if (maintenance == null) return false;
             if ("PAID".equalsIgnoreCase(maintenance.getStatus())) return true;
+
+            if (!canPayMaintenance(maintenanceId)) {
+                return false;
+            }
+            
             User instructor = maintenance.getCourse().getInstructor();
             Fee fee = maintenance.getFee();
             double feeAmount = fee != null ? fee.getMaintenanceFee() : 0.0;
@@ -420,6 +442,13 @@ public class CourseMaintenanceServiceImpl implements CourseMaintenanceService {
             maintenance.setDescription("Maintenance payment");
             maintenance.setRefCode(refCode != null ? refCode : UUID.randomUUID().toString());
             courseMaintenanceRepository.save(maintenance);
+
+            Course course = maintenance.getCourse();
+            if (course != null) {
+                course.setStatus("publish");
+                courseRepository.save(course);
+            }
+
             return true;
         } catch (Exception e) {
             return false;
