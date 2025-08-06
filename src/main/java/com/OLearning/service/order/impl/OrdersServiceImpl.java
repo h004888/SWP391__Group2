@@ -521,7 +521,6 @@ public class OrdersServiceImpl implements OrdersService {
         String orderType = "course_purchase";
         String orderStatus = "paid";
 
-        // Tìm orders theo userId, orderType và status = "paid"
         Page<Order> orderPage = ordersRepository.findByUserUserIdAndOrderTypeAndStatus(userId, orderType, orderStatus, pageableWithSort);
         if (orderPage.isEmpty()) {
             return Page.empty(pageable);
@@ -577,15 +576,12 @@ public class OrdersServiceImpl implements OrdersService {
     @Transactional
     public Page<OrderHistoryDTO> getUserCoursePurchaseOrders(Long userId, String courseName, String status, String startDate, String endDate, int page, int size) {
         String orderType = "course_purchase";
-        String orderStatus = "paid"; // Chỉ lấy những order có status = "paid"
+        String orderStatus = "paid";
 
-        // Lấy tất cả orders có status "paid" mà không phân trang
         List<Order> orders = ordersRepository.findByUserUserIdAndOrderTypeAndStatus(userId, orderType, orderStatus, Pageable.unpaged()).getContent();
 
-        // Ánh xạ tất cả orders thành DTOs
         List<OrderHistoryDTO> allDtos = orderHistoryMapper.toDTOList(orders);
 
-        // Lọc theo courseName nếu có
         if (courseName != null && !courseName.trim().isEmpty()) {
             allDtos = allDtos.stream()
                     .filter(dto -> dto.getCourseName() != null &&
@@ -593,7 +589,6 @@ public class OrdersServiceImpl implements OrdersService {
                     .collect(Collectors.toList());
         }
 
-        // Lọc theo ngày nếu có
         if (startDate != null && !startDate.trim().isEmpty() && endDate != null && !endDate.trim().isEmpty()) {
             try {
                 LocalDate start = LocalDate.parse(startDate);
@@ -609,14 +604,11 @@ public class OrdersServiceImpl implements OrdersService {
                         })
                         .collect(Collectors.toList());
             } catch (Exception e) {
-                // Nếu parse date lỗi thì bỏ qua filter date
             }
         }
 
-        // Sắp xếp theo ngày giảm dần
         allDtos.sort((a, b) -> b.getOrderDate().compareTo(a.getOrderDate()));
 
-        // Tính toán phân trang thủ công
         int totalItems = allDtos.size();
         int totalPages = (int) Math.ceil((double) totalItems / size);
         int startIndex = page * size;

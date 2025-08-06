@@ -921,9 +921,11 @@ Listed courses START -->
 										<!-- Hover element -->
 										<div class="card-img-overlay">
 											<div class="card-element-hover d-flex justify-content-end">
-												<a href="#" class="icon-md bg-white rounded-circle text-center">
+												<button type="button"
+														class="btn btn-sm btn-success-soft item-show-hover m-1 add-to-cart-btn bg-white rounded-circle text-center"
+														th:attr="data-course-id=${course.courseId}">
 													<i class="fas fa-shopping-cart text-danger"></i>
-												</a>
+												</button>
 											</div>
 										</div>
 									</div>
@@ -1216,15 +1218,17 @@ Footer END -->
 	<div class="back-top"><i class="bi bi-arrow-up-short position-absolute top-50 start-50 translate-middle"></i></div>
 
 	<!-- Bootstrap JS -->
-	<script src="assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+	<script th:src="@{assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js}"></script>
 
 	<!-- Vendors -->
-	<script src="assets/vendor/tiny-slider/tiny-slider.js"></script>
-	<script src="assets/vendor/glightbox/js/glightbox.js"></script>
-	<script src="assets/vendor/choices/js/choices.min.js"></script>
-	<script src="/js/homePage/addtocart.js"></script>
+	<script th:src="@{assets/vendor/tiny-slider/tiny-slider.js}"></script>
+	<script th:src="@{assets/vendor/glightbox/js/glightbox.js}"></script>
+	<script th:src="@{assets/vendor/choices/js/choices.min.js}"></script>
+	<script th:src="@{/js/homePage/addtocart.js}"></script>
 	<!-- Template Functions -->
-	<script src="assets/js/functions.js"></script>
+
+	<script th:src="@{assets/js/functions.js}"></script>
+	<script th:src="@{/js/homePage/voucher.js}"></script>
 	<script>
 		document.getElementById("copyLinkBtn").addEventListener("click", function (e) {
 			e.preventDefault();
@@ -1257,7 +1261,7 @@ Footer END -->
 	<script th:inline="javascript">
 		window.userId = /*[[${currentUser != null ? currentUser.userId : 0}]]*/ 0;
 	</script>
-	<script src="/js/homePage/voucher.js"></script>
+
 
 	<!-- Modal Report Course -->
 	<div class="modal fade" id="reportCourseModal" tabindex="-1" aria-hidden="true">

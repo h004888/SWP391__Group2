@@ -285,6 +285,7 @@ public class VoucherServiceImpl implements VoucherService {
         if (voucher.getVoucherCourses() == null || voucher.getVoucherCourses().isEmpty()) {
             return new ArrayList<>();
         }
+
         return voucher.getVoucherCourses().stream()
                 .map(vc -> vc.getCourse().getTitle())
                 .collect(Collectors.toList());

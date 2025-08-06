@@ -1,4 +1,4 @@
-// voucher.js - dùng chung cho cart và course-detail
+
 
 window.voucherJS = (function() {
     function formatNumberWithCommas(x) {
